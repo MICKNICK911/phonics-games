@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web App</title>
+  <style>
+    body {
+        font-family: 'Times New Roman', Times, serif;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        background-color: rgb(0, 0, 0);
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        }
+
+    #initial-screen{
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      justify-items: center;
+      align-items: center;
+    }
+
+    #initial-screen input{
+      margin: 20px;
+      padding: 20px;
+      width: 70%;
+      background-color: transparent;
+      border: none;
+      text-align: center;
+      color: #fff;
+    }
+
+    #grid-list {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      justify-items: center;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      width: 90%;
+    }
+    .grid-item {
+      padding: 10px;
+      border: 1px solid black;
+      cursor: pointer;
+    }
+    .selected-yes {
+      background-color: rgb(2, 252, 2);
+    }
+    .selected-no {
+      background-color: red;
+    }
+    #radio-buttons br {
+      display: none;
+    }
+    #radio-buttons input[type="radio"] {
+      margin: 0 10px;
+    }
+    #radio-buttons {
+      text-align: center;
+      color: white;
+      margin-top: 0px;
+    }
+    #second-screen {
+      position: relative;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 50px;
+      font-weight: bold;
+      color: yellow;
+    }
+    #reset-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #2918c2;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #add-text-btn {
+      /* position: absolute; */
+      /* top: 10px;
+      right: 10px; */
+      padding: 10px 20px;
+      border: none;
+      margin: 20px;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #generate-text-btn {
+      /* position: absolute; */
+      /* top: 10px;
+      right: 10px; */
+      padding: 50px;
+      
+      border: none;
+      border-radius: 5px;
+      margin: 20px;
+      background-color: #4caf4f00;
+      color: red;
+      font-size: 80px;
+      /* border: 1px solid black; */
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="initial-screen" >
+    <div style="display: flex;">
+        <input type="text" id="text-field-1" placeholder="ENTER 1 TASK">
+        <input type="text" id="text-field-2" placeholder="ENTER LIST 1">
+        <input type="text" id="text-field-3" placeholder="ENTER LIST 2">
+    </div>
+
+    
+    <button id="add-text-btn">Add Task</button>
+    <button id="generate-text-btn">START</button>
+    
+
+  </div>
+  <div id="second-screen" style="display: none;">
+    <div id="score">Score: 0</div>
+    <button id="reset-btn">Reset</button>
+    <div id="radio-buttons" style="text-align: center; padding-top: 50px;"></div>
+    <h1 id="heading" style="text-align: center; color: orange;"></h1>
+    <div id="grid-list"></div>
+  </div>
+  <script>
+    let dictionary = [];
+    let currentItem = 0;
+    let score = 0;
+
+    dictionary = [
+    {
+        text: "choose All Vowels",
+        list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
+        targetList: "a,e,i,o,u".split(',')
+      },
+      {
+        text: "choose All Consonants",
+        list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
+        targetList: "b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,y,z".split(",")
+      }
+    ];
+
+    document.getElementById('add-text-btn').addEventListener('click', () => {
+      if (document.getElementById('text-field-1').value === '' 
+         | document.getElementById('text-field-2').value === '' 
+         | document.getElementById('text-field-1').value === '') {
+
+         }else{
+          const textField1 = document.getElementById('text-field-1').value;
+          const textField2 = document.getElementById('text-field-2').value.split(',').map(item => item.trim());
+          const textField3 = document.getElementById('text-field-3').value.split(',').map(item => item.trim());
+          dictionary.push({ text: textField1, list: textField2, targetList: textField3 });
+         }
+
+      
+      document.getElementById('text-field-1').value = '';
+      document.getElementById('text-field-2').value = '';
+      document.getElementById('text-field-3').value = '';
+    });
+
+    document.getElementById('generate-text-btn').addEventListener('click', () => {
+      document.getElementById('initial-screen').style.display = 'none';
+      document.getElementById('second-screen').style.display = 'block';
+      const radioButtons = document.getElementById('radio-buttons');
+      radioButtons.innerHTML = '';
+      dictionary.forEach((item, index) => {
+        const radioButton = document.createElement('input');
+        radioButton.type = 'radio';
+        radioButton.name = 'item';
+        radioButton.value = index;
+        radioButton.checked = index === 0;
+        radioButton.addEventListener('change', () => {
+          currentItem = index;
+          updateScreen();
+        });
+        radioButtons.appendChild(radioButton);
+        radioButtons.appendChild(document.createTextNode(`QUIZ ${index + 1}`));
+        radioButtons.appendChild(document.createElement('br'));
+      });
+      currentItem = 0;
+      updateScreen();
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        resetScreen();
+      });
+    });
+
+    function updateScreen() {
+      const heading = document.getElementById('heading');
+      heading.textContent = dictionary[currentItem].text;
+      const gridList = document.getElementById('grid-list');
+      gridList.innerHTML = '';
+      gridList.style.display = 'grid';
+      gridList.style.gridTemplateColumns = 'repeat(5,1fr)';
+      gridList.style.gap = '10px';
+      dictionary[currentItem].list.forEach(item => {
+        const gridItem = document.createElement('div');
+        gridItem.style.padding = '10px';
+        gridItem.style.cursor = 'pointer';
+        gridItem.style.fontWeight = 'bold';
+        gridItem.style.fontSize = '45px';
+        gridItem.style.color = 'white';
+        gridItem.style.display = 'flex';
+        gridItem.style.justifyContent = 'center';
+        gridItem.style.alignItems = 'center';
+        gridItem.textContent = item;
+        
+            gridItem.addEventListener('click', () => {
+            if (!gridItem.dataset.tapped) {
+                if (dictionary[currentItem].targetList.includes(item)) {
+                gridItem.style.color = 'rgb(1, 253, 14)';
+                score++;
+                } else {
+                gridItem.style.color = 'red';
+                score--;
+                }
+                document.getElementById('score').textContent = `Score: ${score}`;
+                gridItem.dataset.tapped = true;
+
+                const correctItems = dictionary[currentItem].list.filter(i => dictionary[currentItem].targetList.includes(i));
+                const tappedCorrectItems = Array.from(gridList.children).filter(i => i.style.color === 'rgb(1, 253, 14)').length;
+                if (tappedCorrectItems === correctItems.length && score >= dictionary[currentItem].list.length * 0 + dictionary[currentItem].targetList.length) {
+                const congratsScreen = document.createElement('div');
+                congratsScreen.style.position = 'fixed';
+                congratsScreen.style.top = '0';
+                congratsScreen.style.left = '0';
+                congratsScreen.style.width = '100%';
+                congratsScreen.style.height = '100%';
+                congratsScreen.style.background = 'green';
+                congratsScreen.style.display = 'flex';
+                congratsScreen.style.justifyContent = 'center';
+                congratsScreen.style.alignItems = 'center';
+                congratsScreen.style.color = 'white';
+                congratsScreen.style.fontSize = '50px';
+                congratsScreen.style.fontWeight = 'bold';
+                congratsScreen.textContent = 'Congratulations!';
+                document.body.appendChild(congratsScreen);
+                setTimeout(() => {
+                    document.body.removeChild(congratsScreen);
+                }, 2000);
+                resetScreen();
+                }
+            }
+            });
+
+
+        gridList.appendChild(gridItem);
+      });
+    }
+
+    function resetScreen() {
+      const gridList = document.getElementById('grid-list');
+      gridList.innerHTML = '';
+      updateScreen();
+      const gridItems = gridList.children;
+      Array.from(gridItems).forEach(item => {
+        item.style.color = 'white';
+      });
+      score = 0;
+      document.getElementById('score').textContent = `Score: ${score}`;
+    }
+  </script>
+</body>
+</html>

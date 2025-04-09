@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Collage App</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden; /* Makes screen fixed */
+      margin: 0;
+      padding: 0;
+    }
+      
+    .item {
+      background-color: black;
+      padding: 0;
+      border: 5px solid rgb(249, 249, 249);
+      border-radius: 8px;
+      /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */     
+    }
+
+    
+    .score {font-size: 24px;display: flex;flex-direction: column;align-items: center;}
+    .minus-b,.plus-b,.minus-a,.plus-a {width: 20px;height: 20px;font-size: 12px;padding: 0;margin: 0 5px;display: inline-block;}
+    .score .score-value {font-size: 75px;margin-top: 10px;}
+    .word-container {text-align: center;font-size: 100px;margin: 50px 0;}
+    .player-1,.player-2 {text-align: center;}
+    /* .button-container {display: flex;justify-content: space-between;padding: 20px;} */
+    /* .playername {display: flex;justify-content: space-between;padding: 20px; text-align: center;} */
+    /* .button-a, .button-b {padding: 10px 20px;border: none;border-radius: 5px;cursor: pointer; display: none;} */
+    .red {color: rgb(121, 2, 2);}
+    .yellow {color: rgb(119, 107, 2);}
+    
+    .green {
+        background-color: rgba(0, 128, 0, 0); 
+        font-size: 50px;
+        color: white; 
+        padding: 10px 20px; 
+        border: none; 
+        border-radius: 5px; 
+        cursor: pointer;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .result-screen {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: black; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-size: 36px; display: none;}
+
+    .word-list-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    
+
+    
+    
+
+    /* Styles for small screens. */
+    @media only screen and (max-width: 730px) {
+
+        /* Collage Styles */
+    .collage {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      grid-gap: 0px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .restart-btn1{
+      right: 10px;
+      top: 20px
+    }
+
+    .button-a, .button-b {
+    padding: 10px 10px;
+    border: 5px solid rgb(248, 166, 59);
+    border-radius: 60px;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    /* margin-top: 50%; */
+    display: none;
+    background-color: rgb(5, 192, 30);
+    }
+
+    .score .score-value {font-size: 45px;margin-top: 10px;}
+
+    .word-container {text-align: center;font-size: 40px;margin: 50px 0;}
+
+    /* Row 1: 3 columns */
+    .item:nth-child(1) {
+      /* grid-row: 1; */
+      background-color: red;
+      grid-row: 1;
+    }
+
+    /* Row 2: 1 columns */
+    .item:nth-child(2) {
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+        grid-row: 2;
+    }
+
+    /* Row 2: 1 columns */
+    .item:nth-child(3) {
+      /* grid-row: 2 / 4; */
+      background-color: yellow;
+      grid-row: 3;
+    }
+
+    }
+
+    /* 
+      Styles for large screens.
+      We're positioning the button at the top left.
+    */
+    @media only screen and (min-width: 731px) {
+      /* Collage Styles */
+    .collage {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 0px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .restart-btn1{
+      bottom: 20px; 
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .button-a, .button-b {
+    padding: 10px 10px;
+    border: 5px solid rgb(248, 166, 59);
+    border-radius: 60px;
+    cursor: pointer;
+    width: 120px;
+    height: 120px;
+    margin-top: 50%;
+    display: none;
+    background-color: rgb(5, 192, 30);
+    }
+
+    
+
+    /* Row 1: 3 columns */
+    .item:nth-child(1) {
+      /* grid-row: 1; */
+      background-color: red;
+      grid-column: 1;
+    }
+
+    /* Row 2: 1 columns */
+    .item:nth-child(2) {
+      /* display: flex;
+      flex-direction: column;
+      justify-content: center; */
+      
+      grid-column: 2 / 4;
+    }
+
+    /* Row 2: 1 columns */
+    .item:nth-child(3) {
+      /* grid-row: 2 / 4; */
+      background-color: yellow;
+      grid-column: 4;
+    }
+
+    }
+    
+  </style>
+</head>
+<body>
+  <!-- Collage Section -->
+    <section class="collage">
+
+        <div class="item">
+            <div class="score score-a red">
+                <div>
+                    <button class="minus-a" style="background-color: #ccc;">-</button>
+                    <button class="plus-a" style="background-color: #ccc;">+</button>
+                </div>
+                <span class="score-value score-a-value">0</span>
+                <span>Score</span>
+                <input type="text" id="player-1" placeholder="Enter Your Name" style="width: 45%; padding: 10px; font-size: 18px; text-align: center;">
+                <button class="button-a"></button>
+            </div>
+        </div>
+
+        <div class="item item2">
+            <div class="word-list-container">
+                <input type="text" id="word-list" placeholder="Enter words separated by comma" style="width: 80%; padding: 2px; font-size: 18px; text-align: center; border: none;">
+                <input type="number" id="number" placeholder="Even number" style="width: 10%; padding: 2px; font-size: 18px; text-align: center; border: none;background-color: #ccc;">
+                <input type="number" id="level" placeholder="Level" style="width: 10%; padding: 2px; font-size: 18px; text-align: center; border: none;background-color: #84e8f5;">
+
+
+            </div>
+
+            <div class="word-container"></div>
+            <button class="restart-btn1" style="background-color: rgba(0, 128, 0, 0); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; position: absolute;">Restart</button>
+
+
+            <div class="result-screen">
+                <span id="winner" style="font-size: 45px; margin-bottom: 20px; text-align: center;"></span>
+                <button class="restart-btn2" style="background-color: green; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Restart</button>
+            </div>
+        </div>
+
+        <div class="item">
+            <div class="score score-b yellow">
+                <div>
+                    <button class="minus-b" style="background-color: #ccc;">-</button>
+                    <button class="plus-b" style="background-color: #ccc;">+</button>
+                </div>
+                <span class="score-value score-b-value">0</span>
+                <span>Score</span>
+                <input type="text" id="player-2" placeholder="Enter Your Name" style="width: 45%; padding: 10px; font-size: 18px;text-align: center;">
+                <button class="button-b" ></button>
+            </div>
+        </div>
+
+    </section>
+</body>
+<script>
+    let defaultwords = [], shuffledWordList = [], wordList = [], currentWordIndex = 0, scoreA = 0, scoreB = 0;
+    defaultwords = [
+      ['my','you','it','of','why','said'],
+      ['about','other','before','should','could','around']
+    ];
+    
+
+
+document.querySelector('#word-list').addEventListener('keypress', (e) => {
+if (e.key === 'Enter') {
+    wordList = document.querySelector('#word-list').value.split(',').map((word) => word.trim());
+
+    if (wordList.length === 1) {
+      shuffledWordList = [...defaultwords[document.querySelector('#level').value - 1]]; // create a copy of the default list
+    } else {
+      shuffledWordList = [...wordList]; // create a copy of the word list
+    }
+    // shuffledWordList = [...wordList]; 
+    shuffledWordList.sort(() => Math.random() - 0.5); // shuffle the copy
+
+    document.querySelector('.word-list-container').style.display = 'none';
+    document.querySelector('#player-1').style.display = 'none';
+    document.querySelector('#player-2').style.display = 'none';
+    document.querySelector('.button-a').style.display = 'block';
+    document.querySelector('.button-b').style.display = 'block';
+    
+    currentWordIndex = 0; 
+    displayWord('white');
+}
+});
+
+
+
+   
+document.querySelector('.button-a').addEventListener('click', () => {displayWord('yellow'); scoreA++; updateScore('a', scoreA);});
+document.querySelector('.button-b').addEventListener('click', () => {displayWord('red'); scoreB++; updateScore('b', scoreB);});
+document.querySelector('.plus-a').addEventListener('click', () => {scoreA++; updateScore('a', scoreA);});
+document.querySelector('.minus-a').addEventListener('click', () => {scoreA--; updateScore('a', scoreA);});
+    
+document.querySelector('.plus-b').addEventListener('click', () => {scoreB++; updateScore('b', scoreB);});
+document.querySelector('.minus-b').addEventListener('click', () => {scoreB--; updateScore('b', scoreB);});
+document.querySelector('.restart-btn1').addEventListener('click', () => restart());
+document.querySelector('.restart-btn2').addEventListener('click', () => restart());
+
+function restart(){
+  document.querySelector('.result-screen').style.display = 'none';
+  scoreA = 0;
+  scoreB = 0;
+  updateScore('a', scoreA);
+  updateScore('b', scoreB);
+  currentWordIndex = 0;
+  document.querySelector('.word-container').innerText = '';
+  document.querySelector('.word-list-container').style.display = 'flex';
+  document.querySelector('.green').remove();
+  document.querySelector('.button-a').style.display = 'none';
+  document.querySelector('.button-b').style.display = 'none';
+  document.querySelector('#player-1').style.display = 'flex';
+  document.querySelector('#player-2').style.display = 'flex';
+  document.querySelector('#player-1').value = '';
+  document.querySelector('#player-2').value = '';
+}
+
+//currentWordIndex = 0;
+function displayWord(color) {
+  if (document.querySelector('#number').value > shuffledWordList.length) {
+    document.querySelector('#number').value = shuffledWordList.length;
+  }
+
+if (currentWordIndex < document.querySelector('#number').value) {
+    document.querySelector('.word-container').innerText = shuffledWordList[currentWordIndex];
+    document.querySelector('.word-container').style.color = color;
+    currentWordIndex++;
+  } else {
+    document.querySelector('.word-container').innerText = '';
+    document.querySelector('.word-container').style.color = 'black';
+    document.querySelector('.button-a').style.display = 'none';
+    document.querySelector('.button-b').style.display = 'none';
+    let endMatchBtn = document.createElement('button');
+    endMatchBtn.className = 'green';
+    endMatchBtn.innerText = 'Results';
+    endMatchBtn.onclick = endMatch;
+    document.querySelector('.item2').appendChild(endMatchBtn);
+  }
+}
+
+
+function updateScore(player, score) {
+if (player === 'a') {
+    document.querySelector('.score-a-value').innerText = score;
+} else {
+    document.querySelector('.score-b-value').innerText = score;
+}
+}
+
+function endMatch() {
+document.querySelector('.result-screen').style.display = 'flex';
+document.querySelector('.green').style.display = 'none';
+if (scoreA > scoreB) {
+    document.querySelector('#winner').innerText = `Winner is\n${document.querySelector('#player-1').value}`;
+} else if (scoreB > scoreA) {
+    document.querySelector('#winner').innerText = `Winner is \n${document.querySelector('#player-2').value}`;
+} else {
+    document.querySelector('#winner').innerText = 'It\'s a Tie!';
+}
+}
+</script>
+</html>
+
+    

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Collage App</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden; /* Makes screen fixed */
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Add styles for the popup box */
+ .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .popup-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      width: 80%;
+      max-width: 400px;
+    }
+      
+    .item {
+      background-color: black;
+      padding: 0;
+      border: 5px solid rgb(249, 249, 249);
+      border-radius: 8px;
+      justify-content: center;
+      justify-items: center;
+      /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */     
+    }
+
+    .item h2 {
+      text-align: center; 
+      color: antiquewhite; 
+    }
+    
+        #game-container {
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .heading {
+            font-size: 25px;
+            font-weight: bold;
+            margin: 20px;
+            color: brown;
+            font-family: 'times new roman'
+        }
+
+        .text-container {
+            position: relative;
+            height: 100%;
+            /* background-color: rgb(72, 18, 196); */
+            font-size: 100px;
+            font-weight: bold;
+            margin: 10px;
+            padding: 0px;
+            /* border: 5px solid brown; */
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            justify-content: center;
+        }
+
+        #input-field {
+            padding: 10px;
+            font-size: 12px;
+            border: 0px solid #ddd;
+            width: 50%;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            width: 80%;
+        }
+
+        .button {
+            background-color: #fff;
+            color: brown;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 25px;
+            font-weight: bold;
+
+        }
+
+        .button:hover {
+            background-color: yellow;
+        }
+
+        .input-buttons button {
+            background-color: #f44336;
+            /* display: none; */
+            color: #fff;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 40px; 
+            margin-left: 20px;       
+        }
+
+        .input-buttons {
+            
+            display: none;
+            justify-items: center;       
+        }
+
+        #clear-button:hover {
+            background-color: #180108;
+        }
+
+        #add-button:hover {
+            background-color: #e29e0a;
+        }
+
+        #save-button:hover {
+            background-color: #01ac09;
+        }
+
+        .correct-words-container {
+          position: relative;
+          top: 0px;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          /* background-color: blue; */
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+        }
+
+        .correct-words-list {
+          list-style: decimal inside;
+          padding: 0px;
+          margin: 0px;
+          display: flex;
+          flex-direction: column;
+          justify-items:right;
+          align-items: right;
+        }
+
+        .correct-words-list li {
+          margin: 20px;
+          padding: 0px;
+          color: black;
+          font-weight: bolder;
+          font-size: 40px;
+          font-family: 'Times New Roman', Times, serif;
+        }
+
+    /* Styles for small screens. */
+    @media only screen and (max-width: 730px) {
+
+      /* Collage Styles */
+    .collage {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      grid-gap: 0px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .item:nth-child(1) {
+      border: 5px solid rgb(246, 5, 5);
+      grid-column: 1;
+      grid-row: 1;    
+    }
+
+    .item:nth-child(2) {
+      background-color: white;
+      grid-column: 1;
+      grid-row: 2;  
+    }
+    
+    .item:nth-child(3) {
+      background-color: rgb(253, 191, 84);
+      grid-column: 1;
+      grid-row: 3;  
+      overflow: auto;
+    }
+
+    }
+
+    /* 
+      Styles for large screens.
+      We're positioning the button at the top left.
+    */
+    @media only screen and (min-width: 731px) {
+      /* Collage Styles */
+    .collage {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      grid-gap: 0px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Row 1: 3 columns */
+    .item:nth-child(1) {
+      border: 5px solid rgb(246, 5, 5);
+      grid-row: 1;
+      grid-column: 1 / 3;
+    }
+
+    /* Row 2: 1 columns */
+    .item:nth-child(2) {
+      background-color: white;
+      grid-row: 2 / 4;
+      grid-column: 1;
+    }
+    
+    /* Row 2: 1 columns */
+    .item:nth-child(3) {
+      background-color: rgb(253, 191, 84);
+      grid-column: 2;
+      grid-row: 2 / 4;
+      overflow: auto;
+      
+    }
+
+    }
+    
+  </style>
+</head>
+<body>
+  <!-- Add the popup box HTML -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button onclick="closePopup()" style="background-color: red; color: white; padding: 10px; border-radius: 8px;">OK</button>
+    </div>
+  </div>
+  <!-- Collage Section -->
+    <section class="collage">
+
+        <div class="item">
+          <div>
+
+            <div class="text-container" id="text-container"></div>
+
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="game-container" id="game-container">
+            <div class="heading" id="heading">Sentence Formation</div>
+            <input class="input-field" id="input-field" type="text" placeholder="Enter words separated by comma">
+            <div class="input-buttons" id="input-buttons">
+              <button class="clear-button" id="clear-button">Clear Text</button>
+              <button class="add-button" id="add-button" >add word</button>
+              <button class="save-button" id="save-button" >save</button>
+            </div>
+            <div id="button-grid"></div>          
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="correct-words-container">
+            <ol id="correct-words-list" class="correct-words-list"></ol>
+        </div>
+        </div>
+
+    </section>
+</body>
+<script>
+  const gameContainer = document.getElementById('game-container');
+  const textContainer = document.getElementById('text-container');
+  const inputField = document.getElementById('input-field');
+  const buttonGrid = document.getElementById('button-grid');
+  const inputButtons = document.getElementById('input-buttons');
+  const clearButton = document.getElementById('clear-button');
+  const addButton = document.getElementById('add-button');
+  const saveButton = document.getElementById('save-button');
+  const heading = document.getElementById('heading');
+  
+
+  inputField.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+          const words = inputField.value.split(',');
+          const allwords = words.concat(['.','?',',']);
+          const wordButtons = allwords.map((word) => {
+          const button = document.createElement('button');
+          button.classList.add('button');
+          button.textContent = word.trim();
+              
+              button.addEventListener('click', () => {
+                const newText = word.trim();
+                if (textContainer.textContent === '') {
+                textContainer.textContent = newText.charAt(0).toUpperCase() + newText.slice(1);
+                } else {
+                textContainer.textContent += ' ' + newText;
+                }
+                });
+              inputField.value = '';
+              inputField.style.display = "none";
+              heading.style.display = "none";
+              inputButtons.style.display = "flex";
+              return button;
+          });
+          buttonGrid.innerHTML = '';
+          wordButtons.forEach((button) => {
+              buttonGrid.appendChild(button);
+          });
+       
+      }
+  });
+
+  clearButton.addEventListener('click', () => {
+      textContainer.textContent = '';
+  });
+
+  saveButton.addEventListener('click', () => { 
+    let correctWordsList = document.getElementById('correct-words-list');
+    let newWord = document.createElement('LI');
+    newWord.textContent = textContainer.textContent;
+    newWord.onclick = () => {
+                    document.querySelector('#text-container').innerText = newWord.textContent;
+                };
+    correctWordsList.appendChild(newWord);
+  });
+
+  addButton.addEventListener('click', () => {
+      inputField.style.display = "flex";
+      heading.style.display = "flex";
+      inputButtons.style.display = "none";
+      inputField.value = '';
+      buttonGrid.innerHTML = '';
+      textContainer.textContent = '';
+  });
+
+  // Function to close the popup box
+  function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+    window.onload = function() {
+      const popupMessage = document.getElementById('popup-message');
+      popupMessage.innerText = '1.Enter list of words in Text field separating them with comma\n2.Click Enter\n3.Use word buttons that appears to form sentences';
+      document.getElementById('popup').style.display = 'flex';
+    };
+</script>
+</html>
+
+    

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Collage App</title>
+  <style>
+   
+body {
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+ /* Add styles for the popup box */
+ .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .popup-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      width: 80%;
+      max-width: 400px;
+    }
+
+#cvc {
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 0px;
+}
+
+.item {
+  background-color: rgb(253, 191, 84);
+  padding: 0;
+  /* border: 0px solid rgb(253, 38, 38); */
+  justify-items: center;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+}
+
+.item h2 {
+  text-align: center;
+  color: antiquewhite;
+}
+
+.correct-words-container {
+  position: relative;
+  top: 0px;
+  left: 0;
+  width: 100%;
+  height: 95%;
+  background-color: black;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.vowel-buttons button {
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  margin: 10px;
+  background-color: pink;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+}
+
+.correct-words-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.correct-words-list li {
+  padding: 20px;
+  color: white;
+  font-weight: bolder;
+  font-size: 60px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.vowel-buttons {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.word-container {
+  margin-bottom: 10px;
+  justify-content: center;
+}
+
+.word-container p {
+  font-size: 80px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+
+}
+
+.alphabet-buttons {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 30px;
+  padding: 10px;
+  bottom: 0px;
+  left: 0;
+  justify-items: center;
+}
+
+.alphabet-buttons button {
+  width: 80px;
+  height: 50px;
+  font-size: 35px;
+}
+
+#game-over-screen {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: red;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#restart-button {
+  width: 100px;
+  height: 50px;
+  font-size: 24px;
+  border: none;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  background-color: yellow;
+  color: black;
+  cursor: pointer;
+}
+
+#win-screen {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: green;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#word-exists-screen {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #03fe46;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 60px;
+  font-family: 'Times New Roman', Times, serif;
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+  z-index: 1000;
+}
+
+@media only screen and (max-width: 730px) {
+  .collage {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-gap: 0px;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .item:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .item:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    border: 5px solid rgb(253, 38, 38);
+    background-color: black;
+    overflow: auto;
+  }
+
+  .alphabet-buttons button {
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+  }
+
+  .correct-words-list li {
+    padding: 20px;
+    color: white;
+    font-weight: bolder;
+    font-size: 30px;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  #word1 {
+    font-size: 60px;
+  }
+
+  #wrong {
+    font-size: 60px;
+  }
+
+  #word-exists-message {
+    font-size: 60px;
+  }
+}
+
+@media only screen and (min-width: 731px) {
+  .collage {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 0px;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .item:nth-child(1) {
+    grid-column: 1 / 4;
+  }
+
+  .item:nth-child(2) {
+    grid-column: 4;
+    border: 5px solid rgb(253, 38, 38);
+    background-color: black;
+    overflow: auto;
+  }
+
+  #word1 {
+    font-size: 200px;
+  }
+
+  #wrong {
+    font-size: 100px;
+  }
+
+  #word-exists-message {
+    font-size: 200px;
+  }
+}
+
+
+    
+  </style>
+</head>
+<body>
+
+  <!-- Add the popup box HTML -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button onclick="closePopup()" style="background-color: red; color: white; padding: 10px; border-radius: 8px;">OK</button>
+    </div>
+  </div>
+  
+  <!-- Collage Section -->
+    <section class="collage">
+
+        <div class="item">
+          <h1 id="cvc" style= "font-family: times new roman; color: rgb(23, 23, 23); font-size: 30px;">CVC Words</h1>
+          <div id="vowelButtons" class="vowel-buttons">
+            <button id="a-button" style="background-color: black; color: white;">A</button>
+            <button id="e-button">E</button>
+            <button id="i-button">I</button>
+            <button id="o-button">O</button>
+            <button id="u-button">U</button>
+          </div>
+
+          <div id="cvcWord" class="word-container">
+            <p id="word"></p>
+          </div>
+
+          <div class="alphabet-buttons" id="alpha-keys">
+            <button id="button-a">a</button>
+            <button id="button-b">b</button>
+            <button id="button-c">c</button>
+            <button id="button-d">d</button>
+            <button id="button-e">e</button>
+            <button id="button-f">f</button>
+            <button id="button-g">g</button>
+            <button id="button-h">h</button>
+            <button id="button-i">i</button>
+            <button id="button-j">j</button>
+            <button id="button-k">k</button>
+            <button id="button-l">l</button>
+            <button id="button-m">m</button>
+            <button id="button-n">n</button>
+            <button id="button-o">o</button>
+            <button id="button-p">p</button>
+            <!--<button id="button-q">Q</button>-->
+            <button id="button-r">r</button>
+            <button id="button-s">s</button>
+            <button id="button-t">t</button>
+            <button id="button-u">u</button>
+            <button id="button-v">v</button>
+            <button id="button-w">w</button>
+            <button id="button-x">x</button>
+            <button id="button-y">y</button>
+            <button id="button-z">z</button>
+        </div>
+        <div id="game-over-screen">
+            <h1 id="wrong" style="font-weight: bold; color: #fb8686; font-family: 'Times New Roman', Times, serif; margin: 0;">WRONG!</h1>
+            <button id="restart-button">Restart</button>
+        </div>
+        <div id="win-screen">
+            <h1 id= "word1" style="font-weight: bold; color: #fff; font-family: 'Times New Roman', Times, serif; margin: 0;"></h1>
+        </div>
+
+        <div id="word-exists-screen" style="display: none;">
+            <h1 id="word-exists-message"></h1>
+        </div>
+          
+        </div>
+
+        <div class="item">
+          <div class="correct-words-container">
+            <ul id="correct-words-list" class="correct-words-list"></ul>
+        </div>
+
+        </div>
+
+    </section>
+</body>
+
+<script>
+
+  let activeWord = 'a';
+  let word = '';
+  let cvcWords = {
+      'a': ['cat','can', 'bag', 'hat', 'mat', 'rat', 'sat', 'fat', 'bat', 'cap', 'tap', 'pat'],
+      'e': ['pet', 'bet', 'get', 'let', 'met', 'net', 'set', 'vet', 'yet', 'jet'],
+      'i': ['bit', 'kit', 'lit', 'mit', 'nit', 'pit', 'sit', 'fit', 'hit', 'tip'],
+      'o': ['bot', 'cot', 'dot', 'got', 'hot', 'lot', 'not', 'pot', 'rot', 'tot'],
+      'u': ['but', 'cut', 'gut', 'hut', 'nut', 'put', 'rut', 'tut', 'yut', 'mut']
+  };
+  let vowelButtons = document.querySelectorAll('.vowel-buttons button');
+  vowelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+          vowelButtons.forEach(btn => {
+              btn.style.backgroundColor = '';
+              btn.style.color = '';
+          });
+          button.style.backgroundColor = 'black';
+          button.style.color = 'white';
+          activeWord = button.textContent.toLowerCase();
+      });
+  });
+  let alphabetButtons = document.querySelectorAll('.alphabet-buttons button');
+  alphabetButtons.forEach(button => {
+      button.addEventListener('click', () => {
+          word += button.textContent;
+          document.getElementById('word').textContent = word;
+          document.getElementById('word1').textContent = word;
+          button.style.backgroundColor = 'yellow';
+          if (word.length === 3) {
+              checkWord();
+          }
+      });
+  });
+
+function checkWord() {
+    if (cvcWords[activeWord].includes(word.toLowerCase())) {
+        let correctWordsList = document.getElementById('correct-words-list');
+        let existingWords = Array.from(correctWordsList.children).map(li => li.textContent);
+        if (existingWords.includes(word.toLowerCase())) {
+            document.getElementById('word-exists-message').textContent = "Exists!";
+            document.getElementById('alpha-keys').style.display = 'none';
+            document.getElementById('cvc').style.display = 'none';
+            document.getElementById('cvcWord').style.display = 'none';
+            document.getElementById('vowelButtons').style.display = 'none';
+            document.getElementById('word-exists-screen').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('alpha-keys').style.display = 'grid';
+                document.getElementById('cvc').style.display = 'flex';
+                document.getElementById('cvc').style.justifyContent = 'center';
+                document.getElementById('cvcWord').style.display = 'flex';
+                //document.getElementById('cvcWord').style.justifyContent = 'center';
+                document.getElementById('vowelButtons').style.display = 'flex';
+                document.getElementById('word-exists-screen').style.display = 'none';
+                word = '';
+                document.getElementById('word').textContent = '';
+                alphabetButtons.forEach(button => {
+                    button.style.backgroundColor = '';
+                });
+            }, 2000);
+        } else {
+            document.getElementById('alpha-keys').style.display = 'none';
+            document.getElementById('cvc').style.display = 'none';
+            document.getElementById('cvcWord').style.display = 'none';
+            document.getElementById('vowelButtons').style.display = 'none';
+            document.getElementById('win-screen').style.display = 'flex';
+            let correctWordsList = document.getElementById('correct-words-list');
+            let newWord = document.createElement('LI');
+            newWord.textContent = word;
+            correctWordsList.appendChild(newWord);
+            setTimeout(() => {
+                document.getElementById('win-screen').style.display = 'none';
+                document.getElementById('alpha-keys').style.display = 'grid';
+                document.getElementById('cvc').style.display = 'flex';
+                document.getElementById('cvc').style.justifyContent = 'center';
+                document.getElementById('cvcWord').style.display = 'flex';
+               // document.getElementById('cvcWord').style.justifyContent = 'center';
+                document.getElementById('vowelButtons').style.display = 'flex';
+                word = '';
+                document.getElementById('word').textContent = '';
+                alphabetButtons.forEach(button => {
+                    button.style.backgroundColor = '';
+                });
+            }, 3000);
+        }
+    } else {
+        document.getElementById('alpha-keys').style.display = 'none';
+        document.getElementById('cvc').style.display = 'none';
+        document.getElementById('cvcWord').style.display = 'none';
+        document.getElementById('vowelButtons').style.display = 'none';
+        document.getElementById('game-over-screen').style.display = 'flex';
+    }
+}
+
+
+
+  document.getElementById('restart-button').addEventListener('click', () => {
+      document.getElementById('game-over-screen').style.display = 'none';
+      document.getElementById('alpha-keys').style.display = 'grid';
+        document.getElementById('cvc').style.display = 'flex';
+        document.getElementById('cvc').style.justifyContent = 'center';
+        document.getElementById('cvcWord').style.display = 'flex';
+        //document.getElementById('cvcWord').style.justifyContent = 'center';
+        document.getElementById('vowelButtons').style.display = 'flex';
+      word = '';
+      document.getElementById('word').textContent = '';
+      document.getElementById('correct-words-list').textContent = '';
+      alphabetButtons.forEach(button => {
+          button.style.backgroundColor = '';
+      });
+  });
+
+
+   // Function to close the popup box
+   function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+
+    // Show the popup box with a message when the page loads
+    window.onload = function() {
+      const popupMessage = document.getElementById('popup-message');
+
+      popupMessage.innerText = 'Create correct CVC words by tapping on the buttons with letters.';
+      document.getElementById('popup').style.display = 'flex';
+    };
+</script>
+</html>
+
+    
