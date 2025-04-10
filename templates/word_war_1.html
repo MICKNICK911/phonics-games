@@ -12,6 +12,27 @@
       margin: 0;
       padding: 0;
     }
+
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .popup-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      width: 80%;
+      max-width: 400px;
+    }
       
     .item {
       background-color: black;
@@ -199,6 +220,15 @@
   </style>
 </head>
 <body>
+
+   <!-- Add the popup box HTML -->
+   <div class="popup" id="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button onclick="closePopup()" style="background-color: red; color: white; padding: 10px; border-radius: 8px;">OK</button>
+    </div>
+  </div>
+
   <!-- Collage Section -->
     <section class="collage">
 
@@ -374,6 +404,21 @@ if (scoreA > scoreB) {
     document.querySelector('#winner').innerText = 'It\'s a Tie!';
 }
 }
+
+// Function to close the popup box
+function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+
+    // Show the popup box with a message when the page loads
+    window.onload = function() {
+      const popupMessage = document.getElementById('popup-message');
+
+      popupMessage.innerText = '1.It required 2 playerd.\n2.Enter words separated by commas.\n3.Enter the number of words to be displayed.\n4.Enter the level of difficulty.\n5.Click on START button to start the game.\n6.Click on the buttons to score points when target word is mentioned correctly.\n7.Click on the Restart button to play again.';
+      popupMessage.style.textAlign = 'left';
+      popupMessage.style.fontSize = '20px';
+      document.getElementById('popup').style.display = 'flex';
+    };
 </script>
 </html>
 
