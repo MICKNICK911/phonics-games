@@ -75,6 +75,23 @@
       top: 20px
     }
 
+    .start {
+        background-color: green; 
+        font-size: 15px;
+        color: white; 
+        padding: 10px 10px; 
+        border: none; 
+        border-radius: 5px; 
+        cursor: pointer;
+        position: relative;
+      }
+
+    .word-list-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
     .button-a, .button-b {
     padding: 10px 10px;
     border: 5px solid rgb(248, 166, 59);
@@ -87,7 +104,7 @@
     background-color: rgb(5, 192, 30);
     }
 
-    .score .score-value {font-size: 45px;margin-top: 10px;}
+    .score .score-value {font-size: 35px;margin-top: 10px;}
 
     .word-container {text-align: center;font-size: 40px;margin: 50px 0;}
 
@@ -135,6 +152,10 @@
       left: 50%;
       transform: translateX(-50%);
     }
+
+    .start {
+      display: none;
+        }
 
     .button-a, .button-b {
     padding: 10px 10px;
@@ -196,10 +217,11 @@
 
         <div class="item item2">
             <div class="word-list-container">
-                <input type="text" id="word-list" placeholder="Enter words separated by comma" style="width: 80%; padding: 2px; font-size: 18px; text-align: center; border: none;">
-                <input type="number" id="number" placeholder="Even number" style="width: 10%; padding: 2px; font-size: 18px; text-align: center; border: none;background-color: #ccc;">
-                <input type="number" id="level" placeholder="Level" style="width: 10%; padding: 2px; font-size: 18px; text-align: center; border: none;background-color: #84e8f5;">
-
+                <input type="text" id="word-list" placeholder="Enter words separated by comma" style="width: 50%; padding: 2px; font-size: 18px; text-align: center; border-radius: 8px;">
+                <input type="number" id="number" placeholder="Even number" style="width: 10%; padding: 2px; font-size: 18px; text-align: center; border-radius: 8px;background-color: #ccc;">
+                <input type="number" id="level" placeholder="Level" style="width: 10%; padding: 2px; font-size: 18px; text-align: center; border-radius: 8px;background-color: #84e8f5;">
+                <button class="start">START</button>
+                
 
             </div>
 
@@ -260,7 +282,25 @@ if (e.key === 'Enter') {
 }
 });
 
+document.querySelector('.start').addEventListener('click', () => {
+    wordList = document.querySelector('#word-list').value.split(',').map((word) => word.trim());
+    if (wordList.length === 1) {
+      shuffledWordList = [...defaultwords[document.querySelector('#level').value - 1]]; // create a copy of the default list
+    } else {
+      shuffledWordList = [...wordList]; // create a copy of the word list
+    }
+    // shuffledWordList = [...wordList]; 
+    shuffledWordList.sort(() => Math.random() - 0.5); // shuffle the copy
 
+    document.querySelector('.word-list-container').style.display = 'none';
+    document.querySelector('#player-1').style.display = 'none';
+    document.querySelector('#player-2').style.display = 'none';
+    document.querySelector('.button-a').style.display = 'block';
+    document.querySelector('.button-b').style.display = 'block';
+    
+    currentWordIndex = 0; 
+    displayWord('white');
+});
 
    
 document.querySelector('.button-a').addEventListener('click', () => {displayWord('yellow'); scoreA++; updateScore('a', scoreA);});
