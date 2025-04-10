@@ -237,26 +237,44 @@
                 const correctItems = dictionary[currentItem].list.filter(i => dictionary[currentItem].targetList.includes(i));
                 const tappedCorrectItems = Array.from(gridList.children).filter(i => i.style.color === 'rgb(1, 253, 14)').length;
                 if (tappedCorrectItems === correctItems.length && score >= dictionary[currentItem].list.length * 0 + dictionary[currentItem].targetList.length) {
-                const congratsScreen = document.createElement('div');
-                congratsScreen.style.position = 'fixed';
-                congratsScreen.style.top = '0';
-                congratsScreen.style.left = '0';
-                congratsScreen.style.width = '100%';
-                congratsScreen.style.height = '100%';
-                congratsScreen.style.background = 'green';
-                congratsScreen.style.display = 'flex';
-                congratsScreen.style.justifyContent = 'center';
-                congratsScreen.style.alignItems = 'center';
-                congratsScreen.style.color = 'white';
-                congratsScreen.style.fontSize = '50px';
-                congratsScreen.style.fontWeight = 'bold';
-                congratsScreen.textContent = 'Congratulations!';
-                document.body.appendChild(congratsScreen);
-                setTimeout(() => {
+                  const congratsScreen = document.createElement('div');
+                  congratsScreen.style.position = 'fixed';
+                  congratsScreen.style.top = '0';
+                  congratsScreen.style.left = '0';
+                  congratsScreen.style.width = '100%';
+                  congratsScreen.style.height = '100%';
+                  congratsScreen.style.background = 'green';
+                  congratsScreen.style.display = 'flex';
+                  congratsScreen.style.flexDirection = 'column';
+                  congratsScreen.style.justifyContent = 'center';
+                  congratsScreen.style.alignItems = 'center';
+                  congratsScreen.style.color = 'white';
+                  congratsScreen.style.fontSize = '50px';
+                  congratsScreen.style.fontWeight = 'bold';
+
+                  const congratsText = document.createElement('div');
+                  congratsText.textContent = 'Congratulations!';
+                  congratsScreen.appendChild(congratsText);
+
+                  const nextButton = document.createElement('button');
+                  nextButton.textContent = 'Restart';
+                  nextButton.style.padding = '10px 20px';
+                  nextButton.style.border = 'none';
+                  nextButton.style.borderRadius = '5px';
+                  nextButton.style.background = '#2918c2';
+                  nextButton.style.color = '#fff';
+                  nextButton.style.cursor = 'pointer';
+                  nextButton.style.fontSize = '30px';
+                  nextButton.style.marginTop = '20px';
+                  nextButton.addEventListener('click', () => {
                     document.body.removeChild(congratsScreen);
-                }, 2000);
-                resetScreen();
+                    resetScreen();
+                  });
+                  congratsScreen.appendChild(nextButton);
+
+                  document.body.appendChild(congratsScreen);
                 }
+
             }
             });
 

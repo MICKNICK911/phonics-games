@@ -142,7 +142,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: red;
+  background-color: rgb(243, 150, 150);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -157,12 +157,38 @@ body {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+}
+
+#restart-button2 {
+  width: 100px;
+  height: 50px;
+  font-size: 24px;
+  border: none;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
   background-color: yellow;
   color: black;
   cursor: pointer;
 }
 
 #win-screen {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: green;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#congrats-screen {
   position: relative;
   top: 0;
   left: 0;
@@ -191,6 +217,7 @@ body {
   font-weight: bold;
   z-index: 1000;
 }
+
 
 @media only screen and (max-width: 730px) {
   .collage {
@@ -236,6 +263,10 @@ body {
     font-size: 60px;
   }
 
+  #congrats-message {
+    font-size: 60px;
+  }
+
   #word-exists-message {
     font-size: 60px;
   }
@@ -269,6 +300,10 @@ body {
     font-size: 100px;
   }
 
+  #congrats-message {
+    font-size: 100px;
+  }
+
   #word-exists-message {
     font-size: 200px;
   }
@@ -292,7 +327,16 @@ body {
     <section class="collage">
 
         <div class="item">
-          <h1 id="cvc" style= "font-family: times new roman; color: rgb(23, 23, 23); font-size: 30px;">CVC Words</h1>
+        <div style="position: relative; width: 100%;">
+          <div id="target-score-container" style="font-size: 24px; font-weight: bold; right: 0; top: 0;position: absolute; padding: 10px;">
+            Target: <input id="target-score" type="number" value="3" style="width: 40px; font-size: 20px;">
+          </div>
+          <div id="score-container" style="font-size: 24px; font-weight: bold; color: black; left: 0; top: 0; position: absolute; padding: 5px;"><span id="score" style="color: red; font-size: 50px;">0</span></div>
+        </div>
+
+          <h1 id="cvc" style= "font-family: times new roman; color: rgb(23, 23, 23); font-size: 30px;">Make CVC Words With Vowel Sound Below</h1>
+
+
           <div id="vowelButtons" class="vowel-buttons">
             <button id="a-button" style="background-color: black; color: white;">A</button>
             <button id="e-button">E</button>
@@ -334,7 +378,8 @@ body {
             <button id="button-z">z</button>
         </div>
         <div id="game-over-screen">
-            <h1 id="wrong" style="font-weight: bold; color: #fb8686; font-family: 'Times New Roman', Times, serif; margin: 0;">WRONG!</h1>
+            <h1 id="wrong" style="font-weight: bold; color: #f80202; font-family: 'Times New Roman', Times, serif; margin: 0;">WRONG!</h1>
+            <h4 style="font-weight: bold; color: green; font-family: 'Times New Roman', Times, serif; margin: 5px; font-size: 30px;">Game Over</h4>
             <button id="restart-button">Restart</button>
         </div>
         <div id="win-screen">
@@ -343,6 +388,12 @@ body {
 
         <div id="word-exists-screen" style="display: none;">
             <h1 id="word-exists-message"></h1>
+        </div>
+
+        <div id="congrats-screen" style="display: none;">
+          <div id="score-container1" style="font-size: 35px; font-weight: bold; color: rgb(253, 253, 253); top: 30px; position: absolute; padding: 5px;">Score: <span id="score2" style="color: yellow; font-size: 60px;"></span></div>
+          <h1 id="congrats-message" style="font-weight: bold; color: #8afaa6; font-family: 'Times New Roman', Times, serif; margin: 0;">WELL DONE</h1>
+          <button id="restart-button2">Restart</button>
         </div>
           
         </div>
@@ -359,6 +410,8 @@ body {
 
 <script>
 
+  let score = 0;
+  let targetScore = parseInt(document.getElementById('target-score').value);
   let activeWord = 'a';
   let word = '';
   let cvcWords = {
@@ -378,6 +431,8 @@ body {
           button.style.backgroundColor = 'black';
           button.style.color = 'white';
           activeWord = button.textContent.toLowerCase();
+          resetScore();
+
       });
   });
   let alphabetButtons = document.querySelectorAll('.alphabet-buttons button');
@@ -394,6 +449,8 @@ body {
   });
 
 function checkWord() {
+    targetScore = parseInt(document.getElementById('target-score').value);
+
     if (cvcWords[activeWord].includes(word.toLowerCase())) {
         let correctWordsList = document.getElementById('correct-words-list');
         let existingWords = Array.from(correctWordsList.children).map(li => li.textContent);
@@ -419,6 +476,22 @@ function checkWord() {
                 });
             }, 2000);
         } else {
+            score++;
+            if (score === targetScore) {
+              document.getElementById('alpha-keys').style.display = 'none';
+              document.getElementById('cvc').style.display = 'none';
+              document.getElementById('cvcWord').style.display = 'none';
+              document.getElementById('vowelButtons').style.display = 'none';
+              document.getElementById('congrats-screen').style.display = 'flex';
+              document.getElementById('score').textContent = score;
+              document.getElementById('score2').textContent = score;
+              let correctWordsList = document.getElementById('correct-words-list');
+              let newWord = document.createElement('LI');
+              newWord.textContent = word;
+              correctWordsList.appendChild(newWord);
+
+            } else {
+
             document.getElementById('alpha-keys').style.display = 'none';
             document.getElementById('cvc').style.display = 'none';
             document.getElementById('cvcWord').style.display = 'none';
@@ -428,6 +501,10 @@ function checkWord() {
             let newWord = document.createElement('LI');
             newWord.textContent = word;
             correctWordsList.appendChild(newWord);
+            document.getElementById('score').textContent = score;
+            document.getElementById('score2').textContent = score;
+
+            
             setTimeout(() => {
                 document.getElementById('win-screen').style.display = 'none';
                 document.getElementById('alpha-keys').style.display = 'grid';
@@ -442,7 +519,9 @@ function checkWord() {
                     button.style.backgroundColor = '';
                 });
             }, 3000);
+          }
         }
+        
     } else {
         document.getElementById('alpha-keys').style.display = 'none';
         document.getElementById('cvc').style.display = 'none';
@@ -450,6 +529,7 @@ function checkWord() {
         document.getElementById('vowelButtons').style.display = 'none';
         document.getElementById('game-over-screen').style.display = 'flex';
     }
+
 }
 
 
@@ -468,7 +548,30 @@ function checkWord() {
       alphabetButtons.forEach(button => {
           button.style.backgroundColor = '';
       });
+      score = 0;
+      document.getElementById('score').textContent = 0;
+      document.getElementById('correct-words-list').innerHTML = '';
   });
+
+  document.getElementById('restart-button2').addEventListener('click', () => {
+      document.getElementById('congrats-screen').style.display = 'none';
+      document.getElementById('alpha-keys').style.display = 'grid';
+        document.getElementById('cvc').style.display = 'flex';
+        document.getElementById('cvc').style.justifyContent = 'center';
+        document.getElementById('cvcWord').style.display = 'flex';
+        //document.getElementById('cvcWord').style.justifyContent = 'center';
+        document.getElementById('vowelButtons').style.display = 'flex';
+      word = '';
+      document.getElementById('word').textContent = '';
+      document.getElementById('correct-words-list').textContent = '';
+      alphabetButtons.forEach(button => {
+        button.style.backgroundColor = '';
+      });
+      score = 0;
+      document.getElementById('score').textContent = 0;
+      document.getElementById('correct-words-list').innerHTML = '';
+  });
+
 
 
    // Function to close the popup box
@@ -483,6 +586,15 @@ function checkWord() {
       popupMessage.innerText = 'Create correct CVC words by tapping on the buttons with letters.';
       document.getElementById('popup').style.display = 'flex';
     };
+
+    // Reset score when radio button is switched
+      function resetScore() {
+        score = 0;
+        document.getElementById('score').textContent = score;
+      }
+
+      
+
 </script>
 </html>
 

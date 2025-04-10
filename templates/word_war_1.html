@@ -294,7 +294,7 @@
     </section>
 </body>
 <script>
-    let digit = 0, defaultwords = [], shuffledWordList = [], wordList = [], currentWordIndex = 0, scoreA = 0, scoreB = 0;
+    let playerBD = 0, playerAD = 0, digit = 0, defaultwords = [], shuffledWordList = [], wordList = [], currentWordIndex = 0, scoreA = 0, scoreB = 0;
     defaultwords = [
     'a find is not three and for it one to away funny jump play two big go little red up blue help look run we can here make said where come I me see yellow down in my the you all do no she well am eat now so went are four on soon what at get our that white ate good out there who be have please they will black he pretty this with brown into ran too yes but like ride under came must saw want did new say was'.split(' '),
     "after fly how open then again from just over think an give know put walk any going let round were as had live some when ask has may stop by her of take could him old thank every his once them always does made tell why around don't many their wish because fast off these work been first or those would before five pull upon write best found read us your both gave right use buy goes sing very call green sit wash cold its sleep which".split(' '), 
@@ -365,8 +365,8 @@ document.querySelector('.start').addEventListener('click', () => {
 });
 
    
-document.querySelector('.button-a').addEventListener('click', () => {displayWord('yellow'); scoreA++; updateScore('a', scoreA);});
-document.querySelector('.button-b').addEventListener('click', () => {displayWord('red'); scoreB++; updateScore('b', scoreB);});
+document.querySelector('.button-a').addEventListener('click', () => {scoreA++; updateScore('a', scoreA);playerAD >= 1 ? scoreB-- : scoreB += 0;updateScore('b', scoreB);displayWord('yellow');playerAD++;playerBD = 0;});
+document.querySelector('.button-b').addEventListener('click', () => {scoreB++; updateScore('b', scoreB);playerBD >= 1 ? scoreA-- : scoreA += 0;updateScore('a', scoreA);displayWord('red');playerBD++;playerAD = 0;});
 document.querySelector('.plus-a').addEventListener('click', () => {scoreA++; updateScore('a', scoreA);});
 document.querySelector('.minus-a').addEventListener('click', () => {scoreA--; updateScore('a', scoreA);});
     
@@ -391,6 +391,8 @@ function restart(){
   document.querySelector('#player-2').style.display = 'flex';
   document.querySelector('#player-1').value = '';
   document.querySelector('#player-2').value = '';
+  playerAD = 0;
+  playerBD = 0;
 }
 
 //currentWordIndex = 0;
@@ -399,7 +401,7 @@ function displayWord(color) {
     document.querySelector('#number').value = shuffledWordList.length;
   }
 
-  if (document.querySelector('#number').value < shuffledWordList.length) {
+  if (document.querySelector('#number').value < 0) {
     document.querySelector('#number').value = shuffledWordList.length;
   }
 
