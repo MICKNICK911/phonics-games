@@ -155,6 +155,30 @@
         text: "choose All Consonants",
         list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
         targetList: "b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,y,z".split(",")
+      },
+
+      {
+        text: "choose All Blends",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw ch tch th th ng nk sh ck ph wh gn kn gh wr".split(" "),
+        targetList: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw".split(" ")
+      },
+
+      {
+        text: "choose All Begining-Blends",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw".split(" "),
+        targetList: "bl cl fl gl pl sl br cr dr fr gr pr tr sc sk squ st sm sn sp sw tw dw".split(" ")
+      },
+
+      {
+        text: "choose All Ending-Blends",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw".split(" "),
+        targetList: "st sk sp nd nt mp rd ld lp rk lf pt ft ct lk lt xt ts".split(" ")
+      },
+
+      {
+        text: "choose All Digraphs",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw ch tch th th ng nk sh ck ph wh gn kn gh wr".split(" "),
+        targetList: "ch,tch,th,th,ng,nk,sh,ck,ph,wh,gn,kn,gh,wr".split(",")
       }
     ];
 
@@ -202,86 +226,101 @@
       });
     });
 
-    function updateScreen() {
-      const heading = document.getElementById('heading');
-      heading.textContent = dictionary[currentItem].text;
-      const gridList = document.getElementById('grid-list');
-      gridList.innerHTML = '';
-      gridList.style.display = 'grid';
-      gridList.style.gridTemplateColumns = 'repeat(5,1fr)';
-      gridList.style.gap = '10px';
-      dictionary[currentItem].list.forEach(item => {
-        const gridItem = document.createElement('div');
-        gridItem.style.padding = '10px';
-        gridItem.style.cursor = 'pointer';
-        gridItem.style.fontWeight = 'bold';
-        gridItem.style.fontSize = '45px';
-        gridItem.style.color = 'white';
-        gridItem.style.display = 'flex';
-        gridItem.style.justifyContent = 'center';
-        gridItem.style.alignItems = 'center';
-        gridItem.textContent = item;
-        
-            gridItem.addEventListener('click', () => {
-            if (!gridItem.dataset.tapped) {
-                if (dictionary[currentItem].targetList.includes(item)) {
-                gridItem.style.color = 'rgb(1, 253, 14)';
-                score++;
-                } else {
-                gridItem.style.color = 'red';
-                score--;
-                }
-                document.getElementById('score').textContent = `Score: ${score}`;
-                gridItem.dataset.tapped = true;
 
-                const correctItems = dictionary[currentItem].list.filter(i => dictionary[currentItem].targetList.includes(i));
-                const tappedCorrectItems = Array.from(gridList.children).filter(i => i.style.color === 'rgb(1, 253, 14)').length;
-                if (tappedCorrectItems === correctItems.length && score >= dictionary[currentItem].list.length * 0 + dictionary[currentItem].targetList.length) {
-                  const congratsScreen = document.createElement('div');
-                  congratsScreen.style.position = 'fixed';
-                  congratsScreen.style.top = '0';
-                  congratsScreen.style.left = '0';
-                  congratsScreen.style.width = '100%';
-                  congratsScreen.style.height = '100%';
-                  congratsScreen.style.background = 'green';
-                  congratsScreen.style.display = 'flex';
-                  congratsScreen.style.flexDirection = 'column';
-                  congratsScreen.style.justifyContent = 'center';
-                  congratsScreen.style.alignItems = 'center';
-                  congratsScreen.style.color = 'white';
-                  congratsScreen.style.fontSize = '50px';
-                  congratsScreen.style.fontWeight = 'bold';
+  function updateScreen() {
+    // Shuffle the list items
+    dictionary[currentItem].list = shuffleArray(dictionary[currentItem].list);
 
-                  const congratsText = document.createElement('div');
-                  congratsText.textContent = 'Congratulations!';
-                  congratsScreen.appendChild(congratsText);
+    const heading = document.getElementById('heading');
+    heading.textContent = dictionary[currentItem].text;
 
-                  const nextButton = document.createElement('button');
-                  nextButton.textContent = 'Restart';
-                  nextButton.style.padding = '10px 20px';
-                  nextButton.style.border = 'none';
-                  nextButton.style.borderRadius = '5px';
-                  nextButton.style.background = '#2918c2';
-                  nextButton.style.color = '#fff';
-                  nextButton.style.cursor = 'pointer';
-                  nextButton.style.fontSize = '30px';
-                  nextButton.style.marginTop = '20px';
-                  nextButton.addEventListener('click', () => {
-                    document.body.removeChild(congratsScreen);
-                    resetScreen();
-                  });
-                  congratsScreen.appendChild(nextButton);
+    const gridList = document.getElementById('grid-list');
+    gridList.innerHTML = '';
+    gridList.style.display = 'grid';
+    gridList.style.gridTemplateColumns = 'repeat(10,1fr)';
+    gridList.style.gap = '10px';
 
-                  document.body.appendChild(congratsScreen);
-                }
+    dictionary[currentItem].list.forEach(item => {
+      const gridItem = document.createElement('div');
+      gridItem.style.padding = '10px';
+      gridItem.style.cursor = 'pointer';
+      gridItem.style.fontWeight = 'bold';
+      gridItem.style.fontSize = '45px';
+      gridItem.style.color = 'white';
+      gridItem.style.display = 'flex';
+      gridItem.style.justifyContent = 'center';
+      gridItem.style.alignItems = 'center';
+      gridItem.textContent = item;
 
-            }
+      gridItem.addEventListener('click', () => {
+        if (!gridItem.dataset.tapped) {
+          if (dictionary[currentItem].targetList.includes(item)) {
+            gridItem.style.color = 'rgb(1, 253, 14)';
+            score++;
+          } else {
+            gridItem.style.color = 'red';
+            score--;
+          }
+          document.getElementById('score').textContent = `Score: ${score}`;
+          gridItem.dataset.tapped = true;
+
+          const correctItems = dictionary[currentItem].list.filter(i => dictionary[currentItem].targetList.includes(i));
+          const tappedCorrectItems = Array.from(gridList.children).filter(i => i.style.color === 'rgb(1, 253, 14)').length;
+
+          if (tappedCorrectItems === correctItems.length && score >= dictionary[currentItem].list.length * 0 + dictionary[currentItem].targetList.length) {
+            const congratsScreen = document.createElement('div');
+            congratsScreen.style.position = 'fixed';
+            congratsScreen.style.top = '0';
+            congratsScreen.style.left = '0';
+            congratsScreen.style.width = '100%';
+            congratsScreen.style.height = '100%';
+            congratsScreen.style.background = 'green';
+            congratsScreen.style.display = 'flex';
+            congratsScreen.style.flexDirection = 'column';
+            congratsScreen.style.justifyContent = 'center';
+            congratsScreen.style.alignItems = 'center';
+            congratsScreen.style.color = 'white';
+            congratsScreen.style.fontSize = '50px';
+            congratsScreen.style.fontWeight = 'bold';
+
+            const congratsText = document.createElement('div');
+            congratsText.textContent = 'Congratulations!';
+            congratsScreen.appendChild(congratsText);
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Restart';
+            nextButton.style.padding = '10px 20px';
+            nextButton.style.border = 'none';
+            nextButton.style.borderRadius = '5px';
+            nextButton.style.background = '#2918c2';
+            nextButton.style.color = '#fff';
+            nextButton.style.cursor = 'pointer';
+            nextButton.style.fontSize = '30px';
+            nextButton.style.marginTop = '20px';
+
+            nextButton.addEventListener('click', () => {
+              document.body.removeChild(congratsScreen);
+              resetScreen();
             });
 
-
-        gridList.appendChild(gridItem);
+            congratsScreen.appendChild(nextButton);
+            document.body.appendChild(congratsScreen);
+          }
+        }
       });
-    }
+
+      gridList.appendChild(gridItem);
+    });
+  }
+
+// Function to shuffle an array
+function shuffleArray(array) {
+for (let i = array.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [array[i], array[j]] = [array[j], array[i]];
+}
+return array;
+}
 
     function resetScreen() {
       const gridList = document.getElementById('grid-list');
@@ -297,3 +336,13 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
