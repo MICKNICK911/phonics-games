@@ -17,6 +17,7 @@
       justify-content: center;
       margin-bottom: 20px;
       flex-wrap: wrap;
+      display: none;
     }
   
     #input-container input {
@@ -36,6 +37,8 @@
       background-color: #4CAF50;
       color: #fff;
       margin-bottom: 20px;
+      display: none;
+      justify-self: center;
     }
   
     #game-name {
@@ -45,6 +48,8 @@
       width: 50%;
       min-width: 200px;
       margin-bottom: 10px;
+      justify-self: center;
+      display: none;
       
       
     }
@@ -57,6 +62,8 @@
       background-color: #4CAF50;
       color: #fff;
       margin-bottom: 40px;
+      justify-self: center;
+      display: none;
     }
   
     #start-game {
@@ -69,7 +76,77 @@
       font-size: 24px;
       font-weight: bold;
       border: 2px solid #4CAF50;
+      /* display: none; */
     }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+  
+    .popup-content {
+      width: 300px;
+      z-index: 9999;
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    #popup button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007BFF;
+      color: white;
+    }
+  
+    #popup button {
+      background-color: #dc3545;
+    }
+  
+    #popup button:hover {
+      background-color: #a71d2a;
+    }
+
+    #menu{
+      display: block;
+      position: absolute;
+      top: 10px;
+      left: 10PX;
+      margin: 20px auto;
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: transparent;
+      color: transparent;
+    }
+  
+    /* #grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+  
+    #grid-container div {
+      background-color: #f0f0f0;
+      padding: 20px;
+      border: 1px solid #ddd;
+    } */
   
     @media only screen and (max-width: 730px) {
       #input-container {
@@ -87,6 +164,14 @@
   </style>
   </head>
   <body>
+    <div id="popup">
+      <div class="popup-content">
+        <h2>Popup Message</h2>
+        <p id="popup-message"></p>
+        <button onclick="closePopup()">Close</button>
+      </div>
+    </div>
+
     <h1 style="color: red;">Word Picked Game</h1>
     <div id="input-container">
       <input id="key" type="text" placeholder="Key">
@@ -96,12 +181,32 @@
     <div style="justify-self: center; width: 80%;"><input id="game-name" type="text" placeholder="Game Name"></div>
     <button id="save-game">Save Game</button>
     <button id="start-game">Start Game</button>
+    <button id="menu">Menu</button>
     <div id="game-container"></div>
 
   <script>
     
 let dictionaryX = {};
-let dictionaryY = {};
+let dictionaryY = {
+  "Match Words To sounds 1": {
+      "Long a": "day yea they main take".split(' '),
+      "Long e": "meat week these field team".split(' '),
+      "Long i": "fried pie ride high cry".split(' '),
+      "Long o": "blow woe stone cold boat".split(' '),
+  },
+  "Match Words To sounds 2": {
+      "Short a": "mark chart blast class hard".split(' '),
+      "Short e": "bread word shirt herd hurt curve".split(' '),
+      "Short i": "spin twist fist myth gym".split(' '),
+      "Long u": "book mute pull bush flute".split(' '),
+  },
+  // "Match Words To Their corresponding vowel sounds": {
+  //     "Short a": "",
+  //     "Short e": "",
+  //     "Short i": "",
+  //     "Short i": "",
+  // },
+};
 let score = 0;
 let gameOver = false;
 
@@ -120,6 +225,15 @@ document.getElementById('save-game').addEventListener('click', () => {
   document.getElementById('key').value = '';
   document.getElementById('values').value = '';
   document.getElementById('game-name').value = '';
+});
+
+document.getElementById('menu').addEventListener('click', () => {
+  document.getElementById('input-container').style.display= 'flex';
+  document.getElementById('save-key-values').style.display= 'block';
+  document.getElementById('game-name').style.display= 'flex';
+  document.getElementById('save-game').style.display= 'block';
+  // document.getElementById('start-game').style.display= 'flex';
+
 });
 
 document.getElementById('start-game').addEventListener('click', () => {
@@ -259,9 +373,20 @@ function gameOverScreen(container) {
     displayGame(currentGameName, container);
   });
 }
-
-
 });
+
+
+// Function to close the popup box
+function closePopup() {
+    document.getElementById('popup').style.display = 'none';
+  }
+
+  // Show the popup box with a message when the page loads
+  window.onload = function() {
+    const popupMessage = document.getElementById('popup-message');
+    popupMessage.innerText = "Click on Start to begin!";
+    document.getElementById('popup').style.display = 'flex';
+  };
 
   </script>
 </body>
