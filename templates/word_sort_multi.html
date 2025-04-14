@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: hsl(39, 100%, 65%);
+    }
+  
+    #input-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+  
+    #input-container input {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 30%;
+      min-width: 200px;
+      margin: 10px;
+    }
+  
+    #save-key-values {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+  
+    #game-name {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 50%;
+      min-width: 200px;
+      margin-bottom: 10px;
+      
+      
+    }
+  
+    #save-game {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: #fff;
+      margin-bottom: 40px;
+    }
+  
+    #start-game {
+      padding: 20px 40px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: transparent;
+      color: #4CAF50;
+      font-size: 24px;
+      font-weight: bold;
+      border: 2px solid #4CAF50;
+    }
+  
+    @media only screen and (max-width: 730px) {
+      #input-container {
+        flex-direction: column;
+        justify-self: center;
+      }
+      #input-container input {
+        width: 80%;
+        margin: 10px;
+      }
+      #game-name {
+        width: 100%;
+      }
+    }
+  </style>
+  </head>
+  <body>
+    <h1 style="color: red;">Word Picked Game</h1>
+    <div id="input-container">
+      <input id="key" type="text" placeholder="Key">
+      <input id="values" type="text" placeholder="Values (comma separated)">
+    </div>
+    <button id="save-key-values">Save Key-Values</button>
+    <div style="justify-self: center; width: 80%;"><input id="game-name" type="text" placeholder="Game Name"></div>
+    <button id="save-game">Save Game</button>
+    <button id="start-game">Start Game</button>
+    <div id="game-container"></div>
+
+  <script>
+    
+let dictionaryX = {};
+let dictionaryY = {};
+let score = 0;
+let gameOver = false;
+
+document.getElementById('save-key-values').addEventListener('click', () => {
+  const key = document.getElementById('key').value;
+  const values = document.getElementById('values').value.split(" ");
+  dictionaryX[key] = values.map(value => value.trim());
+  document.getElementById('key').value = '';
+  document.getElementById('values').value = '';
+});
+
+document.getElementById('save-game').addEventListener('click', () => {
+  const gameName = document.getElementById('game-name').value;
+  dictionaryY[gameName] = { ...dictionaryX };
+  dictionaryX = {};
+  document.getElementById('key').value = '';
+  document.getElementById('values').value = '';
+  document.getElementById('game-name').value = '';
+});
+
+document.getElementById('start-game').addEventListener('click', () => {
+  document.body.innerHTML = '';
+  const gameContainer = document.createElement('div');
+  document.body.appendChild(gameContainer);
+  const radioContainer = document.createElement('div');
+    radioContainer.style.display = 'flex';
+    radioContainer.style.justifyContent = 'center';
+    radioContainer.style.marginBottom = '20px';
+  gameContainer.appendChild(radioContainer);
+  const gameDisplay = document.createElement('div');
+  gameContainer.appendChild(gameDisplay);
+  let currentGameName = Object.keys(dictionaryY)[0];
+
+  Object.keys(dictionaryY).forEach((gameName, index) => {
+  const radioInput = document.createElement('input');
+  radioInput.type = 'radio';
+  radioInput.name = 'game';
+  radioInput.value = gameName;
+  if (index === 0) {
+    radioInput.checked = true;
+  }
+  radioInput.addEventListener('change', () => {
+    currentGameName = gameName;
+    score = 0;
+    gameOver = false;
+    displayGame(currentGameName, gameDisplay);
+  });
+  // const radioLabel = document.createElement('label');
+  // radioLabel.textContent = gameName;
+  // radioLabel.style.marginRight = '20px';
+  radioContainer.appendChild(radioInput);
+  radioContainer.appendChild(document.createTextNode(`QUIZ ${index + 1}`));
+});
+  displayGame(currentGameName, gameDisplay);
+
+  function displayGame(gameName, container) {
+  container.innerHTML = '';
+  container.style.textAlign = 'center';
+  const scoreElement = document.createElement('div');
+  scoreElement.style.fontSize = '24px';
+  scoreElement.style.fontWeight = 'bold';
+  scoreElement.style.marginBottom = '20px';
+  scoreElement.textContent = `Score: ${score}`;
+  container.appendChild(scoreElement);
+  const gameDiv = document.createElement('div');
+  gameDiv.style.display = 'flex';
+  gameDiv.style.flexDirection = 'column';
+  gameDiv.style.alignItems = 'center';
+  gameDiv.innerHTML = `
+    <h2 style="font-size: 36px; margin-bottom: 20px;">${gameName}</h2>
+    <div id="grid-container-${gameName}" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+  `;
+  container.appendChild(gameDiv);
+  const gridContainer = gameDiv.querySelector('div');
+  const values = Object.values(dictionaryY[gameName]).flat();
+  const shuffledValues = values.sort(() => Math.random() - 0.5);
+  let selectedItem = null;
+  const dictionary = dictionaryY[gameName];
+  shuffledValues.forEach(value => {
+    const valueDiv = document.createElement('div');
+    valueDiv.textContent = value;
+    valueDiv.style.fontWeight = 'bold';
+    valueDiv.style.fontSize = '24px';
+    valueDiv.style.fontFamily = 'serif';
+    // valueDiv.style.width = '100%';
+    valueDiv.style.backgroundColor = '#f0f0f0';
+    valueDiv.style.padding = '20px';
+    valueDiv.style.borderRadius = '10px';
+    valueDiv.style.boxShadow = '0px 0px 10px rgba(0, 0, 0, 0.1)';
+    valueDiv.style.cursor = 'pointer';
+    valueDiv.addEventListener('click', () => {
+      if (!gameOver) {
+        if (selectedItem) {
+          selectedItem.style.backgroundColor = '#f0f0f0';
+        }
+        valueDiv.style.backgroundColor = 'yellow';
+        selectedItem = valueDiv;
+      }
+    });
+    gridContainer.appendChild(valueDiv);
+  });
+  const buttons = Object.keys(dictionaryY[gameName]);
+  buttons.forEach((button, index) => {
+    const buttonElement = document.createElement('button');
+    buttonElement.textContent = button;
+    buttonElement.style.backgroundColor = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+    buttonElement.style.color = '#fff';
+    buttonElement.style.padding = '10px 20px';
+    buttonElement.style.border = 'none';
+    buttonElement.style.borderRadius = '10px';
+    buttonElement.style.cursor = 'pointer';
+    buttonElement.style.fontSize = '16px';
+    buttonElement.addEventListener('click', () => {
+
+    if (!gameOver && selectedItem) {
+      const selectedText = selectedItem.textContent;
+      if (dictionary[button].includes(selectedText) && !selectedItem.classList.contains('correct')) {
+        selectedItem.style.color = buttonElement.style.backgroundColor;
+        selectedItem.style.backgroundColor = '#f0f0f0';
+        selectedItem.classList.add('correct');
+        selectedItem = null;
+        score++;
+        scoreElement.textContent = `Score: ${score}`;
+      } else if (!dictionary[button].includes(selectedText)) {
+        gameOverScreen(container);
+      }
+    }
+  });
+    gridContainer.appendChild(buttonElement);
+  });
+}
+
+function gameOverScreen(container) {
+  gameOver = true;
+  container.innerHTML = '';
+  container.style.textAlign = 'center';
+  const gameOverDiv = document.createElement('div');
+  gameOverDiv.style.display = 'flex';
+  gameOverDiv.style.flexDirection = 'column';
+  gameOverDiv.style.alignItems = 'center';
+  gameOverDiv.style.justifyContent = 'center';
+  gameOverDiv.style.height = '100vh';
+  gameOverDiv.style.background = 'linear-gradient(to bottom, #4CAF50, #3e8e41)';
+  gameOverDiv.style.color = '#fff';
+  gameOverDiv.innerHTML = `
+    <h1 style="font-size: 48px; margin-bottom: 20px;">Game Over!</h1>
+    <p style="font-size: 24px; margin-bottom: 40px;">Your final score is ${score}.</p>
+    <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color: #4CAF50; font-size: 18px;">Play Again</button>
+  `;
+  container.appendChild(gameOverDiv);
+  const playAgainButton = gameOverDiv.querySelector('button');
+  playAgainButton.addEventListener('click', () => {
+    score = 0;
+    gameOver = false;
+    displayGame(currentGameName, container);
+  });
+}
+
+
+});
+
+  </script>
+</body>
+</html>
+
+
+
+
+
+
