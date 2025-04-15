@@ -144,6 +144,7 @@
     let dictionary = [];
     let currentItem = 0;
     let score = 0;
+    let failscore = 0;
 
     dictionary = [
     {
@@ -254,18 +255,22 @@
 
       gridItem.addEventListener('click', () => {
         if (!gridItem.dataset.tapped) {
+          failscore ++
           if (dictionary[currentItem].targetList.includes(item)) {
             gridItem.style.color = 'rgb(1, 253, 14)';
             score++;
           } else {
             gridItem.style.color = 'red';
             score--;
+            
           }
           document.getElementById('score').textContent = `Score: ${score}`;
           gridItem.dataset.tapped = true;
 
           const correctItems = dictionary[currentItem].list.filter(i => dictionary[currentItem].targetList.includes(i));
           const tappedCorrectItems = Array.from(gridList.children).filter(i => i.style.color === 'rgb(1, 253, 14)').length;
+          const tappedWrongItems = Array.from(gridList.children).filter(i => i.style.color === 'red').length;
+
 
           if (tappedCorrectItems === correctItems.length && score >= dictionary[currentItem].list.length * 0 + dictionary[currentItem].targetList.length) {
             const congratsScreen = document.createElement('div');
@@ -284,7 +289,7 @@
             congratsScreen.style.fontWeight = 'bold';
 
             const congratsText = document.createElement('div');
-            congratsText.textContent = 'Congratulations!';
+            congratsText.textContent = 'Exellent!';
             congratsScreen.appendChild(congratsText);
 
             const nextButton = document.createElement('button');
@@ -301,11 +306,56 @@
             nextButton.addEventListener('click', () => {
               document.body.removeChild(congratsScreen);
               resetScreen();
+              failscore = 0;
             });
 
             congratsScreen.appendChild(nextButton);
             document.body.appendChild(congratsScreen);
           }
+
+          //if(tappedCorrectItems.length + tappedWrongItems.length >= dictionary[currentItem].targetList.length) {
+          else if(failscore >= dictionary[currentItem].targetList.length) {
+
+            const FailScreen = document.createElement('div');
+            FailScreen.style.position = 'fixed';
+            FailScreen.style.top = '0';
+            FailScreen.style.left = '0';
+            FailScreen.style.width = '100%';
+            FailScreen.style.height = '100%';
+            FailScreen.style.background = 'red';
+            FailScreen.style.display = 'flex';
+            FailScreen.style.flexDirection = 'column';
+            FailScreen.style.justifyContent = 'center';
+            FailScreen.style.alignItems = 'center';
+            FailScreen.style.color = 'white';
+            FailScreen.style.fontSize = '50px';
+            FailScreen.style.fontWeight = 'bold';
+
+            const FailText = document.createElement('div');
+            FailText.textContent = `Score: ${score} \n Try Again`;
+            FailScreen.appendChild(FailText);
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Restart';
+            nextButton.style.padding = '10px 20px';
+            nextButton.style.border = 'none';
+            nextButton.style.borderRadius = '5px';
+            nextButton.style.background = '#2918c2';
+            nextButton.style.color = '#fff';
+            nextButton.style.cursor = 'pointer';
+            nextButton.style.fontSize = '30px';
+            nextButton.style.marginTop = '20px';
+
+            nextButton.addEventListener('click', () => {
+              document.body.removeChild(FailScreen);
+              resetScreen();
+              failscore = 0;
+            });
+
+            FailScreen.appendChild(nextButton);
+            document.body.appendChild(FailScreen);
+          }
+        
         }
       });
 

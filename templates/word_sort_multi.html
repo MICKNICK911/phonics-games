@@ -196,7 +196,7 @@ let dictionaryY = {
   },
   "Match Words To sounds 2": {
       "Short a": "mark chart blast class hard".split(' '),
-      "Short e": "bread word shirt herd hurt curve".split(' '),
+      "Short e": "bread word shirt herd hurt".split(' '),
       "Short i": "spin twist fist myth gym".split(' '),
       "Long u": "book mute pull bush flute".split(' '),
   },
@@ -285,8 +285,8 @@ document.getElementById('start-game').addEventListener('click', () => {
   gameDiv.style.flexDirection = 'column';
   gameDiv.style.alignItems = 'center';
   gameDiv.innerHTML = `
-    <h2 style="font-size: 36px; margin-bottom: 20px;">${gameName}</h2>
-    <div id="grid-container-${gameName}" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+    <h2 style="font-size: 18px; margin-bottom: 10px;">${gameName}</h2>
+    <div id="grid-container-${gameName}" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
   `;
   container.appendChild(gameDiv);
   const gridContainer = gameDiv.querySelector('div');
@@ -298,11 +298,11 @@ document.getElementById('start-game').addEventListener('click', () => {
     const valueDiv = document.createElement('div');
     valueDiv.textContent = value;
     valueDiv.style.fontWeight = 'bold';
-    valueDiv.style.fontSize = '24px';
+    valueDiv.style.fontSize = '26px';
     valueDiv.style.fontFamily = 'serif';
     // valueDiv.style.width = '100%';
     valueDiv.style.backgroundColor = '#f0f0f0';
-    valueDiv.style.padding = '20px';
+    valueDiv.style.padding = '8px';
     valueDiv.style.borderRadius = '10px';
     valueDiv.style.boxShadow = '0px 0px 10px rgba(0, 0, 0, 0.1)';
     valueDiv.style.cursor = 'pointer';
@@ -323,7 +323,7 @@ document.getElementById('start-game').addEventListener('click', () => {
     buttonElement.textContent = button;
     buttonElement.style.backgroundColor = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
     buttonElement.style.color = '#fff';
-    buttonElement.style.padding = '10px 20px';
+    buttonElement.style.padding = '8px';
     buttonElement.style.border = 'none';
     buttonElement.style.borderRadius = '10px';
     buttonElement.style.cursor = 'pointer';
@@ -342,6 +342,10 @@ document.getElementById('start-game').addEventListener('click', () => {
       } else if (!dictionary[button].includes(selectedText)) {
         gameOverScreen(container);
       }
+
+      if (score === shuffledValues.length) {
+        gameWinScreen(container);
+      }
     }
   });
     gridContainer.appendChild(buttonElement);
@@ -358,10 +362,36 @@ function gameOverScreen(container) {
   gameOverDiv.style.alignItems = 'center';
   gameOverDiv.style.justifyContent = 'center';
   gameOverDiv.style.height = '100vh';
-  gameOverDiv.style.background = 'linear-gradient(to bottom, #4CAF50, #3e8e41)';
+  gameOverDiv.style.background = 'red';
   gameOverDiv.style.color = '#fff';
   gameOverDiv.innerHTML = `
     <h1 style="font-size: 48px; margin-bottom: 20px;">Game Over!</h1>
+    <p style="font-size: 24px; margin-bottom: 40px;">Your final score is ${score}.</p>
+    <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color:red; font-size: 18px;">Play Again</button>
+  `;
+  container.appendChild(gameOverDiv);
+  const playAgainButton = gameOverDiv.querySelector('button');
+  playAgainButton.addEventListener('click', () => {
+    score = 0;
+    gameOver = false;
+    displayGame(currentGameName, container);
+  });
+}
+
+function gameWinScreen(container) {
+  gameOver = true;
+  container.innerHTML = '';
+  container.style.textAlign = 'center';
+  const gameOverDiv = document.createElement('div');
+  gameOverDiv.style.display = 'flex';
+  gameOverDiv.style.flexDirection = 'column';
+  gameOverDiv.style.alignItems = 'center';
+  gameOverDiv.style.justifyContent = 'center';
+  gameOverDiv.style.height = '100vh';
+  gameOverDiv.style.background = 'linear-gradient(to bottom, #4CAF50, #3e8e41)';
+  gameOverDiv.style.color = '#fff';
+  gameOverDiv.innerHTML = `
+    <h1 style="font-size: 48px; margin-bottom: 20px;">Congratulation!</h1>
     <p style="font-size: 24px; margin-bottom: 40px;">Your final score is ${score}.</p>
     <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color: #4CAF50; font-size: 18px;">Play Again</button>
   `;
