@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Brick Breaker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            touch-action: manipulation;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 95vw;
+            height: 40vh;
+            max-width: 600px;
+            max-height: 600px;
+            margin: 5px;
+            background-color: #fff;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        .brick-row {
+            display: flex;
+            justify-content: center;
+            gap: 2%;
+            margin: 1vh 0;
+        }
+
+        .brick {
+            width: 5%;
+            height: 2vh;
+            background-color: #4CAF50;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        #shooter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5vw;
+            height: 5vw;
+            max-width: 30px;
+            max-height: 30px;
+            background-color: #333;
+            border-radius: 50%;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 2vw;
+            height: 2vw;
+            max-width: 15px;
+            max-height: 15px;
+            background-color: #ff0000;
+            border-radius: 50%;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 2px;
+            width: 95vw;
+            max-width: 600px;
+        }
+
+        #inputSection {
+            margin-top: 10px;
+            width: 95vw;
+            max-width: 600px;
+        }
+
+        #customKeyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            margin-top: 10px;
+            width: 95vw;
+            max-width: 600px;
+        }
+        
+        .heading {font-weight: bold;
+            
+        }
+
+        .key-btn {
+            padding: 5px;
+            font-size: 12px;
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            touch-action: manipulation;
+        }
+        
+        .key-btn-lf {
+            padding: 5px;
+            font-size: 12px;
+            background-color: blue;
+            width: 50%;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            touch-action: manipulation;
+        }
+        
+        #rightBtn, #leftBtn {
+            background-color: green;
+        }
+
+         .key-btn-shoot {
+            padding: 15px;
+            font-size: 12px;
+            background-color: red;
+            width: 100%;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            touch-action: manipulation;
+        }
+
+
+        .gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+
+        #usedWords {
+            margin: 5px 0;
+            min-height: 15px;
+        }
+
+        @media (max-width: 600px) {
+            #customKeyboard {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            .key-btn {
+                padding: 4px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="heading">Word Brick Breaker</div>
+    <div id="gameContainer">
+        <div id="brickGrid"></div>
+        <div id="shooter"></div>
+        <div id="gameOver" class="gameOver">
+            <h2 id="gameOverText">Game Over!</h2>
+            <button class="key-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="key-btn-lf" id="leftBtn">←</button>
+        <button class="key-btn-lf" id="backspaceBtn">⌫</button>
+        <button class="key-btn-lf" id="rightBtn">→</button>
+    </div>
+    
+    <div id="inputSection">
+        <div id="usedWords" style="background-color: black; height: 80px; color: white; overflow: auto; border-radius: 8px;"></div>
+        <div id="customKeyboard"></div>
+        <div style="margin-top: 10px; display: flex; gap: 5px;">
+            
+            <button class="key-btn-shoot" id="shootBtn">SHOOT</button>
+        </div>
+    </div>
+
+    <script>
+        const words = ['APPLE', 'BRAVE', 'CHAIR', 'DANCE', 'EARTH', 
+                      'FRUIT', 'GHOST', 'HOUSE', 'IGLOO', 'JELLY','ZEBRA', 'AXE', 'KILL'];
+        const allLetters = [...new Set(words.join(''))].sort();
+        let bricks = [];
+        let shooterPosition = 50;
+        let addedBricks = 0;
+        let bulletSpeed = 5;
+        let usedWords = [];
+        
+        function initializeGame() {
+            createCustomKeyboard();
+            initializeBricks();
+            updateShooterPosition();
+        }
+
+        function initializeBricks() {
+            const brickGrid = document.getElementById('brickGrid');
+            brickGrid.innerHTML = '';
+            bricks = [];
+            
+            // Create initial 10 bricks in 5x2 grid
+            for(let i = 0; i < 2; i++) {
+                const row = document.createElement('div');
+                row.className = 'brick-row';
+                for(let j = 0; j < 5; j++) {
+                    const brick = createBrick();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                }
+                brickGrid.appendChild(row);
+            }
+            updateBrickCount();
+        }
+
+        function createBrick() {
+            const brick = document.createElement('div');
+            brick.className = 'brick';
+            return brick;
+        }
+
+        function addBrickToGrid() {
+            const brickGrid = document.getElementById('brickGrid');
+            const rows = brickGrid.children;
+            
+            // Find first available spot in existing rows
+            for(let row of rows) {
+                if(row.children.length < 5) {
+                    const brick = createBrick();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    return;
+                }
+            }
+            
+            // Add new row if all are full
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            newRow.appendChild(createBrick());
+            brickGrid.appendChild(newRow);
+            bricks.push(newRow.firstChild);
+        }
+
+        function updateShooterPosition() {
+            document.getElementById('shooter').style.left = `${shooterPosition}%`;
+        }
+
+        function checkWord() {
+            const input = document.getElementById('currentWord').textContent.toUpperCase();
+            if(!input) return false;
+            
+            const isValid = words.includes(input);
+            const isUsed = usedWords.includes(input);
+            
+            if(isValid && !isUsed) {
+                usedWords.push(input);
+                document.getElementById('usedWords').textContent = `Used Words: ${usedWords.join(', ')}`;
+                return true;
+            } else {
+                if(!isValid || isUsed) addBrickToGrid();
+                return false;
+            }
+        }
+
+        function shootBullet() {
+            if(!checkWord()) {
+                if(++addedBricks >= 5) showGameOver(false);
+                updateBrickCount();
+                return;
+            }
+
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = `${shooterPosition}%`;
+            bullet.style.bottom = '30px';
+            document.getElementById('gameContainer').appendChild(bullet);
+
+            const animation = setInterval(() => {
+                const currentBottom = parseFloat(bullet.style.bottom) || 30;
+                const newBottom = currentBottom + bulletSpeed;
+                bullet.style.bottom = `${newBottom}px`;
+
+                // Collision detection
+                const bulletRect = bullet.getBoundingClientRect();
+                const brickRects = [...bricks].map(b => b.getBoundingClientRect());
+                
+                brickRects.forEach((rect, index) => {
+                    if(detectCollision(bulletRect, rect)) {
+                        bricks[index].remove();
+                        bricks.splice(index, 1);
+                        bullet.remove();
+                        clearInterval(animation);
+                        updateBrickCount();
+                        if(bricks.length === 0) showGameOver(true);
+                        return;
+                    }
+                });
+
+                if(newBottom > document.getElementById('gameContainer').clientHeight) {
+                    bullet.remove();
+                    clearInterval(animation);
+                }
+            }, 16);
+        }
+
+        function detectCollision(rect1, rect2) {
+            return !(rect1.right < rect2.left || 
+                    rect1.left > rect2.right || 
+                    rect1.bottom < rect2.top || 
+                    rect1.top > rect2.bottom);
+        }
+
+        function updateBrickCount() {
+            document.querySelector('#brickCount').textContent = bricks.length;
+        }
+
+        function showGameOver(won) {
+            const gameOver = document.getElementById('gameOver');
+            document.getElementById('gameOverText').textContent = 
+                won ? 'You Win!' : 'Game Over!';
+            gameOver.style.display = 'block';
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            shooterPosition = 50;
+            addedBricks = 0;
+            usedWords = [];
+            document.getElementById('usedWords').textContent = 'Used Words: ';
+            initializeBricks();
+            updateShooterPosition();
+        }
+
+        function createCustomKeyboard() {
+            const keyboard = document.getElementById('customKeyboard');
+            keyboard.innerHTML = '';
+            
+            allLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter;
+                btn.onclick = () => {
+                    const current = document.getElementById('currentWord');
+                    current.textContent += letter;
+                };
+                keyboard.appendChild(btn);
+            });
+            
+            // Add current word display
+            const wordDisplay = document.createElement('div');
+            wordDisplay.id = 'currentWord';
+            wordDisplay.style.margin = '10px 0';
+            wordDisplay.style.minHeight = '20px';
+            wordDisplay.style.textAlign = 'center';
+            keyboard.parentNode.insertBefore(wordDisplay, keyboard);
+        }
+
+        // Event Listeners
+        document.getElementById('leftBtn').addEventListener('click', () => {
+            shooterPosition = Math.max(2, shooterPosition - 4);
+            updateShooterPosition();
+        });
+
+        document.getElementById('rightBtn').addEventListener('click', () => {
+            shooterPosition = Math.min(94, shooterPosition + 4);
+            updateShooterPosition();
+        });
+
+        document.getElementById('backspaceBtn').addEventListener('click', () => {
+            const current = document.getElementById('currentWord');
+            current.textContent = current.textContent.slice(0, -1);
+        });
+
+        document.getElementById('shootBtn').addEventListener('click', () => {
+            shootBullet();
+            document.getElementById('currentWord').textContent = '';
+        });
+
+        // Initialize game
+        initializeGame();
+    </script>
+</body>
+</html>

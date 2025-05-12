@@ -1,6 +1,5 @@
 
-<script>
-var wordBank = `word
+export const wordBank = `word
 a
 abandon
 ability
@@ -5941,5 +5940,4 @@ yours
 yourself
 youth
 zero
-zone`.split(" ");
-</script>
+zone`;

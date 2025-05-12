@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phonics Snake Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: none;
+        }
+        body {
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        #gameContainer {
+            position: relative;
+            width: 95vw;
+            max-width: 400px;
+            aspect-ratio: 1/1;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #4CAF50;
+            background-color: #000;
+        }
+        #controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            width: 95vw;
+            max-width: 400px;
+        }
+        .control-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 24px;
+            touch-action: manipulation;
+            min-height: 60px;
+        }
+        .control-btn:active {
+            background-color: #45a049;
+        }
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.9);
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            width: 80%;
+        }
+        @media (orientation: landscape) {
+            body {
+                flex-direction: row;
+                justify-content: center;
+                gap: 20px;
+            }
+            #controls {
+                max-width: 150px;
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="score">Score: 0</div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button class="control-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div></div>
+        <button class="control-btn" id="upBtn">↑</button>
+        <div></div>
+        <button class="control-btn" id="leftBtn">←</button>
+        <button class="control-btn" id="pauseBtn">⏸</button>
+        <button class="control-btn" id="rightBtn">→</button>
+        <div></div>
+        <button class="control-btn" id="downBtn">↓</button>
+        <div></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gridSize = 20;
+        let tileCount;
+        let snake = [{x: 10, y: 10}];
+        let letters = [];
+        let dx = 1;
+        let dy = 0;
+        let score = 0;
+        let gameLoop;
+        let wallCollision = false;
+        let isPaused = false;
+        const vowels = ['A', 'E', 'I', 'O', 'U'];
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+        function resizeCanvas() {
+            const container = document.getElementById('gameContainer');
+            const size = container.clientWidth;
+            canvas.width = size;
+            canvas.height = size;
+            gridSize = Math.max(15, Math.floor(size / 20));
+            tileCount = Math.floor(size / gridSize);
+        }
+
+        function generateLetters() {
+            letters = [];
+            const positions = new Set();
+            
+            // Generate all alphabet letters
+            alphabet.forEach(letter => {
+                let pos;
+                do {
+                    pos = {
+                        x: Math.floor(Math.random() * tileCount),
+                        y: Math.floor(Math.random() * tileCount),
+                        letter: letter,
+                        isVowel: vowels.includes(letter)
+                    };
+                } while (
+                    positions.has(`${pos.x},${pos.y}`) || 
+                    (pos.x === snake[0].x && pos.y === snake[0].y)
+                );
+                
+                positions.add(`${pos.x},${pos.y}`);
+                letters.push(pos);
+            });
+        }
+
+        function drawGame() {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw snake
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? '#4CAF50' : '#45a049';
+                ctx.fillRect(
+                    segment.x * gridSize,
+                    segment.y * gridSize,
+                    gridSize-2,
+                    gridSize-2
+                );
+            });
+
+            // Draw letters
+            letters.forEach(letter => {
+                if (letter.isVowel) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.font = `bold ${gridSize*0.8}px Arial`;
+                    ctx.fillText(letter.letter, 
+                        letter.x * gridSize + gridSize/4, 
+                        letter.y * gridSize + gridSize*0.8);
+                } else {
+                    ctx.fillStyle = '#FF0000';
+                    ctx.beginPath();
+                    ctx.arc(
+                        letter.x * gridSize + gridSize/2,
+                        letter.y * gridSize + gridSize/2,
+                        gridSize/2.5,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+            });
+        }
+
+        function updateGame() {
+            if (isPaused) return;
+
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            
+            // Wall collision handling
+            if (wallCollision) {
+                if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                    gameOver();
+                    return;
+                }
+            } else {
+                head.x = (head.x + tileCount) % tileCount;
+                head.y = (head.y + tileCount) % tileCount;
+            }
+
+            // Self collision
+            for (let i = 0; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            // Check letter collisions
+            letters.forEach((letter, index) => {
+                if (head.x === letter.x && head.y === letter.y) {
+                    if (letter.isVowel) {
+                        // Grow snake and remove letter
+                        snake.unshift(head);
+                        score += 10;
+                        document.getElementById('score').textContent = `Score: ${score}`;
+                        letters.splice(index, 1);
+                    } else {
+                        gameOver();
+                    }
+                }
+            });
+
+            // Move snake
+            snake.unshift(head);
+            snake.pop();
+
+            drawGame();
+        }
+
+        function gameOver() {
+            clearInterval(gameLoop);
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('finalScore').textContent = score;
+            dx = 0;
+            dy = 0;
+        }
+
+        function restartGame() {
+            snake = [{x: 10, y: 10}];
+            dx = 1;
+            dy = 0;
+            score = 0;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('gameOver').style.display = 'none';
+            
+            generateLetters();
+            
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(updateGame, 100);
+            isPaused = false;
+        }
+
+        // Touch controls
+        document.getElementById('upBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (dy === 0) { dx = 0; dy = -1; }
+        });
+        document.getElementById('downBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (dy === 0) { dx = 0; dy = 1; }
+        });
+        document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (dx === 0) { dx = -1; dy = 0; }
+        });
+        document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (dx === 0) { dx = 1; dy = 0; }
+        });
+        document.getElementById('pauseBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isPaused = !isPaused;
+            if (!isPaused) {
+                gameLoop = setInterval(updateGame, 100);
+            } else {
+                clearInterval(gameLoop);
+            }
+        });
+
+        // Mouse controls
+        document.getElementById('upBtn').addEventListener('click', () => {
+            if (dy === 0) { dx = 0; dy = -1; }
+        });
+        document.getElementById('downBtn').addEventListener('click', () => {
+            if (dy === 0) { dx = 0; dy = 1; }
+        });
+        document.getElementById('leftBtn').addEventListener('click', () => {
+            if (dx === 0) { dx = -1; dy = 0; }
+        });
+        document.getElementById('rightBtn').addEventListener('click', () => {
+            if (dx === 0) { dx = 1; dy = 0; }
+        });
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            isPaused = !isPaused;
+            if (!isPaused) {
+                gameLoop = setInterval(updateGame, 100);
+            } else {
+                clearInterval(gameLoop);
+            }
+        });
+
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        restartGame();
+    </script>
+</body>
+</html>
