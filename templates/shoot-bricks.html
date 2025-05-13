@@ -10,10 +10,47 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f0f0f0;
+            background-color: #8bd4f7;
             font-family: Arial, sans-serif;
             touch-action: manipulation;
         }
+
+    #gameContainer {
+        /* Existing styles */
+        position: relative;
+        width: 95vw;
+        height: 60vh;
+        max-width: 600px;
+        max-height: 600px;
+        margin: 10px;
+        overflow: hidden;
+        
+        /* New background styles */
+        background-image: url('../assets/images/pexels-no-name-14543-66997-2.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 2px solid #333;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Add semi-transparent overlay if needed */
+    #gameContainer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        z-index: 0;
+    }
+
+    /* Ensure game elements stay on top */
+    #brickGrid, #shooter, .bullet, .gameOver {
+        position: relative;
+        z-index: 1;
+    }
 
         #gameContainer {
             position: relative;
@@ -22,7 +59,7 @@
             max-width: 600px;
             max-height: 600px;
             margin: 5px;
-            background-color: #fff;
+            background-color: #faec9c;
             border: 2px solid #333;
             overflow: hidden;
         }
@@ -37,7 +74,7 @@
         .brick {
             width: 5%;
             height: 2vh;
-            background-color: #4CAF50;
+            background-color: #05fa0d;
             border-radius: 3px;
             transition: all 0.3s;
         }
@@ -51,7 +88,7 @@
             height: 5vw;
             max-width: 30px;
             max-height: 30px;
-            background-color: #333;
+            background-color: #ffbb3d;
             border-radius: 50%;
         }
 
@@ -94,7 +131,7 @@
 
         .key-btn {
             padding: 5px;
-            font-size: 12px;
+            font-size: 16px;
             background-color: blue;
             color: white;
             border: none;
@@ -154,7 +191,7 @@
             }
             .key-btn {
                 padding: 4px;
-                font-size: 13px;
+                font-size: 14px;
             }
         }
     </style>
@@ -171,13 +208,13 @@
     </div>
     
     <div id="controls">
-        <button class="key-btn-lf" id="leftBtn">←</button>
-        <button class="key-btn-lf" id="backspaceBtn">⌫</button>
-        <button class="key-btn-lf" id="rightBtn">→</button>
+        <button class="key-btn-lf" id="leftBtn"><<<</button>
+        <button class="key-btn-lf" id="backspaceBtn">CLEAR TEXT</button>
+        <button class="key-btn-lf" id="rightBtn">>>></button>
     </div>
     
     <div id="inputSection">
-        <div id="usedWords" style="background-color: black; height: 80px; color: white; overflow: auto; border-radius: 8px;"></div>
+        <div id="usedWords" style="background-color: black; height: 80px; color: white; overflow: auto; border-radius: 8px; padding: 5px;"></div>
         <div id="customKeyboard"></div>
         <div style="margin-top: 10px; display: flex; gap: 5px;">
             
@@ -185,11 +222,16 @@
         </div>
     </div>
 
+    <script src="../wordlist.js"></script>
+
     <script>
-        const words = ['APPLE', 'BRAVE', 'CHAIR', 'DANCE', 'EARTH', 
-                      'FRUIT', 'GHOST', 'HOUSE', 'IGLOO', 'JELLY','ZEBRA', 'AXE', 'KILL'];
+        // const words = ['APPLE', 'BRAVE', 'CHAIR', 'DANCE', 'EARTH', 
+                    //   'FRUIT', 'GHOST', 'HOUSE', 'IGLOO', 'JELLY','ZEBRA', 'AXE', 'KILL'].map(word => word.toLowerCase());
+
+        const words = wordList.map(word => word.toLowerCase());
         const allLetters = [...new Set(words.join(''))].sort();
         let bricks = [];
+        let InitialBricks = [];
         let shooterPosition = 50;
         let addedBricks = 0;
         let bulletSpeed = 5;
@@ -205,15 +247,17 @@
             const brickGrid = document.getElementById('brickGrid');
             brickGrid.innerHTML = '';
             bricks = [];
+            InitialBricks = [];
             
             // Create initial 10 bricks in 5x2 grid
             for(let i = 0; i < 2; i++) {
                 const row = document.createElement('div');
                 row.className = 'brick-row';
-                for(let j = 0; j < 5; j++) {
+                for(let j = 0; j < 15; j++) {
                     const brick = createBrick();
                     row.appendChild(brick);
                     bricks.push(brick);
+                    InitialBricks.push(brick);
                 }
                 brickGrid.appendChild(row);
             }
@@ -232,7 +276,7 @@
             
             // Find first available spot in existing rows
             for(let row of rows) {
-                if(row.children.length < 5) {
+                if(row.children.length < 15) {
                     const brick = createBrick();
                     row.appendChild(brick);
                     bricks.push(brick);
@@ -253,7 +297,7 @@
         }
 
         function checkWord() {
-            const input = document.getElementById('currentWord').textContent.toUpperCase();
+            const input = document.getElementById('currentWord').textContent.toLowerCase();
             if(!input) return false;
             
             const isValid = words.includes(input);
@@ -261,7 +305,7 @@
             
             if(isValid && !isUsed) {
                 usedWords.push(input);
-                document.getElementById('usedWords').textContent = `Used Words: ${usedWords.join(', ')}`;
+                document.getElementById('usedWords').textContent = `${usedWords.join(', ')}`;
                 return true;
             } else {
                 if(!isValid || isUsed) addBrickToGrid();
@@ -271,7 +315,9 @@
 
         function shootBullet() {
             if(!checkWord()) {
-                if(++addedBricks >= 5) showGameOver(false);
+                document.getElementById('currentWord').textContent = '';
+                //if(++addedBricks >= 6) showGameOver(false);
+                if(bricks.length >= InitialBricks.length + 3) showGameOver(false);
                 updateBrickCount();
                 return;
             }
@@ -333,7 +379,7 @@
             shooterPosition = 50;
             addedBricks = 0;
             usedWords = [];
-            document.getElementById('usedWords').textContent = 'Used Words: ';
+            document.getElementById('usedWords').textContent = '';
             initializeBricks();
             updateShooterPosition();
         }

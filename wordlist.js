@@ -1,5 +1,5 @@
 
-export const wordBank = `word
+var wordBank = `word
 a
 abandon
 ability
@@ -415,9 +415,6 @@ away
 awful
 awkward
 baby
-back
-back
-back
 back
 backdrop
 background
@@ -5940,4 +5937,7 @@ yours
 yourself
 youth
 zero
+don't
 zone`;
+
+var wordList = wordBank.trim().split(/[\s,\n]/).filter((word, index, self) => self.indexOf(word) === index);
