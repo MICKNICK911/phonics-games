@@ -19,14 +19,14 @@
         /* Existing styles */
         position: relative;
         width: 95vw;
-        height: 60vh;
+        height: 40vh;
         max-width: 600px;
         max-height: 600px;
-        margin: 10px;
+        margin: 25px;
         overflow: hidden;
         
         /* New background styles */
-        background-image: url('../assets/images/pexels-no-name-14543-66997-2.jpg');
+        background-image: url('../assets/images/gbg2.webp');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -52,18 +52,6 @@
         z-index: 1;
     }
 
-        #gameContainer {
-            position: relative;
-            width: 95vw;
-            height: 40vh;
-            max-width: 600px;
-            max-height: 600px;
-            margin: 5px;
-            background-color: #faec9c;
-            border: 2px solid #333;
-            overflow: hidden;
-        }
-
         .brick-row {
             display: flex;
             justify-content: center;
@@ -84,12 +72,20 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 5vw;
-            height: 5vw;
+            width: 7vw;
+            height: 7vw;
             max-width: 30px;
             max-height: 30px;
-            background-color: #ffbb3d;
-            border-radius: 50%;
+            /*background-color: #ffbb3d;*/
+           /* border-radius: 50%;*/
+            
+        /* New background styles */
+        background-image: url('../assets/images/shooter.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+       /* border: 2px solid #333;*/
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .bullet {
@@ -125,8 +121,12 @@
             max-width: 600px;
         }
         
-        .heading {font-weight: bold;
-            
+        .heading {
+            font-weight: bold;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            margin: 5px;
         }
 
         .key-btn {
@@ -198,6 +198,12 @@
 </head>
 <body>
     <div class="heading">Word Brick Breaker</div>
+    
+    <div id="target-score-container" style="font-size: 16px; font-weight: bold; right: 0px; top: 0px;position: absolute; padding: 0px; margin: 5px;">
+            Rows: <input id="target-row" type="number" value="2" style="width: 30px; font-size: 16px;">
+            Bricks: <input id="target-bricks" type="number" value="10" style="width: 30px; font-size: 16px;">
+   </div>
+    
     <div id="gameContainer">
         <div id="brickGrid"></div>
         <div id="shooter"></div>
@@ -217,6 +223,8 @@
         <div id="usedWords" style="background-color: black; height: 80px; color: white; overflow: auto; border-radius: 8px; padding: 5px;"></div>
         <div id="customKeyboard"></div>
         <div style="margin-top: 10px; display: flex; gap: 5px;">
+            
+        <button class="key-btn" id="replay" onclick="restartGame()">Restart</button>                
             
             <button class="key-btn-shoot" id="shootBtn">SHOOT</button>
         </div>
@@ -244,16 +252,20 @@
         }
 
         function initializeBricks() {
+          let targetRow = parseInt(document.getElementById('target-row').value);
+        
+          let targetBricks = parseInt(document.getElementById('target-bricks').value);
+
             const brickGrid = document.getElementById('brickGrid');
             brickGrid.innerHTML = '';
             bricks = [];
             InitialBricks = [];
             
             // Create initial 10 bricks in 5x2 grid
-            for(let i = 0; i < 2; i++) {
+            for(let i = 0; i < targetRow; i++) {
                 const row = document.createElement('div');
                 row.className = 'brick-row';
-                for(let j = 0; j < 15; j++) {
+                for(let j = 0; j < targetBricks; j++) {
                     const brick = createBrick();
                     row.appendChild(brick);
                     bricks.push(brick);
