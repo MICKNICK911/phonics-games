@@ -164,6 +164,23 @@
       transition: all 0.2s ease;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    
+     /* Action Buttons */
+    .start {
+     width: 100%;
+      height: 100px;
+      border: none;
+      border-radius: 20px;
+      background: green;
+      color: white;
+      font-size: 3.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    
 
     .action-btn:hover {
       transform: scale(1.05);
@@ -275,7 +292,7 @@
           <input type="number" id="number" placeholder="Rounds" min="1">
           <input type="number" id="level" placeholder="Level" min="1">
         </div>
-        <button class="action-btn start">START</button>
+        <button class="start">START</button>
       </div>
       <div class="word-container"></div>
       <button class="action-btn restart-btn1">RESET</button>
@@ -306,7 +323,14 @@
   <script>
     // Original game logic maintained
     let playerBD = 0, playerAD = 0, digit = 0, defaultwords = [], shuffledWordList = [], wordList = [], currentWordIndex = 0, scoreA = 0, scoreB = 0;
-    defaultwords = allwords;
+    // Initialize defaultwords safely
+    try {
+      defaultwords = allwords || [];
+    } catch (e) {
+      console.error("Error loading word list:", e);
+      defaultwords = [];
+    }
+
 
     // DOM Elements
     const startBtn = document.querySelector('.start');
@@ -319,6 +343,36 @@
     document.querySelector('.button-b').addEventListener('click', () => handleScore('b'));
     document.querySelectorAll('.control-btn').forEach(btn => btn.addEventListener('click', handleControls));
     document.querySelectorAll('.restart-btn1, .restart-btn2').forEach(btn => btn.addEventListener('click', restart));
+    
+    document.querySelectorAll('.control-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const isPlus = e.target.classList.contains('plus-a') || 
+                   e.target.classList.contains('plus-b');
+    const player = e.target.classList.contains('minus-a') || 
+                   e.target.classList.contains('plus-a') ? 'a' : 'b';
+    
+    if (isPlus) {
+      player === 'a' ? scoreA++ : scoreB++;
+    } else {
+      player === 'a' ? scoreA-- : scoreB--;
+    }
+    
+    // Ensure scores stay non-negative
+    scoreA = Math.max(0, scoreA);
+    scoreB = Math.max(0, scoreB);
+    
+    updateScore('a', scoreA);
+    updateScore('b', scoreB);
+  });
+});
+    
+    
+    //document.querySelector('.plus-a').addEventListener('click', () => {scoreA++; updateScore('a', scoreA);});
+    //document.querySelector('.minus-a').addEventListener('click', () => {scoreA--; updateScore('a', scoreA);});
+    //document.querySelector('.plus-b').addEventListener('click', () => {scoreB++; updateScore('b', scoreB);});
+    //document.querySelector('.minus-b').addEventListener('click', () => {scoreB--; updateScore('b', scoreB);});
+    
+    
 
     function initGame() {
       wordList = wordInput.value.split(',').map(w => w.trim());
