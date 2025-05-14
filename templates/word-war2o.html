@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Challenge Duels</title>
+  <style>
+    /* Modern CSS Variables */
+    :root {
+      --primary: #2563eb;
+      --secondary: #f59e0b;
+      --background: #0f172a;
+      --glass: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+    }
+
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* Modern Popup Styles */
+    .popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .popup-content {
+      background: var(--glass);
+      padding: 2rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 500px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-content p {
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      white-space: pre-line;
+    }
+
+    .popup-content button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.1s ease;
+    }
+
+    .popup-content button:active {
+      transform: scale(0.95);
+    }
+
+    /* Game Grid Layout */
+    .collage {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      height: 100vh;
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Player Panels */
+    .player-panel {
+      background: var(--glass);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .score {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .score-value {
+      font-size: 4rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Control Buttons */
+    .control-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: var(--glass);
+      color: var(--text);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover {
+      background: var(--primary);
+      transform: scale(1.1);
+    }
+
+    /* Game Center Area */
+    .game-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: var(--glass);
+      position: relative;
+    }
+
+    /* Word Display */
+    .word-container {
+      font-size: 3rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 2rem 0;
+      min-height: 100px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-btn {
+      width: 100px;
+      height: 100px;
+      border: none;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Input Fields */
+    input {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      padding: 0.8rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Results Screen */
+    .result-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      z-index: 200;
+    }
+
+    #winner {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .collage {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .player-panel {
+        padding: 1rem;
+      }
+
+      .score-value {
+        font-size: 3rem;
+      }
+
+      .word-container {
+        font-size: 2rem;
+      }
+
+      .action-btn {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Popup Instructions -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <p>🏆 How to Play 🏆
+        
+        1. 2 Players Required
+        2. Enter words separated by commas
+        3. Set number of rounds
+        4. Choose difficulty level
+        5. Press START to begin
+        6. Tap your button when correct
+        7. Restart anytime</p>
+      <button onclick="closePopup()">Let's Play!</button>
+    </div>
+  </div>
+
+  <!-- Main Game Layout -->
+  <section class="collage">
+    <!-- Player 1 Panel -->
+    <div class="player-panel">
+      <div class="score">
+        <div class="control-buttons">
+          <button class="control-btn minus-a">-</button>
+          <button class="control-btn plus-a">+</button>
+        </div>
+        <div class="score-value score-a-value">0</div>
+        <span>SCORE</span>
+      </div>
+      <input type="text" id="player-1" placeholder="Player 1 Name">
+      <button class="action-btn button-a" style="background-color: red"></button>
+    </div>
+
+    <!-- Game Center -->
+    <div class="game-center">
+      <div class="word-list-container">
+        <input type="text" id="word-list" placeholder="Enter words (comma separated)">
+        <div class="input-group">
+          <input type="number" id="number" placeholder="Rounds" min="1">
+          <input type="number" id="level" placeholder="Level" min="1">
+        </div>
+        <button class="action-btn start">START</button>
+      </div>
+      <div class="word-container"></div>
+      <button class="action-btn restart-btn1">RESET</button>
+    </div>
+
+    <!-- Player 2 Panel -->
+    <div class="player-panel">
+      <div class="score">
+        <div class="control-buttons">
+          <button class="control-btn minus-b">-</button>
+          <button class="control-btn plus-b">+</button>
+        </div>
+        <div class="score-value score-b-value">0</div>
+        <span>SCORE</span>
+      </div>
+      <input type="text" id="player-2" placeholder="Player 2 Name">
+      <button class="action-btn button-b"style="background-color: yellow"></button>
+    </div>
+
+    <!-- Results Screen -->
+    <div class="result-screen">
+      <span id="winner"></span>
+      <button class="action-btn restart-btn2">PLAY AGAIN</button>
+    </div>
+  </section>
+
+  <script src="../wordlisting.js"></script>
+  <script>
+    // Original game logic maintained
+    let playerBD = 0, playerAD = 0, digit = 0, defaultwords = [], shuffledWordList = [], wordList = [], currentWordIndex = 0, scoreA = 0, scoreB = 0;
+    defaultwords = allwords;
+
+    // DOM Elements
+    const startBtn = document.querySelector('.start');
+    const wordInput = document.querySelector('#word-list');
+    const popup = document.getElementById('popup');
+
+    // Event Listeners
+    startBtn.addEventListener('click', initGame);
+    document.querySelector('.button-a').addEventListener('click', () => handleScore('a'));
+    document.querySelector('.button-b').addEventListener('click', () => handleScore('b'));
+    document.querySelectorAll('.control-btn').forEach(btn => btn.addEventListener('click', handleControls));
+    document.querySelectorAll('.restart-btn1, .restart-btn2').forEach(btn => btn.addEventListener('click', restart));
+
+    function initGame() {
+      wordList = wordInput.value.split(',').map(w => w.trim());
+      digit = document.querySelector('#level').value;
+      
+      shuffledWordList = wordList.length === 1 
+        ? [...defaultwords[Math.min(digit-1, defaultwords.length-1)]] 
+        : [...wordList];
+      
+      shuffledWordList.sort(() => Math.random() - 0.5);
+      
+      document.querySelectorAll('.player-panel input, .word-list-container')
+        .forEach(el => el.style.display = 'none');
+      
+      currentWordIndex = 0;
+      displayWord('white');
+    }
+
+    function handleScore(player) {
+      if(player === 'a') {
+        scoreA++; 
+        if(playerAD >= 1) scoreB--;
+        playerAD++;
+        playerBD = 0;
+      } else {
+        scoreB++;
+        if(playerBD >= 1) scoreA--;
+        playerBD++;
+        playerAD = 0;
+      }
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      displayWord(player === 'a' ? 'yellow' : 'red');
+    }
+
+    function updateScore(player, score) {
+      document.querySelector(`.score-${player}-value`).textContent = score;
+    }
+
+    function displayWord(color) {
+      const wordDisplay = document.querySelector('.word-container');
+      if(currentWordIndex < document.querySelector('#number').value) {
+        wordDisplay.style.color = color;
+        wordDisplay.textContent = shuffledWordList[currentWordIndex++];
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      document.querySelector('.result-screen').style.display = 'flex';
+      const winner = scoreA === scoreB ? "It's a Tie!" 
+        : `Winner: ${scoreA > scoreB ? document.querySelector('#player-1').value 
+                                   : document.querySelector('#player-2').value}`;
+      document.querySelector('#winner').textContent = winner;
+    }
+
+    function restart() {
+      location.reload();
+    }
+
+    function handleControls(e) {
+      const isPlus = e.target.classList.contains('plus-a') || e.target.classList.contains('plus-b');
+      const player = e.target.classList.contains('minus-a') ? 'a' : 'b';
+      window[`score${player.toUpperCase()}`] += isPlus ? 1 : -1;
+      updateScore(player, window[`score${player.toUpperCase()}`]);
+    }
+
+    function closePopup() {
+      popup.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
