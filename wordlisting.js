@@ -99,7 +99,7 @@ words
 would
 write
 you
-your`.split(/[\s,\n]/),
+your`.trim().split(/[\s,\n]/),
     `after fly how open then again from just over think an give know put walk any going let round were as had live some when ask has may stop by her of take could him old thank every his once them always does made tell why around don't many their wish because fast off these work been first or those would before five pull upon write best found read us your both gave right use buy goes sing very call green sit wash cold its sleep which
     after
 again
@@ -200,7 +200,7 @@ where
 why
 work
 world
-years`.split(/[\s,\n]/), 
+years`.trim().split(/[\s,\n]/), 
     `about eight if only ten better fall keep own today bring far kind pick together carry full laugh seven try clean got light shall warm cut grow long show done hold much six draw hot myself small drink hurt never start
     above
 add
@@ -301,7 +301,7 @@ watch
 while
 white
 without
-young`.split(/[\s,\n]/), 
+young`.trim().split(/[\s,\n]/), 
     `apple children flower money sister baby Christmas game morning snow back coat garden mother song ball corn girl name squirrel bear cow goodbye nest stick bed day grass night street bell dog ground paper sun bird doll hand party table birthday door head picture thing boat duck hill pig time box egg home rabbit top boy eye horse rain toy bread farm house ring tree brother farmer kitty robin watch cake father leg Santa Claus water car feet letter school way cat fire man seed wind chair fish men sheep window chicken floor milk shoe wood
     across
 against
@@ -402,7 +402,7 @@ war
 waves
 whole
 wind
-wood`.split(/[\s,\n]/),
+wood`.trim().split(/[\s,\n]/),
 
 `able
 ago
@@ -503,7 +503,7 @@ warm
 week
 wheels
 yes
-yet`.split(/[\s,\n]/),
+yet`.trim().split(/[\s,\n]/),
 
 `anything
 arms
@@ -604,7 +604,7 @@ wild
 window
 winter
 wish
-written`.split(/[\s,\n]/),
+written`.trim().split(/[\s,\n]/),
 
 `act
 Africa
@@ -705,7 +705,7 @@ trip
 type
 village
 within
-wonder`.split(/[\s,\n]/),
+wonder`.trim().split(/[\s,\n]/),
 
 `alone
 art
@@ -806,7 +806,7 @@ woman
 wrote
 yard
 you’re
-yourself`.split(/[\s,\n]/),
+yourself`.trim().split(/[\s,\n]/),
 
 `addition
 army
@@ -907,7 +907,7 @@ wasn’t
 weight
 wife
 wings
-won’t`.split(/[\s,\n]/),
+won’t`.trim().split(/[\s,\n]/),
 
 `action
 actually
@@ -1008,5 +1008,7 @@ women
 workers
 wouldn’t
 wrong
-yellow`.split(/[\s,\n]/),
+hard
+rasp
+yellow`.trim().split(/[\s,\n]/),
     ];

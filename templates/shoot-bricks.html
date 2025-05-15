@@ -252,6 +252,13 @@
         }
 
         function initializeBricks() {
+          // does not display in ui
+          const brickCountElement = document.createElement('div');
+          brickCountElement.id = 'brickCount';
+          brickCountElement.style.display = 'none';
+          document.getElementById('gameContainer').appendChild(brickCountElement);
+          updateBrickCount();   
+            
           let targetRow = parseInt(document.getElementById('target-row').value);
         
           let targetBricks = parseInt(document.getElementById('target-bricks').value);
@@ -278,17 +285,54 @@
 
         function createBrick() {
             const brick = document.createElement('div');
+            //brick.style.backgroundColor = 'red';
             brick.className = 'brick';
             return brick;
         }
-
-        function addBrickToGrid() {
+        
+        function createBrickRed() {
+            const brick = document.createElement('div');
+            brick.style.backgroundColor = 'red';
+            brick.className = 'brick';
+            return brick;
+        }
+        
+        function addRedBrickToGrid() {
+            
+            let targetBricks = parseInt(document.getElementById('target-bricks').value);
+            
             const brickGrid = document.getElementById('brickGrid');
             const rows = brickGrid.children;
             
             // Find first available spot in existing rows
             for(let row of rows) {
-                if(row.children.length < 15) {
+                if(row.children.length < targetBricks) {
+                    const brick = createBrickRed();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    return;
+                }
+            }
+            
+            // Add new row if all are full
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            newRow.appendChild(createBrickRed());
+            brickGrid.appendChild(newRow);
+            bricks.push(newRow.firstChild);
+        }
+
+
+        function addBrickToGrid() {
+            
+            let targetBricks = parseInt(document.getElementById('target-bricks').value);
+            
+            const brickGrid = document.getElementById('brickGrid');
+            const rows = brickGrid.children;
+            
+            // Find first available spot in existing rows
+            for(let row of rows) {
+                if(row.children.length < targetBricks) {
                     const brick = createBrick();
                     row.appendChild(brick);
                     bricks.push(brick);
@@ -320,7 +364,7 @@
                 document.getElementById('usedWords').textContent = `${usedWords.join(', ')}`;
                 return true;
             } else {
-                if(!isValid || isUsed) addBrickToGrid();
+                if(!isValid || isUsed) addRedBrickToGrid();
                 return false;
             }
         }

@@ -1,5 +1,5 @@
 
-var wordBank = `
+wordBank = `
 a
 about
 all
@@ -536,7 +536,7 @@ happened
 heard
 himself
 hold
-2(horse
+horse
 hours
 however
 hundred
@@ -1919,7 +1919,6 @@ axis
 aye
 az
 azerbaijan
-b
 ba
 babe
 babes
@@ -2455,7 +2454,6 @@ by
 bye
 byte
 bytes
-c
 ca
 cab
 cabin
@@ -3751,6 +3749,7 @@ dictionaries
 dictionary
 did
 die
+b
 died
 diego
 dies
