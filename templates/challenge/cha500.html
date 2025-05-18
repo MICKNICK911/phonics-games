@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Phonics Challenge</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --btn-bg: #333333;
+      --btn-color: #ffffff;
+      --screen1-bg: #ffcccc;
+      --screen2-bg: #ccffcc;
+      --screen3-bg: #cccfff;
+    }
+
+    .dark-mode {
+      --bg-color: #1a1a1a;
+      --text-color: #ffffff;
+      --btn-bg: #4a4a4a;
+      --screen1-bg: #4d0000;
+      --screen2-bg: #004d00;
+      --screen3-bg: #00004d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      overflow: hidden;
+      touch-action: pan-y;
+      --vh: 1vh;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .container {
+      width: 100vw;
+      height: 300vh;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      
+      
+    }
+
+    #screen1 { background-color: var(--screen1-bg); }
+    #screen2 { background-color: var(--screen2-bg); }
+    #screen3 { background-color: var(--screen3-bg); }
+
+    .nav-btn {
+      padding: 16px 32px;
+      margin: 10px;
+      cursor: pointer;
+      background-color: var(--btn-bg);
+      color: var(--btn-color);
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      min-width: 140px;
+    }
+
+    #themeToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2147483647;
+      padding: 12px;
+      border-radius: 50px;
+      cursor: pointer;
+      background-color: var(--btn-bg);
+      color: var(--btn-color);
+      border: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .grid-item:active {
+      transform: scale(0.95);
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Overlay screens */
+    .overlay-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 1000;
+      color: white;
+    }
+
+    #next-level-screen {
+      background: orange;
+    }
+
+    #game-over-screen {
+      background: red;
+    }
+
+    .overlay-screen h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .overlay-screen p {
+      font-size: 24px;
+      margin-bottom: 40px;
+    }
+
+    .overlay-screen button {
+      padding: 20px 40px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: white;
+      font-size: 18px;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    #next-level-screen button { color: orange; }
+    #game-over-screen button { color: red; }
+
+    /*small Screen*/
+    @media only screen and (max-width: 980px) {
+      #heading {
+        font-size: 45px;
+      }
+
+      #grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      width: 100%;
+      max-width: 1000px;
+      margin-bottom: 200px;
+    }
+
+    .grid-item {
+      padding: 10px;
+      text-align: center;
+      font-size: 45px;
+      font-weight: bold;
+      border-radius: 8px;
+      background-color: rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    }
+
+
+    /*Large Screen*/
+    @media only screen and (min-width: 981px) {
+      #grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      width: 100%;
+      max-width: 2000px;
+      margin-bottom: 0px;
+    }
+
+    .grid-item {
+      padding: 10px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 8px;
+      background-color: rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    #heading {
+      font-size: 20px;
+    }
+
+    }
+
+  </style>
+</head>
+<body>
+<button id="themeToggle" onclick="toggleTheme()">L/D</button>
+<div id="score">Score: 0</div>
+  
+  <div class="container" id="slider">
+    <div class="screen" id="screen1">
+      <h1 style="text-align: center;">Are You A<br>WORD CHAMPION?<br>Prove It!</h1>
+      <button class="nav-btn" onclick="navigate(1)">Start Game</button>
+    </div>
+    
+    <div class="screen" id="screen2">
+      
+      <h2 style="color: red; text-align: center" id="heading"></h2>
+      <div id="grid-list"></div>
+    </div>
+
+    <div class="screen" id="screen3">
+  <h1 style="text-align: center;">
+    <span style="margin-bottom: 150px; font-size: 70px">CONGRATULATIONS!</span><br>
+    Challenge Complete!<br>
+    Score:<br><span id="final-score" style="font-size: 50px;">100%</span><br>
+    Time: <span id="completion-time" style="font-size: 50px;"></span>
+  </h1>
+  <button class="nav-btn" onclick="instantRestart()">Restart</button>
+</div>
+
+  <div id="next-level-screen" class="overlay-screen">
+    <div style="font-size: 60px; margin-bottom: 80px; font-weight: bold">Well Done!</div>
+    <div style="font-size: 30px" id="next-level-text"></div>
+    <button style="font-size: 30px" onclick="continueToNextLevel()">Continue</button>
+  </div>
+
+  <div id="game-over-screen" class="overlay-screen">
+    <h1>Game Over!</h1>
+    <p id="final-score-text"></p>
+    <button onclick="restartGame()">Try Again</button>
+  </div>
+
+  <script>
+  
+  // Add at the beginning of the script
+const setVH = () => {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+};
+setVH();
+window.addEventListener('resize', setVH);
+window.addEventListener('orientationchange', setVH);
+  
+    let currentPosition = 0;
+    const slider = document.getElementById('slider');
+    let currentLevel = 0;
+    let score = 0;
+    let failCount = 0;
+    const maxFails = 3;
+    let startTime;
+    let completionTime;
+
+    // Theme management
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+
+    // Game data
+    const challenges = [
+      {
+        text: "Select All Vowels",
+        list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
+        target: "a,e,i,o,u,a,e,i,o,u".split(',')
+      },
+      {
+        text: "Select All Consonants",
+        list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
+        target: "b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,y,z,b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,y,z".split(",")
+      },
+
+    {
+        text: "Select All Words With Long Vowels",
+        list: "cake Pete bike cone cube came mete hive bone mute mate eve like home tune gate these bite note cute date here line stone flute me she we be he the see bee so lo co go no hi flu poll find volt both old wild host is it on ink of axe am an all lost colt bag get sit pot sun cat wet fix hot fun mat net hit not gun hat let win lot mud rat pen pin got but".split(" "),
+        target: "cake Pete bike cone cube came mete hive bone mute mate eve like home tune gate these bite note cute date here line stone flute me she we be he the see bee so lo co go no hi flu poll find volt both old wild host".split(" ")
+      },
+  
+      {
+        text: "choose All Blends",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw ch tch th th ng nk sh ck ph wh gn kn gh wr".split(" "),
+        target: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw".split(" ")
+      },
+
+      {
+        text: "choose All Begining-Blends",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw".split(" "),
+        target: "bl cl fl gl pl sl br cr dr fr gr pr tr sc sk squ st sm sn sp sw tw dw".split(" ")
+      },
+
+      {
+        text: "choose All Ending-Blends",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw".split(" "),
+        target: "st sk sp nd nt mp rd ld lp rk lf pt ft ct lk lt xt ts".split(" ")
+      },
+
+      {
+        text: "choose All Digraphs",
+        list: "bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw ch tch th th ng nk sh ck ph wh gn kn gh wr".split(" "),
+        target: "ch,tch,th,th,ng,nk,sh,ck,ph,wh,gn,kn,gh,wr".split(",")
+      }
+    ];
+
+    function startGame() {
+      currentLevel = 0;
+      score = 0;
+      failCount = 0;
+      startTime = Date.now(); // Add this line
+      document.getElementById('score').textContent = 'Score: 0';
+      loadLevel(currentLevel);
+      //loadLevel(8);
+      navigate(1);
+      //navigate(2);
+    }
+
+    function loadLevel(levelIndex) {
+      const level = challenges[levelIndex];
+      const grid = document.getElementById('grid-list');
+      const heading = document.getElementById('heading');
+      
+      heading.textContent = level.text;
+      grid.innerHTML = '';
+      
+      shuffleArray(level.list).forEach(item => {
+        const button = document.createElement('div');
+        button.className = 'grid-item';
+        button.textContent = item;
+        
+        button.addEventListener('click', () => handleSelection(item, button));
+        grid.appendChild(button);
+      });
+    }
+
+    function handleSelection(item, button) {
+      if (button.classList.contains('selected')) return;
+
+      const isCorrect = challenges[currentLevel].target.includes(item);
+      
+      button.style.color = isCorrect ? '#4CAF50' : '#ff4444';
+      button.classList.add('selected');
+
+      if (isCorrect) {
+        score += 2;
+      } else {
+        score = Math.max(0, score - 1);
+        failCount++;
+      }
+      
+      document.getElementById('score').textContent = `Score: ${score}`;
+
+      if (failCount >= maxFails) {
+        showGameOver();
+        return;
+      }
+
+      if (document.querySelectorAll('.selected').length === challenges[currentLevel].target.length) {
+        showNextLevelScreen();
+      }
+    }
+
+    function showNextLevelScreen() {
+      const nextLevelScreen = document.getElementById('next-level-screen');
+      const nextLevelText = document.getElementById('next-level-text');
+      
+      if (currentLevel < challenges.length - 1) {
+        nextLevelText.innerHTML = `Score: ${score}<br>Continue to Level ${currentLevel + 2}`;
+        nextLevelScreen.style.display = 'flex';
+      } else {
+        completionTime = Date.now() - startTime;
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('completion-time').textContent = formatTime(completionTime);
+        navigate(2);
+      }
+
+      // completionTime = Date.now() - startTime;
+      //   document.getElementById('final-score').textContent = score;
+      //   document.getElementById('completion-time').textContent = formatTime(completionTime);
+      //   navigate(2);
+}
+
+    function showGameOver() {
+      const gameOverScreen = document.getElementById('game-over-screen');
+      const finalScoreText = document.getElementById('final-score-text');
+      finalScoreText.textContent = `Final Score: ${score}`;
+      gameOverScreen.style.display = 'flex';
+      
+    }
+
+    function continueToNextLevel() {
+      document.getElementById('next-level-screen').style.display = 'none';
+      currentLevel++;
+      loadLevel(currentLevel);
+    }
+
+    function restartGame() {
+      document.getElementById('game-over-screen').style.display = 'none';
+      score = 0;
+  document.getElementById('score').textContent = 'Score: 0';
+  
+      startGame();
+    }
+
+    function navigate(position) {
+      currentPosition = position;
+      slider.style.transform = `translateY(-${currentPosition * 100}vh)`;
+    }
+
+   function instantRestart() {
+      slider.style.transition = 'none';
+      currentPosition = 0;
+      slider.style.transform = 'translateY(0)';
+      void slider.offsetHeight;
+      slider.style.transition = '';
+      document.getElementById('completion-time').textContent = ''; // Add this line
+      startGame();
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    document.querySelector('.nav-btn').addEventListener('click', startGame);
+    
+    function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}m ${seconds}s`;
+}
+  </script>
+</body>
+</html>
