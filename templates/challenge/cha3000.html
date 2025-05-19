@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Phonics Challenge</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --btn-bg: #333333;
+      --btn-color: #ffffff;
+      --screen1-bg: #ffcccc;
+      --screen3-bg: #ff4444;
+      --task-bg-even: #cccfff;
+      --task-bg-odd: #ccffcc;
+    }
+
+    .dark-mode {
+      --bg-color: #1a1a1a;
+      --text-color: #ffffff;
+      --btn-bg: #4a4a4a;
+      --screen1-bg: #4d0000;
+      --screen3-bg: #4d0000;
+      --task-bg-even: #00004d;
+      --task-bg-odd: #004d00;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      overflow: hidden;
+      touch-action: pan-y;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .container {
+      width: 100vw;
+      height: 300vh;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #screen1 { background-color: var(--screen1-bg); }
+    #screen3 { background-color: var(--screen3-bg); }
+
+    .nav-btn {
+      padding: 16px 32px;
+      margin: 10px;
+      cursor: pointer;
+      background-color: var(--btn-bg);
+      color: var(--btn-color);
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      min-width: 140px;
+    }
+
+    #themeToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2147483647;
+      padding: 12px;
+      border-radius: 50px;
+      cursor: pointer;
+      background-color: var(--btn-bg);
+      color: var(--btn-color);
+      border: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 10px;
+      width: 90%;
+      max-width: 600px;
+      margin: 20px 0;
+    }
+
+    .grid-item {
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 8px;
+      background-color: rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .grid-item:active {
+      transform: scale(0.95);
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    #timer {
+      position: absolute;
+      top: 20px;
+      right: 100px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .game-over-text {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <button id="themeToggle" onclick="toggleTheme()">🌓</button>
+  
+  <div class="container" id="slider">
+    <div class="screen" id="screen1">
+      <h1>Phonics Master</h1>
+      <button class="nav-btn" onclick="startGame()">Start Game</button>
+    </div>
+    
+    <div class="screen" id="screen2">
+      <div id="score">Score: 0</div>
+      <div id="timer">Time: 0s</div>
+      <h2 id="heading"></h2>
+      <div id="grid-list"></div>
+    </div>
+
+    <div class="screen" id="screen3">
+      <div class="game-over-text">Game Over!</div>
+      <div id="final-score" style="font-size: 2em; margin-bottom: 20px;"></div>
+      <button class="nav-btn" onclick="instantRestart()">↺ Try Again</button>
+    </div>
+
+    <div class="screen" id="screen4">
+      <h1>Game Complete!</h1>
+      <div id="final-time" style="font-size: 1.5em; margin: 20px 0;"></div>
+      <button class="nav-btn" onclick="instantRestart()">↺ Restart</button>
+    </div>
+  </div>
+
+  <script>
+    let currentPosition = 0;
+    const slider = document.getElementById('slider');
+    let currentLevel = 0;
+    let score = 0;
+    let startTime;
+    let timerInterval;
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+
+    const challenges = [
+      {
+        text: "Select All Vowels",
+        list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
+        target: "a,e,i,o,u".split(',')
+      },
+      {
+        text: "Select All Consonants",
+        list: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(","),
+        target: "b,c,d,f,g,h,j,k,l,m,n,p,q,r,s,t,v,w,x,y,z".split(",")
+      },
+      {
+        text: "Select All Blends",
+        list: "bl,cl,fl,gl,pl,nd,nt,sl,br,cr,dr,fr,mp,rd,ld,lp,gr,pr,tr,sc,sk,rk,lf,pt,ft,ct,squ,st,sm,sn,sp,lk,lt,xt,ts,sw,tw,dw".split(","),
+        target: "bl,cl,fl,gl,pl,nd,nt,sl,br,cr,dr,fr,mp,rd,ld,lp,gr,pr,tr,sc,sk,rk,lf,pt,ft,ct,squ,st,sm,sn,sp,lk,lt,xt,ts,sw,tw,dw".split(",")
+      }
+    ];
+
+    function startGame() {
+      currentLevel = 0;
+      score = 0;
+      document.getElementById('score').textContent = `Score: ${score}`;
+      startTime = Date.now();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      loadLevel(currentLevel);
+      navigate(1);
+    }
+
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById('timer').textContent = `Time: ${elapsed}s`;
+    }
+
+    function loadLevel(levelIndex) {
+      const level = challenges[levelIndex];
+      const grid = document.getElementById('grid-list');
+      const heading = document.getElementById('heading');
+      const screen2 = document.getElementById('screen2');
+      
+      grid.innerHTML = '';
+      heading.textContent = level.text;
+      screen2.style.backgroundColor = `var(--task-bg-${levelIndex % 2 === 0 ? 'even' : 'odd'})`;
+      
+      shuffleArray(level.list).forEach(item => {
+        const button = document.createElement('div');
+        button.className = 'grid-item';
+        button.textContent = item;
+        
+        button.addEventListener('click', () => handleSelection(item, button));
+        grid.appendChild(button);
+      });
+    }
+
+    function handleSelection(item, button) {
+      if (button.classList.contains('selected')) return;
+
+      const isCorrect = challenges[currentLevel].target.includes(item);
+      button.style.color = isCorrect ? '#4CAF50' : '#ff4444';
+      button.classList.add('selected');
+
+      if (!isCorrect) {
+        clearInterval(timerInterval);
+        const finalTime = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('final-score').textContent = `Score: ${score} | Time: ${finalTime}s`;
+        navigate(2);
+        return;
+      }
+
+      score += 2;
+      document.getElementById('score').textContent = `Score: ${score}`;
+
+      if (document.querySelectorAll('.selected').length === challenges[currentLevel].target.length) {
+        setTimeout(() => {
+          if (currentLevel < challenges.length - 1) {
+            currentLevel++;
+            loadLevel(currentLevel);
+          } else {
+            clearInterval(timerInterval);
+            const finalTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('final-time').textContent = `Time: ${finalTime}s`;
+            instantNav(3);
+          }
+        }, 1000);
+      }
+    }
+
+    function navigate(position) {
+      currentPosition = position;
+      slider.style.transform = `translateY(-${currentPosition * 100}vh)`;
+    }
+
+    function instantRestart() {
+      slider.style.transition = 'none';
+      currentPosition = 0;
+      slider.style.transform = 'translateY(0)';
+      void slider.offsetHeight;
+      slider.style.transition = '';
+      if (timerInterval) clearInterval(timerInterval);
+      startGame();
+    }
+    
+    function instantNav(position) {
+      slider.style.transition = 'none';
+      currentPosition = position;
+      slider.style.transform = `translateY(-${currentPosition * 100}vh)`;
+      void slider.offsetHeight;
+      slider.style.transition = '';
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+  </script>
+</body>
+</html>
