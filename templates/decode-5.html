@@ -343,12 +343,12 @@
     </div>
 
     <div id="winScreen" class="result-screen">
-        <h2>🎉 Correct! Well Done!</h2>
+        <h2>Correct! Well Done!</h2>
         <button onclick="resetGame()">Play Again</button>
     </div>
 
     <div id="gameOverScreen" class="result-screen">
-        <h2>❌ Game Over! Try Again</h2>
+        <h2>Wrong! Try Again</h2>
         <button onclick="resetGame()">Try Again</button>
     </div>
 
@@ -482,7 +482,13 @@
                         type: 'group-semicircle',
                         positions: ann.dataset.positions.split(',').map(Number)
                     });
-                } else {
+                }else if (ann.classList.contains('group-semicircle2')) {
+            userAnnotations.push({
+                type: 'group-semicircle2',
+                positions: ann.dataset.positions.split(',').map(Number)
+            });
+           // alert('inside circle2');
+        } else {
                     const type = Array.from(ann.classList).find(c => c !== 'annotation');
                     userAnnotations.push({
                         type,
@@ -561,6 +567,11 @@
         if (ann.classList.contains('group-semicircle')) {
             annotations.push({
                 type: 'group-semicircle',
+                positions: ann.dataset.positions.split(',').map(Number)
+            });
+        }else if (ann.classList.contains('group-semicircle2')) {
+            annotations.push({
+                type: 'group-semicircle2',
                 positions: ann.dataset.positions.split(',').map(Number)
             });
         } else {
