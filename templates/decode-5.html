@@ -216,6 +216,35 @@
             width: 1em;
             text-align: center;
         }
+        
+        .s::before {
+            content: "s";
+            position: absolute;
+            top: -65px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%);
+            color: green;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+            z-index: 9999;
+        }
+        
+        .j::before {
+            content: "j";
+            position: absolute;
+            top: -65px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%);
+            color: green;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+            z-index: 9999;
+        }
+
 
         .semicircle {
             border-top: 3px solid #009688;
@@ -236,6 +265,18 @@
             border-top: none;
             border-radius: 0 0 150px 150px;
             top: calc(50% + 60px);
+        }
+        
+        .group-semicircle2 {
+            position: absolute;
+            height: 40px;
+            width: 50%;
+            left: 100%;
+            border: 4px solid yellow;
+            border-top: none;
+            border-radius: 0 0 150px 150px;
+            top: calc(50% + -60px);
+            transform: rotate(180deg);
         }
 
         .result-screen {
@@ -280,7 +321,8 @@
             <div class="tools-grid">
                 <button data-tool="vowel" onclick="selectTool('vowel')">Long Vowel</button>
                 <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
-                <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve</button>
+                <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
+                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve</button>
                 <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
                 <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
                 <button data-tool="strike" onclick="selectTool('strike')">Vertical Strike</button>
@@ -288,6 +330,11 @@
                 <button data-tool="asterisk1" onclick="selectTool('asterisk1')">Guardian-down</button>
                 <button data-tool="asterisk2" onclick="selectTool('asterisk2')">Guardian-middle-down</button>
                 <button data-tool="asterisk3" onclick="selectTool('asterisk3')">Guardian-middle-top</button>
+                
+                <button data-tool="s" onclick="selectTool('s')">s</button>
+                
+                <button data-tool="j" onclick="selectTool('j')">j</button>
+                
                 <button onclick="clearAll()" class="clear-btn">Clear All</button>
                 <button onclick="saveCurrentWord()" style="background: #4CAF50; color: white;">Save Word</button>
                 <button onclick="checkAnswer()" style="background: #2196F3; color: white;">Check Answer</button>
@@ -350,7 +397,7 @@
             const currentIndex = parseInt(container.dataset.index);
             const letter = container.textContent.trim();
 
-            if (currentTool === 'group-semi') {
+            if (currentTool === 'group-semi' | currentTool === 'group-semi2') {
                 if (firstLetterIndex === -1) {
                     firstLetterIndex = currentIndex;
                     container.style.backgroundColor = '#fff3e0';
@@ -390,6 +437,8 @@
                 asterisk1: 'asterisk1',
                 asterisk2: 'asterisk2',
                 asterisk3: 'asterisk3',
+                s: 's',
+                j: 'j',
                 semicircle: 'semicircle'
             }[currentTool];
 
@@ -407,7 +456,14 @@
             const displayRect = display.getBoundingClientRect();
             
             const semicircle = document.createElement('div');
-            semicircle.className = 'annotation group-semicircle';
+            
+            if (currentTool === 'group-semi2'){
+                semicircle.className = 'annotation group-semicircle2';
+            }else{
+               semicircle.className = 'annotation group-semicircle'; 
+            }
+            
+            
             semicircle.dataset.positions = `${index1},${index2}`;
             semicircle.style.left = `${firstRect.right - displayRect.left - 50}px`;
             semicircle.style.width = `${secondLetter.offsetLeft - firstLetter.offsetLeft + 20}px`;
