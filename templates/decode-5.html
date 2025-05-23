@@ -339,6 +339,10 @@
             background-color: green;
         }
         
+        #UnknownOverScreen {
+            background-color: blue;
+        }
+        
         #gameOverScreen {
             background-color: red;
         }
@@ -390,7 +394,7 @@
         </div>
         <div class="controls">
             <div class="input-group">
-                <input type="text" id="wordInput" placeholder="Enter a word..." value="phonics">
+                <input type="text" id="wordInput" placeholder="Enter a word..." value="mat">
                 <button onclick="displayWord()" style="background: #34c759; color: white;">Show Word</button>
             </div>
 
@@ -431,10 +435,16 @@
         <h1>WRONG!<br>Try Again</h1>
         <button onclick="resetGame()">Try Again</button>
     </div>
+    
+    <div id="UnknownOverScreen" class="result-screen">
+        <h1>I DON'T KNOW!<br>Try Another Word</h1>
+        <button onclick="resetGame()">Try Again</button>
+    </div>
 
     <script>
         let currentTool = null;
         let firstLetterIndex = -1;
+        let unknown = 0;
         let correctWords = [
             {
                 word: "phonics",
@@ -581,7 +591,10 @@
             });
 
             const isCorrect = correctWords.filter(correct => {
-                if (correct.word !== currentWord) return false;
+                
+                if (correct.word === currentWord) {unknown = 0;}
+                
+else if (correct.word !== currentWord) {unknown = 1; return false;}
                 
                 const correctMap = new Map();
                 correct.annotations.forEach(ann => {
@@ -607,13 +620,16 @@
            // } else {
              //   document.getElementById('gameOverScreen').style.display = 'block';
           //  }
+          if (unknown === 1){
+            document.getElementById('UnknownOverScreen').style.display = 'block';  
+          }
           
-          if (isCorrect.length > 0) {
+          else if (isCorrect.length > 0) {
         document.getElementById('winScreen').style.display = 'block';
         // Show which patterns matched
         const matchList = isCorrect.map(m => m.word).join(', ');
-        document.getElementById('winScreen').innerHTML += 
-            `<p>Matched patterns: ${matchList}</p>`;
+        //document.getElementById('winScreen').innerHTML += 
+            //`<p>Matched patterns: ${matchList}</p>`;
     } else {
         document.getElementById('gameOverScreen').style.display = 'block';
     }
@@ -622,6 +638,7 @@
         function resetGame() {
             document.getElementById('winScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('UnknownOverScreen').style.display = 'none';
             clearAll();
         }
 
