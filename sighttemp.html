@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Page Slide</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            transition: transform 0.5s ease-in-out;
+            top: 0;
+            left: 0;
+        }
+
+        .content {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+
+    <script>
+        const predefinedList = [
+            "Page 1 Content",
+            "Page 2 Text",
+            "Page 3 Data",
+            "Page 4 Info",
+            "Page 5 Final"
+        ];
+
+        const colors = ['#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFDFBA', '#D0BAFF'];
+        let currentIndex = 0;
+        let currentPage = null;
+
+        function createPage(content, index) {
+            const page = document.createElement('div');
+            page.className = 'page';
+            page.style.backgroundColor = colors[index % colors.length];
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'content';
+            contentDiv.textContent = content;
+            
+            page.appendChild(contentDiv);
+            return page;
+        }
+
+        function handleContainerClick(event) {
+            const y = event.clientY;
+            const screenHeight = window.innerHeight;
+            
+            if (y < screenHeight / 2) {
+                // Top half clicked - next page
+                navigate(1);
+            } else {
+                // Bottom half clicked - previous page
+                navigate(-1);
+            }
+        }
+
+        function navigate(direction) {
+            const newIndex = currentIndex + direction;
+            
+            // Prevent navigation beyond list limits
+            if (newIndex < 0 || newIndex >= predefinedList.length) return;
+
+            const newPage = createPage(predefinedList[newIndex], newIndex);
+            const container = document.getElementById('container');
+            
+            // Set initial position based on direction
+            newPage.style.transform = direction === 1 ? 'translateY(100%)' : 'translateY(-100%)';
+            container.appendChild(newPage);
+
+            // Animate transition
+            setTimeout(() => {
+                currentPage.style.transform = direction === 1 ? 'translateY(-100%)' : 'translateY(100%)';
+                newPage.style.transform = 'translateY(0)';
+                currentIndex = newIndex;
+                currentPage = newPage;
+            }, 10);
+        }
+
+        // Initialize
+        document.getElementById('container').addEventListener('click', handleContainerClick);
+        window.onload = () => {
+            currentPage = createPage(predefinedList[0], 0);
+            document.getElementById('container').appendChild(currentPage);
+        };
+    </script>
+</body>
+</html>
