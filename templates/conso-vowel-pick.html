@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Letter Slide</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            font-size: 4rem;
+            transition: transform 0.5s ease-in-out;
+            top: 0;
+            left: 0;
+        }
+
+        .letter {
+            cursor: pointer;
+            padding: 1rem;
+            transition: transform 0.2s;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .letter:hover {
+            transform: scale(1.1);
+        }
+
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: red;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 3rem;
+            z-index: 1000;
+        }
+        
+        .startscreen {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: green;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 3rem;
+            z-index: 1000;
+        }
+
+
+        .restart-btn {
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            cursor: pointer;
+            background: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            /*template-columns: repeat(3, 1fr);*/
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            padding: 8px;
+            border: none;
+            width: 80px;
+            border-radius: 20px;
+            cursor: pointer;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        #scoreBoard {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        #game-over strong {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+
+        .stats {
+            font-size: 2rem;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .duration-input {
+            /*margin: 20px 0;*/
+            padding: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .duration-input:focus {
+            outline: none;
+            border-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="controls">
+        <button id="modeToggle" class="toggle-btn" onclick="toggleGameMode()">Consonant</button>
+        <button id="caseToggle" class="toggle-btn" onclick="toggleLetterCase()">ABCD</button>
+        
+        <input type="number" class="duration-input" id= "duration-input" placeholder="Game duration (seconds)" min="10" value="8">
+        <div id="scoreBoard">Score: 0<br>Time: 0s</div>
+    </div>
+    
+    
+    
+    <div class="container" id="container"></div>
+    <div class="game-over" id="gameOver">
+        <div>Game Ended!</div>
+        <div class="stats">
+            <strong>Score: <span id="finalScore">0</span></strong><br>
+            <strong>Time: <span id="finalTime">0</span>s</strong>
+        </div>
+        <button class="restart-btn" onclick="startGame()">Play Again</button>
+    </div>
+    
+    <div class="startscreen" id="startScreen">
+        <div>Ready?</div>
+        
+        <button class="restart-btn" onclick="restartGame()">Start</button>
+    </div>
+
+    <script>
+        const vowels = ['A', 'E', 'I', 'O', 'U'];
+        const consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M','N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+        const colors = ['#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFDFBA', '#D0BAFF'];
+        let colorIndex = 0;
+        let currentPage = null;
+        
+        let isVowelSafe = false;
+        let isLowerCase = false;
+        
+        let score = 0;
+        let startTime;
+        let timerInterval;
+        
+        let targetS = parseInt(document.getElementById('duration-input').value);
+        
+
+        function createNewPage() {
+            const page = document.createElement('div');
+            page.className = 'page';
+            page.style.backgroundColor = colors[colorIndex % colors.length];
+            colorIndex++;
+            
+            const letters = [
+                randomConsonant(),
+                randomConsonant(),
+                randomVowel()
+            ].sort(() => Math.random() - 0.5);
+
+            letters.forEach(letter => {
+                const letterElement = document.createElement('div');
+                letterElement.className = 'letter';
+                // Store original letter in dataset
+                letterElement.dataset.original = letter;
+                // Apply case transformation
+                letterElement.textContent = isLowerCase ? letter.toLowerCase() : letter;
+                letterElement.onclick = () => handleLetterClick(letterElement);
+                page.appendChild(letterElement);
+            });
+            
+            score += 10; // 10 points per correct selection
+            updateScoreBoard();
+            
+            
+            return page;
+        }
+        
+        function updateScoreBoard() {
+            const scoreBoard = document.getElementById('scoreBoard');
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            scoreBoard.textContent = `Score: ${score} | ${elapsed}s`;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateScoreBoard, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function randomVowel() {
+            return vowels[Math.floor(Math.random() * vowels.length)];
+        }
+
+        function randomConsonant() {
+            return consonants[Math.floor(Math.random() * consonants.length)];
+        }
+
+        function handleLetterClick(element) {
+            const originalLetter = element.dataset.original;
+            const isVowel = vowels.includes(originalLetter);
+            
+            if ((isVowelSafe && !isVowel) || (!isVowelSafe && isVowel)) {
+                showGameOver();
+            } else {
+                const currentPage = element.closest('.page');
+                const newPage = createNewPage();
+                const container = document.getElementById('container');
+                
+                newPage.style.transform = 'translateY(100%)';
+                container.appendChild(newPage);
+                
+                setTimeout(() => {
+                    currentPage.style.transform = 'translateY(-100%)';
+                    newPage.style.transform = 'translateY(0)';
+                }, 10);
+            }
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            targetS = parseInt(document.getElementById('duration-input').value);
+        
+            
+            if (elapsed >= targetS){
+                showGameOver();
+            }
+
+            
+        }
+        
+        function toggleGameMode() {
+            isVowelSafe = !isVowelSafe;
+            const btn = document.getElementById('modeToggle');
+            btn.textContent = isVowelSafe ? 'Vowels Safe' : 'Consonants Safe';
+            btn.classList.toggle('active', isVowelSafe);
+        }
+        
+        function toggleLetterCase() {
+            isLowerCase = !isLowerCase;
+            const btn = document.getElementById('caseToggle');
+            btn.textContent = isLowerCase ? 'abcd' : 'ABCD';
+            btn.classList.toggle('active', isLowerCase);
+            
+            // Update existing letters
+            document.querySelectorAll('.letter').forEach(letter => {
+                const original = letter.dataset.original;
+                letter.textContent = isLowerCase ? original.toLowerCase() : original;
+            });
+        }
+
+        function showGameOver() {
+            stopTimer();
+            document.getElementById('gameOver').style.display = 'flex';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalTime').textContent = 
+                Math.floor((Date.now() - startTime) / 1000);
+        }
+
+        function restartGame() {
+            score = 0;
+            stopTimer();
+            startTimer();
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            colorIndex = 0;
+            container.appendChild(createNewPage());
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'none';
+            updateScoreBoard();
+        }
+        
+        function startGame() {
+            score = 0;
+            stopTimer();
+            startTimer();
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+            updateScoreBoard();
+        }
+
+        // Start the game
+        window.onload = () => {
+            //startTimer();
+            //restartGame();
+            
+             
+        };
+    </script>
+</body>
+</html>

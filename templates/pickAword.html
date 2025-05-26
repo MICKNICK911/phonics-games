@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Slide with Clues</title>
+    <style>
+        /* Previous styles maintained with additions */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            font-size: 4rem;
+            transition: transform 0.5s ease-in-out;
+            top: 0;
+            left: 0;
+        }
+
+        .clue-text {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .letters-container {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .letter {
+            cursor: pointer;
+            padding: 1rem;
+            transition: transform 0.2s;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .letter:hover {
+            transform: scale(1.1);
+        }
+
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 3rem;
+            z-index: 1000;
+        }
+
+        .restart-btn {
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            cursor: pointer;
+            background: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+    <div class="game-over" id="gameOver">
+        <div>Game Over!</div>
+        <button class="restart-btn" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Predefined levels with clues
+        const levels = [
+            { 
+                list: ['A', 'B', 'C'], 
+                target: 'A',
+                clue: "Find the vowel" 
+            },
+            { 
+                list: ['D', 'E', 'F'], 
+                target: 'E',
+                clue: "Look for the vowel" 
+            },
+            { 
+                list: ['X', 'Y', 'Z'], 
+                target: 'Z',
+                clue: "Find the last letter of the alphabet" 
+            },
+            { 
+                list: ['M', 'N', 'O'], 
+                target: 'O',
+                clue: "Select the vowel" 
+            },
+            { 
+                list: ['P', 'Q', 'R'], 
+                target: 'Q',
+                clue: "Find the letter after P" 
+            }
+        ];
+
+        const colors = ['#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFDFBA', '#D0BAFF'];
+        let colorIndex = 0;
+        let currentLevelIndex = 0;
+
+        function createNewPage(levelData) {
+            const page = document.createElement('div');
+            page.className = 'page';
+            page.style.backgroundColor = colors[colorIndex % colors.length];
+            colorIndex++;
+
+            // Add clue element
+            const clue = document.createElement('div');
+            clue.className = 'clue-text';
+            clue.textContent = levelData.clue;
+            page.appendChild(clue);
+
+            // Add letters container
+            const lettersContainer = document.createElement('div');
+            lettersContainer.className = 'letters-container';
+
+            levelData.list.forEach(letter => {
+                const letterElement = document.createElement('div');
+                letterElement.className = 'letter';
+                letterElement.textContent = letter;
+                letterElement.onclick = () => handleLetterClick(letter, page, levelData.target);
+                lettersContainer.appendChild(letterElement);
+            });
+
+            page.appendChild(lettersContainer);
+            return page;
+        }
+
+        function handleLetterClick(clickedLetter, currentPage, target) {
+            if (clickedLetter === target) {
+                currentLevelIndex = (currentLevelIndex + 1) % levels.length;
+                const newPage = createNewPage(levels[currentLevelIndex]);
+                const container = document.getElementById('container');
+                
+                newPage.style.transform = 'translateY(100%)';
+                container.appendChild(newPage);
+                
+                setTimeout(() => {
+                    currentPage.style.transform = 'translateY(-100%)';
+                    newPage.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                showGameOver();
+            }
+        }
+
+        function showGameOver() {
+            document.getElementById('gameOver').style.display = 'flex';
+        }
+
+        function restartGame() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            colorIndex = 0;
+            currentLevelIndex = 0;
+            container.appendChild(createNewPage(levels[currentLevelIndex]));
+            document.getElementById('gameOver').style.display = 'none';
+        }
+
+        // Start the game
+        window.onload = () => {
+            restartGame();
+        };
+    </script>
+</body>
+</html>
