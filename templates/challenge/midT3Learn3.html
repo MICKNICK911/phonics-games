@@ -10,9 +10,9 @@
             --text-color: #333333;
             --btn-bg: #333333;
             --btn-color: #ffffff;
-            --screen1-bg: #00FF0B;
-            --screen2-bg: #FFDB6E;
-            --screen3-bg: #00FFFE;
+            --screen1-bg: #ffcccc;
+            --screen2-bg: #ccffcc;
+            --screen3-bg: #cccfff;
         }
 
         .dark-mode {
@@ -174,57 +174,64 @@
     <!--GAME SCRIPT-->
     <script>
         let dictionaryY = {
+            "1.Match Words To R-Controlled Sounds": {
+                "Short a": "mark scar charm factor spinner".split(' '),
+                "Short o": "born cork corn fork scorch".split(' '),
+                "Short e": "burn girl work clerk herd".split(' '),
+            },
+            "2.Match Words To sounds": {
+                "/ie/ Long e": "thief grief belief yield brief".split(' '),
+                "/ie/ Long i": "fried tries lie tie".split(' '),
+                "/ea/ Long e": "deal teach lean meat".split(' '),
+                "/ea/ Long a": "great create break steak".split(' '),
+                "/ea/ Short e": "weather health instead spread".split(' '),
+                
+            },
+            "3.Match Words To sounds": {
+                "/ow/ Long o": "blow snow yellow show throw pillow shown hollow window glow".split(' '),
+                "/ow/ [a + w]": "frown cow down gown clown crowd brown howl now how".split(' '),
+                
+            },
+            "4.Match Words To Vowel Team sounds": {
+                "Long a": "bail main stay way they obey steak great".split(' '),
+                "Long e": "see week key money brief chief".split(' '),
+                "Long o": "boat coat toe woe goes show grow".split(' '),
+                "Long i": "tie die pie lie flies".split(' '),
+                "Long u": "glue true new blew few good hook".split(' '),
+            },
+            "5.Match Words To /y/ sounds": {
+                "Short i": "gym lyrics syrub myth cyst hymn".split(' '),
+                "Long i": "fly cry dry shy sky my".split(' '),
+                "Long e": "army handy party baby thirty candy".split(' '),
+            },
+            "6.Match Words To /gh/ sounds": {
+                "G": "ghost ghast Ghana ghoul ghetto".split(' '),
+                "F": "tough laugh cough rough enough".split(' '),
+                "Silent": "thigh right high light sigh".split(' '),
+            },
+            "7.Match Words To Correct sounds": {
+                "G": "go gun goat game gas".split(' '),
+                "J": "age page gist gym ginger edge judge bridge".split(' '),
+            },
+            "8.Match Words To Correct sounds": {
+                "CK": "cat cone cube cast cute".split(' '),
+                "SS": "scent trace rice cycle cyst".split(' '),
+            },
+            "9.Pick Words With Silent Letters": {
+                "Silent": "knot knife bomb climb write wrote calm talk listen fasten".split(' '),
+                "Normal": "plant swift last blend left".split(' '),
+            },
+            "10.Match To Correct Syllable": {
+                "Open": "so go we she hi flu".split(' '),
+                "Closed": "mat stand plant swift hut fast".split(' '),
+                "CVe": "bike make mete cute stone huge".split(' '),
+            },
             
-            "1. Match Words To Correct Vowel sounds": {
-                "short a": "mat sat cat fan rat".split(' '),
-                "short e": "net set get leg bed".split(' '),
-                "short i": "sit fin pin tin win".split(' '),
-                "short o": "not pot lot rob got".split(' '),
-                "short u": "sun gun mud jug run".split(' '),
-            },
-
-            "2. Match Words To Correct Vowel sounds": {
-                "Long a": "mate make rate bake take".split(' '),
-                "Long e": "mete eve fete rede here".split(' '),
-                "Long i": "site nice time bike kite".split(' '),
-                "Long o": "note dote mole hole pole".split(' '),
-                "Long u": "flute mute cute cube rube".split(' '),
-            },
-
-            "3. Match Words To Correct Vowel sounds": {
-                "Long Vowel": "bake take mete eve bike kite hole pole cute cube".split(' '),
-                "Short Vowel": "fan rat leg bed tin win not got jug run".split(' '),
-            },
-
-            "4. Match Words To Correct Vowel sounds": {
-                "Short Vowel": ['red'],
-                "Long Vowel": "me he we the so go no lo co be she hi flu".split(' '),
-            },
-
-            "5. Match Words To Correct Rhyming Word": {
-                "fall": "call tall".split(' '),
-                "push": "bush".split(' '),
-                "hold": "gold told".split(' '),
-                "mild": "child wild".split(' '),
-                "mind": "kind find".split(' '),
-                "poll": "toll poll".split(' '),
-                "both": "loth both".split(' '),
-                "most": "post host".split(' '),
-                "bolt": "jolt holt".split(' '),
-                "pull": "bull full".split(' '),
-            },
-
-           "6. Match Words To Correct Blend or Digraph": {
-                "Blends": "text part twin grass blow pets cold dwell pray clap".split(' '),
-                "Digraph": "pink song thin that match chat ship link long thank".split(' '),
-            },
             
-            "7. Match Words To Correct Blend or Digraph": {
-                "Blends": "sand smart slap scrap soft went snip brass split fact".split(' '),
-                "Digraph": "ghost gnash know write chuck phone which Ghana gnome knap".split(' '),
-            },
+            
             
         };
+
 
         let score = 0;
         let Grandscore = 0;
@@ -249,7 +256,7 @@
             gameDiv.style.flexDirection = 'column';
             gameDiv.style.alignItems = 'center';
             gameDiv.innerHTML = `
-                <h2 style="font-size: 18px; margin-bottom: 10px;">${gameName}</h2>
+                <h2 style="font-size: 15px; margin-bottom: 10px;">${gameName}</h2>
                 <div id="grid-container-${gameName}" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
             `;
             container.appendChild(gameDiv);
@@ -264,7 +271,7 @@
                 const valueDiv = document.createElement('div');
                 valueDiv.textContent = value;
                 valueDiv.style.fontWeight = 'bold';
-                valueDiv.style.fontSize = '26px';
+                valueDiv.style.fontSize = '15px';
                 valueDiv.style.fontFamily = 'serif';
                 valueDiv.style.backgroundColor = '#f0f0f0';
                 valueDiv.style.color = 'black';
@@ -294,7 +301,7 @@
                 buttonElement.style.border = 'none';
                 buttonElement.style.borderRadius = '10px';
                 buttonElement.style.cursor = 'pointer';
-                buttonElement.style.fontSize = '16px';
+                buttonElement.style.fontSize = '15px';
                 buttonElement.addEventListener('click', () => {
                     if (!gameOver && selectedItem) {
                         const selectedText = selectedItem.textContent;

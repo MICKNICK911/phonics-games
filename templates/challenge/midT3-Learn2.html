@@ -10,9 +10,9 @@
             --text-color: #333333;
             --btn-bg: #333333;
             --btn-color: #ffffff;
-            --screen1-bg: #00FF0B;
-            --screen2-bg: #FFDB6E;
-            --screen3-bg: #00FFFE;
+            --screen1-bg: #ffcccc;
+            --screen2-bg: #ccffcc;
+            --screen3-bg: #cccfff;
         }
 
         .dark-mode {
@@ -99,8 +99,6 @@
             border: 2px solid #4CAF50;
         }
 
-        
-
         @media (min-width: 768px) {
             .nav-btn {
                 padding: 18px 36px;
@@ -174,7 +172,6 @@
     <!--GAME SCRIPT-->
     <script>
         let dictionaryY = {
-            
             "1. Match Words To Correct Vowel sounds": {
                 "short a": "mat sat cat fan rat".split(' '),
                 "short e": "net set get leg bed".split(' '),
@@ -221,7 +218,7 @@
             
             "7. Match Words To Correct Blend or Digraph": {
                 "Blends": "sand smart slap scrap soft went snip brass split fact".split(' '),
-                "Digraph": "ghost gnash know write chuck phone which Ghana gnome knap".split(' '),
+                "Digraph": "ghost gnash know write track phone which Ghana gnome knap".split(' '),
             },
             
         };
@@ -231,8 +228,6 @@
         let gameOver = false;
         let gameLevel = 0; 
         let startTime = 0;
-        
-        let learn = true; // toggle modes
 
         function displayGame(gameName, container) {
             container.innerHTML = '';
@@ -307,7 +302,6 @@
                             Grandscore++;
                             scoreElement.textContent = `Score: ${Grandscore}`;
                         } else if (!dictionary[button].includes(selectedText)) {
-                        ;
                             gameOverScreen(container);
                         }
 
@@ -338,27 +332,21 @@
             gameOverDiv.style.justifyContent = 'center';
             gameOverDiv.style.height = '100%';
             gameOverDiv.style.width = '100%';
-            gameOverDiv.style.background = 'purple';
+            gameOverDiv.style.background = 'red';
             gameOverDiv.style.color = '#fff';
             gameOverDiv.innerHTML = `
-                <h1 style="font-size: 48px; margin-bottom: 20px;">WRONG!</h1>
+                <h1 style="font-size: 48px; margin-bottom: 20px;">Game Over!</h1>
                 <p style="font-size: 24px; margin-bottom: 40px;">Your final score is ${score}.</p>
-                <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color:red; font-size: 18px;">Continue</button>
+                <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color:red; font-size: 18px;">Play Again</button>
             `;
             container.appendChild(gameOverDiv);
             const playAgainButton = gameOverDiv.querySelector('button');
             playAgainButton.addEventListener('click', () => {
-                if (learn){
-                    score = 0;
-                    Grandscore -= 3
-                    gameOver = false;
-                } else {
                 score = 0;
                 gameLevel = 0;
                 Grandscore = 0;
                 gameOver = false;
-                startTime = Date.now();}
-                
+                startTime = Date.now();
                 displayGame(Object.keys(dictionaryY)[gameLevel], container);
             });
         }
@@ -433,7 +421,7 @@
         document.getElementById('start-game').addEventListener('click', () => {
             startTime = Date.now();
             const currentScreen = document.getElementById('screen2');
-            displayGame(Object.keys(dictionaryY)[0], currentScreen);
+            displayGame(Object.keys(dictionaryY)[gameLevel], currentScreen);
             navigate(1);
         });
     </script>
