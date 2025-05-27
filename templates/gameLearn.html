@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vertical Slider with Dark Mode</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --btn-bg: #333333;
+            --btn-color: #ffffff;
+            --screen1-bg: #ffcccc;
+            --screen2-bg: #ccffcc;
+            --screen3-bg: #cccfff;
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --btn-bg: #4a4a4a;
+            --screen1-bg: #4d0000;
+            --screen2-bg: #004d00;
+            --screen3-bg: #00004d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            overflow: hidden;
+            touch-action: pan-y;
+            --vh: 1vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 100vw;
+            height: 300vh;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0px;
+        }
+
+        #screen1 { background-color: var(--screen1-bg); }
+        #screen2 { background-color: var(--screen2-bg); }
+        #screen3 { background-color: var(--screen3-bg); }
+
+        .nav-btn {
+            padding: 16px 32px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: var(--btn-bg);
+            color: var(--btn-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            min-width: 140px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #themeToggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2147483647;
+            padding: 12px 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            background-color: var(--btn-bg);
+            color: var(--btn-color);
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #start-game {
+            padding: 20px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: transparent;
+            color: #4CAF50;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #4CAF50;
+        }
+
+        
+
+        @media (min-width: 768px) {
+            .nav-btn {
+                padding: 18px 36px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" onclick="toggleTheme()">🌓</button>
+    
+    <div class="container" id="slider">
+        <div class="screen" id="screen1">
+            <h1 style="text-align: center;">Are You A<br>WORD CHAMPION?<br>Prove It!</h1>
+            <div style="margin-bottom: 35px;"></div>
+            <button id="start-game">Start Game</button>
+        </div>
+        <div class="screen" id="screen2">
+            <h1>Screen 2</h1>
+            <button class="nav-btn" onclick="navigate(2)">Continue ↓</button>
+        </div>
+        <div class="screen" id="screen3">
+            <h1>Screen 3</h1>
+            <button class="nav-btn" onclick="instantRestart()">↺ Restart</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPosition = 0;
+        const slider = document.getElementById('slider');
+        const themeToggle = document.getElementById('themeToggle');
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        const setVH = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        
+        setVH();
+        window.addEventListener('resize', setVH);
+        window.addEventListener('orientationchange', setVH);
+
+        function navigate(position) {
+            currentPosition = position;
+            updateSliderPosition();
+        }
+
+        function instantRestart() {
+            slider.style.transition = 'none';
+            currentPosition = 0;
+            updateSliderPosition();
+            void slider.offsetHeight;
+            slider.style.transition = '';
+        }
+
+        function updateSliderPosition() {
+            slider.style.transform = `translateY(-${currentPosition * 100}vh)`;
+        }
+
+        window.addEventListener('load', () => setTimeout(() => window.scrollTo(0, 1), 0));
+    </script>
+
+    <!--GAME SCRIPT-->
+    <script>
+        let dictionaryY = {
+            "Match Words To sounds 1": {
+                "Long a": "day".split(' '),
+                "Long e": "meat".split(' '),
+                "Long i": "fried".split(' '),
+                "Long o": "blow".split(' '),
+            },
+            "Match Words To sounds 2": {
+                "Long a": "day".split(' '),
+                "Long e": "meat".split(' '),
+                "Long i": "fried".split(' '),
+                "Long o": "blow".split(' '),
+            },
+            
+        };
+
+        let score = 0;
+        let Grandscore = 0;
+        let gameOver = false;
+        let gameLevel = 0; 
+        let startTime = 0;
+        
+        let learn = true; // toggle modes
+
+        function displayGame(gameName, container) {
+            container.innerHTML = '';
+            container.style.textAlign = 'center';
+            const scoreElement = document.createElement('div');
+            scoreElement.style.fontSize = '24px';
+            scoreElement.style.fontWeight = 'bold';
+            scoreElement.style.marginBottom = '20px';
+            scoreElement.textContent = `Score: ${score}`;
+            container.appendChild(scoreElement);
+            
+            const gameDiv = document.createElement('div');
+            gameDiv.style.display = 'flex';
+            gameDiv.style.flexDirection = 'column';
+            gameDiv.style.alignItems = 'center';
+            gameDiv.innerHTML = `
+                <h2 style="font-size: 18px; margin-bottom: 10px;">${gameName}</h2>
+                <div id="grid-container-${gameName}" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
+            `;
+            container.appendChild(gameDiv);
+            
+            const gridContainer = gameDiv.querySelector('div');
+            const values = Object.values(dictionaryY[gameName]).flat();
+            const shuffledValues = values.sort(() => Math.random() - 0.5);
+            let selectedItem = null;
+            const dictionary = dictionaryY[gameName];
+
+            shuffledValues.forEach(value => {
+                const valueDiv = document.createElement('div');
+                valueDiv.textContent = value;
+                valueDiv.style.fontWeight = 'bold';
+                valueDiv.style.fontSize = '26px';
+                valueDiv.style.fontFamily = 'serif';
+                valueDiv.style.backgroundColor = '#f0f0f0';
+                valueDiv.style.color = 'black';
+                valueDiv.style.padding = '8px';
+                valueDiv.style.borderRadius = '10px';
+                valueDiv.style.boxShadow = '0px 0px 10px rgba(0, 0, 0, 0.1)';
+                valueDiv.style.cursor = 'pointer';
+                valueDiv.addEventListener('click', () => {
+                    if (!gameOver) {
+                        if (selectedItem) {
+                            selectedItem.style.backgroundColor = '#f0f0f0';
+                        }
+                        valueDiv.style.backgroundColor = 'yellow';
+                        selectedItem = valueDiv;
+                    }
+                });
+                gridContainer.appendChild(valueDiv);
+            });
+
+            const buttons = Object.keys(dictionaryY[gameName]);
+            buttons.forEach((button, index) => {
+                const buttonElement = document.createElement('button');
+                buttonElement.textContent = button;
+                buttonElement.style.backgroundColor = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+                buttonElement.style.color = '#fff';
+                buttonElement.style.padding = '8px';
+                buttonElement.style.border = 'none';
+                buttonElement.style.borderRadius = '10px';
+                buttonElement.style.cursor = 'pointer';
+                buttonElement.style.fontSize = '16px';
+                buttonElement.addEventListener('click', () => {
+                    if (!gameOver && selectedItem) {
+                        const selectedText = selectedItem.textContent;
+                        if (dictionary[button].includes(selectedText) && !selectedItem.classList.contains('correct')) {
+                            selectedItem.style.color = buttonElement.style.backgroundColor;
+                            selectedItem.style.backgroundColor = '#f0f0f0';
+                            selectedItem.classList.add('correct');
+                            selectedItem = null;
+                            score++;
+                            Grandscore++;
+                            scoreElement.textContent = `Score: ${Grandscore}`;
+                        } else if (!dictionary[button].includes(selectedText)) {
+                        ;
+                            gameOverScreen(container);
+                        }
+
+                        if (score === shuffledValues.length) {
+                            if (gameLevel < Object.keys(dictionaryY).length - 1) {
+                                gameLevel++;
+                                NextLevelScreen(container);
+                            } else {
+                                const currentScreen = document.getElementById('screen3');
+                                gameWinScreen(currentScreen); 
+                                navigate(2);
+                            }
+                        }
+                    }
+                });
+                gridContainer.appendChild(buttonElement);
+            });
+        }
+
+        function gameOverScreen(container) {
+            gameOver = true;
+            container.innerHTML = '';
+            container.style.textAlign = 'center';
+            const gameOverDiv = document.createElement('div');
+            gameOverDiv.style.display = 'flex';
+            gameOverDiv.style.flexDirection = 'column';
+            gameOverDiv.style.alignItems = 'center';
+            gameOverDiv.style.justifyContent = 'center';
+            gameOverDiv.style.height = '100%';
+            gameOverDiv.style.width = '100%';
+            gameOverDiv.style.background = 'purple';
+            gameOverDiv.style.color = '#fff';
+            gameOverDiv.innerHTML = `
+                <h1 style="font-size: 48px; margin-bottom: 20px;">WRONG!</h1>
+                <p style="font-size: 24px; margin-bottom: 40px;">Your final score is ${score}.</p>
+                <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color:red; font-size: 18px;">Continue</button>
+            `;
+            container.appendChild(gameOverDiv);
+            const playAgainButton = gameOverDiv.querySelector('button');
+            playAgainButton.addEventListener('click', () => {
+                if (learn){
+                    score = 0;
+                    Grandscore -= 3
+                    gameOver = false;
+                } else {
+                score = 0;
+                gameLevel = 0;
+                Grandscore = 0;
+                gameOver = false;
+                startTime = Date.now();}
+                
+                displayGame(Object.keys(dictionaryY)[gameLevel], container);
+            });
+        }
+
+        function NextLevelScreen(container) {
+            gameOver = true;
+            container.innerHTML = '';
+            container.style.textAlign = 'center';
+            const gameOverDiv = document.createElement('div');
+            gameOverDiv.style.display = 'flex';
+            gameOverDiv.style.flexDirection = 'column';
+            gameOverDiv.style.alignItems = 'center';
+            gameOverDiv.style.justifyContent = 'center';
+            gameOverDiv.style.height = '100%';
+            gameOverDiv.style.width = '100%';
+            gameOverDiv.style.background = 'orange';
+            gameOverDiv.style.color = '#fff';
+            gameOverDiv.innerHTML = `
+                <h1 style="font-size: 48px; margin-bottom: 20px;">Well Done!</h1>
+                <p style="font-size: 24px; margin-bottom: 40px;">Your final score is:<br><span style="font-size: 50px; font-weight: bold;">${Grandscore}</span><br>Continue to Level: ${gameLevel + 1}</p>
+                <button style="padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; background-color: #fff; color:orange; font-size: 18px;">Continue</button>
+            `;
+            container.appendChild(gameOverDiv);
+            const playAgainButton = gameOverDiv.querySelector('button');
+            playAgainButton.addEventListener('click', () => {
+                score = 0;
+                gameOver = false;
+                const currentScreen = document.getElementById('screen2');
+                displayGame(Object.keys(dictionaryY)[gameLevel], currentScreen);
+            });
+        }
+
+        function gameWinScreen(container) {
+            gameOver = true;
+            const timeElapsed = Date.now() - startTime;
+            const minutes = Math.floor(timeElapsed / 60000);
+            const seconds = Math.floor((timeElapsed % 60000) / 1000);
+            const paddedSeconds = seconds.toString().padStart(2, '0');
+            const timeString = `${minutes}m ${paddedSeconds}s`;
+
+            container.innerHTML = '';
+            container.style.textAlign = 'center';
+            const gameOverDiv = document.createElement('div');
+            gameOverDiv.style.display = 'flex';
+            gameOverDiv.style.flexDirection = 'column';
+            gameOverDiv.style.alignItems = 'center';
+            gameOverDiv.style.justifyContent = 'center';
+            gameOverDiv.style.height = '100%';
+            gameOverDiv.style.width = '100%';
+            gameOverDiv.style.background = 'linear-gradient(to bottom, blue, blue)';
+            gameOverDiv.style.color = '#fff';
+            gameOverDiv.innerHTML = `
+                <h1 style="font-size: 50px; margin-bottom: 20px;">Congratulations!</h1>
+                <p style="font-size: 20px; margin-bottom: 20px;">Your final score is:<br>
+                <span style="font-size: 50px; font-weight: bold;">${Grandscore}</span></p>
+                <p style="font-size: 20px; margin-bottom: 40px;">Time taken:<br><span style="font-size: 60px;">${timeString}</span></p>
+                <button style="padding: 20px 40px; border: none; border-radius: 10px; 
+                cursor: pointer; background-color: #fff; color: #4CAF50; font-size: 18px;">
+                Play Again</button>
+            `;
+            container.appendChild(gameOverDiv);
+            const playAgainButton = gameOverDiv.querySelector('button');
+            playAgainButton.addEventListener('click', () => {
+                score = 0;
+                gameLevel = 0;
+                Grandscore = 0;
+                gameOver = false;
+                instantRestart();
+            });
+        }
+
+        document.getElementById('start-game').addEventListener('click', () => {
+            startTime = Date.now();
+            const currentScreen = document.getElementById('screen2');
+            displayGame(Object.keys(dictionaryY)[0], currentScreen);
+            navigate(1);
+        });
+    </script>
+</body>
+</html>

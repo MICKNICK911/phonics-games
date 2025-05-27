@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Code Decoder</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --btn-bg: #4CAF50;
+            --btn-color: #ffffff;
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --btn-bg: #45a049;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .decoder-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid var(--text-color);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 16px;
+            min-height: 150px;
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            color: var(--btn-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Verification Code Decoder</h1>
+        
+        <div class="decoder-box">
+            <textarea id="encryptedCode" 
+                      placeholder="Paste verification code here..."></textarea>
+            <div>
+                <button onclick="decryptCode()">Decrypt Code</button>
+                <button onclick="pasteFromClipboard()">Paste from Clipboard</button>
+                <button onclick="clearFields()">Clear</button>
+            </div>
+            <div id="result" class="hidden"></div>
+        </div>
+
+        <div class="decoder-box">
+            <h3>Decryption Result:</h3>
+            <pre id="decryptedResult"></pre>
+        </div>
+    </div>
+
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓</button>
+
+    <script>
+        function decryptCode() {
+            const encryptedCode = document.getElementById('encryptedCode').value.trim();
+            const resultElement = document.getElementById('decryptedResult');
+
+            try {
+                // Remove "Verification Code: " prefix if present
+                const cleanCode = encryptedCode.replace('Verification Code: ', '');
+                
+                // Decode from Base64
+                const decodedString = decodeURIComponent(escape(atob(cleanCode)));
+                
+                // Parse JSON
+                const result = JSON.parse(decodedString);
+                
+                // Format the output
+                const formattedResult = `Name: ${result.name}
+School: ${result.school}
+Grade: ${result.grade}
+Score: ${result.score}
+Time: ${result.time}
+Date: ${new Date(result.timestamp).toLocaleString()}
+Checksum: ${result.checksum || 'N/A'}`;
+
+                resultElement.textContent = formattedResult;
+            } catch (error) {
+                resultElement.textContent = '❌ Error: Invalid verification code\n' +
+                    'Please check the code and try again.';
+            }
+        }
+
+        function pasteFromClipboard() {
+            navigator.clipboard.readText().then(text => {
+                document.getElementById('encryptedCode').value = text;
+            });
+        }
+
+        function clearFields() {
+            document.getElementById('encryptedCode').value = '';
+            document.getElementById('decryptedResult').textContent = '';
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('decoderTheme', 
+                document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('decoderTheme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+</body>
+</html>

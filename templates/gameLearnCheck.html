@@ -99,6 +99,36 @@
             border: 2px solid #4CAF50;
         }
 
+        .player-info {
+            width: 80%;
+            max-width: 400px;
+            margin: 20px 0;
+        }
+
+        .player-info input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        .encrypted-code {
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 4px;
+            user-select: all;
+        }
+
+        .encrypted-code:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         @media (min-width: 768px) {
             .nav-btn {
                 padding: 18px 36px;
@@ -111,11 +141,20 @@
     <button id="themeToggle" onclick="toggleTheme()">🌓</button>
     
     <div class="container" id="slider">
-        <div class="screen" id="screen1">
-            <h1 style="text-align: center;">Are You A<br>WORD CHAMPION?<br>Prove It!</h1>
-            <div style="margin-bottom: 35px;"></div>
-            <button id="start-game">Start Game</button>
+    <div class="screen" id="screen1">
+        <h1 style="text-align: center;">Are You A<br>WORD CHAMPION?<br>Prove It!</h1>
+        <div class="player-info">
+            <label for="nameInput">Name:</label>
+            <input type="text" id="nameInput" required>
+            
+            <!-- <label for="schoolInput">School:</label>
+            <input type="text" id="schoolInput" required> -->
+            
+            <label for="gradeInput">Grade:</label>
+            <input type="text" id="gradeInput" required>
         </div>
+        <button id="start-game">Start Game</button>
+    </div>
         <div class="screen" id="screen2">
             <h1>Screen 2</h1>
             <button class="nav-btn" onclick="navigate(2)">Continue ↓</button>
@@ -360,6 +399,23 @@
             const paddedSeconds = seconds.toString().padStart(2, '0');
             const timeString = `${minutes}m ${paddedSeconds}s`;
 
+            // Get player information
+            const playerName = document.getElementById('nameInput').value.trim() || 'Anonymous';
+            //const school = document.getElementById('schoolInput').value.trim() || 'Unknown School';
+            const grade = document.getElementById('gradeInput').value.trim() || 'N/A';
+
+            // Create verification code
+            const verificationData = {
+                name: playerName,
+               // school: school,
+                grade: grade,
+                score: Grandscore,
+                time: timeString,
+                timestamp: Date.now()
+            };
+            
+            const encryptedCode = btoa(unescape(encodeURIComponent(JSON.stringify(verificationData))));
+
             container.innerHTML = '';
             container.style.textAlign = 'center';
             const gameOverDiv = document.createElement('div');
@@ -369,34 +425,131 @@
             gameOverDiv.style.justifyContent = 'center';
             gameOverDiv.style.height = '100%';
             gameOverDiv.style.width = '100%';
-            gameOverDiv.style.background = 'linear-gradient(to bottom, blue, blue)';
+            gameOverDiv.style.background = 'linear-gradient(to bottom, blue, green)';
             gameOverDiv.style.color = '#fff';
             gameOverDiv.innerHTML = `
-                <h1 style="font-size: 50px; margin-bottom: 20px;">Congratulations!</h1>
-                <p style="font-size: 20px; margin-bottom: 20px;">Your final score is:<br>
-                <span style="font-size: 50px; font-weight: bold;">${Grandscore}</span></p>
-                <p style="font-size: 20px; margin-bottom: 40px;">Time taken:<br><span style="font-size: 60px;">${timeString}</span></p>
-                <button style="padding: 20px 40px; border: none; border-radius: 10px; 
-                cursor: pointer; background-color: #fff; color: #4CAF50; font-size: 18px;">
-                Play Again</button>
-            `;
+        <div>
+            <div class="encrypted-code">
+                ${encryptedCode} 
+            </div>
+            <button onclick="copyVerificationCode('${encryptedCode}')" 
+                    style="margin: 10px 0;
+                           padding: 6px 12px;
+                           background-color: red;
+                           border: 5px solid #fff;
+                           color: white;
+                           font-size: 12px;
+                           border: none;
+                           border-radius: 50px;
+                           cursor: pointer;">
+                📋 Copy Code
+            </button>
+            
+            <h1 style="font-size: 40px; margin: 20px 0;">Congratulations</h1>
+            <div style="font-size: 20px; line-height: 1.6;">
+                <p>${playerName}<br>
+                Grade:<br>${grade}<br>
+                Final Score:<br><span style="font-size:25px; font-weight: bold;">${Grandscore}</span></p>
+                <p>Time Taken:<br><span style="font-size: 35px;">${timeString}</span></p>
+            </div>
+        </div>
+        <button style="padding: 20px 40px; 
+                     margin-top: 30px;
+                     border: none; 
+                     border-radius: 10px; 
+                     cursor: pointer; 
+                     background-color: #fff; 
+                     color: #4CAF50; 
+                     font-size: 18px;" onclick="replayGame()">
+            Play Again
+        </button>
+    `;
             container.appendChild(gameOverDiv);
-            const playAgainButton = gameOverDiv.querySelector('button');
-            playAgainButton.addEventListener('click', () => {
-                score = 0;
-                gameLevel = 0;
-                Grandscore = 0;
-                gameOver = false;
-                instantRestart();
-            });
+            
+            // const playAgainButton = gameOverDiv.querySelector('button');
+            // playAgainButton.addEventListener('click', () => {
+            //     score = 0;
+            //     gameLevel = 0;
+            //     Grandscore = 0;
+            //     gameOver = false;
+            //     instantRestart();
+            // });
         }
 
         document.getElementById('start-game').addEventListener('click', () => {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+
             startTime = Date.now();
             const currentScreen = document.getElementById('screen2');
             displayGame(Object.keys(dictionaryY)[0], currentScreen);
             navigate(1);
         });
+
+
+        function replayGame() {
+            score = 0;
+            gameLevel = 0;
+            Grandscore = 0;
+            gameOver = false;
+            instantRestart();
+        }
+                
+        function copyVerificationCode(code) {
+            // Create temporary text area for mobile compatibility
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = code;
+            tempTextArea.style.position = 'fixed';
+            tempTextArea.style.opacity = 0;
+            document.body.appendChild(tempTextArea);
+            
+            try {
+                // Select and copy text
+                tempTextArea.select();
+                const successful = document.execCommand('copy');
+                
+                // Show mobile-friendly feedback
+                const msg = successful ? 'Copied to clipboard!' : 'Failed to copy';
+                showMobileToast(msg);
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+                showMobileToast('Copy failed. Please manually select the code.');
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+
+            // Modern clipboard API for desktop
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).catch(err => {
+                    console.error('Clipboard API failed', err);
+                });
+            }
+        }
+
+        function showMobileToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '25px';
+            toast.style.textAlign = 'center'
+            toast.style.zIndex = '10000';
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 2000);
+        }
+
+
     </script>
 </body>
 </html>
