@@ -312,28 +312,36 @@
             position: fixed;
             top: 50%;
             left: 50%;
+            width: 100vw;
+            height: 100vh;
             transform: translate(-50%, -50%);
             padding: 40px;
-            border-radius: 20px;
+            /*border-radius: 20px;*/
             box-shadow: 0 0 30px rgba(0,0,0,0.2);
             text-align: center;
             z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-content: center;
             display: none;
         }
 
         .result-screen h1 {
-            font-size: 50px;
+            font-size: 80px;
             margin: 0 0 20px 0;
+            font-family: Times New Roman;
             color: yellow;
         }
 
         .result-screen button {
-            background: #2196F3;
+            background: #00B0FF;
             color: white;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 20px;
+            font-size: 25px;
             border-radius: 8px;
             cursor: pointer;
+            display: relative;
+            justify-self: center;
         }
         
         #winScreen {
@@ -476,8 +484,8 @@
         </div>
         <div class="controls">
             <div class="input-group">
-                <input type="text" id="wordInput" placeholder="Enter a word..." value="spray">
-                <button onclick="displayWord()" style="background: #34c759; color: white;">Show Word</button>
+                <input type="text" id="wordInput" placeholder="Enter a word..." value="spray" readonly="true">
+                <!--<button onclick="displayWord()" style="background: #34c759; color: white;">Show Word</button>-->
             </div>
 
             <div class="tools-grid">
@@ -511,7 +519,7 @@
 
     <div id="winScreen" class="result-screen">
         <h1>CORRECT!<br>Well Done!</h1>
-        <button onclick="resetGame()">Play Again</button>
+        <button onclick="continueGame()">Play Again</button>
     </div>
 
     <div id="gameOverScreen" class="result-screen">
@@ -761,6 +769,16 @@
             correctWords = [...initialWords];
             
             clearAll();
+        }
+        
+        function continueGame() {
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('UnknownOverScreen').style.display = 'none';
+            document.getElementById('congratulationsScreen').style.display = 'none';
+            
+            document.getElementById('wordInput').value = correctWords[0].word;
+                    displayWord();
         }
 
         // Clear all annotations
