@@ -7,13 +7,12 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f8f9fa;
+            background-color: #FF91EC;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #FFF846;
         }
 
         #wordDisplay {
@@ -47,6 +46,7 @@
 
         .input-group {
             display: flex;
+            flex-direction: column;
             gap: 12px;
             margin-bottom: 20px;
         }
@@ -70,6 +70,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 10px;
+            padding: 10px;
+            background-color: black;
         }
 
         button {
@@ -218,6 +220,32 @@
             text-align: center;
         }
         
+        .k::before {
+            content: "/k/";
+            position: absolute;
+            top: -65px;
+            left: calc(50% - 28px);
+            transform: translateX(-50%);
+            color: #FF5722;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+        
+        .g::before {
+            content: "/g/";
+            position: absolute;
+            top: -65px;
+            left: calc(50% - 28px);
+            transform: translateX(-50%);
+            color: #FF5722;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+        
         .s::before {
             content: "s";
             position: absolute;
@@ -246,33 +274,7 @@
             z-index: 9999;
         }
 
-        .k::before {
-            content: "/k/";
-            position: absolute;
-            top: -65px;
-            left: calc(50% - 28px);
-            transform: translateX(-50%);
-            color: #FF5722;
-            font-size: 50px;
-            font-weight: bold;
-            width: 1em;
-            text-align: center;
-        }
-        
-        .g::before {
-            content: "/g/";
-            position: absolute;
-            top: -65px;
-            left: calc(50% - 28px);
-            transform: translateX(-50%);
-            color: #FF5722;
-            font-size: 50px;
-            font-weight: bold;
-            width: 1em;
-            text-align: center;
-        }
-        
-        
+
         .semicircle {
             border-top: 3px solid #009688;
             border-radius: 50% 50% 0 0;
@@ -286,9 +288,9 @@
         .group-semicircle {
             position: absolute;
             height: 40px;
-            width: 25%;
+            width: 50%;
             left: 100%;
-            border: 3px solid #FF9800;
+            border: 4px solid #C31F00;
             border-top: none;
             border-radius: 0 0 150px 150px;
             top: calc(50% + 60px);
@@ -306,13 +308,11 @@
             transform: rotate(180deg);
         }
 
-
         .result-screen {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 0 30px rgba(0,0,0,0.2);
@@ -321,9 +321,10 @@
             display: none;
         }
 
-        .result-screen h2 {
+        .result-screen h1 {
+            font-size: 50px;
             margin: 0 0 20px 0;
-            color: #1d1d1f;
+            color: yellow;
         }
 
         .result-screen button {
@@ -331,34 +332,31 @@
             color: white;
             padding: 12px 24px;
             font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
         }
         
         #winScreen {
             background-color: green;
         }
         
+        #UnknownOverScreen {
+            background-color: blue;
+        }
+        
         #gameOverScreen {
             background-color: red;
         }
         
-        #UnknownOverScreen {
-            background-color: blue;
+        #congratulationsScreen {
+            background-color: #9C27B0;
         }
         
         #wordDisplay {
             margin-left: 0px;
         }
         
-        #codeExportScreen pre {
-    font-family: 'Courier New', monospace;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    max-width: 80vw;
-    max-height: 60vh;
-    overflow: auto;
-}
-
-    .word-bank-modal {
+        .word-bank-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -402,6 +400,8 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            min-width: 80px;
+            text-align: center;
         }
         
         .word-bank-item:hover {
@@ -418,48 +418,48 @@
             color: white;
             cursor: pointer;
         }
-
-    @media only screen and (min-width: 981px){
-        .controls-container {
-            position: fixed;
-            bottom: 0;
-           /*left: 0; */
-           width: 15%;
-           height: 100%;
-           overflow: auto;
-            right: 0; 
-            background: white;
+        
+        .bank-empty-message {
+            color: #666;
+            font-style: italic;
+            text-align: center;
             padding: 20px;
-            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
         }
         
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            padding: 10px;
-            background-color: black;
-            /*margin-top: 250px;*/
+        @media only screen and (min-width: 981px){
+            .controls-container {
+                position: fixed;
+                bottom: 0;
+                width: 15%;
+                height: 100%;
+                overflow: auto;
+                right: 0; 
+                background: white;
+                padding: 20px;
+                box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
+            }
+            
+            .tools-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+                padding: 10px;
+                background-color: black;
+            }
+            
+            #wordDisplay {
+                margin-left: 20px;
+            }
         }
-        
-        #wordDisplay {
-            margin-left: 20px;
-        }
-
-        
-        }
-
     </style>
 </head>
-
 <body>
-    <h1 style="color: #1d1d1f; text-align: center; margin-bottom: 40px;">Phonics Decoder</h1>
     
     <div id="wordDisplay"></div>
     
-    <!-- New Word Bank Modal -->
+    <!-- Word Bank Modal -->
     <div class="word-bank-modal" id="wordBankModal">
         <div class="word-bank-content">
             <div class="word-bank-title">Word Bank</div>
@@ -471,20 +471,21 @@
     </div>
 
     <div class="controls-container">
+        <div style="margin: 30px">
+            <h3 style="color: #1d1d1f; text-align: center;">Phonics Decoder</h3>
+        </div>
         <div class="controls">
             <div class="input-group">
                 <input type="text" id="wordInput" placeholder="Enter a word..." value="spray">
                 <button onclick="displayWord()" style="background: #34c759; color: white;">Show Word</button>
             </div>
-                
+
             <div class="tools-grid">
                 <button onclick="showWordBank()" style="background: #9C27B0; color: white;">Word Bank</button>
                 <button data-tool="vowel" onclick="selectTool('vowel')">Long Vowel</button>
                 <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
                 <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
-                
                 <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve</button>
-                
                 <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
                 <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
                 <button data-tool="strike" onclick="selectTool('strike')">Vertical Strike</button>
@@ -504,19 +505,17 @@
                 <button onclick="clearAll()" class="clear-btn">Clear All</button>
                 <button onclick="saveCurrentWord()" style="background: #4CAF50; color: white;">Save Word</button>
                 <button onclick="checkAnswer()" style="background: #2196F3; color: white;">Check Answer</button>
-                <button onclick="showCodeExport()" style="background: #9C27B0; color: white;">Export Code</button>
-                
             </div>
         </div>
     </div>
 
     <div id="winScreen" class="result-screen">
-        <h2>🎉 Correct! Well Done!</h2>
+        <h1>CORRECT!<br>Well Done!</h1>
         <button onclick="resetGame()">Play Again</button>
     </div>
 
     <div id="gameOverScreen" class="result-screen">
-        <h2>❌ Game Over! Try Again</h2>
+        <h1>WRONG!<br>Try Again</h1>
         <button onclick="resetGame()">Try Again</button>
     </div>
     
@@ -525,20 +524,15 @@
         <button onclick="resetGame()">Try Again</button>
     </div>
     
-    <!-- Add this screen before </body> -->
-<div id="codeExportScreen" class="result-screen">
-    <h2>Code Export</h2>
-    <pre id="codeSnippet" style="background: #f5f5f5; padding: 20px; border-radius: 8px;"></pre>
-    <button onclick="copyCode()" style="background: #2196F3; margin-top: 15px;">Copy Code</button>
-    <button onclick="closeExportScreen()" style="background: #666; margin-top: 10px;">Close</button>
-</div>
-
+    <div id="congratulationsScreen" class="result-screen">
+        <h1>CONGRATULATIONS!<br>All Words Completed!</h1>
+        <button onclick="resetGame()">Play Again</button>
+    </div>
 
     <script>
         let currentTool = null;
         let firstLetterIndex = -1;
-        let unknown = 0;
-        let correctWords = [
+        let initialWords = [
             {
                 word: "spray",
                 annotations: [
@@ -559,7 +553,6 @@
                     { type: "consonant-cross", position: 3 }
                 ]
             },
-            
             {
                 word: "fetch",
                 annotations: [
@@ -569,6 +562,9 @@
             }
         ];
         
+        let correctWords = [...initialWords]; // Start with a copy of initial words
+
+        // Display the current word
         function displayWord() {
             const word = document.getElementById('wordInput').value.toLowerCase().replace(/[^a-z]/g, '');
             const display = document.getElementById('wordDisplay');
@@ -584,6 +580,7 @@
             });
         }
 
+        // Select the current tool
         function selectTool(tool) {
             currentTool = tool;
             firstLetterIndex = -1;
@@ -592,6 +589,7 @@
             });
         }
 
+        // Handle annotation placement
         function handleAnnotation(e) {
             if (!currentTool) return;
             
@@ -600,7 +598,7 @@
             const currentIndex = parseInt(container.dataset.index);
             const letter = container.textContent.trim();
 
-            if (currentTool === 'group-semi' | currentTool === 'group-semi2') {
+            if (currentTool === 'group-semi' || currentTool === 'group-semi2') {
                 if (firstLetterIndex === -1) {
                     firstLetterIndex = currentIndex;
                     container.style.backgroundColor = '#fff3e0';
@@ -629,7 +627,7 @@
                 }
                 return;
             }
-
+            
             if (currentTool === 'semicircle' && !['A','E','I','O','U','a','e','i','o','u'].includes(letter)) return;
 
             const annotationType = {
@@ -640,17 +638,18 @@
                 asterisk1: 'asterisk1',
                 asterisk2: 'asterisk2',
                 asterisk3: 'asterisk3',
-                semicircle: 'semicircle',
                 s: 's',
                 j: 'j',
                 g: 'g',
                 k: 'k',
+                semicircle: 'semicircle'
             }[currentTool];
 
             const existing = container.querySelector(`.${annotationType}`);
             existing ? existing.remove() : container.appendChild(createAnnotation(annotationType));
         }
 
+        // Create group semicircle annotation
         function createGroupSemicircle(index1, index2) {
             const firstLetter = document.querySelector(`[data-index="${index1}"]`);
             const secondLetter = document.querySelector(`[data-index="${index2}"]`);
@@ -661,11 +660,13 @@
             const displayRect = display.getBoundingClientRect();
             
             const semicircle = document.createElement('div');
+            
             if (currentTool === 'group-semi2'){
                 semicircle.className = 'annotation group-semicircle2';
-            }else{
-               semicircle.className = 'annotation group-semicircle'; 
+            } else {
+                semicircle.className = 'annotation group-semicircle'; 
             }
+            
             semicircle.dataset.positions = `${index1},${index2}`;
             semicircle.style.left = `${firstRect.right - displayRect.left - 50}px`;
             semicircle.style.width = `${secondLetter.offsetLeft - firstLetter.offsetLeft + 20}px`;
@@ -673,79 +674,96 @@
             display.appendChild(semicircle);
         }
 
+        // Check the answer against saved patterns
         function checkAnswer() {
-    const userAnnotations = [];
-    const currentWord = document.getElementById('wordInput').value.toLowerCase();
-    
-    // Collect user annotations
-    document.querySelectorAll('.annotation').forEach(ann => {
-        const container = ann.closest('.letter-container');
-        if (ann.classList.contains('group-semicircle')) {
-            userAnnotations.push({
-                type: 'group-semicircle',
-                positions: ann.dataset.positions.split(',').map(Number)
+            const userAnnotations = [];
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            
+            // Collect user annotations
+            document.querySelectorAll('.annotation').forEach(ann => {
+                const container = ann.closest('.letter-container');
+                if (ann.classList.contains('group-semicircle')) {
+                    userAnnotations.push({
+                        type: 'group-semicircle',
+                        positions: ann.dataset.positions.split(',').map(Number)
+                    });
+                } else if (ann.classList.contains('group-semicircle2')) {
+                    userAnnotations.push({
+                        type: 'group-semicircle2',
+                        positions: ann.dataset.positions.split(',').map(Number)
+                    });
+                } else {
+                    const type = Array.from(ann.classList).find(c => c !== 'annotation');
+                    userAnnotations.push({
+                        type,
+                        position: parseInt(container.dataset.index)
+                    });
+                }
             });
-        } else if (ann.classList.contains('group-semicircle2')) {
-            userAnnotations.push({
-                type: 'group-semicircle2',
-                positions: ann.dataset.positions.split(',').map(Number)
+
+            // Get all patterns for current word
+            const patternsForCurrentWord = correctWords.filter(item => 
+                item.word === currentWord
+            );
+            
+            // If word not found in patterns
+            if (patternsForCurrentWord.length === 0) {
+                document.getElementById('UnknownOverScreen').style.display = 'block';
+                return;
+            }
+
+            // Check against all patterns for this word
+            const isCorrect = patternsForCurrentWord.some(pattern => {
+                const patternMap = new Map();
+                pattern.annotations.forEach(ann => {
+                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+                    patternMap.set(key, (patternMap.get(key) || 0) + 1);
+                });
+
+                const userMap = new Map();
+                userAnnotations.forEach(ann => {
+                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+                    userMap.set(key, (userMap.get(key) || 0) + 1);
+                });
+
+                // Compare map sizes and contents
+                if (patternMap.size !== userMap.size) return false;
+                for (const [key, count] of patternMap) {
+                    if (userMap.get(key) !== count) return false;
+                }
+                return true;
             });
-        } else {
-            const type = Array.from(ann.classList).find(c => c !== 'annotation');
-            userAnnotations.push({
-                type,
-                position: parseInt(container.dataset.index)
-            });
+
+            // Show appropriate result
+            if (isCorrect) {
+                // Remove all occurrences of the word from the bank
+                correctWords = correctWords.filter(wordData => wordData.word !== currentWord);
+                
+                // Check if word bank is empty
+                if (correctWords.length === 0) {
+                    document.getElementById('congratulationsScreen').style.display = 'block';
+                } else {
+                    document.getElementById('winScreen').style.display = 'block';
+                }
+            } else {
+                document.getElementById('gameOverScreen').style.display = 'block';
+            }
         }
-    });
 
-    // Get all patterns for current word
-    const patternsForCurrentWord = correctWords.filter(item => 
-        item.word === currentWord
-    );
-    
-    // If word not found in patterns
-    if (patternsForCurrentWord.length === 0) {
-        document.getElementById('UnknownOverScreen').style.display = 'block';
-        return;
-    }
-
-    // Check against all patterns for this word
-    const isCorrect = patternsForCurrentWord.some(pattern => {
-        const patternMap = new Map();
-        pattern.annotations.forEach(ann => {
-            const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
-            patternMap.set(key, (patternMap.get(key) || 0) + 1);
-        });
-
-        const userMap = new Map();
-        userAnnotations.forEach(ann => {
-            const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
-            userMap.set(key, (userMap.get(key) || 0) + 1);
-        });
-
-        // Compare map sizes and contents
-        if (patternMap.size !== userMap.size) return false;
-        for (const [key, count] of patternMap) {
-            if (userMap.get(key) !== count) return false;
-        }
-        return true;
-    });
-
-    // Show appropriate result
-    if (isCorrect) {
-        document.getElementById('winScreen').style.display = 'block';
-    } else {
-        document.getElementById('gameOverScreen').style.display = 'block';
-    }
-}
+        // Reset the game to initial state
         function resetGame() {
             document.getElementById('winScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'none';
             document.getElementById('UnknownOverScreen').style.display = 'none';
+            document.getElementById('congratulationsScreen').style.display = 'none';
+            
+            // Reset word bank to initial words
+            correctWords = [...initialWords];
+            
             clearAll();
         }
 
+        // Clear all annotations
         function clearAll() {
             currentTool = null;
             firstLetterIndex = -1;
@@ -754,118 +772,89 @@
             displayWord();
         }
 
+        // Create annotation element
         function createAnnotation(type) {
             const annotation = document.createElement('div');
             annotation.className = `annotation ${type}`;
             return annotation;
         }
         
-      // Add this function to handle saving
-    function saveCurrentWord() {
-    const currentWord = document.getElementById('wordInput').value.toLowerCase();
-    const annotations = [];
-    
-    // Collect annotations from the current word
-    document.querySelectorAll('.annotation').forEach(ann => {
-        const container = ann.closest('.letter-container');
-        if (ann.classList.contains('group-semicircle')) {
-            annotations.push({
-                type: 'group-semicircle',
-                positions: ann.dataset.positions.split(',').map(Number)
+        // Save current word to the word bank
+        function saveCurrentWord() {
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            const annotations = [];
+            
+            // Collect annotations from the current word
+            document.querySelectorAll('.annotation').forEach(ann => {
+                const container = ann.closest('.letter-container');
+                if (ann.classList.contains('group-semicircle')) {
+                    annotations.push({
+                        type: 'group-semicircle',
+                        positions: ann.dataset.positions.split(',').map(Number)
+                    });
+                } else if (ann.classList.contains('group-semicircle2')) {
+                    annotations.push({
+                        type: 'group-semicircle2',
+                        positions: ann.dataset.positions.split(',').map(Number)
+                    });
+                } else {
+                    const type = Array.from(ann.classList).find(c => c !== 'annotation');
+                    annotations.push({
+                        type,
+                        position: parseInt(container.dataset.index)
+                    });
+                }
             });
-        } else if (ann.classList.contains('group-semicircle2')) {
-            annotations.push({
-                type: 'group-semicircle2',
-                positions: ann.dataset.positions.split(',').map(Number)
-            });
-        } else {
-            const type = Array.from(ann.classList).find(c => c !== 'annotation');
-            annotations.push({
-                type,
-                position: parseInt(container.dataset.index)
-            });
-        }
-    });
 
-    // Add to correctWords array
-    correctWords.push({
-        word: currentWord,
-        annotations: annotations
-    });
-    
-    document.getElementById('wordDisplay').innerHTML = '';
+            // Add to correctWords array
+            correctWords.push({
+                word: currentWord,
+                annotations: annotations
+            });
+            
+            document.getElementById('wordDisplay').innerHTML = '';
             displayWord();
 
-    alert('Word saved to correct words list!');
-}
+            alert('Word saved to word bank!');
+        }
 
-// Code Export functions
-function showCodeExport() {
-    const currentWord = document.getElementById('wordInput').value.toLowerCase();
-    const annotations = [];
-    
-    // Collect annotations
-    document.querySelectorAll('.annotation').forEach(ann => {
-        const container = ann.closest('.letter-container');
-        if (ann.classList.contains('group-semicircle')) {
-            annotations.push({
-                type: 'group-semicircle',
-                positions: ann.dataset.positions.split(',').map(Number)
-            });
-        }else if(ann.classList.contains('group-semicircle2')) {
-            annotations.push({
-                type: 'group-semicircle2',
-                positions: ann.dataset.positions.split(',').map(Number)
-            });
-        } else {
-            const type = Array.from(ann.classList).find(c => c !== 'annotation');
-            annotations.push({
-                type: type,
-                position: parseInt(container.dataset.index)
+        // Filter unique words by key
+        function filterUniqueByKey(array, key) {
+            const seen = new Set();
+            return array.filter(item => {
+                const value = item[key];
+                if (seen.has(value)) {
+                    return false;
+                }
+                seen.add(value);
+                return true;
             });
         }
-    });
 
-    // Generate code snippet
-    const code = `{
-    word: "${currentWord}",
-    annotations: ${JSON.stringify(annotations, null, 4).replace(/"/g, "'")}
-}`;
-
-    document.getElementById('codeSnippet').textContent = code;
-    document.getElementById('codeExportScreen').style.display = 'block';
-}
-
-function copyCode() {
-    const textarea = document.createElement('textarea');
-    textarea.value = document.getElementById('codeSnippet').textContent;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    alert('Code copied to clipboard!');
-}
-
-function closeExportScreen() {
-    document.getElementById('codeExportScreen').style.display = 'none';
-}
-
-    function showWordBank() {
+        // Show word bank modal
+        function showWordBank() {
             const modal = document.getElementById('wordBankModal');
             const wordList = document.getElementById('wordBankList');
             
             // Clear previous list
             wordList.innerHTML = '';
             
+            if (correctWords.length === 0) {
+                wordList.innerHTML = '<div class="bank-empty-message">Word bank is empty!</div>';
+                modal.style.display = 'flex';
+                return;
+            }
+            
+            // Get unique words
+            const uniqueWords = filterUniqueByKey(correctWords, 'word');
+            
             // Add words to the bank
-            correctWords.forEach(wordData => {
+            uniqueWords.forEach(wordData => {
                 const wordItem = document.createElement('div');
                 wordItem.className = 'word-bank-item';
                 wordItem.textContent = wordData.word;
                 wordItem.onclick = () => {
                     document.getElementById('wordInput').value = wordData.word;
-                    
-                    
                     displayWord();
                     closeWordBank();
                 };
@@ -876,6 +865,7 @@ function closeExportScreen() {
             modal.style.display = 'flex';
         }
         
+        // Close word bank modal
         function closeWordBank() {
             document.getElementById('wordBankModal').style.display = 'none';
         }
@@ -887,8 +877,6 @@ function closeExportScreen() {
                 closeWordBank();
             }
         };
-
-
 
         // Initial setup
         displayWord();

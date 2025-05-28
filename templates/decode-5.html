@@ -350,6 +350,67 @@
         #wordDisplay {
             margin-left: 0px;
         }
+        
+        .word-bank-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .word-bank-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .word-bank-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .word-bank-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .word-bank-item {
+            background-color: #f0f2f5;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .word-bank-item:hover {
+            background-color: #2196F3;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .close-word-bank {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
         @media only screen and (min-width: 981px){
         .controls-container {
             position: fixed;
@@ -386,6 +447,17 @@
 <body>
     
     <div id="wordDisplay"></div>
+    
+    <!-- New Word Bank Modal -->
+    <div class="word-bank-modal" id="wordBankModal">
+        <div class="word-bank-content">
+            <div class="word-bank-title">Word Bank</div>
+            <div class="word-bank-list" id="wordBankList">
+                <!-- Word items will be added here dynamically -->
+            </div>
+        </div>
+        <div class="close-word-bank" onclick="closeWordBank()">✕</div>
+    </div>
 
     <div class="controls-container">
         <div style="margin: 30px">
@@ -394,11 +466,12 @@
         </div>
         <div class="controls">
             <div class="input-group">
-                <input type="text" id="wordInput" placeholder="Enter a word..." value="mat">
+                <input type="text" id="wordInput" placeholder="Enter a word..." value="spray">
                 <button onclick="displayWord()" style="background: #34c759; color: white;">Show Word</button>
             </div>
 
             <div class="tools-grid">
+                <button onclick="showWordBank()" style="background: #9C27B0; color: white;">Word Bank</button>
                 <button data-tool="vowel" onclick="selectTool('vowel')">Long Vowel</button>
                 <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
                 <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
@@ -447,14 +520,35 @@
         let unknown = 0;
         let correctWords = [
             {
-                word: "phonics",
+                word: "spray",
+                annotations: [
+                    { type: "asterisk", position: 1 }
+                ]
+            },
+            {
+                word: "take",
                 annotations: [
                     { type: "vowel-arc", position: 1 },
-                    { type: "consonant-cross", position: 0 },
-                    { type: "group-semicircle", positions: [2,3] }
+                    { type: "asterisk", position: 3 }
+                ]
+            },
+            {
+                word: "fish",
+                annotations: [
+                    { type: "group-semicircle", positions: [0,1] },
+                    { type: "consonant-cross", position: 3 }
+                ]
+            },
+            
+            {
+                word: "fetch",
+                annotations: [
+                    { type: "group-semicircle", positions: [0,1] },
+                    { type: "consonant-cross", position: 3 }
                 ]
             }
         ];
+
 
         function displayWord() {
             const word = document.getElementById('wordInput').value.toLowerCase().replace(/[^a-z]/g, '');
@@ -565,75 +659,71 @@
         }
 
         function checkAnswer() {
-            const userAnnotations = [];
-            const currentWord = document.getElementById('wordInput').value.toLowerCase();
-            
-            document.querySelectorAll('.annotation').forEach(ann => {
-                const container = ann.closest('.letter-container');
-                if (ann.classList.contains('group-semicircle')) {
-                    userAnnotations.push({
-                        type: 'group-semicircle',
-                        positions: ann.dataset.positions.split(',').map(Number)
-                    });
-                }else if (ann.classList.contains('group-semicircle2')) {
+    const userAnnotations = [];
+    const currentWord = document.getElementById('wordInput').value.toLowerCase();
+    
+    // Collect user annotations
+    document.querySelectorAll('.annotation').forEach(ann => {
+        const container = ann.closest('.letter-container');
+        if (ann.classList.contains('group-semicircle')) {
+            userAnnotations.push({
+                type: 'group-semicircle',
+                positions: ann.dataset.positions.split(',').map(Number)
+            });
+        } else if (ann.classList.contains('group-semicircle2')) {
             userAnnotations.push({
                 type: 'group-semicircle2',
                 positions: ann.dataset.positions.split(',').map(Number)
             });
-           // alert('inside circle2');
         } else {
-                    const type = Array.from(ann.classList).find(c => c !== 'annotation');
-                    userAnnotations.push({
-                        type,
-                        position: parseInt(container.dataset.index)
-                    });
-                }
+            const type = Array.from(ann.classList).find(c => c !== 'annotation');
+            userAnnotations.push({
+                type,
+                position: parseInt(container.dataset.index)
             });
+        }
+    });
 
-            const isCorrect = correctWords.filter(correct => {
-                
-                if (correct.word === currentWord) {unknown = 0;}
-                
-else if (correct.word !== currentWord) {unknown = 1; return false;}
-                
-                const correctMap = new Map();
-                correct.annotations.forEach(ann => {
-                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
-                    correctMap.set(key, (correctMap.get(key) || 0) + 1);
-                });
+    // Get all patterns for current word
+    const patternsForCurrentWord = correctWords.filter(item => 
+        item.word === currentWord
+    );
+    
+    // If word not found in patterns
+    if (patternsForCurrentWord.length === 0) {
+        document.getElementById('UnknownOverScreen').style.display = 'block';
+        return;
+    }
 
-                const userMap = new Map();
-                userAnnotations.forEach(ann => {
-                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
-                    userMap.set(key, (userMap.get(key) || 0) + 1);
-                });
+    // Check against all patterns for this word
+    const isCorrect = patternsForCurrentWord.some(pattern => {
+        const patternMap = new Map();
+        pattern.annotations.forEach(ann => {
+            const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+            patternMap.set(key, (patternMap.get(key) || 0) + 1);
+        });
 
-                if (correctMap.size !== userMap.size) return false;
-                for (const [key, count] of correctMap) {
-                    if (userMap.get(key) !== count) return false;
-                }
-                return true;
-            });
+        const userMap = new Map();
+        userAnnotations.forEach(ann => {
+            const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+            userMap.set(key, (userMap.get(key) || 0) + 1);
+        });
 
-            //if (isCorrect) {
-               // document.getElementById('winScreen').style.display = 'block';
-           // } else {
-             //   document.getElementById('gameOverScreen').style.display = 'block';
-          //  }
-          if (unknown === 1){
-            document.getElementById('UnknownOverScreen').style.display = 'block';  
-          }
-          
-          else if (isCorrect.length > 0) {
+        // Compare map sizes and contents
+        if (patternMap.size !== userMap.size) return false;
+        for (const [key, count] of patternMap) {
+            if (userMap.get(key) !== count) return false;
+        }
+        return true;
+    });
+
+    // Show appropriate result
+    if (isCorrect) {
         document.getElementById('winScreen').style.display = 'block';
-        // Show which patterns matched
-        const matchList = isCorrect.map(m => m.word).join(', ');
-        //document.getElementById('winScreen').innerHTML += 
-            //`<p>Matched patterns: ${matchList}</p>`;
     } else {
         document.getElementById('gameOverScreen').style.display = 'block';
     }
-        }
+}
 
         function resetGame() {
             document.getElementById('winScreen').style.display = 'none';
@@ -695,6 +785,46 @@ else if (correct.word !== currentWord) {unknown = 1; return false;}
 
     alert('Word saved to correct words list!');
 }
+
+    function showWordBank() {
+            const modal = document.getElementById('wordBankModal');
+            const wordList = document.getElementById('wordBankList');
+            
+            // Clear previous list
+            wordList.innerHTML = '';
+            
+            // Add words to the bank
+            correctWords.forEach(wordData => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-bank-item';
+                wordItem.textContent = wordData.word;
+                wordItem.onclick = () => {
+                    document.getElementById('wordInput').value = wordData.word;
+                    
+                    
+                    displayWord();
+                    closeWordBank();
+                };
+                wordList.appendChild(wordItem);
+            });
+            
+            // Show the modal
+            modal.style.display = 'flex';
+        }
+        
+        function closeWordBank() {
+            document.getElementById('wordBankModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById('wordBankModal');
+            if (event.target === modal) {
+                closeWordBank();
+            }
+        };
+
+        
 
         // Initial setup
         displayWord();
