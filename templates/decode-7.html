@@ -7,7 +7,7 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #FF91EC;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -16,15 +16,20 @@
         }
 
         #wordDisplay {
-            font-size: 48px;
+            font-size: 64px;
             letter-spacing: 15px;
-            margin: 40px 0;
+            margin: 80px 0;
             position: relative;
-            min-height: 100px;
+            min-height: 180px;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-grow: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 3px solid #ff9966;
         }
 
         .controls-container {
@@ -113,10 +118,23 @@
             display: inline-flex;
             justify-content: center;
             position: relative;
-            width: 60px;
+            width: 70px;
             margin: 0 15px;
             vertical-align: top;
             cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .letter-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .letter {
+            font-weight: bold;
+            font-size: 70px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .annotation {
@@ -140,7 +158,7 @@
             left: 35%;
             width: 0.6em;
             height: 2px;
-            background: #9C27B0;
+            background: #010c6e;
             transform: translate(-50%, 10px) rotate(45deg);
         }
 
@@ -149,25 +167,24 @@
             position: absolute;
             width: 100%;
             height: 2px;
-            background: #9C27B0;
+            background: #010c6e;
             transform: rotate(90deg);
         }
 
         .syllable-divider {
-            border-right: 3px solid #2196F3;
-            height: 100px;
+            border-right: 5px solid #2196F3;
+            height: 120px;
             top: -10px;
             right: -10px;
         }
 
         .vertical-strike {
-            border-left: 3px solid green;
-            height: 80px;
+            border-left: 4px solid rgb(109, 14, 1);
+            height: 150px;
             top: -100;
             left: 37.5%;
             transform: translateX(-50%);
         }
-
         .asterisk::before {
             content: "*";
             position: absolute;
@@ -223,10 +240,10 @@
         .k::before {
             content: "/k/";
             position: absolute;
-            top: -65px;
+            top: -75px;
             left: calc(50% - 28px);
             transform: translateX(-50%);
-            color: #FF5722;
+            color: #e74c3c;
             font-size: 50px;
             font-weight: bold;
             width: 1em;
@@ -236,10 +253,10 @@
         .g::before {
             content: "/g/";
             position: absolute;
-            top: -65px;
+            top: -75px;
             left: calc(50% - 28px);
             transform: translateX(-50%);
-            color: #FF5722;
+            color: #e74c3c;
             font-size: 50px;
             font-weight: bold;
             width: 1em;
@@ -249,10 +266,10 @@
         .s::before {
             content: "s";
             position: absolute;
-            top: -65px;
+            top: -82px;
             left: calc(50% + 45px);
             transform: translateX(-50%);
-            color: green;
+            color: #5a3601;
             font-size: 50px;
             font-weight: bold;
             width: 1em;
@@ -263,10 +280,10 @@
         .j::before {
             content: "j";
             position: absolute;
-            top: -65px;
+            top: -82px;
             left: calc(50% + 45px);
             transform: translateX(-50%);
-            color: green;
+            color: #5a3601;
             font-size: 50px;
             font-weight: bold;
             width: 1em;
@@ -287,25 +304,22 @@
 
         .group-semicircle {
             position: absolute;
-            height: 40px;
-            width: 50%;
-            left: 100%;
-            border: 4px solid #C31F00;
+            height: 50px;
+            border: 5px solid #77014a;
             border-top: none;
             border-radius: 0 0 150px 150px;
-            top: calc(50% + 60px);
+            top: calc(50% + 45px);
+            z-index: 0;
         }
         
         .group-semicircle2 {
             position: absolute;
-            height: 40px;
-            width: 50%;
-            left: 100%;
-            border: 4px solid yellow;
-            border-top: none;
-            border-radius: 0 0 150px 150px;
-            top: calc(50% + -60px);
-            transform: rotate(180deg);
+            height: 50px;
+            border: 5px solid #e7b40c;
+            border-bottom: none;
+            border-radius: 50% 50% 0 0;
+            top: calc(50% + -90px);
+            z-index: 0;
         }
 
         .result-screen {
@@ -458,7 +472,7 @@
             }
             
             #wordDisplay {
-                margin-left: 20px;
+                margin-left: 10%;
             }
         }
     </style>
@@ -480,7 +494,7 @@
 
     <div class="controls-container">
         <div style="margin: 30px">
-            <h3 style="color: #1d1d1f; text-align: center;">Phonics Decoder</h3>
+            <h3 style="color: #1d1d1f; text-align: center;">Phonics Decode Test</h3>
         </div>
         <div class="controls">
             <div class="input-group">
@@ -493,14 +507,14 @@
                 <button data-tool="vowel" onclick="selectTool('vowel')">Long Vowel</button>
                 <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
                 <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
-                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve</button>
+                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve Up</button>
                 <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
                 <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
                 <button data-tool="strike" onclick="selectTool('strike')">Vertical Strike</button>
-                <button data-tool="asterisk" onclick="selectTool('asterisk')">Guardian-top</button>
-                <button data-tool="asterisk1" onclick="selectTool('asterisk1')">Guardian-down</button>
+                <button data-tool="asterisk" onclick="selectTool('asterisk')">Guardian-Star</button>
+                <!-- <button data-tool="asterisk1" onclick="selectTool('asterisk1')">Guardian-down</button>
                 <button data-tool="asterisk2" onclick="selectTool('asterisk2')">Guardian-middle-down</button>
-                <button data-tool="asterisk3" onclick="selectTool('asterisk3')">Guardian-middle-top</button>
+                <button data-tool="asterisk3" onclick="selectTool('asterisk3')">Guardian-middle-top</button> -->
                 
                 <button data-tool="s" onclick="selectTool('s')">s</button>
                 
@@ -612,12 +626,10 @@
                     container.style.backgroundColor = '#fff3e0';
                 } else {
                     document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
-                    if (Math.abs(firstLetterIndex - currentIndex) === 1) {
-                        createGroupSemicircle(
-                            Math.min(firstLetterIndex, currentIndex),
-                            Math.max(firstLetterIndex, currentIndex)
-                        );
-                    }
+                    createGroupSemicircle(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex)
+                    );
                     firstLetterIndex = -1;
                 }
                 return;
@@ -636,7 +648,7 @@
                 return;
             }
             
-            if (currentTool === 'semicircle' && !['A','E','I','O','U','a','e','i','o','u'].includes(letter)) return;
+           // if (currentTool === 'semicircle' && !['A','E','I','O','U','a','e','i','o','u'].includes(letter)) return;
 
             const annotationType = {
                 vowel: 'vowel-arc',
@@ -660,27 +672,35 @@
         // Create group semicircle annotation
         function createGroupSemicircle(index1, index2) {
             const firstLetter = document.querySelector(`[data-index="${index1}"]`);
-            const secondLetter = document.querySelector(`[data-index="${index2}"]`);
-            if (!firstLetter || !secondLetter) return;
+            const lastLetter = document.querySelector(`[data-index="${index2}"]`);
+            if (!firstLetter || !lastLetter) return;
 
             const display = document.getElementById('wordDisplay');
             const firstRect = firstLetter.getBoundingClientRect();
+            const lastRect = lastLetter.getBoundingClientRect();
             const displayRect = display.getBoundingClientRect();
             
             const semicircle = document.createElement('div');
             
-            if (currentTool === 'group-semi2'){
+            if (currentTool === 'group-semi2') {
                 semicircle.className = 'annotation group-semicircle2';
             } else {
-                semicircle.className = 'annotation group-semicircle'; 
+                semicircle.className = 'annotation group-semicircle';
             }
             
             semicircle.dataset.positions = `${index1},${index2}`;
-            semicircle.style.left = `${firstRect.right - displayRect.left - 50}px`;
-            semicircle.style.width = `${secondLetter.offsetLeft - firstLetter.offsetLeft + 20}px`;
+            
+            // Position the arc below the letters
+            const startX = firstRect.left - displayRect.left;
+            const endX = lastRect.right - displayRect.left - 37;
+            const width = endX - startX;
+            
+            semicircle.style.left = `${startX}px`;
+            semicircle.style.width = `${width}px`;
             
             display.appendChild(semicircle);
         }
+
 
         // Check the answer against saved patterns
         function checkAnswer() {

@@ -26,7 +26,7 @@
             margin: 0;
             font-size: 2.5rem;
             background: linear-gradient(to right, #ff9966, #ff5e62);
-            -webkit-background-clip: text;
+            /*-webkit-background-clip: text;*/
             -webkit-text-fill-color: transparent;
         }
 
@@ -39,7 +39,7 @@
         #wordDisplay {
             font-size: 64px;
             letter-spacing: 15px;
-            margin: 40px 0;
+            margin: 80px 0;
             position: relative;
             min-height: 180px;
             display: flex;
@@ -177,10 +177,10 @@
         .consonant-cross {
             position: absolute;
             top: 100%;
-            left: 35%;
+            left: 37%;
             width: 0.8em;
             height: 3px;
-            background: #9C27B0;
+            background: #2601ca;
             transform: translate(-50%, 10px) rotate(45deg);
         }
 
@@ -189,7 +189,7 @@
             position: absolute;
             width: 100%;
             height: 3px;
-            background: #9C27B0;
+            background: #2601ca;
             transform: rotate(90deg);
         }
 
@@ -201,8 +201,8 @@
         }
 
         .vertical-strike {
-            border-left: 4px solid #2ecc71;
-            height: 100px;
+            border-left: 4px solid #990702;
+            height: 150px;
             top: -20px;
             left: 37.5%;
             transform: translateX(-50%);
@@ -263,7 +263,7 @@
         .k::before {
             content: "/k/";
             position: absolute;
-            top: -75px;
+            top: -82px;
             left: calc(50% - 28px);
             transform: translateX(-50%);
             color: #e74c3c;
@@ -292,7 +292,7 @@
             top: -75px;
             left: calc(50% + 45px);
             transform: translateX(-50%);
-            color: #3498db;
+            color: #5a3601;
             font-size: 50px;
             font-weight: bold;
             width: 1em;
@@ -303,10 +303,10 @@
         .j::before {
             content: "j";
             position: absolute;
-            top: -75px;
+            top: -82px;
             left: calc(50% + 45px);
             transform: translateX(-50%);
-            color: #3498db;
+            color: #5a3601;
             font-size: 50px;
             font-weight: bold;
             width: 1em;
@@ -315,7 +315,7 @@
         }
 
         .semicircle {
-            border-top: 4px solid #9b59b6;
+            border-top: 4px solid #057501;
             border-radius: 50% 50% 0 0;
             width: 50px;
             height: 25px;
@@ -327,20 +327,20 @@
         .group-arc {
             position: absolute;
             height: 50px;
-            border: 4px solid #f39c12;
+            border: 5px solid #77014a;
             border-top: none;
             border-radius: 0 0 150px 150px;
-            top: calc(100% + 30px);
+            top: calc(50% + 45px);
             z-index: 0;
         }
         
         .group-arc-up {
             position: absolute;
             height: 50px;
-            border: 4px solid #27ae60;
+            border: 5px solid #e7b40c;
             border-bottom: none;
             border-radius: 50% 50% 0 0;
-            top: -50px;
+            top: calc(50% + -90px);
             z-index: 0;
         }
 
@@ -518,18 +518,18 @@
             }
             
             #wordDisplay {
-                margin-right: 20%;
+                margin-left: 20%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
+    <!-- <div class="header">
         <h1>Phonics Decoding Tool</h1>
         <p>An interactive tool for visualizing phonics patterns and decoding strategies</p>
-    </div>
+    </div> -->
     
-    <div class="instructions">
+    <!-- <div class="instructions">
         <h3>How to Use:</h3>
         <ul>
             <li>Enter a word and click "Show Word" to display it</li>
@@ -539,7 +539,7 @@
             <li>Save your annotations with "Save Word"</li>
             <li>Check your annotations with "Check Answer"</li>
         </ul>
-    </div>
+    </div> -->
     
     <div id="wordDisplay"></div>
     
@@ -573,10 +573,10 @@
                 <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
                 <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
                 <button data-tool="strike" onclick="selectTool('strike')">Vertical Strike</button>
-                <button data-tool="asterisk" onclick="selectTool('asterisk')">Guardian-top</button>
-                <button data-tool="asterisk1" onclick="selectTool('asterisk1')">Guardian-down</button>
+                <button data-tool="asterisk" onclick="selectTool('asterisk')">Guardian-Star</button>
+                <!-- <button data-tool="asterisk1" onclick="selectTool('asterisk1')">Guardian-down</button>
                 <button data-tool="asterisk2" onclick="selectTool('asterisk2')">Guardian-middle-down</button>
-                <button data-tool="asterisk3" onclick="selectTool('asterisk3')">Guardian-middle-top</button>
+                <button data-tool="asterisk3" onclick="selectTool('asterisk3')">Guardian-middle-top</button> -->
                 
                 <button data-tool="s" onclick="selectTool('s')">s</button>
                 <button data-tool="j" onclick="selectTool('j')">j</button>
@@ -656,7 +656,7 @@
                 const container = document.createElement('div');
                 container.className = 'letter-container';
                 container.dataset.index = index;
-                container.innerHTML = `<div class="letter">${letter.toUpperCase()}</div>`;
+                container.innerHTML = `<div class="letter">${letter.toLowerCase()}</div>`;
                 container.onclick = handleAnnotation;
                 display.appendChild(container);
             });
@@ -749,7 +749,7 @@
             
             // Position the arc to cover all letters between the two indices
             const startX = firstRect.left - displayRect.left;
-            const endX = lastRect.right - displayRect.left;
+            const endX = lastRect.right - displayRect.left - 37;
             const width = endX - startX;
             
             arc.style.left = `${startX}px`;

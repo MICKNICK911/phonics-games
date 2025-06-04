@@ -47,9 +47,11 @@
 
         .input-group {
             display: flex;
+            flex-direction: column;
             gap: 12px;
             margin-bottom: 20px;
         }
+
 
         input {
             padding: 14px 20px;
@@ -111,11 +113,25 @@
             display: inline-flex;
             justify-content: center;
             position: relative;
-            width: 60px;
+            width: 70px;
             margin: 0 15px;
             vertical-align: top;
             cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
         }
+
+        .letter-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .letter {
+            font-weight: bold;
+            font-size: 70px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
 
         .annotation {
             position: absolute;
@@ -285,27 +301,23 @@
 
         .group-semicircle {
             position: absolute;
-            height: 40px;
-            width: 25%;
-            left: 100%;
-            border: 3px solid #FF9800;
+            height: 50px;
+            border: 5px solid #77014a;
             border-top: none;
             border-radius: 0 0 150px 150px;
-            top: calc(50% + 60px);
+            top: calc(50% + 45px);
+            z-index: 0;
         }
         
         .group-semicircle2 {
             position: absolute;
-            height: 40px;
-            width: 50%;
-            left: 100%;
-            border: 4px solid yellow;
-            border-top: none;
-            border-radius: 0 0 150px 150px;
-            top: calc(50% + -60px);
-            transform: rotate(180deg);
+            height: 50px;
+            border: 5px solid #e7b40c;
+            border-bottom: none;
+            border-radius: 50% 50% 0 0;
+            top: calc(50% + -90px);
+            z-index: 0;
         }
-
 
         .result-screen {
             position: fixed;
@@ -471,6 +483,9 @@
     </div>
 
     <div class="controls-container">
+        <div style="margin: 30px">
+            <h3 style="color: #1d1d1f; text-align: center;">Phonics Decoder</h3>
+        </div>
         <div class="controls">
             <div class="input-group">
                 <input type="text" id="wordInput" placeholder="Enter a word..." value="spray">
@@ -600,18 +615,16 @@
             const currentIndex = parseInt(container.dataset.index);
             const letter = container.textContent.trim();
 
-            if (currentTool === 'group-semi' | currentTool === 'group-semi2') {
+            if (currentTool === 'group-semi' || currentTool === 'group-semi2') {
                 if (firstLetterIndex === -1) {
                     firstLetterIndex = currentIndex;
                     container.style.backgroundColor = '#fff3e0';
                 } else {
                     document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
-                    if (Math.abs(firstLetterIndex - currentIndex) === 1) {
-                        createGroupSemicircle(
-                            Math.min(firstLetterIndex, currentIndex),
-                            Math.max(firstLetterIndex, currentIndex)
-                        );
-                    }
+                    createGroupSemicircle(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex)
+                    );
                     firstLetterIndex = -1;
                 }
                 return;
@@ -653,26 +666,34 @@
 
         function createGroupSemicircle(index1, index2) {
             const firstLetter = document.querySelector(`[data-index="${index1}"]`);
-            const secondLetter = document.querySelector(`[data-index="${index2}"]`);
-            if (!firstLetter || !secondLetter) return;
+            const lastLetter = document.querySelector(`[data-index="${index2}"]`);
+            if (!firstLetter || !lastLetter) return;
 
             const display = document.getElementById('wordDisplay');
             const firstRect = firstLetter.getBoundingClientRect();
+            const lastRect = lastLetter.getBoundingClientRect();
             const displayRect = display.getBoundingClientRect();
             
             const semicircle = document.createElement('div');
-            if (currentTool === 'group-semi2'){
+            
+            if (currentTool === 'group-semi2') {
                 semicircle.className = 'annotation group-semicircle2';
-            }else{
-               semicircle.className = 'annotation group-semicircle'; 
+            } else {
+                semicircle.className = 'annotation group-semicircle';
             }
+            
             semicircle.dataset.positions = `${index1},${index2}`;
-            semicircle.style.left = `${firstRect.right - displayRect.left - 50}px`;
-            semicircle.style.width = `${secondLetter.offsetLeft - firstLetter.offsetLeft + 20}px`;
+            
+            // Position the arc below the letters
+            const startX = firstRect.left - displayRect.left;
+            const endX = lastRect.right - displayRect.left - 37;
+            const width = endX - startX;
+            
+            semicircle.style.left = `${startX}px`;
+            semicircle.style.width = `${width}px`;
             
             display.appendChild(semicircle);
         }
-
         function checkAnswer() {
     const userAnnotations = [];
     const currentWord = document.getElementById('wordInput').value.toLowerCase();
