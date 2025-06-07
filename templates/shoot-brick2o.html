@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Word Brick Breaker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            width: 95%;
+            max-width: 600px;
+            padding: 10px 0;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .settings {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .settings label {
+            font-size: 0.9rem;
+        }
+
+        .settings input {
+            width: 40px;
+            padding: 3px;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 95vw;
+            height: 40vh;
+            max-width: 600px;
+            max-height: 600px;
+            margin: 10px 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #1e5799, #207cca);
+            border: 3px solid #ffcc00;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        #brickGrid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+        }
+
+        .brick-row {
+            display: flex;
+            justify-content: center;
+            gap: 2%;
+            margin: 1vh 0;
+        }
+
+        .brick {
+            width: 5%;
+            height: 2vh;
+            background: linear-gradient(45deg, #ff6b6b, #ffcc00);
+            border-radius: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .brick.red {
+            background: linear-gradient(45deg, #ff0000, #8b0000);
+        }
+
+        #shooter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffcc00, #ff9900);
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ffcc00;
+            z-index: 10;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff3333;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ff0000;
+            z-index: 5;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            width: 95vw;
+            max-width: 600px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+            background: linear-gradient(to bottom, #4a86e8, #1c4587);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #leftBtn, #rightBtn {
+            background: linear-gradient(to bottom, #38761d, #274e13);
+        }
+
+        #shootBtn {
+            background: linear-gradient(to bottom, #cc0000, #990000);
+        }
+
+        #inputSection {
+            margin-top: 10px;
+            width: 95vw;
+            max-width: 600px;
+        }
+
+        #usedWords {
+            background: rgba(0,0,0,0.7);
+            height: 80px;
+            color: white;
+            overflow: auto;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #ffcc00;
+        }
+
+        #usedWords h3 {
+            color: #ffcc00;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        #wordList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        #wordList span {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        #currentWord {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            border: 2px solid #4a86e8;
+            min-height: 60px;
+        }
+
+        #customKeyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .key-btn {
+            padding: 10px 5px;
+            font-size: 1.1rem;
+            background: linear-gradient(to bottom, #4a86e8, #1c4587);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .key-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .gameOver {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        #gameOverContent {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 90%;
+            border: 3px solid #ffcc00;
+            box-shadow: 0 0 30px rgba(255,204,0,0.5);
+        }
+
+        #gameOverText {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255,204,0,0.8);
+        }
+
+        #timeScore {
+            font-size: 2rem;
+            margin: 20px 0;
+            color: #ffffff;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        #scoreContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        /* Instructions Popup */
+        #instructionsPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #instructionsContent {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid #ffcc00;
+            box-shadow: 0 0 30px rgba(255,204,0,0.5);
+        }
+
+        #instructionsContent h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+
+        .instructions-list {
+            text-align: left;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        .instructions-list li {
+            margin: 15px 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            background: linear-gradient(to bottom, #4a86e8, #1c4587);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        #instructionsBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid #ffcc00;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        @media (max-width: 600px) {
+            #customKeyboard {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .key-btn {
+                padding: 8px 2px;
+                font-size: 0.9rem;
+            }
+            
+            .title {
+                font-size: 1.2rem;
+            }
+            
+            .settings {
+                font-size: 0.8rem;
+            }
+            
+            .settings input {
+                width: 30px;
+            }
+            
+            #instructionsContent h2 {
+                font-size: 2rem;
+            }
+            
+            .instructions-list li {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="instructionsBtn">Instructions</button>
+    <div id="scoreContainer">Time: <span id="timer">0.0</span>s</div>
+    
+    <div id="instructionsPopup">
+        <div id="instructionsContent">
+            <h2>How to Play Word Brick Breaker</h2>
+            
+            <div class="instructions-list">
+                <ol>
+                    <li><span class="highlight">Goal:</span> Break all bricks by forming valid words.</li>
+                    <li><span class="highlight">Form words:</span> Use the keyboard to type words using the letters provided.</li>
+                    <li><span class="highlight">Shoot:</span> Press the SHOOT button when you've formed a valid word.</li>
+                    <li><span class="highlight">Valid words:</span> Words must be in the dictionary and not already used.</li>
+                    <li><span class="highlight">Movement:</span> Use the &lt;&lt;&lt; and &gt;&gt;&gt; buttons to position your shooter.</li>
+                    <li><span class="highlight">Beware:</span> Invalid words add red bricks. Too many red bricks and you lose!</li>
+                    <li><span class="highlight">Win:</span> Clear all bricks before you get too many red ones.</li>
+                    <li><span class="highlight">Timer:</span> Your time is recorded - try to beat your best score!</li>
+                </ol>
+            </div>
+            
+            <button id="startGameBtn" class="btn">Start Game</button>
+        </div>
+    </div>
+    
+    <div class="game-header">
+        <div class="title">Word Brick Breaker</div>
+        <div class="settings">
+            Rows: <input id="target-row" type="number" value="2" min="1" max="10">
+            Bricks: <input id="target-bricks" type="number" value="10" min="5" max="15">
+        </div>
+    </div>
+    
+    <div id="gameContainer">
+        <div id="brickGrid"></div>
+        <div id="shooter"></div>
+        <div id="gameOver" class="gameOver">
+            <div id="gameOverContent">
+                <h2 id="gameOverText">Game Over!</h2>
+                <div id="timeScore"></div>
+                <button class="btn" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="control-btn" id="leftBtn">&lt;&lt;&lt;</button>
+        <button class="control-btn" id="backspaceBtn">CLEAR TEXT</button>
+        <button class="control-btn" id="rightBtn">&gt;&gt;&gt;</button>
+    </div>
+    
+    <div id="inputSection">
+        <div id="usedWords">
+            <h3>Used Words:</h3>
+            <div id="wordList"></div>
+        </div>
+        
+        <div id="currentWord"></div>
+        
+        <div id="customKeyboard"></div>
+        
+        <div style="margin-top: 10px;">
+            <button class="control-btn" id="replay" style="margin-bottom: 10px;">Restart Game</button>
+            <button class="control-btn" id="shootBtn" style="background:linear-gradient(to bottom, #cc0000, #990000);">SHOOT</button>
+        </div>
+    </div>
+    <script src="../wordlist.js"></script>
+    <script>
+        // Game word list
+        // const words = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 
+        //               'honeydew', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear',
+        //               'quince', 'raspberry', 'strawberry', 'tangerine', 'ugli', 'vanilla',
+        //               'watermelon', 'xigua', 'yellow', 'zucchini', 'animal', 'brave', 'chair',
+        //               'dance', 'earth', 'fruit', 'ghost', 'house', 'igloo', 'jelly', 'zebra',
+        //               'axe', 'kill', 'code', 'game', 'play', 'fun', 'word', 'brick', 'breaker',
+        //               'shoot', 'keyboard', 'victory', 'defeat', 'score', 'time', 'fast', 'slow'];
+        const words = wordList.map(word => word.toLowerCase());
+        const allLetters = [...new Set(words.join(''))].sort();
+        let bricks = [];
+        let InitialBricks = [];
+        let shooterPosition = 50;
+        let bulletSpeed = 5;
+        let usedWords = [];
+        let gameActive = false;
+        let startTime;
+        let timerInterval;
+
+        // DOM Elements
+        const instructionsPopup = document.getElementById('instructionsPopup');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const instructionsBtn = document.getElementById('instructionsBtn');
+
+        // Initialize game
+        function initializeGame() {
+            createCustomKeyboard();
+            initializeBricks();
+            updateShooterPosition();
+            startTimer();
+            gameActive = true;
+        }
+
+        function initializeBricks() {
+            let targetRow = parseInt(document.getElementById('target-row').value);
+            let targetBricks = parseInt(document.getElementById('target-bricks').value);
+
+            const brickGrid = document.getElementById('brickGrid');
+            brickGrid.innerHTML = '';
+            bricks = [];
+            InitialBricks = [];
+            
+            // Create initial bricks
+            for(let i = 0; i < targetRow; i++) {
+                const row = document.createElement('div');
+                row.className = 'brick-row';
+                for(let j = 0; j < targetBricks; j++) {
+                    const brick = createBrick();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    InitialBricks.push(brick);
+                }
+                brickGrid.appendChild(row);
+            }
+        }
+
+        function createBrick() {
+            const brick = document.createElement('div');
+            brick.className = 'brick';
+            return brick;
+        }
+        
+        function createBrickRed() {
+            const brick = document.createElement('div');
+            brick.className = 'brick red';
+            return brick;
+        }
+        
+        function addRedBrickToGrid() {
+            let targetBricks = parseInt(document.getElementById('target-bricks').value);
+            const brickGrid = document.getElementById('brickGrid');
+            const rows = brickGrid.children;
+            
+            // Find first available spot in existing rows
+            for(let row of rows) {
+                if(row.children.length < targetBricks) {
+                    const brick = createBrickRed();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    return;
+                }
+            }
+            
+            // Add new row if all are full
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            newRow.appendChild(createBrickRed());
+            brickGrid.appendChild(newRow);
+            bricks.push(newRow.firstChild);
+        }
+
+        function addBrickToGrid() {
+            let targetBricks = parseInt(document.getElementById('target-bricks').value);
+            const brickGrid = document.getElementById('brickGrid');
+            const rows = brickGrid.children;
+            
+            // Find first available spot in existing rows
+            for(let row of rows) {
+                if(row.children.length < targetBricks) {
+                    const brick = createBrick();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    return;
+                }
+            }
+            
+            // Add new row if all are full
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            newRow.appendChild(createBrick());
+            brickGrid.appendChild(newRow);
+            bricks.push(newRow.firstChild);
+        }
+
+        function updateShooterPosition() {
+            document.getElementById('shooter').style.left = `${shooterPosition}%`;
+        }
+
+        function checkWord() {
+            const input = document.getElementById('currentWord').textContent.toLowerCase();
+            if(!input) return false;
+            
+            const isValid = words.includes(input);
+            const isUsed = usedWords.includes(input);
+            
+            if(isValid && !isUsed) {
+                usedWords.push(input);
+                updateWordList();
+                return true;
+            } else {
+                if(!isValid || isUsed) addRedBrickToGrid();
+                return false;
+            }
+        }
+
+        function updateWordList() {
+            const wordList = document.getElementById('wordList');
+            wordList.innerHTML = '';
+            
+            usedWords.forEach(word => {
+                const span = document.createElement('span');
+                span.textContent = word;
+                wordList.appendChild(span);
+            });
+        }
+
+        function shootBullet() {
+            if(!gameActive) return;
+            
+            if(!checkWord()) {
+                document.getElementById('currentWord').textContent = '';
+                if(bricks.length >= InitialBricks.length + 5) showGameOver(false);
+                return;
+            }
+
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = `${shooterPosition}%`;
+            bullet.style.bottom = '30px';
+            document.getElementById('gameContainer').appendChild(bullet);
+
+            const animation = setInterval(() => {
+                if(!gameActive) {
+                    clearInterval(animation);
+                    return;
+                }
+                
+                const currentBottom = parseFloat(bullet.style.bottom) || 30;
+                const newBottom = currentBottom + bulletSpeed;
+                bullet.style.bottom = `${newBottom}px`;
+
+                // Collision detection
+                const bulletRect = bullet.getBoundingClientRect();
+                const brickRects = [...bricks].map(b => b.getBoundingClientRect());
+                
+                brickRects.forEach((rect, index) => {
+                    if(detectCollision(bulletRect, rect)) {
+                        bricks[index].remove();
+                        bricks.splice(index, 1);
+                        bullet.remove();
+                        clearInterval(animation);
+                        if(bricks.length === 0) showGameOver(true);
+                        return;
+                    }
+                });
+
+                if(newBottom > document.getElementById('gameContainer').clientHeight) {
+                    bullet.remove();
+                    clearInterval(animation);
+                }
+            }, 16);
+        }
+
+        function detectCollision(rect1, rect2) {
+            return !(rect1.right < rect2.left || 
+                    rect1.left > rect2.right || 
+                    rect1.bottom < rect2.top || 
+                    rect1.top > rect2.bottom);
+        }
+
+        function showGameOver(won) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            const elapsed = (new Date().getTime() - startTime) / 1000;
+            const gameOver = document.getElementById('gameOver');
+            const timeScore = document.getElementById('timeScore');
+            
+            if (won) {
+                document.getElementById('gameOverText').textContent = 'You Win!';
+                timeScore.textContent = `Your Time: ${elapsed.toFixed(2)} seconds`;
+                timeScore.style.display = 'block';
+            } else {
+                document.getElementById('gameOverText').textContent = 'Game Over!';
+                timeScore.style.display = 'none';
+            }
+            
+            gameOver.style.display = 'flex';
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            shooterPosition = 50;
+            usedWords = [];
+            document.getElementById('wordList').innerHTML = '';
+            document.getElementById('currentWord').textContent = '';
+            initializeBricks();
+            updateShooterPosition();
+            gameActive = true;
+            startTimer();
+        }
+
+        function createCustomKeyboard() {
+            const keyboard = document.getElementById('customKeyboard');
+            keyboard.innerHTML = '';
+            
+            allLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter.toUpperCase();
+                btn.onclick = () => {
+                    if(gameActive) {
+                        const current = document.getElementById('currentWord');
+                        current.textContent += letter;
+                    }
+                };
+                keyboard.appendChild(btn);
+            });
+        }
+
+        function startTimer() {
+            startTime = new Date().getTime();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 100);
+        }
+
+        function updateTimer() {
+            if (!gameActive) return;
+            const elapsed = (new Date().getTime() - startTime) / 1000;
+            document.getElementById('timer').textContent = elapsed.toFixed(1);
+        }
+
+        // Event Listeners
+        document.getElementById('leftBtn').addEventListener('click', () => {
+            if(gameActive) {
+                shooterPosition = Math.max(2, shooterPosition - 4);
+                updateShooterPosition();
+            }
+        });
+
+        document.getElementById('rightBtn').addEventListener('click', () => {
+            if(gameActive) {
+                shooterPosition = Math.min(94, shooterPosition + 4);
+                updateShooterPosition();
+            }
+        });
+
+        document.getElementById('backspaceBtn').addEventListener('click', () => {
+            if(gameActive) {
+                const current = document.getElementById('currentWord');
+                current.textContent = current.textContent.slice(0, -1);
+            }
+        });
+
+        document.getElementById('shootBtn').addEventListener('click', () => {
+            if(gameActive) {
+                shootBullet();
+                document.getElementById('currentWord').textContent = '';
+            }
+        });
+
+        document.getElementById('replay').addEventListener('click', restartGame);
+        
+        startGameBtn.addEventListener('click', () => {
+            instructionsPopup.style.display = 'none';
+            initializeGame();
+        });
+        
+        instructionsBtn.addEventListener('click', () => {
+            instructionsPopup.style.display = 'flex';
+        });
+
+        // Show instructions on load
+        instructionsPopup.style.display = 'flex';
+    </script>
+</body>
+</html>
