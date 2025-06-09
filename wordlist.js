@@ -1,6 +1,7 @@
 
 wordBank = `
 a
+********
 about
 all
 an
