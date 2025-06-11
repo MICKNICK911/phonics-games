@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Word Brick Breaker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life and Death Word Brick Breaker</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: white;
             height: 100vh;
             overflow: hidden;
@@ -22,36 +22,42 @@
             flex-direction: column;
             align-items: center;
             padding: 10px;
+            position: relative;
         }
 
         .game-header {
             display: flex;
+            position: absolute;
+            left: 45%;
+            top: 10px;
             justify-content: space-between;
             width: 95%;
             max-width: 600px;
             padding: 10px 0;
             align-items: center;
+            z-index: 10;
         }
 
         .title {
-            font-size: 1.5rem;
+            font-size: 0.5rem;
             font-weight: bold;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            color: #ff6b6b;
         }
 
         .settings {
             display: flex;
-            position: relative;
             gap: 10px;
             align-items: center;
-            justify-self: center;
             background: rgba(0,0,0,0.3);
             padding: 5px 10px;
             border-radius: 8px;
+            border: 1px solid #ff6b6b;
         }
 
         .settings label {
             font-size: 0.9rem;
+            color: #ffcc00;
         }
 
         .settings input {
@@ -60,6 +66,8 @@
             border: none;
             border-radius: 4px;
             text-align: center;
+            background: rgba(255,255,255,0.1);
+            color: white;
         }
 
         #gameContainer {
@@ -67,13 +75,15 @@
             width: 95vw;
             height: 40vh;
             max-width: 600px;
-            max-height: 600px;
+            max-height: 200px;
             margin: 10px 0;
+            margin-top:60px;
             overflow: hidden;
-            background: linear-gradient(to bottom, #1e5799, #207cca);
-            border: 3px solid #ffcc00;
+            background: linear-gradient(to bottom, #1e5799, #0f2c52);
+            border: 3px solid #ff6b6b;
             border-radius: 8px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            z-index: 5;
         }
 
         #brickGrid {
@@ -108,15 +118,15 @@
             bottom: 5px;
             left: 50%;
             transform: translateX(-50%);
-            width: 25px;
-            height: 25px;
-            /*background: radial-gradient(circle, #ffcc00, #ff9900);*/
-            border-radius: 50%;
-            /*box-shadow: 0 0 10px #ffcc00;*/
+            width: 20px;
+            height: 15px;
+            /*background: radial-gradient(circle, #ffcc00, #ff9900);
+            border-radius: 50%;*/
             background-image: url('../assets/images/shooter.png');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+            /*box-shadow: 0 0 10px #ffcc00;*/
             z-index: 10;
         }
 
@@ -124,7 +134,7 @@
             position: absolute;
             width: 10px;
             height: 10px;
-            background: #ff3333;
+            background: white;
             border-radius: 50%;
             box-shadow: 0 0 8px #ff0000;
             z-index: 5;
@@ -133,7 +143,7 @@
         #controls {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
             width: 95vw;
             max-width: 600px;
         }
@@ -141,7 +151,7 @@
         .control-btn {
             flex: 1;
             padding: 10px;
-            font-size: 1.5rem;
+            font-size: 0.8rem;
             background: linear-gradient(to bottom, #4a86e8, #1c4587);
             color: white;
             border: none;
@@ -169,6 +179,7 @@
             margin-top: 10px;
             width: 95vw;
             max-width: 600px;
+            z-index: 5;
         }
 
         #usedWords {
@@ -178,14 +189,14 @@
             overflow: auto;
             border-radius: 8px;
             padding: 10px;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
             border: 2px solid #ffcc00;
         }
 
         #usedWords h3 {
             color: #ffcc00;
             margin-bottom: 5px;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
         }
 
         #wordList {
@@ -203,14 +214,17 @@
 
         #currentWord {
             background: rgba(255,255,255,0.2);
-            padding: 2px;
+            padding: 5px;
             border-radius: 8px;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             letter-spacing: 2px;
-            margin: 10px 0;
+            margin: 5px 0;
             border: 2px solid #4a86e8;
-            min-height: 60px;
+            min-height: 40px;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255,107,107,0.5);
         }
 
         #customKeyboard {
@@ -239,101 +253,114 @@
         }
 
         .gameOver {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
             display: none;
+            z-index: 3000;
         }
 
         #gameOverContent {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            background: linear-gradient(135deg, #1a1a2e, #0d1137);
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            max-width: 90%;
-            border: 3px solid #ffcc00;
-            box-shadow: 0 0 30px rgba(255,204,0,0.5);
+            max-width: 85%;
+            width: 85vw;
+            height: 60vh;
+            border: 3px solid #ff6b6b;
+            box-shadow: 0 0 30px rgba(255,107,107,0.5);
+            margin: 30px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            justify-self: center;
+            
+            
         }
 
         #gameOverText {
-            font-size: 3rem;
+            font-size: 2rem;
             margin-bottom: 20px;
-            color: #ffcc00;
-            text-shadow: 0 0 10px rgba(255,204,0,0.8);
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255,107,107,0.8);
+            
         }
 
         #timeScore {
             font-size: 2rem;
-            margin: 20px 0;
+            margin: 10px 0;
             color: #ffffff;
             background: rgba(0,0,0,0.3);
-            padding: 15px;
+            padding: 8px;
             border-radius: 10px;
         }
 
         #scoreContainer {
             position: absolute;
-            top: 10px;
+            top: 20px;
             left: 10px;
-            padding: 10px 15px;
+            padding: 5px 5px;
             font-size: 1.1rem;
             font-weight: bold;
             color: white;
             background: rgba(0,0,0,0.5);
             border-radius: 8px;
             z-index: 10;
+            border: 1px solid #ff6b6b;
         }
 
-        /* Instructions Popup */
-        #instructionsPopup {
-            position: fixed;
-            top: 0;
-            left: 0;
+        #storyContainer {
+            position: flex;
+            /*top: 0px;
+            left: 0;*/
             width: 100%;
-            height: 100%;
+            height: 40%;
             background: rgba(0,0,0,0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 2000;
+            padding: 0px;
+            text-align: center;
         }
 
-        #instructionsContent {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+        #storyContent {
+            background: linear-gradient(135deg, #1a1a2e, #0d1137);
             width: 90%;
-            max-width: 600px;
-            padding: 30px;
+            margin-top:300px;
+            max-width: 800px;
+            padding: 10px;
             border-radius: 15px;
             text-align: center;
-            border: 3px solid #ffcc00;
-            box-shadow: 0 0 30px rgba(255,204,0,0.5);
+            border: 3px solid #ff6b6b;
+            box-shadow: 0 0 30px rgba(255,107,107,0.5);
         }
 
-        #instructionsContent h2 {
-            font-size: 2.5rem;
+        #storyContent h2 {
+            font-size: 1.5rem;
             margin-bottom: 20px;
-            color: #ffcc00;
+            color: #ff6b6b;
         }
 
-        .instructions-list {
+        .story-text {
+            font-size: 1.2rem;
+            line-height:1rem;
+            margin: 10px 0;
             text-align: left;
-            margin: 20px 0;
-            padding: 0 20px;
+            color: #e0e0e0;
         }
 
-        .instructions-list li {
-            margin: 15px 0;
-            font-size: 1.1rem;
-            line-height: 1.5;
+        .story-text p {
+            margin-bottom: 10px;
         }
 
         .highlight {
@@ -341,10 +368,16 @@
             font-weight: bold;
         }
 
+        .danger {
+            color: #ff6b6b;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255,107,107,0.5);
+        }
+
         .btn {
             padding: 12px 30px;
             font-size: 1.2rem;
-            background: linear-gradient(to bottom, #4a86e8, #1c4587);
+            background: linear-gradient(to bottom, #cc0000, #990000);
             color: white;
             border: none;
             border-radius: 8px;
@@ -357,154 +390,125 @@
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            background: linear-gradient(to bottom, #ff0000, #cc0000);
         }
 
-        .btn:active {
-            transform: translateY(1px);
-        }
-
-        #instructionsBtn {
+        #countdown {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: 1px solid #ffcc00;
-            border-radius: 5px;
-            cursor: pointer;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(255,107,107,0.8);
             z-index: 15;
+            display: none;
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .toxin-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, rgba(0,255,0,0.3), transparent);
+            z-index: 2;
+            transition: height 1s linear;
         }
 
         @media (max-width: 600px) {
-            
-        .control-btn {
-            flex: 1;
-            padding: 5px;
-            font-size: 0.8rem;
-            background: linear-gradient(to bottom, #4a86e8, #1c4587);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.2s;
-        }
-
-            
-         #gameContainer {
-            position: relative;
-            width: 95vw;
-            height: 40vh;
-            max-width: 600px;
-            max-height: 200px;
-            margin: 0px 0px;
-            overflow: hidden;
-            background: linear-gradient(to bottom, #1e5799, #207cca);
-            border: 3px solid #ffcc00;
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-        }
-
-            
-            #currentWord {
-            background: rgba(255,255,255,0.2);
-            padding: px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            margin: 6px 0;
-            border: 2px solid #4a86e8;
-            min-height: 35px;
-        }
-            
-            #usedWords h3 {
-            color: #ffcc00;
-            margin-bottom: 5px;
-            font-size: 0.5rem;
-        }
-            
             #customKeyboard {
-                grid-template-columns: repeat(6, 1fr);
+                grid-template-columns: repeat(7, 1fr);
             }
             
             .key-btn {
-                padding: 4px 2px;
-                font-size: 0.9rem;
+                padding: 6px 2px;
+                font-size: 0.8rem;
             }
             
             .title {
-                font-size: 1.2rem;
+                font-size: 0.6rem;
             }
             
             .settings {
                 font-size: 0.8rem;
-                margin-top: 40px;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
             }
             
             .settings input {
                 width: 30px;
             }
             
-            #instructionsContent h2 {
-                font-size: 0.7rem;
+            #storyContent h2 {
+                font-size: 1rem;
             }
             
-            .instructions-list li {
-                font-size: 0.7rem;
+            .story-text {
+                font-size: 0.8rem;
             }
         }
     </style>
 </head>
 <body>
-    <button id="instructionsBtn">Instructions</button>
-    <div id="scoreContainer">Time: <span id="timer">0.0</span>s</div>
+    <div id="countdown">120</div>
+    <div id="scoreContainer">Time: <span id="timer">120</span>s</div>
     
-    <div id="instructionsPopup">
-        <div id="instructionsContent">
-            <h2>How to Play Word Brick Breaker</h2>
+    <div id="storyContainer">
+        <div id="storyContent">
+            <h2>Life and Death Challenge</h2>
             
-            <div class="instructions-list">
-                <ol>
-                    <li><span class="highlight">Goal:</span> Break all bricks by forming valid words.</li>
-                    <li><span class="highlight">Form words:</span> Use the keyboard to type words using the letters provided.</li>
-                    <li><span class="highlight">Shoot:</span> Press the SHOOT button when you've formed a valid word.</li>
-                    <li><span class="highlight">Valid words:</span> Words must be in the dictionary and not already used.</li>
-                    <li><span class="highlight">Movement:</span> Use the &lt;&lt;&lt; and &gt;&gt;&gt; buttons to position your shooter.</li>
-                    <li><span class="highlight">Beware:</span> Invalid words add red bricks. Too many red bricks and you lose!</li>
-                    <li><span class="highlight">Win:</span> Clear all bricks before you get too many red ones.</li>
-                    <li><span class="highlight">Timer:</span> Your time is recorded - try to beat your best score!</li>
-                </ol>
+            <div class="story-text">
+                <p>You wake up strapped to a chair in a dimly lit room. A cold metallic voice echoes:</p>
+                <p>"Welcome to the Neurotoxin Chamber. To survive, you must complete the Word Brick Breaker challenge."</p>
+                
+                <p>A screen flickers to life showing the game interface. The voice continues:</p>
+                
+                <p>"You have <span class="danger">120 seconds</span> to clear all bricks. Fail and the chamber will fill with lethal neurotoxin."</p>
+                
+                <p>You feel a sharp pain in your arm as a needle injects a glowing green substance. The voice mocks:</p>
+                
+                <p>"The toxin is already in your bloodstream. Only completing the challenge will neutralize it."</p>
+                
+                <p>As the countdown begins, you notice the chamber's vents start to release a faint green mist. With each passing second, the mist thickens, rising from the floor.</p>
+                
+                <p>Form words quickly and accurately. Every mistake adds more bricks to break. Every second counts.</p>
+                <p>Your life depends on completing this challenge before the timer reaches zero...</p>
             </div>
             
-            <button id="startGameBtn" class="btn">Start Game</button>
+            <button id="startChallenge" class="btn">BEGIN CHALLENGE</button>
         </div>
     </div>
     
     <div class="game-header">
-        <!--<div class="title">Word Brick Breaker</div>-->
+        
         <div class="settings">
-            Rows: <input id="target-row" type="number" value="4" min="1" max="10" readonly="true">
+            Rows: <input id="target-row" type="number" value="4" min="1" max="15" readonly="true">
             Bricks: <input id="target-bricks" type="number" value="15" min="5" max="25" readonly="true">
         </div>
     </div>
-    
+
     <div id="gameContainer">
+        <div class="toxin-overlay" id="toxinOverlay"></div>
         <div id="brickGrid"></div>
         <div id="shooter"></div>
-        <div id="gameOver" class="gameOver">
+    </div>
+     <div id="gameOver" class="gameOver">
             <div id="gameOverContent">
                 <h2 id="gameOverText">Game Over!</h2>
                 <div id="timeScore"></div>
-                <button class="btn" onclick="restartGame()">Play Again</button>
+                <button class="btn" onclick="restartGame()">TRY TO SURVIVE AGAIN</button>
             </div>
         </div>
-    </div>
     
     <div id="controls">
         <button class="control-btn" id="leftBtn">&lt;&lt;&lt;</button>
@@ -523,21 +527,15 @@
         <div id="customKeyboard"></div>
         
         <div style="margin-top: 10px;">
-            <button class="control-btn" id="replay" style="margin-bottom: 10px;">Restart Game</button>
-            <button class="control-btn" id="shootBtn" style="background:linear-gradient(to bottom, #cc0000, #990000);">SHOOT</button>
+            <button class="control-btn" id="replay" style="margin-bottom: 10px;">RESTART</button>
+            <button class="control-btn" id="shootBtn" style="background:linear-gradient(to bottom, #cc0000, #990000);">FIRE WORD</button>
         </div>
     </div>
     <script src="../wordlist.js"></script>
     <script>
         // Game word list
-        // const words = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 
-        //               'honeydew', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear',
-        //               'quince', 'raspberry', 'strawberry', 'tangerine', 'ugli', 'vanilla',
-        //               'watermelon', 'xigua', 'yellow', 'zucchini', 'animal', 'brave', 'chair',
-        //               'dance', 'earth', 'fruit', 'ghost', 'house', 'igloo', 'jelly', 'zebra',
-        //               'axe', 'kill', 'code', 'game', 'play', 'fun', 'word', 'brick', 'breaker',
-        //               'shoot', 'keyboard', 'victory', 'defeat', 'score', 'time', 'fast', 'slow'];
         const words = wordList.map(word => word.toLowerCase());
+        
         const allLetters = [...new Set(words.join(''))].sort();
         let bricks = [];
         let InitialBricks = [];
@@ -545,20 +543,22 @@
         let bulletSpeed = 5;
         let usedWords = [];
         let gameActive = false;
-        let startTime;
+        let countdown = 120;
         let timerInterval;
 
         // DOM Elements
-        const instructionsPopup = document.getElementById('instructionsPopup');
-        const startGameBtn = document.getElementById('startGameBtn');
-        const instructionsBtn = document.getElementById('instructionsBtn');
+        const storyContainer = document.getElementById('storyContainer');
+        const startChallengeBtn = document.getElementById('startChallenge');
+        const countdownDisplay = document.getElementById('countdown');
+        const timerDisplay = document.getElementById('timer');
+        const toxinOverlay = document.getElementById('toxinOverlay');
 
         // Initialize game
         function initializeGame() {
             createCustomKeyboard();
             initializeBricks();
             updateShooterPosition();
-            startTimer();
+            startCountdown();
             gameActive = true;
         }
 
@@ -620,29 +620,6 @@
             bricks.push(newRow.firstChild);
         }
 
-        function addBrickToGrid() {
-            let targetBricks = parseInt(document.getElementById('target-bricks').value);
-            const brickGrid = document.getElementById('brickGrid');
-            const rows = brickGrid.children;
-            
-            // Find first available spot in existing rows
-            for(let row of rows) {
-                if(row.children.length < targetBricks) {
-                    const brick = createBrick();
-                    row.appendChild(brick);
-                    bricks.push(brick);
-                    return;
-                }
-            }
-            
-            // Add new row if all are full
-            const newRow = document.createElement('div');
-            newRow.className = 'brick-row';
-            newRow.appendChild(createBrick());
-            brickGrid.appendChild(newRow);
-            bricks.push(newRow.firstChild);
-        }
-
         function updateShooterPosition() {
             document.getElementById('shooter').style.left = `${shooterPosition}%`;
         }
@@ -659,7 +636,12 @@
                 updateWordList();
                 return true;
             } else {
-                if(!isValid || isUsed) addRedBrickToGrid();
+                if(!isValid || isUsed) {
+                    addRedBrickToGrid();
+                    // Penalty for wrong words - lose 5 seconds
+                    countdown = Math.max(0, countdown - 5);
+                    timerDisplay.textContent = countdown;
+                }
                 return false;
             }
         }
@@ -680,7 +662,9 @@
             
             if(!checkWord()) {
                 document.getElementById('currentWord').textContent = '';
-                if(bricks.length >= InitialBricks.length + 5) showGameOver(false);
+                if(bricks.length >= InitialBricks.length + 5) {
+                    showGameOver(false);
+                }
                 return;
             }
 
@@ -710,7 +694,14 @@
                         bricks.splice(index, 1);
                         bullet.remove();
                         clearInterval(animation);
-                        if(bricks.length === 0) showGameOver(true);
+                        
+                        // Bonus for hitting a brick - gain 3 seconds
+                        countdown = Math.min(120, countdown + 3);
+                        timerDisplay.textContent = countdown;
+                        
+                        if(bricks.length === 0) {
+                            showGameOver(true);
+                        }
                         return;
                     }
                 });
@@ -733,17 +724,17 @@
             gameActive = false;
             clearInterval(timerInterval);
             
-            const elapsed = (new Date().getTime() - startTime) / 1000;
             const gameOver = document.getElementById('gameOver');
             const timeScore = document.getElementById('timeScore');
             
             if (won) {
-                document.getElementById('gameOverText').textContent = 'You Win!';
-                timeScore.textContent = `Your Time: ${elapsed.toFixed(2)} seconds`;
+                document.getElementById('gameOverText').textContent = 'YOU SURVIVED!';
+                timeScore.textContent = `Neurotoxin neutralized with ${countdown} seconds remaining`;
                 timeScore.style.display = 'block';
             } else {
-                document.getElementById('gameOverText').textContent = 'Game Over!';
-                timeScore.style.display = 'none';
+                document.getElementById('gameOverText').textContent = 'YOU ARE DEAD!';
+                timeScore.textContent = "You couldn't complete the challenge in time";
+                timeScore.style.display = 'block';
             }
             
             gameOver.style.display = 'flex';
@@ -753,12 +744,15 @@
             document.getElementById('gameOver').style.display = 'none';
             shooterPosition = 50;
             usedWords = [];
+            countdown = 120;
+            timerDisplay.textContent = countdown;
             document.getElementById('wordList').innerHTML = '';
             document.getElementById('currentWord').textContent = '';
+            toxinOverlay.style.height = "0%";
             initializeBricks();
             updateShooterPosition();
             gameActive = true;
-            startTimer();
+            startCountdown();
         }
 
         function createCustomKeyboard() {
@@ -779,16 +773,33 @@
             });
         }
 
-        function startTimer() {
-            startTime = new Date().getTime();
+        function startCountdown() {
             clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimer, 100);
-        }
-
-        function updateTimer() {
-            if (!gameActive) return;
-            const elapsed = (new Date().getTime() - startTime) / 1000;
-            document.getElementById('timer').textContent = elapsed.toFixed(1);
+            timerInterval = setInterval(() => {
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    if(gameActive) {
+                        showGameOver(false);
+                    }
+                    return;
+                }
+                
+                countdown--;
+                timerDisplay.textContent = countdown;
+                
+                // Update toxin overlay height
+                toxinOverlay.style.height = `${100 - (countdown / 120 * 100)}%`;
+                
+                // Blink warning when time is low
+                if(countdown <= 10) {
+                    countdownDisplay.textContent = countdown;
+                    countdownDisplay.style.display = "block";
+                    countdownDisplay.classList.add("pulse");
+                } else {
+                    countdownDisplay.style.display = "none";
+                    countdownDisplay.classList.remove("pulse");
+                }
+            }, 1000);
         }
 
         // Event Listeners
@@ -822,17 +833,10 @@
 
         document.getElementById('replay').addEventListener('click', restartGame);
         
-        startGameBtn.addEventListener('click', () => {
-            instructionsPopup.style.display = 'none';
+        startChallengeBtn.addEventListener('click', () => {
+            storyContainer.style.display = 'none';
             initializeGame();
         });
-        
-        instructionsBtn.addEventListener('click', () => {
-            instructionsPopup.style.display = 'flex';
-        });
-
-        // Show instructions on load
-        instructionsPopup.style.display = 'flex';
     </script>
 </body>
 </html>
