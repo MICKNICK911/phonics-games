@@ -193,6 +193,16 @@
                 padding: 4px;
                 font-size: 14px;
             }
+            
+            .heading {
+            font-weight: bold;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            display: none;
+            margin: 5px;
+        }
+        
         }
     </style>
 </head>
@@ -202,6 +212,7 @@
     <div id="target-score-container" style="font-size: 16px; font-weight: bold; right: 0px; top: 0px;position: absolute; padding: 0px; margin: 5px;">
             Rows: <input id="target-row" type="number" value="2" style="width: 30px; font-size: 16px;">
             Bricks: <input id="target-bricks" type="number" value="10" style="width: 30px; font-size: 16px;">
+            sound: <input id="target-sound" type="text" value="st" style="width: 30px; font-size: 16px;">
    </div>
     
     <div id="gameContainer">
@@ -354,17 +365,26 @@
 
         function checkWord() {
             const input = document.getElementById('currentWord').textContent.toLowerCase();
+            
+            const inputTarg = document.getElementById('target-sound').value.toLowerCase();
+            
             if(!input) return false;
+            
+            const isValidTag = input.includes(inputTarg);
+            
+            //(!isValidTag) return false;
             
             const isValid = words.includes(input);
             const isUsed = usedWords.includes(input);
             
-            if(isValid && !isUsed) {
+            
+            
+            if(isValidTag && isValid && !isUsed) {
                 usedWords.push(input);
                 document.getElementById('usedWords').textContent = `${usedWords.join(', ')}`;
                 return true;
             } else {
-                if(!isValid || isUsed) addRedBrickToGrid();
+                if(!isValidTag || !isValid || isUsed) addRedBrickToGrid();
                 return false;
             }
         }
