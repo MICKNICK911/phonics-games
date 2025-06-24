@@ -1,14 +1,14 @@
-### 🧠 Core Principles for Coding Prompts  
-1. **Atomic Instructions**  
+Core Principles for Coding Prompts  
+1.Atomic Instructions 
    - Break tasks into tiny, unambiguous steps.  
-2. **Context Control**  
+2.Context Control 
    - Explicitly set language, frameworks, and constraints.  
-3. **Defensive Prompting**  
+3.Defensive Prompting 
    - Anticipate edge cases and errors.  
-4. **Structured Output**  
+4.Structured Output 
    - Demand specific formats (JSON, YAML, tests, etc.).  
 
-//SUPERTEMP
+//////////////////////////////////////////////////////////////////////SUPERTEMP
 **Role**: You are a {Senior X Engineer} expert in {Language/Framework}.  
 **Task**: Create {specific output} that solves {business goal}.  
 
@@ -37,7 +37,7 @@
 {File structure / function signature}  
 
 
-//TEMP
+///////////////////////////////////////////////////////////////////////////////TEMP
 You are an expert {language} developer. Your task is to write {a function/script/class} that {detailed description}.
 
 Requirements:
@@ -63,7 +63,7 @@ Example:
 Now, generate the code as described.
 
 
-//Ex 1
+//////////////////////////////////////////////////////////////////////////////////Ex 1
 You are a professional JavaScript developer. Write a function `longestCommonPrefix` that takes an array of strings `strs` and returns the longest common prefix string. If there is no common prefix, return an empty string "".
 
 Requirements:
@@ -83,7 +83,7 @@ Output: "fl"
 
 Now, write the JavaScript code.
 
-//Ex2
+/////////////////////////////////////////////////////////////////////////////Ex2
 You are a senior Java architect. Design a class `MinStack` that supports:
 - `void push(int val)`: pushes element val onto the stack.
 - `void pop()`: removes the element on the top.
@@ -113,7 +113,7 @@ minStack.getMin(); // returns -2
 
 Now, write the Java class accordingly.
 
-//Ex3
+//////////////////////////////////////////////////////////////////////////////////Ex3
 You are a senior Python developer. Write a function `merge_sorted_lists(list1: List[int], list2: List[int]) -> List[int]` that merges two sorted lists into one sorted list without using any built-in sort functions.
 
 Requirements:
@@ -160,7 +160,7 @@ Now, write the code.
 def process_csvs(file_paths: list[str]) -> dict:  
     ...  
     
- //Ex5   
+ /////////////////////////////////////////////////////////////////////Ex5   
 **Role**: Senior Frontend Engineer using React 18 + TypeScript  
 **Task**: Create a paginated data table with sortable columns.  
 
@@ -192,7 +192,7 @@ def process_csvs(file_paths: list[str]) -> dict:
 export default function DataTable<T>({...}: Props<T>) { ... }  
 
 
-Ex6
+//////////////////////////////////////////////////////////////////////////Ex6
 **Role**: SRE using Bash on Ubuntu 22.04  
 **Task**: Create a server monitoring script  
 
@@ -219,3 +219,249 @@ Ex6
 # Script name: server_monitor.sh  
 ...  
 
+///////////////////////////////////////////////////////////////////////
+**Role**: Senior Frontend Engineer specializing in educational games  
+**Task**: Recreate "Learning Game Web App" with identical functionality and styling  
+**Reference Logic**:  
+- Dual-screen interface with task configuration and gameplay  
+- Dynamic dictionary management for learning activities  
+- Grid-based selection system with scoring  
+- Win/loss detection with custom thresholds  
+
+**Requirements**:  
+1. Languages: HTML5, CSS3, JavaScript (ES6)  
+2. Core Mechanics:  
+   - Initial screen for task creation (3 input fields + add button)  
+   - Game screen with shuffled item grid  
+   - Color-coded selection feedback (green=correct, red=incorrect)  
+   - Score tracking with win/loss screens  
+3. UI Components:  
+   - Black background with Times New Roman font  
+   - Large START button (red text, transparent background)  
+   - Grid layout with 10 columns  
+   - Absolute-positioned score display (yellow)  
+4. Styling Constraints:  
+   - Grid items: 45px bold white text  
+   - Input fields: transparent background, white text  
+   - Win screen: green background with "Excellent!"  
+   - Loss screen: red background with "Try Again"  
+
+**Implementation Rules**:  
+- Use CSS Grid for gameplay area  
+- Maintain state:  
+  • `dictionary` - array of tasks  
+  • `currentItem` - active task index  
+  • `score` - current points  
+  • `failscore` - error counter  
+- Implement core functions:  
+  1. `updateScreen()` - renders current task  
+  2. `resetScreen()` - resets gameplay  
+  3. `shuffleArray()` - randomizes items  
+  4. Event handlers for buttons/grid items  
+
+**Critical Details**:  
+- Pre-populated dictionary with 6 phonics tasks  
+- Radio button system for task selection (labeled "QUIZ 1-6")  
+- Win condition: `tappedCorrectItems === correctItems.length`  
+- Loss condition: `failscore >= targetList.length`  
+- Score calculation: +1 correct, -1 incorrect  
+
+**DOM Structure Requirements**:  
+```html
+<div id="initial-screen">
+  <div style="display: flex;">
+    <input id="text-field-1" placeholder="ENTER 1 TASK">
+    <input id="text-field-2" placeholder="ENTER LIST 1">
+    <input id="text-field-3" placeholder="ENTER LIST 2">
+  </div>
+  <button id="add-text-btn">Add Task</button>
+  <button id="generate-text-btn">START</button>
+</div>
+
+<div id="second-screen" style="display: none;">
+  <div id="score">Score: 0</div>
+  <button id="reset-btn">Reset</button>
+  <div id="radio-buttons"></div>
+  <h1 id="heading"></h1>
+  <div id="grid-list"></div>
+</div>
+
+/////////////////////////////////////////////////////////////////////////////////////////
+Create a letter selection game where players click letters while avoiding traps. The game should have:
+
+1. **Game Board**
+   - Letters displayed in vertical sliding panels
+   - Three letters per panel (2 consonants, 1 vowel)
+   - Letters scale up 10% on hover
+
+2. **Game Mechanics**
+   - Two modes (toggle with button):
+     * Consonant Safe: Click consonants, avoid vowels
+     * Vowel Safe: Click vowels, avoid consonants
+   - Correct click: Slide panel up, reveal new panel
+   - Wrong click: Game over
+
+3. **Scoring & Timing**
+   +10 points per correct letter
+   Countdown timer (default 8 seconds)
+   Time displays: "Score: X | Ys"
+
+4. **Controls**
+   - Consonant/Vowel toggle button
+   - Uppercase/Lowercase toggle button
+   - Timer adjustment input
+   - Reset button
+
+5. **Screens**
+   - Green start screen: "Ready?" with Start button
+   - Red game over screen: Shows final score/time
+   - Yellow score display (top-right)
+
+6. **Visual Design**
+   - Color rotation: #FFB3BA, #BAFFC9, #BAE1FF, #FFDFBA, #D0BAFF
+   - Text shadows: 2px 2px 4px rgba(0,0,0,0.3)
+   - Full viewport height/width
+
+
+///////////////////////////////////////////////////////////////////////////////
+   Create a phonics learning game with two screens:
+1. **Setup Screen**
+   - Three input fields:
+     * Task name ("Find Vowels")
+     * Item list ("a,b,c,d")
+     * Target answers ("a,e,i,o,u")
+   - Green "Add Task" button
+   - Big red "START" button (80px text)
+
+2. **Game Screen**
+   - Radio buttons to select quizzes (QUIZ 1-6)
+   - 10-column grid of letters/phonics
+   - Click feedback:
+     * Correct → Green text
+     * Wrong → Red text
+   - Score display (yellow, top-left)
+
+3. **Game Rules**
+   - Scoring: +1 correct, -1 wrong
+   - Win: Find all targets → Green "Excellent!" screen
+   - Lose: Too many mistakes → Red "Try Again" screen
+
+4. **Preloaded Content**
+   6 phonics challenges:
+   1. Vowels
+   2. Consonants
+   3. Blends
+   4. Beginning blends
+   5. Ending blends
+   6. Digraphs
+
+5. **Design**
+   - Black background
+   - White Times New Roman text
+   - 45px grid letters
+   - Absolute positioned controls
+//////////////////////////////////////////////////////////////////
+
+**ROLE**: Senior Frontend Engineer specializing in educational games  
+**TASK**: What to do  
+**REFERENCE LOGIC**:(Optional)  
+- List All
+- General Expected
+- Logic to apply  
+- [dictionaries, list, or language specific jagons] 
+
+**REQUIREMENTS**:  
+1. Languages: HTML5, CSS3, JavaScript (ES6)  
+2. Core Mechanics:  
+   - Initial screen for task creation (3 input fields + add button)  
+   - Game screen with shuffled item grid  
+   - Color-coded selection feedback (green=correct, red=incorrect)  
+   - Score tracking with win/loss screens  
+3. UI Components:  
+   - Black background with Times New Roman font  
+   - Large START button (red text, transparent background)  
+   - Grid layout with 10 columns  
+   - Absolute-positioned score display (yellow)  
+4. Styling Constraints:  
+   - Grid items: 45px bold white text  
+   - Input fields: transparent background, white text  
+   - Win screen: green background with "Excellent!"  
+   - Loss screen: red background with "Try Again"  
+
+**IMPLEMENTATION RULES**:  
+- Use CSS Grid for gameplay area  
+- Maintain state:  
+  • `dictionary` - array of tasks  
+  • `currentItem` - active task index  
+  • `score` - current points  
+  • `failscore` - error counter  
+- Implement core functions:  
+  1. `updateScreen()` - renders current task  
+  2. `resetScreen()` - resets gameplay  
+  3. `shuffleArray()` - randomizes items  
+  4. Event handlers for buttons/grid items  
+
+**CRITICAL DETAILS**:  
+- Pre-populated dictionary with 6 phonics tasks  
+- Radio button system for task selection (labeled "QUIZ 1-6")  
+- Win condition: `tappedCorrectItems === correctItems.length`  
+- Loss condition: `failscore >= targetList.length`  
+- Score calculation: +1 correct, -1 incorrect  
+
+**DOM STRUCTURE REQUIREMENTS**:  
+```html
+<div id="initial-screen">
+  <div style="display: flex;">
+    <input id="text-field-1" placeholder="ENTER 1 TASK">
+    <input id="text-field-2" placeholder="ENTER LIST 1">
+    <input id="text-field-3" placeholder="ENTER LIST 2">
+  </div>
+  <button id="add-text-btn">Add Task</button>
+  <button id="generate-text-btn">START</button>
+</div>
+
+<div id="second-screen" style="display: none;">
+  <div id="score">Score: 0</div>
+  <button id="reset-btn">Reset</button>
+  <div id="radio-buttons"></div>
+  <h1 id="heading"></h1>
+  <div id="grid-list"></div>
+</div>
+
+///////////////////MY CUSTOM////////////////////////////////////////
+**ROLE**: Senior Frontend Engineer specializing in educational games  
+**TASK**: What to do  
+
+**REQUIREMENTS**:  
+1. Language: HTML5, CSS3, JavaScript (ES6)  
+2. Libraries: Do not use any third party library
+3. Constraints:    
+   - No placeholder code
+   - Edge cases:(Optional) {list critical cases}  
+6. Documentation:(Optional)  
+   - Add comments to explain code logic in each step  
+   - Include error handling for any specific failures 
+
+**REASONING STEPS**:  
+1. First, {explain approach} (Required) 
+2. Then, {handle edge case X} (Optional)  
+3. Finally, {optimize for Y} (Optional) 
+
+**EXAMPLE FORMAT**:(Optional)  
+{Show code snippet}  
+
+///////////////DEBUGGING-PROMPTS/////////////////////////////////
+**DEBUGGING REQUEST**:  
+{Error message/test failure from working environment}  
+
+**CONTEXT**:  
+{Original prompt + generated code}  
+
+**INSTRUCTIONS**:  
+1. Analyze root cause  
+2. Propose minimal fix  
+3. Show corrected code snippet  
+
+**CONSTRAINTS**:  
+- Preserve original architecture  
+- Explain fix in one sentence  
