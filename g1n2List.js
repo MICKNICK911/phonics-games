@@ -81,6 +81,17 @@ gift milk and
 tilt mist help
 gust mend its
 
+blow grass twin part text
+clap pray dwell cold pets
+flap trap squat help last
+glad scan task work
+plan skin rasp half
+slap smart sand wept
+brass snip went soft scrap
+crab spin pink fact split
+drop step jump milk spray
+frog swim hard salt strap
+
 cash hush shed shop
 dish wish shelf shot
 fish shall ship shut

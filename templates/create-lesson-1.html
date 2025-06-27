@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary Builder</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --secondary: #34a853;
+            --danger: #ea4335;
+            --light: #f8f9fa;
+            --dark: #202124;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            margin: 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2d9249;
+        }
+        
+        .btn-icon {
+            margin-right: 8px;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .dictionary-preview {
+            margin-top: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: var(--light);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .dictionary-preview h2 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 20px;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        
+        .entry-count {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+        }
+        
+        .clear-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .clear-btn:hover {
+            background-color: #d33426;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--dark);
+            font-size: 1.3rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .filename-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .filename-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dictionary Builder</h1>
+        
+        <div class="input-group">
+            <label for="topic">Topic:</label>
+            <input type="text" id="topic" placeholder="Enter topic name (e.g., topic1)">
+        </div>
+        
+        <div class="input-group">
+            <label for="desc">Description:</label>
+            <textarea id="desc" rows="3" placeholder="Enter description text"></textarea>
+        </div>
+        
+        <div class="input-group">
+            <label for="ex">Examples (comma separated):</label>
+            <input type="text" id="ex" placeholder="Enter examples (e.g., a,b,c)">
+        </div>
+        
+        <div class="button-group">
+            <button id="addBtn" class="btn btn-primary">
+                <span class="btn-icon">+</span> Add Entry
+            </button>
+        </div>
+        
+        <div class="dictionary-preview">
+            <h2>Dictionary Preview</h2>
+            <pre id="preview">No entries yet</pre>
+            <div class="entry-count" id="entryCount">0 entries</div>
+        </div>
+        
+        <div class="button-group">
+            <button id="exportBtn" class="btn btn-secondary">
+                <span class="btn-icon">↓</span> Export as JSON
+            </button>
+            <button id="clearBtn" class="btn clear-btn">
+                <span class="btn-icon">×</span> Clear All
+            </button>
+        </div>
+    </div>
+
+    <!-- Export Filename Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Save Dictionary</h3>
+            <div class="input-group">
+                <label for="filename">File name:</label>
+                <input type="text" id="filename" class="filename-input" value="dictionary.json" placeholder="Enter filename">
+            </div>
+            <div class="modal-actions">
+                <button id="cancelExport" class="btn clear-btn">Cancel</button>
+                <button id="confirmExport" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize dictionary
+        let dictionary = {};
+        
+        // DOM elements
+        const topicInput = document.getElementById('topic');
+        const descInput = document.getElementById('desc');
+        const exInput = document.getElementById('ex');
+        const addBtn = document.getElementById('addBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const preview = document.getElementById('preview');
+        const entryCount = document.getElementById('entryCount');
+        const exportModal = document.getElementById('exportModal');
+        const filenameInput = document.getElementById('filename');
+        const cancelExport = document.getElementById('cancelExport');
+        const confirmExport = document.getElementById('confirmExport');
+        
+        // Add entry to dictionary
+        addBtn.addEventListener('click', () => {
+            const topic = topicInput.value.trim();
+            const desc = descInput.value.trim();
+            const ex = exInput.value.trim();
+            
+            if (!topic || !desc || !ex) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Create or update topic
+            dictionary[topic] = {
+                desc: desc,
+                ex: ex.split(',').map(item => item.trim())
+            };
+            
+            // Update preview
+            updatePreview();
+            
+            // Clear inputs
+            topicInput.value = '';
+            descInput.value = '';
+            exInput.value = '';
+            
+            // Focus back to topic input
+            topicInput.focus();
+        });
+        
+        // Show export modal
+        exportBtn.addEventListener('click', () => {
+            if (Object.keys(dictionary).length === 0) {
+                alert('No entries to export');
+                return;
+            }
+            
+            // Set default filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            filenameInput.value = `dictionary_${dateStr}.json`;
+            
+            exportModal.style.display = 'flex';
+            filenameInput.focus();
+        });
+        
+        // Handle export confirmation
+        confirmExport.addEventListener('click', () => {
+            const filename = filenameInput.value.trim();
+            
+            if (!filename) {
+                alert('Please enter a filename');
+                return;
+            }
+            
+            // Ensure .json extension
+            const finalFilename = filename.endsWith('.json') ? filename : `${filename}.json`;
+            
+            exportDictionary(finalFilename);
+            exportModal.style.display = 'none';
+        });
+        
+        // Cancel export
+        cancelExport.addEventListener('click', () => {
+            exportModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        exportModal.addEventListener('click', (e) => {
+            if (e.target === exportModal) {
+                exportModal.style.display = 'none';
+            }
+        });
+        
+        // Export as JSON file
+        function exportDictionary(filename) {
+            const jsonStr = JSON.stringify(dictionary, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Clear all entries
+        clearBtn.addEventListener('click', () => {
+            if (Object.keys(dictionary).length === 0 || confirm('Are you sure you want to clear all entries?')) {
+                dictionary = {};
+                updatePreview();
+            }
+        });
+        
+        // Update the preview panel
+        function updatePreview() {
+            if (Object.keys(dictionary).length === 0) {
+                preview.textContent = 'No entries yet';
+            } else {
+                preview.textContent = JSON.stringify(dictionary, null, 2);
+            }
+            entryCount.textContent = `${Object.keys(dictionary).length} entries`;
+        }
+        
+        // Allow pressing Enter in inputs to add entry
+        [topicInput, descInput, exInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addBtn.click();
+                }
+            });
+        });
+        
+        // Allow pressing Enter in filename input to confirm export
+        filenameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmExport.click();
+            }
+        });
+    </script>
+</body>
+</html>
