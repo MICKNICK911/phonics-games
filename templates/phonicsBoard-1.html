@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary Explorer</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+            --header-height: 70px;
+        }
+
+        .dark-theme {
+            --primary-color: #4895ef;
+            --secondary-color: #560bad;
+            --accent-color: #f72585;
+            --bg-color: #121212;
+            --text-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --border-color: #343a40;
+            --shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.05) 0%, rgba(247, 37, 133, 0) 25%);
+        }
+
+        .dark-theme body {
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.08) 0%, rgba(67, 97, 238, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.08) 0%, rgba(247, 37, 133, 0) 25%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--bg-color-rgb), 0.8);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo span {
+            font-size: 28px;
+        }
+
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .search-container input:focus {
+            outline: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .case-toggle, .history-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover, .case-toggle:hover, .history-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .results-container {
+            padding: 30px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .no-results span {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .example-item.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.03);
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .lowercase {
+            text-transform: lowercase;
+        }
+
+        .instructions {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .search-history {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-item:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .history-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 90;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .history-panel.active {
+            transform: translateX(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item-panel {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-panel:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .history-item-panel .time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .close-history {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 80;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-wrap: wrap;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .controls {
+                order: 2;
+            }
+            
+            .entry-header h1 {
+                font-size: 28px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .history-panel {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .entry-card {
+                padding: 20px;
+            }
+            
+            .history-item {
+                padding: 6px 14px;
+            }
+        }
+
+        .feature-highlight {
+            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .feature-highlight h2 {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h2>📜 Search History</h2>
+            <div class="close-history" id="closeHistory">❌</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- History items will be added here dynamically -->
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span>📚</span>
+                    <span>Dictionary Explorer</span>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. topic1, topic2)">
+                    <button class="search-btn" id="searchBtn">
+                        <span>🔍</span>
+                        <span>Search</span>
+                    </button>
+                </div>
+                <div class="controls">
+                    <div class="history-toggle" id="historyToggle" title="View History">
+                        🕒
+                    </div>
+                    <div class="case-toggle" id="caseToggle" title="Toggle Case">
+                        🔤
+                    </div>
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                        🌙
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-container" id="resultsContainer">
+            <div class="no-results">
+                <span>📖</span>
+                <h2>Dictionary Explorer</h2>
+                <p>Search for topics to see their details and examples</p>
+                <p>Try these examples:</p>
+                <div class="search-history">
+                    <div class="history-item">🔍 topic1</div>
+                    <div class="history-item">🔍 topic2</div>
+                    <div class="history-item">🔍 topic3</div>
+                    <div class="history-item">🔍 topic4</div>
+                </div>
+            </div>
+            
+            <div class="feature-highlight">
+                <h2>🕒 Access Your Search History</h2>
+                <p>Click the history icon 🕒 in the top right corner to view your recent searches</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Predefined dictionary
+        const lessons = {
+            "topic1": {
+                "desc": "Introduction to JavaScript fundamentals including variables, data types, and basic operators. Learn how to declare variables using let, const, and var.",
+                "ex": ['Variables', 'Data Types', 'Operators', 'Functions', 'Objects']
+            },
+            "topic2": {
+                "desc": "Explore Document Object Model (DOM) manipulation techniques. Learn how to select, modify, and interact with HTML elements using JavaScript.",
+                "ex": ['Selectors', 'Event Listeners', 'Element Creation', 'DOM Traversal', 'Styling']
+            },
+            "topic3": {
+                "desc": "Deep dive into asynchronous JavaScript concepts. Master callbacks, promises, async/await, and error handling for non-blocking code execution.",
+                "ex": ['Callbacks', 'Promises', 'Async/Await', 'Fetch API', 'Error Handling']
+            },
+            "topic4": {
+                "desc": "Comprehensive guide to JavaScript ES6+ features. Learn modern syntax including arrow functions, classes, modules, destructuring, and more.",
+                "ex": ['Arrow Functions', 'Classes', 'Modules', 'Destructuring', 'Spread Operator']
+            },
+            "HTML": {
+                "desc": "HyperText Markup Language is the standard markup language for documents designed to be displayed in a web browser.",
+                "ex": ['Tags', 'Attributes', 'Forms', 'Semantic HTML', 'Accessibility']
+            },
+            "CSS": {
+                "desc": "Cascading Style Sheets is a style sheet language used for describing the presentation of a document written in HTML.",
+                "ex": ['Selectors', 'Box Model', 'Flexbox', 'Grid', 'Animations']
+            },
+            "React": {
+                "desc": "React is a free and open-source front-end JavaScript library for building user interfaces based on components.",
+                "ex": ['Components', 'JSX', 'Hooks', 'State', 'Props']
+            }
+        };
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const caseToggle = document.getElementById('caseToggle');
+        const historyToggle = document.getElementById('historyToggle');
+        const historyPanel = document.getElementById('historyPanel');
+        const historyList = document.getElementById('historyList');
+        const closeHistory = document.getElementById('closeHistory');
+        const overlay = document.getElementById('overlay');
+
+        // State
+        let isDarkTheme = false;
+        let isUppercase = false;
+        const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
+
+        // Initialize
+        function init() {
+            // Set theme from localStorage if available
+            const savedTheme = localStorage.getItem('dictionaryTheme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Set text case from localStorage if available
+            const savedCase = localStorage.getItem('dictionaryTextCase');
+            if (savedCase === 'uppercase') {
+                toggleCase();
+            }
+            
+            // Event listeners
+            searchBtn.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            themeToggle.addEventListener('click', toggleTheme);
+            caseToggle.addEventListener('click', toggleCase);
+            historyToggle.addEventListener('click', toggleHistoryPanel);
+            closeHistory.addEventListener('click', toggleHistoryPanel);
+            overlay.addEventListener('click', toggleHistoryPanel);
+            
+            // Add history item click handlers
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+            
+            // Render history panel
+            renderHistoryPanel();
+        }
+
+        // Search handler
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Add to search history if not already present
+            if (!searchHistory.some(item => item.term === searchTerm)) {
+                searchHistory.unshift({
+                    term: searchTerm,
+                    time: new Date().toISOString()
+                });
+                
+                // Keep only the last 10 searches
+                if (searchHistory.length > 10) {
+                    searchHistory.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
+                
+                // Update history panel
+                renderHistoryPanel();
+            }
+            
+            // Display results
+            displayResults(searchTerm);
+        }
+
+        // Display search results
+        function displayResults(term) {
+            const topic = lessons[term];
+            
+            if (!topic) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>🔍</span>
+                        <h2>Topic Not Found</h2>
+                        <p>No results found for "${term}". Try one of these:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>🕒 Access Your Search History</h2>
+                        <p>Click the history icon 🕒 in the top right corner to view your recent searches</p>
+                    </div>
+                `;
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+                return;
+            }
+            
+            const caseClass = isUppercase ? 'uppercase' : 'lowercase';
+            
+            resultsContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1 class="${caseClass}">${term}</h1>
+                    </div>
+                    <p class="entry-desc ${caseClass}">${topic.desc}</p>
+                    
+                    <h3>Examples:</h3>
+                    <div class="examples-grid">
+                        ${topic.ex.map((example, index) => 
+                            `<div class="example-item" data-index="${index}">${example}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h2>How to use this app</h2>
+                    <ul>
+                        <li>Enter a topic name in the search field and click search</li>
+                        <li>Click on any example to highlight it</li>
+                        <li>Toggle between dark/light mode using the 🌙 icon</li>
+                        <li>Toggle text case using the 🔤 icon</li>
+                        <li>Access your search history using the 🕒 icon</li>
+                    </ul>
+                </div>
+            `;
+            
+            // Add click handlers to example items
+            document.querySelectorAll('.example-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+            localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
+        }
+
+        // Toggle text case
+        function toggleCase() {
+            isUppercase = !isUppercase;
+            
+            // Update all text elements
+            const textElements = document.querySelectorAll('h1, h2, h3, p, .example-item');
+            textElements.forEach(el => {
+                if (isUppercase) {
+                    el.classList.add('uppercase');
+                    el.classList.remove('lowercase');
+                } else {
+                    el.classList.add('lowercase');
+                    el.classList.remove('uppercase');
+                }
+            });
+            
+            localStorage.setItem('dictionaryTextCase', isUppercase ? 'uppercase' : 'lowercase');
+        }
+
+        // Toggle history panel
+        function toggleHistoryPanel() {
+            historyPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = historyPanel.classList.contains('active') ? 'hidden' : 'auto';
+        }
+
+        // Render history panel
+        function renderHistoryPanel() {
+            historyList.innerHTML = '';
+            
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<p>No search history yet</p>';
+                return;
+            }
+            
+            searchHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item-panel';
+                historyItem.innerHTML = `
+                    <div class="term">🔍 ${item.term}</div>
+                    <div class="time">${formatTime(item.time)}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    searchInput.value = item.term;
+                    handleSearch();
+                    toggleHistoryPanel();
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Format time for display
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
