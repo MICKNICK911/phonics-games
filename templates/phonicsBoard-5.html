@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Explorer</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --export-color: #34a853;
+            --builder-color: #7209b7;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+            --header-height: 70px;
+        }
+
+        .dark-theme {
+            --primary-color: #4895ef;
+            --secondary-color: #560bad;
+            --accent-color: #f72585;
+            --export-color: #2d9249;
+            --builder-color: #9d4edd;
+            --bg-color: #121212;
+            --text-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --border-color: #343a40;
+            --shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.05) 0%, rgba(247, 37, 133, 0) 25%);
+        }
+
+        .dark-theme body {
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.08) 0%, rgba(67, 97, 238, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.08) 0%, rgba(247, 37, 133, 0) 25%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--bg-color-rgb), 0.8);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .logo span {
+            font-size: 28px;
+        }
+
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .search-container input:focus {
+            outline: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .case-toggle, .history-toggle, 
+        .topics-toggle, .help-toggle, .load-toggle,
+        .export-toggle, .slide-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover, .case-toggle:hover, 
+        .history-toggle:hover, .topics-toggle:hover,
+        .help-toggle:hover, .load-toggle:hover,
+        .export-toggle:hover, .slide-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .export-toggle:hover {
+            background: var(--export-color);
+        }
+
+        .results-container {
+            padding: 30px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .no-results span {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .example-item.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.03);
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .lowercase {
+            text-transform: lowercase;
+        }
+
+        .instructions {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .search-history {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-item:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .history-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 90;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .history-panel.active {
+            transform: translateX(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item-panel {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-panel:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .history-item-panel .time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .close-history {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 80;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Topics Panel */
+        .topics-panel {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 90;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .topics-panel.active {
+            transform: translateX(0);
+        }
+
+        .topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .topics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .topic-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .topic-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+            transform: translateX(5px);
+        }
+
+        .topic-item span {
+            font-size: 20px;
+        }
+
+        /* Instructions Modal */
+        .instructions-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            z-index: 200;
+            max-width: 600px;
+            width: 90%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .instructions-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-content {
+            line-height: 1.7;
+        }
+
+        .modal-content ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        .modal-content li {
+            margin-bottom: 10px;
+        }
+
+        .feature-highlight {
+            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .feature-highlight h2 {
+            margin-bottom: 15px;
+        }
+        
+        /* Slideshow Styles */
+        .slideshow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slideshow-overlay.active {
+            display: flex;
+        }
+
+        .slideshow-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-content {
+            font-size: 72px;
+            text-align: center;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 2;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .slideshow-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-color);
+            z-index: 2;
+        }
+
+        .slideshow-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 3;
+            box-shadow: var(--shadow);
+        }
+
+        .instruction-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            z-index: 200;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            display: none;
+        }
+
+        .instruction-modal.active {
+            display: block;
+        }
+
+        .instruction-modal h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .instruction-modal p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .instruction-modal button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .instruction-modal button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Dictionary load notification */
+        .dictionary-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .dictionary-notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .dictionary-notification.error {
+            background: #e74c3c;
+        }
+        
+        .dictionary-notification.success {
+            background: var(--export-color);
+        }
+        
+        /* Dictionary Builder */
+        .builder-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        .builder-container.active {
+            display: block;
+        }
+        
+        .builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .builder-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            color: var(--builder-color);
+        }
+        
+        .builder-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .builder-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .builder-cancel {
+            background: #e0e0e0;
+            color: var(--text-color);
+        }
+        
+        .builder-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        .builder-export {
+            background: var(--export-color);
+            color: white;
+        }
+        
+        .builder-export:hover {
+            background: #2d9249;
+            transform: translateY(-2px);
+        }
+        
+        .builder-form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: border 0.3s;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--builder-color);
+            box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2);
+        }
+        
+        .builder-preview {
+            margin-top: 40px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .preview-title {
+            font-size: 22px;
+            color: var(--builder-color);
+        }
+        
+        .preview-clear {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .preview-clear:hover {
+            background: #d91a63;
+        }
+        
+        .preview-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        
+        .entry-count {
+            text-align: right;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .builder-add {
+            background: var(--builder-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px auto;
+            transition: var(--transition);
+        }
+        
+        .builder-add:hover {
+            background: #5a189a;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .slideshow-content {
+                font-size: 48px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .controls {
+                order: 2;
+            }
+            
+            .entry-header h1 {
+                font-size: 28px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .history-panel, .topics-panel {
+                width: 100%;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .builder-form {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slideshow-content {
+                font-size: 36px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .slide-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .entry-card {
+                padding: 20px;
+            }
+            
+            .history-item {
+                padding: 6px 14px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .theme-toggle, .case-toggle, 
+            .history-toggle, .topics-toggle,
+            .help-toggle, .load-toggle,
+            .export-toggle, .slide-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .builder-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .builder-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Dictionary Notification -->
+    <div class="dictionary-notification" id="dictionaryNotification">
+        <span id="notificationIcon">✅</span>
+        <span id="notificationText">Dictionary loaded successfully!</span>
+    </div>
+    
+    <!-- Hidden file input for dictionary loading -->
+    <input type="file" id="dictionaryFileInput" accept=".json" style="display: none;">
+    
+    <!-- Dictionary Builder -->
+    <div class="builder-container" id="builderContainer">
+        <div class="builder-header">
+            <div class="builder-title">
+                <span>📝</span>
+                <h2>Dictionary Builder</h2>
+            </div>
+            <div class="builder-actions">
+                <button class="builder-btn builder-cancel" id="builderCancel">Cancel</button>
+                <button class="builder-btn builder-export" id="builderExport">Export as JSON</button>
+            </div>
+        </div>
+        
+        <div class="builder-form">
+            <div class="input-group">
+                <label for="builderTopic">Topic:</label>
+                <input type="text" id="builderTopic" placeholder="Enter topic name (e.g. vowels, consonants)">
+            </div>
+            
+            <div class="input-group">
+                <label for="builderDesc">Description:</label>
+                <textarea id="builderDesc" rows="3" placeholder="Enter description text"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="builderEx">Examples (comma separated):</label>
+                <input type="text" id="builderEx" placeholder="Enter examples (e.g. a,b,c)">
+            </div>
+            
+            <button class="builder-add" id="builderAdd">
+                <span>+</span> Add Entry
+            </button>
+            
+            <div class="builder-preview">
+                <div class="preview-header">
+                    <h3 class="preview-title">Dictionary Preview</h3>
+                    <button class="preview-clear" id="previewClear">Clear All</button>
+                </div>
+                <pre class="preview-content" id="builderPreview">No entries yet</pre>
+                <div class="entry-count" id="builderEntryCount">0 entries</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slideshow Elements -->
+    <div class="slideshow-overlay" id="slideshowOverlay">
+        <div class="slideshow-close" id="slideshowClose">❌</div>
+        <div class="slideshow-top" id="slideshowTop"></div>
+        <div class="slideshow-content" id="slideshowContent"></div>
+        <div class="slideshow-bottom" id="slideshowBottom"></div>
+        <div class="slideshow-indicator" id="slideshowIndicator">1/5</div>
+    </div>
+    
+    <div class="instruction-modal" id="instructionModal">
+        <h2>Slide Mode Instructions</h2>
+        <p>You are now in slide mode. The control panel is hidden to maximize your viewing experience.</p>
+        <p>Tap the <strong>top half</strong> of the screen to go to the next example.</p>
+        <p>Tap the <strong>bottom half</strong> of the screen to go to the previous example.</p>
+        <p>Text case toggle applies to the slide content as well.</p>
+        <button id="closeInstruction">Start Slideshow</button>
+    </div>
+    
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h2>📜 Search History</h2>
+            <div class="close-history" id="closeHistory">❌</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- History items will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Topics Panel -->
+    <div class="topics-panel" id="topicsPanel">
+        <div class="topics-header">
+            <h2>📚 All Topics</h2>
+            <div class="close-topics" id="closeTopics">❌</div>
+        </div>
+        <div class="topics-list" id="topicsList">
+            <!-- Topics will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Instructions Modal -->
+    <div class="instructions-modal" id="instructionsModal">
+        <div class="modal-header">
+            <h2><span>❓</span> How to Use This App</h2>
+            <div class="close-modal" id="closeModal">✕</div>
+        </div>
+        <div class="modal-content">
+            <p>Welcome to the Dictionary Explorer! Here's how to get started:</p>
+            <ul>
+                <li><strong>🔍 Search</strong> - Enter a topic in the search field to see its details</li>
+                <li><strong>📚 Topics</strong> - Click the topics button to browse all available topics</li>
+                <li><strong>🕒 History</strong> - View your recent searches with the history button</li>
+                <li><strong>🌙 Theme</strong> - Toggle between light and dark mode</li>
+                <li><strong>🔤 Case</strong> - Switch between uppercase and lowercase text</li>
+                <li><strong>📂 Load</strong> - Import your own dictionary from a JSON file</li>
+                <li><strong>📝 Export</strong> - Create and export custom dictionaries</li>
+                <li><strong>❓ Help</strong> - Click the help button to see these instructions again</li>
+            </ul>
+            <p>You can click on examples to highlight them for better focus.</p>
+            <p>Start exploring by searching for a topic or browsing the available topics!</p>
+        </div>
+    </div>
+
+    <div class="container" id="appContainer">
+        <header>
+            <div class="header-content">
+                <div class="logo" id="appLogo">
+                    <span>📚</span>
+                    <span>Phonics Explorer</span>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
+                    <button class="search-btn" id="searchBtn">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <div class="controls">
+                    <div class="load-toggle" id="loadToggle" title="Load Dictionary">
+                        📂
+                    </div>
+                    <div class="export-toggle" id="exportToggle" title="Create Dictionary">
+                        📝
+                    </div>
+                    <div class="topics-toggle" id="topicsToggle" title="Browse Topics">
+                        📚
+                    </div>
+                    <div class="history-toggle" id="historyToggle" title="View History">
+                        🕒
+                    </div>
+                    <div class="case-toggle" id="caseToggle" title="Toggle Case">
+                        🔤
+                    </div>
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                        🌙
+                    </div>
+                    <div class="help-toggle" id="helpToggle" title="Help">
+                        ❓
+                    </div>
+                    <div class="slide-toggle" id="slideToggle" title="Slide Show">
+                        ▶️
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-container" id="resultsContainer">
+            <div class="no-results">
+                <span>📖</span>
+                <h2>Phonics Explorer</h2>
+                <p>Search for topics to see their details and examples</p>
+                <p>Try these examples:</p>
+                <div class="search-history">
+                    <div class="history-item">🔍 vowels</div>
+                    <div class="history-item">🔍 consonants</div>
+                    <div class="history-item">🔍 cvc</div>
+                    <div class="history-item">🔍 cvce</div>
+                </div>
+            </div>
+            
+            <div class="feature-highlight">
+                <h2>📚 Browse All Topics</h2>
+                <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Predefined dictionary
+        const DEFAULT_LESSONS = {
+            "vowels": {
+                "desc": "There are 5 Short vowels and 5 long vowels. Sometimes /y/ can act as a vowel.",
+                "ex": `a e i o u y`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "consonants": {
+                "desc": "There are 21 consonants.",
+                "ex": `b c d f g h j k l m n p q r s t v w x y z`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "pair-a": {
+                "desc": "pair short vowel /a/ and consonants",
+                "ex": `ab ac ad af ag ah aj ak al am an ap aq ar as at av aw ax ay az`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "pair-e": {
+                "desc": "pair short vowel /e/ and consonants",
+                "ex": `eb ec ed ef eg eh ej ek el em en ep eq er es et ev ew ex ey ez`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "pair-i": {
+                "desc": "pair short vowel /i/ and consonants",
+                "ex": `ib ic id if ig ih ij ik il im in ip iq ir is it iv iw ix iy iz`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "pair-o": {
+                "desc": "pair short vowel /o/ and consonants",
+                "ex": `ob oc od of og oh oj ok ol om on op oq or os ot ov ow ox oy oz`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "pair-u": {
+                "desc": "pair short vowel /u/ and consonants",
+                "ex": `bu cu du fu gu hu ju uk ul um un up uq ur us ut uv uw ux uy uz`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "cvc": {
+                "desc": `CVC [Consonant Vowel Consonant]:
+                is a 3 letter word that begins with a consonant followed by a vowel and ends with a consonant.`,
+                "ex": `bat cat rat fan man bed net let red pen sit him fix win pin not top hop lot got sun gun fun bus bug gum`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "blends": {
+                "desc": "Blends are 2 or more consonants standing together in a word and makes 2 or more sounds.",
+                "ex": `bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "beginning-blends": {
+                "desc": "beginning-blends are blends that begins a word. ",
+                "ex": `bl cl fl gl pl sl br cr dr fr gr pr tr sc sk squ st sm sn sp sw spr spl str scr tw dw bless club flip glass plot slim scrab split strap sprint brass crop drip from grass press trap scan skin squat star smit snip spot swim twin dwell`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "ending-blends": {
+                "desc": "ending-blends are blends that ends a word.",
+                "ex": `st sk sp nd nt mp rd ld lp rk lf pt ft ct lk lt xt ts last mask rasp bend tent jump hard gild help park half wept left sect milk melt next pets`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "blend words": {
+                "desc": "practice these werds",
+                "ex": `blow grass twin part text
+clap pray dwell cold pets
+flap trap squat help last
+glad scan task work
+plan skin rasp half
+slap smart sand wept
+brass snip went soft scrap
+crab spin pink fact split
+drop step jump milk spray
+frog swim hard salt strap`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "digraphs": {
+                "desc": "digraphs are 2 or more consonants standing together in a word and makes 1 sound",
+                "ex": `ch-3,tch,th-2,ng,nk,sh,ck,ph,wh,gn,kn,gh-3,wr chat pitch that thin sing pink shot lock graph when gnat knot ghana wrap mechanic machine want watch when whip was wash which whisk water what whiff wish`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "blends and digraphs": {
+                "desc": "practice these words.",
+                "ex": `black fling skin spill bland flip skip spin blend flit slam spit blink flock slap spot bliss flop slash spun
+block clung sled spunk
+blush glad slip stab
+clang gland slot stack
+clank glass slum stand
+clap plan slush stem
+clench plant smack step
+click plop smash stiff
+cliff plot smell still
+clinch pluck smelt stop
+cling plum smug stub
+clink plus snap stuck
+clip scalp snip stuff
+clock scat snob swam
+club scotch snub swell
+flag scat snuff swept
+flap scuff snug swift
+flash scum span swim
+flat sketch spank swing
+fled skid spat switch
+flesh skill spell
+brag crunch frump grin
+brand crust fresh prank
+brass drag French press
+brim drank Fred prim
+brick drop frog print
+bring drum frock track
+branch drink grand trap
+brush dress grass trick
+crab drunk grasp trim
+crash drip grant trip
+cramp drug gruff trot
+crack Fran grog truck
+crib Frank grip trend
+crop frost grunt
+`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "vowel-consonant digraphs": {
+                "desc": "vowel-consonant digraphs are digraphs that begins with a vowel",
+                "ex": `ang ing ong ung ank ink onk unk bang ding wing song
+gang ping-pong king hung
+hang ring thing lung
+rang sing gong rung
+sang thing-a-ling long sung
+bank link sink chunk
+bunk mink wink thank
+dunk pink tank honk
+monk bonk 
+kink rink sank think
+`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "cvce": {
+                "desc": "when /e/ ends a word and is silent, the first vowel in the word is a long vowel",
+                "ex": `mate make rate bake take mete eve fete rede here site nice time bike kite note dote mole hole pole flute mute cute cube tube june ate tame bite tile rope bake tape dime tide sole cane blame dine wife stone cape flame dike wine scone cake plane fine wide spoke date stake fife slide slope daze glade dive size smoke fate snake file glide note fade chase five while tote gaze paste hive drive those hate gave lime pride stole came case life prime mope haze fake like prize mole lake haste mine vote lame flake mite bone woke make save mile cone broke mane blaze nine cope drove made vase pike code probe mate taste pine dote  late waste pile dole cube game brave quite dome duke wake brake kite globe dune name crate ride hole cute pale crave shine home tube quake craze side hope tune rate drape spike joke mule rake grape smile lone flute pane grade slime lode prune sake grave stile lope rule shame trade swine poke rude shake spine quote plume same here ripe rode brute take these time robe mete Steve here rede fete gene Pete complete eve squeeze sleeve sneeze`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "open syllable": {
+                "desc": "an open syllable is a word that ends with a vowel. it usually makes the long vowel sound.",
+                "ex": `me we she he the be so lo go no co hi flu`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "phonograms": {
+                "desc": "phonograms are groups of words that makes a sound",
+                "ex": `all al ull ul ut ush old oll olt ost oth ild ind bold colt most blind old jolt post find cold molt host grind fold bolt hind gold volt both kind hold mind mold toll child rind sold roll mild wind told wild scold loth betroth zeroth fall ball call walk talk chalk full pull bull careful fulfill push bush cushion put brut `.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "2-consonant-division words": {
+                "desc": "2-consonant-division words are also called compound words. they are 2 or more words with different meaning joined together to form a new word with a new meaning.",
+                "ex": `ashcan dishpan hilltop sandbag backstop dogsled Hobbit shipment bedrock dustpan hubcap sunspot napkin eggnog kidnap tiptop blacktop endless hotdog traffic bobcat filmstrip landmass trashcan cashbox flapjack laptop upland catfish gumdrop lesson sunset catnap handbag magnet sudden catnip handcuff Midland combat chestnut handstand nutmeg upon desktop helmet pocket keyboard`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            
+            "rhyming words": {
+                "desc": "rhyming words are words with the same ending sound.",
+                "ex": `mat sat bake take bold cold plant hunt so go pitch switch`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+        };
+
+        // Current dictionary
+        let lessons = { ...DEFAULT_LESSONS };
+        
+        // DOM Elements
+        const slideToggle = document.getElementById('slideToggle');
+        const loadToggle = document.getElementById('loadToggle');
+        const exportToggle = document.getElementById('exportToggle');
+        const dictionaryFileInput = document.getElementById('dictionaryFileInput');
+        const dictionaryNotification = document.getElementById('dictionaryNotification');
+        const notificationText = document.getElementById('notificationText');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const caseToggle = document.getElementById('caseToggle');
+        const historyToggle = document.getElementById('historyToggle');
+        const topicsToggle = document.getElementById('topicsToggle');
+        const helpToggle = document.getElementById('helpToggle');
+        const appLogo = document.getElementById('appLogo');
+        const historyPanel = document.getElementById('historyPanel');
+        const topicsPanel = document.getElementById('topicsPanel');
+        const topicsList = document.getElementById('topicsList');
+        const historyList = document.getElementById('historyList');
+        const closeHistory = document.getElementById('closeHistory');
+        const closeTopics = document.getElementById('closeTopics');
+        const overlay = document.getElementById('overlay');
+        const instructionsModal = document.getElementById('instructionsModal');
+        const closeModal = document.getElementById('closeModal');
+        const appContainer = document.getElementById('appContainer');
+        
+        // Slideshow Elements
+        const slideshowOverlay = document.getElementById('slideshowOverlay');
+        const slideshowContent = document.getElementById('slideshowContent');
+        const slideshowTop = document.getElementById('slideshowTop');
+        const slideshowBottom = document.getElementById('slideshowBottom');
+        const slideshowClose = document.getElementById('slideshowClose');
+        const slideshowIndicator = document.getElementById('slideshowIndicator');
+        const instructionModal = document.getElementById('instructionModal');
+        const closeInstruction = document.getElementById('closeInstruction');
+        
+        // Dictionary Builder Elements
+        const builderContainer = document.getElementById('builderContainer');
+        const builderCancel = document.getElementById('builderCancel');
+        const builderExport = document.getElementById('builderExport');
+        const builderTopic = document.getElementById('builderTopic');
+        const builderDesc = document.getElementById('builderDesc');
+        const builderEx = document.getElementById('builderEx');
+        const builderAdd = document.getElementById('builderAdd');
+        const builderPreview = document.getElementById('builderPreview');
+        const builderEntryCount = document.getElementById('builderEntryCount');
+        const previewClear = document.getElementById('previewClear');
+
+        // State
+        let isDarkTheme = false;
+        let isUppercase = false;
+        const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
+        
+        // Slideshow state
+        let currentSlideshow = null;
+        let currentSlideIndex = 0;
+        
+        // Dictionary Builder state
+        let builderDictionary = {};
+
+        // Initialize
+        function init() {
+            // Try to load saved dictionary from localStorage
+            const savedDictionary = localStorage.getItem('customDictionary');
+            if (savedDictionary) {
+                try {
+                    lessons = JSON.parse(savedDictionary);
+                    showNotification('Custom dictionary loaded', '✅');
+                } catch (e) {
+                    console.error('Failed to load saved dictionary:', e);
+                    showNotification('Error loading saved dictionary', '❌', true);
+                }
+            }
+            
+            // Add dictionary load event listener
+            loadToggle.addEventListener('click', () => {
+                dictionaryFileInput.click();
+            });
+            
+            // Add dictionary builder event listener
+            exportToggle.addEventListener('click', () => {
+                appContainer.style.display = 'none';
+                builderContainer.classList.add('active');
+            });
+            
+            // Builder cancel button
+            builderCancel.addEventListener('click', () => {
+                builderContainer.classList.remove('active');
+                appContainer.style.display = 'block';
+            });
+            
+            // Builder export button
+            builderExport.addEventListener('click', exportBuilderDictionary);
+            
+            // Builder add entry button
+            builderAdd.addEventListener('click', addBuilderEntry);
+            
+            // Builder clear preview button
+            previewClear.addEventListener('click', () => {
+                if (Object.keys(builderDictionary).length > 0 && confirm('Are you sure you want to clear all entries?')) {
+                    builderDictionary = {};
+                    updateBuilderPreview();
+                }
+            });
+            
+            // Allow pressing Enter in builder inputs
+            [builderTopic, builderDesc, builderEx].forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        builderAdd.click();
+                    }
+                });
+            });
+            
+            dictionaryFileInput.addEventListener('change', handleFileSelect);
+            
+            // Add slideshow event listeners
+            slideToggle.addEventListener('click', startSlideshow);
+            slideshowClose.addEventListener('click', closeSlideshow);
+            slideshowTop.addEventListener('click', nextSlide);
+            slideshowBottom.addEventListener('click', prevSlide);
+            closeInstruction.addEventListener('click', () => {
+                instructionModal.classList.remove('active');
+                overlay.classList.remove('active');
+                beginSlideshow();
+            });
+            
+            // Set theme from localStorage if available
+            const savedTheme = localStorage.getItem('dictionaryTheme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Set text case from localStorage if available
+            const savedCase = localStorage.getItem('dictionaryTextCase');
+            if (savedCase === 'uppercase') {
+                toggleCase();
+            }
+            
+            // Check if instructions have been shown before
+            const instructionsShown = localStorage.getItem('instructionsShown');
+            if (!instructionsShown) {
+                // Show instructions after a short delay
+                setTimeout(() => {
+                    toggleInstructionsModal();
+                    localStorage.setItem('instructionsShown', 'true');
+                }, 500);
+            }
+            
+            // Event listeners
+            searchBtn.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            themeToggle.addEventListener('click', toggleTheme);
+            caseToggle.addEventListener('click', toggleCase);
+            historyToggle.addEventListener('click', toggleHistoryPanel);
+            topicsToggle.addEventListener('click', toggleTopicsPanel);
+            helpToggle.addEventListener('click', toggleInstructionsModal);
+            appLogo.addEventListener('click', () => {
+                // Reset to home screen
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>📖</span>
+                        <h2>Phonics Explorer</h2>
+                        <p>Search for topics to see their details and examples</p>
+                        <p>Try these examples:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+            });
+            
+            closeHistory.addEventListener('click', toggleHistoryPanel);
+            closeTopics.addEventListener('click', toggleTopicsPanel);
+            closeModal.addEventListener('click', toggleInstructionsModal);
+            overlay.addEventListener('click', closeAllPanels);
+            
+            // Add history item click handlers
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+            
+            // Render history panel
+            renderHistoryPanel();
+            
+            // Render topics list
+            renderTopicsList();
+        }
+        
+        // Add entry to builder dictionary
+        function addBuilderEntry() {
+            const topic = builderTopic.value.trim();
+            const desc = builderDesc.value.trim();
+            const ex = builderEx.value.trim();
+            
+            if (!topic || !desc || !ex) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Create or update topic
+            builderDictionary[topic] = {
+                desc: desc,
+                ex: ex.split(',').map(item => item.trim())
+            };
+            
+            // Update preview
+            updateBuilderPreview();
+            
+            // Clear inputs
+            builderTopic.value = '';
+            builderDesc.value = '';
+            builderEx.value = '';
+            
+            // Focus back to topic input
+            builderTopic.focus();
+        }
+        
+        // Update the builder preview panel
+        function updateBuilderPreview() {
+            if (Object.keys(builderDictionary).length === 0) {
+                builderPreview.textContent = 'No entries yet';
+            } else {
+                builderPreview.textContent = JSON.stringify(builderDictionary, null, 2);
+            }
+            builderEntryCount.textContent = `${Object.keys(builderDictionary).length} entries`;
+        }
+        
+        // Export builder dictionary
+        function exportBuilderDictionary() {
+            if (Object.keys(builderDictionary).length === 0) {
+                alert('No entries to export');
+                return;
+            }
+            
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `custom_dictionary_${dateStr}.json`;
+            
+            const jsonStr = JSON.stringify(builderDictionary, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification(`Dictionary exported as ${filename}`, '📤', false, true);
+        }
+
+        // Handle file selection for dictionary
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const newDictionary = JSON.parse(e.target.result);
+                    
+                    // Validate the dictionary structure
+                    let isValid = true;
+                    for (const key in newDictionary) {
+                        if (!newDictionary[key].desc || !Array.isArray(newDictionary[key].ex)) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!isValid) {
+                        throw new Error('Invalid dictionary structure');
+                    }
+                    
+                    // Update the dictionary
+                    lessons = newDictionary;
+                    
+                    // Save to localStorage for persistence
+                    localStorage.setItem('customDictionary', JSON.stringify(lessons));
+                    
+                    // Update UI
+                    renderTopicsList();
+                    showNotification('Dictionary loaded successfully!', '✅');
+                    
+                    // Clear the file input
+                    dictionaryFileInput.value = '';
+                    
+                    // Reset to home screen
+                    appLogo.click();
+                } catch (error) {
+                    console.error('Error loading dictionary:', error);
+                    showNotification('Error loading dictionary. Invalid format.', '❌', true);
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error reading file', '❌', true);
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Show notification
+        function showNotification(message, icon, isError = false, isSuccess = false) {
+            notificationText.textContent = message;
+            notificationIcon.textContent = icon;
+            
+            if (isError) {
+                dictionaryNotification.classList.add('error');
+                dictionaryNotification.classList.remove('success');
+            } else if (isSuccess) {
+                dictionaryNotification.classList.add('success');
+                dictionaryNotification.classList.remove('error');
+            } else {
+                dictionaryNotification.classList.remove('error', 'success');
+            }
+            
+            dictionaryNotification.classList.add('active');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                dictionaryNotification.classList.remove('active');
+            }, 3000);
+        }
+
+        // Search handler
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Add to search history if not already present
+            if (!searchHistory.some(item => item.term === searchTerm)) {
+                searchHistory.unshift({
+                    term: searchTerm,
+                    time: new Date().toISOString()
+                });
+                
+                // Keep only the last 10 searches
+                if (searchHistory.length > 10) {
+                    searchHistory.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
+                
+                // Update history panel
+                renderHistoryPanel();
+            }
+            
+            // Display results
+            displayResults(searchTerm);
+        }
+
+        // Display search results
+        function displayResults(term) {
+            const topic = lessons[term];
+            
+            if (!topic) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>🔍</span>
+                        <h2>Topic Not Found</h2>
+                        <p>No results found for "${term}". Try one of these:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+                return;
+            }
+            
+            const caseClass = isUppercase ? 'uppercase' : 'lowercase';
+            
+            resultsContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1 class="${caseClass}">${term}</h1>
+                    </div>
+                    <p class="entry-desc ${caseClass}">${topic.desc}</p>
+                    
+                    <h3>Examples:</h3>
+                    <div class="examples-grid">
+                        ${topic.ex.map((example, index) => 
+                            `<div class="example-item" data-index="${index}">${example}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers to example items
+            document.querySelectorAll('.example-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+            localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
+        }
+
+        // Toggle text case
+        function toggleCase() {
+            isUppercase = !isUppercase;
+            
+            // Update all text elements
+            const textElements = document.querySelectorAll('h1, h2, h3, p, .example-item');
+            textElements.forEach(el => {
+                if (isUppercase) {
+                    el.classList.add('uppercase');
+                    el.classList.remove('lowercase');
+                } else {
+                    el.classList.add('lowercase');
+                    el.classList.remove('uppercase');
+                }
+            });
+            
+            localStorage.setItem('dictionaryTextCase', isUppercase ? 'uppercase' : 'lowercase');
+        }
+
+        // Toggle history panel
+        function toggleHistoryPanel() {
+            historyPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = historyPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            topicsPanel.classList.remove('active');
+        }
+        
+        // Toggle topics panel
+        function toggleTopicsPanel() {
+            topicsPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = topicsPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            historyPanel.classList.remove('active');
+        }
+        
+        // Toggle instructions modal
+        function toggleInstructionsModal() {
+            instructionsModal.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = instructionsModal.classList.contains('active') ? 'hidden' : 'auto';
+        }
+        
+        // Close all panels and modals
+        function closeAllPanels() {
+            historyPanel.classList.remove('active');
+            topicsPanel.classList.remove('active');
+            instructionsModal.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Render history panel
+        function renderHistoryPanel() {
+            historyList.innerHTML = '';
+            
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<p>No search history yet</p>';
+                return;
+            }
+            
+            searchHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item-panel';
+                historyItem.innerHTML = `
+                    <div class="term">🔍 ${item.term}</div>
+                    <div class="time">${formatTime(item.time)}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    searchInput.value = item.term;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Render topics list
+        function renderTopicsList() {
+            topicsList.innerHTML = '';
+            
+            Object.keys(lessons).forEach(topic => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <span>📄</span>
+                    <div>${topic}</div>
+                `;
+                
+                topicItem.addEventListener('click', () => {
+                    searchInput.value = topic;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                topicsList.appendChild(topicItem);
+            });
+        }
+
+        // Format time for display
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Slideshow functions
+        function startSlideshow() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm || !lessons[searchTerm]) {
+                alert("Please search for a valid topic first");
+                return;
+            }
+            
+            const topic = lessons[searchTerm];
+            if (topic.ex.length === 0) {
+                alert("No examples available for this topic");
+                return;
+            }
+            
+            currentSlideshow = searchTerm;
+            currentSlideIndex = 0;
+            
+            // Show instruction modal
+            instructionModal.classList.add('active');
+            overlay.classList.add('active');
+        }
+        
+        function beginSlideshow() {
+            // Hide header and show slideshow
+            document.querySelector('header').style.display = 'none';
+            slideshowOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateSlideshow();
+        }
+        
+        function updateSlideshow() {
+            const examples = lessons[currentSlideshow].ex;
+            slideshowContent.textContent = examples[currentSlideIndex];
+            slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
+            
+            // Apply text case
+            if (isUppercase) {
+                slideshowContent.classList.add('uppercase');
+                slideshowContent.classList.remove('lowercase');
+            } else {
+                slideshowContent.classList.add('lowercase');
+                slideshowContent.classList.remove('uppercase');
+            }
+        }
+        
+        function nextSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex + 1) % examples.length;
+            updateSlideshow();
+        }
+        
+        function prevSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
+            updateSlideshow();
+        }
+        
+        function closeSlideshow() {
+            slideshowOverlay.classList.remove('active');
+            document.querySelector('header').style.display = 'flex';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize app
+        init();
+        
+        // Add keyboard navigation for slideshow
+        document.addEventListener('keydown', (e) => {
+            if (!slideshowOverlay.classList.contains('active')) return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'Escape') {
+                closeSlideshow();
+            }
+        });
+        
+    </script>
+</body>
+</html>
