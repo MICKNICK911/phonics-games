@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Phonics Explorer</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+            --header-height: 70px;
+        }
+
+        .dark-theme {
+            --primary-color: #4895ef;
+            --secondary-color: #560bad;
+            --accent-color: #f72585;
+            --bg-color: #121212;
+            --text-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --border-color: #343a40;
+            --shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.05) 0%, rgba(247, 37, 133, 0) 25%);
+        }
+
+        .dark-theme body {
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.08) 0%, rgba(67, 97, 238, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.08) 0%, rgba(247, 37, 133, 0) 25%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--bg-color-rgb), 0.8);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+
+        .logo span {
+            font-size: 28px;
+        }
+
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .search-container input:focus {
+            outline: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .case-toggle, .history-toggle, .topics-toggle, .help-toggle, .load-toggle, .key-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover, .case-toggle:hover, 
+        .history-toggle:hover, .topics-toggle:hover,
+        .help-toggle:hover, .load-toggle:hover, .key-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .results-container {
+            padding: 30px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .no-results span {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Key Management Styles */
+        .key-management {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .key-management h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .key-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+        
+        .copy-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .key-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-color);
+        }
+        
+        .qr-code {
+            margin: 20px auto;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .import-export {
+            margin-top: 30px;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-right: 10px;
+        }
+        
+        .file-input-label:hover {
+            background: var(--secondary-color);
+        }
+        
+        .file-input {
+            display: none;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .example-item.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.03);
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .lowercase {
+            text-transform: lowercase;
+        }
+
+        .instructions {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .search-history {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-item:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .history-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 90;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .history-panel.active {
+            transform: translateX(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item-panel {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-panel:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .history-item-panel .time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .close-history {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 80;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Topics Panel */
+        .topics-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 90;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .topics-panel.active {
+            transform: translateX(0);
+        }
+
+        .topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .topics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .topic-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topic-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+            transform: translateX(-5px);
+        }
+
+        .topic-item .topic-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .topic-item .topic-name {
+            font-weight: 500;
+        }
+
+        .topic-item .topic-count {
+            margin-left: auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+        }
+
+        .close-topics {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        /* Slideshow Elements */
+        .slideshow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slideshow-overlay.active {
+            display: flex;
+        }
+
+        .slideshow-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-content {
+            font-size: 72px;
+            text-align: center;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 2;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .slideshow-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-color);
+            z-index: 2;
+        }
+
+        .slideshow-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 3;
+            box-shadow: var(--shadow);
+        }
+
+        .instruction-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            z-index: 200;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            display: none;
+        }
+
+        .instruction-modal.active {
+            display: block;
+        }
+
+        .instruction-modal h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .instruction-modal p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .instruction-modal button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .instruction-modal button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Slideshow button */
+        .slide-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .slide-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* Key Management Panel */
+        .key-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            z-index: 200;
+            max-width: min(1000px, 90vw);
+            width: 70vw;
+            min-width: 300px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .key-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%);
+        }
+        
+        .key-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .key-panel-header h2 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-key-panel {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+            transition: var(--transition);
+        }
+        
+        .close-key-panel:hover {
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .slideshow-content {
+                font-size: 48px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .controls {
+                order: 2;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .entry-header h1 {
+                font-size: 28px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .history-panel, .topics-panel {
+                width: 100%;
+            }
+            
+            .key-actions {
+                flex-direction: column;
+            }
+            
+            .key-panel {
+                width: 90vw;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slideshow-content {
+                font-size: 36px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .slide-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .entry-card {
+                padding: 20px;
+            }
+            
+            .history-item {
+                padding: 6px 14px;
+            }
+            
+            .theme-toggle, .case-toggle, 
+            .history-toggle, .topics-toggle,
+            .help-toggle, .load-toggle, .key-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .key-panel {
+                width: 95vw;
+                padding: 20px;
+            }
+            
+            .key-box {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <span id="notificationIcon">✅</span>
+        <span id="notificationText">Notification message</span>
+    </div>
+    
+    <!-- Hidden file input for dictionary loading -->
+    <input type="file" id="dictionaryFileInput" accept=".json" style="display: none;">
+    
+    <!-- Slideshow Elements -->
+    <div class="slideshow-overlay" id="slideshowOverlay">
+        <div class="slideshow-close" id="slideshowClose">❌</div>
+        <div class="slideshow-top" id="slideshowTop"></div>
+        <div class="slideshow-content" id="slideshowContent"></div>
+        <div class="slideshow-bottom" id="slideshowBottom"></div>
+        <div class="slideshow-indicator" id="slideshowIndicator">1/5</div>
+    </div>
+    
+    <div class="instruction-modal" id="instructionModal">
+        <h2>Slide Mode Instructions</h2>
+        <p>You are now in slide mode. The control panel is hidden to maximize your viewing experience.</p>
+        <p>Tap the <strong>top half</strong> of the screen to go to the next example.</p>
+        <p>Tap the <strong>bottom half</strong> of the screen to go to the previous example.</p>
+        <p>Text case toggle applies to the slide content as well.</p>
+        <button id="closeInstruction">Start Slideshow</button>
+    </div>
+    
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h2>📜 Search History</h2>
+            <div class="close-history" id="closeHistory">❌</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- History items will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Topics Panel -->
+    <div class="topics-panel" id="topicsPanel">
+        <div class="topics-header">
+            <h2>📚 All Topics</h2>
+            <div class="close-topics" id="closeTopics">❌</div>
+        </div>
+        <div class="topics-list" id="topicsList">
+            <!-- Topics will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Key Management Panel -->
+    <div class="key-panel" id="keyPanel">
+        <div class="key-panel-header">
+            <h2><span>🔑</span> Encryption Keys</h2>
+            <div class="close-key-panel" id="closeKeyPanel">✕</div>
+        </div>
+        <div class="key-management">
+            <h2><span>🔐</span> Your Encryption Keys</h2>
+            <p>Share your public key with the content author to receive encrypted notes.</p>
+            
+            <h3>Public Key (Share this):</h3>
+            <div class="key-box" id="publicKeyBox">
+                <button class="copy-btn" id="copyPublicKey">Copy</button>
+                <div id="publicKeyText">Generating keys...</div>
+            </div>
+            
+            <h3>Private Key (Keep this secure):</h3>
+            <div class="key-box" id="privateKeyBox">
+                <div id="privateKeyText">Stored securely on this device</div>
+            </div>
+            
+            <div class="key-actions">
+                <button class="btn btn-primary" id="showPrivateKey">
+                    <i class="btn-icon">👁️</i> View Private Key
+                </button>
+                <button class="btn btn-secondary" id="exportKeys">
+                    <i class="btn-icon">💾</i> Backup Keys
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo" id="appLogo">
+                    <span>🔐</span>
+                    <span>Secure Phonics Explorer</span>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
+                    <button class="search-btn" id="searchBtn">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <div class="controls">
+                    <div class="load-toggle" id="loadToggle" title="Load Notes">
+                        📂
+                    </div>
+                    <div class="key-toggle" id="keyToggle" title="Manage Keys">
+                        🔑
+                    </div>
+                    <div class="topics-toggle" id="topicsToggle" title="Browse Topics">
+                        📚
+                    </div>
+                    <div class="history-toggle" id="historyToggle" title="View History">
+                        🕒
+                    </div>
+                    <div class="case-toggle" id="caseToggle" title="Toggle Case">
+                        🔤
+                    </div>
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                        🌙
+                    </div>
+                    <div class="help-toggle" id="helpToggle" title="Help">
+                        ❓
+                    </div>
+                    <div class="slide-toggle" id="slideToggle" title="Slide Show">
+                        ▶️
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-container" id="resultsContainer">
+            <div class="no-results">
+                <span>🔐</span>
+                <h2>Secure Phonics Explorer</h2>
+                <p>Your personal decryption keys have been generated</p>
+                
+                <div class="key-management">
+                    <h2><span>🔑</span> Your Encryption Keys</h2>
+                    <p>Share your public key with the content author to receive encrypted notes.</p>
+                    
+                    <h3>Public Key (Share this):</h3>
+                    <div class="key-box" id="homePublicKeyBox">
+                        <button class="copy-btn" id="homeCopyPublicKey">Copy</button>
+                        <div id="homePublicKeyText">Generating keys...</div>
+                    </div>
+                    
+                    <h3>Private Key (Keep this secure):</h3>
+                    <div class="key-box" id="homePrivateKeyBox">
+                        <div id="homePrivateKeyText">Stored securely on this device</div>
+                    </div>
+                    
+                    <div class="key-actions">
+                        <button class="btn btn-primary" id="homeShowPrivateKey">
+                            <i class="btn-icon">👁️</i> View Private Key
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="notesContainer"></div>
+        </main>
+    </div>
+
+    <script>
+        // Predefined dictionary (default lessons)
+        const DEFAULT_LESSONS = {
+            "vowels": {
+                "desc": "There are 5 Short vowels and 5 long vowels. Sometimes /y/ can act as a vowel.",
+                "ex": `a e i o u y`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "consonants": {
+                "desc": "There are 21 consonants.",
+                "ex": `b c d f g h j k l m n p q r s t v w x y z`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "cvc": {
+                "desc": `CVC [Consonant Vowel Consonant]:
+                is a 3 letter word that begins with a consonant followed by a vowel and ends with a consonant.`,
+                "ex": `bat cat rat fan man bed net let red pen sit him fix win pin not top hop lot got sun gun fun bus bug gum`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "cvce": {
+                "desc": "when /e/ ends a word and is silent, the first vowel in the word is a long vowel",
+                "ex": `mate make rate bake take note dote mole hole pole flute mute cute cube tube june ate tame bite tile rope`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "digraphs": {
+                "desc": "Two letters that make one sound together",
+                "ex": `sh ch th ph wh ng ck kn qu`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "blends": {
+                "desc": "Two or three consonants together where each sound is heard",
+                "ex": `bl cl fl gl pl sl br cr dr fr gr pr tr sc sk sm sn sp st sw`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            }
+        };
+
+        // Current dictionary
+        let lessons = { ...DEFAULT_LESSONS };
+        
+        // DOM Elements
+        const slideToggle = document.getElementById('slideToggle');
+        const loadToggle = document.getElementById('loadToggle');
+        const keyToggle = document.getElementById('keyToggle');
+        const dictionaryFileInput = document.getElementById('dictionaryFileInput');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const notesContainer = document.getElementById('notesContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const caseToggle = document.getElementById('caseToggle');
+        const historyToggle = document.getElementById('historyToggle');
+        const topicsToggle = document.getElementById('topicsToggle');
+        const helpToggle = document.getElementById('helpToggle');
+        const appLogo = document.getElementById('appLogo');
+        const historyPanel = document.getElementById('historyPanel');
+        const topicsPanel = document.getElementById('topicsPanel');
+        const keyPanel = document.getElementById('keyPanel');
+        const closeKeyPanel = document.getElementById('closeKeyPanel');
+        const topicsList = document.getElementById('topicsList');
+        const historyList = document.getElementById('historyList');
+        const closeHistory = document.getElementById('closeHistory');
+        const closeTopics = document.getElementById('closeTopics');
+        const overlay = document.getElementById('overlay');
+        const slideshowOverlay = document.getElementById('slideshowOverlay');
+        const slideshowContent = document.getElementById('slideshowContent');
+        const slideshowTop = document.getElementById('slideshowTop');
+        const slideshowBottom = document.getElementById('slideshowBottom');
+        const slideshowClose = document.getElementById('slideshowClose');
+        const slideshowIndicator = document.getElementById('slideshowIndicator');
+        const instructionModal = document.getElementById('instructionModal');
+        const closeInstruction = document.getElementById('closeInstruction');
+        
+        // Key management elements
+        const publicKeyText = document.getElementById('publicKeyText');
+        const privateKeyText = document.getElementById('privateKeyText');
+        const copyPublicKey = document.getElementById('copyPublicKey');
+        const showPrivateKey = document.getElementById('showPrivateKey');
+        const exportKeys = document.getElementById('exportKeys');
+        const homePublicKeyText = document.getElementById('homePublicKeyText');
+        const homePrivateKeyText = document.getElementById('homePrivateKeyText');
+        const homeCopyPublicKey = document.getElementById('homeCopyPublicKey');
+        const homeShowPrivateKey = document.getElementById('homeShowPrivateKey');
+
+        // State
+        let isDarkTheme = false;
+        let isUppercase = false;
+        let privateKeyVisible = false;
+        const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
+        
+        // Slideshow state
+        let currentSlideshow = null;
+        let currentSlideIndex = 0;
+        
+        // Crypto state
+        let cryptoKeys = {
+            publicKey: null,
+            privateKey: null,
+            deviceId: null
+        };
+        
+        // Current notes data
+        let decryptedNotes = {};
+
+        // Initialize
+        async function init() {
+            // First try to load existing keys from localStorage
+            await loadCryptoKeys();
+            
+            // If no keys exist, generate new ones
+            if (!cryptoKeys.publicKey) {
+                await generateCryptoKeys();
+            }
+            
+            // Display public key
+            displayPublicKey();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Check for theme preference
+            const savedTheme = localStorage.getItem('dictionaryTheme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Check for text case preference
+            const savedCase = localStorage.getItem('dictionaryTextCase');
+            if (savedCase === 'uppercase') {
+                toggleCase();
+            }
+            
+            // Check if instructions have been shown before
+            const instructionsShown = localStorage.getItem('instructionsShown');
+            if (!instructionsShown) {
+                // Show instructions after a short delay
+                setTimeout(() => {
+                    showNotification("Welcome! Share your public key to receive encrypted phonics notes", "🔑");
+                    localStorage.setItem('instructionsShown', 'true');
+                }, 1000);
+            }
+            
+            // Load default lessons initially
+            decryptedNotes = {...DEFAULT_LESSONS};
+            displayNotes();
+            
+            // Populate topics panel
+            populateTopicsPanel();
+        }
+        
+        // Populate topics panel with available topics
+        function populateTopicsPanel() {
+            topicsList.innerHTML = '';
+            
+            if (!decryptedNotes || Object.keys(decryptedNotes).length === 0) {
+                topicsList.innerHTML = '<p>No topics available</p>';
+                return;
+            }
+            
+            // Topic icons for visual representation
+            const topicIcons = {
+                vowels: '🔊',
+                consonants: '🎵',
+                cvc: '🔤',
+                cvce: '📝',
+                digraphs: '🎯',
+                blends: '🔗'
+            };
+            
+            Object.keys(decryptedNotes).forEach(topic => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <div class="topic-icon">${topicIcons[topic] || '📚'}</div>
+                    <div class="topic-name">${topic}</div>
+                    <div class="topic-count">${decryptedNotes[topic].ex.length} ex</div>
+                `;
+                topicItem.addEventListener('click', () => {
+                    searchInput.value = topic;
+                    handleSearch();
+                    topicsPanel.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+                topicsList.appendChild(topicItem);
+            });
+        }
+        
+        // Generate cryptographic keys
+        async function generateCryptoKeys() {
+            try {
+                showNotification("Generating encryption keys...", "⏳");
+                
+                // Generate device ID
+                cryptoKeys.deviceId = await generateDeviceId();
+                
+                // Generate RSA-OAEP key pair
+                const keyPair = await window.crypto.subtle.generateKey(
+                    {
+                        name: "RSA-OAEP",
+                        modulusLength: 2048,
+                        publicExponent: new Uint8Array([1, 0, 1]),
+                        hash: "SHA-256"
+                    },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+                
+                // Export keys
+                const exportedPublicKey = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+                const exportedPrivateKey = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+                
+                // Convert to Base64 for storage
+                cryptoKeys.publicKey = arrayBufferToBase64(exportedPublicKey);
+                cryptoKeys.privateKey = arrayBufferToBase64(exportedPrivateKey);
+                
+                // Save to localStorage
+                localStorage.setItem('cryptoKeys', JSON.stringify(cryptoKeys));
+                
+                showNotification("Encryption keys generated successfully", "✅");
+            } catch (error) {
+                console.error("Error generating keys:", error);
+                showNotification("Failed to generate encryption keys", "❌", true);
+            }
+        }
+        
+        // Load crypto keys from localStorage
+        async function loadCryptoKeys() {
+            try {
+                const savedKeys = localStorage.getItem('cryptoKeys');
+                if (savedKeys) {
+                    cryptoKeys = JSON.parse(savedKeys);
+                    return true;
+                }
+            } catch (error) {
+                console.error("Error loading saved keys:", error);
+            }
+            return false;
+        }
+        
+        // Import private key from Base64
+        async function importPrivateKey(base64Key) {
+            const binaryKey = base64ToArrayBuffer(base64Key);
+            return await window.crypto.subtle.importKey(
+                "pkcs8",
+                binaryKey,
+                {
+                    name: "RSA-OAEP",
+                    hash: "SHA-256"
+                },
+                true,
+                ["decrypt"]
+            );
+        }
+        
+        // Generate device ID
+        async function generateDeviceId() {
+            // Create a fingerprint from available browser information
+            const fingerprint = [
+                navigator.userAgent,
+                navigator.hardwareConcurrency,
+                navigator.deviceMemory,
+                screen.width,
+                screen.height,
+                screen.colorDepth,
+                navigator.languages.join(','),
+                new Date().getTimezoneOffset()
+            ].join('|');
+            
+            // Hash the fingerprint to create a consistent ID
+            const encoder = new TextEncoder();
+            const data = encoder.encode(fingerprint);
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        // Display public key information
+        function displayPublicKey() {
+            if (!cryptoKeys.publicKey) return;
+            
+            // Format the public key for display
+            const formattedKey = 
+                "-----BEGIN PUBLIC KEY-----\n" +
+                chunkString(cryptoKeys.publicKey, 64).join('\n') +
+                "\n-----END PUBLIC KEY-----";
+            
+            publicKeyText.textContent = formattedKey;
+            homePublicKeyText.textContent = formattedKey;
+        }
+        
+        // Display private key (only when requested by user)
+        function displayPrivateKey() {
+            if (!cryptoKeys.privateKey) return;
+            
+            if (privateKeyVisible) {
+                // Format the private key for display
+                const formattedKey = 
+                    "-----BEGIN PRIVATE KEY-----\n" +
+                    chunkString(cryptoKeys.privateKey, 64).join('\n') +
+                    "\n-----END PRIVATE KEY-----";
+                
+                privateKeyText.textContent = formattedKey;
+                homePrivateKeyText.textContent = formattedKey;
+                showPrivateKey.innerHTML = '<i class="btn-icon">👁️</i> Hide Private Key';
+                homeShowPrivateKey.innerHTML = '<i class="btn-icon">👁️</i> Hide Private Key';
+            } else {
+                privateKeyText.textContent = "Stored securely on this device";
+                homePrivateKeyText.textContent = "Stored securely on this device";
+                showPrivateKey.innerHTML = '<i class="btn-icon">👁️</i> View Private Key';
+                homeShowPrivateKey.innerHTML = '<i class="btn-icon">👁️</i> View Private Key';
+            }
+        }
+        
+        // Export keys to a file
+        function exportKeysToFile() {
+            if (!cryptoKeys.publicKey || !cryptoKeys.privateKey) {
+                showNotification("No keys to export", "❌", true);
+                return;
+            }
+            
+            try {
+                const keyData = {
+                    publicKey: cryptoKeys.publicKey,
+                    privateKey: cryptoKeys.privateKey,
+                    deviceId: cryptoKeys.deviceId,
+                    exportedAt: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(keyData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `phonics-explorer-keys-${cryptoKeys.deviceId.slice(0, 8)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification("Keys exported successfully", "✅");
+            } catch (error) {
+                console.error("Error exporting keys:", error);
+                showNotification("Failed to export keys", "❌", true);
+            }
+        }
+        
+        // Import and decrypt notes from a file
+        async function importNotesFromFile(file) {
+            try {
+                showNotification("Decrypting notes...", "⏳");
+                
+                const fileText = await readFileAsText(file);
+                const encryptedData = JSON.parse(fileText);
+                
+                // Validate the encrypted data structure
+                if (!encryptedData.encrypted || !encryptedData.encryptedKey || !encryptedData.iv || !encryptedData.encryptedData) {
+                    throw new Error("Invalid notes file format");
+                }
+                
+                // Import the private key
+                const privateKey = await importPrivateKey(cryptoKeys.privateKey);
+                
+                // Convert array of numbers to Uint8Array for encrypted AES key
+                const encryptedKey = new Uint8Array(encryptedData.encryptedKey);
+                
+                // Decrypt the AES key with RSA-OAEP
+                const aesKeyBuffer = await window.crypto.subtle.decrypt(
+                    { name: "RSA-OAEP" },
+                    privateKey,
+                    encryptedKey
+                );
+                
+                // Import the AES key
+                const importedAesKey = await window.crypto.subtle.importKey(
+                    "raw",
+                    aesKeyBuffer,
+                    { name: "AES-GCM" },
+                    false,
+                    ["decrypt"]
+                );
+                
+                // Convert IV and encrypted data from arrays to Uint8Array
+                const iv = new Uint8Array(encryptedData.iv);
+                const encryptedContent = new Uint8Array(encryptedData.encryptedData);
+                
+                // Decrypt the data with AES-GCM
+                const decryptedContent = await window.crypto.subtle.decrypt(
+                    {
+                        name: "AES-GCM",
+                        iv: iv
+                    },
+                    importedAesKey,
+                    encryptedContent
+                );
+                
+                // Convert the decrypted data to text
+                const decoder = new TextDecoder();
+                const decryptedText = decoder.decode(decryptedContent);
+                decryptedNotes = JSON.parse(decryptedText);
+                
+                // Save to localStorage
+                localStorage.setItem('decryptedNotes', JSON.stringify(decryptedNotes));
+                
+                // Display the notes
+                displayNotes();
+                
+                // Update topics panel
+                populateTopicsPanel();
+                
+                showNotification("Notes decrypted and loaded successfully", "✅");
+            } catch (error) {
+                console.error("Error decrypting notes:", error);
+                showNotification("Failed to decrypt notes. Invalid file or wrong key.", "❌", true);
+            }
+        }
+        
+        // Load notes from localStorage
+        function loadNotesFromStorage() {
+            const savedNotes = localStorage.getItem('decryptedNotes');
+            if (savedNotes) {
+                try {
+                    decryptedNotes = JSON.parse(savedNotes);
+                    displayNotes();
+                    populateTopicsPanel();
+                } catch (error) {
+                    console.error("Error loading saved notes:", error);
+                }
+            }
+        }
+        
+        // Display decrypted notes
+        function displayNotes() {
+            if (!decryptedNotes || Object.keys(decryptedNotes).length === 0) {
+                notesContainer.innerHTML = '';
+                return;
+            }
+            
+            // Hide the key management section
+            document.querySelector('.no-results').style.display = 'none';
+            
+            // Show the notes
+            notesContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1>Your Phonics Notes</h1>
+                    </div>
+                    <p class="entry-desc">These are your securely decrypted phonics notes.</p>
+                    
+                    <div class="instructions">
+                        <h2>Available Topics</h2>
+                        <div class="search-history" id="notesTopicsList">
+                            ${Object.keys(decryptedNotes).map(topic => 
+                                `<div class="history-item">🔍 ${topic}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers to topic items
+            document.querySelectorAll('#notesTopicsList .history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+        }
+        
+        // Handle search
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Add to search history
+            if (!searchHistory.includes(searchTerm)) {
+                searchHistory.unshift(searchTerm);
+                if (searchHistory.length > 10) searchHistory.pop();
+                localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
+            }
+            
+            // Search in the decrypted notes
+            if (decryptedNotes[searchTerm]) {
+                displayNoteTopic(searchTerm);
+                return;
+            }
+            
+            // If not found, show message
+            notesContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1>Topic Not Found</h1>
+                    </div>
+                    <p class="entry-desc">No notes found for "${searchTerm}".</p>
+                    <p>Available topics:</p>
+                    <div class="search-history">
+                        ${Object.keys(decryptedNotes).map(topic => 
+                            `<div class="history-item">🔍 ${topic}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers to topic items
+            document.querySelectorAll('.search-history .history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+        }
+        
+        // Display a specific note topic
+        function displayNoteTopic(topic) {
+            const note = decryptedNotes[topic];
+            if (!note) return;
+            
+            const caseClass = isUppercase ? 'uppercase' : 'lowercase';
+            
+            notesContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1 class="${caseClass}">${topic}</h1>
+                    </div>
+                    <p class="entry-desc ${caseClass}">${note.desc}</p>
+                    
+                    <h3>Examples:</h3>
+                    <div class="examples-grid">
+                        ${note.ex.map((example, index) => 
+                            `<div class="example-item" data-index="${index}">${isUppercase ? example.toUpperCase() : example.toLowerCase()}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers to example items
+            document.querySelectorAll('.example-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+            localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
+        }
+        
+        // Toggle text case
+        function toggleCase() {
+            isUppercase = !isUppercase;
+            
+            // Update all text elements
+            const textElements = document.querySelectorAll('h1, h2, h3, p, .example-item');
+            textElements.forEach(el => {
+                if (isUppercase) {
+                    el.classList.add('uppercase');
+                    el.classList.remove('lowercase');
+                } else {
+                    el.classList.add('lowercase');
+                    el.classList.remove('uppercase');
+                }
+            });
+            
+            localStorage.setItem('dictionaryTextCase', isUppercase ? 'uppercase' : 'lowercase');
+        }
+        
+        // Show notification
+        function showNotification(message, icon, isError = false) {
+            notificationText.textContent = message;
+            notificationIcon.textContent = icon;
+            
+            if (isError) {
+                notification.classList.add('error');
+            } else {
+                notification.classList.remove('error');
+            }
+            
+            notification.classList.add('active');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+        }
+        
+        // Helper functions
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+        
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes;
+        }
+        
+        function chunkString(str, size) {
+            const chunks = [];
+            for (let i = 0; i < str.length; i += size) {
+                chunks.push(str.substr(i, size));
+            }
+            return chunks;
+        }
+        
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        }
+        
+        // Slideshow functions
+        function startSlideshow() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm || !decryptedNotes[searchTerm]) {
+                alert("Please search for a valid topic first");
+                return;
+            }
+            
+            const topic = decryptedNotes[searchTerm];
+            if (topic.ex.length === 0) {
+                alert("No examples available for this topic");
+                return;
+            }
+            
+            currentSlideshow = searchTerm;
+            currentSlideIndex = 0;
+            
+            // Show instruction modal
+            instructionModal.classList.add('active');
+            overlay.classList.add('active');
+        }
+        
+        function beginSlideshow() {
+            // Hide header and show slideshow
+            document.querySelector('header').style.display = 'none';
+            slideshowOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateSlideshow();
+        }
+        
+        function updateSlideshow() {
+            const examples = decryptedNotes[currentSlideshow].ex;
+            slideshowContent.textContent = isUppercase ? examples[currentSlideIndex].toUpperCase() : examples[currentSlideIndex].toLowerCase();
+            slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
+        }
+        
+        function nextSlide() {
+            const examples = decryptedNotes[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex + 1) % examples.length;
+            updateSlideshow();
+        }
+        
+        function prevSlide() {
+            const examples = decryptedNotes[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
+            updateSlideshow();
+        }
+        
+        function closeSlideshow() {
+            slideshowOverlay.classList.remove('active');
+            document.querySelector('header').style.display = 'flex';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchBtn.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Case toggle
+            caseToggle.addEventListener('click', toggleCase);
+            
+            // Help toggle
+            helpToggle.addEventListener('click', () => {
+                showNotification("Search for topics to view their content. Share your public key to receive encrypted notes.", "❓");
+            });
+            
+            // Logo click
+            appLogo.addEventListener('click', () => {
+                // Reset view
+                document.querySelector('.no-results').style.display = 'block';
+                notesContainer.innerHTML = '';
+                searchInput.value = '';
+            });
+            
+            // Key management
+            copyPublicKey.addEventListener('click', () => {
+                navigator.clipboard.writeText(publicKeyText.textContent)
+                    .then(() => showNotification("Public key copied to clipboard", "📋"))
+                    .catch(() => showNotification("Failed to copy public key", "❌", true));
+            });
+            
+            homeCopyPublicKey.addEventListener('click', () => {
+                navigator.clipboard.writeText(homePublicKeyText.textContent)
+                    .then(() => showNotification("Public key copied to clipboard", "📋"))
+                    .catch(() => showNotification("Failed to copy public key", "❌", true));
+            });
+            
+            showPrivateKey.addEventListener('click', () => {
+                privateKeyVisible = !privateKeyVisible;
+                displayPrivateKey();
+            });
+            
+            homeShowPrivateKey.addEventListener('click', () => {
+                privateKeyVisible = !privateKeyVisible;
+                displayPrivateKey();
+            });
+            
+            exportKeys.addEventListener('click', exportKeysToFile);
+            
+            // Load dictionary/notes
+            loadToggle.addEventListener('click', () => {
+                dictionaryFileInput.click();
+            });
+            
+            dictionaryFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    importNotesFromFile(e.target.files[0]);
+                    e.target.value = '';
+                }
+            });
+            
+            // Key panel toggle
+            keyToggle.addEventListener('click', () => {
+                keyPanel.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = keyPanel.classList.contains('active') ? 'hidden' : 'auto';
+            });
+            
+            closeKeyPanel.addEventListener('click', () => {
+                keyPanel.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Existing event listeners for panels
+            historyToggle.addEventListener('click', () => {
+                historyPanel.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            topicsToggle.addEventListener('click', () => {
+                topicsPanel.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            closeHistory.addEventListener('click', () => {
+                historyPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            closeTopics.addEventListener('click', () => {
+                topicsPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            overlay.addEventListener('click', () => {
+                historyPanel.classList.remove('active');
+                topicsPanel.classList.remove('active');
+                keyPanel.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Slideshow functionality
+            slideToggle.addEventListener('click', startSlideshow);
+            slideshowClose.addEventListener('click', closeSlideshow);
+            slideshowTop.addEventListener('click', nextSlide);
+            slideshowBottom.addEventListener('click', prevSlide);
+            closeInstruction.addEventListener('click', () => {
+                instructionModal.classList.remove('active');
+                overlay.classList.remove('active');
+                beginSlideshow();
+            });
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

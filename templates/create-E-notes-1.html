@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Phonics Notes Distributor</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --dark: #212529;
+            --darker: #161b22;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border: #444c56;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), #1a1f2d);
+            color: #e6e6e6;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(25, 30, 45, 0.85);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            color: #a0aec0;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .security-badge {
+            display: inline-block;
+            background: rgba(67, 97, 238, 0.15);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(20, 25, 40, 0.6);
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: #fff;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title i {
+            color: var(--primary);
+            font-size: 1.6rem;
+        }
+        
+        .input-group {
+            margin-bottom: 22px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #cbd5e0;
+            font-size: 0.95rem;
+        }
+        
+        input[type="text"], textarea, input[type="password"], select {
+            width: 100%;
+            padding: 14px;
+            background: rgba(15, 20, 35, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 16px;
+            color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus, input[type="password"]:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+            background: rgba(15, 20, 35, 0.9);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3a56e0, #2f0ca3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--success), #2d9cc9);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #3ab9e0, #278fb3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f72585, #b5175e);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #e01c74, #9c1451);
+            transform: translateY(-2px);
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .dictionary-preview {
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            background: rgba(15, 20, 35, 0.5);
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #cbd5e0;
+        }
+        
+        .preview-content {
+            white-space: pre-wrap;
+            background: rgba(10, 15, 30, 0.5);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 200px;
+        }
+        
+        .entry-count {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #a0aec0;
+            text-align: right;
+        }
+        
+        .key-display {
+            background: rgba(15, 20, 35, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .key-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+        
+        .security-info {
+            background: rgba(15, 20, 35, 0.7);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        
+        .security-info h3 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .hint-text {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            margin-top: 5px;
+        }
+        
+        .topic-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .topic-item {
+            background: rgba(15, 20, 35, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topic-name {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .topic-desc {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            color: #a0aec0;
+        }
+        
+        .delete-topic {
+            background: rgba(247, 37, 133, 0.2);
+            border: none;
+            color: #f72585;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        
+        .delete-topic:hover {
+            background: rgba(247, 37, 133, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Secure Phonics Notes Distributor</h1>
+            <p class="subtitle">Create and encrypt phonics notes using student's public key for secure distribution</p>
+            <div class="security-badge">
+                <i>🔒</i> RSA-OAEP Encryption | AES-GCM Encryption | Secure Content Distribution
+            </div>
+        </header>
+        
+        <div class="app-container">
+            <div class="card">
+                <div class="card-title">
+                    <i>📝</i> Create Phonics Notes
+                </div>
+                
+                <div class="input-group">
+                    <label for="topic">Topic:</label>
+                    <input type="text" id="topic" placeholder="e.g., Vowels, Consonants, CVC Words">
+                </div>
+                
+                <div class="input-group">
+                    <label for="desc">Description:</label>
+                    <textarea id="desc" rows="4" placeholder="Detailed explanation of the phonics concept"></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="ex">Examples (comma separated):</label>
+                    <input type="text" id="ex" placeholder="e.g., cat, bat, rat, hat">
+                </div>
+                
+                <div class="button-group">
+                    <button id="addBtn" class="btn btn-primary">
+                        <i>+</i> Add Entry
+                    </button>
+                </div>
+                
+                <div class="topic-list" id="topicList">
+                    <!-- Topics will be added here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <i>🔒</i> Secure Export
+                </div>
+                
+                <div class="input-group">
+                    <label for="publicKey">Student's Public Key:</label>
+                    <textarea id="publicKey" rows="5" placeholder="Paste student's public key here" style="font-family: monospace;"></textarea>
+                    <p class="hint-text">Get this from the student's Secure Phonics Explorer app</p>
+                </div>
+                
+                <div class="key-actions">
+                    <button id="pasteKeyBtn" class="btn btn-secondary">
+                        <i>📋</i> Paste Key
+                    </button>
+                    <button id="clearKeyBtn" class="btn btn-danger">
+                        <i>×</i> Clear
+                    </button>
+                </div>
+                
+                <div class="key-display" id="keyPreview">
+                    <div style="color: #6c757d; text-align: center; padding: 20px;">
+                        No public key entered. Paste student's public key above.
+                    </div>
+                </div>
+                
+                <div class="dictionary-preview">
+                    <div class="preview-content" id="preview">
+                        {
+          "vowels": {
+            "desc": "There are 5 Short vowels and 5 long vowels. Sometimes /y/ can act as a vowel.",
+            "ex": ["a", "e", "i", "o", "u", "y"]
+          },
+          "consonants": {
+            "desc": "There are 21 consonants.",
+            "ex": ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"]
+          }
+        }
+                    </div>
+                    <div class="entry-count" id="entryCount">2 entries</div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="exportBtn" class="btn btn-primary">
+                        <i>🔒</i> Encrypt & Export Notes
+                    </button>
+                    <button id="clearBtn" class="btn btn-danger">
+                        <i>×</i> Clear All
+                    </button>
+                </div>
+                
+                <div class="security-info">
+                    <h3><i>🔐</i> Security Note</h3>
+                    <p>All notes are encrypted using the student's public key. Only the student with the matching private key can decrypt and view the content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notificationIcon">✅</span>
+        <span id="notificationText">Notification message</span>
+    </div>
+
+    <script>
+        // Initialize dictionary
+        let dictionary = {
+            "vowels": {
+                "desc": "There are 5 Short vowels and 5 long vowels. Sometimes /y/ can act as a vowel.",
+                "ex": ["a", "e", "i", "o", "u", "y"]
+            },
+            "consonants": {
+                "desc": "There are 21 consonants.",
+                "ex": ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"]
+            }
+        };
+        
+        // DOM elements
+        const topicInput = document.getElementById('topic');
+        const descInput = document.getElementById('desc');
+        const exInput = document.getElementById('ex');
+        const addBtn = document.getElementById('addBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const preview = document.getElementById('preview');
+        const entryCount = document.getElementById('entryCount');
+        const publicKeyInput = document.getElementById('publicKey');
+        const keyPreview = document.getElementById('keyPreview');
+        const pasteKeyBtn = document.getElementById('pasteKeyBtn');
+        const clearKeyBtn = document.getElementById('clearKeyBtn');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const topicList = document.getElementById('topicList');
+        
+        // Initialize the app
+        function init() {
+            updatePreview();
+            updateTopicList();
+            
+            // Add event listeners
+            addBtn.addEventListener('click', addEntry);
+            exportBtn.addEventListener('click', exportNotes);
+            clearBtn.addEventListener('click', clearAll);
+            pasteKeyBtn.addEventListener('click', pasteKey);
+            clearKeyBtn.addEventListener('click', clearKey);
+            
+            // Update key preview when input changes
+            publicKeyInput.addEventListener('input', updateKeyPreview);
+            
+            // Allow Enter to add entry
+            topicInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter') addEntry();
+            });
+            
+            exInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter') addEntry();
+            });
+        }
+        
+        // Add entry to dictionary
+        function addEntry() {
+            const topic = topicInput.value.trim();
+            const desc = descInput.value.trim();
+            const ex = exInput.value.trim();
+            
+            if (!topic || !desc) {
+                showNotification('Please fill in topic and description', '⚠️', true);
+                return;
+            }
+            
+            // Create or update topic
+            dictionary[topic] = {
+                desc: desc,
+                ex: ex ? ex.split(',').map(item => item.trim()) : []
+            };
+            
+            // Update UI
+            updatePreview();
+            updateTopicList();
+            
+            // Clear inputs
+            topicInput.value = '';
+            descInput.value = '';
+            exInput.value = '';
+            
+            // Focus back to topic input
+            topicInput.focus();
+            
+            showNotification(`Added topic: ${topic}`, '✅');
+        }
+        
+        // Delete a topic
+        function deleteTopic(topic) {
+            if (confirm(`Delete topic "${topic}"?`)) {
+                delete dictionary[topic];
+                updatePreview();
+                updateTopicList();
+                showNotification(`Deleted topic: ${topic}`, '🗑️');
+            }
+        }
+        
+        // Update topic list UI
+        function updateTopicList() {
+            topicList.innerHTML = '';
+            
+            if (Object.keys(dictionary).length === 0) {
+                topicList.innerHTML = '<div style="color: #6c757d; text-align: center; padding: 20px;">No topics added yet</div>';
+                return;
+            }
+            
+            for (const [topic, data] of Object.entries(dictionary)) {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <div>
+                        <div class="topic-name">${topic}</div>
+                        <div class="topic-desc">${data.desc.substring(0, 60)}${data.desc.length > 60 ? '...' : ''}</div>
+                    </div>
+                    <button class="delete-topic" data-topic="${topic}">×</button>
+                `;
+                topicList.appendChild(topicItem);
+            }
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-topic').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    deleteTopic(btn.dataset.topic);
+                });
+            });
+        }
+        
+        // Update preview panel
+        function updatePreview() {
+            if (Object.keys(dictionary).length === 0) {
+                preview.textContent = 'No entries yet. Add topics to see preview.';
+            } else {
+                preview.textContent = JSON.stringify(dictionary, null, 2);
+            }
+            entryCount.textContent = `${Object.keys(dictionary).length} entries`;
+        }
+        
+        // Paste key from clipboard
+        async function pasteKey() {
+            try {
+                const text = await navigator.clipboard.readText();
+                publicKeyInput.value = text;
+                updateKeyPreview();
+                showNotification('Public key pasted from clipboard', '📋');
+            } catch (err) {
+                showNotification('Could not paste from clipboard', '⚠️', true);
+            }
+        }
+        
+        // Clear key
+        function clearKey() {
+            publicKeyInput.value = '';
+            updateKeyPreview();
+            showNotification('Public key cleared', '🗑️');
+        }
+        
+        // Update key preview display
+        function updateKeyPreview() {
+            const publicKey = publicKeyInput.value.trim();
+            
+            if (!publicKey) {
+                keyPreview.innerHTML = '<div style="color: #6c757d; text-align: center; padding: 20px;">No public key entered. Paste student\'s public key above.</div>';
+                return;
+            }
+            
+            if (!publicKey.includes('-----BEGIN PUBLIC KEY-----')) {
+                keyPreview.innerHTML = '<div style="color: #f72585; text-align: center; padding: 20px;">⚠️ Invalid key format - missing header</div>';
+                return;
+            }
+            
+            // Format key for display
+            const keyHeader = publicKey.split('-----BEGIN PUBLIC KEY-----')[1]
+                .split('-----END PUBLIC KEY-----')[0]
+                .trim();
+            
+            const keyLines = [];
+            for (let i = 0; i < keyHeader.length; i += 64) {
+                keyLines.push(keyHeader.substring(i, i + 64));
+            }
+            
+            keyPreview.innerHTML = `
+                <div style="color: #4361ee; font-weight: 500;">-----BEGIN PUBLIC KEY-----</div>
+                ${keyLines.map(line => `<div>${line}</div>`).join('')}
+                <div style="color: #4361ee; font-weight: 500;">-----END PUBLIC KEY-----</div>
+            `;
+        }
+        
+        // Export notes using public key encryption
+        async function exportNotes() {
+            const publicKeyPem = publicKeyInput.value.trim();
+            
+            // Validate inputs
+            if (Object.keys(dictionary).length === 0) {
+                showNotification('No entries to export', '⚠️', true);
+                return;
+            }
+            
+            if (!publicKeyPem || !publicKeyPem.includes('-----BEGIN PUBLIC KEY-----')) {
+                showNotification('Please provide a valid RSA public key in PEM format', '⚠️', true);
+                return;
+            }
+            
+            // Set filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `phonics_notes_${dateStr}.json`;
+            
+            // Encrypt and export
+            try {
+                await exportWithPublicKey(filename, publicKeyPem);
+                showNotification(`Notes encrypted and saved as ${filename}`, '✅');
+            } catch (error) {
+                console.error('Encryption error:', error);
+                showNotification(`Encryption failed: ${error.message}`, '❌', true);
+            }
+        }
+        
+        // Export using public key encryption
+        async function exportWithPublicKey(filename, publicKeyPem) {
+            const jsonStr = JSON.stringify(dictionary, null, 2);
+            
+            try {
+                // Import the public key
+                const publicKey = await importPublicKey(publicKeyPem);
+                
+                // Generate a random AES key for content encryption
+                const aesKey = await crypto.subtle.generateKey(
+                    { name: "AES-GCM", length: 256 },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+                
+                // Encrypt the content with AES
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const contentBuffer = new TextEncoder().encode(jsonStr);
+                const encryptedContent = await crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv },
+                    aesKey,
+                    contentBuffer
+                );
+                
+                // Export the AES key and encrypt it with RSA
+                const exportedKey = await crypto.subtle.wrapKey(
+                    "raw",
+                    aesKey,
+                    publicKey,
+                    { name: "RSA-OAEP" }
+                );
+                
+                // Create final export object
+                const exportObj = {
+                    encrypted: true,
+                    version: "2.0",
+                    algorithm: "RSA-OAEP + AES-GCM",
+                    timestamp: new Date().toISOString(),
+                    iv: Array.from(iv),
+                    encryptedKey: Array.from(new Uint8Array(exportedKey)),
+                    encryptedData: Array.from(new Uint8Array(encryptedContent))
+                };
+                
+                const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Encryption error:', error);
+                throw new Error('Failed to encrypt with provided public key');
+            }
+        }
+        
+        // Import RSA public key from PEM format
+        async function importPublicKey(pem) {
+            // Extract base64 portion between headers
+            const pemHeader = "-----BEGIN PUBLIC KEY-----";
+            const pemFooter = "-----END PUBLIC KEY-----";
+            
+            const pemContents = pem
+                .split(pemHeader)[1]
+                .split(pemFooter)[0]
+                .replace(/\s+/g, '')
+                .trim();
+            
+            // Base64 decode
+            const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+            
+            // Import the public key
+            return await crypto.subtle.importKey(
+                "spki",
+                binaryDer,
+                { name: "RSA-OAEP", hash: "SHA-256" },
+                true,
+                ["wrapKey"]
+            );
+        }
+        
+        // Clear all entries
+        function clearAll() {
+            if (Object.keys(dictionary).length === 0 || confirm('Are you sure you want to clear all entries?')) {
+                dictionary = {};
+                updatePreview();
+                updateTopicList();
+                showNotification('All entries cleared', '🗑️');
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, icon, isError = false) {
+            notificationText.textContent = message;
+            notificationIcon.textContent = icon;
+            
+            if (isError) {
+                notification.classList.add('error');
+            } else {
+                notification.classList.remove('error');
+            }
+            
+            notification.classList.add('active');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
