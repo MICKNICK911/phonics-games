@@ -3,14 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phonics Explorer</title>
+    <title>Elites Phonics Notes</title>
     <style>
+        /* Prevent touch highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        /* New splash screen styles */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #29c702, #017507);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .bullet-line {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: -25px;
+        }
+
+        .bullet {
+            display: flex;
+            margin-right: -20px;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+        
+        .splash-content {
+            text-align: center;
+            padding: 30px;
+            max-width: 80%;
+        }
+        
+        .splash-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            border: 5px solid #1447ee;
+        }
+        
+        .splash-logo-inner {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #29c702, #017507);
+            background-image: url('../assets/images/shooter.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .splash-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .splash-subtitle {
+            font-size: 24px;
+            font-weight: 500;
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 4px;
+            transition: width 5s linear;
+        }
+        
+        /* Updated theme colors to orange and gold */
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3a0ca3;
-            --accent-color: #f72585;
-            --export-color: #34a853;
-            --builder-color: #7209b7;
+            --primary-color: #29c702;
+            --secondary-color: #740264;
+            --accent-color: #ff5722;
+            --export-color: #665404;
+            --builder-color: #02500d;
             --bg-color: #ffffff;
             --text-color: #333333;
             --card-bg: #f8f9fa;
@@ -21,11 +129,11 @@
         }
 
         .dark-theme {
-            --primary-color: #4895ef;
-            --secondary-color: #560bad;
-            --accent-color: #f72585;
-            --export-color: #2d9249;
-            --builder-color: #9d4edd;
+            --primary-color: #29c702;
+            --secondary-color: #740264;
+            --accent-color: #ff8a65;
+            --export-color: #81c784;
+            --builder-color: #ba68c8;
             --bg-color: #121212;
             --text-color: #f8f9fa;
             --card-bg: #1e1e1e;
@@ -48,14 +156,14 @@
             min-height: 100vh;
             padding-bottom: 40px;
             background-image: 
-                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0) 25%),
-                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.05) 0%, rgba(247, 37, 133, 0) 25%);
+                radial-gradient(circle at 15% 50%, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0) 25%);
         }
 
         .dark-theme body {
             background-image: 
-                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.08) 0%, rgba(67, 97, 238, 0) 25%),
-                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.08) 0%, rgba(247, 37, 133, 0) 25%);
+                radial-gradient(circle at 15% 50%, rgba(255, 152, 0, 0.08) 0%, rgba(255, 152, 0, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 193, 7, 0.08) 0%, rgba(255, 193, 7, 0) 25%);
         }
 
         .container {
@@ -72,6 +180,7 @@
             z-index: 100;
             backdrop-filter: blur(8px);
             background-color: rgba(var(--bg-color-rgb), 0.8);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .header-content {
@@ -109,7 +218,7 @@
 
         .search-container:focus-within {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
         }
 
         .search-container input {
@@ -147,7 +256,7 @@
             gap: 10px;
         }
 
-        .theme-toggle, .case-toggle, .history-toggle, 
+        .theme-toggle, .history-toggle, 
         .topics-toggle, .help-toggle, .load-toggle,
         .export-toggle, .slide-toggle {
             width: 44px;
@@ -164,7 +273,7 @@
             font-size: 18px;
         }
 
-        .theme-toggle:hover, .case-toggle:hover, 
+        .theme-toggle:hover, 
         .history-toggle:hover, .topics-toggle:hover,
         .help-toggle:hover, .load-toggle:hover,
         .export-toggle:hover, .slide-toggle:hover {
@@ -220,15 +329,41 @@
         }
 
         .entry-header h1 {
-            font-size: 32px;
+            font-size: 42px;
             color: var(--primary-color);
             margin-bottom: 10px;
         }
 
         .entry-desc {
-            font-size: 18px;
+            font-size: 35px;
             margin-bottom: 25px;
             line-height: 1.7;
+            white-space: pre-line; /* Preserve line breaks */
+        }
+
+        /* Text formatting styles */
+        .formatted-text .bold {
+            font-weight: bold;
+        }
+
+        .formatted-text .italic {
+            font-style: italic;
+        }
+
+        .formatted-text .underline {
+            text-decoration: underline;
+        }
+
+        .formatted-text .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .formatted-text .bullet {
+            display: inline-block;
+            width: 1.5em;
+            color: var(--primary-color);
+            font-weight: bold;
         }
 
         .examples-grid {
@@ -246,7 +381,7 @@
             text-align: center;
             cursor: pointer;
             transition: var(--transition);
-            font-size: 18px;
+            font-size: 30px;
             font-weight: 500;
         }
 
@@ -261,14 +396,6 @@
             color: white;
             border-color: var(--primary-color);
             transform: scale(1.03);
-        }
-
-        .uppercase {
-            text-transform: uppercase;
-        }
-
-        .lowercase {
-            text-transform: lowercase;
         }
 
         .instructions {
@@ -321,14 +448,14 @@
 
         .history-panel {
             position: fixed;
-            top: var(--header-height);
+            top: 0;
             right: 0;
             width: 300px;
             height: calc(100vh - var(--header-height));
             background: var(--card-bg);
             box-shadow: -5px 0 15px rgba(0,0,0,0.1);
             padding: 20px;
-            z-index: 90;
+            z-index: 9999;
             transform: translateX(100%);
             transition: transform 0.3s ease;
             overflow-y: auto;
@@ -399,14 +526,14 @@
         /* Topics Panel */
         .topics-panel {
             position: fixed;
-            top: var(--header-height);
+            top: 0;
             left: 0;
             width: 300px;
             height: calc(100vh - var(--header-height));
             background: var(--card-bg);
             box-shadow: 5px 0 15px rgba(0,0,0,0.1);
             padding: 20px;
-            z-index: 90;
+            z-index: 9999;
             transform: translateX(-100%);
             transition: transform 0.3s ease;
             overflow-y: auto;
@@ -467,9 +594,11 @@
             z-index: 200;
             max-width: 600px;
             width: 90%;
+            height: 50%;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            overflow: auto;
         }
 
         .instructions-modal.active {
@@ -517,7 +646,7 @@
         }
 
         .feature-highlight {
-            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+            background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 30px;
             border-radius: 16px;
@@ -863,6 +992,43 @@
         }
         
         @media (max-width: 768px) {
+            .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
+            
             .slideshow-content {
                 font-size: 48px;
             }
@@ -906,9 +1072,64 @@
             .builder-form {
                 padding: 20px;
             }
+            
+            .splash-logo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .splash-logo-inner {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+            
+            .splash-title {
+                font-size: 28px;
+            }
+            
+            .splash-subtitle {
+                font-size: 20px;
+            }
         }
 
         @media (max-width: 480px) {
+            .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
             .slideshow-content {
                 font-size: 36px;
             }
@@ -939,7 +1160,7 @@
                 gap: 5px;
             }
             
-            .theme-toggle, .case-toggle, 
+            .theme-toggle, 
             .history-toggle, .topics-toggle,
             .help-toggle, .load-toggle,
             .export-toggle, .slide-toggle {
@@ -956,16 +1177,43 @@
             .builder-btn {
                 width: 100%;
             }
+            
+            .splash-title {
+                font-size: 24px;
+            }
+            
+            .splash-subtitle {
+                font-size: 18px;
+            }
+            
+            .loading-bar {
+                width: 250px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="splash-logo-inner"></div>
+            </div>
+            <h1 class="splash-title">Elites Phonics</h1>
+            <p class="splash-subtitle">Digital-Notes</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App -->
     <div class="overlay" id="overlay"></div>
     
     <!-- Dictionary Notification -->
     <div class="dictionary-notification" id="dictionaryNotification">
         <span id="notificationIcon">✅</span>
-        <span id="notificationText">Dictionary loaded successfully!</span>
+        <span id="notificationText">Notes loaded successfully!</span>
     </div>
     
     <!-- Hidden file input for dictionary loading -->
@@ -976,7 +1224,7 @@
         <div class="builder-header">
             <div class="builder-title">
                 <span>📝</span>
-                <h2>Dictionary Builder</h2>
+                <h2>Create Notes</h2>
             </div>
             <div class="builder-actions">
                 <button class="builder-btn builder-cancel" id="builderCancel">Cancel</button>
@@ -992,7 +1240,7 @@
             
             <div class="input-group">
                 <label for="builderDesc">Description:</label>
-                <textarea id="builderDesc" rows="3" placeholder="Enter description text"></textarea>
+                <textarea id="builderDesc" rows="3" placeholder="Enter description text (supports multi-line and formatting)"></textarea>
             </div>
             
             <div class="input-group">
@@ -1006,7 +1254,7 @@
             
             <div class="builder-preview">
                 <div class="preview-header">
-                    <h3 class="preview-title">Dictionary Preview</h3>
+                    <h3 class="preview-title">Notes Preview</h3>
                     <button class="preview-clear" id="previewClear">Clear All</button>
                 </div>
                 <pre class="preview-content" id="builderPreview">No entries yet</pre>
@@ -1029,7 +1277,6 @@
         <p>You are now in slide mode. The control panel is hidden to maximize your viewing experience.</p>
         <p>Tap the <strong>top half</strong> of the screen to go to the next example.</p>
         <p>Tap the <strong>bottom half</strong> of the screen to go to the previous example.</p>
-        <p>Text case toggle applies to the slide content as well.</p>
         <button id="closeInstruction">Start Slideshow</button>
     </div>
     
@@ -1062,18 +1309,25 @@
             <div class="close-modal" id="closeModal">✕</div>
         </div>
         <div class="modal-content">
-            <p>Welcome to the Dictionary Explorer! Here's how to get started:</p>
+            <p>Welcome to the Digital-Notes! Here's how to get started:</p>
             <ul>
                 <li><strong>🔍 Search</strong> - Enter a topic in the search field to see its details</li>
                 <li><strong>📚 Topics</strong> - Click the topics button to browse all available topics</li>
                 <li><strong>🕒 History</strong> - View your recent searches with the history button</li>
                 <li><strong>🌙 Theme</strong> - Toggle between light and dark mode</li>
-                <li><strong>🔤 Case</strong> - Switch between uppercase and lowercase text</li>
                 <li><strong>📂 Load</strong> - Import your own dictionary from a JSON file</li>
-                <li><strong>📝 Export</strong> - Create and export custom dictionaries</li>
+                <li><strong>📝 Export</strong> - Create and export custom Notes</li>
                 <li><strong>❓ Help</strong> - Click the help button to see these instructions again</li>
             </ul>
             <p>You can click on examples to highlight them for better focus.</p>
+            <p><strong>Text Formatting Guide:</strong></p>
+            <ul>
+                <li><strong>*text*</strong> - <b>Bold text</b></li>
+                <li><strong>_text_</strong> - <i>Italic text</i></li>
+                <li><strong>-text-</strong> - <u>Underlined text</u></li>
+                <li><strong>[text]</strong> - <span class="highlight">Colored text</span></li>
+                <li><strong>+ text</strong> - Bullet point (must be at start of line with space after +)</li>
+            </ul>
             <p>Start exploring by searching for a topic or browsing the available topics!</p>
         </div>
     </div>
@@ -1083,7 +1337,7 @@
             <div class="header-content">
                 <div class="logo" id="appLogo">
                     <span>📚</span>
-                    <span>Phonics Explorer</span>
+                    <span>Digital Notes Basic</span>
                 </div>
                 <div class="search-container">
                     <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
@@ -1092,10 +1346,10 @@
                     </button>
                 </div>
                 <div class="controls">
-                    <div class="load-toggle" id="loadToggle" title="Load Dictionary">
+                    <div class="load-toggle" id="loadToggle" title="Load Dictionary" style="display: none;">
                         📂
                     </div>
-                    <div class="export-toggle" id="exportToggle" title="Create Dictionary">
+                    <div class="export-toggle" id="exportToggle" title="Create Dictionary" style="display: none;">
                         📝
                     </div>
                     <div class="topics-toggle" id="topicsToggle" title="Browse Topics">
@@ -1103,9 +1357,6 @@
                     </div>
                     <div class="history-toggle" id="historyToggle" title="View History">
                         🕒
-                    </div>
-                    <div class="case-toggle" id="caseToggle" title="Toggle Case">
-                        🔤
                     </div>
                     <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
                         🌙
@@ -1123,14 +1374,14 @@
         <main class="results-container" id="resultsContainer">
             <div class="no-results">
                 <span>📖</span>
-                <h2>Phonics Explorer</h2>
+                <h2>Digital Notes</h2>
                 <p>Search for topics to see their details and examples</p>
                 <p>Try these examples:</p>
                 <div class="search-history">
-                    <div class="history-item">🔍 vowels</div>
-                    <div class="history-item">🔍 consonants</div>
-                    <div class="history-item">🔍 cvc</div>
-                    <div class="history-item">🔍 cvce</div>
+                    <div class="history-item">🔍 noun</div>
+                    <div class="history-item">🔍 pronoun</div>
+                    <div class="history-item">🔍 adjective</div>
+                    <div class="history-item">🔍 adverb</div>
                 </div>
             </div>
             
@@ -1142,7 +1393,25 @@
     </div>
 
     <script>
-        // Predefined dictionary
+        // Show splash screen and animate loading bar
+        const splashScreen = document.getElementById('splashScreen');
+        const loadingProgress = document.getElementById('loadingProgress');
+        
+        // Start loading animation
+        loadingProgress.style.width = '100%';
+        
+        // Hide splash screen after 5 seconds
+        setTimeout(() => {
+            splashScreen.style.opacity = '0';
+            splashScreen.style.pointerEvents = 'none';
+            
+            // Remove splash screen after transition completes
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+            }, 800);
+        }, 5000);
+        
+         // Predefined dictionary
         const DEFAULT_LESSONS = {
             "vowels": {
                 "desc": "There are 5 Short vowels and 5 long vowels. Sometimes /y/ can act as a vowel.",
@@ -1200,77 +1469,23 @@
             },
             
             "blend words": {
-                "desc": "practice these werds",
-                "ex": `blow grass twin part text
-clap pray dwell cold pets
-flap trap squat help last
-glad scan task work
-plan skin rasp half
-slap smart sand wept
-brass snip went soft scrap
-crab spin pink fact split
-drop step jump milk spray
-frog swim hard salt strap`.trim().split(/[\s,\n]/).map(s => s.trim()),
+                "desc": "practice these words",
+                "ex": `blow grass twin part text clap pray dwell cold pets flap trap squat help last glad scan task work plan skin rasp half slap smart sand wept brass snip went soft scrap crab spin pink fact split drop step jump milk spray frog swim hard salt strap`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
             
             "digraphs": {
-                "desc": "digraphs are 2 or more consonants standing together in a word and makes 1 sound",
-                "ex": `ch-3,tch,th-2,ng,nk,sh,ck,ph,wh,gn,kn,gh-3,wr chat pitch that thin sing pink shot lock graph when gnat knot ghana wrap mechanic machine want watch when whip was wash which whisk water what whiff wish`.trim().split(/[\s,\n]/).map(s => s.trim()),
+                "desc": "digraphs are [2] or more consonants standing together in a word and makes [1] sound",
+                "ex": `ch...,tch,th..,ng,nk,sh,ck,ph,wh,gn,kn,gh...,wr chat pitch that thin sing pink shot lock graph when gnat knot ghana wrap mechanic machine want watch when whip was wash which whisk water what whiff wish`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
             
             "blends and digraphs": {
                 "desc": "practice these words.",
-                "ex": `black fling skin spill bland flip skip spin blend flit slam spit blink flock slap spot bliss flop slash spun
-block clung sled spunk
-blush glad slip stab
-clang gland slot stack
-clank glass slum stand
-clap plan slush stem
-clench plant smack step
-click plop smash stiff
-cliff plot smell still
-clinch pluck smelt stop
-cling plum smug stub
-clink plus snap stuck
-clip scalp snip stuff
-clock scat snob swam
-club scotch snub swell
-flag scat snuff swept
-flap scuff snug swift
-flash scum span swim
-flat sketch spank swing
-fled skid spat switch
-flesh skill spell
-brag crunch frump grin
-brand crust fresh prank
-brass drag French press
-brim drank Fred prim
-brick drop frog print
-bring drum frock track
-branch drink grand trap
-brush dress grass trick
-crab drunk grasp trim
-crash drip grant trip
-cramp drug gruff trot
-crack Fran grog truck
-crib Frank grip trend
-crop frost grunt
-`.trim().split(/[\s,\n]/).map(s => s.trim()),
+                "ex": `black fling skin spill bland flip skip spin blend flit slam spit blink flock slap spot bliss flop slash spun block clung sled spunk blush glad slip stab clang gland slot stack clank glass slum stand clap plan slush stem clench plant smack step click plop smash stiff cliff plot smell still clinch pluck smelt stop cling plum smug stub clink plus snap stuck clip scalp snip stuff clock scat snob swam club scotch snub swell flag scat snuff swept flap scuff snug swift flash scum span swim flat sketch spank swing fled skid spat switch flesh skill spell brag crunch frump grin brand crust fresh prank brass drag French press brim drank Fred prim brick drop frog print bring drum frock track branch drink grand trap brush dress grass trick crab drunk grasp trim crash drip grant trip cramp drug gruff trot crack Fran grog truck crib Frank grip trend crop frost grunt`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
             
             "vowel-consonant digraphs": {
                 "desc": "vowel-consonant digraphs are digraphs that begins with a vowel",
-                "ex": `ang ing ong ung ank ink onk unk bang ding wing song
-gang ping-pong king hung
-hang ring thing lung
-rang sing gong rung
-sang thing-a-ling long sung
-bank link sink chunk
-bunk mink wink thank
-dunk pink tank honk
-monk bonk 
-kink rink sank think
-`.trim().split(/[\s,\n]/).map(s => s.trim()),
+                "ex": `ang ing ong ung ank ink onk unk bang ding wing song gang ping-pong king hung hang ring thing lung rang sing gong rung sang thing-a-ling long sung bank link sink chunk bunk mink wink thank dunk pink tank honk monk bonk kink rink sank think`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
             
             "cvce": {
@@ -1371,6 +1586,7 @@ kink rink sank think
             },
         };
 
+
         // Current dictionary
         let lessons = { ...DEFAULT_LESSONS };
         
@@ -1386,7 +1602,6 @@ kink rink sank think
         const searchBtn = document.getElementById('searchBtn');
         const resultsContainer = document.getElementById('resultsContainer');
         const themeToggle = document.getElementById('themeToggle');
-        const caseToggle = document.getElementById('caseToggle');
         const historyToggle = document.getElementById('historyToggle');
         const topicsToggle = document.getElementById('topicsToggle');
         const helpToggle = document.getElementById('helpToggle');
@@ -1426,7 +1641,6 @@ kink rink sank think
 
         // State
         let isDarkTheme = false;
-        let isUppercase = false;
         const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
         
         // Slideshow state
@@ -1443,11 +1657,37 @@ kink rink sank think
             if (savedDictionary) {
                 try {
                     lessons = JSON.parse(savedDictionary);
-                    showNotification('Custom dictionary loaded', '✅');
+                    showNotification('Custom Notes loaded successfully', '✅');
                 } catch (e) {
-                    console.error('Failed to load saved dictionary:', e);
-                    showNotification('Error loading saved dictionary', '❌', true);
+                    console.error('Failed to load saved Notes:', e);
+                    showNotification('Error loading Notes', '❌', true);
                 }
+                
+                // Allow pressing Enter in builder inputs
+    [builderTopic, builderDesc, builderEx].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                builderAdd.click();
+            }
+        });
+    });
+
+    // ADD THIS NEW CODE FOR TEXTAREA LINE BREAKS:
+    builderDesc.addEventListener('keydown', function(e) {
+        // Allow Enter to create new lines in the description textarea
+        if (e.key === 'Enter' && e.target === builderDesc) {
+            e.preventDefault();
+            
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            this.value = this.value.substring(0, start) + '\n' + this.value.substring(end);
+            
+            this.selectionStart = this.selectionEnd = start + 1;
+        }
+    });
+
             }
             
             // Add dictionary load event listener
@@ -1510,20 +1750,14 @@ kink rink sank think
                 toggleTheme();
             }
             
-            // Set text case from localStorage if available
-            const savedCase = localStorage.getItem('dictionaryTextCase');
-            if (savedCase === 'uppercase') {
-                toggleCase();
-            }
-            
             // Check if instructions have been shown before
             const instructionsShown = localStorage.getItem('instructionsShown');
             if (!instructionsShown) {
-                // Show instructions after a short delay
+                // Show instructions after splash screen
                 setTimeout(() => {
                     toggleInstructionsModal();
                     localStorage.setItem('instructionsShown', 'true');
-                }, 500);
+                }, 5500);
             }
             
             // Event listeners
@@ -1533,7 +1767,6 @@ kink rink sank think
             });
             
             themeToggle.addEventListener('click', toggleTheme);
-            caseToggle.addEventListener('click', toggleCase);
             historyToggle.addEventListener('click', toggleHistoryPanel);
             topicsToggle.addEventListener('click', toggleTopicsPanel);
             helpToggle.addEventListener('click', toggleInstructionsModal);
@@ -1542,7 +1775,7 @@ kink rink sank think
                 resultsContainer.innerHTML = `
                     <div class="no-results">
                         <span>📖</span>
-                        <h2>Phonics Explorer</h2>
+                        <h2>Digital Notes</h2>
                         <p>Search for topics to see their details and examples</p>
                         <p>Try these examples:</p>
                         <div class="search-history">
@@ -1587,11 +1820,68 @@ kink rink sank think
             renderTopicsList();
         }
         
+        // Format text with custom markers
+        function formatText(text) {
+    if (!text) return '';
+    
+    // Split text into lines
+    const lines = text.split('\n');
+    const formattedLines = lines.map(line => {
+        // Check for bullet points
+        if (line.trim().startsWith('+')) {
+            return `<div class="bullet-line"><span class="bullet">•</span> ${line.substring(1)}</div>`;
+        }
+        
+        // Apply inline formatting
+        let formattedLine = line;
+        const patterns = [
+            { regex: /\*(.*?)\*/g, replacement: '<span class="bold">$1</span>' },
+            { regex: /_(.*?)_/g, replacement: '<span class="italic">$1</span>' },
+            { regex: /-(.*?)-/g, replacement: '<span class="underline">$1</span>' },
+            { regex: /\[(.*?)\]/g, replacement: '<span class="highlight">$1</span>' }
+        ];
+        
+        patterns.forEach(pattern => {
+            formattedLine = formattedLine.replace(pattern.regex, pattern.replacement);
+        });
+        
+        return formattedLine;
+    });
+    
+    return `<div class="formatted-text">${formattedLines.join('<br>')}</div>`;
+}
+        
         // Add entry to builder dictionary
         function addBuilderEntry() {
             const topic = builderTopic.value.trim();
             const desc = builderDesc.value.trim();
             const ex = builderEx.value.trim();
+            
+            // Allow pressing Enter in builder inputs
+    [builderTopic, builderDesc, builderEx].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                builderAdd.click();
+            }
+        });
+    });
+
+    // ADD THIS NEW CODE FOR TEXTAREA LINE BREAKS:
+    builderDesc.addEventListener('keydown', function(e) {
+        // Allow Enter to create new lines in the description textarea
+        if (e.key === 'Enter' && e.target === builderDesc) {
+            e.preventDefault();
+            
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            this.value = this.value.substring(0, start) + '\n' + this.value.substring(end);
+            
+            this.selectionStart = this.selectionEnd = start + 1;
+        }
+    });
+
             
             if (!topic || !desc || !ex) {
                 alert('Please fill in all fields');
@@ -1635,7 +1925,7 @@ kink rink sank think
             
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
-            const filename = `custom_dictionary_${dateStr}.json`;
+            const filename = `E_Notes_${dateStr}.json`;
             
             const jsonStr = JSON.stringify(builderDictionary, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -1649,7 +1939,7 @@ kink rink sank think
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showNotification(`Dictionary exported as ${filename}`, '📤', false, true);
+            showNotification(`Notes exported as ${filename}`, '📤', false, true);
         }
 
         // Handle file selection for dictionary
@@ -1672,7 +1962,7 @@ kink rink sank think
                     }
                     
                     if (!isValid) {
-                        throw new Error('Invalid dictionary structure');
+                        throw new Error('Invalid Note structure');
                     }
                     
                     // Update the dictionary
@@ -1683,7 +1973,7 @@ kink rink sank think
                     
                     // Update UI
                     renderTopicsList();
-                    showNotification('Dictionary loaded successfully!', '✅');
+                    showNotification('Notes loaded successfully!', '✅');
                     
                     // Clear the file input
                     dictionaryFileInput.value = '';
@@ -1691,8 +1981,8 @@ kink rink sank think
                     // Reset to home screen
                     appLogo.click();
                 } catch (error) {
-                    console.error('Error loading dictionary:', error);
-                    showNotification('Error loading dictionary. Invalid format.', '❌', true);
+                    console.error('Error loading No:', error);
+                    showNotification('Error loading Notes. Invalid format.', '❌', true);
                 }
             };
             
@@ -1787,16 +2077,14 @@ kink rink sank think
                 return;
             }
             
-            const caseClass = isUppercase ? 'uppercase' : 'lowercase';
-            
             resultsContainer.innerHTML = `
                 <div class="entry-card">
                     <div class="entry-header">
-                        <h1 class="${caseClass}">${term}</h1>
+                        <h1>${term}</h1>
                     </div>
-                    <p class="entry-desc ${caseClass}">${topic.desc}</p>
+                    <div class="entry-desc">${formatText(topic.desc)}</div>
                     
-                    <h3>Examples:</h3>
+                    <h3>Examples & Word Bank:</h3>
                     <div class="examples-grid">
                         ${topic.ex.map((example, index) => 
                             `<div class="example-item" data-index="${index}">${example}</div>`
@@ -1819,25 +2107,6 @@ kink rink sank think
             document.body.classList.toggle('dark-theme', isDarkTheme);
             themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
             localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
-        }
-
-        // Toggle text case
-        function toggleCase() {
-            isUppercase = !isUppercase;
-            
-            // Update all text elements
-            const textElements = document.querySelectorAll('h1, h2, h3, p, .example-item');
-            textElements.forEach(el => {
-                if (isUppercase) {
-                    el.classList.add('uppercase');
-                    el.classList.remove('lowercase');
-                } else {
-                    el.classList.add('lowercase');
-                    el.classList.remove('uppercase');
-                }
-            });
-            
-            localStorage.setItem('dictionaryTextCase', isUppercase ? 'uppercase' : 'lowercase');
         }
 
         // Toggle history panel
@@ -1965,15 +2234,6 @@ kink rink sank think
             const examples = lessons[currentSlideshow].ex;
             slideshowContent.textContent = examples[currentSlideIndex];
             slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
-            
-            // Apply text case
-            if (isUppercase) {
-                slideshowContent.classList.add('uppercase');
-                slideshowContent.classList.remove('lowercase');
-            } else {
-                slideshowContent.classList.add('lowercase');
-                slideshowContent.classList.remove('uppercase');
-            }
         }
         
         function nextSlide() {
@@ -1994,8 +2254,8 @@ kink rink sank think
             document.body.style.overflow = 'auto';
         }
 
-        // Initialize app
-        init();
+        // Initialize app after splash screen
+        setTimeout(init, 5000);
         
         // Add keyboard navigation for slideshow
         document.addEventListener('keydown', (e) => {

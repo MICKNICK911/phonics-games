@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Phonics Explorer</title>
+    <title>Elites Phonics Pro</title>
     <style>
+         /* Prevent touch highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
         :root {
             --primary-color: #4361ee;
             --secondary-color: #3a0ca3;
@@ -213,6 +218,8 @@
             margin-top: 30px;
             box-shadow: var(--shadow);
             border-left: 4px solid var(--primary-color);
+            height: 70vh;
+            overflow: auto;
         }
         
         .key-management h2 {
@@ -368,7 +375,7 @@
         }
 
         .entry-desc {
-            font-size: 18px;
+            font-size: 28px;
             margin-bottom: 25px;
             line-height: 1.7;
         }
@@ -463,14 +470,15 @@
 
         .history-panel {
             position: fixed;
-            top: var(--header-height);
+            /* top: var(--header-height); */
+            top: 0;
             right: 0;
             width: 300px;
             height: calc(100vh - var(--header-height));
             background: var(--card-bg);
             box-shadow: -5px 0 15px rgba(0,0,0,0.1);
             padding: 20px;
-            z-index: 90;
+            z-index: 9999;
             transform: translateX(100%);
             transition: transform 0.3s ease;
             overflow-y: auto;
@@ -541,15 +549,16 @@
         /* Topics Panel */
         .topics-panel {
             position: fixed;
-            top: var(--header-height);
-            right: 0;
+            /* top: var(--header-height); */
+            top: 0;
+            left: 0;
             width: 300px;
             height: calc(100vh - var(--header-height));
             background: var(--card-bg);
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
             padding: 20px;
-            z-index: 90;
-            transform: translateX(100%);
+            z-index: 9999;
+            transform: translateX(-100%);
             transition: transform 0.3s ease;
             overflow-y: auto;
         }
@@ -808,6 +817,32 @@
             color: var(--accent-color);
         }
 
+         /* Text formatting styles */
+        .formatted-text .bold {
+            font-weight: bold;
+        }
+
+        .formatted-text .italic {
+            font-style: italic;
+        }
+
+        .formatted-text .underline {
+            text-decoration: underline;
+        }
+
+        .formatted-text .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .formatted-text .bullet {
+            display: inline-block;
+            width: 1.5em;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+
         @media (max-width: 768px) {
             .slideshow-content {
                 font-size: 48px;
@@ -836,6 +871,12 @@
             
             .entry-header h1 {
                 font-size: 28px;
+            }
+
+            .entry-desc {
+                font-size: 18px;
+                margin-bottom: 25px;
+                line-height: 1.7;
             }
             
             .examples-grid {
@@ -876,6 +917,12 @@
             
             .entry-card {
                 padding: 20px;
+            }
+
+            .entry-desc {
+                font-size: 18px;
+                margin-bottom: 25px;
+                line-height: 1.7;
             }
             
             .history-item {
@@ -969,12 +1016,12 @@
                 <div id="publicKeyText">Generating keys...</div>
             </div>
             
-            <h3>Private Key (Keep this secure):</h3>
-            <div class="key-box" id="privateKeyBox">
+            <!-- <h3>Private Key (Keep this secure):</h3> -->
+            <div class="key-box" id="privateKeyBox" style="display: none;">
                 <div id="privateKeyText">Stored securely on this device</div>
             </div>
             
-            <div class="key-actions">
+            <div class="key-actions" style="display: none;">
                 <button class="btn btn-primary" id="showPrivateKey">
                     <i class="btn-icon">👁️</i> View Private Key
                 </button>
@@ -990,7 +1037,7 @@
             <div class="header-content">
                 <div class="logo" id="appLogo">
                     <span>🔐</span>
-                    <span>Secure Phonics Explorer</span>
+                    <span>Elites Phonics Pro</span>
                 </div>
                 <div class="search-container">
                     <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
@@ -1579,7 +1626,7 @@
                     <div class="entry-header">
                         <h1 class="${caseClass}">${topic}</h1>
                     </div>
-                    <p class="entry-desc ${caseClass}">${note.desc}</p>
+                    <p class="entry-desc ${caseClass}">${formatText(note.desc)}</p>
                     
                     <h3>Examples:</h3>
                     <div class="examples-grid">
@@ -1846,6 +1893,38 @@
                 overlay.classList.remove('active');
                 beginSlideshow();
             });
+        }
+
+        // Format text with custom markers
+        function formatText(text) {
+            if (!text) return '';
+    
+                // Split text into lines
+                const lines = text.split('\n');
+                const formattedLines = lines.map(line => {
+                    
+                // Check for bullet points
+                if (line.trim().startsWith('+')) {
+                    return `<div class="bullet-line"><span class="bullet">•</span> ${line.substring(1)}</div>`;
+                }
+                
+                // Apply inline formatting
+                let formattedLine = line;
+                const patterns = [
+                    { regex: /\*(.*?)\*/g, replacement: '<span class="bold">$1</span>' },
+                    { regex: /_(.*?)_/g, replacement: '<span class="italic">$1</span>' },
+                    { regex: /-(.*?)-/g, replacement: '<span class="underline">$1</span>' },
+                    { regex: /\[(.*?)\]/g, replacement: '<span class="highlight">$1</span>' }
+                ];
+                
+                patterns.forEach(pattern => {
+                    formattedLine = formattedLine.replace(pattern.regex, pattern.replacement);
+                });
+                
+                return formattedLine;
+            });
+            
+            return `<div class="formatted-text">${formattedLines.join('<br>')}</div>`;
         }
         
         // Initialize the app
