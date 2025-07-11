@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Phonics Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease;
+        }
+        
+        .splash-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 30px;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .avatar-container {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 30px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .avatar {
+            font-size: 70px;
+            color: white;
+        }
+        
+        .app-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .app-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: #a0c4ff;
+        }
+        
+        .author-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .author-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 40px;
+            overflow: hidden;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4e9af1, #2ecc71);
+            border-radius: 10px;
+            transition: width 3s ease;
+        }
+        
+        /* Main App */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        header {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            background: rgba(25, 25, 35, 0.9);
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            border-radius: 0 0 20px 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #4e9af1;
+            cursor: pointer;
+        }
+        
+        .logo span {
+            font-size: 28px;
+        }
+        
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .search-container:focus-within {
+            border-color: #4e9af1;
+            box-shadow: 0 0 0 3px rgba(78, 154, 241, 0.3);
+        }
+        
+        .search-container input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .search-container input:focus {
+            outline: none;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-btn:hover {
+            background: linear-gradient(135deg, #3a75c4, #2a5a9c);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .theme-toggle, 
+        .history-toggle, .topics-toggle,
+        .help-toggle, .load-toggle, .slide-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 30, 40, 0.8);
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #a0c4ff;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .theme-toggle:hover, 
+        .history-toggle:hover, .topics-toggle:hover,
+        .help-toggle:hover, .load-toggle:hover,
+        .slide-toggle:hover {
+            background: #4e9af1;
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .results-container {
+            padding: 30px 0;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 50px auto;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+        }
+        
+        .no-results span {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            color: #4e9af1;
+        }
+        
+        .entry-card {
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #4e9af1;
+            animation: fadeIn 0.5s ease;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .entry-header h1 {
+            font-size: 32px;
+            color: #4e9af1;
+            margin-bottom: 10px;
+        }
+        
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            color: #a0c4ff;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .example-item {
+            background: rgba(40, 40, 50, 0.6);
+            border: 1px solid rgba(100, 181, 246, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: #4e9af1;
+        }
+        
+        .example-item.selected {
+            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            color: white;
+            border-color: #4e9af1;
+            transform: scale(1.03);
+        }
+        
+        .feature-highlight {
+            background: linear-gradient(135deg, rgba(78, 154, 241, 0.2), rgba(46, 204, 113, 0.2));
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+        }
+        
+        .feature-highlight h2 {
+            margin-bottom: 15px;
+            color: #4e9af1;
+        }
+        
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .password-modal-content {
+            background: linear-gradient(135deg, #1e2749, #2d3b5b);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+        }
+        
+        .password-modal h2 {
+            margin-bottom: 20px;
+            color: #4e9af1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            background: rgba(20, 20, 30, 0.7);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .password-error {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .password-modal button {
+            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .password-modal button:hover {
+            background: linear-gradient(135deg, #3a75c4, #2a5a9c);
+            transform: translateY(-2px);
+        }
+        
+        /* Markdown styling */
+        .markdown-content strong {
+            color: #64b5f6;
+            font-weight: bold;
+        }
+        
+        .markdown-content em {
+            font-style: italic;
+            color: #a0c4ff;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+            padding-left: 30px;
+            margin: 15px 0;
+        }
+        
+        .markdown-content li {
+            margin-bottom: 8px;
+        }
+        
+        .markdown-content code {
+            background: rgba(20, 20, 30, 0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        /* History Panel */
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: calc(100vh - 80px);
+            background: rgba(30, 30, 40, 0.95);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            padding: 20px;
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(100, 181, 246, 0.3);
+        }
+        
+        .history-panel.active {
+            transform: translateX(0);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .history-item-panel {
+            background: rgba(40, 40, 50, 0.6);
+            border: 1px solid rgba(100, 181, 246, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item-panel:hover {
+            border-color: #4e9af1;
+            background: rgba(78, 154, 241, 0.2);
+        }
+        
+        .history-item-panel .time {
+            font-size: 12px;
+            color: #a0c4ff;
+        }
+        
+        .close-history {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+        
+        /* Topics Panel */
+        .topics-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: calc(100vh - 80px);
+            background: rgba(30, 30, 40, 0.95);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            padding: 20px;
+            z-index: 9999;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(100, 181, 246, 0.3);
+        }
+        
+        .topics-panel.active {
+            transform: translateX(0);
+        }
+        
+        .topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .topics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .topic-item {
+            background: rgba(40, 40, 50, 0.6);
+            border: 1px solid rgba(100, 181, 246, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .topic-item:hover {
+            border-color: #4e9af1;
+            background: rgba(78, 154, 241, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 80;
+            display: none;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        /* Slideshow */
+        .slideshow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(25, 25, 35, 0.95);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .slideshow-overlay.active {
+            display: flex;
+        }
+        
+        .slideshow-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+        
+        .slideshow-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+        
+        .slideshow-content {
+            font-size: 72px;
+            text-align: center;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 2;
+            font-weight: bold;
+            color: #4e9af1;
+        }
+        
+        .slideshow-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            color: #a0c4ff;
+            z-index: 2;
+        }
+        
+        .slideshow-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 30, 40, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 3;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            color: #a0c4ff;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+        }
+        
+        .slideshow-close:hover {
+            background: #4e9af1;
+            color: white;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .controls {
+                order: 2;
+            }
+            
+            .entry-header h1 {
+                font-size: 28px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .history-panel, .topics-panel {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                gap: 5px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .entry-card {
+                padding: 20px;
+            }
+            
+            .slideshow-content {
+                font-size: 48px;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Light Theme */
+        body.light-theme {
+            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+            color: #333;
+        }
+        
+        body.light-theme header {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.light-theme .search-container {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(100, 181, 246, 0.5);
+        }
+        
+        body.light-theme .search-container input {
+            color: #333;
+        }
+        
+        body.light-theme .no-results,
+        body.light-theme .entry-card,
+        body.light-theme .feature-highlight {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+        }
+        
+        body.light-theme .example-item {
+            background: rgba(240, 240, 240, 0.9);
+            color: #333;
+            border: 1px solid rgba(100, 181, 246, 0.5);
+        }
+        
+        body.light-theme .history-panel,
+        body.light-theme .topics-panel {
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        body.light-theme .history-item-panel,
+        body.light-theme .topic-item {
+            background: rgba(240, 240, 240, 0.9);
+            color: #333;
+            border: 1px solid rgba(100, 181, 246, 0.5);
+        }
+        
+        body.light-theme .password-modal-content {
+            background: linear-gradient(135deg, #f5f7fa, #e4e7f4);
+        }
+        
+        body.light-theme .password-input {
+            background: rgba(240, 240, 240, 0.9);
+            color: #333;
+        }
+        
+        body.light-theme .slideshow-overlay {
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        body.light-theme .slideshow-content {
+            color: #4361ee;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-content">
+            <div class="avatar-container">
+                <div class="avatar">📚</div>
+            </div>
+            <h1 class="app-title">Phonics Explorer</h1>
+            <p class="app-subtitle">Secure Learning Platform with Military-Grade Encryption</p>
+            
+            <div class="author-info">
+                <div class="author-avatar">
+                    👤
+                </div>
+                <div class="author-name">By EduTech Solutions</div>
+            </div>
+            
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Password Modal -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-modal-content">
+            <h2>🔒 Enter Password</h2>
+            <p>This dictionary is encrypted. Please enter the password:</p>
+            <input type="password" id="filePassword" class="password-input" placeholder="Enter password">
+            <div class="password-error" id="passwordError">Incorrect password. Please try again.</div>
+            <div>
+                <button id="cancelPassword">Cancel</button>
+                <button id="submitPassword">Decrypt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="container" id="appContainer">
+        <header>
+            <div class="header-content">
+                <div class="logo" id="appLogo">
+                    <span>📚</span>
+                    <span>Phonics Explorer</span>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
+                    <button class="search-btn" id="searchBtn">
+                        🔍
+                    </button>
+                </div>
+                <div class="controls">
+                    <div class="load-toggle" id="loadToggle" title="Load Dictionary">
+                        📂
+                    </div>
+                    <div class="topics-toggle" id="topicsToggle" title="Browse Topics">
+                        📚
+                    </div>
+                    <div class="history-toggle" id="historyToggle" title="View History">
+                        🕒
+                    </div>
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                        🌙
+                    </div>
+                    <div class="help-toggle" id="helpToggle" title="Help">
+                        ❓
+                    </div>
+                    <div class="slide-toggle" id="slideToggle" title="Slide Show">
+                        ▶️
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-container" id="resultsContainer">
+            <div class="no-results">
+                <span>📖</span>
+                <h2>Phonics Explorer</h2>
+                <p>Search for topics to see their details and examples</p>
+                <p>Try these examples:</p>
+                <div class="search-history">
+                    <div class="history-item">🔍 vowels</div>
+                    <div class="history-item">🔍 consonants</div>
+                    <div class="history-item">🔍 cvc</div>
+                    <div class="history-item">🔍 cvce</div>
+                </div>
+            </div>
+            
+            <div class="feature-highlight">
+                <h2>📚 Browse All Topics</h2>
+                <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden file input for dictionary loading -->
+    <input type="file" id="dictionaryFileInput" accept=".json" style="display: none;">
+
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h2>📜 Search History</h2>
+            <div class="close-history" id="closeHistory">❌</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- History items will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Topics Panel -->
+    <div class="topics-panel" id="topicsPanel">
+        <div class="topics-header">
+            <h2>📚 All Topics</h2>
+            <div class="close-topics" id="closeTopics">❌</div>
+        </div>
+        <div class="topics-list" id="topicsList">
+            <!-- Topics will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Overlay for panels -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Slideshow -->
+    <div class="slideshow-overlay" id="slideshowOverlay">
+        <div class="slideshow-close" id="slideshowClose">❌</div>
+        <div class="slideshow-top" id="slideshowTop"></div>
+        <div class="slideshow-content" id="slideshowContent"></div>
+        <div class="slideshow-bottom" id="slideshowBottom"></div>
+        <div class="slideshow-indicator" id="slideshowIndicator">1/5</div>
+    </div>
+
+    <script>
+        // Predefined dictionary
+        const DEFAULT_LESSONS = {
+            "vowels": {
+                "desc": "**There are 5 Short vowels and 5 long vowels.** Sometimes /y/ can act as a vowel.\n\n- Short vowels: a, e, i, o, u\n- Long vowels: ā, ē, ī, ō, ū",
+                "ex": `a e i o u y`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "consonants": {
+                "desc": "**There are 21 consonants in the English alphabet.**\n\n- Examples: b, c, d, f, g, h, j, k, l, m, n, p, q, r, s, t, v, w, x, y, z",
+                "ex": `b c d f g h j k l m n p q r s t v w x y z`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "cvc": {
+                "desc": "`CVC` [Consonant Vowel Consonant]:\n\n- A 3-letter word pattern\n- Begins with a consonant\n- Followed by a vowel\n- Ends with a consonant\n\n*Examples: cat, dog, pen*",
+                "ex": `bat cat rat fan man bed net let red pen sit him fix win pin not top hop lot got sun gun fun bus bug gum`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "blends": {
+                "desc": "**Blends** are 2 or more consonants standing together in a word and making 2 or more sounds.\n\n- Examples: bl, cl, fl, gl, pl, nd, nt, sl",
+                "ex": `bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "cvce": {
+                "desc": "**CVCe** pattern:\n\n- When /e/ ends a word and is silent\n- The first vowel in the word is a long vowel\n\n*Examples: mate, make, rate*",
+                "ex": `mate make rate bake take note dote mole hole pole flute mute cute cube tube june ate tame bite tile rope bake tape dime tide sole cane blame dine wife stone cape flame dike wine scone`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "digraphs": {
+                "desc": "**Digraphs** are two letters that make one sound.\n\n- Examples: sh, ch, th, wh, ph, ck, ng, kn, wr",
+                "ex": `ship shop wish chat chip such that them whip when phone graph duck back song ring know knit write wrap`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "diphthongs": {
+                "desc": "**Diphthongs** are sounds formed by the combination of two vowels in a single syllable.\n\n- Examples: oi, oy, ou, ow, au, aw, oo",
+                "ex": `oil coin boy toy out house cow how sauce paw saw book moon`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "r-controlled": {
+                "desc": "**R-controlled vowels** occur when a vowel is followed by an r, which changes the vowel sound.\n\n- Examples: ar, er, ir, or, ur",
+                "ex": `car farm her fern bird shirt fork corn burn turn`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            }
+        };
+
+        // Current dictionary
+        let lessons = { ...DEFAULT_LESSONS };
+        
+        // DOM Elements
+        const splashScreen = document.getElementById('splashScreen');
+        const appContainer = document.getElementById('appContainer');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const slideToggle = document.getElementById('slideToggle');
+        const loadToggle = document.getElementById('loadToggle');
+        const dictionaryFileInput = document.getElementById('dictionaryFileInput');
+        const passwordModal = document.getElementById('passwordModal');
+        const filePasswordInput = document.getElementById('filePassword');
+        const passwordError = document.getElementById('passwordError');
+        const cancelPasswordBtn = document.getElementById('cancelPassword');
+        const submitPasswordBtn = document.getElementById('submitPassword');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const historyToggle = document.getElementById('historyToggle');
+        const topicsToggle = document.getElementById('topicsToggle');
+        const helpToggle = document.getElementById('helpToggle');
+        const appLogo = document.getElementById('appLogo');
+        const historyPanel = document.getElementById('historyPanel');
+        const topicsPanel = document.getElementById('topicsPanel');
+        const closeHistory = document.getElementById('closeHistory');
+        const closeTopics = document.getElementById('closeTopics');
+        const overlay = document.getElementById('overlay');
+        const historyList = document.getElementById('historyList');
+        const topicsList = document.getElementById('topicsList');
+        const slideshowOverlay = document.getElementById('slideshowOverlay');
+        const slideshowContent = document.getElementById('slideshowContent');
+        const slideshowTop = document.getElementById('slideshowTop');
+        const slideshowBottom = document.getElementById('slideshowBottom');
+        const slideshowClose = document.getElementById('slideshowClose');
+        const slideshowIndicator = document.getElementById('slideshowIndicator');
+        
+        // State
+        let isDarkTheme = false;
+        const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
+        let fileToDecrypt = null;
+        let currentSlideshow = null;
+        let currentSlideIndex = 0;
+
+        // Initialize
+        function init() {
+            // Simulate loading progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                loadingProgress.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            splashScreen.style.display = 'none';
+                            appContainer.style.display = 'block';
+                        }, 800);
+                    }, 300);
+                }
+            }, 150);
+            
+            // Set theme from localStorage if available
+            const savedTheme = localStorage.getItem('dictionaryTheme');
+            if (savedTheme === 'dark') {
+                isDarkTheme = true;
+                document.body.classList.add('dark-theme');
+                themeToggle.textContent = '☀️';
+            } else {
+                document.body.classList.add('light-theme');
+                themeToggle.textContent = '🌙';
+            }
+            
+            // Event listeners
+            searchBtn.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            themeToggle.addEventListener('click', toggleTheme);
+            historyToggle.addEventListener('click', toggleHistoryPanel);
+            topicsToggle.addEventListener('click', toggleTopicsPanel);
+            helpToggle.addEventListener('click', toggleHelp);
+            appLogo.addEventListener('click', resetToHome);
+            closeHistory.addEventListener('click', toggleHistoryPanel);
+            closeTopics.addEventListener('click', toggleTopicsPanel);
+            overlay.addEventListener('click', closeAllPanels);
+            slideToggle.addEventListener('click', startSlideshow);
+            slideshowClose.addEventListener('click', closeSlideshow);
+            slideshowTop.addEventListener('click', nextSlide);
+            slideshowBottom.addEventListener('click', prevSlide);
+            
+            // Load dictionary event listeners
+            loadToggle.addEventListener('click', () => {
+                dictionaryFileInput.click();
+            });
+            
+            dictionaryFileInput.addEventListener('change', handleFileSelect);
+            
+            // Password modal event listeners
+            cancelPasswordBtn.addEventListener('click', () => {
+                passwordModal.style.display = 'none';
+                dictionaryFileInput.value = '';
+            });
+            
+            submitPasswordBtn.addEventListener('click', decryptFile);
+            filePasswordInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') decryptFile();
+            });
+            
+            // Render history and topics
+            renderHistoryPanel();
+            renderTopicsList();
+            
+            // Add event listeners to history items
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+        }
+        
+        // Fixed theme toggle function
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            
+            if (isDarkTheme) {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                themeToggle.textContent = '☀️';
+            } else {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                themeToggle.textContent = '🌙';
+            }
+            
+            localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
+        }
+        
+        // Handle file selection for dictionary
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // Store the file content for decryption
+                    fileToDecrypt = JSON.parse(e.target.result);
+                    
+                    // Show password modal
+                    passwordModal.style.display = 'flex';
+                    filePasswordInput.focus();
+                    passwordError.style.display = 'none';
+                    filePasswordInput.value = '';
+                } catch (error) {
+                    console.error('Error reading file:', error);
+                    showNotification('Error reading file. Invalid format.', 'error');
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error reading file', 'error');
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Decrypt file with password
+        async function decryptFile() {
+            const password = filePasswordInput.value;
+            if (!password) {
+                passwordError.textContent = 'Password cannot be empty';
+                passwordError.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const decryptedDictionary = await decryptData(fileToDecrypt, password);
+                
+                // Validate the dictionary structure
+                let isValid = true;
+                for (const key in decryptedDictionary) {
+                    if (!decryptedDictionary[key].desc || !Array.isArray(decryptedDictionary[key].ex)) {
+                        isValid = false;
+                        break;
+                    }
+                }
+                
+                if (!isValid) {
+                    throw new Error('Decrypted content is not a valid dictionary');
+                }
+                
+                // Update the dictionary
+                lessons = decryptedDictionary;
+                
+                // Save to localStorage for persistence
+                localStorage.setItem('customDictionary', JSON.stringify(lessons));
+                
+                // Update UI
+                renderTopicsList();
+                showNotification('Dictionary decrypted successfully!', 'success');
+                
+                // Clear and close
+                passwordModal.style.display = 'none';
+                dictionaryFileInput.value = '';
+                filePasswordInput.value = '';
+                passwordError.style.display = 'none';
+                
+                // Reset to home screen
+                resetToHome();
+            } catch (error) {
+                console.error('Decryption failed:', error);
+                passwordError.textContent = 'Incorrect password or corrupted file';
+                passwordError.style.display = 'block';
+                filePasswordInput.value = '';
+                filePasswordInput.focus();
+            }
+        }
+        
+        // Decrypt data with password
+        async function decryptData(encryptedData, password) {
+            // Convert arrays to Uint8Arrays
+            const salt = new Uint8Array(encryptedData.salt);
+            const iv = new Uint8Array(encryptedData.iv);
+            const ciphertext = new Uint8Array(encryptedData.ciphertext);
+            
+            // Derive key from password
+            const baseKey = await crypto.subtle.importKey(
+                "raw",
+                new TextEncoder().encode(password),
+                "PBKDF2",
+                false,
+                ["deriveBits", "deriveKey"]
+            );
+            
+            // Derive encryption key
+            const key = await crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: salt,
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                baseKey,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["decrypt"]
+            );
+            
+            // Decrypt data
+            const decryptedBuffer = await crypto.subtle.decrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv
+                },
+                key,
+                ciphertext
+            );
+            
+            // Convert to string and parse as JSON
+            const decryptedStr = new TextDecoder().decode(decryptedBuffer);
+            return JSON.parse(decryptedStr);
+        }
+        
+        // Reset to home screen
+        function resetToHome() {
+            resultsContainer.innerHTML = `
+                <div class="no-results">
+                    <span>📖</span>
+                    <h2>Phonics Explorer</h2>
+                    <p>Search for topics to see their details and examples</p>
+                    <p>Try these examples:</p>
+                    <div class="search-history">
+                        ${Object.keys(lessons).map(key => 
+                            `<div class="history-item">🔍 ${key}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="feature-highlight">
+                    <h2>📚 Browse All Topics</h2>
+                    <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                </div>
+            `;
+            
+            // Add event listeners to new history items
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+        }
+        
+        // Search handler
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Add to search history if not already present
+            if (!searchHistory.some(item => item.term === searchTerm)) {
+                searchHistory.unshift({
+                    term: searchTerm,
+                    time: new Date().toISOString()
+                });
+                
+                // Keep only the last 10 searches
+                if (searchHistory.length > 10) {
+                    searchHistory.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
+                
+                // Update history panel
+                renderHistoryPanel();
+            }
+            
+            // Close panels
+            closeAllPanels();
+            
+            // Display results
+            displayResults(searchTerm);
+        }
+        
+        // Display search results
+        function displayResults(term) {
+            const topic = lessons[term];
+            
+            if (!topic) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>🔍</span>
+                        <h2>Topic Not Found</h2>
+                        <p>No results found for "${term}". Try one of these:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+                return;
+            }
+            
+            // Format description with markdown
+            const formattedDesc = formatMarkdown(topic.desc);
+            
+            resultsContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1>${term}</h1>
+                    </div>
+                    <div class="entry-desc markdown-content">${formattedDesc}</div>
+                    
+                    <h3>Examples:</h3>
+                    <div class="examples-grid">
+                        ${topic.ex.map((example, index) => 
+                            `<div class="example-item" data-index="${index}">${example}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers to example items
+            document.querySelectorAll('.example-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+        }
+        
+        // Simple markdown formatting
+        function formatMarkdown(text) {
+            // Bold: **text**
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Italics: *text*
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Code: `text`
+            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+            
+            // Line breaks
+            text = text.replace(/\n/g, '<br>');
+            
+            // Lists
+            text = text.replace(/^- (.*?)(<br>|$)/g, '<li>$1</li>');
+            text = text.replace(/<li>(.*?)<\/li>/g, '<ul><li>$1</li></ul>');
+            
+            return text;
+        }
+        
+        // Toggle history panel
+        function toggleHistoryPanel() {
+            historyPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = historyPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            topicsPanel.classList.remove('active');
+        }
+        
+        // Toggle topics panel
+        function toggleTopicsPanel() {
+            topicsPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = topicsPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            historyPanel.classList.remove('active');
+        }
+        
+        // Show help
+        function toggleHelp() {
+            alert("Welcome to Phonics Explorer!\n\n- Search for phonics topics\n- Click examples to highlight them\n- Load encrypted dictionaries with the folder icon\n- Use the slideshow for focused practice");
+        }
+        
+        // Close all panels
+        function closeAllPanels() {
+            historyPanel.classList.remove('active');
+            topicsPanel.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Render history panel
+        function renderHistoryPanel() {
+            historyList.innerHTML = '';
+            
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<p>No search history yet</p>';
+                return;
+            }
+            
+            searchHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item-panel';
+                historyItem.innerHTML = `
+                    <div class="term">🔍 ${item.term}</div>
+                    <div class="time">${formatTime(item.time)}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    searchInput.value = item.term;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Render topics list
+        function renderTopicsList() {
+            topicsList.innerHTML = '';
+            
+            Object.keys(lessons).forEach(topic => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <span>📄</span>
+                    <div>${topic}</div>
+                `;
+                
+                topicItem.addEventListener('click', () => {
+                    searchInput.value = topic;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                topicsList.appendChild(topicItem);
+            });
+        }
+        
+        // Format time for display
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Start slideshow
+        function startSlideshow() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm || !lessons[searchTerm]) {
+                showNotification("Please search for a valid topic first", "error");
+                return;
+            }
+            
+            const topic = lessons[searchTerm];
+            if (topic.ex.length === 0) {
+                showNotification("No examples available for this topic", "error");
+                return;
+            }
+            
+            currentSlideshow = searchTerm;
+            currentSlideIndex = 0;
+            
+            // Hide header and show slideshow
+            document.querySelector('header').style.display = 'none';
+            slideshowOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateSlideshow();
+        }
+        
+        // Update slideshow content
+        function updateSlideshow() {
+            const examples = lessons[currentSlideshow].ex;
+            slideshowContent.textContent = examples[currentSlideIndex];
+            slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
+        }
+        
+        // Next slide
+        function nextSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex + 1) % examples.length;
+            updateSlideshow();
+        }
+        
+        // Previous slide
+        function prevSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
+            updateSlideshow();
+        }
+        
+        // Close slideshow
+        function closeSlideshow() {
+            slideshowOverlay.classList.remove('active');
+            document.querySelector('header').style.display = 'flex';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // Remove existing notifications
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-icon">${type === 'success' ? '✅' : '❌'}</div>
+                <div class="notification-text">${message}</div>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 10px;
+                background: ${type === 'error' ? '#e74c3c' : '#2ecc71'};
+                color: white;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 3s forwards;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.5s ease-in forwards';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+            
+            // Add keyframes for animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
