@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Phonics Explorer</title>
+    <title>Secure Digital Notes</title>
     <style>
+        /* Prevent touch highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +18,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background: linear-gradient(135deg, #0a1a5c, #a01f1f, #0a1a5c);
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
@@ -27,7 +32,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            background: linear-gradient(135deg, #0a1a5c, #a01f1f);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -47,12 +52,12 @@
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            background: linear-gradient(135deg, #3d7ddb, #2a5a9c);
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0 auto 30px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
+            border: 5px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
@@ -71,7 +76,7 @@
         .app-subtitle {
             font-size: 1.5rem;
             margin-bottom: 40px;
-            color: #a0c4ff;
+            color: #8ab4ff;
         }
         
         .author-info {
@@ -113,7 +118,7 @@
         .loading-progress {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #4e9af1, #2ecc71);
+            background: linear-gradient(90deg, #3d7ddb, #2ecc71);
             border-radius: 10px;
             transition: width 3s ease;
         }
@@ -130,12 +135,13 @@
             width: 100%;
             position: sticky;
             top: 0;
-            background: rgba(25, 25, 35, 0.9);
+            background: rgba(15, 15, 25, 0.95);
             z-index: 100;
             backdrop-filter: blur(8px);
             border-radius: 0 0 20px 20px;
             padding: 15px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: block; /* Ensure header is always visible */
         }
         
         .header-content {
@@ -154,8 +160,9 @@
             gap: 10px;
             font-size: 24px;
             font-weight: 700;
-            color: #4e9af1;
+            color: #3d7ddb;
             cursor: pointer;
+            min-width: max-content;
         }
         
         .logo span {
@@ -166,17 +173,17 @@
             display: flex;
             flex: 1;
             max-width: 600px;
-            background: rgba(30, 30, 40, 0.8);
+            background: rgba(20, 20, 30, 0.85);
             border-radius: 50px;
             overflow: hidden;
-            border: 1px solid rgba(100, 181, 246, 0.3);
+            border: 1px solid rgba(80, 150, 220, 0.4);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
         }
         
         .search-container:focus-within {
-            border-color: #4e9af1;
-            box-shadow: 0 0 0 3px rgba(78, 154, 241, 0.3);
+            border-color: #3d7ddb;
+            box-shadow: 0 0 0 3px rgba(61, 125, 219, 0.4);
         }
         
         .search-container input {
@@ -193,7 +200,7 @@
         }
         
         .search-btn {
-            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            background: linear-gradient(135deg, #3d7ddb, #2a5a9c);
             color: white;
             border: none;
             padding: 0 25px;
@@ -206,12 +213,13 @@
         }
         
         .search-btn:hover {
-            background: linear-gradient(135deg, #3a75c4, #2a5a9c);
+            background: linear-gradient(135deg, #2a5a9c, #1a3a6c);
         }
         
         .controls {
             display: flex;
             gap: 10px;
+            min-width: max-content;
         }
         
         .theme-toggle, 
@@ -220,13 +228,13 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(30, 30, 40, 0.8);
-            border: 1px solid rgba(100, 181, 246, 0.3);
+            background: rgba(20, 20, 30, 0.85);
+            border: 1px solid rgba(80, 150, 220, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: #a0c4ff;
+            color: #8ab4ff;
             transition: all 0.3s ease;
             font-size: 18px;
         }
@@ -235,7 +243,7 @@
         .history-toggle:hover, .topics-toggle:hover,
         .help-toggle:hover, .load-toggle:hover,
         .slide-toggle:hover {
-            background: #4e9af1;
+            background: #3d7ddb;
             color: white;
             transform: translateY(-3px);
         }
@@ -247,31 +255,31 @@
         .no-results {
             text-align: center;
             padding: 40px 20px;
-            background: rgba(30, 30, 40, 0.8);
+            background: rgba(20, 20, 30, 0.85);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             max-width: 600px;
             margin: 50px auto;
-            border: 1px solid rgba(100, 181, 246, 0.2);
+            border: 1px solid rgba(80, 150, 220, 0.3);
         }
         
         .no-results span {
             font-size: 48px;
             margin-bottom: 20px;
             display: block;
-            color: #4e9af1;
+            color: #3d7ddb;
         }
         
         .entry-card {
-            background: rgba(30, 30, 40, 0.8);
+            background: rgba(20, 20, 30, 0.85);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 30px;
             margin-bottom: 30px;
             transition: all 0.3s ease;
-            border-left: 4px solid #4e9af1;
+            border-left: 4px solid #3d7ddb;
             animation: fadeIn 0.5s ease;
-            border: 1px solid rgba(100, 181, 246, 0.2);
+            border: 1px solid rgba(80, 150, 220, 0.3);
         }
         
         @keyframes fadeIn {
@@ -282,12 +290,12 @@
         .entry-header {
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         }
         
         .entry-header h1 {
             font-size: 32px;
-            color: #4e9af1;
+            color: #3d7ddb;
             margin-bottom: 10px;
         }
         
@@ -298,6 +306,13 @@
             color: #a0c4ff;
         }
         
+         body.light-theme .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            color: #5D1C24;
+        }
+        
         .examples-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -306,8 +321,8 @@
         }
         
         .example-item {
-            background: rgba(40, 40, 50, 0.6);
-            border: 1px solid rgba(100, 181, 246, 0.2);
+            background: rgba(30, 30, 45, 0.7);
+            border: 1px solid rgba(80, 150, 220, 0.3);
             border-radius: 10px;
             padding: 15px;
             text-align: center;
@@ -321,29 +336,29 @@
         .example-item:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            border-color: #4e9af1;
+            border-color: #3d7ddb;
         }
         
         .example-item.selected {
-            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            background: linear-gradient(135deg, #3d7ddb, #2a5a9c);
             color: white;
-            border-color: #4e9af1;
+            border-color: #3d7ddb;
             transform: scale(1.03);
         }
         
         .feature-highlight {
-            background: linear-gradient(135deg, rgba(78, 154, 241, 0.2), rgba(46, 204, 113, 0.2));
+            background: linear-gradient(135deg, rgba(61, 125, 219, 0.25), rgba(46, 204, 113, 0.25));
             border-radius: 16px;
             padding: 25px;
             margin-top: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             text-align: center;
-            border: 1px solid rgba(100, 181, 246, 0.2);
+            border: 1px solid rgba(80, 150, 220, 0.3);
         }
         
         .feature-highlight h2 {
             margin-bottom: 15px;
-            color: #4e9af1;
+            color: #3d7ddb;
         }
         
         .password-modal {
@@ -352,7 +367,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 2000;
             display: none;
             justify-content: center;
@@ -360,19 +375,19 @@
         }
         
         .password-modal-content {
-            background: linear-gradient(135deg, #1e2749, #2d3b5b);
+            background: linear-gradient(135deg, #0e1c39, #1a2a5c);
             border-radius: 16px;
             padding: 30px;
             max-width: 400px;
             width: 90%;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             text-align: center;
-            border: 1px solid rgba(100, 181, 246, 0.3);
+            border: 1px solid rgba(80, 150, 220, 0.4);
         }
         
         .password-modal h2 {
             margin-bottom: 20px;
-            color: #4e9af1;
+            color: #3d7ddb;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -384,8 +399,8 @@
             padding: 15px;
             margin: 15px 0;
             border-radius: 8px;
-            border: 1px solid rgba(100, 181, 246, 0.3);
-            background: rgba(20, 20, 30, 0.7);
+            border: 1px solid rgba(80, 150, 220, 0.4);
+            background: rgba(10, 10, 20, 0.8);
             color: white;
             font-size: 16px;
         }
@@ -397,7 +412,7 @@
         }
         
         .password-modal button {
-            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            background: linear-gradient(135deg, #3d7ddb, #2a5a9c);
             color: white;
             border: none;
             border-radius: 50px;
@@ -409,35 +424,70 @@
         }
         
         .password-modal button:hover {
-            background: linear-gradient(135deg, #3a75c4, #2a5a9c);
+            background: linear-gradient(135deg, #2a5a9c, #1a3a6c);
             transform: translateY(-2px);
         }
         
         /* Markdown styling */
-        .markdown-content strong {
-            color: #64b5f6;
+        .markdown-content h2.markdown-h2 {
+            font-size: 28px;
+            color: #5ca5f8;
+            margin: 20px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(92, 165, 248, 0.4);
+        }
+
+        .markdown-content h3.markdown-h3 {
+            font-size: 22px;
+            color: #3d7ddb;
+            margin: 18px 0 12px;
+        }
+
+        .markdown-content strong.markdown-strong {
             font-weight: bold;
+            color: #ffd700;
         }
-        
-        .markdown-content em {
+
+        .markdown-content em.markdown-em {
             font-style: italic;
-            color: #a0c4ff;
+            color: #ff9d76;
         }
-        
-        .markdown-content ul, .markdown-content ol {
-            padding-left: 30px;
-            margin: 15px 0;
+
+        .markdown-content u.markdown-u {
+            text-decoration: underline;
+            text-decoration-color: #ff6b6b;
+            text-underline-offset: 3px;
         }
-        
-        .markdown-content li {
-            margin-bottom: 8px;
-        }
-        
-        .markdown-content code {
-            background: rgba(20, 20, 30, 0.7);
+
+        .theme-color {
+            color: #3d7ddb;
+            font-weight: bold;
+            background: rgba(61, 125, 219, 0.15);
             padding: 2px 6px;
             border-radius: 4px;
-            font-family: monospace;
+            display: inline-block;
+            margin: 2px 0;
+        }
+
+        .markdown-content ul.markdown-ul {
+            margin: 15px 0;
+            padding-left: 30px;
+            list-style: none;
+        }
+
+        .markdown-content li.markdown-li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .markdown-content li.markdown-li:before {
+            content: "•";
+            color: #3d7ddb;
+            font-size: 24px;
+            position: absolute;
+            left: 0;
+            top: -3px;
         }
         
         /* History Panel */
@@ -447,7 +497,7 @@
             right: 0;
             width: 300px;
             height: calc(100vh - 80px);
-            background: rgba(30, 30, 40, 0.95);
+            background: rgba(20, 20, 30, 0.95);
             box-shadow: -5px 0 15px rgba(0,0,0,0.3);
             padding: 20px;
             z-index: 9999;
@@ -455,7 +505,7 @@
             transition: transform 0.3s ease;
             overflow-y: auto;
             backdrop-filter: blur(10px);
-            border-left: 1px solid rgba(100, 181, 246, 0.3);
+            border-left: 1px solid rgba(80, 150, 220, 0.4);
         }
         
         .history-panel.active {
@@ -468,7 +518,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         }
         
         .history-list {
@@ -478,8 +528,8 @@
         }
         
         .history-item-panel {
-            background: rgba(40, 40, 50, 0.6);
-            border: 1px solid rgba(100, 181, 246, 0.2);
+            background: rgba(30, 30, 45, 0.7);
+            border: 1px solid rgba(80, 150, 220, 0.3);
             border-radius: 8px;
             padding: 12px;
             cursor: pointer;
@@ -490,13 +540,13 @@
         }
         
         .history-item-panel:hover {
-            border-color: #4e9af1;
-            background: rgba(78, 154, 241, 0.2);
+            border-color: #3d7ddb;
+            background: rgba(61, 125, 219, 0.25);
         }
         
         .history-item-panel .time {
             font-size: 12px;
-            color: #a0c4ff;
+            color: #8ab4ff;
         }
         
         .close-history {
@@ -512,7 +562,7 @@
             left: 0;
             width: 300px;
             height: calc(100vh - 80px);
-            background: rgba(30, 30, 40, 0.95);
+            background: rgba(20, 20, 30, 0.95);
             box-shadow: 5px 0 15px rgba(0,0,0,0.3);
             padding: 20px;
             z-index: 9999;
@@ -520,7 +570,7 @@
             transition: transform 0.3s ease;
             overflow-y: auto;
             backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(100, 181, 246, 0.3);
+            border-right: 1px solid rgba(80, 150, 220, 0.4);
         }
         
         .topics-panel.active {
@@ -533,7 +583,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         }
         
         .topics-list {
@@ -543,8 +593,8 @@
         }
         
         .topic-item {
-            background: rgba(40, 40, 50, 0.6);
-            border: 1px solid rgba(100, 181, 246, 0.2);
+            background: rgba(30, 30, 45, 0.7);
+            border: 1px solid rgba(80, 150, 220, 0.3);
             border-radius: 8px;
             padding: 15px;
             cursor: pointer;
@@ -557,8 +607,8 @@
         }
         
         .topic-item:hover {
-            border-color: #4e9af1;
-            background: rgba(78, 154, 241, 0.2);
+            border-color: #3d7ddb;
+            background: rgba(61, 125, 219, 0.25);
             transform: translateX(5px);
         }
         
@@ -568,7 +618,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 80;
             display: none;
         }
@@ -584,7 +634,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(25, 25, 35, 0.95);
+            background: rgba(15, 15, 25, 0.95);
             z-index: 150;
             display: none;
             flex-direction: column;
@@ -622,7 +672,7 @@
             padding: 20px;
             z-index: 2;
             font-weight: bold;
-            color: #4e9af1;
+            color: #3d7ddb;
         }
         
         .slideshow-indicator {
@@ -632,7 +682,7 @@
             right: 0;
             text-align: center;
             font-size: 18px;
-            color: #a0c4ff;
+            color: #8ab4ff;
             z-index: 2;
         }
         
@@ -641,9 +691,8 @@
             top: 20px;
             right: 20px;
             width: 44px;
-            height: 44px;
             border-radius: 50%;
-            background: rgba(30, 30, 40, 0.8);
+            background: rgba(20, 20, 30, 0.85);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -651,34 +700,36 @@
             font-size: 24px;
             z-index: 3;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: #a0c4ff;
-            border: 1px solid rgba(100, 181, 246, 0.3);
+            color: #8ab4ff;
+            border: 1px solid rgba(80, 150, 220, 0.4);
         }
         
         .slideshow-close:hover {
-            background: #4e9af1;
+            background: #3d7ddb;
             color: white;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-content {
-                flex-direction: column;
+                flex-wrap: wrap;
             }
             
             .logo {
-                order: 1;
-                flex: 1;
+                flex: 1 1 100%;
+                justify-content: center;
+                margin-bottom: 10px;
             }
             
             .search-container {
                 order: 3;
                 width: 100%;
-                margin-top: 15px;
+                margin-top: 10px;
             }
             
             .controls {
                 order: 2;
+                margin: 0 auto;
             }
             
             .entry-header h1 {
@@ -726,63 +777,177 @@
         
         /* Light Theme */
         body.light-theme {
-            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-            color: #333;
+            background: linear-gradient(135deg, #e6f0ff, #d1e0ff);
+            color: #222;
         }
         
         body.light-theme header {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(245, 245, 255, 0.95);
         }
         
         body.light-theme .search-container {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(100, 181, 246, 0.5);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(61, 125, 219, 0.5);
         }
         
         body.light-theme .search-container input {
-            color: #333;
+            color: #222;
         }
         
         body.light-theme .no-results,
         body.light-theme .entry-card,
         body.light-theme .feature-highlight {
-            background: rgba(255, 255, 255, 0.8);
-            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            color: #222;
+            border: 1px solid rgba(61, 125, 219, 0.3);
         }
         
         body.light-theme .example-item {
-            background: rgba(240, 240, 240, 0.9);
-            color: #333;
-            border: 1px solid rgba(100, 181, 246, 0.5);
+            background: rgba(240, 245, 255, 0.95);
+            color: #222;
+            border: 1px solid rgba(61, 125, 219, 0.3);
         }
         
         body.light-theme .history-panel,
         body.light-theme .topics-panel {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(245, 245, 255, 0.95);
         }
         
         body.light-theme .history-item-panel,
         body.light-theme .topic-item {
-            background: rgba(240, 240, 240, 0.9);
-            color: #333;
-            border: 1px solid rgba(100, 181, 246, 0.5);
+            background: rgba(230, 240, 255, 0.95);
+            color: #222;
+            border: 1px solid rgba(61, 125, 219, 0.3);
         }
         
         body.light-theme .password-modal-content {
-            background: linear-gradient(135deg, #f5f7fa, #e4e7f4);
+            background: linear-gradient(135deg, #f0f5ff, #e0ebff);
         }
         
         body.light-theme .password-input {
-            background: rgba(240, 240, 240, 0.9);
-            color: #333;
+            background: rgba(240, 245, 255, 0.95);
+            color: #222;
+            border: 1px solid rgba(61, 125, 219, 0.4);
         }
         
         body.light-theme .slideshow-overlay {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(245, 245, 255, 0.95);
         }
         
         body.light-theme .slideshow-content {
-            color: #4361ee;
+            color: #2a5a9c;
+        }
+        
+        /* Light theme markdown adjustments */
+        body.light-theme .markdown-content h2.markdown-h2 {
+            color: #1a56db;
+            border-bottom: 2px solid rgba(26, 86, 219, 0.4);
+        }
+
+        body.light-theme .markdown-content h3.markdown-h3 {
+            color: #1e429f;
+        }
+
+        body.light-theme .markdown-content strong.markdown-strong {
+            color: #d97706;
+        }
+
+        body.light-theme .markdown-content em.markdown-em {
+            color: #c53030;
+        }
+
+        body.light-theme .markdown-content u.markdown-u {
+            text-decoration-color: #c53030;
+        }
+
+        body.light-theme .theme-color {
+            color: #1a56db;
+            background: rgba(26, 86, 219, 0.15);
+        }
+
+        body.light-theme .markdown-content li.markdown-li:before {
+            color: #1a56db;
+        }
+        
+        body.light-theme .entry-header h1 {
+            color: #1a56db;
+        }
+        
+        body.light-theme .feature-highlight h2 {
+            color: #1a56db;
+        }
+        
+        body.light-theme .no-results span {
+            color: #1a56db;
+        }
+        
+        body.light-theme .entry-card {
+            border-left: 4px solid #1a56db;
+        }
+        
+        body.light-theme .example-item.selected {
+            background: linear-gradient(135deg, #1a56db, #0e3a9c);
+            color: white;
+            border-color: #1a56db;
+        }
+        
+        body.light-theme .search-btn {
+            background: linear-gradient(135deg, #1a56db, #0e3a9c);
+        }
+        
+        body.light-theme .search-btn:hover {
+            background: linear-gradient(135deg, #0e3a9c, #09256c);
+        }
+        
+        body.light-theme .password-modal button {
+            background: linear-gradient(135deg, #1a56db, #0e3a9c);
+        }
+        
+        body.light-theme .password-modal button:hover {
+            background: linear-gradient(135deg, #0e3a9c, #09256c);
+        }
+        
+        body.light-theme .theme-toggle:hover, 
+        body.light-theme .history-toggle:hover, 
+        body.light-theme .topics-toggle:hover,
+        body.light-theme .help-toggle:hover, 
+        body.light-theme .load-toggle:hover,
+        body.light-theme .slide-toggle:hover {
+            background: #1a56db;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 3s forwards;
+        }
+        
+        .notification.success {
+            background: #2ecc71;
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
     </style>
 </head>
@@ -793,14 +958,14 @@
             <div class="avatar-container">
                 <div class="avatar">📚</div>
             </div>
-            <h1 class="app-title">Phonics Explorer</h1>
-            <p class="app-subtitle">Secure Learning Platform with Military-Grade Encryption</p>
+            <h1 class="app-title">Digital Notes</h1>
+            <p class="app-subtitle">Secure Learning Platform</p>
             
             <div class="author-info">
                 <div class="author-avatar">
                     👤
                 </div>
-                <div class="author-name">By EduTech Solutions</div>
+                <div class="author-name">By Sir Michael</div>
             </div>
             
             <div class="loading-bar">
@@ -831,12 +996,6 @@
                     <span>📚</span>
                     <span>Phonics Explorer</span>
                 </div>
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
-                    <button class="search-btn" id="searchBtn">
-                        🔍
-                    </button>
-                </div>
                 <div class="controls">
                     <div class="load-toggle" id="loadToggle" title="Load Dictionary">
                         📂
@@ -856,6 +1015,12 @@
                     <div class="slide-toggle" id="slideToggle" title="Slide Show">
                         ▶️
                     </div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
+                    <button class="search-btn" id="searchBtn">
+                        🔍
+                    </button>
                 </div>
             </div>
         </header>
@@ -919,41 +1084,41 @@
     </div>
 
     <script>
-        // Predefined dictionary
-        const DEFAULT_LESSONS = {
-            "vowels": {
-                "desc": "**There are 5 Short vowels and 5 long vowels.** Sometimes /y/ can act as a vowel.\n\n- Short vowels: a, e, i, o, u\n- Long vowels: ā, ē, ī, ō, ū",
-                "ex": `a e i o u y`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "consonants": {
-                "desc": "**There are 21 consonants in the English alphabet.**\n\n- Examples: b, c, d, f, g, h, j, k, l, m, n, p, q, r, s, t, v, w, x, y, z",
-                "ex": `b c d f g h j k l m n p q r s t v w x y z`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "cvc": {
-                "desc": "`CVC` [Consonant Vowel Consonant]:\n\n- A 3-letter word pattern\n- Begins with a consonant\n- Followed by a vowel\n- Ends with a consonant\n\n*Examples: cat, dog, pen*",
-                "ex": `bat cat rat fan man bed net let red pen sit him fix win pin not top hop lot got sun gun fun bus bug gum`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "blends": {
-                "desc": "**Blends** are 2 or more consonants standing together in a word and making 2 or more sounds.\n\n- Examples: bl, cl, fl, gl, pl, nd, nt, sl",
-                "ex": `bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "cvce": {
-                "desc": "**CVCe** pattern:\n\n- When /e/ ends a word and is silent\n- The first vowel in the word is a long vowel\n\n*Examples: mate, make, rate*",
-                "ex": `mate make rate bake take note dote mole hole pole flute mute cute cube tube june ate tame bite tile rope bake tape dime tide sole cane blame dine wife stone cape flame dike wine scone`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "digraphs": {
-                "desc": "**Digraphs** are two letters that make one sound.\n\n- Examples: sh, ch, th, wh, ph, ck, ng, kn, wr",
-                "ex": `ship shop wish chat chip such that them whip when phone graph duck back song ring know knit write wrap`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "diphthongs": {
-                "desc": "**Diphthongs** are sounds formed by the combination of two vowels in a single syllable.\n\n- Examples: oi, oy, ou, ow, au, aw, oo",
-                "ex": `oil coin boy toy out house cow how sauce paw saw book moon`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            },
-            "r-controlled": {
-                "desc": "**R-controlled vowels** occur when a vowel is followed by an r, which changes the vowel sound.\n\n- Examples: ar, er, ir, or, ur",
-                "ex": `car farm her fern bird shirt fork corn burn turn`.trim().split(/[\s,\n]/).map(s => s.trim()),
-            }
-        };
+        
+const DEFAULT_LESSONS = {
+    "vowels": {
+        "desc": "***Vowels Overview***\n\n**There are 5 short vowels and 5 long vowels.** Sometimes /y/ can act as a vowel.\n\n+ *Short vowels*: a, e, i, o, u\n+ *Long vowels*: ā, ē, ī, ō, ū\n+ _Note_: Vowels are [essential] for syllable formation",
+        "ex": `a e i o u y`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "consonants": {
+        "desc": "***Consonant Basics***\n\n**There are 21 consonants in the English alphabet.**\n\n+ *Examples*: b, c, d, f, g, h, j, k, l, m, n, p, q, r, s, t, v, w, x, y, z\n+ _Function_: -Block- or -modify- airflow",
+        "ex": `b c d f g h j k l m n p q r s t v w x y z`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "cvc": {
+        "desc": "***CVC Pattern***\n\n`CVC` [Consonant Vowel Consonant]:\n\n+ A 3-letter word pattern\n+ Begins with a consonant\n+ Followed by a vowel\n+ Ends with a consonant\n\n*Examples*: -cat-, -dog-, -pen-",
+        "ex": `bat cat rat fan man bed net let red pen sit him fix win pin not top hop lot got sun gun fun bus bug gum`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "blends": {
+        "desc": "***Consonant Blends***\n\n**Blends** are 2 or more consonants standing together in a word and making 2 or more sounds.\n\n+ *Initial blends*: bl, cl, fl, gl, pl\n+ *Final blends*: nd, nt, st\n+ _Key feature_: Each consonant keeps its sound",
+        "ex": `bl cl fl gl pl nd nt sl br cr dr fr mp rd ld lp gr pr tr sc sk rk lf pt ft ct squ st sm sn sp lk lt xt ts sw tw dw`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "cvce": {
+        "desc": "***CVCe Pattern***\n\n**CVCe** (Magic E/Silent E):\n\n+ When /e/ ends a word and is silent\n+ The first vowel in the word becomes long\n+ Changes word meaning: -cap- vs -cape-\n\n*Examples*: mate, make, rate",
+        "ex": `mate make rate bake take note dote mole hole pole flute mute cute cube tube june ate tame bite tile rope bake tape dime tide sole cane blame dine wife stone cape flame dike wine scone`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "digraphs": {
+        "desc": "***Digraphs***\n\n**Digraphs** are two letters that make one sound.\n\n+ *Common examples*: sh, ch, th, wh, ph\n+ *Less common*: ck, ng, kn, wr....\n\n_Important_: Different from blends - creates a [new sound]",
+        "ex": `ship shop wish chat chip such that them whip when phone graph duck back song ring know knit write wrap`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "diphthongs": {
+        "desc": "***Diphthongs***\n**Diphthongs** are sounds formed by the combination of two vowels in a single syllable. \n *Examples*: oi, oy, ou, ow, au, aw, oo\n *Pronunciation*: The sound glides from one vowel to another\n*Word examples*:\n -oil-, -boy-, -house-",
+        "ex": `oil coin boy toy out house cow how sauce paw saw book moon`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    },
+    "r-controlled": {
+        "desc": "***R-Controlled Vowels***\n\n**R-controlled vowels** occur when a vowel is followed by an r, which changes the vowel sound.\n\n+ *Main patterns*: ar, er, ir, or, ur\n+ _Effect_: The 'r' -controls- the vowel sound\n+ *Examples*: car, her, bird, fork, burn",
+        "ex": `car farm her fern bird shirt fork corn burn turn`.trim().split(/[\s,\n]/).map(s => s.trim()),
+    }
+};
 
         // Current dictionary
         let lessons = { ...DEFAULT_LESSONS };
@@ -1344,26 +1509,83 @@
             });
         }
         
-        // Simple markdown formatting
         function formatMarkdown(text) {
-            // Bold: **text**
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Split text into lines
+            const lines = text.split('\n');
+            let output = '';
+            let inList = false;
             
-            // Italics: *text*
-            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            for (let line of lines) {
+                // Trim whitespace
+                line = line.trim();
+                
+                // Skip empty lines
+                if (!line) continue;
+                
+                // Process headings
+                if (line.startsWith('***') && line.endsWith('***')) {
+                    output += `<h2 class="markdown-h2">${processInlineMarkdown(line.slice(3, -3))}</h2>`;
+                    continue;
+                }
+                
+                if (line.startsWith('**') && line.endsWith('**')) {
+                    output += `<h3 class="markdown-h3">${processInlineMarkdown(line.slice(2, -2))}</h3>`;
+                    continue;
+                }
+                
+                // Process list items
+                if (line.startsWith('+ ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        output += '<ul class="markdown-ul">';
+                        inList = true;
+                    }
+                    output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
+                    continue;
+                }
+                
+                // Close list if needed
+                if (inList) {
+                    output += '</ul>';
+                    inList = false;
+                }
+                
+                // Process regular paragraphs
+                output += `<p class="markdown-p">${processInlineMarkdown(line)}</p>`;
+            }
             
-            // Code: `text`
-            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+            // Close list if still open
+            if (inList) {
+                output += '</ul>';
+            }
             
-            // Line breaks
-            text = text.replace(/\n/g, '<br>');
+            return output;
+        }
+        
+        // Process inline markdown formatting
+        function processInlineMarkdown(text) {
             
-            // Lists
-            text = text.replace(/^- (.*?)(<br>|$)/g, '<li>$1</li>');
-            text = text.replace(/<li>(.*?)<\/li>/g, '<ul><li>$1</li></ul>');
+            // Main headings: ***text***
+    text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<h2 class="markdown-h2">$1</h2>');
+    
+    // Sub-headings: **text**
+    text = text.replace(/\*\*([^*]+)\*\*/g, '<h3 class="markdown-h3">$1</h3>');
+    
+            
+            // Bold: *text*
+            text = text.replace(/\*([^*]+)\*/g, '<strong class="markdown-strong">$1</strong>');
+            
+            // Italic: _text_
+            text = text.replace(/_([^_]+)_/g, '<em class="markdown-em">$1</em>');
+            
+            // Underline: -text-
+            text = text.replace(/-([^-]+)-/g, '<u class="markdown-u">$1</u>');
+            
+            // Colored text: [text]
+            text = text.replace(/\[([^\]]+)\]/g, '<span class="theme-color">$1</span>');
             
             return text;
         }
+
         
         // Toggle history panel
         function toggleHistoryPanel() {
@@ -1470,8 +1692,7 @@
             currentSlideshow = searchTerm;
             currentSlideIndex = 0;
             
-            // Hide header and show slideshow
-            document.querySelector('header').style.display = 'none';
+            // Show slideshow
             slideshowOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
             updateSlideshow();
@@ -1501,7 +1722,6 @@
         // Close slideshow
         function closeSlideshow() {
             slideshowOverlay.classList.remove('active');
-            document.querySelector('header').style.display = 'flex';
             document.body.style.overflow = 'auto';
         }
         
@@ -1517,21 +1737,6 @@
                 <div class="notification-icon">${type === 'success' ? '✅' : '❌'}</div>
                 <div class="notification-text">${message}</div>
             `;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 25px;
-                border-radius: 10px;
-                background: ${type === 'error' ? '#e74c3c' : '#2ecc71'};
-                color: white;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 3s forwards;
-            `;
             
             document.body.appendChild(notification);
             
@@ -1540,20 +1745,6 @@
                 notification.style.animation = 'fadeOut 0.5s ease-in forwards';
                 setTimeout(() => notification.remove(), 500);
             }, 3000);
-            
-            // Add keyframes for animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes fadeOut {
-                    from { opacity: 1; }
-                    to { opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
         }
         
         // Initialize app

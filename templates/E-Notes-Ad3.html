@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EliteTech Consult - Educational Digital Tools</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #202124;
+            --gray: #6c757d;
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            font-size: 2.8rem;
+            font-weight: 700;
+        }
+        
+        .logo i {
+            background: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .tagline {
+            font-size: 1.4rem;
+            max-width: 800px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 10px;
+        }
+        
+        .mission {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 900px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            margin-top: 20px;
+            overflow: hidden;
+            max-width: 500px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .app-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .app-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .app-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .app-description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .app-content {
+            padding: 30px;
+        }
+        
+        .features {
+            margin: 20px 0;
+        }
+        
+        .feature {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(67, 97, 238, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateX(5px);
+            background: rgba(67, 97, 238, 0.1);
+        }
+        
+        .feature i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            min-width: 40px;
+        }
+        
+        .feature-content h3 {
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+        
+        .problem-solution {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .problem-solution h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .column h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+        
+        .column ul {
+            list-style: none;
+        }
+        
+        .column li {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .column li:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .column li i {
+            color: var(--success);
+            font-size: 1.2rem;
+            min-width: 25px;
+        }
+        
+        .testimonial {
+            background: linear-gradient(135deg, #4e9af1, #3a75c4);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin: 40px;
+            border-radius: 15px;
+        }
+        
+        .testimonial i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        
+        .testimonial p {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 25px;
+            font-style: italic;
+            line-height: 1.7;
+        }
+        
+        .author {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+            cursor: pointer;
+            border: none;
+        }
+        
+        .cta-button:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.6);
+        }
+        
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .popup {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .popup-overlay.active .popup {
+            transform: scale(1);
+        }
+        
+        .close-popup {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.3s ease;
+        }
+        
+        .close-popup:hover {
+            color: var(--danger);
+        }
+        
+        .popup h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .contact-info {
+            margin-bottom: 25px;
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+        
+        .contact-item i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .popup-button {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .popup-button:hover {
+            background: #27ae60;
+        }
+        
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .logo {
+                flex-direction: row;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .columns {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            .logo i {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .mission {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            header {
+                padding: 20px 15px;
+            }
+            
+            .logo {
+                font-size: 1.8rem;
+            }
+            
+            .logo i {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .problem-solution, .testimonial {
+                margin: 20px 15px;
+                padding: 20px;
+            }
+            
+            .popup {
+                padding: 20px;
+            }
+        }
+        
+        /* Animation Effects */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .app-card, .problem-solution, .testimonial {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .app-card:nth-child(1) { animation-delay: 0.1s; }
+        .app-card:nth-child(2) { animation-delay: 0.2s; }
+        .problem-solution { animation-delay: 0.3s; }
+        .testimonial { animation-delay: 0.4s; }
+        
+        /* Decorative Elements */
+        .decoration {
+            position: absolute;
+            z-index: 0;
+        }
+        
+        .circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            position: absolute;
+            top: -100px;
+            right: -100px;
+        }
+        
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-bottom: 180px solid rgba(247, 37, 133, 0.1);
+            position: absolute;
+            bottom: 50px;
+            left: -50px;
+            transform: rotate(45deg);
+        }
+        
+        /* Section IDs for scrolling */
+        #author-app-section, #user-app-section {
+            scroll-margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Decorative elements -->
+        <div class="decoration circle"></div>
+        <div class="decoration triangle"></div>
+        
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <div>eliteTech Consult</div>
+                </div>
+                <p class="tagline">Transforming Education Through Innovative Digital Solutions</p>
+                <div class="mission">
+                    We create educational digital tools tailored towards the needs of students, teachers, and educational institutes
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-target="author-app-section">Author App</div>
+                    <div class="tab" data-target="user-app-section">User App</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="app-container">
+            <div class="app-card" id="author-app-section">
+                <div class="app-header">
+                    <div class="app-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <h2 class="app-title">Author Application</h2>
+                    <p class="app-description">For Educators & Content Creators</p>
+                </div>
+                <div class="app-content">
+                    <h3>Create Encrypted Educational Content</h3>
+                    <p>Easily build dictionaries, lessons, and study materials with military-grade encryption.</p>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-lock"></i>
+                            <div class="feature-content">
+                                <h3>Secure Content Creation</h3>
+                                <p>Protect your educational materials with AES-256 encryption and password protection</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="fas fa-file-export"></i>
+                            <div class="feature-content">
+                                <h3>Easy Distribution</h3>
+                                <p>Export your content as encrypted JSON files for secure sharing</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="fas fa-shapes"></i>
+                            <div class="feature-content">
+                                <h3>Rich Formatting</h3>
+                                <p>Use markdown to create beautifully formatted educational content</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="cta-button launch-btn">Launch Author App</button>
+                </div>
+            </div>
+            
+            <div class="app-card" id="user-app-section">
+                <div class="app-header">
+                    <div class="app-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h2 class="app-title">User Application</h2>
+                    <p class="app-description">For Students & Learners</p>
+                </div>
+                <div class="app-content">
+                    <h3>Access Educational Content Securely</h3>
+                    <p>Load encrypted educational materials with password access and interactive learning tools.</p>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-key"></i>
+                            <div class="feature-content">
+                                <h3>Secure Access</h3>
+                                <p>Access content with password provided by your instructor</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="fas fa-book-reader"></i>
+                            <div class="feature-content">
+                                <h3>Interactive Learning</h3>
+                                <p>Study with flashcards, search, and slideshow features</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div class="feature-content">
+                                <h3>Anywhere Access</h3>
+                                <p>Works on all devices - desktop, tablet, or mobile</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="cta-button launch-btn">Launch User App</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="problem-solution">
+            <h2><i class="fas fa-exclamation-circle"></i> Problems We Solve in Educational Institutions</h2>
+            
+            <div class="columns">
+                <div class="column">
+                    <h3><i class="fas fa-ban"></i> Current Challenges</h3>
+                    <ul>
+                        <li>
+                            <i class="fas fa-times"></i>
+                            <div>Unauthorized distribution of educational materials</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times"></i>
+                            <div>Difficulty in updating and distributing new content</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times"></i>
+                            <div>Lack of interactive learning tools for students</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times"></i>
+                            <div>Inconsistent content formats across devices</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times"></i>
+                            <div>Limited control over copyrighted materials</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times"></i>
+                            <div>Difficulty tracking content usage</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="column">
+                    <h3><i class="fas fa-check-circle"></i> Our Solutions</h3>
+                    <ul>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <div>Military-grade encryption protects content</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <div>Instant content updates with version control</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <div>Interactive flashcards and slideshow learning</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <div>Fully responsive design for all devices</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <div>Password-controlled access to materials</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-check"></i>
+                            <div>Usage analytics for content creators</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="testimonial">
+            <i class="fas fa-quote-left"></i>
+            <p>"eliteTech Consult has revolutionized how we create and distribute educational content. The encryption ensures our materials remain exclusive to enrolled students, while the user app provides an exceptional learning experience."</p>
+            <div class="author">- Dr. Sarah Johnson, Director of Curriculum Development</div>
+        </div>
+        
+        <footer>
+            <div class="footer-content">
+                <h3>eliteTech Consult</h3>
+                <p>Secure Educational Content Management Platform</p>
+                
+                <div class="footer-links">
+                    <a href="#"><i class="fas fa-lock"></i> Security</a>
+                    <a href="#"><i class="fas fa-book"></i> Features</a>
+                    <a href="#"><i class="fas fa-graduation-cap"></i> For Institutions</a>
+                    <a href="#"><i class="fas fa-question-circle"></i> Support</a>
+                </div>
+                
+                <p>&copy; 2023 eliteTech Consult. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Contact Popup -->
+    <div class="popup-overlay">
+        <div class="popup">
+            <button class="close-popup">&times;</button>
+            <h2>Contact eliteTech Consult</h2>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Mobile: 0545800158</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>WhatsApp: 0545800158</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Email: sirmick04@gmail.com</span>
+                </div>
+            </div>
+            
+            <form id="contact-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="Enter your phone number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="whatsapp">WhatsApp (optional)</label>
+                    <input type="tel" id="whatsapp" placeholder="Enter your WhatsApp number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email (optional)</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                
+                <button type="submit" class="popup-button">
+                    <i class="fab fa-whatsapp"></i> Send via WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality with scrolling
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Get target section ID
+                const targetId = tab.getAttribute('data-target');
+                
+                // Scroll to target section
+                if (targetId) {
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        const headerHeight = document.querySelector('header').offsetHeight;
+                        const targetPosition = targetSection.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+        
+        // Popup functionality
+        const popupOverlay = document.querySelector('.popup-overlay');
+        const closePopup = document.querySelector('.close-popup');
+        const launchButtons = document.querySelectorAll('.launch-btn');
+        const contactForm = document.getElementById('contact-form');
+        
+        // Open popup
+        launchButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                popupOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            });
+        });
+        
+        // Close popup
+        closePopup.addEventListener('click', () => {
+            popupOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Close popup when clicking outside
+        popupOverlay.addEventListener('click', (e) => {
+            if (e.target === popupOverlay) {
+                popupOverlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Form submission
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const whatsapp = document.getElementById('whatsapp').value || phone;
+            const email = document.getElementById('email').value;
+            
+            // Create WhatsApp message
+            const message = `Hello eliteTech Consult!%0A%0A` +
+                            `I'm interested in your educational tools.%0A%0A` +
+                            `*Name:* ${name}%0A` +
+                            `*Phone:* ${phone}%0A` +
+                            `*WhatsApp:* ${whatsapp}%0A` +
+                            `*Email:* ${email || 'Not provided'}%0A%0A` +
+                            `Please contact me with more information.`;
+            
+            // Open WhatsApp
+            window.open(`https://wa.me/233545800158?text=${message}`, '_blank');
+            
+            // Close popup
+            popupOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            contactForm.reset();
+        });
+        
+        // Animation on scroll
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe elements
+        document.querySelectorAll('.app-card, .problem-solution, .testimonial').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
