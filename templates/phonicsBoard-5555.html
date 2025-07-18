@@ -341,29 +341,77 @@
             white-space: pre-line; /* Preserve line breaks */
         }
 
-        /* Text formatting styles */
-        .formatted-text .bold {
-            font-weight: bold;
+         /* Markdown styling */
+        .markdown-content h2.markdown-h2 {
+            font-size: 28px;
+            color: #5ca5f8;
+            margin: 20px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(92, 165, 248, 0.4);
         }
 
-        .formatted-text .italic {
+        .markdown-content h3.markdown-h3 {
+            font-size: 22px;
+            color: #3d7ddb;
+            margin: 18px 0 12px;
+        }
+        
+        .markdown-content h4.markdown-h4 {
+            font-size: 20px;
+            color: #2ecc71;
+            margin: 15px 0 10px;
+        }
+
+        .markdown-content strong.markdown-strong {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .markdown-content em.markdown-em {
             font-style: italic;
+            color: #ff9d76;
         }
 
-        .formatted-text .underline {
+        .markdown-content u.markdown-u {
             text-decoration: underline;
+            text-decoration-color: #ff6b6b;
+            text-underline-offset: 3px;
         }
 
-        .formatted-text .highlight {
-            color: var(--primary-color);
+        .theme-color {
+            color: #3d7ddb;
             font-weight: bold;
-        }
-
-        .formatted-text .bullet {
+            background: rgba(61, 125, 219, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
             display: inline-block;
-            width: 1.5em;
-            color: var(--primary-color);
-            font-weight: bold;
+            margin: 2px 0;
+        }
+
+        .markdown-content ol.markdown-ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        .markdown-content ul.markdown-ul {
+            margin: 15px 0;
+            padding-left: 30px;
+            list-style: none;
+        }
+
+        .markdown-content li.markdown-li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .markdown-content ul.markdown-ul li.markdown-li:before {
+            content: "•";
+            color: #3d7ddb;
+            font-size: 24px;
+            position: absolute;
+            left: 0;
+            top: -3px;
         }
 
         .examples-grid {
@@ -1322,11 +1370,14 @@
             <p>You can click on examples to highlight them for better focus.</p>
             <p><strong>Text Formatting Guide:</strong></p>
             <ul>
-                <li><strong>*text*</strong> - <b>Bold text</b></li>
-                <li><strong>_text_</strong> - <i>Italic text</i></li>
-                <li><strong>-text-</strong> - <u>Underlined text</u></li>
-                <li><strong>[text]</strong> - <span class="highlight">Colored text</span></li>
-                <li><strong>+ text</strong> - Bullet point (must be at start of line with space after +)</li>
+                <li>### Main topic → Large heading</li>
+                <li>## Sub-topic → Medium heading</li>
+                <li># Bold text → Important terms</li>
+                <li>[Colored text] → Key concepts</li>
+                <li>_Underlined text_ → Emphasis</li>
+                <li>*Italic text* → Additional details</li>
+                <li>- Ordered list → Sequential items</li>
+                <li>+ Unordered list → Related items</li>
             </ul>
             <p>Start exploring by searching for a topic or browsing the available topics!</p>
         </div>
@@ -1414,7 +1465,7 @@
          // Predefined dictionary
         const DEFAULT_LESSONS = {
             "vowels": {
-                "desc": "There are 5 Short vowels and 5 long vowels. Sometimes /y/ can act as a vowel.",
+                "desc": "There are [5] *Short* vowels and [5] *long* vowels. Sometimes /y/ can act as a vowel.",
                 "ex": `a e i o u y`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
             "consonants": {
@@ -1556,13 +1607,33 @@
                 "desc": "All makes short stretched vowel sound /or/",
                 "ex": `law cause saw fault crawl haul hawk sauce paw autumn draw vault claw launch yawn Paul dawn fraud pawpaw`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
-            "rhyming words": {
-                "desc": "o",
-                "ex": `o`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            "vowel teams(oa, -oe)": {
+                "desc": "All makes long vowel sound /o/",
+                "ex": `boat toe coat does oak hoe toad woe loaf Joe road goes toast hoed coast tiptoe roast Chloe throat foe`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
-            "rhyming words": {
-                "desc": "o",
-                "ex": `o`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            "vowel team(ow)": {
+                "desc": "All makes long vowel sound /o/",
+                "ex": `row grow follow show flow pillow blow glow window slow`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "vowel teams(-ue, -ew)": {
+                "desc": "All makes long vowel sound /u/",
+                "ex": `glue flew blue news true brew due threw sue grew hue chew clue stew cue crew pursue few subdue blew`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "Diphthong(ow, ou)": {
+                "desc": "All makes 2 sounds sequencially, (a + w)",
+                "ex": `how scout cow found crowd mouse bow out howl sound town count down ground frown shout clown loud now cloud`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "Diphthong(oi, oy)": {
+                "desc": "All makes 2 sounds sequencially, (o + i)",
+                "ex": `boil toy soil joy toil oyster joint Troy coin Joyce spoil decoy oil ploy join deploy foil employ point boy`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "Diphthong(oo, oo)": {
+                "desc": "Makes long /u/ and stretched long /u/",
+                "ex": `boot hood moon shook soon foot roof look spoon hook smooth wood shoot took too book cool stood food good`.trim().split(/[\s,\n]/).map(s => s.trim()),
+            },
+            "Y as a Vowel": {
+                "desc": "Makes short /i/, long /i/ and long /e/",
+                "ex": `myth handy try gym happy cry symbol party dry syrup candy shy hymn thirty sky system sleepy my cymbals funny why lyrics baby ply typical mommy spy pyramid`.trim().split(/[\s,\n]/).map(s => s.trim()),
             },
             "rhyming words": {
                 "desc": "o",
@@ -1821,35 +1892,92 @@
         }
         
         // Format text with custom markers
-        function formatText(text) {
-    if (!text) return '';
-    
-    // Split text into lines
-    const lines = text.split('\n');
-    const formattedLines = lines.map(line => {
-        // Check for bullet points
-        if (line.trim().startsWith('+')) {
-            return `<div class="bullet-line"><span class="bullet">•</span> ${line.substring(1)}</div>`;
+        function formatMarkdown(text) {
+            // Split text into lines
+            const lines = text.split('\n');
+            let output = '';
+            let inOrderedList = false;
+            let inUnorderedList = false;
+            
+            for (let line of lines) {
+                // Trim whitespace
+                line = line.trim();
+                
+                // Skip empty lines
+                if (!line) continue;
+                
+                // Process main topic (###)
+                if (line.startsWith('### ')) {
+                    output += `<h2 class="markdown-h2">${processInlineMarkdown(line.slice(4))}</h2>`;
+                    continue;
+                }
+                
+                // Process sub-topic (##)
+                if (line.startsWith('## ')) {
+                    output += `<h3 class="markdown-h3">${processInlineMarkdown(line.slice(3))}</h3>`;
+                    continue;
+                }
+                
+                // Process bold (#)
+                if (line.startsWith('# ')) {
+                    output += `<strong class="markdown-strong">${processInlineMarkdown(line.slice(2))}</strong>`;
+                    continue;
+                }
+                
+                // Process ordered list (-)
+                if (line.startsWith('- ')) {
+                    if (!inOrderedList) {
+                        output += '<ol class="markdown-ol">';
+                        inOrderedList = true;
+                    }
+                    output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
+                    continue;
+                }
+                
+                // Process unordered list (+)
+                if (line.startsWith('+ ')) {
+                    if (!inUnorderedList) {
+                        output += '<ul class="markdown-ul">';
+                        inUnorderedList = true;
+                    }
+                    output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
+                    continue;
+                }
+                
+                // Close lists if needed
+                if (inOrderedList) {
+                    output += '</ol>';
+                    inOrderedList = false;
+                }
+                if (inUnorderedList) {
+                    output += '</ul>';
+                    inUnorderedList = false;
+                }
+                
+                // Process regular paragraphs
+                output += `<p class="markdown-p">${processInlineMarkdown(line)}</p>`;
+            }
+            
+            // Close lists if still open
+            if (inOrderedList) output += '</ol>';
+            if (inUnorderedList) output += '</ul>';
+            
+            return output;
         }
-        
-        // Apply inline formatting
-        let formattedLine = line;
-        const patterns = [
-            { regex: /\*(.*?)\*/g, replacement: '<span class="bold">$1</span>' },
-            { regex: /_(.*?)_/g, replacement: '<span class="italic">$1</span>' },
-            { regex: /-(.*?)-/g, replacement: '<span class="underline">$1</span>' },
-            { regex: /\[(.*?)\]/g, replacement: '<span class="highlight">$1</span>' }
-        ];
-        
-        patterns.forEach(pattern => {
-            formattedLine = formattedLine.replace(pattern.regex, pattern.replacement);
-        });
-        
-        return formattedLine;
-    });
-    
-    return `<div class="formatted-text">${formattedLines.join('<br>')}</div>`;
-}
+
+        // Process inline markdown formatting
+        function processInlineMarkdown(text) {
+            // Colored text: [text]
+            text = text.replace(/\[([^\]]+)\]/g, '<span class="theme-color">$1</span>');
+            
+            // Underline: _text_
+            text = text.replace(/_([^_]+)_/g, '<u class="markdown-u">$1</u>');
+            
+            // Italic: *text*
+            text = text.replace(/\*([^*]+)\*/g, '<em class="markdown-em">$1</em>');
+            
+            return text;
+        }
         
         // Add entry to builder dictionary
         function addBuilderEntry() {
@@ -2082,7 +2210,7 @@
                     <div class="entry-header">
                         <h1>${term}</h1>
                     </div>
-                    <div class="entry-desc">${formatText(topic.desc)}</div>
+                    <div class="entry-desc">${formatMarkdown(topic.desc)}</div>
                     
                     <h3>Examples & Word Bank:</h3>
                     <div class="examples-grid">
