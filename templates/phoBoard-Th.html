@@ -261,7 +261,8 @@
 
         .theme-toggle, .history-toggle, 
         .topics-toggle, .help-toggle, .load-toggle,
-        .export-toggle, .slide-toggle, .font-toggle {
+        .export-toggle, .slide-toggle, .font-toggle,
+        .case-toggle {
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -279,7 +280,8 @@
         .theme-toggle:hover, 
         .history-toggle:hover, .topics-toggle:hover,
         .help-toggle:hover, .load-toggle:hover,
-        .export-toggle:hover, .slide-toggle:hover, .font-toggle:hover {
+        .export-toggle:hover, .slide-toggle:hover, 
+        .font-toggle:hover, .case-toggle:hover {
             background: var(--primary-color);
             color: white;
         }
@@ -290,6 +292,15 @@
         
         .font-toggle:hover {
             background: #3d7ddb;
+        }
+        
+        .case-toggle:hover {
+            background: #9c27b0;
+        }
+        
+        .case-toggle.active {
+            background: #9c27b0;
+            color: white;
         }
 
         .results-container {
@@ -1315,7 +1326,8 @@
             .theme-toggle, 
             .history-toggle, .topics-toggle,
             .help-toggle, .load-toggle,
-            .export-toggle, .slide-toggle, .font-toggle {
+            .export-toggle, .slide-toggle, .font-toggle,
+            .case-toggle {
                 width: 38px;
                 height: 38px;
                 font-size: 16px;
@@ -1478,6 +1490,7 @@
                 <li><strong>📝 Export</strong> - Create and export custom Notes</li>
                 <li><strong>❓ Help</strong> - Click the help button to see these instructions again</li>
                 <li><strong>🔤 Font Size</strong> - Adjust text size for better readability</li>
+                <li><strong>🔄 Case Toggle</strong> - Toggle between UPPERCASE and lowercase text</li>
             </ul>
             <p>You can click on examples to highlight them for better focus.</p>
             <p><strong>Text Formatting Guide:</strong></p>
@@ -1524,8 +1537,11 @@
                     <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
                         🌙
                     </div>
-                    <div class="font-toggle" id="fontToggle" title="Font Size">
+                    <div class="font-toggle" id="fontToggle" title="Font Size" style="display: none;">
                         🔤
+                    </div>
+                    <div class="case-toggle" id="caseToggle" title="Toggle Case">
+                        Aa
                     </div>
                     <div class="help-toggle" id="helpToggle" title="Help">
                         ❓
@@ -1649,7 +1665,7 @@
     },
   "blends-digraphs": {
       "desc": "## Blends and Digraphs Practice\nWords containing *both patterns*",
-      "ex": ["black", "fling", "skin", "spill", "bland", "flip", "skip", "spin", "blend", "flit", "slam", "spit", "blink", "flock", "slap", "spot", "bliss", "flop", "slash", "spun", "block", "clung", "sled", "spunk", "blush", "glad", "slip", "stab", "clang", "gland", "slot", "stack", "clank", "glass", "slum", "stand", "clap", "plan", "slush", "stem", "clench", "plant", "smack", "step", "click", "plop", "smash", "stiff", "cliff", "plot", "smell", "still", "clinch", "pluck", "smelt", "stop", "cling", "plum", "smug", "stub", "clink", "plus", "snap", "stuck", "clip", "scalp", "snip", "stuff", "clock", "scat", "snob", "swam", "club", "scotch", "snub", "swell", "flag", "scat", "snuff", "swept", "flap", "scuff", "snug", "swift", "flash", "scum", "span", "swim", "flat", "sketch", "spank", "swing", "fled", "skid", "spat", "switch", "flesh", "skill", "spell", "brag", "crunch", "frump", "grin", "brand", "crust", "fresh", "prank", "brass", "drag", "french", "press", "brim", "drank", "fred", "prim", "brick", "drop", "frog", "print", "bring", "drum", "frock", "track", "branch", "drink", "grand", "trap", "brush", "dress", "grass", "trick", "crab", "drunk", "grasp", "trim", "crash", "drip", "grant", "trip", "cramp", "drug", "gruff", "trot", "crack", "fran", "grog", "truck", "crib", "frank", "grip", "trend", "crop", "frost", "grunt"]
+      "ex": ["black", "fling", "skin", "spill", "bland", "flip", "skip", "spin", "blend", "flit", "slam", "spit", "blink", "flock", "slap", "spot", "bliss", "flop", "slash", "spun", "block", "clung", "sled", "spunk", "blush", "glad", "slip", "stab", "clang", "gland", "slot", "stack", "clank", "glass", "slum", "stand", "clap", "plan", "slush", "stem", "clench", "plant", "smack", "step", "click", "plop", "smash", "stiff", "cliff", "plot", "smell", "still", "clinch", "pluck", "smelt", "stop", "cling", "plum", "smug", "stub", "clink", "plus", "snap", "stuck", "clip", "scalp", "snip", "stuff", "clock", "scat", "snob", "swam", "club", "scotch", "snub", "swell", "flag", "scat", "snuff", "swept", "flap", "scuff", "snug", "swift", "flash", "scum", "span", "swim", "flat", "sketch", "spank", "switch", "fled", "skid", "spat", "brag", "crunch", "frump", "grin", "brand", "crust", "fresh", "prank", "brass", "drag", "french", "press", "brim", "drank", "fred", "prim", "brick", "drop", "frog", "print", "bring", "drum", "frock", "track", "branch", "drink", "grand", "trap", "brush", "dress", "grass", "trick", "crab", "drunk", "grasp", "trim", "crash", "drip", "grant", "trip", "cramp", "drug", "gruff", "trot", "crack", "fran", "grog", "truck", "crib", "frank", "grip", "trend", "crop", "frost", "grunt"]
     },
   "Digraph - Blends": {
         "desc": "### Blend + Digraph Combos\nWhen *digraphs join blends*:\n+ _phrase_ [phr]\n+ _shred_ [shr]\n+ _school_ [sch]\n+ _phleum_ [phl]\n+ _chloe_ [chl]\n+ _thrust_ [thr]\n+ _christ_ [chr]",
@@ -1661,7 +1677,7 @@
     },
   "cvce": {
       "desc": "## CVCe Words\n# [Silent e] pattern\n+ Makes first vowel *long*\n+ _e_ at end not pronounced",
-      "ex": ["mate", "make", "rate", "bake", "take", "mete", "eve", "fete", "rede", "here", "site", "nice", "time", "bike", "kite", "note", "dote", "mole", "hole", "pole", "flute", "mute", "cute", "cube", "tube", "june", "ate", "tame", "bite", "tile", "rope", "bake", "tape", "dime", "tide", "sole", "cane", "blame", "dine", "wife", "stone", "cape", "flame", "dike", "wine", "scone", "cake", "plane", "fine", "wide", "spoke", "date", "stake", "fife", "slide", "slope", "daze", "glade", "dive", "size", "smoke", "fate", "snake", "file", "glide", "note", "fade", "chase", "five", "while", "tote", "gaze", "paste", "hive", "drive", "those", "hate", "gave", "lime", "pride", "stole", "came", "case", "life", "prime", "mope", "haze", "fake", "like", "prize", "mole", "lake", "haste", "mine", "vote", "lame", "flake", "mite", "bone", "woke", "make", "save", "mile", "code", "probe", "mate", "taste", "pine", "dote", "late", "waste", "pile", "dole", "cube", "game", "brave", "quite", "dome", "duke", "wake", "brake", "kite", "globe", "dune", "name", "crate", "ride", "hole", "cute", "pale", "crave", "shine", "home", "tube", "quake", "craze", "side", "hope", "tune", "rate", "drape", "spike", "joke", "mule", "rake", "grape", "smile", "lone", "flute", "pane", "grade", "slime", "lode", "prune", "sake", "grave", "stile", "lope", "rule", "shake", "spine", "quote", "plume", "same", "here", "ripe", "rode", "brute", "take", "these", "time", "robe", "mete", "steve", "here", "rede", "fete", "gene", "pete", "complete", "eve", "squeeze", "sleeve", "sneeze"]
+      "ex": ["mate", "make", "rate", "bake", "take", "mete", "eve", "fete", "rede", "here", "site", "nice", "time", "bike", "kite", "note", "dote", "mole", "hole", "pole", "flute", "mute", "cute", "cube", "tube", "june", "ate", "tame", "bite", "tile", "rope", "bake", "tape", "dime", "tide", "sole", "cane", "blame", "dine", "wife", "stone", "cape", "flame", "dike", "wine", "scone", "cake", "plane", "fine", "wide", "spoke", "date", "stake", "fife", "slide", "slope", "daze", "glade", "dive", "size", "smoke", "fate", "snake", "file", "glide", "note", "fade", "chase", "five", "while", "tote", "gaze", "paste", "hive", "drive", "those", "hate", "gave", "lime", "pride", "stole", "came", "case", "life", "prime", "mope", "haze", "fake", "like", "vote", "lame", "flake", "mite", "bone", "woke", "make", "save", "mile", "code", "probe", "mate", "taste", "pine", "dote", "late", "waste", "pile", "dole", "cube", "game", "brave", "quite", "dome", "duke", "wake", "brake", "kite", "globe", "dune", "name", "crate", "ride", "hole", "cute", "pale", "crave", "shine", "home", "tube", "quake", "craze", "side", "hope", "tune", "rate", "drape", "spike", "joke", "mule", "rake", "grape", "smile", "lone", "flute", "pane", "grade", "slime", "lode", "prune", "sake", "grave", "stile", "lope", "rule", "shake", "spine", "quote", "plume", "same", "here", "ripe", "rode", "brute", "take", "these", "time", "robe", "mete", "steve", "here", "rede", "fete", "gene", "pete", "complete", "eve", "squeeze", "sleeve", "sneeze"]
     },
   "open-syllable": {
       "desc": "## Open Syllable\nSyllables ending with a [vowel]\n+ Usually makes [long vowel] sound",
@@ -1700,7 +1716,7 @@
         "ex": ["see", "key", "fee", "money", "tree", "honey", "sleep", "attorney", "week", "hockey", "sweet", "volley", "free", "valley", "weed", "monkey", "sheep", "donkey", "green", "turkey"]
     },
     "Vowel Digraphs (ea)": {
-        "desc": "### Magic EA Team\nSame letters make *different sounds*:\n+ [Long e]: _beat_\n+ [Short e]: _bread_\n+ [Long a]: _break_",
+        "desc": "### Magic EA Team\nSame letters make *different sounds*:\n1. [Long e]: _beat_\n2. [Short e]: _bread_\n3. [Long a]: _break_",
         "ex": ["beat", "threat", "create", "meat", "real", "break", "seat", "tread", "great", "speak", "bread", "Yeats", "team", "dead", "yea", "read", "death", "steak", "steal", "read", "breakup", "cheap", "health", "breakdown", "bean", "sweat", "outbreak", "heat", "swear", "creator"]
     },
     "Vowel Digraphs (ie)": {
@@ -2100,6 +2116,7 @@
         const resultsContainer = document.getElementById('resultsContainer');
         const themeToggle = document.getElementById('themeToggle');
         const fontToggle = document.getElementById('fontToggle');
+        const caseToggle = document.getElementById('caseToggle');
         const historyToggle = document.getElementById('historyToggle');
         const topicsToggle = document.getElementById('topicsToggle');
         const helpToggle = document.getElementById('helpToggle');
@@ -2143,6 +2160,7 @@
 
         // State
         let isDarkTheme = false;
+        let isUpperCase = false; // Track case state
         const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
         
         // Slideshow state
@@ -2181,6 +2199,13 @@
                 });
             }
             
+            // Load case state from localStorage
+            const savedCaseState = localStorage.getItem('dictionaryCaseState');
+            if (savedCaseState === 'uppercase') {
+                isUpperCase = true;
+                caseToggle.classList.add('active');
+            }
+            
             // Add event listeners for font size buttons
             fontSizeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -2191,6 +2216,11 @@
                     // Update active button
                     fontSizeBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    
+                    // Re-render current topic if any
+                    if (currentTopic) {
+                        displayResults(currentTopic);
+                    }
                 });
             });
             
@@ -2264,6 +2294,10 @@
             fontToggle.addEventListener('click', () => {
                 fontControls.style.display = fontControls.style.display === 'flex' ? 'none' : 'flex';
             });
+            
+            // Case toggle button
+            caseToggle.addEventListener('click', toggleCase);
+            
             historyToggle.addEventListener('click', toggleHistoryPanel);
             topicsToggle.addEventListener('click', toggleTopicsPanel);
             helpToggle.addEventListener('click', toggleInstructionsModal);
@@ -2424,6 +2458,25 @@
             text = text.replace(/\*([^*]+)\*/g, '<em class="markdown-em">$1</em>');
             
             return text;
+        }
+        
+        // Toggle text case
+        function toggleCase() {
+            isUpperCase = !isUpperCase;
+            caseToggle.classList.toggle('active', isUpperCase);
+            
+            // Save state to localStorage
+            localStorage.setItem('dictionaryCaseState', isUpperCase ? 'uppercase' : 'normal');
+            
+            // Re-render current topic if any
+            if (currentTopic) {
+                displayResults(currentTopic);
+            }
+        }
+        
+        // Apply case to text
+        function applyCase(text) {
+            return isUpperCase ? text.toUpperCase() : text.toLowerCase();
         }
         
         // Add entry to builder dictionary
@@ -2593,8 +2646,12 @@
             displayResults(searchTerm);
         }
 
+        // Current topic for re-rendering
+        let currentTopic = null;
+
         // Display search results
         function displayResults(term) {
+            currentTopic = term;
             const topic = lessons[term];
             
             if (!topic) {
@@ -2647,16 +2704,28 @@
                 return;
             }
             
+            // Apply case transformation if needed
+            let displayDesc = topic.desc;
+            let displayEx = topic.ex;
+            
+            if (isUpperCase) {
+                displayDesc = displayDesc.toUpperCase();
+                displayEx = displayEx.map(ex => ex.toUpperCase());
+            } else {
+                displayDesc = displayDesc.toLowerCase();
+                displayEx = displayEx.map(ex => ex.toLowerCase());
+            }
+            
             resultsContainer.innerHTML = `
                 <div class="entry-card">
                     <div class="entry-header">
-                        <h1>${term}</h1>
+                        <h1>${applyCase(term)}</h1>
                     </div>
-                    <div class="entry-desc">${formatMarkdown(topic.desc)}</div>
+                    <div class="entry-desc">${formatMarkdown(displayDesc)}</div>
                     
                     <h3>Examples & Word Bank:</h3>
                     <div class="examples-grid">
-                        ${topic.ex.map((example, index) => 
+                        ${displayEx.map((example, index) => 
                             `<div class="example-item" data-index="${index}">${example}</div>`
                         ).join('')}
                     </div>
@@ -2828,7 +2897,7 @@
             words.forEach((word, index) => {
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'slideshow-word';
-                wordSpan.textContent = word;
+                wordSpan.textContent = isUpperCase ? word.toUpperCase() : word.toLowerCase();
                 
                 // Check if this word is selected
                 if (selectedWords[currentSlideIndex][index]) {
