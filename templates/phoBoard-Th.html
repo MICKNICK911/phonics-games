@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Digital Notes</title>
+    <style>
+        /* Prevent touch highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        /* New splash screen styles */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #29c702, #017507);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .bullet-line {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: -25px;
+        }
+
+        .bullet {
+            display: flex;
+            margin-right: -20px;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+        
+        .splash-content {
+            text-align: center;
+            padding: 30px;
+            max-width: 80%;
+        }
+        
+        .splash-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            border: 5px solid #1447ee;
+        }
+        
+        .splash-logo-inner {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #29c702, #017507);
+            background-image: url('../assets/images/shooter.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .splash-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .splash-subtitle {
+            font-size: 24px;
+            font-weight: 500;
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 4px;
+            transition: width 5s linear;
+        }
+        
+        /* Updated theme colors */
+        :root {
+            --primary-color: #29c702;
+            --secondary-color: #740264;
+            --accent-color: #ff5722;
+            --export-color: #665404;
+            --builder-color: #02500d;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+            --header-height: 70px;
+            --selected-color: #ff0000;
+            --font-base: 1;
+        }
+
+        .dark-theme {
+            --primary-color: #29c702;
+            --secondary-color: #740264;
+            --accent-color: #ff8a65;
+            --export-color: #81c784;
+            --builder-color: #ba68c8;
+            --bg-color: #121212;
+            --text-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --border-color: #343a40;
+            --shadow: 0 4px 12px rgba(0,0,0,0.25);
+            --selected-color: #ff5555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0) 25%);
+        }
+
+        .dark-theme body {
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 152, 0, 0.08) 0%, rgba(255, 152, 0, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 193, 7, 0.08) 0%, rgba(255, 193, 7, 0) 25%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--bg-color-rgb), 0.8);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: calc(24px * var(--font-base));
+            font-weight: 700;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .logo span {
+            font-size: calc(28px * var(--font-base));
+        }
+
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: calc(16px * var(--font-base));
+        }
+
+        .search-container input:focus {
+            outline: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: calc(18px * var(--font-base));
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .history-toggle, 
+        .topics-toggle, .help-toggle, .load-toggle,
+        .export-toggle, .slide-toggle, .font-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+            font-size: calc(18px * var(--font-base));
+        }
+
+        .theme-toggle:hover, 
+        .history-toggle:hover, .topics-toggle:hover,
+        .help-toggle:hover, .load-toggle:hover,
+        .export-toggle:hover, .slide-toggle:hover, .font-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .export-toggle:hover {
+            background: var(--export-color);
+        }
+        
+        .font-toggle:hover {
+            background: #3d7ddb;
+        }
+
+        .results-container {
+            padding: 30px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .no-results span {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: calc(42px * var(--font-base));
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: calc(20px * var(--font-base));
+            margin-bottom: 25px;
+            line-height: 1.7;
+            white-space: pre-line; /* Preserve line breaks */
+        }
+
+        /* Enhanced font sizing for larger screens */
+        @media (min-width: 768px) {
+            .entry-desc {
+                font-size: calc(24px * var(--font-base));
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .entry-desc {
+                font-size: calc(28px * var(--font-base));
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .entry-desc {
+                font-size: calc(32px * var(--font-base));
+            }
+        }
+
+         /* Markdown styling */
+        .markdown-content h2.markdown-h2 {
+            font-size: calc(28px * var(--font-base));
+            color: #5ca5f8;
+            margin: 20px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(92, 165, 248, 0.4);
+        }
+
+        .markdown-content h3.markdown-h3 {
+            font-size: calc(22px * var(--font-base));
+            color: #3d7ddb;
+            margin: 18px 0 12px;
+        }
+        
+        .markdown-content h4.markdown-h4 {
+            font-size: calc(20px * var(--font-base));
+            color: #2ecc71;
+            margin: 15px 0 10px;
+        }
+
+        .markdown-content strong.markdown-strong {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .markdown-content em.markdown-em {
+            font-style: italic;
+            color: #5EA517;
+        }
+
+        .markdown-content u.markdown-u {
+            text-decoration: underline;
+            text-decoration-color: red;
+            text-underline-offset: 3px;
+        }
+
+        .theme-color {
+            color: #3d7ddb;
+            font-weight: bold;
+            background: rgba(61, 125, 219, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 2px 0;
+        }
+
+        .markdown-content ol.markdown-ol {
+            margin: 15px 0px;
+            padding-left: 30px;
+            color: #FF1500
+        }
+
+        .markdown-content ul.markdown-ul {
+            margin: 15px 0px;
+            padding-left: 30px;
+            list-style: none;
+        }
+
+        .markdown-content li.markdown-li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .markdown-content ul.markdown-ul li.markdown-li:before {
+            content: "•";
+            color: #3d7ddb;
+            font-size: calc(24px * var(--font-base));
+            position: absolute;
+            left: 0;
+            top: -3px;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: calc(20px * var(--font-base));
+            font-weight: 500;
+        }
+
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .example-item.selected {
+            background: var(--selected-color);
+            color: white;
+            border-color: var(--selected-color);
+            transform: scale(1.03);
+        }
+        
+        .clear-selection {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: var(--transition);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .clear-selection:hover {
+            background: #e64a19;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .search-history {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-item:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .history-panel.active {
+            transform: translateX(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item-panel {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-panel:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .history-item-panel .time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .close-history {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 80;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Topics Panel */
+        .topics-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 9999;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .topics-panel.active {
+            transform: translateX(0);
+        }
+
+        .topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .topics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .topic-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .topic-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+            transform: translateX(5px);
+        }
+
+        .topic-item span {
+            font-size: 20px;
+        }
+
+        /* Instructions Modal */
+        .instructions-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            z-index: 200;
+            max-width: 600px;
+            width: 90%;
+            height: 50%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            overflow: auto;
+        }
+
+        .instructions-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-content {
+            line-height: 1.7;
+        }
+
+        .modal-content ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        .modal-content li {
+            margin-bottom: 10px;
+        }
+
+        .feature-highlight {
+            background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .feature-highlight h2 {
+            margin-bottom: 15px;
+        }
+        
+        /* Slideshow Styles */
+        .slideshow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slideshow-overlay.active {
+            display: flex;
+        }
+
+        .slideshow-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-content {
+            font-size: calc(72px * var(--font-base));
+            text-align: center;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 2;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .slideshow-word {
+            transition: color 0.3s ease, background 0.3s ease;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .slideshow-word.selected {
+            color: var(--selected-color);
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .slideshow-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-color);
+            z-index: 2;
+        }
+
+        .slideshow-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 3;
+            box-shadow: var(--shadow);
+        }
+
+        .instruction-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            z-index: 200;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            display: none;
+        }
+
+        .instruction-modal.active {
+            display: block;
+        }
+
+        .instruction-modal h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .instruction-modal p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .instruction-modal ul {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        
+        .instruction-modal li {
+            margin-bottom: 10px;
+        }
+
+        .instruction-modal button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .instruction-modal button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Dictionary load notification */
+        .dictionary-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .dictionary-notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .dictionary-notification.error {
+            background: #e74c3c;
+        }
+        
+        .dictionary-notification.success {
+            background: var(--export-color);
+        }
+        
+        /* Dictionary Builder */
+        .builder-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        .builder-container.active {
+            display: block;
+        }
+        
+        .builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .builder-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            color: var(--builder-color);
+        }
+        
+        .builder-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .builder-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .builder-cancel {
+            background: #e0e0e0;
+            color: var(--text-color);
+        }
+        
+        .builder-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        .builder-export {
+            background: var(--export-color);
+            color: white;
+        }
+        
+        .builder-export:hover {
+            background: #2d9249;
+            transform: translateY(-2px);
+        }
+        
+        .builder-form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: border 0.3s;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--builder-color);
+            box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2);
+        }
+        
+        .builder-preview {
+            margin-top: 40px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .preview-title {
+            font-size: 22px;
+            color: var(--builder-color);
+        }
+        
+        .preview-clear {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .preview-clear:hover {
+            background: #d91a63;
+        }
+        
+        .preview-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        
+        .entry-count {
+            text-align: right;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .builder-add {
+            background: var(--builder-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px auto;
+            transition: var(--transition);
+        }
+        
+        .builder-add:hover {
+            background: #5a189a;
+            transform: translateY(-2px);
+        }
+        
+        /* Font size controls */
+        .font-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .font-label {
+            font-weight: 500;
+        }
+        
+        .font-size-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .font-size-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .entry-header {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .entry-header h1 {
+                font-size: 32px;
+                color: var(--primary-color);
+                margin-bottom: 10px;
+            }
+
+            .entry-desc {
+                font-size: 18px;
+                margin-bottom: 25px;
+                line-height: 1.7;
+            }
+
+            .examples-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .example-item {
+                background: var(--bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                padding: 15px;
+                text-align: center;
+                cursor: pointer;
+                transition: var(--transition);
+                font-size: 18px;
+                font-weight: 500;
+            }
+            
+            .slideshow-content {
+                font-size: 48px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .controls {
+                order: 2;
+            }
+            
+            .entry-header h1 {
+                font-size: 28px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .history-panel, .topics-panel {
+                width: 100%;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .builder-form {
+                padding: 20px;
+            }
+            
+            .splash-logo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .splash-logo-inner {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+            
+            .splash-title {
+                font-size: 28px;
+            }
+            
+            .splash-subtitle {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .entry-header {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .entry-header h1 {
+                font-size: 32px;
+                color: var(--primary-color);
+                margin-bottom: 10px;
+            }
+
+            .entry-desc {
+                font-size: 18px;
+                margin-bottom: 25px;
+                line-height: 1.7;
+            }
+
+            .examples-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .example-item {
+                background: var(--bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                padding: 15px;
+                text-align: center;
+                cursor: pointer;
+                transition: var(--transition);
+                font-size: 18px;
+                font-weight: 500;
+            }
+            .slideshow-content {
+                font-size: 36px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .slide-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .entry-card {
+                padding: 20px;
+            }
+            
+            .history-item {
+                padding: 6px 14px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .theme-toggle, 
+            .history-toggle, .topics-toggle,
+            .help-toggle, .load-toggle,
+            .export-toggle, .slide-toggle, .font-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .builder-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .builder-btn {
+                width: 100%;
+            }
+            
+            .splash-title {
+                font-size: 24px;
+            }
+            
+            .splash-subtitle {
+                font-size: 18px;
+            }
+            
+            .loading-bar {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="splash-logo-inner"></div>
+            </div>
+            <h1 class="splash-title">Enhanced Digital Notes</h1>
+            <p class="splash-subtitle">Interactive Learning Platform</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Dictionary Notification -->
+    <div class="dictionary-notification" id="dictionaryNotification">
+        <span id="notificationIcon">✅</span>
+        <span id="notificationText">Notes loaded successfully!</span>
+    </div>
+    
+    <!-- Hidden file input for dictionary loading -->
+    <input type="file" id="dictionaryFileInput" accept=".json" style="display: none;">
+    
+    <!-- Dictionary Builder -->
+    <div class="builder-container" id="builderContainer">
+        <div class="builder-header">
+            <div class="builder-title">
+                <span>📝</span>
+                <h2>Create Notes</h2>
+            </div>
+            <div class="builder-actions">
+                <button class="builder-btn builder-cancel" id="builderCancel">Cancel</button>
+                <button class="builder-btn builder-export" id="builderExport">Export as JSON</button>
+            </div>
+        </div>
+        
+        <div class="builder-form">
+            <div class="input-group">
+                <label for="builderTopic">Topic:</label>
+                <input type="text" id="builderTopic" placeholder="Enter topic name (e.g. vowels, consonants)">
+            </div>
+            
+            <div class="input-group">
+                <label for="builderDesc">Description:</label>
+                <textarea id="builderDesc" rows="3" placeholder="Enter description text (supports multi-line and formatting)"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="builderEx">Examples (comma separated):</label>
+                <input type="text" id="builderEx" placeholder="Enter examples (e.g. a,b,c)">
+            </div>
+            
+            <button class="builder-add" id="builderAdd">
+                <span>+</span> Add Entry
+            </button>
+            
+            <div class="builder-preview">
+                <div class="preview-header">
+                    <h3 class="preview-title">Notes Preview</h3>
+                    <button class="preview-clear" id="previewClear">Clear All</button>
+                </div>
+                <pre class="preview-content" id="builderPreview">No entries yet</pre>
+                <div class="entry-count" id="builderEntryCount">0 entries</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slideshow Elements -->
+    <div class="slideshow-overlay" id="slideshowOverlay">
+        <div class="slideshow-close" id="slideshowClose">❌</div>
+        <div class="slideshow-top" id="slideshowTop"></div>
+        <div class="slideshow-content" id="slideshowContent"></div>
+        <div class="slideshow-bottom" id="slideshowBottom"></div>
+        <div class="slideshow-indicator" id="slideshowIndicator">1/5</div>
+    </div>
+    
+    <div class="instruction-modal" id="instructionModal">
+        <h2>Slide Mode Instructions</h2>
+        <p>You are now in slide mode. The control panel is hidden to maximize your viewing experience.</p>
+        
+        <ul>
+            <li>Tap the <strong>top half</strong> of the screen to go to the next example</li>
+            <li>Tap the <strong>bottom half</strong> of the screen to go to the previous example</li>
+            <li>Tap any <strong>word</strong> to highlight it in red</li>
+            <li>Tap a highlighted word again to remove the highlight</li>
+            <li>Press <strong>ESC</strong> or tap the close button to exit slide mode</li>
+        </ul>
+        
+        <button id="closeInstruction">Start Slideshow</button>
+    </div>
+    
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h2>📜 Search History</h2>
+            <div class="close-history" id="closeHistory">❌</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- History items will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Topics Panel -->
+    <div class="topics-panel" id="topicsPanel">
+        <div class="topics-header">
+            <h2>📚 All Topics</h2>
+            <div class="close-topics" id="closeTopics">❌</div>
+        </div>
+        <div class="topics-list" id="topicsList">
+            <!-- Topics will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Instructions Modal -->
+    <div class="instructions-modal" id="instructionsModal">
+        <div class="modal-header">
+            <h2><span>❓</span> How to Use This App</h2>
+            <div class="close-modal" id="closeModal">✕</div>
+        </div>
+        <div class="modal-content">
+            <p>Welcome to the Enhanced Digital Notes! Here's how to get started:</p>
+            <ul>
+                <li><strong>🔍 Search</strong> - Enter a topic in the search field to see its details</li>
+                <li><strong>📚 Topics</strong> - Click the topics button to browse all available topics</li>
+                <li><strong>🕒 History</strong> - View your recent searches with the history button</li>
+                <li><strong>🌙 Theme</strong> - Toggle between light and dark mode</li>
+                <li><strong>📂 Load</strong> - Import your own dictionary from a JSON file</li>
+                <li><strong>📝 Export</strong> - Create and export custom Notes</li>
+                <li><strong>❓ Help</strong> - Click the help button to see these instructions again</li>
+                <li><strong>🔤 Font Size</strong> - Adjust text size for better readability</li>
+            </ul>
+            <p>You can click on examples to highlight them for better focus.</p>
+            <p><strong>Text Formatting Guide:</strong></p>
+            <ul>
+                <li>### Main topic → Large heading</li>
+                <li>## Sub-topic → Medium heading</li>
+                <li># Bold text → Important terms</li>
+                <li>[Colored text] → Key concepts</li>
+                <li>_Underlined text_ → Emphasis</li>
+                <li>*Italic text* → Additional details</li>
+                <li>- Ordered list → Sequential items</li>
+                <li>+ Unordered list → Related items</li>
+            </ul>
+            <p>Start exploring by searching for a topic or browsing the available topics!</p>
+        </div>
+    </div>
+
+    <div class="container" id="appContainer">
+        <header>
+            <div class="header-content">
+                <div class="logo" id="appLogo">
+                    <span>📚</span>
+                    <span>Enhanced Digital Notes</span>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
+                    <button class="search-btn" id="searchBtn">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <div class="controls">
+                    <div class="load-toggle" id="loadToggle" title="Load Dictionary">
+                        📂
+                    </div>
+                    <div class="export-toggle" id="exportToggle" title="Create Dictionary">
+                        📝
+                    </div>
+                    <div class="topics-toggle" id="topicsToggle" title="Browse Topics">
+                        📚
+                    </div>
+                    <div class="history-toggle" id="historyToggle" title="View History">
+                        🕒
+                    </div>
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                        🌙
+                    </div>
+                    <div class="font-toggle" id="fontToggle" title="Font Size">
+                        🔤
+                    </div>
+                    <div class="help-toggle" id="helpToggle" title="Help">
+                        ❓
+                    </div>
+                    <div class="slide-toggle" id="slideToggle" title="Slide Show">
+                        ▶️
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-container" id="resultsContainer">
+            <div class="no-results">
+                <span>📖</span>
+                <h2>Enhanced Digital Notes</h2>
+                <p>Search for topics to see their details and examples</p>
+                <p>Try these examples:</p>
+                <div class="search-history">
+                    <div class="history-item">🔍 vowels</div>
+                    <div class="history-item">🔍 consonants</div>
+                    <div class="history-item">🔍 syllables</div>
+                    <div class="history-item">🔍 diphthongs</div>
+                </div>
+                
+                <div class="font-controls">
+                    <span class="font-label">Font Size:</span>
+                    <button class="font-size-btn" data-size="0.9">S</button>
+                    <button class="font-size-btn active" data-size="1">M</button>
+                    <button class="font-size-btn" data-size="1.1">L</button>
+                    <button class="font-size-btn" data-size="1.2">XL</button>
+                </div>
+            </div>
+            
+            <div class="feature-highlight">
+                <h2>📚 Browse All Topics</h2>
+                <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Show splash screen and animate loading bar
+        const splashScreen = document.getElementById('splashScreen');
+        const loadingProgress = document.getElementById('loadingProgress');
+        
+        // Start loading animation
+        loadingProgress.style.width = '100%';
+        
+        // Hide splash screen after 5 seconds
+        setTimeout(() => {
+            splashScreen.style.opacity = '0';
+            splashScreen.style.pointerEvents = 'none';
+            
+            // Remove splash screen after transition completes
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+            }, 800);
+        }, 5000);
+        
+        // Predefined dictionary
+        const DEFAULT_LESSONS = {
+  "vowels": {
+      "desc": "## Vowels\nThere are [5 Short vowels] and [5 long vowels]. Sometimes _/y/_ can act as a *vowel*.",
+      "ex": ["a", "e", "i", "o", "u", "y"]
+    },
+  "consonants": {
+      "desc": "## Consonants\nThere are [21] consonants in English.",
+      "ex": ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"]
+    },
+    "Special Consonants": {
+        "desc": "### Letter Magicians\nLetters that *change sounds*:\n- [x] = ks sound (_fox_)\n- [qu] = kw sound (_queen_)\n- [y] = short i sound (_gym_)\n- [y] = e sound (_happy_)\n- [y] = long i sound (_fly_)",
+        "ex": ["quit", "queen", "quiz", "gym", "cry", "happy"]
+    },
+    "c/k Rule": {
+        "desc": "### Sound Switch\nWhen to use [c] or [k] for /k/ sound:\n- [c] before _a/o/u_ (_cat_)\n- [k] before _e/i_ (_kit_)",
+        "ex": ["cat", "cot", "cup", "ken", "kit"]
+    },
+  "pair-a": {
+      "desc": "## Short Vowel /a/ Pairs\nPairing _short vowel /a/_ with consonants",
+      "ex": ["ab", "ac", "ad", "af", "ag", "ah", "aj", "ak", "al", "am", "an", "ap", "aq", "ar", "as", "at", "av", "aw", "ax", "ay", "az"]
+    },
+  "pair-e": {
+      "desc": "## Short Vowel /e/ Pairs\nPairing _short vowel /e/_ with consonants",
+      "ex": ["eb", "ec", "ed", "ef", "eg", "eh", "ej", "ek", "el", "em", "en", "ep", "eq", "er", "es", "et", "ev", "ew", "ex", "ey", "ez"]
+    },
+  "pair-i": {
+      "desc": "## Short Vowel /i/ Pairs\nPairing _short vowel /i/_ with consonants",
+      "ex": ["ib", "ic", "id", "if", "ig", "ih", "ij", "ik", "il", "im", "in", "ip", "iq", "ir", "is", "it", "iv", "iw", "ix", "iy", "iz"]
+    },
+  "pair-o": {
+      "desc": "## Short Vowel /o/ Pairs\nPairing _short vowel /o/_ with consonants",
+      "ex": ["ob", "oc", "od", "of", "og", "oh", "oj", "ok", "ol", "om", "on", "op", "oq", "or", "os", "ot", "ov", "ow", "ox", "oy", "oz"]
+    },
+  "pair-u": {
+      "desc": "## Short Vowel /u/ Pairs\nPairing _short vowel /u/_ with consonants",
+      "ex": ["bu", "cu", "du", "fu", "gu", "hu", "ju", "uk", "ul", "um", "un", "up", "uq", "ur", "us", "ut", "uv", "uw", "ux", "uy", "uz"]
+    },
+  "cvc": {
+      "desc": "## CVC Words\n# [Consonant-Vowel-Consonant] pattern\n+ Three-letter words\n+ Begins and ends with consonants\n+ Short vowel sound in middle",
+      "ex": ["bat", "cat", "rat", "fan", "man", "bed", "net", "let", "red", "pen", "sit", "him", "fix", "win", "pin", "not", "top", "hop", "lot", "got", "sun", "gun", "fun", "bus", "bug", "gum"]
+    },
+  "blends": {
+      "desc": "## Blends\n# [Two consonants] together\n+ Each sound is heard\n+ Can be at beginning or end of words",
+      "ex": ["bl", "cl", "fl", "gl", "pl", "nd", "nt", "sl", "br", "cr", "dr", "fr", "mp", "rd", "ld", "lp", "gr", "pr", "tr", "sc", "sk", "rk", "lf", "pt", "ft", "ct", "squ", "st", "sm", "sn", "sp", "lk", "lt", "xt", "ts", "sw", "tw", "dw"]
+    },
+  "beginning-blends": {
+      "desc": "## Beginning Blends\nBlends that appear at #start# of words",
+      "ex": ["bl", "cl", "fl", "gl", "pl", "sl", "br", "cr", "dr", "fr", "gr", "pr", "tr", "sc", "sk", "squ", "st", "sm", "sn", "sp", "sw", "spr", "spl", "str", "scr", "tw", "dw", "bless", "club", "flip", "glass", "plot", "slim", "scrab", "split", "strap", "sprint", "brass", "crop", "drip", "from", "grass", "press", "trap", "scan", "skin", "squat", "star", "smit", "snip", "spot", "swim", "twin", "dwell"]
+    },
+  "ending-blends": {
+      "desc": "## Ending Blends\nBlends that appear at #end# of words",
+      "ex": ["st", "sk", "sp", "nd", "nt", "mp", "rd", "ld", "lp", "rk", "lf", "pt", "ft", "ct", "lk", "lt", "xt", "ts", "last", "mask", "rasp", "bend", "tent", "jump", "hard", "gild", "help", "park", "half", "wept", "left", "sect", "milk", "melt", "next", "pets"]
+    },
+  "blend-words": {
+      "desc": "## Blend Words Practice\nWords containing various #blend patterns#",
+      "ex": ["blow", "grass", "twin", "part", "text", "clap", "pray", "dwell", "cold", "pets", "flap", "trap", "squat", "help", "last", "glad", "scan", "task", "work", "plan", "skin", "rasp", "half", "slap", "smart", "sand", "wept", "brass", "snip", "went", "soft", "scrap", "crab", "spin", "pink", "fact", "split", "drop", "step", "jump", "milk", "spray", "frog", "swim", "hard", "salt", "strap"]
+    },
+  "digraphs": {
+      "desc": "## Digraphs\n# [Two letters] making [one sound]\n+ Different from blends\n+ Creates new phoneme",
+      "ex": ["ch", "tch", "th", "ng", "nk", "sh", "ck", "ph", "wh", "gn", "kn", "gh", "wr", "chat", "pitch", "that", "thin", "sing", "pink", "shot", "lock", "graph", "when", "gnat", "knot", "ghana", "wrap", "mechanic", "machine", "want", "watch", "when", "whip", "was", "wash", "which", "whisk", "water", "what", "whiff", "wish"]
+    },
+  "blends-digraphs": {
+      "desc": "## Blends and Digraphs Practice\nWords containing *both patterns*",
+      "ex": ["black", "fling", "skin", "spill", "bland", "flip", "skip", "spin", "blend", "flit", "slam", "spit", "blink", "flock", "slap", "spot", "bliss", "flop", "slash", "spun", "block", "clung", "sled", "spunk", "blush", "glad", "slip", "stab", "clang", "gland", "slot", "stack", "clank", "glass", "slum", "stand", "clap", "plan", "slush", "stem", "clench", "plant", "smack", "step", "click", "plop", "smash", "stiff", "cliff", "plot", "smell", "still", "clinch", "pluck", "smelt", "stop", "cling", "plum", "smug", "stub", "clink", "plus", "snap", "stuck", "clip", "scalp", "snip", "stuff", "clock", "scat", "snob", "swam", "club", "scotch", "snub", "swell", "flag", "scat", "snuff", "swept", "flap", "scuff", "snug", "swift", "flash", "scum", "span", "swim", "flat", "sketch", "spank", "swing", "fled", "skid", "spat", "switch", "flesh", "skill", "spell", "brag", "crunch", "frump", "grin", "brand", "crust", "fresh", "prank", "brass", "drag", "french", "press", "brim", "drank", "fred", "prim", "brick", "drop", "frog", "print", "bring", "drum", "frock", "track", "branch", "drink", "grand", "trap", "brush", "dress", "grass", "trick", "crab", "drunk", "grasp", "trim", "crash", "drip", "grant", "trip", "cramp", "drug", "gruff", "trot", "crack", "fran", "grog", "truck", "crib", "frank", "grip", "trend", "crop", "frost", "grunt"]
+    },
+  "Digraph - Blends": {
+        "desc": "### Blend + Digraph Combos\nWhen *digraphs join blends*:\n+ _phrase_ [phr]\n+ _shred_ [shr]\n+ _school_ [sch]\n+ _phleum_ [phl]\n+ _chloe_ [chl]\n+ _thrust_ [thr]\n+ _christ_ [chr]",
+        "ex": ["chr","thr","chl","phl","sch","shr","phr","phrase", "phlegm", "shred", "throw", "school", "chloride", "chrome", "phrenic", "phlox", "shrimp", "throat", "schedule", "chlorine", "Christ", "phratry", "Phleum", "shrink", "through", "scheme", "chlamydia", "chronic"]
+    },
+  "vowel-consonant-digraphs": {
+      "desc": "## Vowel-Consonant Digraphs\n# [Vowel+consonant] combinations making *one sound*",
+      "ex": ["ang", "ing", "ong", "ung", "ank", "ink", "onk", "unk", "bang", "ding", "wing", "song", "gang", "ping-pong", "king", "hung", "hang", "ring", "thing", "lung", "rang", "sing", "gong", "rung", "sang", "thing-a-ling", "long", "sung", "bank", "link", "sink", "chunk", "bunk", "mink", "wink", "thank", "dunk", "pink", "tank", "honk", "monk", "bonk", "kink", "rink", "sank", "think"]
+    },
+  "cvce": {
+      "desc": "## CVCe Words\n# [Silent e] pattern\n+ Makes first vowel *long*\n+ _e_ at end not pronounced",
+      "ex": ["mate", "make", "rate", "bake", "take", "mete", "eve", "fete", "rede", "here", "site", "nice", "time", "bike", "kite", "note", "dote", "mole", "hole", "pole", "flute", "mute", "cute", "cube", "tube", "june", "ate", "tame", "bite", "tile", "rope", "bake", "tape", "dime", "tide", "sole", "cane", "blame", "dine", "wife", "stone", "cape", "flame", "dike", "wine", "scone", "cake", "plane", "fine", "wide", "spoke", "date", "stake", "fife", "slide", "slope", "daze", "glade", "dive", "size", "smoke", "fate", "snake", "file", "glide", "note", "fade", "chase", "five", "while", "tote", "gaze", "paste", "hive", "drive", "those", "hate", "gave", "lime", "pride", "stole", "came", "case", "life", "prime", "mope", "haze", "fake", "like", "prize", "mole", "lake", "haste", "mine", "vote", "lame", "flake", "mite", "bone", "woke", "make", "save", "mile", "code", "probe", "mate", "taste", "pine", "dote", "late", "waste", "pile", "dole", "cube", "game", "brave", "quite", "dome", "duke", "wake", "brake", "kite", "globe", "dune", "name", "crate", "ride", "hole", "cute", "pale", "crave", "shine", "home", "tube", "quake", "craze", "side", "hope", "tune", "rate", "drape", "spike", "joke", "mule", "rake", "grape", "smile", "lone", "flute", "pane", "grade", "slime", "lode", "prune", "sake", "grave", "stile", "lope", "rule", "shake", "spine", "quote", "plume", "same", "here", "ripe", "rode", "brute", "take", "these", "time", "robe", "mete", "steve", "here", "rede", "fete", "gene", "pete", "complete", "eve", "squeeze", "sleeve", "sneeze"]
+    },
+  "open-syllable": {
+      "desc": "## Open Syllable\nSyllables ending with a [vowel]\n+ Usually makes [long vowel] sound",
+      "ex": ["me", "we", "she", "he", "the", "be", "so", "lo", "go", "no", "co", "hi", "flu"]
+    },
+  "phonograms": {
+      "desc": "## Phonograms\nLetter groups with consistent [sound patterns]",
+      "ex": ["all", "al", "ull", "ul", "ut", "ush", "old", "oll", "olt", "ost", "oth", "ild", "ind", "bold", "colt", "most", "blind", "old", "jolt", "post", "find", "cold", "molt", "host", "grind", "fold", "bolt", "hind", "gold", "volt", "both", "kind", "hold", "mind", "mold", "toll", "child", "rind", "sold", "roll", "mild", "wind", "told", "wild", "scold", "loth", "betroth", "zeroth", "fall", "ball", "call", "walk", "talk", "chalk", "full", "pull", "bull", "careful", "fulfill", "push", "bush", "cushion", "put", "brut"]
+    },
+  "compound-words": {
+      "desc": "## Compound Words\n# [Two words] combined to make new word\n+ Also called [2-consonant-division words]",
+      "ex": ["ashcan", "dishpan", "hilltop", "sandbag", "backstop", "dogsled", "hobbit", "shipment", "bedrock", "dustpan", "hubcap", "sunspot", "napkin", "eggnog", "kidnap", "tiptop", "blacktop", "endless", "hotdog", "traffic", "bobcat", "filmstrip", "landmass", "trashcan", "cashbox", "flapjack", "laptop", "upland", "catfish", "gumdrop", "lesson", "sunset", "catnap", "handbag", "magnet", "sudden", "catnip", "handcuff", "midland", "combat", "chestnut", "handstand", "nutmeg", "upon", "desktop", "helmet", "pocket", "keyboard"]
+    },
+  "rhyming-words": {
+      "desc": "## Rhyming Words\nWords with same \n[ending sounds]\n+ Helps develop phonemic awareness",
+      "ex": ["mat", "sat", "bake", "take", "bold", "cold", "plant", "hunt", "so", "go", "pitch", "switch"]
+    },
+  "R-Controlled Vowels (ar, or)": {
+        "desc": "### Bossy R Sounds\nWhen 'a' or 'o' is with 'r', they make new sounds:\n+ [ar] = *stretched* _short /a/_ as in _car_\n+ [or] = *streched* _short /o/_ as in _fork_\n# Exceptional Words\n+ _ar_ can sound [or]\n+ _or_ can sound [er]",
+        "ex": ["bar", "born", "dark", "war", "fork", "worm", "mark", "warm", "torn", "word", "park", "warm", "cord", "work", "hard", "dwarf", "fort", "world", "star", "ward", "scorn", "worse", "farm", "award", "corn", "worst", "charm", "reward", "storm", "worth", "smart", "toward", "for", "worship", "chart", "forward", "worn", "worsen"]
+    },
+    "R-Controlled Vowels (er, ir, ur)": {
+        "desc": "### R-Controlled Trio\n[er], [ir], or [ur] make the [same sound]:\n+ *stretched* _short /e/_ as in _her_, _bird_, _hurt_",
+        "ex": ["her", "stir", "hurt", "herd", "third", "burn", "term", "dirt", "turn", "verse", "bird", "curb", "there", "girl", "curve", "perm", "first", "burst", "clerk", "sir", "curl", "were", "firm", "surf", "jerk", "birth", "lurk", "expert", "shirt", "churn"]
+    },
+    "R-Controlled Vowels (suffixes)": {
+        "desc": "### Word Endings\nWords ending with [or] or [er] sounds [short /a/]:\n- _actor_, _visitor_\n- _camper_, _bigger_",
+        "ex": ["actor", "camper", "doctor", "bigger", "visitor", "better", "sector", "water", "vector", "helper", "creator", "never", "tailor", "summer", "vendor", "fever", "educator", "smaller", "orator", "lower"]
+    },
+    "Vowel Digraphs (ai, ay)": {
+        "desc": "### Long A Teams\n[ai] in middle and [ay] at end:\n- _rain_, _train_\n- _day_, _play_",
+        "ex": ["bail", "lay", "wail", "pay", "jail", "ray", "mail", "stay", "gain", "stray", "wait", "way", "brain", "may", "grain", "day", "train", "say", "strain", "play"]
+    },
+    "Vowel Digraphs (ee, ey)": {
+        "desc": "### Long E Partners\nTwo ways to make long e sound:\n- [ee] like _see_\n- [ey] like _key_",
+        "ex": ["see", "key", "fee", "money", "tree", "honey", "sleep", "attorney", "week", "hockey", "sweet", "volley", "free", "valley", "weed", "monkey", "sheep", "donkey", "green", "turkey"]
+    },
+    "Vowel Digraphs (ea)": {
+        "desc": "### Magic EA Team\nSame letters make *different sounds*:\n+ [Long e]: _beat_\n+ [Short e]: _bread_\n+ [Long a]: _break_",
+        "ex": ["beat", "threat", "create", "meat", "real", "break", "seat", "tread", "great", "speak", "bread", "Yeats", "team", "dead", "yea", "read", "death", "steak", "steal", "read", "breakup", "cheap", "health", "breakdown", "bean", "sweat", "outbreak", "heat", "swear", "creator"]
+    },
+    "Vowel Digraphs (ie)": {
+        "desc": "### Two Sounds of IE\nCan make *long e* or *long i*:\n+ [Long e]: _field_\n+ [Long i]: _pie_",
+        "ex": ["priest", "lie", "field", "tie", "brief", "die", "grief", "pie", "thief", "flies", "yield", "tried", "relief", "spies", "belief", "cried", "retrieve", "dried", "chief", "fried"]
+    },
+    "Vowel Digraphs (aw, au)": {
+        "desc": "### OR Sound Teams\n[aw] and [au] make same sound:\n+ _saw_, _crawl_\n+ _pause_, _fault_",
+        "ex": ["law", "pause", "saw", "cause", "crawl", "fault", "hawk", "haul", "paw", "sauce", "draw", "autumn", "claw", "vault", "yawn", "launch", "dawn", "Paul", "pawpaw", "fraud"]
+    },
+    "Vowel Digraphs (oa, oe)": {
+        "desc": "### Long O Partners\nTwo ways to make long o sound:\n+ [oa] like _boat_\n+ [oe] like _toe_",
+        "ex": ["boat", "foe", "coat", "toe", "soak", "doe", "toad", "hoe", "loaf", "woe", "road", "Joe", "toast", "goes", "coast", "hoed", "roast", "tiptoe", "throat", "Chloe"]
+    },
+    "Vowel Digraphs (ow long o)": {
+        "desc": "### Special OW Sound\nWhen [ow] makes *long o* sound:\n+ _grow_, _show_\n+ _blow_, _slow_",
+        "ex": ["row", "grow", "follow", "show", "flow", "pillow", "blow", "glow", "window", "slow"]
+    },
+    "Vowel Digraphs (ue, ew)": {
+        "desc": "### Long U Teams\n[ue] and [ew] make long u sound:\n+ _glue_, _blue_\n+ _blew_, _flew_",
+        "ex": ["glue", "blew", "blue", "flew", "true", "news", "due", "brew", "sue", "threw", "hue", "grew", "clue", "chew", "cue", "stew", "pursue", "crew", "subdue", "few"]
+    },
+    "Diphthongs (ow, ou)": {
+        "desc": "### OW Sound Teams\n[ow] and [ou] make [/a + w/] sound:\n+ _how_, _cow_\n+ _cloud_, _found_",
+        "ex": ["how", "cloud", "cow", "scout", "crowd", "found", "bow", "mouse", "howl", "out", "town", "sound", "down", "count", "frown", "ground", "clown", "shout", "now", "loud"]
+    },
+    "Diphthongs (oi, oy)": {
+        "desc": "### OI Sound Friends\n[oi] and [oy] make same sound [/o + i/]:\n- _boil_, _coin_\n- _boy_, _toy_",
+        "ex": ["boil", "boy", "soil", "toy", "toil", "joy", "joint", "oyster", "coin", "Troy", "spoil", "Joyce", "oil", "decoy", "join", "ploy", "foil", "deploy", "point", "employ"]
+    },
+    "Diphthongs (oo)": {
+        "desc": "### Two OO Sounds\nSame letters make *different sounds*:\n+ [Long u]: _moon_\n+ [Short u]: _book_",
+        "ex": ["boot", "good", "moon", "hood", "soon", "shook", "roof", "foot", "spoon", "look", "smooth", "hook", "shoot", "wood", "too", "took", "cool", "book", "food", "stood"]
+    },
+    "Phonograms with Short Vowels": {
+        "desc": "### Special Short Vowel Teams\n[all] and [al] patterns:\n- _ball_, _call_\n- _walk_, _chalk_",
+        "ex": ["ball", "walk", "tall", "chalk", "wall", "malt", "call", "halt", "hall", "false", "mall", "wait", "fall", "bald", "install", "already", "pall", "also", "small", "talk"]
+    },
+    "Phonograms with Long Vowels (Set 2)": {
+        "desc": "### Long Vowel Teams (Part 2)\nSpecial patterns with *long vowel sounds*:\n+ [old], [oll], [olt]\n+ [ild], [oth], [ind], [ost]",
+        "ex": ["ind","ild","oth","oll","ost","olt","old", "cold", "poll", "bolt", "mild", "both", "bind", "most", "bold", "toll", "volt", "wild", "loth", "find", "post", "sold", "roll", "holt", "child", "quoth", "kind", "host", "hold", "scroll", "jolt", "zeroth", "mind", "ghost", "gold", "stroll", "molt", "betroth", "blind", "almost"]
+    },
+    "Words Beginning With short a": {
+        "desc": "### Short A Starters\nWords beginning with _short a sound_",
+        "ex": ["awake", "amaze", "aside", "amuse", "apart", "alike", "about", "asleep", "ahead", "around"]
+    },
+    "Sounds of gh": {
+        "desc": "### Tricky GH\nCan make *three sounds*:\n1. [g] like _ghost_\n2. [Silent] like _light_\n3. [f] like _laugh_",
+        "ex": ["ghost", "thigh", "laugh", "ghast", "right", "tough", "ghetto", "taught", "trough", "Ghana", "light", "cough", "ghoul", "fight", "rough", "gharry", "slight", "enough", "gherkin", "high", "gopher", "ghastly", "sigh", "slough", "Ghanaian", "weigh", "sought", "ghostly", "eight", "draught"]
+    },
+    "Silent Letters": {
+        "desc": "### Quiet Helpers\nLetters we *don't pronounce*:\n+ [k] in _knot_\n+ [w] in _write_\n+ [t] in _listen_\n+ [b] in _comb_\n+ [l] in _would_",
+        "ex": ["knot", "write", "chasten", "bomb", "would", "knee", "wrote", "listen", "comb", "could", "knife", "wrist", "hasten", "climb", "should", "know", "wrong", "fasten", "crumb", "calf", "knock", "wrinkle", "soften", "dumb", "half", "knapsack", "wreath", "glisten", "lamb", "chalk", "knight", "wretch", "moisten", "limb", "calm", "knob", "wrap", "rapport", "numb", "palm", "knit", "wrath", "buffet", "plumb", "psalm", "knuckle", "sword", "debut", "thumb", "talk"]
+    },
+    "Spelling Patterns (s as z)": {
+        "desc": "### S as Z Sound\nWhen [s] makes *z sound* in words",
+        "ex": ["choose", "as", "is", "cheese", "has", "his", "tease", "visas", "bris", "pose", "divas", "Iris", "chose", "alias", "axis", "loose", "villas", "arsis", "use", "fellas", "pubis", "noise", "atlas", "lexis", "rose", "Texas", "basis", "wise", "bias", "lysis"]
+    },
+    "Spelling Patterns (le, tion, sion)": {
+        "desc": "### Common Endings\nSpecial ending sounds:\n- [le] like _apple_\n- [tion] like _station_\n- [sion] like _mission_",
+        "ex": ["puzzle", "station", "mission", "bundle", "nation", "pension", "struggle", "portion", "erosion", "battle", "mention", "impression", "apple", "education", "session", "tackle", "addition", "profession", "humble", "subtraction", "confession", "hustle", "attraction", "version", "muscle", "section", "aggression", "muffle", "affection", "comprehension"]
+    },
+    "Spelling Patterns (ed)": {
+        "desc": "### ED Endings\nCan sound like:\n- [ed] in _added_\n- [d] in _saved_",
+        "ex": ["added", "aimed", "ended", "changed", "wasted", "saved", "acted", "stayed", "folded", "burned", "landed", "filled", "rested", "rained", "counted", "turned", "printed", "called"]
+    },
+    "Long Vowels In Open Syllables": {
+        "desc": "### Open Syllables\nWhen syllables end with *vowels*, they make [_long sounds_]",
+        "ex": ["baker", "favor", "nasal", "giant", "before", "local", "paper", "fuel", "fatal", "final", "bony", "spider", "racer", "cruel", "pacer", "lady", "maker", "ruin", "hero", "viper", "vocal", "zero", "pupil", "tyrant", "open", "clover", "total", "legal", "taker", "vital"]
+    },
+    "Closed Syllables": {
+        "desc": "### Short Vowel Trap\nSyllables ending with a *consonant* that make [short vowel sound]:\n+ Ends with [≥1] consonant\n+ Vowel says its short sound\n+ Most common syllable type",
+        "ex": ["cat", "sit", "hot", "sun", "bed", "blast", "jump", "hand", "milk", "stop", "black", "frost", "chimp", "stamp", "lunch"]
+    },
+    "Open Syllables": {
+        "desc": "### Long Vowel Freedom\nSyllables ending with a *vowel* that make [long vowel sound]:\n+ Ends with a single vowel\n+ Vowel says its name\n+ Often in first syllables of words",
+        "ex": ["he", "she", "go", "no", "hi", "ba-ker", "pa-per", "gi-ant", "o-pen", "mu-sic", "ti-ger", "fu-ture", "stu-dent", "cra-zy", "po-ny"]
+    },
+    "Vowel-Consonant-e (Magic e)": {
+        "desc": "### Silent e Magician\nSyllables where *silent e* makes vowels long:\n+ Pattern: vowel + consonant + e\n+ e is silent\n+ Vowel says its name",
+        "ex": ["cake", "bike", "home", "cube", "flute", "grace", "shine", "stone", "theme", "prize", "brave", "smile", "note", "tube", "complete"]
+    },
+    "Vowel Team Syllables": {
+        "desc": "### Vowel Partnerships\nTwo vowels working together in one syllable:\n+ Make single vowel sound (long/diphthong)\n+ Can be 2-4 letters\n+ Usually in same syllable",
+        "ex": ["rain", "boat", "see", "pie", "blue", "claw", "joy", "soup", "eight", "feud", "straw", "toast", "field", "fruit", "sleigh"]
+    },
+    "R-Controlled Syllables": {
+        "desc": "### Bossy R Rules\nSyllables where *vowel + r* creates new sounds:\n+ Vowel sound changes before r\n- ar, er, ir, or, ur patterns\n+ Not long or short vowels",
+        "ex": ["car", "star", "her", "bird", "fork", "burn", "term", "earth", "actor", "doctor", "water", "bigger", "reward", "worship", "forward"]
+    },
+    "Consonant-le Syllables": {
+        "desc": "### Final Stable Syllables\n*Consonant + le* endings:\n+ Always at word endings\n+ Makes /əl/ sound\n+ Counts as separate syllable",
+        "ex": ["ap-ple", "puz-zle", "ta-ble", "bu-gle", "cir-cle", "can-dle", "tur-tle", "mar-ble", "cra-dle", "snif-fle", "jun-gle", "sim-ple", "bub-ble", "cas-tle", "twin-kle"]
+    },
+    "Diphthong Syllables": {
+        "desc": "### Gliding Vowel Sounds\nSyllables with vowel combinations that [*glide*] between sounds:\n+ Two vowel sounds in one syllable\n+ Creates new blended sounds\n+ Distinct from pure vowels",
+        "ex": ["oil", "cloud", "boy", "out", "cow", "coin", "loud", "boil", "toy", "pout", "owl", "voice", "house", "point", "enjoy"]
+    },
+    "KG": {
+        "desc": "### Kindergarten Foundations\nFocus on *letter sounds, rhyming, and CVC words* in simple 3-5 word sentences",
+        "ex": [
+            "The cat sat.",
+            "I see a dog.",
+            "Mom has a bag.",
+            "Dad and I run.",
+            "The sun is hot.",
+            "A bug is on a log.",
+            "I like my red hat.",
+            "We jump in the mud.",
+            "She has ten pens.",
+            "It is in the box.",
+            "Look at the map.",
+            "We cut the cake.",
+            "I hop on one leg.",
+            "The pig is big.",
+            "Get the net, Sam.",
+            "A cub is in the den.",
+            "I see six dots.",
+            "The man has a van.",
+            "We see a bus.",
+            "Fix the lid, Pam.",
+            "The dog dug.",
+            "I see a hen.",
+            "The fox ran.",
+            "We put it up.",
+            "She has a hat.",
+            "The kid has a toy.",
+            "We see the sun.",
+            "I am at the top.",
+            "The cat can nap.",
+            "We go up."
+        ]
+    },
+    "Grade 1": {
+        "desc": "### First Grade Building Blocks\nDevelop *blend/digraph recognition, silent e, and basic sight words* in 5-7 word sentences",
+        "ex": [
+            "The black cat sits on a mat.",
+            "She will bake a cake for me.",
+            "My dog likes to chase balls.",
+            "We see three little ducks.",
+            "The ship sails on the blue sea.",
+            "I ride my bike down the path.",
+            "That bird has a long wing.",
+            "Five fish swim in the pond.",
+            "He found a round stone.",
+            "The clock says it is time.",
+            "Please give me that book.",
+            "They went to the green park.",
+            "Look at the pretty flower.",
+            "We play with our new toys.",
+            "The brown bear eats honey.",
+            "She makes art with white chalk.",
+            "I hear a frog croak.",
+            "They jump over the old log.",
+            "My mom drives a fast car.",
+            "The wind blows the tall tree.",
+            "We sleep in soft beds.",
+            "He has a sharp pencil.",
+            "The queen wears a gold crown.",
+            "We eat lunch at twelve noon.",
+            "She reads a good book.",
+            "The train goes very fast.",
+            "I see my house from here.",
+            "They help their dad work.",
+            "The moon shines at night.",
+            "We sing a happy song."
+        ]
+    },
+    "Grade 2": {
+        "desc": "### Second Grade Fluency\nMaster *vowel teams, r-controlled vowels, and multisyllabic words* in 7-9 word sentences",
+        "ex": [
+            "The actor wore a smart costume.",
+            "We avoid poison ivy in the woods.",
+            "My neighbor mows his lawn weekly.",
+            "She uses chalk to draw on pavement.",
+            "Eight birds flew south for autumn.",
+            "Children enjoy chocolate cookies.",
+            "We brought sandwiches for our picnic.",
+            "Grandmother told an old folktale.",
+            "The athlete broke a world record.",
+            "Fireflies glow in summer evenings.",
+            "We measure rainfall with a gauge.",
+            "They built a fortress with cushions.",
+            "The librarian organized the section.",
+            "We bought fresh cauliflower.",
+            "Engineers design modern bridges.",
+            "The knight fought with courage.",
+            "We pour milk on our cereal.",
+            "The musician played a beautiful tune.",
+            "Volunteers help clean the highway.",
+            "Farmers grow grain and soybeans.",
+            "We hang paintings on the wall.",
+            "The detective found a secret clue.",
+            "Astronomers study distant planets.",
+            "Children build castles in sandboxes.",
+            "We prepare for winter's approach.",
+            "The author wrote an exciting chapter.",
+            "Geologists examine rock formations.",
+            "We appreciate our teacher's guidance.",
+            "The athlete won a gold medal.",
+            "Scientists observe chemical reactions."
+        ]
+    },
+    "Grade 3": {
+        "desc": "### Third Grade Advanced Patterns\nApply *complex spelling rules, prefixes/suffixes, and figurative language* in 8-12 word sentences",
+        "ex": [
+            "The photographer captured images of mountain ranges during sunset.",
+            "Electricians install complex systems throughout modern buildings.",
+            "We analyze various chemical reactions in our science laboratory.",
+            "Astronomers discovered new constellations through powerful telescopes.",
+            "Engineers designed an impressive suspension bridge across the river.",
+            "The journalist interviewed famous athletes about their training routines.",
+            "Botanists examine tropical plants in dense rainforest environments.",
+            "We appreciate our teacher's guidance during challenging assignments.",
+            "The orchestra performed magnificent compositions by European musicians.",
+            "Architects created blueprints for sustainable urban communities.",
+            "Geologists investigate volcanic formations and seismic activity patterns.",
+            "Meteorologists predict atmospheric conditions using satellite technology.",
+            "We conducted experiments with electrical circuits in physics class.",
+            "The author developed complex characters throughout the novel's chapters.",
+            "Volunteers organized neighborhood cleanups along the polluted waterfront.",
+            "Technicians repaired sophisticated equipment at the research facility.",
+            "We studied ancient civilizations and their architectural achievements.",
+            "The ecologist documented endangered species in protected habitats.",
+            "Programmers designed innovative applications for educational institutions.",
+            "We examined microscopic organisms through laboratory microscopes.",
+            "Historians researched medieval traditions during European castle tours.",
+            "The committee discussed environmental conservation strategies seriously.",
+            "We calculated mathematical probabilities using statistical analysis methods.",
+            "Linguists analyzed phonetic patterns across different language families.",
+            "Astronauts conducted experiments aboard the international space station.",
+            "Marine biologists observed dolphin communication in ocean habitats.",
+            "We presented scientific findings at the annual research symposium.",
+            "The engineer explained mechanical advantages of simple machines.",
+            "Nutritionists developed healthy meal plans for school cafeterias.",
+            "We explored geological formations in national parks during field trips."
+        ]
+    },
+    "Sight Words – KG 2": {
+        "desc": "### First Reading Words\n*Special words* we memorize to read faster:\n- [Red], [Yellow], [Blue] groups\n- [Purple], [Black] groups\n+ _Bonus words_ in **Bravo!** section",
+        "ex": ["all", "am", "are", "at", "ate", "did", "do", "eat", "four", "get", "must", "new", "no", "now", "on", "ride", "saw", "say", "she", "so", "too", "under", "want", "well", "yes", "funny", "be", "good", "our", "soon", "went", "black", "have", "out", "that", "what", "brown", "he", "please", "there", "white", "but", "into", "pretty", "they", "who", "came", "like", "ran", "this", "will"]
+    },
+    "Sight Words – Grade 1": {
+        "desc": "### Level Up Words\n*More important words* for reading:\n## Color Groups\n1. [Red], [Yellow], [Blue]\n2. [Purple], [Black]\n3. [Orange], [Green]\n4. [Grey], [Pink], [Brown]",
+        "ex": ["the", "to", "and", "he", "I", "you", "it", "for", "on", "they", "but", "had", "at", "him", "some", "out", "as", "be", "have", "go", "we", "when", "did", "what", "so", "see", "not", "were", "me", "will", "yes", "big", "went", "are", "come", "your", "its", "an", "over", "of", "in", "was", "said", "his", "that", "she", "with", "up", "all", "look", "is", "her", "there", "am", "then", "little", "down", "do", "can", "could", "get", "them", "like", "one", "this", "my", "would", "if", "now", "long", "no", "came", "ask", "very"]
+    },
+    "Sight Words – Grade 2": {
+        "desc": "### Advanced Reading Words\n*Tricky words* for super readers:\n## Color Groups\n- [Red], [Yellow], [Blue]\n- [Purple], [Black]\n- [Orange], [Green]\n- [Grey], [Pink], [Brown]",
+        "ex": ["ride", "into", "just", "blue", "red", "from", "good", "right", "put", "too", "got", "take", "where", "every", "their", "here", "saw", "call", "think", "ran", "let", "six", "walk", "two", "or", "before", "eat", "again", "seven", "eight", "cold", "today", "fly", "myself", "around", "must", "start", "because", "new", "any", "about", "around", "want", "don't", "how", "know", "pretty", "jump", "green", "four", "away", "old", "by", "help", "make", "going", "sleep", "brown", "yellow", "five", "play", "who", "been", "may", "stop", "tell", "much", "keep", "give", "work", "first", "try"]
+    },
+    
+  "Reading G1": {
+    "desc": "This is for grade 1",
+    "ex": [
+      "I see it now.",
+      "They have some.",
+      "You are very big.",
+      "It's not little.",
+      "They are coming.",
+      "You can see it.",
+      "He has some.",
+      "I went up.",
+      "What time was it?",
+      "Did they go?",
+      "You are kind.",
+      "It's very big.",
+      "Yes, I am not big.",
+      "They will come.",
+      "You can see them.",
+      "I had some of it.",
+      "What did he do?",
+      "They are all big.",
+      "He went out.",
+      "You can ask me.",
+      "I see it now.",
+      "Yes, I will get it.",
+      "They are coming over.",
+      "You are very big.",
+      "What is it?",
+      "He did see it.",
+      "They have some for you.",
+      "I went with him to the store.",
+      "You can see them now.",
+      "It's not big, but it's long.",
+      "Yes, I am going.",
+      "Are you coming to see me?",
+      "They are very big and little.",
+      "He went up to get it.",
+      "You can see it from here.",
+      "I had some, but I gave it away.",
+      "What did she say to you?",
+      "They did go to the store.",
+      "You are so kind to them.",
+      "I see him, and he's very big.",
+      "Yes, I will go with you.",
+      "They are coming over to see us.",
+      "It's not little, it's big.",
+      "He went out to get some.",
+      "You can ask her if you want.",
+      "I had some of it, but not all.",
+      "What time is it?",
+      "They have some, and they will share.",
+      "You are very kind to me.",
+      "I see it now, it's on the table.",
+      "Are they coming to see you?",
+      "He did go over to her.",
+      "I went up to get it for you.",
+      "You can see them when they come.",
+      "It's not big, it's little.",
+      "Yes, I had it, but I gave it to him.",
+      "What did he say to you?",
+      "They will go to the store for some.",
+      "I see you over there, and you are very big.",
+      "Here I am, out of my home into yours."
+    ]
+  },
+  "Reading G2": {
+    "desc": "This is for grade 2",
+    "ex": [
+      "Take a new ride right here.",
+      "They must walk six or seven.",
+      "Put it into the blue box.",
+      "I saw two cold rides.",
+      "Because it's right, let's start.",
+      "Take eight steps to begin.",
+      "Just saw myself in the mirror.",
+      "Think before you fly from here.",
+      "Where did they put the key?",
+      "Run around the green field.",
+      "Eat before you start work.",
+      "Good morning, let's take a walk.",
+      "Every day is a new start.",
+      "Just give me a pretty ride.",
+      "Play outside with the kids.",
+      "Tell me about the new ride.",
+      "Who wants to jump and play?",
+      "Much too cold to swim.",
+      "Around the corner, I saw you.",
+      "Any help would be good.",
+      "Right here is where I stay.",
+      "Six or seven, let's go.",
+      "Must I take the first ride?",
+      "Put the red flag up high.",
+      "New rides are very good.",
+      "Just think before you act.",
+      "From where I stand, it's nice.",
+      "Take a walk with me today.",
+      "Because it's right, I know.",
+      "Saw two birds flying high.",
+      "Let's start the new game.",
+      "Every morning is a new start.",
+      "Take eight steps forward.",
+      "Just put it in the box.",
+      "Think before you take off.",
+      "Right here is where we meet.",
+      "Must I go to work today?",
+      "Walk with me, don't run.",
+      "Six or seven, let's go.",
+      "Put the key in the lock.",
+      "New rides are very fun.",
+      "Just saw a yellow bird.",
+      "Take a ride with me.",
+      "Because it's right, I see.",
+      "From where I stand, it's good.",
+      "Think before you jump.",
+      "Let's start the new day.",
+      "Every morning is new.",
+      "Put the brown bag away.",
+      "Right here is where we start.",
+      "Must I take the ride?",
+      "Walk six or seven miles.",
+      "New rides are very pretty.",
+      "Just think before you act.",
+      "Take eight steps back.",
+      "Saw two kids playing.",
+      "Here I am with you.",
+      "Every day is a new day.",
+      "Let's start the game now.",
+      "Put the red flag down."
+    ]
+  }
+};
+
+        // Current dictionary
+        let lessons = { ...DEFAULT_LESSONS };
+        
+        // DOM Elements
+        const slideToggle = document.getElementById('slideToggle');
+        const loadToggle = document.getElementById('loadToggle');
+        const exportToggle = document.getElementById('exportToggle');
+        const dictionaryFileInput = document.getElementById('dictionaryFileInput');
+        const dictionaryNotification = document.getElementById('dictionaryNotification');
+        const notificationText = document.getElementById('notificationText');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const fontToggle = document.getElementById('fontToggle');
+        const historyToggle = document.getElementById('historyToggle');
+        const topicsToggle = document.getElementById('topicsToggle');
+        const helpToggle = document.getElementById('helpToggle');
+        const appLogo = document.getElementById('appLogo');
+        const historyPanel = document.getElementById('historyPanel');
+        const topicsPanel = document.getElementById('topicsPanel');
+        const topicsList = document.getElementById('topicsList');
+        const historyList = document.getElementById('historyList');
+        const closeHistory = document.getElementById('closeHistory');
+        const closeTopics = document.getElementById('closeTopics');
+        const overlay = document.getElementById('overlay');
+        const instructionsModal = document.getElementById('instructionsModal');
+        const closeModal = document.getElementById('closeModal');
+        const appContainer = document.getElementById('appContainer');
+        
+        // Slideshow Elements
+        const slideshowOverlay = document.getElementById('slideshowOverlay');
+        const slideshowContent = document.getElementById('slideshowContent');
+        const slideshowTop = document.getElementById('slideshowTop');
+        const slideshowBottom = document.getElementById('slideshowBottom');
+        const slideshowClose = document.getElementById('slideshowClose');
+        const slideshowIndicator = document.getElementById('slideshowIndicator');
+        const instructionModal = document.getElementById('instructionModal');
+        const closeInstruction = document.getElementById('closeInstruction');
+        
+        // Dictionary Builder Elements
+        const builderContainer = document.getElementById('builderContainer');
+        const builderCancel = document.getElementById('builderCancel');
+        const builderExport = document.getElementById('builderExport');
+        const builderTopic = document.getElementById('builderTopic');
+        const builderDesc = document.getElementById('builderDesc');
+        const builderEx = document.getElementById('builderEx');
+        const builderAdd = document.getElementById('builderAdd');
+        const builderPreview = document.getElementById('builderPreview');
+        const builderEntryCount = document.getElementById('builderEntryCount');
+        const previewClear = document.getElementById('previewClear');
+
+        // Font size controls
+        const fontControls = document.querySelector('.font-controls');
+        const fontSizeBtns = document.querySelectorAll('.font-size-btn');
+
+        // State
+        let isDarkTheme = false;
+        const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
+        
+        // Slideshow state
+        let currentSlideshow = null;
+        let currentSlideIndex = 0;
+        let selectedWords = {};
+        
+        // Dictionary Builder state
+        let builderDictionary = {};
+
+        // Initialize
+        function init() {
+            // Try to load saved dictionary from localStorage
+            const savedDictionary = localStorage.getItem('customDictionary');
+            if (savedDictionary) {
+                try {
+                    lessons = JSON.parse(savedDictionary);
+                    showNotification('Custom Notes loaded successfully', '✅');
+                } catch (e) {
+                    console.error('Failed to load saved Notes:', e);
+                    showNotification('Error loading Notes', '❌', true);
+                }
+            }
+            
+            // Set font size from localStorage if available
+            const savedFontSize = localStorage.getItem('dictionaryFontSize');
+            if (savedFontSize) {
+                document.documentElement.style.setProperty('--font-base', savedFontSize);
+                
+                // Set active button
+                fontSizeBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.size === savedFontSize) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            
+            // Add event listeners for font size buttons
+            fontSizeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const size = btn.dataset.size;
+                    document.documentElement.style.setProperty('--font-base', size);
+                    localStorage.setItem('dictionaryFontSize', size);
+                    
+                    // Update active button
+                    fontSizeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+            
+            // Add dictionary load event listener
+            loadToggle.addEventListener('click', () => {
+                dictionaryFileInput.click();
+            });
+            
+            // Add dictionary builder event listener
+            exportToggle.addEventListener('click', () => {
+                appContainer.style.display = 'none';
+                builderContainer.classList.add('active');
+            });
+            
+            // Builder cancel button
+            builderCancel.addEventListener('click', () => {
+                builderContainer.classList.remove('active');
+                appContainer.style.display = 'block';
+            });
+            
+            // Builder export button
+            builderExport.addEventListener('click', exportBuilderDictionary);
+            
+            // Builder add entry button
+            builderAdd.addEventListener('click', addBuilderEntry);
+            
+            // Builder clear preview button
+            previewClear.addEventListener('click', () => {
+                if (Object.keys(builderDictionary).length > 0 && confirm('Are you sure you want to clear all entries?')) {
+                    builderDictionary = {};
+                    updateBuilderPreview();
+                }
+            });
+            
+            dictionaryFileInput.addEventListener('change', handleFileSelect);
+            
+            // Add slideshow event listeners
+            slideToggle.addEventListener('click', startSlideshow);
+            slideshowClose.addEventListener('click', closeSlideshow);
+            slideshowTop.addEventListener('click', nextSlide);
+            slideshowBottom.addEventListener('click', prevSlide);
+            closeInstruction.addEventListener('click', () => {
+                instructionModal.classList.remove('active');
+                overlay.classList.remove('active');
+                beginSlideshow();
+            });
+            
+            // Set theme from localStorage if available
+            const savedTheme = localStorage.getItem('dictionaryTheme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Check if instructions have been shown before
+            const instructionsShown = localStorage.getItem('instructionsShown');
+            if (!instructionsShown) {
+                // Show instructions after splash screen
+                setTimeout(() => {
+                    toggleInstructionsModal();
+                    localStorage.setItem('instructionsShown', 'true');
+                }, 5500);
+            }
+            
+            // Event listeners
+            searchBtn.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            themeToggle.addEventListener('click', toggleTheme);
+            fontToggle.addEventListener('click', () => {
+                fontControls.style.display = fontControls.style.display === 'flex' ? 'none' : 'flex';
+            });
+            historyToggle.addEventListener('click', toggleHistoryPanel);
+            topicsToggle.addEventListener('click', toggleTopicsPanel);
+            helpToggle.addEventListener('click', toggleInstructionsModal);
+            appLogo.addEventListener('click', () => {
+                // Reset to home screen
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>📖</span>
+                        <h2>Enhanced Digital Notes</h2>
+                        <p>Search for topics to see their details and examples</p>
+                        <p>Try these examples:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                        
+                        <div class="font-controls">
+                            <span class="font-label">Font Size:</span>
+                            ${fontSizeBtns[0].outerHTML}
+                            ${fontSizeBtns[1].outerHTML}
+                            ${fontSizeBtns[2].outerHTML}
+                            ${fontSizeBtns[3].outerHTML}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Re-add event listeners to new buttons
+                document.querySelectorAll('.font-size-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const size = btn.dataset.size;
+                        document.documentElement.style.setProperty('--font-base', size);
+                        localStorage.setItem('dictionaryFontSize', size);
+                        
+                        // Update active button
+                        document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+            });
+            
+            closeHistory.addEventListener('click', toggleHistoryPanel);
+            closeTopics.addEventListener('click', toggleTopicsPanel);
+            closeModal.addEventListener('click', toggleInstructionsModal);
+            overlay.addEventListener('click', closeAllPanels);
+            
+            // Add history item click handlers
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+            
+            // Render history panel
+            renderHistoryPanel();
+            
+            // Render topics list
+            renderTopicsList();
+        }
+        
+        // Format text with custom markers
+        function formatMarkdown(text) {
+            // Split text into lines
+            const lines = text.split('\n');
+            let output = '';
+            let inOrderedList = false;
+            let inUnorderedList = false;
+            
+            for (let line of lines) {
+                // Trim whitespace
+                line = line.trim();
+                
+                // Skip empty lines
+                if (!line) continue;
+                
+                // Process main topic (###)
+                if (line.startsWith('### ')) {
+                    output += `<h2 class="markdown-h2">${processInlineMarkdown(line.slice(4))}</h2>`;
+                    continue;
+                }
+                
+                // Process sub-topic (##)
+                if (line.startsWith('## ')) {
+                    output += `<h3 class="markdown-h3">${processInlineMarkdown(line.slice(3))}</h3>`;
+                    continue;
+                }
+                
+                // Process bold (#)
+                if (line.startsWith('# ')) {
+                    output += `<strong class="markdown-strong">${processInlineMarkdown(line.slice(2))}</strong>`;
+                    continue;
+                }
+                
+                // Process ordered list (-)
+                if (line.startsWith('- ')) {
+                    if (!inOrderedList) {
+                        output += '<ol class="markdown-ol">';
+                        inOrderedList = true;
+                    }
+                    output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
+                    continue;
+                }
+                
+                // Process unordered list (+)
+                if (line.startsWith('+ ')) {
+                    if (!inUnorderedList) {
+                        output += '<ul class="markdown-ul">';
+                        inUnorderedList = true;
+                    }
+                    output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
+                    continue;
+                }
+                
+                // Close lists if needed
+                if (inOrderedList) {
+                    output += '</ol>';
+                    inOrderedList = false;
+                }
+                if (inUnorderedList) {
+                    output += '</ul>';
+                    inUnorderedList = false;
+                }
+                
+                // Process regular paragraphs
+                output += `<p class="markdown-p">${processInlineMarkdown(line)}</p>`;
+            }
+            
+            // Close lists if still open
+            if (inOrderedList) output += '</ol>';
+            if (inUnorderedList) output += '</ul>';
+            
+            return output;
+        }
+
+        // Process inline markdown formatting
+        function processInlineMarkdown(text) {
+            // Colored text: [text]
+            text = text.replace(/\[([^\]]+)\]/g, '<span class="theme-color">$1</span>');
+            
+            // Underline: _text_
+            text = text.replace(/_([^_]+)_/g, '<u class="markdown-u">$1</u>');
+            
+            // Italic: *text*
+            text = text.replace(/\*([^*]+)\*/g, '<em class="markdown-em">$1</em>');
+            
+            return text;
+        }
+        
+        // Add entry to builder dictionary
+        function addBuilderEntry() {
+            const topic = builderTopic.value.trim();
+            const desc = builderDesc.value.trim();
+            const ex = builderEx.value.trim();
+            
+            if (!topic || !desc || !ex) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Create or update topic
+            builderDictionary[topic] = {
+                desc: desc,
+                ex: ex.split(',').map(item => item.trim())
+            };
+            
+            // Update preview
+            updateBuilderPreview();
+            
+            // Clear inputs
+            builderTopic.value = '';
+            builderDesc.value = '';
+            builderEx.value = '';
+            
+            // Focus back to topic input
+            builderTopic.focus();
+        }
+        
+        // Update the builder preview panel
+        function updateBuilderPreview() {
+            if (Object.keys(builderDictionary).length === 0) {
+                builderPreview.textContent = 'No entries yet';
+            } else {
+                builderPreview.textContent = JSON.stringify(builderDictionary, null, 2);
+            }
+            builderEntryCount.textContent = `${Object.keys(builderDictionary).length} entries`;
+        }
+        
+        // Export builder dictionary
+        function exportBuilderDictionary() {
+            if (Object.keys(builderDictionary).length === 0) {
+                alert('No entries to export');
+                return;
+            }
+            
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `E_Notes_${dateStr}.json`;
+            
+            const jsonStr = JSON.stringify(builderDictionary, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification(`Notes exported as ${filename}`, '📤', false, true);
+        }
+
+        // Handle file selection for dictionary
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const newDictionary = JSON.parse(e.target.result);
+                    
+                    // Validate the dictionary structure
+                    let isValid = true;
+                    for (const key in newDictionary) {
+                        if (!newDictionary[key].desc || !Array.isArray(newDictionary[key].ex)) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!isValid) {
+                        throw new Error('Invalid Note structure');
+                    }
+                    
+                    // Update the dictionary
+                    lessons = newDictionary;
+                    
+                    // Save to localStorage for persistence
+                    localStorage.setItem('customDictionary', JSON.stringify(lessons));
+                    
+                    // Update UI
+                    renderTopicsList();
+                    showNotification('Notes loaded successfully!', '✅');
+                    
+                    // Clear the file input
+                    dictionaryFileInput.value = '';
+                    
+                    // Reset to home screen
+                    appLogo.click();
+                } catch (error) {
+                    console.error('Error loading No:', error);
+                    showNotification('Error loading Notes. Invalid format.', '❌', true);
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error reading file', '❌', true);
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Show notification
+        function showNotification(message, icon, isError = false, isSuccess = false) {
+            notificationText.textContent = message;
+            notificationIcon.textContent = icon;
+            
+            if (isError) {
+                dictionaryNotification.classList.add('error');
+                dictionaryNotification.classList.remove('success');
+            } else if (isSuccess) {
+                dictionaryNotification.classList.add('success');
+                dictionaryNotification.classList.remove('error');
+            } else {
+                dictionaryNotification.classList.remove('error', 'success');
+            }
+            
+            dictionaryNotification.classList.add('active');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                dictionaryNotification.classList.remove('active');
+            }, 3000);
+        }
+
+        // Search handler
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Add to search history if not already present
+            if (!searchHistory.some(item => item.term === searchTerm)) {
+                searchHistory.unshift({
+                    term: searchTerm,
+                    time: new Date().toISOString()
+                });
+                
+                // Keep only the last 10 searches
+                if (searchHistory.length > 10) {
+                    searchHistory.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
+                
+                // Update history panel
+                renderHistoryPanel();
+            }
+            
+            // Display results
+            displayResults(searchTerm);
+        }
+
+        // Display search results
+        function displayResults(term) {
+            const topic = lessons[term];
+            
+            if (!topic) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>🔍</span>
+                        <h2>Topic Not Found</h2>
+                        <p>No results found for "${term}". Try one of these:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                        
+                        <div class="font-controls">
+                            <span class="font-label">Font Size:</span>
+                            ${fontSizeBtns[0].outerHTML}
+                            ${fontSizeBtns[1].outerHTML}
+                            ${fontSizeBtns[2].outerHTML}
+                            ${fontSizeBtns[3].outerHTML}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Re-add event listeners to new buttons
+                document.querySelectorAll('.font-size-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const size = btn.dataset.size;
+                        document.documentElement.style.setProperty('--font-base', size);
+                        localStorage.setItem('dictionaryFontSize', size);
+                        
+                        // Update active button
+                        document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+                return;
+            }
+            
+            resultsContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1>${term}</h1>
+                    </div>
+                    <div class="entry-desc">${formatMarkdown(topic.desc)}</div>
+                    
+                    <h3>Examples & Word Bank:</h3>
+                    <div class="examples-grid">
+                        ${topic.ex.map((example, index) => 
+                            `<div class="example-item" data-index="${index}">${example}</div>`
+                        ).join('')}
+                    </div>
+                    
+                    <button class="clear-selection" id="clearSelection">
+                        <span>✕</span> Clear Selection
+                    </button>
+                </div>
+            `;
+            
+            // Add click handlers to example items
+            document.querySelectorAll('.example-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+            
+            // Add clear selection button handler
+            document.getElementById('clearSelection').addEventListener('click', () => {
+                document.querySelectorAll('.example-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+            });
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+            localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
+        }
+
+        // Toggle history panel
+        function toggleHistoryPanel() {
+            historyPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = historyPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            topicsPanel.classList.remove('active');
+        }
+        
+        // Toggle topics panel
+        function toggleTopicsPanel() {
+            topicsPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = topicsPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            historyPanel.classList.remove('active');
+        }
+        
+        // Toggle instructions modal
+        function toggleInstructionsModal() {
+            instructionsModal.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = instructionsModal.classList.contains('active') ? 'hidden' : 'auto';
+        }
+        
+        // Close all panels and modals
+        function closeAllPanels() {
+            historyPanel.classList.remove('active');
+            topicsPanel.classList.remove('active');
+            instructionsModal.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Render history panel
+        function renderHistoryPanel() {
+            historyList.innerHTML = '';
+            
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<p>No search history yet</p>';
+                return;
+            }
+            
+            searchHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item-panel';
+                historyItem.innerHTML = `
+                    <div class="term">🔍 ${item.term}</div>
+                    <div class="time">${formatTime(item.time)}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    searchInput.value = item.term;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Render topics list
+        function renderTopicsList() {
+            topicsList.innerHTML = '';
+            
+            Object.keys(lessons).forEach(topic => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <span>📄</span>
+                    <div>${topic}</div>
+                `;
+                
+                topicItem.addEventListener('click', () => {
+                    searchInput.value = topic;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                topicsList.appendChild(topicItem);
+            });
+        }
+
+        // Format time for display
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Slideshow functions
+        function startSlideshow() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm || !lessons[searchTerm]) {
+                alert("Please search for a valid topic first");
+                return;
+            }
+            
+            const topic = lessons[searchTerm];
+            if (topic.ex.length === 0) {
+                alert("No examples available for this topic");
+                return;
+            }
+            
+            currentSlideshow = searchTerm;
+            currentSlideIndex = 0;
+            selectedWords = {};
+            
+            // Show instruction modal
+            instructionModal.classList.add('active');
+            overlay.classList.add('active');
+        }
+        
+        function beginSlideshow() {
+            // Hide header and show slideshow
+            document.querySelector('header').style.display = 'none';
+            slideshowOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateSlideshow();
+        }
+        
+        function updateSlideshow() {
+            const examples = lessons[currentSlideshow].ex;
+            const currentExample = examples[currentSlideIndex];
+            slideshowContent.innerHTML = '';
+            
+            // Create a word element for each word in the example
+            const words = currentExample.split(/\s+/).filter(word => word.length > 0);
+            
+            // Initialize selected words for this slide if needed
+            if (!selectedWords[currentSlideIndex]) {
+                selectedWords[currentSlideIndex] = {};
+            }
+            
+            words.forEach((word, index) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'slideshow-word';
+                wordSpan.textContent = word;
+                
+                // Check if this word is selected
+                if (selectedWords[currentSlideIndex][index]) {
+                    wordSpan.classList.add('selected');
+                }
+                
+                // Add click event to toggle selection
+                wordSpan.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Toggle selection state
+                    selectedWords[currentSlideIndex][index] = !selectedWords[currentSlideIndex][index];
+                    
+                    // Toggle visual selection
+                    wordSpan.classList.toggle('selected');
+                });
+                
+                slideshowContent.appendChild(wordSpan);
+                
+                // Add space between words
+                if (index < words.length - 1) {
+                    slideshowContent.appendChild(document.createTextNode(' '));
+                }
+            });
+            
+            slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
+        }
+        
+        function nextSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex + 1) % examples.length;
+            updateSlideshow();
+        }
+        
+        function prevSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
+            updateSlideshow();
+        }
+        
+        function closeSlideshow() {
+            slideshowOverlay.classList.remove('active');
+            document.querySelector('header').style.display = 'flex';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize app after splash screen
+        setTimeout(init, 5000);
+        
+        // Add keyboard navigation for slideshow
+        document.addEventListener('keydown', (e) => {
+            if (!slideshowOverlay.classList.contains('active')) return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'Escape') {
+                closeSlideshow();
+            }
+        });
+        
+    </script>
+</body>
+</html>
