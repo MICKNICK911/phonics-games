@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Word Brick Breaker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #ff8c00, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 95%;
+            max-width: 600px;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            color: #ffd700;
+        }
+
+        .config-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 95%;
+            max-width: 600px;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .config-item label {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .config-item input {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: bold;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 95vw;
+            height: 40vh;
+            max-width: 600px;
+            max-height: 600px;
+            margin: 10px 0 20px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0b3d91 0%, #1a237e 100%);
+            border: 3px solid #ffd700;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .brick-row {
+            display: flex;
+            justify-content: center;
+            gap: 2%;
+            margin: 1vh 0;
+        }
+
+        .brick {
+            width: 5%;
+            height: 2vh;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            border-radius: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .brick.red {
+            background: linear-gradient(135deg, #f44336, #c62828);
+        }
+
+        #shooter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ff9800 0%, #f57c00 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff9800;
+            border: 2px solid #ffd700;
+            z-index: 10;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 8px #ff5252;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            width: 95vw;
+            max-width: 600px;
+        }
+
+        #inputSection {
+            width: 95vw;
+            max-width: 600px;
+            margin-top: 15px;
+        }
+
+        #usedWords {
+            background: rgba(0, 0, 0, 0.7);
+            height: 80px;
+            color: white;
+            overflow: auto;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ffd700;
+            font-size: 1.1rem;
+        }
+
+        #currentWord {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            height: 50px;
+            margin-top: 10px;
+            letter-spacing: 3px;
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+        }
+
+        #customKeyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            /*margin-top: 10px*/
+            width: 100%;
+        }
+
+        .key-btn {
+            padding: 12px 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(to bottom, #4a86e8, #1c5bb6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 4px 0 #0d3c8a, 0 6px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+
+        .key-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #0d3c8a, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .key-btn-lf {
+            padding: 12px 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            width: 100%;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 4px 0 #1b5e20, 0 6px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+
+        .key-btn-lf:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #1b5e20, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .key-btn-shoot {
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(to bottom, #f44336, #c62828);
+            width: 100%;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 4px 0 #b71c1c, 0 6px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+            text-transform: uppercase;
+        }
+
+        .key-btn-shoot:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b71c1c, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .gameOver h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .gameOver p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            #customKeyboard {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .key-btn {
+                padding: 10px 3px;
+                font-size: 1rem;
+            }
+            
+            #currentWord {
+                font-size: 1.8rem;
+            }
+            
+            .game-stats {
+                font-size: 0.9rem;
+            }
+            
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .config-container {
+                gap: 8px;
+            }
+            
+            .config-item label {
+                font-size: 0.8rem;
+            }
+            
+            .config-item input {
+                width: 50px;
+                font-size: 0.9rem;
+            }
+            
+            #shooter {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WORD BRICK BREAKER</h1>
+        <p>Create words containing the target sound to shoot bricks! Avoid creating invalid words or you'll get penalty bricks.</p>
+    </div>
+    
+    <div class="config-container">
+        <div class="config-item">
+            <label for="target-row">Rows</label>
+            <input type="number" id="target-row" min="1" max="10" value="3">
+        </div>
+        <div class="config-item">
+            <label for="target-bricks">Bricks/Row</label>
+            <input type="number" id="target-bricks" min="1" max="15" value="8">
+        </div>
+        <div class="config-item">
+            <label for="target-sound">Target Sound</label>
+            <input type="text" id="target-sound" value="st">
+        </div>
+    </div>
+    
+    <div class="game-stats">
+        <div class="stat-item">
+            <div>Bricks</div>
+            <div id="brickCount" class="stat-value">0</div>
+        </div>
+        <div class="stat-item">
+            <div>Words Used</div>
+            <div id="wordsUsed" class="stat-value">0</div>
+        </div>
+        <div class="stat-item">
+            <div>Target Sound</div>
+            <div id="targetSound" class="stat-value">st</div>
+        </div>
+    </div>
+    
+    <div id="gameContainer">
+        <div id="brickGrid"></div>
+        <div id="shooter"></div>
+        <div id="gameOver" class="gameOver">
+            <h2 id="gameOverText">Game Over!</h2>
+            <p id="gameOverMessage">You've used <span id="finalWords">0</span> words and cleared <span id="clearedBricks">0</span> bricks!</p>
+            <button class="key-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <button class="key-btn-lf" id="leftBtn">◀◀ LEFT</button>
+        <button class="key-btn-lf" id="backspaceBtn">CLEAR</button>
+        <button class="key-btn-lf" id="rightBtn">RIGHT ▶▶</button>
+    </div>
+    
+    <div id="inputSection">
+        
+        <div id="usedWords">No words used yet...</div>
+        <div class="controls-row">
+            <button class="key-btn" id="replay" onclick="restartGame()">Restart</button>
+            <button class="key-btn-shoot" id="shootBtn">FIRE! 🔥</button>
+        </div>
+        
+        <div id="currentWord"></div>
+        <div id="customKeyboard"></div>
+        
+    </div>
+
+    <script src="../wordlist.js"></script>
+    <script>
+        // Word list with words containing various sounds
+        const words = wordList.map(word => word.toLowerCase());
+
+        // Game variables
+        const allLetters = [...new Set(words.join(''))].sort();
+        let bricks = [];
+        let InitialBricks = [];
+        let shooterPosition = 50;
+        let bulletSpeed = 8;
+        let usedWords = [];
+        let gameActive = true;
+        let clearedBricks = 0;
+        let targetSound = "st";
+
+        function initializeGame() {
+            createCustomKeyboard();
+            initializeBricks();
+            updateShooterPosition();
+            updateTargetSound();
+            
+            // Initialize stats
+            document.getElementById('brickCount').textContent = bricks.length;
+            document.getElementById('wordsUsed').textContent = usedWords.length;
+            document.getElementById('targetSound').textContent = targetSound;
+        }
+
+        function initializeBricks() {
+            const brickGrid = document.getElementById('brickGrid');
+            brickGrid.innerHTML = '';
+            bricks = [];
+            InitialBricks = [];
+            
+            // Get configuration values
+            const rows = parseInt(document.getElementById('target-row').value);
+            const bricksPerRow = parseInt(document.getElementById('target-bricks').value);
+            
+            // Create bricks grid
+            for(let i = 0; i < rows; i++) {
+                const row = document.createElement('div');
+                row.className = 'brick-row';
+                for(let j = 0; j < bricksPerRow; j++) {
+                    const brick = createBrick();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    InitialBricks.push(brick);
+                }
+                brickGrid.appendChild(row);
+            }
+            
+            updateBrickCount();
+        }
+
+        function createBrick() {
+            const brick = document.createElement('div');
+            brick.className = 'brick';
+            return brick;
+        }
+        
+        function createBrickRed() {
+            const brick = document.createElement('div');
+            brick.className = 'brick red';
+            return brick;
+        }
+        
+        function addRedBrickToGrid() {
+            const brickGrid = document.getElementById('brickGrid');
+            const rows = brickGrid.children;
+            const bricksPerRow = parseInt(document.getElementById('target-bricks').value);
+            
+            // Find first available spot in existing rows
+            for(let row of rows) {
+                if(row.children.length < bricksPerRow) {
+                    const brick = createBrickRed();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    return;
+                }
+            }
+            
+            // Add new row if all are full
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            newRow.appendChild(createBrickRed());
+            brickGrid.appendChild(newRow);
+            bricks.push(newRow.firstChild);
+        }
+
+        function updateShooterPosition() {
+            document.getElementById('shooter').style.left = `${shooterPosition}%`;
+        }
+        
+        function updateTargetSound() {
+            targetSound = document.getElementById('target-sound').value.toLowerCase();
+            document.getElementById('targetSound').textContent = targetSound;
+        }
+
+        function checkWord() {
+            const input = document.getElementById('currentWord').textContent.toLowerCase();
+            
+            if(!input) return false;
+            
+            const isValidTag = input.includes(targetSound);
+            const isValid = words.includes(input);
+            const isUsed = usedWords.includes(input);
+            
+            return isValidTag && isValid && !isUsed;
+        }
+
+        function createParticles(x, y, color) {
+            const particleCount = 15;
+            const container = document.getElementById('gameContainer');
+            
+            for(let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.backgroundColor = color;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                container.appendChild(particle);
+                
+                // Random direction and speed
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                
+                // Animate particle
+                let opacity = 1;
+                const particleAnimation = setInterval(() => {
+                    const left = parseFloat(particle.style.left);
+                    const top = parseFloat(particle.style.top);
+                    
+                    particle.style.left = `${left + vx}px`;
+                    particle.style.top = `${top + vy}px`;
+                    opacity -= 0.03;
+                    particle.style.opacity = opacity;
+                    
+                    if(opacity <= 0) {
+                        particle.remove();
+                        clearInterval(particleAnimation);
+                    }
+                }, 30);
+            }
+        }
+
+        function shootBullet() {
+            if(!gameActive) return;
+            
+            const currentWord = document.getElementById('currentWord').textContent;
+            if(!currentWord) return;
+            
+            if(!checkWord()) {
+                // Invalid word - add penalty brick
+                addRedBrickToGrid();
+                updateBrickCount();
+                
+                // Check game over condition
+                if(bricks.length >= InitialBricks.length + 5) {
+                    showGameOver(false);
+                }
+                
+                document.getElementById('currentWord').textContent = '';
+                return;
+            }
+
+            // Valid word
+            usedWords.push(currentWord);
+            document.getElementById('usedWords').textContent = usedWords.join(', ');
+            document.getElementById('wordsUsed').textContent = usedWords.length;
+            document.getElementById('currentWord').textContent = '';
+
+            // Create bullet
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = `${shooterPosition}%`;
+            bullet.style.bottom = '40px';
+            document.getElementById('gameContainer').appendChild(bullet);
+
+            const animation = setInterval(() => {
+                if(!gameActive) {
+                    clearInterval(animation);
+                    return;
+                }
+                
+                const currentBottom = parseFloat(bullet.style.bottom) || 40;
+                const newBottom = currentBottom + bulletSpeed;
+                bullet.style.bottom = `${newBottom}px`;
+
+                // Collision detection
+                const bulletRect = bullet.getBoundingClientRect();
+                const containerRect = document.getElementById('gameContainer').getBoundingClientRect();
+                
+                for(let i = 0; i < bricks.length; i++) {
+                    const brick = bricks[i];
+                    const brickRect = brick.getBoundingClientRect();
+                    
+                    // Adjust positions relative to container
+                    const adjBulletRect = {
+                        left: bulletRect.left - containerRect.left,
+                        top: bulletRect.top - containerRect.top,
+                        right: bulletRect.right - containerRect.left,
+                        bottom: bulletRect.bottom - containerRect.top
+                    };
+                    
+                    const adjBrickRect = {
+                        left: brickRect.left - containerRect.left,
+                        top: brickRect.top - containerRect.top,
+                        right: brickRect.right - containerRect.left,
+                        bottom: brickRect.bottom - containerRect.top
+                    };
+                    
+                    // Check collision
+                    if(adjBulletRect.left < adjBrickRect.right && 
+                       adjBulletRect.right > adjBrickRect.left && 
+                       adjBulletRect.top < adjBrickRect.bottom && 
+                       adjBulletRect.bottom > adjBrickRect.top) {
+                        
+                        // Collision detected - create particles
+                        const collisionX = (adjBrickRect.left + adjBrickRect.right) / 2;
+                        const collisionY = (adjBrickRect.top + adjBrickRect.bottom) / 2;
+                        const color = brick.classList.contains('red') ? '#f44336' : '#4CAF50';
+                        createParticles(collisionX, collisionY, color);
+                        
+                        // Remove brick
+                        brick.remove();
+                        bricks.splice(i, 1);
+                        clearedBricks++;
+                        
+                        // Remove bullet
+                        bullet.remove();
+                        clearInterval(animation);
+                        
+                        // Update brick count
+                        updateBrickCount();
+                        
+                        // Check win condition
+                        if(bricks.length === 0) {
+                            showGameOver(true);
+                        }
+                        return;
+                    }
+                }
+
+                // Remove bullet when it goes off screen
+                if(newBottom > document.getElementById('gameContainer').clientHeight) {
+                    bullet.remove();
+                    clearInterval(animation);
+                }
+            }, 16);
+        }
+
+        function updateBrickCount() {
+            document.getElementById('brickCount').textContent = bricks.length;
+        }
+
+        function showGameOver(won) {
+            gameActive = false;
+            const gameOver = document.getElementById('gameOver');
+            document.getElementById('gameOverText').textContent = 
+                won ? 'You Win!' : 'Game Over!';
+                
+            document.getElementById('finalWords').textContent = usedWords.length;
+            document.getElementById('clearedBricks').textContent = clearedBricks;
+            
+            gameOver.style.display = 'block';
+        }
+
+        function restartGame() {
+            gameActive = true;
+            document.getElementById('gameOver').style.display = 'none';
+            shooterPosition = 50;
+            usedWords = [];
+            clearedBricks = 0;
+            document.getElementById('usedWords').textContent = 'No words used yet...';
+            document.getElementById('currentWord').textContent = '';
+            document.getElementById('wordsUsed').textContent = '0';
+            updateTargetSound();
+            initializeBricks();
+            updateShooterPosition();
+        }
+
+        function createCustomKeyboard() {
+            const keyboard = document.getElementById('customKeyboard');
+            keyboard.innerHTML = '';
+            
+            allLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter.toUpperCase();
+                btn.onclick = () => {
+                    document.getElementById('currentWord').textContent += letter;
+                };
+                keyboard.appendChild(btn);
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('leftBtn').addEventListener('click', () => {
+            shooterPosition = Math.max(2, shooterPosition - 4);
+            updateShooterPosition();
+        });
+
+        document.getElementById('rightBtn').addEventListener('click', () => {
+            shooterPosition = Math.min(94, shooterPosition + 4);
+            updateShooterPosition();
+        });
+
+        document.getElementById('backspaceBtn').addEventListener('click', () => {
+            const current = document.getElementById('currentWord');
+            current.textContent = current.textContent.slice(0, -1);
+        });
+
+        document.getElementById('shootBtn').addEventListener('click', shootBullet);
+        
+        // Configuration listeners
+        document.getElementById('target-row').addEventListener('change', function() {
+            // Ensure value is within limits
+            this.value = Math.max(1, Math.min(10, parseInt(this.value) || 3));
+        });
+        
+        document.getElementById('target-bricks').addEventListener('change', function() {
+            // Ensure value is within limits
+            this.value = Math.max(1, Math.min(15, parseInt(this.value) || 8));
+        });
+        
+        document.getElementById('target-sound').addEventListener('input', function() {
+            updateTargetSound();
+        });
+
+        // Keyboard support for desktop
+        document.addEventListener('keydown', (e) => {
+            if(!gameActive) return;
+            
+            if(e.key === 'ArrowLeft') {
+                shooterPosition = Math.max(2, shooterPosition - 4);
+                updateShooterPosition();
+            } else if(e.key === 'ArrowRight') {
+                shooterPosition = Math.min(94, shooterPosition + 4);
+                updateShooterPosition();
+            } else if(e.key === 'Backspace') {
+                const current = document.getElementById('currentWord');
+                current.textContent = current.textContent.slice(0, -1);
+            } else if(e.key === 'Enter') {
+                shootBullet();
+            } else if(e.key.length === 1 && /[a-z]/i.test(e.key)) {
+                document.getElementById('currentWord').textContent += e.key.toLowerCase();
+            }
+        });
+
+        // Initialize game
+        initializeGame();
+    </script>
+</body>
+</html>
