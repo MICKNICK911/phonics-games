@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Word Challenge Duels</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --player1: #ff6b6b;
@@ -44,13 +43,13 @@
     }
     
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       width: 100%;
     }
     
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
       position: relative;
     }
     
@@ -80,14 +79,13 @@
     }
     
     .game-container {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr 1fr;
       gap: 25px;
       width: 100%;
     }
     
     .player-panel {
-      width: 100%;
       background: var(--card-bg);
       padding: 25px;
       border-radius: var(--border-radius);
@@ -99,6 +97,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      min-height: 500px;
     }
     
     .player-panel.active {
@@ -167,6 +166,7 @@
     
     .score-container {
       margin-bottom: 25px;
+      position: relative;
     }
     
     .score-label {
@@ -180,6 +180,35 @@
       font-weight: 700;
       text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
       transition: transform 0.3s ease;
+    }
+    
+    .score-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .score-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .score-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .score-btn:active {
+      transform: scale(0.95);
     }
     
     .action-btn {
@@ -196,8 +225,7 @@
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
       position: relative;
       overflow: hidden;
-      align-self: center;
-      margin-top: auto;
+      margin: 20px auto;
     }
     
     .action-btn::after {
@@ -242,26 +270,27 @@
     }
     
     .game-center {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .setup-container, .game-display, .result-screen {
       background: var(--card-bg);
       padding: 30px;
       border-radius: var(--border-radius);
-      width: 100%;
-      max-width: 700px;
       text-align: center;
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow);
       border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      min-height: 500px;
+    }
+    
+    .setup-container, .game-display, .result-screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .setup-container {
-      display: block;
+      display: flex;
     }
     
     .game-display, .result-screen {
@@ -339,6 +368,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
+      margin-top: auto;
     }
     
     .btn:hover {
@@ -452,6 +482,7 @@
     
     .result-screen {
       padding: 40px;
+      justify-content: center;
     }
     
     .winner-text {
@@ -493,6 +524,8 @@
       text-align: center;
       box-shadow: var(--shadow);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      height: 50%;
+      overflow: auto;
     }
     
     .popup-title {
@@ -595,7 +628,6 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-      z-index: 10;
     }
     
     /* Player turn indicator */
@@ -612,6 +644,7 @@
       z-index: 10;
       opacity: 0.9;
       white-space: nowrap;
+      display: none;
     }
     
     .player1 .turn-indicator {
@@ -623,52 +656,37 @@
     }
     
     /* Responsive Design */
-    @media (min-width: 768px) {
+    @media (max-width: 1200px) {
       .game-container {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      
-      .player-panel {
-        max-width: 280px;
-        min-height: 400px;
-      }
-      
-      .game-center {
-        max-width: 500px;
-      }
-    }
-    
-    @media (min-width: 992px) {
-      .game-container {
-        flex-wrap: nowrap;
-        justify-content: space-between;
-      }
-      
-      .player-panel {
-        max-width: 320px;
-        min-height: 450px;
-      }
-      
-      .game-center {
-        max-width: 500px;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "center center"
+          "player1 player2";
       }
       
       .player-panel.player1 {
-        order: 1;
-      }
-      
-      .game-center {
-        order: 2;
+        grid-area: player1;
       }
       
       .player-panel.player2 {
-        order: 3;
+        grid-area: player2;
+      }
+      
+      .game-center {
+        grid-area: center;
+        margin-bottom: 25px;
       }
     }
     
     @media (max-width: 768px) {
+      .game-container {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "center"
+          "player1"
+          "player2";
+      }
+      
       .logo {
         font-size: 3rem;
       }
@@ -807,7 +825,7 @@
   <div class="container fade-in">
     <header>
       <div class="logo">
-        <i class="fas fa-brain"></i>
+        🧠
       </div>
       <h1>WORD CHALLENGE DUELS</h1>
       <p class="subtitle">Test your reflexes and vocabulary in this fast-paced word challenge game!</p>
@@ -819,7 +837,7 @@
         <div class="turn-indicator">YOUR TURN!</div>
         <div class="player-header">
           <div class="player-icon">
-            <i class="fas fa-user"></i>
+            👤
           </div>
           <input type="text" class="input-field player-name-input" id="player-1" value="Player 1" placeholder="Player 1">
         </div>
@@ -827,10 +845,18 @@
         <div class="score-container">
           <div class="score-label">SCORE</div>
           <div class="score-value score-a-value">0</div>
+          <div class="score-controls">
+            <button class="score-btn adjust-minus" onclick="adjustScore('a', -1)">
+              ➖
+            </button>
+            <button class="score-btn adjust-plus" onclick="adjustScore('a', 1)">
+              ➕
+            </button>
+          </div>
         </div>
         
         <button class="action-btn button-a" disabled>
-          <i class="fas fa-bolt"></i>
+          ⚡
         </button>
         <div class="streak-indicator">0</div>
       </div>
@@ -862,7 +888,7 @@
           </div>
           
           <button class="btn start">
-            <i class="fas fa-play"></i> START GAME
+            ▶️ START GAME
           </button>
         </div>
         
@@ -884,10 +910,10 @@
           
           <div class="game-controls">
             <button class="icon-btn restart-btn1">
-              <i class="fas fa-redo"></i>
+              🔁
             </button>
             <button class="icon-btn pause-btn">
-              <i class="fas fa-pause"></i>
+              ⏸️
             </button>
           </div>
         </div>
@@ -897,7 +923,7 @@
           <div class="winner-text" id="winner"></div>
           <div class="winner-score" id="winner-score"></div>
           <button class="btn restart-btn2">
-            <i class="fas fa-redo"></i> PLAY AGAIN
+            🔁 PLAY AGAIN
           </button>
         </div>
       </div>
@@ -907,7 +933,7 @@
         <div class="turn-indicator">YOUR TURN!</div>
         <div class="player-header">
           <div class="player-icon">
-            <i class="fas fa-user"></i>
+            👤
           </div>
           <input type="text" class="input-field player-name-input" id="player-2" value="Player 2" placeholder="Player 2">
         </div>
@@ -915,10 +941,18 @@
         <div class="score-container">
           <div class="score-label">SCORE</div>
           <div class="score-value score-b-value">0</div>
+          <div class="score-controls">
+            <button class="score-btn adjust-minus" onclick="adjustScore('b', -1)">
+              ➖
+            </button>
+            <button class="score-btn adjust-plus" onclick="adjustScore('b', 1)">
+              ➕
+            </button>
+          </div>
         </div>
         
         <button class="action-btn button-b" disabled>
-          <i class="fas fa-bolt"></i>
+          ⚡
         </button>
         <div class="streak-indicator">0</div>
       </div>
@@ -932,37 +966,41 @@
       
       <div class="instructions">
         <div class="instruction-item">
-          <div class="instruction-icon">1</div>
+          <div class="instruction-icon">1️⃣</div>
           <div>Two players required for this vocabulary duel</div>
         </div>
         <div class="instruction-item">
-          <div class="instruction-icon">2</div>
+          <div class="instruction-icon">2️⃣</div>
           <div>Enter words separated by commas or use the default list</div>
         </div>
         <div class="instruction-item">
-          <div class="instruction-icon">3</div>
+          <div class="instruction-icon">3️⃣</div>
           <div>Set number of rounds and turn duration</div>
         </div>
         <div class="instruction-item">
-          <div class="instruction-icon">4</div>
+          <div class="instruction-icon">4️⃣</div>
           <div>Press START to begin the challenge</div>
         </div>
         <div class="instruction-item">
-          <div class="instruction-icon">5</div>
+          <div class="instruction-icon">5️⃣</div>
           <div>When a word appears, the active player taps their button to score a point</div>
         </div>
         <div class="instruction-item">
-          <div class="instruction-icon">6</div>
+          <div class="instruction-icon">6️⃣</div>
           <div>Player <span class="player-indicator player1-indicator"></span> uses the red button, Player <span class="player-indicator player2-indicator"></span> uses the blue button</div>
         </div>
         <div class="instruction-item">
-          <div class="instruction-icon">7</div>
+          <div class="instruction-icon">7️⃣</div>
           <div>If the current player doesn't tap in time, they lose a point, and the word is maintained for the next player</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">8️⃣</div>
+          <div>Use the +/- buttons to manually adjust scores during the game</div>
         </div>
       </div>
       
       <button class="popup-btn" id="start-game-btn">
-        <i class="fas fa-play"></i> LET'S PLAY!
+        ▶️ LET'S PLAY!
       </button>
     </div>
   </div>
@@ -1122,14 +1160,14 @@
 
       // Update scores with streak logic
       if (player === 'a') {
-        scoreA++;
+        scoreA+= 3;
         if (playerAD >= 1) scoreB = Math.max(0, scoreB - 1);
         playerAD++;
         playerBD = 0;
         streakA.textContent = playerAD;
         streakB.textContent = playerBD;
       } else {
-        scoreB++;
+        scoreB+= 3;
         if (playerBD >= 1) scoreA = Math.max(0, scoreA - 1);
         playerBD++;
         playerAD = 0;
@@ -1150,6 +1188,24 @@
       } else {
         endGame();
       }
+    }
+    
+    // **Adjust Score Manually**
+    function adjustScore(player, amount) {
+      if (player === 'a') {
+        scoreA = Math.max(0, scoreA + amount);
+      } else {
+        scoreB = Math.max(0, scoreB + amount);
+      }
+      
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      
+      // Add pulse animation to score
+      document.querySelector(`.score-${player}-value`).classList.add('pulse');
+      setTimeout(() => {
+        document.querySelector(`.score-${player}-value`).classList.remove('pulse');
+      }, 500);
     }
 
     // **Update Score Display**
@@ -1324,11 +1380,11 @@
       isPaused = !isPaused;
       
       if (isPaused) {
-        pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        pauseBtn.textContent = '▶️';
         clearTimeout(currentTimeout);
         clearInterval(countdownInterval);
       } else {
-        pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        pauseBtn.textContent = '⏸️';
         currentTimeout = setTimeout(() => {
           handleTimeout();
         }, remainingTime * 1000);
