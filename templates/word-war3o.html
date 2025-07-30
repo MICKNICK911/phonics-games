@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Challenge Duels</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --player1: #ff6b6b;
+      --player2: #4dabf7;
+      --background: #1a1a2e;
+      --background-alt: #16213e;
+      --accent: #0f3460;
+      --text: #f8f9fa;
+      --text-secondary: #adb5bd;
+      --button-bg: #00b894;
+      --button-hover: #00a382;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #ff7675;
+      --transition: all 0.3s ease;
+      --border-radius: 16px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--background), var(--background-alt));
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .logo {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, var(--player1), var(--player2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    }
+    
+    h1 {
+      font-size: 2.8rem;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .subtitle {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      width: 100%;
+    }
+    
+    .player-panel {
+      width: 100%;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    
+    .player-panel.active {
+      transform: translateY(-10px);
+      border: 2px solid;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+    
+    .player1.active {
+      border-color: var(--player1);
+    }
+    
+    .player2.active {
+      border-color: var(--player2);
+    }
+    
+    .player-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+    
+    .player-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, rgba(0,0,0,0.2), rgba(255,255,255,0.1));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .player1 .player-icon {
+      color: var(--player1);
+      border: 2px solid var(--player1);
+    }
+    
+    .player2 .player-icon {
+      color: var(--player2);
+      border: 2px solid var(--player2);
+    }
+    
+    .player-name-input {
+      border: none;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      width: 100%;
+      max-width: 180px;
+      text-align: center;
+      color: var(--text);
+      transition: var(--transition);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .player-name-input:focus {
+      outline: none;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 2px var(--button-bg);
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .score-container {
+      margin-bottom: 25px;
+    }
+    
+    .score-label {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .score-value {
+      font-size: 3.5rem;
+      font-weight: 700;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+    
+    .action-btn {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: none;
+      font-size: 2.2rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      align-self: center;
+      margin-top: auto;
+    }
+    
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .action-btn:hover::after {
+      opacity: 1;
+    }
+    
+    .button-a {
+      background: linear-gradient(135deg, var(--player1), #ff5252);
+      color: white;
+    }
+    
+    .button-b {
+      background: linear-gradient(135deg, var(--player2), #228be6);
+      color: white;
+    }
+    
+    .action-btn:hover:not(:disabled) {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .game-center {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .setup-container, .game-display, .result-screen {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .setup-container {
+      display: block;
+    }
+    
+    .game-display, .result-screen {
+      display: none;
+    }
+    
+    .section-title {
+      font-size: 2.2rem;
+      margin-bottom: 25px;
+      color: var(--text);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: var(--button-bg);
+      border-radius: 2px;
+    }
+    
+    .input-group {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+    
+    .input-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--text);
+      transition: var(--transition);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .input-field:focus {
+      outline: none;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 2px var(--button-bg);
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    textarea.input-field {
+      height: 120px;
+      resize: vertical;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, var(--button-bg), var(--button-hover));
+      color: white;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .word-container {
+      font-size: 3.5rem;
+      font-weight: bold;
+      margin: 30px 0;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.3s ease;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.1);
+      box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timer-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 20px auto;
+    }
+    
+    .timer-circle {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .timer-circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 10;
+    }
+    
+    .timer-circle-fill {
+      fill: none;
+      stroke: var(--button-bg);
+      stroke-width: 10;
+      stroke-dasharray: 440;
+      stroke-dashoffset: 0;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      transition: stroke-dashoffset 0.1s linear;
+      filter: drop-shadow(0 0 5px rgba(0, 184, 148, 0.5));
+    }
+    
+    .timer-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+    
+    .round-indicator {
+      font-size: 1.4rem;
+      margin: 25px 0;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 10px 25px;
+      border-radius: 50px;
+      display: inline-flex;
+      gap: 8px;
+    }
+    
+    .round-value {
+      font-weight: 700;
+      color: var(--warning);
+    }
+    
+    .game-controls {
+      display: flex;
+      gap: 25px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .icon-btn {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: var(--transition);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .icon-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .result-screen {
+      padding: 40px;
+    }
+    
+    .winner-text {
+      font-size: 2.8rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .winner-score {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 15px 40px;
+      border-radius: 50px;
+      display: inline-block;
+    }
+    
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 20, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    
+    .popup-content {
+      background: var(--background-alt);
+      padding: 40px;
+      border-radius: var(--border-radius);
+      max-width: 600px;
+      width: 95%;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .popup-title {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      color: var(--text);
+      position: relative;
+    }
+    
+    .popup-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--button-bg);
+      border-radius: 2px;
+    }
+    
+    .instructions {
+      text-align: left;
+      margin-bottom: 30px;
+    }
+    
+    .instruction-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    
+    .instruction-icon {
+      min-width: 35px;
+      height: 35px;
+      background: linear-gradient(135deg, var(--button-bg), var(--button-hover));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .player-indicator {
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .player1-indicator {
+      background: linear-gradient(135deg, var(--player1), #ff5252);
+    }
+    
+    .player2-indicator {
+      background: linear-gradient(135deg, var(--player2), #228be6);
+    }
+    
+    .popup-btn {
+      background: linear-gradient(135deg, var(--button-bg), var(--button-hover));
+      color: white;
+      padding: 15px 40px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .popup-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Streak indicator */
+    .streak-indicator {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background: var(--warning);
+      color: var(--background);
+      font-size: 0.9rem;
+      font-weight: bold;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+    }
+    
+    /* Player turn indicator */
+    .turn-indicator {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 5px 15px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 10;
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+    
+    .player1 .turn-indicator {
+      background: var(--player1);
+    }
+    
+    .player2 .turn-indicator {
+      background: var(--player2);
+    }
+    
+    /* Responsive Design */
+    @media (min-width: 768px) {
+      .game-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .player-panel {
+        max-width: 280px;
+        min-height: 400px;
+      }
+      
+      .game-center {
+        max-width: 500px;
+      }
+    }
+    
+    @media (min-width: 992px) {
+      .game-container {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+      }
+      
+      .player-panel {
+        max-width: 320px;
+        min-height: 450px;
+      }
+      
+      .game-center {
+        max-width: 500px;
+      }
+      
+      .player-panel.player1 {
+        order: 1;
+      }
+      
+      .game-center {
+        order: 2;
+      }
+      
+      .player-panel.player2 {
+        order: 3;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .logo {
+        font-size: 3rem;
+      }
+      
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .player-panel {
+        padding: 20px;
+      }
+      
+      .action-btn {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .word-container {
+        font-size: 2.5rem;
+      }
+      
+      .section-title {
+        font-size: 1.8rem;
+      }
+      
+      .popup-content {
+        padding: 30px 20px;
+      }
+      
+      .popup-title {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 2.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .player-header {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .player-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      
+      .player-name-input {
+        max-width: 100%;
+      }
+      
+      .score-value {
+        font-size: 3rem;
+      }
+      
+      .action-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+      }
+      
+      .word-container {
+        font-size: 2rem;
+        min-height: 70px;
+      }
+      
+      .timer-container {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .timer-value {
+        font-size: 2rem;
+      }
+      
+      .round-indicator {
+        font-size: 1.2rem;
+      }
+      
+      .btn, .popup-btn {
+        padding: 12px 25px;
+        font-size: 1.1rem;
+      }
+      
+      .winner-text {
+        font-size: 2.2rem;
+      }
+      
+      .winner-score {
+        font-size: 1.7rem;
+      }
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pulse {
+      animation: pulse 0.5s ease;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px currentColor; }
+      50% { box-shadow: 0 0 20px currentColor; }
+      100% { box-shadow: 0 0 5px currentColor; }
+    }
+    
+    .player-panel.active {
+      animation: glow 1.5s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container fade-in">
+    <header>
+      <div class="logo">
+        <i class="fas fa-brain"></i>
+      </div>
+      <h1>WORD CHALLENGE DUELS</h1>
+      <p class="subtitle">Test your reflexes and vocabulary in this fast-paced word challenge game!</p>
+    </header>
+    
+    <div class="game-container">
+      <!-- Player 1 Panel -->
+      <div class="player-panel player1">
+        <div class="turn-indicator">YOUR TURN!</div>
+        <div class="player-header">
+          <div class="player-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <input type="text" class="input-field player-name-input" id="player-1" value="Player 1" placeholder="Player 1">
+        </div>
+        
+        <div class="score-container">
+          <div class="score-label">SCORE</div>
+          <div class="score-value score-a-value">0</div>
+        </div>
+        
+        <button class="action-btn button-a" disabled>
+          <i class="fas fa-bolt"></i>
+        </button>
+        <div class="streak-indicator">0</div>
+      </div>
+      
+      <!-- Game Center -->
+      <div class="game-center">
+        <!-- Setup Screen -->
+        <div class="setup-container">
+          <h2 class="section-title">Game Setup</h2>
+          
+          <div class="input-group">
+            <label class="input-label">Word List (comma separated)</label>
+            <textarea class="input-field" id="word-list" placeholder="Enter words (e.g., apple,banana,cherry)">apple,banana,orange,grape,lemon,pear,peach,plum,kiwi,mango,strawberry,blueberry,raspberry,blackberry,watermelon</textarea>
+          </div>
+          
+          <div class="input-group">
+            <label class="input-label">Number of Rounds</label>
+            <input type="number" class="input-field" id="number" min="1" value="10">
+          </div>
+          
+          <div class="input-group">
+            <label class="input-label">Difficulty Level (1-3)</label>
+            <input type="number" class="input-field" id="level" min="1" max="3" value="2">
+          </div>
+          
+          <div class="input-group">
+            <label class="input-label">Turn Duration (seconds)</label>
+            <input type="number" class="input-field" id="turn-duration" min="1" value="15">
+          </div>
+          
+          <button class="btn start">
+            <i class="fas fa-play"></i> START GAME
+          </button>
+        </div>
+        
+        <!-- Game Display -->
+        <div class="game-display">
+          <div class="word-container"></div>
+          
+          <div class="timer-container">
+            <svg class="timer-circle" viewBox="0 0 160 160">
+              <circle class="timer-circle-bg" cx="80" cy="80" r="70"></circle>
+              <circle class="timer-circle-fill" cx="80" cy="80" r="70"></circle>
+            </svg>
+            <div class="timer-value">15</div>
+          </div>
+          
+          <div class="round-indicator">
+            Round: <span class="current-round">1</span>/<span class="total-rounds round-value">10</span>
+          </div>
+          
+          <div class="game-controls">
+            <button class="icon-btn restart-btn1">
+              <i class="fas fa-redo"></i>
+            </button>
+            <button class="icon-btn pause-btn">
+              <i class="fas fa-pause"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div class="result-screen">
+          <div class="winner-text" id="winner"></div>
+          <div class="winner-score" id="winner-score"></div>
+          <button class="btn restart-btn2">
+            <i class="fas fa-redo"></i> PLAY AGAIN
+          </button>
+        </div>
+      </div>
+      
+      <!-- Player 2 Panel -->
+      <div class="player-panel player2">
+        <div class="turn-indicator">YOUR TURN!</div>
+        <div class="player-header">
+          <div class="player-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <input type="text" class="input-field player-name-input" id="player-2" value="Player 2" placeholder="Player 2">
+        </div>
+        
+        <div class="score-container">
+          <div class="score-label">SCORE</div>
+          <div class="score-value score-b-value">0</div>
+        </div>
+        
+        <button class="action-btn button-b" disabled>
+          <i class="fas fa-bolt"></i>
+        </button>
+        <div class="streak-indicator">0</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Popup Instructions -->
+  <div class="popup" id="popup">
+    <div class="popup-content fade-in">
+      <h2 class="popup-title">HOW TO PLAY</h2>
+      
+      <div class="instructions">
+        <div class="instruction-item">
+          <div class="instruction-icon">1</div>
+          <div>Two players required for this vocabulary duel</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">2</div>
+          <div>Enter words separated by commas or use the default list</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">3</div>
+          <div>Set number of rounds and turn duration</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">4</div>
+          <div>Press START to begin the challenge</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">5</div>
+          <div>When a word appears, the active player taps their button to score a point</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">6</div>
+          <div>Player <span class="player-indicator player1-indicator"></span> uses the red button, Player <span class="player-indicator player2-indicator"></span> uses the blue button</div>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">7</div>
+          <div>If the current player doesn't tap in time, they lose a point, and the word is maintained for the next player</div>
+        </div>
+      </div>
+      
+      <button class="popup-btn" id="start-game-btn">
+        <i class="fas fa-play"></i> LET'S PLAY!
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // **Game State Variables**
+    let playerAD = 0;           // Player A's streak counter
+    let playerBD = 0;           // Player B's streak counter
+    let digit = 0;              // Difficulty level index
+    let defaultwords = [];      // Default word lists by difficulty
+    let shuffledWordList = [];  // Shuffled words for the game
+    let wordList = [];         // User-provided words
+    let currentWordIndex = 0;   // Index of the current word
+    let scoreA = 0;            // Player A's score
+    let scoreB = 0;            // Player B's score
+    let isButtonAActive = true; // Player A button state
+    let isButtonBActive = true; // Player B button state
+    let turnDuration;          // Duration of each turn in seconds
+    let currentPlayer = null;  // Current player's turn ('a' or 'b')
+    let currentTimeout = null; // Timeout ID for turn duration
+    let countdownInterval = null; // Interval ID for timer countdown
+    let remainingTime = 0;     // Remaining time in the current turn
+    let totalRounds = 0;       // Total number of rounds
+    let isPaused = false;      // Game paused state
+    let circleFill;            // Timer circle fill element
+    let timerValue;            // Timer value display element
+
+    // **DOM Elements**
+    const startBtn = document.querySelector('.start');
+    const wordInput = document.querySelector('#word-list');
+    const popup = document.getElementById('popup');
+    const buttonA = document.querySelector('.button-a');
+    const buttonB = document.querySelector('.button-b');
+    const gameDisplay = document.querySelector('.game-display');
+    const setupContainer = document.querySelector('.setup-container');
+    const wordContainer = document.querySelector('.word-container');
+    const resultScreen = document.querySelector('.result-screen');
+    const playerPanels = document.querySelectorAll('.player-panel');
+    const playerNameInputs = document.querySelectorAll('.player-name-input');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const pauseBtn = document.querySelector('.pause-btn');
+    const restartBtns = document.querySelectorAll('.restart-btn1, .restart-btn2');
+    const streakA = document.querySelector('.player1 .streak-indicator');
+    const streakB = document.querySelector('.player2 .streak-indicator');
+    const turnIndicatorA = document.querySelector('.player1 .turn-indicator');
+    const turnIndicatorB = document.querySelector('.player2 .turn-indicator');
+
+    // **Initialize Default Words**
+    defaultwords = [
+      ['cat', 'dog', 'sun', 'car', 'pen', 'cup', 'hat', 'key', 'box', 'map'],
+      ['apple', 'house', 'water', 'music', 'light', 'plant', 'table', 'phone', 'chair', 'paper'],
+      ['computer', 'mountain', 'elephant', 'universe', 'adventure', 'chocolate', 'landscape', 'knowledge', 'beautiful', 'technology']
+    ];
+
+    // **Initialize Game Elements**
+    function initElements() {
+      circleFill = document.querySelector('.timer-circle-fill');
+      timerValue = document.querySelector('.timer-value');
+      turnIndicatorA.style.display = 'none';
+      turnIndicatorB.style.display = 'none';
+    }
+
+    // **Event Listeners**
+    startBtn.addEventListener('click', initGame);
+    buttonA.addEventListener('click', () => handleScore('a'));
+    buttonB.addEventListener('click', () => handleScore('b'));
+    startGameBtn.addEventListener('click', closePopup);
+    pauseBtn.addEventListener('click', togglePause);
+    restartBtns.forEach(btn => btn.addEventListener('click', restart));
+    playerNameInputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        if (input.value === 'Player 1' || input.value === 'Player 2') {
+          input.value = '';
+        }
+      });
+      input.addEventListener('blur', () => {
+        if (input.id === 'player-1' && input.value.trim() === '') {
+          input.value = 'Player 1';
+        }
+        if (input.id === 'player-2' && input.value.trim() === '') {
+          input.value = 'Player 2';
+        }
+      });
+    });
+
+    // **Initialize on Page Load**
+    document.addEventListener('DOMContentLoaded', () => {
+      initElements();
+      popup.style.display = 'flex'; // Show popup on load
+    });
+
+    // **Initialize the Game**
+    function initGame() {
+      const wordListValue = wordInput.value.trim();
+      
+      // Parse user-provided words
+      wordList = wordListValue.split(',').map(w => w.trim()).filter(w => w.length > 0);
+      
+      // Get difficulty level (1-3)
+      digit = parseInt(document.querySelector('#level').value) || 1;
+      digit = Math.max(1, Math.min(3, digit));
+      
+      // Get turn duration
+      turnDuration = parseInt(document.querySelector('#turn-duration').value) || 15;
+      
+      // Get total rounds
+      totalRounds = parseInt(document.querySelector('#number').value) || 10;
+      document.querySelector('.total-rounds').textContent = totalRounds;
+      
+      // Set up word list
+      shuffledWordList = wordList.length > 0 
+        ? [...wordList]
+        : [...defaultwords[digit - 1]];
+      shuffledWordList.sort(() => Math.random() - 0.5);
+      
+      // Switch UI to game display
+      setupContainer.style.display = 'none';
+      gameDisplay.style.display = 'block';
+      
+      // Reset game state
+      currentWordIndex = 0;
+      scoreA = 0;
+      scoreB = 0;
+      playerAD = 0;
+      playerBD = 0;
+      currentPlayer = 'a';
+      isPaused = false;
+      
+      // Update streaks
+      streakA.textContent = playerAD;
+      streakB.textContent = playerBD;
+      
+      // Update scores
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      
+      // Set initial button states
+      setButtonStates();
+      
+      // Display first word
+      displayWord(currentWordIndex, 'var(--player1)');
+      
+      // Start the timer
+      startTimer();
+    }
+
+    // **Handle Player Tap**
+    function handleScore(player) {
+      if (isPaused) return;
+      if ((player === 'a' && !isButtonAActive) || (player === 'b' && !isButtonBActive)) return;
+
+      // Add pulse animation to score
+      document.querySelector(`.score-${player}-value`).classList.add('pulse');
+      setTimeout(() => {
+        document.querySelector(`.score-${player}-value`).classList.remove('pulse');
+      }, 500);
+
+      // Update scores with streak logic
+      if (player === 'a') {
+        scoreA++;
+        if (playerAD >= 1) scoreB = Math.max(0, scoreB - 1);
+        playerAD++;
+        playerBD = 0;
+        streakA.textContent = playerAD;
+        streakB.textContent = playerBD;
+      } else {
+        scoreB++;
+        if (playerBD >= 1) scoreA = Math.max(0, scoreA - 1);
+        playerBD++;
+        playerAD = 0;
+        streakA.textContent = playerAD;
+        streakB.textContent = playerBD;
+      }
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+
+      // Move to next word
+      currentWordIndex++;
+
+      if (currentWordIndex < totalRounds) {
+        currentPlayer = (currentPlayer === 'a') ? 'b' : 'a';
+        displayWord(currentWordIndex, currentPlayer === 'a' ? 'var(--player1)' : 'var(--player2)');
+        setButtonStates();
+        startTimer();
+      } else {
+        endGame();
+      }
+    }
+
+    // **Update Score Display**
+    function updateScore(player, score) {
+      document.querySelector(`.score-${player}-value`).textContent = Math.max(0, score);
+    }
+
+    // **Display Word**
+    function displayWord(index, color) {
+      if (index < totalRounds) {
+        document.querySelector('.current-round').textContent = index + 1;
+        wordContainer.style.color = color;
+        wordContainer.textContent = shuffledWordList[index];
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    // **End the Game**
+    function endGame() {
+      clearTimeout(currentTimeout);
+      clearInterval(countdownInterval);
+      gameDisplay.style.display = 'none';
+      resultScreen.style.display = 'flex';
+      
+      const player1Name = document.querySelector('#player-1').value || 'Player 1';
+      const player2Name = document.querySelector('#player-2').value || 'Player 2';
+      
+      let winnerText, winnerScore;
+      if (scoreA === scoreB) {
+        winnerText = "It's a Tie!";
+        winnerScore = `${scoreA} - ${scoreB}`;
+      } else if (scoreA > scoreB) {
+        winnerText = `${player1Name} Wins!`;
+        winnerScore = `${scoreA} - ${scoreB}`;
+      } else {
+        winnerText = `${player2Name} Wins!`;
+        winnerScore = `${scoreB} - ${scoreA}`;
+      }
+      
+      document.querySelector('#winner').textContent = winnerText;
+      document.querySelector('#winner-score').textContent = winnerScore;
+      
+      buttonA.disabled = true;
+      buttonB.disabled = true;
+      turnIndicatorA.style.display = 'none';
+      turnIndicatorB.style.display = 'none';
+    }
+
+    // **Restart the Game**
+    function restart() {
+      setupContainer.style.display = 'block';
+      gameDisplay.style.display = 'none';
+      resultScreen.style.display = 'none';
+      
+      playerPanels[0].classList.remove('active');
+      playerPanels[1].classList.remove('active');
+      turnIndicatorA.style.display = 'none';
+      turnIndicatorB.style.display = 'none';
+      
+      currentWordIndex = 0;
+      isButtonAActive = true;
+      isButtonBActive = true;
+      scoreA = 0;
+      scoreB = 0;
+      playerAD = 0;
+      playerBD = 0;
+      currentPlayer = null;
+      isPaused = false;
+      
+      streakA.textContent = playerAD;
+      streakB.textContent = playerBD;
+      
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      
+      timerValue.textContent = turnDuration;
+      circleFill.style.strokeDashoffset = "0";
+    }
+
+    // **Close Popup**
+    function closePopup() {
+      popup.style.display = 'none';
+    }
+
+    // **Start Timer**
+    function startTimer() {
+      if (currentTimeout) clearTimeout(currentTimeout);
+      if (countdownInterval) clearInterval(countdownInterval);
+      
+      remainingTime = turnDuration;
+      updateTimerDisplay();
+      
+      const circumference = 440;
+      const offset = circumference - (remainingTime / turnDuration) * circumference;
+      circleFill.style.strokeDashoffset = offset;
+      
+      countdownInterval = setInterval(() => {
+        if (!isPaused) {
+          remainingTime--;
+          updateTimerDisplay();
+          
+          const offset = circumference - (remainingTime / turnDuration) * circumference;
+          circleFill.style.strokeDashoffset = offset;
+          
+          if (remainingTime <= 0) {
+            clearInterval(countdownInterval);
+            handleTimeout();
+          }
+        }
+      }, 1000);
+      
+      currentTimeout = setTimeout(() => {
+        if (!isPaused) {
+          clearInterval(countdownInterval);
+          handleTimeout();
+        }
+      }, turnDuration * 1000);
+    }
+
+    // **Update Timer Display**
+    function updateTimerDisplay() {
+      timerValue.textContent = remainingTime;
+    }
+
+    // **Handle Timer Elapse**
+    function handleTimeout() {
+      if (isPaused) return;
+      
+      // Penalize the current player
+      if (currentPlayer === 'a') {
+        scoreA = Math.max(0, scoreA - 1);
+      } else {
+        scoreB = Math.max(0, scoreB - 1);
+      }
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      
+      // Switch player, keep the same word
+      currentPlayer = (currentPlayer === 'a') ? 'b' : 'a';
+      wordContainer.style.color = currentPlayer === 'a' ? 'var(--player1)' : 'var(--player2)';
+      setButtonStates();
+      startTimer();
+    }
+
+    // **Set Button States**
+    function setButtonStates() {
+      if (currentPlayer === 'a') {
+        isButtonAActive = true;
+        isButtonBActive = false;
+        buttonA.disabled = false;
+        buttonB.disabled = true;
+        playerPanels[0].classList.add('active');
+        playerPanels[1].classList.remove('active');
+        turnIndicatorA.style.display = 'block';
+        turnIndicatorB.style.display = 'none';
+      } else {
+        isButtonAActive = false;
+        isButtonBActive = true;
+        buttonA.disabled = true;
+        buttonB.disabled = false;
+        playerPanels[0].classList.remove('active');
+        playerPanels[1].classList.add('active');
+        turnIndicatorA.style.display = 'none';
+        turnIndicatorB.style.display = 'block';
+      }
+    }
+
+    // **Toggle Pause**
+    function togglePause() {
+      isPaused = !isPaused;
+      
+      if (isPaused) {
+        pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        clearTimeout(currentTimeout);
+        clearInterval(countdownInterval);
+      } else {
+        pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        currentTimeout = setTimeout(() => {
+          handleTimeout();
+        }, remainingTime * 1000);
+        
+        countdownInterval = setInterval(() => {
+          if (!isPaused) {
+            remainingTime--;
+            updateTimerDisplay();
+            
+            const circumference = 440;
+            const offset = circumference - (remainingTime / turnDuration) * circumference;
+            circleFill.style.strokeDashoffset = offset;
+            
+            if (remainingTime <= 0) {
+              clearInterval(countdownInterval);
+              handleTimeout();
+            }
+          }
+        }, 1000);
+      }
+    }
+  </script>
+</body>
+</html>

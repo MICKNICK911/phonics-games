@@ -12,6 +12,8 @@
       --background: #0f172a;
       --glass: rgba(255, 255, 255, 0.1);
       --text: #f8fafc;
+      --player-a: #ff5252;
+      --player-b: #ffd740;
     }
 
     /* Reset and Base Styles */
@@ -26,6 +28,7 @@
       background: var(--background);
       color: var(--text);
       overflow: hidden;
+      background-image: radial-gradient(circle at top right, #1e3a8a, #0f172a 70%);
     }
 
     /* Modern Popup Styles */
@@ -42,19 +45,29 @@
     }
 
     .popup-content {
-      background: var(--glass);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(245, 158, 11, 0.2));
       padding: 2rem;
       border-radius: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       max-width: 500px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .popup-content h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .popup-content p {
       line-height: 1.6;
       margin-bottom: 1.5rem;
       white-space: pre-line;
+      font-size: 1.1rem;
     }
 
     .popup-content button {
@@ -66,6 +79,14 @@
       cursor: pointer;
       width: 100%;
       transition: transform 0.1s ease;
+      font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-content button:hover {
+      background: #3b82f6;
+      transform: translateY(-2px);
     }
 
     .popup-content button:active {
@@ -89,21 +110,35 @@
       flex-direction: column;
       align-items: center;
       backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .player-panel:last-child {
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: none;
     }
 
     .score {
       font-size: 1.5rem;
       margin-bottom: 1rem;
       text-align: center;
+      width: 100%;
     }
 
+    /* SOLID COLOR SCORES */
     .score-value {
       font-size: 4rem;
       font-weight: bold;
       margin: 1rem 0;
-      background: linear-gradient(45deg, var(--primary), var(--secondary));
-      /* -webkit-background-clip: text; */
-      -webkit-text-fill-color: transparent;
+      color: var(--text); /* Solid color instead of gradient */
+    }
+
+    .player-a .score-value {
+      color: var(--player-a); /* Red for Player A */
+    }
+
+    .player-b .score-value {
+      color: var(--player-b); /* Yellow for Player B */
     }
 
     /* Control Buttons */
@@ -111,6 +146,7 @@
       display: flex;
       gap: 0.5rem;
       margin: 1rem 0;
+      justify-content: center;
     }
 
     .control-btn {
@@ -123,11 +159,30 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .player-a .control-btn {
+      background: rgba(255, 82, 82, 0.2);
+    }
+
+    .player-b .control-btn {
+      background: rgba(255, 215, 64, 0.2);
     }
 
     .control-btn:hover {
-      background: var(--primary);
       transform: scale(1.1);
+    }
+
+    .player-a .control-btn:hover {
+      background: var(--player-a);
+    }
+
+    .player-b .control-btn:hover {
+      background: var(--player-b);
     }
 
     /* Game Center Area */
@@ -139,6 +194,9 @@
       padding: 2rem;
       background: var(--glass);
       position: relative;
+      border-radius: 16px;
+      margin: 10px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
     }
 
     /* Word Display */
@@ -148,7 +206,11 @@
       text-align: center;
       margin: 2rem 0;
       min-height: 100px;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      width: 100%;
     }
 
     /* Action Buttons */
@@ -162,54 +224,69 @@
       font-size: 1.2rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      font-weight: bold;
     }
     
-     /* Action Buttons */
+     /* Start Button */
     .start {
-     width: 100%;
-      height: 100px;
+      width: 100%;
+      height: 80px;
       border: none;
       border-radius: 20px;
-      background: green;
+      background: linear-gradient(to right, #10b981, #22c55e);
       color: white;
-      font-size: 3.2rem;
+      font-size: 2.5rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+      margin: 20px 0;
+      letter-spacing: 1px;
     }
-    
-    
+
+    .start:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    }
 
     .action-btn:hover {
       transform: scale(1.05);
-      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
     }
 
     /* Input Fields */
     input {
-      background: var(--glass);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--text);
       padding: 0.8rem;
       border-radius: 0.5rem;
       width: 100%;
       margin-bottom: 1rem;
       text-align: center;
+      font-size: 1.1rem;
     }
 
     input::placeholder {
       color: rgba(255, 255, 255, 0.6);
     }
 
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .input-group input {
+      flex: 1;
+    }
+
     /* Results Screen */
     .result-screen {
       position: fixed;
-      /*inset: 0;*/
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
       display: none;
       flex-direction: column;
       align-items: center;
@@ -219,12 +296,20 @@
     }
 
     #winner {
-      font-size: 2.5rem;
+      font-size: 4rem;
       text-align: center;
       margin-bottom: 2rem;
-      background: linear-gradient(45deg, var(--primary), var(--secondary));
-      /* -webkit-background-clip: text; */
-      -webkit-text-fill-color: transparent;
+      padding: 20px 40px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     /* Responsive Design */
@@ -236,6 +321,14 @@
 
       .player-panel {
         padding: 1rem;
+        border-right: none;
+        border-left: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .player-panel:last-child {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: none;
       }
 
       .score-value {
@@ -244,11 +337,17 @@
 
       .word-container {
         font-size: 2rem;
+        padding: 10px;
       }
 
       .action-btn {
         width: 80px;
         height: 80px;
+      }
+      
+      #winner {
+        font-size: 2.5rem;
+        padding: 15px 30px;
       }
     }
   </style>
@@ -257,23 +356,24 @@
   <!-- Popup Instructions -->
   <div class="popup" id="popup">
     <div class="popup-content">
+      <h2>WORD CHALLENGE DUELS</h2>
       <p>🏆 How to Play 🏆
         
         1. 2 Players Required
         2. Enter words separated by commas
         3. Set number of rounds
-        4. Choose difficulty level
+        4. Choose difficulty level (1-5)
         5. Press START to begin
         6. Tap your button when correct
         7. Restart anytime</p>
-      <button onclick="closePopup()">Let's Play!</button>
+      <button onclick="closePopup()">LET'S PLAY!</button>
     </div>
   </div>
 
   <!-- Main Game Layout -->
   <section class="collage">
     <!-- Player 1 Panel -->
-    <div class="player-panel">
+    <div class="player-panel player-a">
       <div class="score">
         <div class="control-buttons">
           <button class="control-btn minus-a">-</button>
@@ -282,26 +382,26 @@
         <div class="score-value score-a-value">0</div>
         <span>SCORE</span>
       </div>
-      <input type="text" id="player-1" placeholder="Player 1 Name">
-      <button class="action-btn button-a" style="background-color: red"></button>
+      <input type="text" id="player-1" placeholder="Player 1 Name" value="Player A">
+      <button class="action-btn button-a" style="background-color: var(--player-a);">PLAYER 1</button>
     </div>
 
     <!-- Game Center -->
     <div class="game-center">
       <div class="word-list-container">
-        <input type="text" id="word-list" placeholder="Enter words (comma separated)">
+        <input type="text" id="word-list" placeholder="Enter words (comma separated)" value="apple,banana,orange,grape,kiwi,mango">
         <div class="input-group">
-          <input type="number" id="number" placeholder="Rounds" min="1">
-          <input type="number" id="level" placeholder="Level" min="1">
+          <input type="number" id="number" placeholder="Rounds" min="1" value="10">
+          <input type="number" id="level" placeholder="Level (1-5)" min="1" max="5" value="2">
         </div>
-        <button class="start">START</button>
+        <button class="start">START GAME</button>
       </div>
-      <div class="word-container"></div>
+      <div class="word-container">Ready to play!</div>
       <button class="action-btn restart-btn1">RESET</button>
     </div>
 
     <!-- Player 2 Panel -->
-    <div class="player-panel">
+    <div class="player-panel player-b">
       <div class="score">
         <div class="control-buttons">
           <button class="control-btn minus-b">-</button>
@@ -310,8 +410,8 @@
         <div class="score-value score-b-value">0</div>
         <span>SCORE</span>
       </div>
-      <input type="text" id="player-2" placeholder="Player 2 Name">
-      <button class="action-btn button-b"style="background-color: yellow"></button>
+      <input type="text" id="player-2" placeholder="Player 2 Name" value="Player B">
+      <button class="action-btn button-b" style="background-color: var(--player-b);">PLAYER 2</button>
     </div>
 
     <!-- Results Screen -->
@@ -321,67 +421,99 @@
     </div>
   </section>
 
-  <script src="../wordlisting.js"></script>
   <script>
-    // Original game logic maintained
-    let playerBD = 0, playerAD = 0, digit = 0, defaultwords = [], shuffledWordList = [], wordList = [], currentWordIndex = 0, scoreA = 0, scoreB = 0;
-    // Initialize defaultwords safely
-    try {
-      defaultwords = allwords || [];
-    } catch (e) {
-      console.error("Error loading word list:", e);
-      defaultwords = [];
-    }
+    // Sample word list database
+    const defaultwords = [
+      ["cat", "dog", "bird", "fish", "frog"],
+      ["apple", "banana", "orange", "grape", "kiwi"],
+      ["computer", "keyboard", "monitor", "mouse", "printer"],
+      ["elephant", "giraffe", "kangaroo", "rhinoceros", "hippopotamus"],
+      ["encyclopedia", "magnificent", "extraordinary", "phenomenon", "architecture"]
+    ];
 
+    // Game state variables
+    let playerBD = 0, playerAD = 0, digit = 0;
+    let shuffledWordList = [], wordList = [];
+    let currentWordIndex = 0, scoreA = 0, scoreB = 0;
+    let totalRounds = 10;
 
     // DOM Elements
     const startBtn = document.querySelector('.start');
     const wordInput = document.querySelector('#word-list');
     const popup = document.getElementById('popup');
+    const wordContainer = document.querySelector('.word-container');
+
+    // Initialize game
+    function init() {
+      popup.style.display = 'flex';
+      document.querySelectorAll('.player-panel input, .word-list-container')
+        .forEach(el => el.style.display = 'block');
+      wordContainer.textContent = "Ready to play!";
+    }
 
     // Event Listeners
     startBtn.addEventListener('click', initGame);
     document.querySelector('.button-a').addEventListener('click', () => handleScore('a'));
     document.querySelector('.button-b').addEventListener('click', () => handleScore('b'));
-    document.querySelectorAll('.control-btn').forEach(btn => btn.addEventListener('click', handleControls));
     document.querySelectorAll('.restart-btn1, .restart-btn2').forEach(btn => btn.addEventListener('click', restart));
     
+    // Score controls
     document.querySelectorAll('.control-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const isPlus = e.target.classList.contains('plus-a') || 
-                   e.target.classList.contains('plus-b');
-    const player = e.target.classList.contains('minus-a') || 
-                   e.target.classList.contains('plus-a') ? 'a' : 'b';
-    
-    if (isPlus) {
-      player === 'a' ? scoreA++ : scoreB++;
-    } else {
-      player === 'a' ? scoreA-- : scoreB--;
-    }
-    
-    // Ensure scores stay non-negative
-    scoreA = Math.max(0, scoreA);
-    scoreB = Math.max(0, scoreB);
-    
-    updateScore('a', scoreA);
-    updateScore('b', scoreB);
-  });
-});
+      btn.addEventListener('click', (e) => {
+        const isPlus = e.target.classList.contains('plus-a') || 
+                       e.target.classList.contains('plus-b');
+        const player = e.target.classList.contains('minus-a') || 
+                       e.target.classList.contains('plus-a') ? 'a' : 'b';
+        
+        if (isPlus) {
+          player === 'a' ? scoreA++ : scoreB++;
+        } else {
+          player === 'a' ? scoreA-- : scoreB--;
+        }
+        
+        // Ensure scores stay non-negative
+        scoreA = Math.max(0, scoreA);
+        scoreB = Math.max(0, scoreB);
+        
+        updateScore('a', scoreA);
+        updateScore('b', scoreB);
+      });
+    });
 
     function initGame() {
-      wordList = wordInput.value.split(',').map(w => w.trim());
-      digit = document.querySelector('#level').value;
+      // Get word list from input
+      const words = wordInput.value;
+      wordList = words.split(',').map(w => w.trim()).filter(w => w.length > 0);
       
-      shuffledWordList = wordList.length === 1 
-        ? [...defaultwords[Math.min(digit-1, defaultwords.length-1)]] 
-        : [...wordList];
+      // Get difficulty level
+      digit = parseInt(document.querySelector('#level').value) || 2;
+      digit = Math.min(Math.max(digit, 1), 5); // Clamp between 1-5
       
+      // Get total rounds
+      totalRounds = parseInt(document.querySelector('#number').value) || 10;
+      
+      // Create word list to use
+      shuffledWordList = wordList.length > 1 
+        ? [...wordList] 
+        : [...defaultwords[digit-1]];
+      
+      // Shuffle the word list
       shuffledWordList.sort(() => Math.random() - 0.5);
       
+      // Hide setup inputs
       document.querySelectorAll('.player-panel input, .word-list-container')
         .forEach(el => el.style.display = 'none');
       
+      // Reset game state
       currentWordIndex = 0;
+      scoreA = 0;
+      scoreB = 0;
+      playerAD = 0;
+      playerBD = 0;
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      
+      // Start the game
       displayWord('white');
     }
 
@@ -399,7 +531,7 @@
       }
       updateScore('a', scoreA);
       updateScore('b', scoreB);
-      displayWord(player === 'a' ? 'yellow' : 'red');
+      displayWord(player === 'a' ? 'var(--player-a)' : 'var(--player-b)');
     }
 
     function updateScore(player, score) {
@@ -407,10 +539,10 @@
     }
 
     function displayWord(color) {
-      const wordDisplay = document.querySelector('.word-container');
-      if(currentWordIndex < document.querySelector('#number').value) {
-        wordDisplay.style.color = color;
-        wordDisplay.textContent = shuffledWordList[currentWordIndex++];
+      if(currentWordIndex < totalRounds && currentWordIndex < shuffledWordList.length) {
+        wordContainer.style.color = color;
+        wordContainer.textContent = shuffledWordList[currentWordIndex];
+        currentWordIndex++;
       } else {
         endGame();
       }
@@ -418,26 +550,43 @@
 
     function endGame() {
       document.querySelector('.result-screen').style.display = 'flex';
-      const winner = scoreA === scoreB ? "It's a Tie!" 
-        : `Winner: ${scoreA > scoreB ? document.querySelector('#player-1').value 
-                                   : document.querySelector('#player-2').value}`;
-      document.querySelector('#winner').textContent = winner;
+      let winnerText;
+      
+      if (scoreA === scoreB) {
+        winnerText = "It's a Tie!";
+      } else {
+        const winnerName = scoreA > scoreB 
+          ? document.querySelector('#player-1').value || 'Player A'
+          : document.querySelector('#player-2').value || 'Player B';
+        winnerText = `🏆 Winner: ${winnerName} 🏆`;
+      }
+      
+      document.querySelector('#winner').textContent = winnerText;
     }
 
     function restart() {
-      location.reload();
-    }
-
-    function handleControls(e) {
-      const isPlus = e.target.classList.contains('plus-a') || e.target.classList.contains('plus-b');
-      const player = e.target.classList.contains('minus-a') ? 'a' : 'b';
-      window[`score${player.toUpperCase()}`] += isPlus ? 1 : -1;
-      updateScore(player, window[`score${player.toUpperCase()}`]);
+      // Reset scores
+      scoreA = 0;
+      scoreB = 0;
+      updateScore('a', scoreA);
+      updateScore('b', scoreB);
+      
+      // Hide result screen
+      document.querySelector('.result-screen').style.display = 'none';
+      
+      // Show setup UI
+      document.querySelectorAll('.player-panel input, .word-list-container')
+        .forEach(el => el.style.display = 'block');
+      
+      wordContainer.textContent = "Ready to play!";
     }
 
     function closePopup() {
       popup.style.display = 'none';
     }
+
+    // Initialize the game
+    init();
   </script>
 </body>
 </html>
