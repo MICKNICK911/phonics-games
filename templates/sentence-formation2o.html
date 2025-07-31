@@ -4,8 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Modern Sentence Formation App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Modern Global Styles */
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a0ca3;
+      --secondary: #f72585;
+      --accent: #4cc9f0;
+      --success: #57cc99;
+      --danger: #ff6b6b;
+      --dark-bg: #0f172a;
+      --dark-card: #1e293b;
+      --dark-border: #334155;
+      --light-text: #f1f5f9;
+      --light-muted: #94a3b8;
+    }
+    
     * {
       box-sizing: border-box;
       margin: 0;
@@ -13,311 +27,253 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      overflow: hidden;
-      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-      color: #333;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--dark-bg);
+      color: var(--light-text);
       line-height: 1.6;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 16px;
     }
-
-    /* Modern Popup Styles */
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
+    
+    .app-container {
       width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.3s ease;
-    }
-    
-    .popup-content {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      width: 85%;
-      max-width: 450px;
-      text-align: center;
-      position: relative;
-    }
-    
-    .popup-content p {
-      margin: 0 0 25px;
-      font-size: 17px;
-      line-height: 1.7;
-      color: #444;
-    }
-    
-    .popup-content button {
-      background: linear-gradient(to right, #4361ee, #3a0ca3);
-      color: #fff;
-      padding: 12px 30px;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-    }
-    
-    .popup-content button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
-    }
-
-    /* Modern Collage Layout */
-    .collage-container {
-      width: 95%;
-      height: 95vh;
       max-width: 1400px;
-      background: rgba(255, 255, 255, 0.92);
-      border-radius: 20px;
-      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr 1fr 1.5fr;
-      gap: 0;
+      height: 95vh;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
     
-    @media only screen and (min-width: 768px) {
-      .collage-container {
+    @media (min-width: 992px) {
+      .app-container {
+        display: grid;
         grid-template-columns: 1.5fr 1fr;
-        grid-template-rows: 1fr 1.5fr;
+        grid-template-rows: auto 1fr;
+        gap: 20px;
+        height: 90vh;
       }
       
-      .item:nth-child(1) {
+      .display-section {
         grid-column: 1;
-        grid-row: 1 / span 2;
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
-      }
-      
-      .item:nth-child(2) {
-        grid-column: 2;
         grid-row: 1;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        overflow: auto;
       }
       
-      .item:nth-child(3) {
-        grid-column: 2;
+      .input-section {
+        grid-column: 1;
         grid-row: 2;
       }
-    }
-
-    /* Collage Item Styles */
-    .item {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    
-    .item-header {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #3a0ca3;
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #4361ee;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .emoji-icon {
-      font-size: 1.5rem;
-    }
-
-    /* Sentence Display Area */
-    .sentence-display {
-      flex: 1;
-      background: linear-gradient(145deg, #f0f4ff, #e2e8ff);
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    
-    .sentence-display.active {
-      background: linear-gradient(145deg, #e6f7ff, #d1edff);
-      box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    #text-container {
-      font-size: 2.2rem;
-      font-weight: 600;
-      color: #3a0ca3;
-      line-height: 1.4;
-      padding: 10px;
-      max-width: 100%;
-      word-break: break-word;
-    }
-    
-    @media only screen and (max-width: 767px) {
-      #text-container {
-        font-size: 1.8rem;
+      
+      .saved-section {
+        grid-column: 2;
+        grid-row: 1 / span 2;
       }
     }
-
-    /* Game Container */
-    #game-container {
+    
+    .card {
+      background: var(--dark-card);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 100%;
+      border: 1px solid var(--dark-border);
     }
     
-    .game-header {
+    .card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--dark-border);
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 15px;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--accent);
     }
     
-    .game-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #3a0ca3;
-      background: linear-gradient(to right, #4361ee, #3a0ca3);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .card-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .display-section .card-content {
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .sentence-display {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      border: 1px solid var(--dark-border);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    #text-container {
+      font-size: 2.4rem;
+      font-weight: 600;
+      line-height: 1.4;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--light-text);
+      padding: 10px;
+    }
+    
+    .input-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .input-field-container {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
     }
     
     #input-field {
-      padding: 15px;
-      font-size: 16px;
-      border: 2px solid #dce1ff;
-      border-radius: 12px;
       width: 100%;
-      margin-bottom: 15px;
-      background: #f8f9ff;
+      padding: 16px 20px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      color: var(--light-text);
+      font-size: 1rem;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
     
     #input-field:focus {
       outline: none;
-      border-color: #4361ee;
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
     }
     
-    .input-buttons {
-      display: none;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 15px;
+    #input-field::placeholder {
+      color: var(--light-muted);
     }
     
-    .control-btn {
-      flex: 1;
-      min-width: 120px;
-      padding: 12px;
+    #process-button {
+      background: var(--primary);
+      color: white;
       border: none;
       border-radius: 12px;
-      cursor: pointer;
-      font-size: 15px;
+      padding: 0 24px;
       font-weight: 600;
-      transition: all 0.3s ease;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     
-    .control-btn i {
-      font-size: 18px;
+    #process-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
     }
     
-    #clear-button {
-      background: linear-gradient(to right, #ff6b6b, #ff4d4d);
-      color: white;
-    }
-    
-    #add-button {
-      background: linear-gradient(to right, #4cc9f0, #4895ef);
-      color: white;
-    }
-    
-    #save-button {
-      background: linear-gradient(to right, #57cc99, #38b000);
-      color: white;
-    }
-    
-    #slideshow-button {
-      background: linear-gradient(to right, #f72585, #b5179e);
-      color: white;
-    }
-    
-    .control-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .control-btn:active {
+    #process-button:active {
       transform: translateY(0);
     }
     
     #button-grid {
-      flex: 1;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-      grid-gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      flex: 1;
       overflow-y: auto;
       padding: 5px;
     }
     
     .word-button {
-      background: linear-gradient(to bottom, #f0f4ff, #e2e8ff);
-      color: #3a0ca3;
-      padding: 15px 10px;
-      border: none;
-      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--light-text);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      padding: 15px 5px;
+      font-size: 1.1rem;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 17px;
-      font-weight: 600;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 6px rgba(67, 97, 238, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      min-height: 60px;
+      min-height: 70px;
     }
     
     .word-button:hover {
+      background: rgba(67, 97, 238, 0.2);
       transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
-      background: linear-gradient(to bottom, #e6f0ff, #d6e4ff);
+      border-color: var(--primary);
     }
     
-    .word-button:active {
-      transform: translateY(0);
+    .word-button.punctuation {
+      background: rgba(247, 37, 133, 0.15);
     }
     
-    .word-button:disabled {
-      background: #e9ecef;
-      color: #adb5bd;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
     }
-
-    /* Saved Sentences */
+    
+    .action-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    #clear-button {
+      background: rgba(255, 107, 107, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+    }
+    
+    #clear-button:hover {
+      background: rgba(255, 107, 107, 0.25);
+    }
+    
+    #save-button {
+      background: rgba(87, 204, 153, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(87, 204, 153, 0.3);
+    }
+    
+    #save-button:hover {
+      background: rgba(87, 204, 153, 0.25);
+    }
+    
+    #slideshow-button {
+      background: rgba(247, 37, 133, 0.15);
+      color: var(--secondary);
+      border: 1px solid rgba(247, 37, 133, 0.3);
+    }
+    
+    #slideshow-button:hover {
+      background: rgba(247, 37, 133, 0.25);
+    }
+    
     .saved-container {
       display: flex;
       flex-direction: column;
@@ -332,60 +288,63 @@
     }
     
     #saved-count {
-      background: #3a0ca3;
+      background: var(--primary);
       color: white;
-      padding: 3px 10px;
+      padding: 4px 12px;
       border-radius: 20px;
       font-size: 0.9rem;
+      font-weight: 500;
     }
     
-    .correct-words-container {
+    .saved-list {
       flex: 1;
       overflow-y: auto;
-      padding: 5px;
-      background: #f8f9ff;
-      border-radius: 15px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 12px;
+      padding: 15px;
     }
     
-    .correct-words-list {
+    #correct-words-list {
       list-style: none;
       padding: 0;
       margin: 0;
     }
     
-    .correct-words-list li {
-      margin: 10px 0;
-      padding: 15px;
-      color: #333;
-      font-size: 18px;
-      background: white;
+    #correct-words-list li {
+      margin: 12px 0;
+      padding: 16px;
+      background: rgba(30, 41, 59, 0.7);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-      border-left: 4px solid #4361ee;
+      border-left: 3px solid var(--primary);
     }
     
-    .correct-words-list li:hover {
+    #correct-words-list li:hover {
       transform: translateX(5px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      background: rgba(67, 97, 238, 0.15);
+    }
+    
+    .sentence-text {
+      flex: 1;
+      font-size: 1.1rem;
     }
     
     .sentence-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
     
     .sentence-btn {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 18px;
-      padding: 5px;
-      border-radius: 50%;
+      font-size: 1.1rem;
+      padding: 6px;
+      border-radius: 8px;
       width: 36px;
       height: 36px;
       display: flex;
@@ -395,24 +354,31 @@
     }
     
     .edit-button {
-      color: #4361ee;
-      background: rgba(67, 97, 238, 0.1);
+      color: var(--accent);
+      background: rgba(76, 201, 240, 0.1);
     }
     
     .edit-button:hover {
-      background: rgba(67, 97, 238, 0.2);
+      background: rgba(76, 201, 240, 0.2);
     }
     
     .delete-button {
-      color: #ff6b6b;
+      color: var(--danger);
       background: rgba(255, 107, 107, 0.1);
     }
     
     .delete-button:hover {
       background: rgba(255, 107, 107, 0.2);
     }
-
-    /* Slideshow Mode */
+    
+    .empty-message {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--light-muted);
+      font-style: italic;
+    }
+    
+    /* Slideshow Styles */
     #slideshow-container {
       display: none;
       position: fixed;
@@ -420,7 +386,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.95);
+      background: rgba(15, 23, 42, 0.98);
       justify-content: center;
       align-items: center;
       flex-direction: column;
@@ -435,17 +401,18 @@
       max-width: 90%;
       font-weight: 700;
       line-height: 1.4;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
     }
     
     #slideshow-controls {
       display: flex;
       gap: 15px;
       margin-top: 30px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(30, 41, 59, 0.7);
       padding: 15px;
       border-radius: 50px;
       backdrop-filter: blur(10px);
+      border: 1px solid var(--dark-border);
     }
     
     #slideshow-controls button {
@@ -459,51 +426,50 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(67, 97, 238, 0.2);
       color: white;
     }
     
     #slideshow-controls button:hover {
       transform: scale(1.1);
-      background: rgba(255, 255, 255, 0.25);
-    }
-    
-    #mode-toggle {
-      background: rgba(67, 97, 238, 0.3);
-      font-size: 26px;
-    }
-    
-    #mode-toggle:hover {
-      background: rgba(67, 97, 238, 0.5);
+      background: var(--primary);
     }
     
     #slide-indicator {
-      color: white;
+      color: var(--light-muted);
       font-size: 1.2rem;
       margin-top: 20px;
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(30, 41, 59, 0.7);
       padding: 8px 20px;
       border-radius: 20px;
       font-weight: 500;
     }
     
     /* Responsive Adjustments */
-    @media only screen and (max-width: 767px) {
-      .collage-container {
-        height: 95vh;
+    @media (max-width: 768px) {
+      .app-container {
+        height: auto;
+        min-height: 95vh;
       }
       
-      #button-grid {
-          margin-bottom: 100px;
+      #text-container {
+        font-size: 1.8rem;
       }
       
-      .input-buttons {
-          flex-direction: row;
+      .input-controls {
+        flex-direction: column;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .action-btn {
+        width: 100%;
       }
       
       #slideshow-text {
-        font-size: 2.5rem;
-        padding: 20px;
+        font-size: 2.2rem;
       }
       
       #slideshow-controls button {
@@ -511,44 +477,24 @@
         height: 50px;
         font-size: 20px;
       }
-      
-      .item-header {
-        font-size: 1.1rem;
-      }
-      
-      .word-button {
-        font-size: 15px;
-        padding: 12px 8px;
-        min-height: 50px;
-      }
-      
-      .correct-words-list li {
-        font-size: 16px;
-        padding: 12px;
-      }
-      
-      .sentence-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
-      }
     }
     
-    @media only screen and (max-width: 480px) {
+    @media (max-width: 480px) {
       #text-container {
         font-size: 1.5rem;
       }
       
-      #slideshow-text {
-        font-size: 2rem;
-      }
-      
-      .control-btn {
-        min-width: 100%;
-      }
-      
       #button-grid {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      }
+      
+      .word-button {
+        min-height: 60px;
+        font-size: 1rem;
+      }
+      
+      #slideshow-text {
+        font-size: 1.8rem;
       }
     }
     
@@ -558,17 +504,17 @@
     }
     
     ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
+      background: rgba(0, 0, 0, 0.1);
       border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb {
-      background: rgba(67, 97, 238, 0.5);
+      background: var(--primary);
       border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(67, 97, 238, 0.7);
+      background: var(--primary-dark);
     }
     
     /* Animations */
@@ -578,95 +524,117 @@
     }
     
     .fade-in {
-      animation: fadeIn 0.5s ease forwards;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(67, 97, 238, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
     }
   </style>
 </head>
 <body>
-  <!-- Popup -->
-  <div class="popup" id="popup">
-    <div class="popup-content">
-      <p id="popup-message"></p>
-      <button id="popup-ok-button">OK</button>
-    </div>
-  </div>
-
-  <!-- Main App Container -->
-  <div class="collage-container">
-    <!-- Sentence Display Area -->
-    <div class="item">
-      <div class="item-header">
-        <span class="emoji-icon">📄</span>
+  <div class="app-container">
+    <!-- Sentence Display Section -->
+    <section class="display-section card">
+      <div class="card-header">
+        <i class="fas fa-file-alt"></i>
         <span>Current Sentence</span>
       </div>
-      <div class="sentence-display active">
-        <div class="text-container" id="text-container" role="region" aria-live="polite"></div>
-      </div>
-    </div>
-    
-    <!-- Word Input Area -->
-    <div class="item">
-      <div class="game-container" id="game-container">
-        <div class="game-header">
-          <span class="emoji-icon">✏️</span>
-          <div class="game-title">Sentence Formation</div>
+      <div class="card-content">
+        <div class="sentence-display">
+          <div id="text-container">Create your sentence here...</div>
         </div>
-        <input
-          class="input-field"
-          id="input-field"
-          type="text"
-          placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
-          aria-label="Enter words separated by commas"
-          maxlength="100"
-        >
-        <div class="input-buttons" id="input-buttons">
-          <button class="control-btn" id="clear-button">
-            <span>🗑️</span>
+      </div>
+    </section>
+    
+    <!-- Word Input Section -->
+    <section class="input-section card">
+      <div class="card-header">
+        <i class="fas fa-edit"></i>
+        <span>Sentence Formation</span>
+      </div>
+      <div class="card-content">
+        <div class="input-controls">
+          <div class="input-field-container">
+            <input 
+              type="text" 
+              id="input-field" 
+              placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
+              aria-label="Enter words separated by commas"
+              maxlength="100"
+            >
+          </div>
+          <button id="process-button">
+            <i class="fas fa-cogs"></i>
+            Process
+          </button>
+        </div>
+        
+        <div id="button-grid"></div>
+        
+        <div class="action-buttons">
+          <button class="action-btn" id="clear-button">
+            <i class="fas fa-trash-alt"></i>
             Clear
           </button>
-          <button class="control-btn" id="add-button">
-            <span>🔄</span>
-            Reset
-          </button>
-          <button class="control-btn" id="save-button">
-            <span>💾</span>
+          <button class="action-btn" id="save-button">
+            <i class="fas fa-save"></i>
             Save
           </button>
-          <button class="control-btn" id="slideshow-button">
-            <span>🎬</span>
+          <button class="action-btn" id="slideshow-button">
+            <i class="fas fa-film"></i>
             Slideshow
           </button>
         </div>
-        <div id="button-grid" role="grid"></div>
       </div>
-    </div>
+    </section>
     
-    <!-- Saved Sentences Area -->
-    <div class="item">
-      <div class="saved-container">
+    <!-- Saved Sentences Section -->
+    <section class="saved-section card">
+      <div class="card-header">
         <div class="saved-header">
-          <div class="item-header">
-            <span class="emoji-icon">📚</span>
+          <div>
+            <i class="fas fa-book"></i>
             <span>Saved Sentences</span>
           </div>
           <div id="saved-count">0 saved</div>
         </div>
-        <div class="correct-words-container">
-          <ol id="correct-words-list" class="correct-words-list" role="list"></ol>
+      </div>
+      <div class="card-content">
+        <div class="saved-container">
+          <div class="saved-list">
+            <ol id="correct-words-list"></ol>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <!-- Slideshow Container -->
   <div id="slideshow-container">
-    <div id="slideshow-text" role="region" aria-live="polite"></div>
+    <div id="slideshow-text"></div>
     <div id="slideshow-controls">
-      <button id="prev-button" aria-label="Previous slide">⬅️</button>
-      <button id="mode-toggle" aria-label="Toggle mode">🔄</button>
-      <button id="next-button" aria-label="Next slide">➡️</button>
-      <button id="pause-resume-button" aria-label="Pause slideshow">⏸️</button>
-      <button id="stop-slideshow-button" aria-label="Stop slideshow">⏹️</button>
+      <button id="prev-button" aria-label="Previous slide">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <button id="mode-toggle" aria-label="Toggle mode">
+        <i class="fas fa-sync"></i>
+      </button>
+      <button id="next-button" aria-label="Next slide">
+        <i class="fas fa-arrow-right"></i>
+      </button>
+      <button id="pause-resume-button" aria-label="Pause slideshow">
+        <i class="fas fa-pause"></i>
+      </button>
+      <button id="stop-slideshow-button" aria-label="Stop slideshow">
+        <i class="fas fa-stop"></i>
+      </button>
     </div>
     <div id="slide-indicator">1/0</div>
   </div>
@@ -676,15 +644,12 @@
     const textContainer = document.getElementById('text-container');
     const inputField = document.getElementById('input-field');
     const buttonGrid = document.getElementById('button-grid');
-    const inputButtons = document.getElementById('input-buttons');
+    const processButton = document.getElementById('process-button');
     const clearButton = document.getElementById('clear-button');
-    const addButton = document.getElementById('add-button');
     const saveButton = document.getElementById('save-button');
     const slideshowButton = document.getElementById('slideshow-button');
     const correctWordsList = document.getElementById('correct-words-list');
-    const popup = document.getElementById('popup');
-    const popupMessage = document.getElementById('popup-message');
-    const popupOkButton = document.getElementById('popup-ok-button');
+    const savedCount = document.getElementById('saved-count');
     const slideshowContainer = document.getElementById('slideshow-container');
     const slideshowText = document.getElementById('slideshow-text');
     const pauseResumeButton = document.getElementById('pause-resume-button');
@@ -693,7 +658,6 @@
     const nextButton = document.getElementById('next-button');
     const modeToggle = document.getElementById('mode-toggle');
     const slideIndicator = document.getElementById('slide-indicator');
-    const savedCount = document.getElementById('saved-count');
 
     // State Variables
     let sentences = loadSentences();
@@ -716,7 +680,7 @@
         updateSavedCount(data.length);
         return data;
       } catch (e) {
-        showPopup('Error loading saved sentences. Starting fresh.');
+        showMessage('Error loading saved sentences. Starting fresh.');
         return [];
       }
     }
@@ -727,28 +691,20 @@
         localStorage.setItem('sentences', JSON.stringify(sentences));
         updateSavedCount(sentences.length);
       } catch (e) {
-        showPopup('Failed to save sentences. Storage may be full.');
+        showMessage('Failed to save sentences. Storage may be full.');
       }
     }
     
     // Update saved count display
     function updateSavedCount(count) {
       savedCount.textContent = `${count} saved`;
-      savedCount.style.display = count > 0 ? 'block' : 'none';
       slideshowButton.disabled = count === 0;
     }
 
-    // Show popup with message
-    function showPopup(message) {
-      popupMessage.textContent = message;
-      popup.style.display = 'flex';
-      popupOkButton.focus();
-    }
-
-    // Close popup
-    function closePopup() {
-      popup.style.display = 'none';
-      inputField.focus();
+    // Show message
+    function showMessage(message) {
+      // In a real app, you might use a toast notification
+      console.log(message);
     }
 
     // Validate input
@@ -776,28 +732,57 @@
     // Generate word buttons
     function generateButtons(words) {
       buttonGrid.innerHTML = '';
-      const allWords = words.concat(['.', '?', ',', '!', ';']);
-      allWords.forEach(word => {
+      const punctuation = ['.', '?', '!', ',', ';', ':', '-', '...'];
+      
+      // Add word buttons
+      words.forEach(word => {
         const button = document.createElement('button');
         button.classList.add('word-button');
         button.textContent = word;
         button.setAttribute('aria-label', `Add ${word} to sentence`);
         button.addEventListener('click', () => {
-          if (isProcessing) return;
-          const currentText = textContainer.textContent.trim();
-          const newText = word.trim();
-          
-          // Handle punctuation
-          if (['.', '?', '!', ',', ';'].includes(newText)) {
-            textContainer.textContent = currentText + newText;
-          } else {
-            textContainer.textContent = currentText
-              ? `${currentText} ${newText}`
-              : newText.charAt(0).toUpperCase() + newText.slice(1);
-          }
+          addToSentence(word);
         });
         buttonGrid.appendChild(button);
       });
+      
+      // Add punctuation buttons
+      punctuation.forEach(punc => {
+        const button = document.createElement('button');
+        button.classList.add('word-button', 'punctuation');
+        button.textContent = punc;
+        button.setAttribute('aria-label', `Add ${punc} to sentence`);
+        button.addEventListener('click', () => {
+          addToSentence(punc);
+        });
+        buttonGrid.appendChild(button);
+      });
+    }
+    
+    // Add word to sentence
+    function addToSentence(word) {
+      const currentText = textContainer.textContent;
+      
+      // Handle initial empty state
+      if (currentText === 'Create your sentence here...') {
+        textContainer.textContent = '';
+      }
+      
+      // Handle punctuation
+      if (['.', '?', '!', ',', ';', ':', '-', '...'].includes(word)) {
+        textContainer.textContent = currentText + word;
+      } else {
+        // Add space before new words if not the first word
+        const separator = currentText.length > 0 ? ' ' : '';
+        textContainer.textContent = currentText + separator + word;
+      }
+      
+      // Capitalize first letter
+      if (textContainer.textContent.length > 0) {
+        const firstChar = textContainer.textContent.charAt(0).toUpperCase();
+        const rest = textContainer.textContent.slice(1);
+        textContainer.textContent = firstChar + rest;
+      }
     }
 
     // Render saved sentences
@@ -807,9 +792,6 @@
         const emptyMsg = document.createElement('div');
         emptyMsg.classList.add('empty-message');
         emptyMsg.textContent = 'No saved sentences yet. Create and save some sentences to see them here.';
-        emptyMsg.style.textAlign = 'center';
-        emptyMsg.style.padding = '20px';
-        emptyMsg.style.color = '#6c757d';
         correctWordsList.appendChild(emptyMsg);
         return;
       }
@@ -817,10 +799,9 @@
       sentences.forEach((sentence, index) => {
         const li = document.createElement('li');
         li.classList.add('fade-in');
-        li.setAttribute('role', 'listitem');
-        li.setAttribute('tabindex', '0');
         
         const textSpan = document.createElement('span');
+        textSpan.classList.add('sentence-text');
         textSpan.textContent = sentence;
         li.appendChild(textSpan);
         
@@ -831,7 +812,7 @@
         // Edit Button
         const editButton = document.createElement('button');
         editButton.classList.add('sentence-btn', 'edit-button');
-        editButton.innerHTML = '✏️';
+        editButton.innerHTML = '<i class="fas fa-edit"></i>';
         editButton.setAttribute('aria-label', `Edit sentence: ${sentence}`);
         editButton.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -842,7 +823,7 @@
         // Delete Button
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('sentence-btn', 'delete-button');
-        deleteButton.innerHTML = '❌';
+        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
         deleteButton.setAttribute('aria-label', `Delete sentence: ${sentence}`);
         deleteButton.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -855,14 +836,6 @@
         // Click to display
         li.addEventListener('click', () => {
           textContainer.textContent = sentence;
-        });
-        
-        // Keyboard support
-        li.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            textContainer.textContent = sentence;
-          }
         });
         
         correctWordsList.appendChild(li);
@@ -878,7 +851,7 @@
           saveSentences();
           renderSentences();
         } else {
-          showPopup('Sentence cannot be empty.');
+          showMessage('Sentence cannot be empty.');
         }
       }
     }
@@ -895,45 +868,48 @@
     // Start slideshow
     function startSlideshow() {
       if (sentences.length === 0) {
-        showPopup('No sentences available for slideshow.');
+        showMessage('No sentences available for slideshow.');
         return;
       }
       slideshowIndex = 0;
       slideshowContainer.style.display = 'flex';
-      displayNextSlide();
+      displaySlide();
       
       // Set to auto mode by default
       isAutoMode = true;
-      modeToggle.textContent = '🔄'; // Auto mode icon
+      modeToggle.innerHTML = '<i class="fas fa-sync"></i>';
       
       // Start auto slideshow
       clearInterval(slideshowInterval);
       slideshowInterval = setInterval(displayNextSlide, SLIDESHOW_INTERVAL);
       
-      pauseResumeButton.textContent = '⏸️';
+      pauseResumeButton.innerHTML = '<i class="fas fa-pause"></i>';
       isSlideshowPaused = false;
       updateControlsVisibility();
-      pauseResumeButton.focus();
     }
 
+    // Display current slide
+    function displaySlide() {
+      slideshowText.textContent = sentences[slideshowIndex];
+      updateSlideIndicator();
+    }
+    
     // Display next slide
     function displayNextSlide() {
       if (sentences.length === 0) {
         stopSlideshow();
-        showPopup('No sentences available.');
+        showMessage('No sentences available.');
         return;
       }
-      slideshowText.textContent = sentences[slideshowIndex];
       slideshowIndex = (slideshowIndex + 1) % sentences.length;
-      updateSlideIndicator();
+      displaySlide();
     }
     
     // Display previous slide
     function displayPrevSlide() {
       if (sentences.length === 0) return;
       slideshowIndex = (slideshowIndex - 1 + sentences.length) % sentences.length;
-      slideshowText.textContent = sentences[slideshowIndex];
-      updateSlideIndicator();
+      displaySlide();
     }
     
     // Update slide indicator
@@ -947,11 +923,11 @@
         if (isAutoMode) {
           slideshowInterval = setInterval(displayNextSlide, SLIDESHOW_INTERVAL);
         }
-        pauseResumeButton.textContent = '⏸️';
+        pauseResumeButton.innerHTML = '<i class="fas fa-pause"></i>';
         isSlideshowPaused = false;
       } else {
         clearInterval(slideshowInterval);
-        pauseResumeButton.textContent = '▶️';
+        pauseResumeButton.innerHTML = '<i class="fas fa-play"></i>';
         isSlideshowPaused = true;
       }
     }
@@ -961,12 +937,12 @@
       isAutoMode = !isAutoMode;
       
       if (isAutoMode) {
-        modeToggle.textContent = '🔄'; // Auto mode icon
+        modeToggle.innerHTML = '<i class="fas fa-sync"></i>';
         if (!isSlideshowPaused) {
           slideshowInterval = setInterval(displayNextSlide, SLIDESHOW_INTERVAL);
         }
       } else {
-        modeToggle.textContent = '✋'; // Manual mode icon
+        modeToggle.innerHTML = '<i class="fas fa-hand-pointer"></i>';
         clearInterval(slideshowInterval);
       }
       
@@ -985,7 +961,7 @@
         pauseResumeButton.style.display = 'none';
         // Ensure we're not paused in manual mode
         isSlideshowPaused = false;
-        pauseResumeButton.textContent = '⏸️';
+        pauseResumeButton.innerHTML = '<i class="fas fa-pause"></i>';
       }
     }
 
@@ -997,67 +973,62 @@
       inputField.focus();
     }
 
+    // Initialize the app
+    function initApp() {
+      renderSentences();
+      
+      // Add pulsating animation to the process button
+      processButton.classList.add('pulse');
+      
+      // Focus the input field
+      inputField.focus();
+    }
+
     // Event Listeners
     inputField.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter' && !isProcessing) {
-        isProcessing = true;
-        const input = inputField.value.trim();
-        const error = validateInput(input);
-        if (error) {
-          showPopup(error);
-          isProcessing = false;
-          return;
-        }
-        const words = input.split(',').map(word => word.trim()).filter(word => word);
-        generateButtons(words);
-        inputField.value = '';
-        inputButtons.style.display = 'flex';
-        isProcessing = false;
-        buttonGrid.querySelector('.word-button')?.focus();
+      if (e.key === 'Enter') {
+        processInput();
       }
     });
 
-    clearButton.addEventListener('click', () => {
+    processButton.addEventListener('click', () => {
+      processInput();
+    });
+
+    function processInput() {
       if (isProcessing) return;
-      textContainer.textContent = '';
-      clearButton.focus();
+      isProcessing = true;
+      const input = inputField.value.trim();
+      const error = validateInput(input);
+      if (error) {
+        alert(error);
+        isProcessing = false;
+        return;
+      }
+      const words = input.split(',').map(word => word.trim()).filter(word => word);
+      generateButtons(words);
+      inputField.value = '';
+      isProcessing = false;
+    }
+
+    clearButton.addEventListener('click', () => {
+      textContainer.textContent = 'Create your sentence here...';
     });
 
     saveButton.addEventListener('click', () => {
-      if (isProcessing) return;
-      isProcessing = true;
-      const sentence = textContainer.textContent.trim();
-      if (!sentence) {
-        showPopup('No sentence to save.');
-        isProcessing = false;
+      const sentence = textContainer.textContent;
+      if (!sentence || sentence === 'Create your sentence here...') {
+        alert('No sentence to save.');
         return;
       }
       sentences.push(sentence);
       saveSentences();
       renderSentences();
-      textContainer.textContent = '';
-      isProcessing = false;
-      saveButton.focus();
-    });
-
-    addButton.addEventListener('click', () => {
-      if (isProcessing) return;
-      if (confirm('Reset will clear current words and sentence. Continue?')) {
-        isProcessing = true;
-        inputButtons.style.display = 'none';
-        inputField.value = '';
-        buttonGrid.innerHTML = '';
-        textContainer.textContent = '';
-        isProcessing = false;
-        inputField.focus();
-      }
+      textContainer.textContent = 'Create your sentence here...';
     });
 
     slideshowButton.addEventListener('click', () => {
-      if (isProcessing) return;
-      isProcessing = true;
       startSlideshow();
-      isProcessing = false;
     });
 
     pauseResumeButton.addEventListener('click', () => {
@@ -1080,27 +1051,8 @@
       toggleMode();
     });
 
-    popupOkButton.addEventListener('click', closePopup);
-
-    // Keyboard support for popup
-    popup.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closePopup();
-    });
-
-    // Initialize
-    window.onload = () => {
-      renderSentences();
-      showPopup(
-        'Welcome to the Sentence Formation App!\n\n' +
-        'HOW TO USE:\n' +
-        '1. Enter words separated by commas (e.g., cat, dog, runs)\n' +
-        '2. Press Enter to create word buttons\n' +
-        '3. Click buttons to form sentences\n' +
-        '4. Save sentences to the list\n' +
-        '5. Use saved sentences for practice or start a slideshow\n\n' +
-        'TIP: Use punctuation buttons to end your sentences properly.'
-      );
-    };
+    // Initialize the app when the page loads
+    window.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
 </html>
