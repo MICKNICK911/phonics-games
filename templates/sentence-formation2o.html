@@ -3,128 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modern Sentence Formation App</title>
+  <title>Dark Theme Sentence Formation App</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #4361ee;
-      --primary-dark: #3a0ca3;
-      --secondary: #f72585;
-      --accent: #4cc9f0;
-      --success: #57cc99;
-      --danger: #ff6b6b;
-      --dark-bg: #0f172a;
-      --dark-card: #1e293b;
-      --dark-border: #334155;
-      --light-text: #f1f5f9;
-      --light-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #ec4899;
+      --accent: #0ea5e9;
+      --success: #10b981;
+      --danger: #ef4444;
+      --dark-1: #0f172a;
+      --dark-2: #1e293b;
+      --dark-3: #334155;
+      --light-1: #f1f5f9;
+      --light-2: #cbd5e1;
+      --light-3: #94a3b8;
     }
     
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
     
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--dark-bg);
-      color: var(--light-text);
-      line-height: 1.6;
-      height: 100vh;
+      background: linear-gradient(135deg, var(--dark-1), var(--dark-2));
+      color: var(--light-1);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 16px;
+      padding: 20px;
     }
     
     .app-container {
       width: 100%;
       max-width: 1400px;
-      height: 95vh;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
     
-    @media (min-width: 992px) {
-      .app-container {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        grid-template-rows: auto 1fr;
-        gap: 20px;
-        height: 90vh;
-      }
-      
-      .display-section {
-        grid-column: 1;
-        grid-row: 1;
-      }
-      
-      .input-section {
-        grid-column: 1;
-        grid-row: 2;
-      }
-      
-      .saved-section {
-        grid-column: 2;
-        grid-row: 1 / span 2;
-      }
-    }
-    
-    .card {
-      background: var(--dark-card);
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--dark-border);
-    }
-    
-    .card-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--dark-border);
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 15px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-weight: 600;
-      font-size: 1.2rem;
+      gap: 10px;
       color: var(--accent);
     }
     
-    .card-content {
-      padding: 20px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    .card {
+      background: var(--dark-2);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--dark-3);
+      overflow: hidden;
+      padding: 25px;
     }
     
-    .display-section .card-content {
-      justify-content: center;
-      align-items: center;
+    /* Display Section */
+    .display-section {
+      grid-area: display;
     }
     
     .sentence-display {
-      width: 100%;
-      background: rgba(30, 41, 59, 0.8);
-      border-radius: 12px;
-      padding: 25px;
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 16px;
+      padding: 30px;
       text-align: center;
-      border: 1px solid var(--dark-border);
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--dark-3);
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     #text-container {
       font-size: 2.4rem;
       font-weight: 600;
       line-height: 1.4;
-      min-height: 120px;
+      color: var(--light-1);
+      transition: all 0.3s ease;
+    }
+    
+    /* Input Section */
+    .input-section {
+      grid-area: input;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--light-text);
-      padding: 10px;
+      flex-direction: column;
     }
     
     .input-controls {
@@ -135,7 +105,6 @@
     }
     
     .input-field-container {
-      position: relative;
       flex: 1;
       min-width: 250px;
     }
@@ -144,9 +113,9 @@
       width: 100%;
       padding: 16px 20px;
       background: rgba(30, 41, 59, 0.7);
-      border: 1px solid var(--dark-border);
+      border: 1px solid var(--dark-3);
       border-radius: 12px;
-      color: var(--light-text);
+      color: var(--light-1);
       font-size: 1rem;
       transition: all 0.3s ease;
     }
@@ -154,11 +123,11 @@
     #input-field:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
     }
     
     #input-field::placeholder {
-      color: var(--light-muted);
+      color: var(--light-3);
     }
     
     #process-button {
@@ -182,8 +151,12 @@
       transform: translateY(-2px);
     }
     
-    #process-button:active {
-      transform: translateY(0);
+    /* Button Grid - Scrollable */
+    #button-grid-container {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
     
     #button-grid {
@@ -192,13 +165,14 @@
       gap: 12px;
       flex: 1;
       overflow-y: auto;
-      padding: 5px;
+      padding: 5px 3px 15px 3px;
+      max-height: 400px;
     }
     
     .word-button {
       background: rgba(30, 41, 59, 0.7);
-      color: var(--light-text);
-      border: 1px solid var(--dark-border);
+      color: var(--light-1);
+      border: 1px solid var(--dark-3);
       border-radius: 10px;
       padding: 15px 5px;
       font-size: 1.1rem;
@@ -213,13 +187,13 @@
     }
     
     .word-button:hover {
-      background: rgba(67, 97, 238, 0.2);
+      background: rgba(99, 102, 241, 0.2);
       transform: translateY(-3px);
       border-color: var(--primary);
     }
     
     .word-button.punctuation {
-      background: rgba(247, 37, 133, 0.15);
+      background: rgba(236, 72, 153, 0.15);
     }
     
     .action-buttons {
@@ -245,36 +219,38 @@
     }
     
     #clear-button {
-      background: rgba(255, 107, 107, 0.15);
+      background: rgba(239, 68, 68, 0.15);
       color: var(--danger);
-      border: 1px solid rgba(255, 107, 107, 0.3);
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
     
     #clear-button:hover {
-      background: rgba(255, 107, 107, 0.25);
+      background: rgba(239, 68, 68, 0.25);
     }
     
     #save-button {
-      background: rgba(87, 204, 153, 0.15);
+      background: rgba(16, 185, 129, 0.15);
       color: var(--success);
-      border: 1px solid rgba(87, 204, 153, 0.3);
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
     
     #save-button:hover {
-      background: rgba(87, 204, 153, 0.25);
+      background: rgba(16, 185, 129, 0.25);
     }
     
     #slideshow-button {
-      background: rgba(247, 37, 133, 0.15);
+      background: rgba(236, 72, 153, 0.15);
       color: var(--secondary);
-      border: 1px solid rgba(247, 37, 133, 0.3);
+      border: 1px solid rgba(236, 72, 153, 0.3);
     }
     
     #slideshow-button:hover {
-      background: rgba(247, 37, 133, 0.25);
+      background: rgba(236, 72, 153, 0.25);
     }
     
-    .saved-container {
+    /* Saved Sentences Section */
+    .saved-section {
+      grid-area: saved;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -302,6 +278,7 @@
       background: rgba(30, 41, 59, 0.5);
       border-radius: 12px;
       padding: 15px;
+      max-height: 500px;
     }
     
     #correct-words-list {
@@ -325,7 +302,7 @@
     
     #correct-words-list li:hover {
       transform: translateX(5px);
-      background: rgba(67, 97, 238, 0.15);
+      background: rgba(99, 102, 241, 0.15);
     }
     
     .sentence-text {
@@ -355,26 +332,26 @@
     
     .edit-button {
       color: var(--accent);
-      background: rgba(76, 201, 240, 0.1);
+      background: rgba(14, 165, 233, 0.1);
     }
     
     .edit-button:hover {
-      background: rgba(76, 201, 240, 0.2);
+      background: rgba(14, 165, 233, 0.2);
     }
     
     .delete-button {
       color: var(--danger);
-      background: rgba(255, 107, 107, 0.1);
+      background: rgba(239, 68, 68, 0.1);
     }
     
     .delete-button:hover {
-      background: rgba(255, 107, 107, 0.2);
+      background: rgba(239, 68, 68, 0.2);
     }
     
     .empty-message {
       text-align: center;
       padding: 30px 20px;
-      color: var(--light-muted);
+      color: var(--light-3);
       font-style: italic;
     }
     
@@ -412,7 +389,7 @@
       padding: 15px;
       border-radius: 50px;
       backdrop-filter: blur(10px);
-      border: 1px solid var(--dark-border);
+      border: 1px solid var(--dark-3);
     }
     
     #slideshow-controls button {
@@ -426,7 +403,7 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
-      background: rgba(67, 97, 238, 0.2);
+      background: rgba(99, 102, 241, 0.2);
       color: white;
     }
     
@@ -436,7 +413,7 @@
     }
     
     #slide-indicator {
-      color: var(--light-muted);
+      color: var(--light-3);
       font-size: 1.2rem;
       margin-top: 20px;
       background: rgba(30, 41, 59, 0.7);
@@ -445,13 +422,44 @@
       font-weight: 500;
     }
     
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
+    /* Grid Layout for Desktop */
+    @media (min-width: 992px) {
       .app-container {
-        height: auto;
-        min-height: 95vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+          "display saved"
+          "input saved";
+        gap: 20px;
+        height: 90vh;
       }
       
+      .display-section {
+        height: 200px;
+      }
+      
+      .input-section {
+        height: calc(100% - 220px);
+      }
+      
+      .saved-section {
+        height: 100%;
+      }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 991px) {
+      .app-container {
+        max-width: 800px;
+      }
+      
+      #text-container {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
       #text-container {
         font-size: 1.8rem;
       }
@@ -484,10 +492,6 @@
         font-size: 1.5rem;
       }
       
-      #button-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      }
-      
       .word-button {
         min-height: 60px;
         font-size: 1rem;
@@ -495,6 +499,10 @@
       
       #slideshow-text {
         font-size: 1.8rem;
+      }
+      
+      .card {
+        padding: 20px;
       }
     }
     
@@ -527,14 +535,18 @@
       animation: fadeIn 0.4s ease forwards;
     }
     
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
     .pulse {
       animation: pulse 2s infinite;
     }
     
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); }
-      70% { box-shadow: 0 0 0 12px rgba(67, 97, 238, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+    .glow {
+      text-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
     }
   </style>
 </head>
@@ -542,76 +554,68 @@
   <div class="app-container">
     <!-- Sentence Display Section -->
     <section class="display-section card">
-      <div class="card-header">
+      <h2 class="section-title">
         <i class="fas fa-file-alt"></i>
-        <span>Current Sentence</span>
-      </div>
-      <div class="card-content">
-        <div class="sentence-display">
-          <div id="text-container">Create your sentence here...</div>
-        </div>
+        Current Sentence
+      </h2>
+      <div class="sentence-display">
+        <div id="text-container">Create your sentence here...</div>
       </div>
     </section>
     
     <!-- Word Input Section -->
     <section class="input-section card">
-      <div class="card-header">
+      <h2 class="section-title">
         <i class="fas fa-edit"></i>
-        <span>Sentence Formation</span>
+        Sentence Formation
+      </h2>
+      <div class="input-controls">
+        <div class="input-field-container">
+          <input 
+            type="text" 
+            id="input-field" 
+            placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
+            aria-label="Enter words separated by commas"
+            maxlength="100"
+          >
+        </div>
+        <button id="process-button">
+          <i class="fas fa-cogs"></i>
+          Process
+        </button>
       </div>
-      <div class="card-content">
-        <div class="input-controls">
-          <div class="input-field-container">
-            <input 
-              type="text" 
-              id="input-field" 
-              placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
-              aria-label="Enter words separated by commas"
-              maxlength="100"
-            >
-          </div>
-          <button id="process-button">
-            <i class="fas fa-cogs"></i>
-            Process
-          </button>
-        </div>
-        
+      
+      <div id="button-grid-container">
         <div id="button-grid"></div>
-        
-        <div class="action-buttons">
-          <button class="action-btn" id="clear-button">
-            <i class="fas fa-trash-alt"></i>
-            Clear
-          </button>
-          <button class="action-btn" id="save-button">
-            <i class="fas fa-save"></i>
-            Save
-          </button>
-          <button class="action-btn" id="slideshow-button">
-            <i class="fas fa-film"></i>
-            Slideshow
-          </button>
-        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="action-btn" id="clear-button">
+          <i class="fas fa-trash-alt"></i>
+          Clear
+        </button>
+        <button class="action-btn" id="save-button">
+          <i class="fas fa-save"></i>
+          Save
+        </button>
+        <button class="action-btn" id="slideshow-button">
+          <i class="fas fa-film"></i>
+          Slideshow
+        </button>
       </div>
     </section>
     
     <!-- Saved Sentences Section -->
     <section class="saved-section card">
-      <div class="card-header">
-        <div class="saved-header">
-          <div>
-            <i class="fas fa-book"></i>
-            <span>Saved Sentences</span>
-          </div>
-          <div id="saved-count">0 saved</div>
-        </div>
+      <div class="saved-header">
+        <h2 class="section-title">
+          <i class="fas fa-book"></i>
+          Saved Sentences
+        </h2>
+        <div id="saved-count">0 saved</div>
       </div>
-      <div class="card-content">
-        <div class="saved-container">
-          <div class="saved-list">
-            <ol id="correct-words-list"></ol>
-          </div>
-        </div>
+      <div class="saved-list">
+        <ol id="correct-words-list"></ol>
       </div>
     </section>
   </div>
@@ -783,6 +787,10 @@
         const rest = textContainer.textContent.slice(1);
         textContainer.textContent = firstChar + rest;
       }
+      
+      // Add glow effect
+      textContainer.classList.add('glow');
+      setTimeout(() => textContainer.classList.remove('glow'), 500);
     }
 
     // Render saved sentences
@@ -836,6 +844,8 @@
         // Click to display
         li.addEventListener('click', () => {
           textContainer.textContent = sentence;
+          textContainer.classList.add('glow');
+          setTimeout(() => textContainer.classList.remove('glow'), 1000);
         });
         
         correctWordsList.appendChild(li);
@@ -1009,6 +1019,10 @@
       generateButtons(words);
       inputField.value = '';
       isProcessing = false;
+      
+      // Add animation to process button
+      processButton.classList.remove('pulse');
+      setTimeout(() => processButton.classList.add('pulse'), 10);
     }
 
     clearButton.addEventListener('click', () => {
@@ -1025,6 +1039,10 @@
       saveSentences();
       renderSentences();
       textContainer.textContent = 'Create your sentence here...';
+      
+      // Add animation to save button
+      saveButton.classList.add('pulse');
+      setTimeout(() => saveButton.classList.remove('pulse'), 1000);
     });
 
     slideshowButton.addEventListener('click', () => {
