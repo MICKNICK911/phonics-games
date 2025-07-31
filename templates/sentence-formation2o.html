@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Sentence Formation App</title>
+  <style>
+    /* Modern Global Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      color: #333;
+      line-height: 1.6;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Modern Popup Styles */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.3s ease;
+    }
+    
+    .popup-content {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      width: 85%;
+      max-width: 450px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .popup-content p {
+      margin: 0 0 25px;
+      font-size: 17px;
+      line-height: 1.7;
+      color: #444;
+    }
+    
+    .popup-content button {
+      background: linear-gradient(to right, #4361ee, #3a0ca3);
+      color: #fff;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .popup-content button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    /* Modern Collage Layout */
+    .collage-container {
+      width: 95%;
+      height: 95vh;
+      max-width: 1400px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr 1.5fr;
+      gap: 0;
+    }
+    
+    @media only screen and (min-width: 768px) {
+      .collage-container {
+        grid-template-columns: 1.5fr 1fr;
+        grid-template-rows: 1fr 1.5fr;
+      }
+      
+      .item:nth-child(1) {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      
+      .item:nth-child(2) {
+        grid-column: 2;
+        grid-row: 1;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        overflow: auto;
+      }
+      
+      .item:nth-child(3) {
+        grid-column: 2;
+        grid-row: 2;
+      }
+    }
+
+    /* Collage Item Styles */
+    .item {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .item-header {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #3a0ca3;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #4361ee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .emoji-icon {
+      font-size: 1.5rem;
+    }
+
+    /* Sentence Display Area */
+    .sentence-display {
+      flex: 1;
+      background: linear-gradient(145deg, #f0f4ff, #e2e8ff);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .sentence-display.active {
+      background: linear-gradient(145deg, #e6f7ff, #d1edff);
+      box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    #text-container {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #3a0ca3;
+      line-height: 1.4;
+      padding: 10px;
+      max-width: 100%;
+      word-break: break-word;
+    }
+    
+    @media only screen and (max-width: 767px) {
+      #text-container {
+        font-size: 1.8rem;
+      }
+    }
+
+    /* Game Container */
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .game-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    
+    .game-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #3a0ca3;
+      background: linear-gradient(to right, #4361ee, #3a0ca3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    #input-field {
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #dce1ff;
+      border-radius: 12px;
+      width: 100%;
+      margin-bottom: 15px;
+      background: #f8f9ff;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    #input-field:focus {
+      outline: none;
+      border-color: #4361ee;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .input-buttons {
+      display: none;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .control-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .control-btn i {
+      font-size: 18px;
+    }
+    
+    #clear-button {
+      background: linear-gradient(to right, #ff6b6b, #ff4d4d);
+      color: white;
+    }
+    
+    #add-button {
+      background: linear-gradient(to right, #4cc9f0, #4895ef);
+      color: white;
+    }
+    
+    #save-button {
+      background: linear-gradient(to right, #57cc99, #38b000);
+      color: white;
+    }
+    
+    #slideshow-button {
+      background: linear-gradient(to right, #f72585, #b5179e);
+      color: white;
+    }
+    
+    .control-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .control-btn:active {
+      transform: translateY(0);
+    }
+    
+    #button-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      grid-gap: 12px;
+      overflow-y: auto;
+      padding: 5px;
+    }
+    
+    .word-button {
+      background: linear-gradient(to bottom, #f0f4ff, #e2e8ff);
+      color: #3a0ca3;
+      padding: 15px 10px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(67, 97, 238, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 60px;
+    }
+    
+    .word-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+      background: linear-gradient(to bottom, #e6f0ff, #d6e4ff);
+    }
+    
+    .word-button:active {
+      transform: translateY(0);
+    }
+    
+    .word-button:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Saved Sentences */
+    .saved-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .saved-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    #saved-count {
+      background: #3a0ca3;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .correct-words-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 5px;
+      background: #f8f9ff;
+      border-radius: 15px;
+    }
+    
+    .correct-words-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .correct-words-list li {
+      margin: 10px 0;
+      padding: 15px;
+      color: #333;
+      font-size: 18px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #4361ee;
+    }
+    
+    .correct-words-list li:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sentence-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .sentence-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 5px;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .edit-button {
+      color: #4361ee;
+      background: rgba(67, 97, 238, 0.1);
+    }
+    
+    .edit-button:hover {
+      background: rgba(67, 97, 238, 0.2);
+    }
+    
+    .delete-button {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.1);
+    }
+    
+    .delete-button:hover {
+      background: rgba(255, 107, 107, 0.2);
+    }
+
+    /* Slideshow Mode */
+    #slideshow-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    
+    #slideshow-text {
+      font-size: 3.5rem;
+      color: white;
+      text-align: center;
+      padding: 40px;
+      max-width: 90%;
+      font-weight: 700;
+      line-height: 1.4;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    #slideshow-controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+    }
+    
+    #slideshow-controls button {
+      width: 60px;
+      height: 60px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    
+    #slideshow-controls button:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.25);
+    }
+    
+    #mode-toggle {
+      background: rgba(67, 97, 238, 0.3);
+      font-size: 26px;
+    }
+    
+    #mode-toggle:hover {
+      background: rgba(67, 97, 238, 0.5);
+    }
+    
+    #slide-indicator {
+      color: white;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    
+    /* Responsive Adjustments */
+    @media only screen and (max-width: 767px) {
+      .collage-container {
+        height: 95vh;
+      }
+      
+      #button-grid {
+          margin-bottom: 100px;
+      }
+      
+      .input-buttons {
+          flex-direction: row;
+      }
+      
+      #slideshow-text {
+        font-size: 2.5rem;
+        padding: 20px;
+      }
+      
+      #slideshow-controls button {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+      
+      .item-header {
+        font-size: 1.1rem;
+      }
+      
+      .word-button {
+        font-size: 15px;
+        padding: 12px 8px;
+        min-height: 50px;
+      }
+      
+      .correct-words-list li {
+        font-size: 16px;
+        padding: 12px;
+      }
+      
+      .sentence-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+    }
+    
+    @media only screen and (max-width: 480px) {
+      #text-container {
+        font-size: 1.5rem;
+      }
+      
+      #slideshow-text {
+        font-size: 2rem;
+      }
+      
+      .control-btn {
+        min-width: 100%;
+      }
+      
+      #button-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      }
+    }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(67, 97, 238, 0.5);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(67, 97, 238, 0.7);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <!-- Popup -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button id="popup-ok-button">OK</button>
+    </div>
+  </div>
+
+  <!-- Main App Container -->
+  <div class="collage-container">
+    <!-- Sentence Display Area -->
+    <div class="item">
+      <div class="item-header">
+        <span class="emoji-icon">📄</span>
+        <span>Current Sentence</span>
+      </div>
+      <div class="sentence-display active">
+        <div class="text-container" id="text-container" role="region" aria-live="polite"></div>
+      </div>
+    </div>
+    
+    <!-- Word Input Area -->
+    <div class="item">
+      <div class="game-container" id="game-container">
+        <div class="game-header">
+          <span class="emoji-icon">✏️</span>
+          <div class="game-title">Sentence Formation</div>
+        </div>
+        <input
+          class="input-field"
+          id="input-field"
+          type="text"
+          placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
+          aria-label="Enter words separated by commas"
+          maxlength="100"
+        >
+        <div class="input-buttons" id="input-buttons">
+          <button class="control-btn" id="clear-button">
+            <span>🗑️</span>
+            Clear
+          </button>
+          <button class="control-btn" id="add-button">
+            <span>🔄</span>
+            Reset
+          </button>
+          <button class="control-btn" id="save-button">
+            <span>💾</span>
+            Save
+          </button>
+          <button class="control-btn" id="slideshow-button">
+            <span>🎬</span>
+            Slideshow
+          </button>
+        </div>
+        <div id="button-grid" role="grid"></div>
+      </div>
+    </div>
+    
+    <!-- Saved Sentences Area -->
+    <div class="item">
+      <div class="saved-container">
+        <div class="saved-header">
+          <div class="item-header">
+            <span class="emoji-icon">📚</span>
+            <span>Saved Sentences</span>
+          </div>
+          <div id="saved-count">0 saved</div>
+        </div>
+        <div class="correct-words-container">
+          <ol id="correct-words-list" class="correct-words-list" role="list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slideshow Container -->
+  <div id="slideshow-container">
+    <div id="slideshow-text" role="region" aria-live="polite"></div>
+    <div id="slideshow-controls">
+      <button id="prev-button" aria-label="Previous slide">⬅️</button>
+      <button id="mode-toggle" aria-label="Toggle mode">🔄</button>
+      <button id="next-button" aria-label="Next slide">➡️</button>
+      <button id="pause-resume-button" aria-label="Pause slideshow">⏸️</button>
+      <button id="stop-slideshow-button" aria-label="Stop slideshow">⏹️</button>
+    </div>
+    <div id="slide-indicator">1/0</div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const textContainer = document.getElementById('text-container');
+    const inputField = document.getElementById('input-field');
+    const buttonGrid = document.getElementById('button-grid');
+    const inputButtons = document.getElementById('input-buttons');
+    const clearButton = document.getElementById('clear-button');
+    const addButton = document.getElementById('add-button');
+    const saveButton = document.getElementById('save-button');
+    const slideshowButton = document.getElementById('slideshow-button');
+    const correctWordsList = document.getElementById('correct-words-list');
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    const popupOkButton = document.getElementById('popup-ok-button');
+    const slideshowContainer = document.getElementById('slideshow-container');
+    const slideshowText = document.getElementById('slideshow-text');
+    const pauseResumeButton = document.getElementById('pause-resume-button');
+    const stopSlideshowButton = document.getElementById('stop-slideshow-button');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const modeToggle = document.getElementById('mode-toggle');
+    const slideIndicator = document.getElementById('slide-indicator');
+    const savedCount = document.getElementById('saved-count');
+
+    // State Variables
+    let sentences = loadSentences();
+    let slideshowInterval = null;
+    let slideshowIndex = 0;
+    let isSlideshowPaused = false;
+    let isProcessing = false;
+    let isAutoMode = true;
+
+    // Constants
+    const MAX_WORDS = 20;
+    const MAX_INPUT_LENGTH = 100;
+    const SLIDESHOW_INTERVAL = 3000; // 3 seconds
+
+    // Load sentences from local storage
+    function loadSentences() {
+      try {
+        const saved = localStorage.getItem('sentences');
+        const data = saved ? JSON.parse(saved) : [];
+        updateSavedCount(data.length);
+        return data;
+      } catch (e) {
+        showPopup('Error loading saved sentences. Starting fresh.');
+        return [];
+      }
+    }
+
+    // Save sentences to local storage
+    function saveSentences() {
+      try {
+        localStorage.setItem('sentences', JSON.stringify(sentences));
+        updateSavedCount(sentences.length);
+      } catch (e) {
+        showPopup('Failed to save sentences. Storage may be full.');
+      }
+    }
+    
+    // Update saved count display
+    function updateSavedCount(count) {
+      savedCount.textContent = `${count} saved`;
+      savedCount.style.display = count > 0 ? 'block' : 'none';
+      slideshowButton.disabled = count === 0;
+    }
+
+    // Show popup with message
+    function showPopup(message) {
+      popupMessage.textContent = message;
+      popup.style.display = 'flex';
+      popupOkButton.focus();
+    }
+
+    // Close popup
+    function closePopup() {
+      popup.style.display = 'none';
+      inputField.focus();
+    }
+
+    // Validate input
+    function validateInput(input) {
+      if (!input || input.trim() === '') {
+        return 'Input cannot be empty.';
+      }
+      if (input.length > MAX_INPUT_LENGTH) {
+        return `Input exceeds ${MAX_INPUT_LENGTH} characters.`;
+      }
+      const words = input.split(',').map(word => word.trim()).filter(word => word);
+      if (words.length > MAX_WORDS) {
+        return `Too many words. Maximum ${MAX_WORDS} allowed.`;
+      }
+      const uniqueWords = new Set(words);
+      if (uniqueWords.size < words.length) {
+        return 'Duplicate words detected. Each word must be unique.';
+      }
+      if (words.some(word => word.length > 20)) {
+        return 'Individual words cannot exceed 20 characters.';
+      }
+      return null;
+    }
+
+    // Generate word buttons
+    function generateButtons(words) {
+      buttonGrid.innerHTML = '';
+      const allWords = words.concat(['.', '?', ',', '!', ';']);
+      allWords.forEach(word => {
+        const button = document.createElement('button');
+        button.classList.add('word-button');
+        button.textContent = word;
+        button.setAttribute('aria-label', `Add ${word} to sentence`);
+        button.addEventListener('click', () => {
+          if (isProcessing) return;
+          const currentText = textContainer.textContent.trim();
+          const newText = word.trim();
+          
+          // Handle punctuation
+          if (['.', '?', '!', ',', ';'].includes(newText)) {
+            textContainer.textContent = currentText + newText;
+          } else {
+            textContainer.textContent = currentText
+              ? `${currentText} ${newText}`
+              : newText.charAt(0).toUpperCase() + newText.slice(1);
+          }
+        });
+        buttonGrid.appendChild(button);
+      });
+    }
+
+    // Render saved sentences
+    function renderSentences() {
+      correctWordsList.innerHTML = '';
+      if (sentences.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.classList.add('empty-message');
+        emptyMsg.textContent = 'No saved sentences yet. Create and save some sentences to see them here.';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.padding = '20px';
+        emptyMsg.style.color = '#6c757d';
+        correctWordsList.appendChild(emptyMsg);
+        return;
+      }
+      
+      sentences.forEach((sentence, index) => {
+        const li = document.createElement('li');
+        li.classList.add('fade-in');
+        li.setAttribute('role', 'listitem');
+        li.setAttribute('tabindex', '0');
+        
+        const textSpan = document.createElement('span');
+        textSpan.textContent = sentence;
+        li.appendChild(textSpan);
+        
+        // Sentence actions
+        const actionsDiv = document.createElement('div');
+        actionsDiv.classList.add('sentence-actions');
+        
+        // Edit Button
+        const editButton = document.createElement('button');
+        editButton.classList.add('sentence-btn', 'edit-button');
+        editButton.innerHTML = '✏️';
+        editButton.setAttribute('aria-label', `Edit sentence: ${sentence}`);
+        editButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          editSentence(index);
+        });
+        actionsDiv.appendChild(editButton);
+        
+        // Delete Button
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('sentence-btn', 'delete-button');
+        deleteButton.innerHTML = '❌';
+        deleteButton.setAttribute('aria-label', `Delete sentence: ${sentence}`);
+        deleteButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteSentence(index);
+        });
+        actionsDiv.appendChild(deleteButton);
+        
+        li.appendChild(actionsDiv);
+        
+        // Click to display
+        li.addEventListener('click', () => {
+          textContainer.textContent = sentence;
+        });
+        
+        // Keyboard support
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            textContainer.textContent = sentence;
+          }
+        });
+        
+        correctWordsList.appendChild(li);
+      });
+    }
+
+    // Edit sentence
+    function editSentence(index) {
+      const newSentence = prompt('Edit sentence:', sentences[index]);
+      if (newSentence !== null) {
+        if (newSentence.trim()) {
+          sentences[index] = newSentence.trim();
+          saveSentences();
+          renderSentences();
+        } else {
+          showPopup('Sentence cannot be empty.');
+        }
+      }
+    }
+
+    // Delete sentence
+    function deleteSentence(index) {
+      if (confirm('Are you sure you want to delete this sentence?')) {
+        sentences.splice(index, 1);
+        saveSentences();
+        renderSentences();
+      }
+    }
+
+    // Start slideshow
+    function startSlideshow() {
+      if (sentences.length === 0) {
+        showPopup('No sentences available for slideshow.');
+        return;
+      }
+      slideshowIndex = 0;
+      slideshowContainer.style.display = 'flex';
+      displayNextSlide();
+      
+      // Set to auto mode by default
+      isAutoMode = true;
+      modeToggle.textContent = '🔄'; // Auto mode icon
+      
+      // Start auto slideshow
+      clearInterval(slideshowInterval);
+      slideshowInterval = setInterval(displayNextSlide, SLIDESHOW_INTERVAL);
+      
+      pauseResumeButton.textContent = '⏸️';
+      isSlideshowPaused = false;
+      updateControlsVisibility();
+      pauseResumeButton.focus();
+    }
+
+    // Display next slide
+    function displayNextSlide() {
+      if (sentences.length === 0) {
+        stopSlideshow();
+        showPopup('No sentences available.');
+        return;
+      }
+      slideshowText.textContent = sentences[slideshowIndex];
+      slideshowIndex = (slideshowIndex + 1) % sentences.length;
+      updateSlideIndicator();
+    }
+    
+    // Display previous slide
+    function displayPrevSlide() {
+      if (sentences.length === 0) return;
+      slideshowIndex = (slideshowIndex - 1 + sentences.length) % sentences.length;
+      slideshowText.textContent = sentences[slideshowIndex];
+      updateSlideIndicator();
+    }
+    
+    // Update slide indicator
+    function updateSlideIndicator() {
+      slideIndicator.textContent = `${slideshowIndex + 1}/${sentences.length}`;
+    }
+
+    // Pause or resume slideshow
+    function togglePauseResume() {
+      if (isSlideshowPaused) {
+        if (isAutoMode) {
+          slideshowInterval = setInterval(displayNextSlide, SLIDESHOW_INTERVAL);
+        }
+        pauseResumeButton.textContent = '⏸️';
+        isSlideshowPaused = false;
+      } else {
+        clearInterval(slideshowInterval);
+        pauseResumeButton.textContent = '▶️';
+        isSlideshowPaused = true;
+      }
+    }
+    
+    // Toggle between auto and manual modes
+    function toggleMode() {
+      isAutoMode = !isAutoMode;
+      
+      if (isAutoMode) {
+        modeToggle.textContent = '🔄'; // Auto mode icon
+        if (!isSlideshowPaused) {
+          slideshowInterval = setInterval(displayNextSlide, SLIDESHOW_INTERVAL);
+        }
+      } else {
+        modeToggle.textContent = '✋'; // Manual mode icon
+        clearInterval(slideshowInterval);
+      }
+      
+      updateControlsVisibility();
+    }
+    
+    // Update controls visibility based on mode
+    function updateControlsVisibility() {
+      if (isAutoMode) {
+        prevButton.style.display = 'none';
+        nextButton.style.display = 'none';
+        pauseResumeButton.style.display = 'flex';
+      } else {
+        prevButton.style.display = 'flex';
+        nextButton.style.display = 'flex';
+        pauseResumeButton.style.display = 'none';
+        // Ensure we're not paused in manual mode
+        isSlideshowPaused = false;
+        pauseResumeButton.textContent = '⏸️';
+      }
+    }
+
+    // Stop slideshow
+    function stopSlideshow() {
+      clearInterval(slideshowInterval);
+      slideshowContainer.style.display = 'none';
+      isSlideshowPaused = false;
+      inputField.focus();
+    }
+
+    // Event Listeners
+    inputField.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter' && !isProcessing) {
+        isProcessing = true;
+        const input = inputField.value.trim();
+        const error = validateInput(input);
+        if (error) {
+          showPopup(error);
+          isProcessing = false;
+          return;
+        }
+        const words = input.split(',').map(word => word.trim()).filter(word => word);
+        generateButtons(words);
+        inputField.value = '';
+        inputButtons.style.display = 'flex';
+        isProcessing = false;
+        buttonGrid.querySelector('.word-button')?.focus();
+      }
+    });
+
+    clearButton.addEventListener('click', () => {
+      if (isProcessing) return;
+      textContainer.textContent = '';
+      clearButton.focus();
+    });
+
+    saveButton.addEventListener('click', () => {
+      if (isProcessing) return;
+      isProcessing = true;
+      const sentence = textContainer.textContent.trim();
+      if (!sentence) {
+        showPopup('No sentence to save.');
+        isProcessing = false;
+        return;
+      }
+      sentences.push(sentence);
+      saveSentences();
+      renderSentences();
+      textContainer.textContent = '';
+      isProcessing = false;
+      saveButton.focus();
+    });
+
+    addButton.addEventListener('click', () => {
+      if (isProcessing) return;
+      if (confirm('Reset will clear current words and sentence. Continue?')) {
+        isProcessing = true;
+        inputButtons.style.display = 'none';
+        inputField.value = '';
+        buttonGrid.innerHTML = '';
+        textContainer.textContent = '';
+        isProcessing = false;
+        inputField.focus();
+      }
+    });
+
+    slideshowButton.addEventListener('click', () => {
+      if (isProcessing) return;
+      isProcessing = true;
+      startSlideshow();
+      isProcessing = false;
+    });
+
+    pauseResumeButton.addEventListener('click', () => {
+      togglePauseResume();
+    });
+
+    stopSlideshowButton.addEventListener('click', () => {
+      stopSlideshow();
+    });
+    
+    prevButton.addEventListener('click', () => {
+      displayPrevSlide();
+    });
+    
+    nextButton.addEventListener('click', () => {
+      displayNextSlide();
+    });
+    
+    modeToggle.addEventListener('click', () => {
+      toggleMode();
+    });
+
+    popupOkButton.addEventListener('click', closePopup);
+
+    // Keyboard support for popup
+    popup.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePopup();
+    });
+
+    // Initialize
+    window.onload = () => {
+      renderSentences();
+      showPopup(
+        'Welcome to the Sentence Formation App!\n\n' +
+        'HOW TO USE:\n' +
+        '1. Enter words separated by commas (e.g., cat, dog, runs)\n' +
+        '2. Press Enter to create word buttons\n' +
+        '3. Click buttons to form sentences\n' +
+        '4. Save sentences to the list\n' +
+        '5. Use saved sentences for practice or start a slideshow\n\n' +
+        'TIP: Use punctuation buttons to end your sentences properly.'
+      );
+    };
+  </script>
+</body>
+</html>
