@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Spelling Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 10;
+            margin: 20px auto;
+            transform: scale(0.95);
+            animation: scaleIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes scaleIn {
+            to { transform: scale(1); }
+        }
+        
+        header {
+            background: linear-gradient(90deg, #4a00e0, #8e2de2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 0 10px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin: 5px;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
+            min-width: 80px;
+            backdrop-filter: blur(5px);
+            margin: 5px;
+        }
+        
+        .stat-box h3 {
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+        
+        .stat-box p {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .game-area {
+            padding: 20px;
+            position: relative;
+        }
+        
+        .target-word {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .target-word::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #4a00e0, #8e2de2);
+        }
+        
+        .target-word h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .speaker-btn {
+            background: #4a00e0;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            margin: 10px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(74, 0, 224, 0.6);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .speaker-btn:hover {
+            transform: scale(1.1);
+            background: #8e2de2;
+            box-shadow: 0 8px 25px rgba(142, 45, 226, 0.8);
+        }
+        
+        .speaker-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .letter-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            min-height: 100px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .letter-box {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            user-select: none;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #grid1 .letter-box {
+            background: #e0e7ff;
+            border: 3px solid #a78bfa;
+            color: #4a00e0;
+        }
+        
+        #grid2 .letter-box {
+            background: #ede9fe;
+            border: 3px solid #c4b5fd;
+            color: #7c3aed;
+        }
+        
+        #grid2 .letter-box:hover {
+            transform: translateY(-5px);
+            background: #d8d1ff;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        #grid2 .letter-box.used {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            display: none;
+            animation: popIn 0.5s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            color: #c62828;
+            display: block;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .instructions h3 {
+            color: #1565c0;
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #333;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            position: relative;
+            z-index: 2;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .result-content {
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 25px;
+            color: #4a00e0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .result-stats {
+            background: #f0f7ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stat-item {
+            margin: 15px 0;
+            font-size: 1.6rem;
+            color: #333;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #4a00e0;
+            font-size: 1.8rem;
+        }
+        
+        .restart-btn {
+            padding: 12px 35px;
+            font-size: 1.3rem;
+            background: linear-gradient(90deg, #00c853, #00e676);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 0, 224, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(74, 0, 224, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 0, 224, 0); }
+        }
+        
+        .floating {
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.1;
+            z-index: 1;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-1000px) rotate(360deg); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+            
+            .letter-box {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 90%;
+                justify-content: center;
+            }
+            
+            .result-title {
+                font-size: 2.5rem;
+            }
+            
+            .stat-item {
+                font-size: 1.3rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .game-area {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-box {
+                min-width: 70px;
+                padding: 6px 10px;
+            }
+            
+            .stat-box p {
+                font-size: 1.1rem;
+            }
+            
+            .letter-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+            
+            .speaker-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            
+            .result-title {
+                font-size: 2rem;
+            }
+            
+            .stat-item {
+                font-size: 1.1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .restart-btn {
+                font-size: 1.1rem;
+                padding: 10px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-spell-check"></i>
+                    <h1>Phonics Challenge</h1>
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <h3>SCORE</h3>
+                        <p id="score">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>LEVEL</h3>
+                        <p id="level">1</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>TIME</h3>
+                        <p id="timer">0s</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="game-area">
+            <!-- Floating letters background -->
+            <div class="floating" style="top: 10%; left: 5%;">A</div>
+            <div class="floating" style="top: 20%; left: 80%;">B</div>
+            <div class="floating" style="top: 40%; left: 15%;">C</div>
+            <div class="floating" style="top: 70%; left: 90%;">D</div>
+            <div class="floating" style="top: 85%; left: 40%;">E</div>
+            
+            <div class="target-word">
+                <h2>Spell the word you hear:</h2>
+                <button class="speaker-btn pulse" id="speakerBtn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+            
+            <div class="grid-container">
+                <div class="letter-grid" id="grid1"></div>
+                <div class="letter-grid" id="grid2"></div>
+            </div>
+            
+            <div class="message" id="message"></div>
+            
+            <div class="controls">
+                <button class="btn clear-btn" id="clearBtn">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+            </div>
+            
+            <div class="instructions">
+                <h3>How to Play:</h3>
+                <ul>
+                    <li>Click the speaker to hear the word</li>
+                    <li>Use the letters below to spell the word</li>
+                    <li>Clear your attempt if you make a mistake</li>
+                    <li>Complete all words to win!</li>
+                    <li>Incorrect spelling ends the game</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="result-screen" id="winScreen">
+            <div class="result-content">
+                <h2 class="result-title">Victory! 🎉</h2>
+                <div class="result-stats">
+                    <div class="stat-item">Total Score: <span class="stat-value" id="finalScore">0</span></div>
+                    <div class="stat-item">Time Taken: <span class="stat-value" id="finalTime">0s</span></div>
+                    <div class="stat-item">Words Completed: <span class="stat-value" id="wordCount">0</span></div>
+                </div>
+                <button class="restart-btn" onclick="restartGame()">
+                    <i class="fas fa-redo"></i> Play Again
+                </button>
+            </div>
+        </div>
+        
+        <div class="result-screen" id="gameOver">
+            <div class="result-content">
+                <h2 class="result-title">Game Over</h2>
+                <div class="result-stats">
+                    <div class="stat-item">Score: <span class="stat-value" id="endScore">0</span></div>
+                    <div class="stat-item">Time: <span class="stat-value" id="endTime">0s</span></div>
+                    <div class="stat-item">Words Completed: <span class="stat-value" id="completedWords">0</span></div>
+                </div>
+                <button class="restart-btn" onclick="restartGame()">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Phonics Spelling Challenge &copy; 2023 | Educational Game</p>
+        </footer>
+    </div>
+
+    <script>
+        // Game data
+        const words = ['CAT', 'DOG', 'FISH', 'BIRD', 'FROG', 'DUCK', 'BEAR', 'LION', 'WOLF', 'DEER'];
+        let currentWordIndex = 0;
+        let score = 0;
+        let level = 1;
+        let grid1Filled = 0;
+        let isWordCompleted = false;
+        let gameStartTime = 0;
+        let gameTimer = null;
+        let totalTime = 0;
+        
+        // DOM elements
+        const speakerBtn = document.getElementById('speakerBtn');
+        const grid1 = document.getElementById('grid1');
+        const grid2 = document.getElementById('grid2');
+        const message = document.getElementById('message');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const timerDisplay = document.getElementById('timer');
+        const clearBtn = document.getElementById('clearBtn');
+        const winScreen = document.getElementById('winScreen');
+        const gameOver = document.getElementById('gameOver');
+        const finalScore = document.getElementById('finalScore');
+        const finalTime = document.getElementById('finalTime');
+        const wordCount = document.getElementById('wordCount');
+        const endScore = document.getElementById('endScore');
+        const endTime = document.getElementById('endTime');
+        const completedWords = document.getElementById('completedWords');
+        
+        // Initialize speech synthesis
+        const synth = window.speechSynthesis;
+        let utterance = new SpeechSynthesisUtterance();
+        
+        // Initialize the game
+        function initGame() {
+            currentWordIndex = 0;
+            score = 0;
+            level = 1;
+            grid1Filled = 0;
+            isWordCompleted = false;
+            totalTime = 0;
+            
+            // Hide result screens
+            winScreen.style.display = 'none';
+            gameOver.style.display = 'none';
+            
+            // Start game timer
+            startTimer();
+            
+            // Load first word
+            loadWord(words[currentWordIndex]);
+            updateStats();
+            
+            // Add event listener to grid2 for letter selection
+            grid2.addEventListener('click', handleLetterClick);
+            
+            // Add event listeners to buttons
+            speakerBtn.addEventListener('click', speakWord);
+            clearBtn.addEventListener('click', clearGrid);
+        }
+        
+        // Start game timer
+        function startTimer() {
+            gameStartTime = Date.now();
+            clearInterval(gameTimer);
+            
+            gameTimer = setInterval(() => {
+                totalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+                timerDisplay.textContent = `${totalTime}s`;
+            }, 1000);
+        }
+        
+        // Stop game timer
+        function stopTimer() {
+            clearInterval(gameTimer);
+        }
+        
+        // Load a word into the game
+        function loadWord(word) {
+            grid1.innerHTML = '';
+            grid2.innerHTML = '';
+            grid1Filled = 0;
+            isWordCompleted = false;
+            message.style.display = 'none';
+            
+            // Create empty boxes for target word
+            for (let i = 0; i < word.length; i++) {
+                const box = document.createElement('div');
+                box.classList.add('letter-box');
+                box.textContent = '';
+                grid1.appendChild(box);
+            }
+            
+            // Create shuffled letters
+            let letters = word.split('');
+            shuffleArray(letters);
+            
+            letters.forEach(letter => {
+                const box = document.createElement('div');
+                box.classList.add('letter-box');
+                box.textContent = letter;
+                box.dataset.letter = letter;
+                grid2.appendChild(box);
+            });
+            
+            // Enable speaker button
+            speakerBtn.disabled = false;
+            speakerBtn.classList.add('pulse');
+            
+            // Speak the word automatically
+            setTimeout(speakWord, 500);
+        }
+        
+        // Handle letter clicks
+        function handleLetterClick(event) {
+            if (isWordCompleted) return;
+            
+            const target = event.target;
+            if (target.classList.contains('letter-box') && 
+                !target.classList.contains('used') && 
+                grid1Filled < words[currentWordIndex].length) {
+                
+                const letter = target.dataset.letter;
+                moveLetter(letter, target);
+            }
+        }
+        
+        // Move a letter to the target grid
+        function moveLetter(letter, sourceBox) {
+            const targetBox = grid1.children[grid1Filled];
+            targetBox.textContent = letter;
+            grid1Filled++;
+            
+            sourceBox.classList.add('used');
+            
+            checkWord();
+        }
+        
+        // Check if the word is correctly spelled
+        function checkWord() {
+            if (grid1Filled === words[currentWordIndex].length) {
+                const userWord = Array.from(grid1.children).map(box => box.textContent).join('');
+                const targetWord = words[currentWordIndex];
+                
+                if (userWord === targetWord) {
+                    // Correct word
+                    message.textContent = 'Correct! Well done!';
+                    message.className = 'message success';
+                    message.style.display = 'block';
+                    score += 10;
+                    isWordCompleted = true;
+                    updateStats();
+                    
+                    // Remove pulse effect
+                    speakerBtn.classList.remove('pulse');
+                    
+                    // Move to next word after delay
+                    setTimeout(() => {
+                        currentWordIndex++;
+                        
+                        if (currentWordIndex < words.length) {
+                            // Increase level every 3 words
+                            if (currentWordIndex % 3 === 0) {
+                                level++;
+                                levelDisplay.textContent = level;
+                            }
+                            
+                            loadWord(words[currentWordIndex]);
+                        } else {
+                            // Game completed
+                            endGame(true);
+                        }
+                    }, 1500);
+                } else {
+                    // Incorrect word
+                    message.textContent = 'Incorrect! Game Over';
+                    message.className = 'message error';
+                    message.style.display = 'block';
+                    
+                    // End game after delay
+                    setTimeout(() => {
+                        endGame(false);
+                    }, 1500);
+                }
+            }
+        }
+        
+        // Clear the target grid
+        function clearGrid() {
+            Array.from(grid1.children).forEach(box => {
+                box.textContent = '';
+            });
+            
+            Array.from(grid2.children).forEach(box => {
+                if (box.classList.contains('used')) {
+                    box.classList.remove('used');
+                }
+            });
+            
+            grid1Filled = 0;
+            message.style.display = 'none';
+            isWordCompleted = false;
+        }
+        
+        // Speak the current word
+        function speakWord() {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            const word = words[currentWordIndex];
+            utterance.text = word;
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            
+            try {
+                synth.speak(utterance);
+                speakerBtn.disabled = true;
+                
+                // Re-enable button after speaking is done
+                utterance.onend = () => {
+                    speakerBtn.disabled = false;
+                };
+            } catch (error) {
+                console.error('Speech synthesis error:', error);
+                message.textContent = 'Speech not supported in this browser';
+                message.className = 'message error';
+                message.style.display = 'block';
+                speakerBtn.disabled = true;
+            }
+        }
+        
+        // Update score and level display
+        function updateStats() {
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+        }
+        
+        // Utility function to shuffle array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // End the game
+        function endGame(isWin) {
+            stopTimer();
+            
+            if (isWin) {
+                // Show win screen
+                winScreen.style.display = 'flex';
+                finalScore.textContent = score;
+                finalTime.textContent = `${totalTime}s`;
+                wordCount.textContent = words.length;
+            } else {
+                // Show game over screen
+                gameOver.style.display = 'flex';
+                endScore.textContent = score;
+                endTime.textContent = `${totalTime}s`;
+                completedWords.textContent = currentWordIndex;
+            }
+        }
+        
+        // Restart the game
+        function restartGame() {
+            initGame();
+        }
+        
+        // Initialize the game
+        window.onload = initGame;
+    </script>
+</body>
+</html>
