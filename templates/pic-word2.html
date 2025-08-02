@@ -70,13 +70,19 @@
             transition: all 0.3s;
         }
         
-        .audio-btn:hover {
+        .audio-btn:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
         
-        .audio-btn:active {
+        .audio-btn:active:not(:disabled) {
             transform: translateY(1px);
+        }
+        
+        .audio-btn:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
         }
         
         .options-container {
@@ -99,10 +105,29 @@
             text-transform: uppercase;
         }
         
-        .option:hover {
+        .option:hover:not(:disabled) {
             background: #e1f0ff;
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
+        }
+        
+        .option:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .option.selected {
+            background: #ffd700;
+        }
+        
+        .option.correct {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .option.incorrect {
+            background: #f44336;
+            color: white;
         }
         
         .game-info {
@@ -130,14 +155,21 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: #1a5fd0;
             transform: translateY(-3px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
         }
         
-        .btn:active {
+        .btn:active:not(:disabled) {
             transform: translateY(1px);
+        }
+        
+        .btn:disabled {
+            background: #cccccc;
+            color: #666666;
+            box-shadow: none;
+            cursor: not-allowed;
         }
         
         .correct-screen, .gameover-screen, .congrats-screen {
@@ -218,6 +250,20 @@
             margin: 8px 0;
         }
         
+        .letter-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #2575fc;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        
         @media (max-width: 500px) {
             .container {
                 padding: 15px;
@@ -240,56 +286,57 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" role="main">
         <h1>Emoji Letter Match</h1>
         
         <!-- Start Screen -->
-        <div id="start-screen" class="screen active">
-            <div class="emoji-display">🎮</div>
+        <div id="start-screen" class="screen active" role="region" aria-label="Start Screen">
+            <div class="emoji-display" aria-hidden="true">🎮</div>
             <p class="message">Match the letter to the emoji!</p>
             
             <div class="instructions">
                 <h3>How to Play:</h3>
                 <p>1. Tap the speaker button to hear the word</p>
-                <p>2. Find the correct starting letter</p>
+                <p>2. Find the correct starting letter (or ending letter for 'x')</p>
                 <p>3. Select the matching letter from the options</p>
                 <p>4. Get it right to advance to the next word</p>
                 <p>5. One wrong answer ends the game!</p>
             </div>
             
             <button id="start-btn" class="btn">Start Game</button>
+            <button id="practice-btn" class="btn">Practice Mode</button>
         </div>
         
         <!-- Game Screen -->
-        <div id="game-screen" class="screen">
+        <div id="game-screen" class="screen" role="region" aria-label="Game Screen">
             <div class="game-info">
                 <div class="score">Score: <span id="score">0</span>/<span id="total">0</span></div>
                 <div class="timer">Time: <span id="timer">0</span>s</div>
             </div>
             
             <div class="progress-container">
-                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                <div class="progress-bar" id="progress-bar" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
             
-            <div class="emoji-display" id="emoji-display">🍏</div>
+            <div class="emoji-display" id="emoji-display" aria-hidden="true">🍏</div>
             
-            <button id="audio-btn" class="audio-btn">🔊 Hear the word</button>
+            <button id="audio-btn" class="audio-btn" aria-label="Play audio">🔊 Hear the word</button>
             
-            <div class="options-container" id="options-container">
+            <div class="options-container" id="options-container" role="radiogroup">
                 <!-- Options will be generated here -->
             </div>
         </div>
         
         <!-- Correct Answer Screen -->
-        <div id="correct-screen" class="screen correct-screen">
-            <div class="result-icon correct-icon">✓</div>
+        <div id="correct-screen" class="screen correct-screen" role="region" aria-label="Correct Answer Screen">
+            <div class="result-icon correct-icon" aria-hidden="true">✓</div>
             <p class="message">Correct!</p>
             <button id="next-btn" class="btn">Next Word</button>
         </div>
         
         <!-- Game Over Screen -->
-        <div id="gameover-screen" class="screen gameover-screen">
-            <div class="result-icon incorrect-icon">✗</div>
+        <div id="gameover-screen" class="screen gameover-screen" role="region" aria-label="Game Over Screen">
+            <div class="result-icon incorrect-icon" aria-hidden="true">✗</div>
             <p class="message">Game Over!</p>
             
             <div class="stats">
@@ -307,8 +354,8 @@
         </div>
         
         <!-- Congratulations Screen -->
-        <div id="congrats-screen" class="screen congrats-screen">
-            <div class="result-icon congrats-icon">🏆</div>
+        <div id="congrats-screen" class="screen congrats-screen" role="region" aria-label="Congratulations Screen">
+            <div class="result-icon congrats-icon" aria-hidden="true">🏆</div>
             <p class="message">Congratulations!</p>
             <p>You completed all the words!</p>
             
@@ -329,228 +376,394 @@
             
             <button id="play-again-btn" class="btn">Play Again</button>
         </div>
+        
+        <!-- Practice Screen -->
+        <div id="practice-screen" class="screen" role="region" aria-label="Practice Mode Screen">
+            <h2>Practice Mode</h2>
+            <div class="emoji-display" id="practice-emoji" aria-hidden="true"></div>
+            <div class="letter-display" id="practice-letter"></div>
+            <button id="practice-audio-btn" class="audio-btn" aria-label="Play audio">🔊 Hear the word</button>
+            <div class="navigation">
+                <button id="practice-prev-btn" class="btn">Previous</button>
+                <button id="practice-next-btn" class="btn">Next</button>
+            </div>
+            <button id="back-to-start-btn" class="btn">Back to Start</button>
+        </div>
     </div>
     
     <script>
-        // Game data
-        const dictionary = [
-            { word: 'apple', image: '🍏', sound: 'a' },
-            { word: 'ball', image: '⚽', sound: 'b' },
-            { word: 'cat', image: '🐈', sound: 'c' },
-            { word: 'duck', image: '🦆', sound: 'd' },
-            { word: 'egg', image: '🥚', sound: 'e' },
-            { word: 'fish', image: '🐟', sound: 'f' },
-            { word: 'goat', image: '🐏', sound: 'g' },
-            { word: 'hat', image: '🎩', sound: 'h' },
-            { word: 'iguana', image: '🦎', sound: 'i' },
-            { word: 'jet', image: '🚀', sound: 'j' },
-            { word: 'koala', image: '🐨', sound: 'k' },
-            { word: 'lip', image: '👄', sound: 'l' },
-            { word: 'man', image: '👨🏽💼', sound: 'm' },
-            { word: 'note', image: '🗒️', sound: 'n' },
-            { word: 'orange', image: '🍊', sound: 'o' },
-            { word: 'pin', image: '🪡', sound: 'p' },
-            { word: 'queen', image: '👸🏼', sound: 'q' },
-            { word: 'ring', image: '💍', sound: 'r' },
-            { word: 'sun', image: '🌞', sound: 's' },
-            { word: 'tongue', image: '👅', sound: 't' },
-            { word: 'umbrella', image: '☂️', sound: 'u' },
-            { word: 'van', image: '🚐', sound: 'v' },
-            { word: 'watermelon', image: '🍉', sound: 'w' },
-            { word: 'ending sound. box', image: '📦', sound: 'x' },
-            { word: 'yellow', image: '🟨', sound: 'y' },
-            { word: 'Zebra', image: '🦓', sound: 'z' }
-        ];
-        
-        // Game state
-        let currentWordIndex = 0;
-        let score = 0;
-        let startTime;
-        let timerInterval;
-        let gameActive = false;
-        
-        // DOM elements
-        const startScreen = document.getElementById('start-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const correctScreen = document.getElementById('correct-screen');
-        const gameoverScreen = document.getElementById('gameover-screen');
-        const congratsScreen = document.getElementById('congrats-screen');
-        
-        const emojiDisplay = document.getElementById('emoji-display');
-        const audioBtn = document.getElementById('audio-btn');
-        const optionsContainer = document.getElementById('options-container');
-        const scoreDisplay = document.getElementById('score');
-        const totalDisplay = document.getElementById('total');
-        const timerDisplay = document.getElementById('timer');
-        const progressBar = document.getElementById('progress-bar');
-        const finalScore = document.getElementById('final-score');
-        const finalTime = document.getElementById('final-time');
-        const totalScore = document.getElementById('total-score');
-        const totalTime = document.getElementById('total-time');
-        
-        // Initialize game
-        function initGame() {
-            currentWordIndex = 0;
-            score = 0;
-            gameActive = true;
-            startTime = new Date();
+        // Ensure DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game data
+            const dictionary = [
+                { word: 'apple', image: '🍏', sound: 'a' },
+                { word: 'ball', image: '⚽', sound: 'b' },
+                { word: 'cat', image: '🐈', sound: 'c' },
+                { word: 'duck', image: '🦆', sound: 'd' },
+                { word: 'egg', image: '🥚', sound: 'e' },
+                { word: 'fish', image: '🐟', sound: 'f' },
+                { word: 'goat', image: '🐏', sound: 'g' },
+                { word: 'hat', image: '🎩', sound: 'h' },
+                { word: 'iguana', image: '🦎', sound: 'i' },
+                { word: 'jet', image: '🚀', sound: 'j' },
+                { word: 'koala', image: '🐨', sound: 'k' },
+                { word: 'lip', image: '👄', sound: 'l' },
+                { word: 'man', image: '👨🏽💼', sound: 'm' },
+                { word: 'note', image: '🗒️', sound: 'n' },
+                { word: 'orange', image: '🍊', sound: 'o' },
+                { word: 'pin', image: '🪡', sound: 'p' },
+                { word: 'queen', image: '👸🏼', sound: 'q' },
+                { word: 'ring', image: '💍', sound: 'r' },
+                { word: 'sun', image: '🌞', sound: 's' },
+                { word: 'tongue', image: '👅', sound: 't' },
+                { word: 'umbrella', image: '☂️', sound: 'u' },
+                { word: 'van', image: '🚐', sound: 'v' },
+                { word: 'watermelon', image: '🍉', sound: 'w' },
+                { word: 'box', image: '📦', sound: 'x' },
+                { word: 'yellow', image: '🟨', sound: 'y' },
+                { word: 'zebra', image: '🦓', sound: 'z' }
+            ];
             
-            scoreDisplay.textContent = score;
-            totalDisplay.textContent = dictionary.length;
+            // Game state
+            let currentWordIndex = 0;
+            let score = 0;
+            let startTime;
+            let timerInterval;
+            let gameActive = false;
+            let practiceIndex = 0;
             
-            // Start timer
-            clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimer, 1000);
-            updateTimer();
+            // Check for SpeechSynthesis support
+            const isSpeechSupported = 'speechSynthesis' in window;
             
-            showScreen(gameScreen);
-            loadWord();
-        }
-        
-        // Load current word
-        function loadWord() {
-            const currentWord = dictionary[currentWordIndex];
+            // DOM elements for game mode
+            const startScreen = document.getElementById('start-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const correctScreen = document.getElementById('correct-screen');
+            const gameoverScreen = document.getElementById('gameover-screen');
+            const congratsScreen = document.getElementById('congrats-screen');
+            const emojiDisplay = document.getElementById('emoji-display');
+            const audioBtn = document.getElementById('audio-btn');
+            const optionsContainer = document.getElementById('options-container');
+            const scoreDisplay = document.getElementById('score');
+            const totalDisplay = document.getElementById('total');
+            const timerDisplay = document.getElementById('timer');
+            const progressBar = document.getElementById('progress-bar');
+            const finalScore = document.getElementById('final-score');
+            const finalTime = document.getElementById('final-time');
+            const totalScore = document.getElementById('total-score');
+            const totalTime = document.getElementById('total-time');
             
-            // Update display
-            emojiDisplay.textContent = currentWord.image;
-            progressBar.style.width = `${(currentWordIndex / dictionary.length) * 100}%`;
+            // DOM elements for practice mode
+            const practiceScreen = document.getElementById('practice-screen');
+            const practiceEmoji = document.getElementById('practice-emoji');
+            const practiceLetter = document.getElementById('practice-letter');
+            const practiceAudioBtn = document.getElementById('practice-audio-btn');
+            const prevBtn = document.getElementById('practice-prev-btn');
+            const nextBtn = document.getElementById('practice-next-btn');
+            const backToStartBtn = document.getElementById('back-to-start-btn');
             
-            // Generate options
-            generateOptions(currentWord.sound);
-        }
-        
-        // Generate letter options
-        function generateOptions(correctSound) {
-            optionsContainer.innerHTML = '';
+            // Game mode buttons
+            const startBtn = document.getElementById('start-btn');
+            const practiceBtn = document.getElementById('practice-btn');
+            const gameNextBtn = document.getElementById('next-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const playAgainBtn = document.getElementById('play-again-btn');
             
-            // Create array with correct sound and two random incorrect sounds
-            const options = [correctSound.toLowerCase()];
+            // Disable audio buttons if speech synthesis is not supported
+            if (!isSpeechSupported) {
+                audioBtn.disabled = true;
+                practiceAudioBtn.disabled = true;
+            }
             
-            // Generate two unique random letters
-            while (options.length < 3) {
-                // Generate random letter from a-z
-                const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
-                
-                // Make sure it's not the correct letter and not already in options
-                if (randomChar !== correctSound.toLowerCase() && !options.includes(randomChar)) {
-                    options.push(randomChar);
+            // Initialize game
+            function initGame() {
+                try {
+                    currentWordIndex = 0;
+                    score = 0;
+                    gameActive = true;
+                    startTime = new Date();
+                    
+                    scoreDisplay.textContent = score;
+                    totalDisplay.textContent = dictionary.length;
+                    
+                    clearInterval(timerInterval);
+                    timerInterval = setInterval(updateTimer, 1000);
+                    updateTimer();
+                    
+                    showScreen(gameScreen);
+                    loadWord();
+                } catch (error) {
+                    console.error('Error initializing game:', error);
+                    alert('An error occurred while starting the game. Please try again.');
                 }
             }
             
-            // Shuffle options
-            shuffleArray(options);
-            
-            // Create buttons for each option
-            options.forEach(letter => {
-                const button = document.createElement('button');
-                button.className = 'option';
-                button.textContent = letter.toUpperCase();
-                button.dataset.letter = letter;
-                button.addEventListener('click', () => checkAnswer(letter, correctSound));
-                optionsContainer.appendChild(button);
-            });
-        }
-        
-        // Shuffle array (Fisher-Yates algorithm)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+            // Load current word for game mode
+            function loadWord() {
+                try {
+                    const currentWord = dictionary[currentWordIndex];
+                    emojiDisplay.textContent = currentWord.image;
+                    progressBar.style.width = `${(currentWordIndex / dictionary.length) * 100}%`;
+                    progressBar.setAttribute('aria-valuenow', Math.round((currentWordIndex / dictionary.length) * 100));
+                    generateOptions(currentWord.sound);
+                } catch (error) {
+                    console.error('Error loading word:', error);
+                }
             }
-        }
-        
-        // Check if answer is correct
-        function checkAnswer(selectedLetter, correctSound) {
-            if (!gameActive) return;
             
-            if (selectedLetter.toLowerCase() === correctSound.toLowerCase()) {
-                // Correct answer
-                score++;
-                scoreDisplay.textContent = score;
-                gameActive = false;
-                
-                // Move to next word or end game
-                setTimeout(() => {
-                    currentWordIndex++;
+            // Generate letter options for game mode
+            function generateOptions(correctSound) {
+                try {
+                    optionsContainer.innerHTML = '';
+                    const options = [correctSound.toLowerCase()];
                     
-                    if (currentWordIndex < dictionary.length) {
-                        showScreen(correctScreen);
-                    } else {
-                        endGame(true);
+                    while (options.length < 3) {
+                        const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+                        if (randomChar !== correctSound.toLowerCase() && !options.includes(randomChar)) {
+                            options.push(randomChar);
+                        }
                     }
-                }, 300);
-            } else {
-                // Wrong answer
+                    
+                    shuffleArray(options);
+                    
+                    options.forEach(letter => {
+                        const button = document.createElement('button');
+                        button.className = 'option';
+                        button.textContent = letter.toUpperCase();
+                        button.dataset.letter = letter;
+                        button.setAttribute('role', 'radio');
+                        button.setAttribute('aria-checked', 'false');
+                        button.addEventListener('click', () => checkAnswer(button, correctSound));
+                        button.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                checkAnswer(button, correctSound);
+                            }
+                        });
+                        optionsContainer.appendChild(button);
+                    });
+                } catch (error) {
+                    console.error('Error generating options:', error);
+                }
+            }
+            
+            // Shuffle array (Fisher-Yates algorithm)
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+            
+            // Check if answer is correct in game mode
+            function checkAnswer(button, correctSound) {
+                if (!gameActive) return;
+                
                 gameActive = false;
-                endGame(false);
+                disableOptions();
+                
+                try {
+                    const selectedLetter = button.dataset.letter;
+                    button.classList.add('selected');
+                    button.setAttribute('aria-checked', 'true');
+                    
+                    if (selectedLetter.toLowerCase() === correctSound.toLowerCase()) {
+                        score++;
+                        scoreDisplay.textContent = score;
+                        button.classList.add('correct');
+                        setTimeout(() => {
+                            currentWordIndex++;
+                            if (currentWordIndex < dictionary.length) {
+                                showScreen(correctScreen);
+                                setTimeout(() => {
+                                    gameActive = true;
+                                    showScreen(gameScreen);
+                                    loadWord();
+                                }, 1000);
+                            } else {
+                                endGame(true);
+                            }
+                        }, 500);
+                    } else {
+                        button.classList.add('incorrect');
+                        setTimeout(() => {
+                            endGame(false);
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('Error checking answer:', error);
+                    gameActive = true;
+                    enableOptions();
+                }
             }
-        }
-        
-        // Update timer
-        function updateTimer() {
-            if (!gameActive) return;
             
-            const currentTime = new Date();
-            const seconds = Math.floor((currentTime - startTime) / 1000);
-            timerDisplay.textContent = seconds;
-        }
-        
-        // End game
-        function endGame(isWin) {
-            clearInterval(timerInterval);
-            
-            const currentTime = new Date();
-            const seconds = Math.floor((currentTime - startTime) / 1000);
-            
-            if (isWin) {
-                // Player completed all words
-                totalScore.textContent = `${score}/${dictionary.length}`;
-                totalTime.textContent = seconds;
-                showScreen(congratsScreen);
-            } else {
-                // Game over
-                finalScore.textContent = `${score}/${dictionary.length}`;
-                finalTime.textContent = seconds;
-                showScreen(gameoverScreen);
+            // Disable options to prevent multiple clicks
+            function disableOptions() {
+                const options = optionsContainer.querySelectorAll('.option');
+                options.forEach(opt => {
+                    opt.disabled = true;
+                    opt.setAttribute('aria-disabled', 'true');
+                });
             }
-        }
-        
-        // Show a specific screen
-        function showScreen(screen) {
-            // Hide all screens
-            startScreen.classList.remove('active');
-            gameScreen.classList.remove('active');
-            correctScreen.classList.remove('active');
-            gameoverScreen.classList.remove('active');
-            congratsScreen.classList.remove('active');
             
-            // Show requested screen
-            screen.classList.add('active');
-        }
-        
-        // Speak the current word
-        function speakWord() {
-            if (!gameActive) return;
+            // Enable options
+            function enableOptions() {
+                const options = optionsContainer.querySelectorAll('.option');
+                options.forEach(opt => {
+                    opt.disabled = false;
+                    opt.setAttribute('aria-disabled', 'false');
+                });
+            }
             
-            const currentWord = dictionary[currentWordIndex].word;
-            const utterance = new SpeechSynthesisUtterance(currentWord);
-            utterance.rate = 0.8;
-            speechSynthesis.speak(utterance);
-        }
-        
-        // Event listeners
-        document.getElementById('start-btn').addEventListener('click', initGame);
-        document.getElementById('next-btn').addEventListener('click', () => {
-            gameActive = true;
-            showScreen(gameScreen);
-            loadWord();
+            // Update timer for game mode
+            function updateTimer() {
+                if (!gameActive) return;
+                try {
+                    const currentTime = new Date();
+                    const seconds = Math.floor((currentTime - startTime) / 1000);
+                    timerDisplay.textContent = seconds;
+                } catch (error) {
+                    console.error('Error updating timer:', error);
+                }
+            }
+            
+            // End game
+            function endGame(isWin) {
+                try {
+                    clearInterval(timerInterval);
+                    const currentTime = new Date();
+                    const seconds = Math.floor((currentTime - startTime) / 1000);
+                    
+                    if (isWin) {
+                        totalScore.textContent = `${score}/${dictionary.length}`;
+                        totalTime.textContent = seconds;
+                        showScreen(congratsScreen);
+                    } else {
+                        finalScore.textContent = `${score}/${dictionary.length}`;
+                        finalTime.textContent = seconds;
+                        showScreen(gameoverScreen);
+                    }
+                } catch (error) {
+                    console.error('Error ending game:', error);
+                }
+            }
+            
+            // Show a specific screen
+            function showScreen(screen) {
+                try {
+                    startScreen.classList.remove('active');
+                    gameScreen.classList.remove('active');
+                    correctScreen.classList.remove('active');
+                    gameoverScreen.classList.remove('active');
+                    congratsScreen.classList.remove('active');
+                    practiceScreen.classList.remove('active');
+                    screen.classList.add('active');
+                    screen.focus();
+                } catch (error) {
+                    console.error('Error showing screen:', error);
+                }
+            }
+            
+            // Speak a word (used in both modes)
+            function speakWord(word) {
+                try {
+                    if (isSpeechSupported) {
+                        speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance(word);
+                        utterance.rate = 0.8;
+                        speechSynthesis.speak(utterance);
+                    } else {
+                        alert('Speech synthesis is not supported in this browser.');
+                    }
+                } catch (error) {
+                    console.error('Error speaking word:', error);
+                }
+            }
+            
+            // Initialize practice mode
+            function initPracticeMode() {
+                try {
+                    practiceIndex = 0;
+                    showScreen(practiceScreen);
+                    loadPracticeWord();
+                } catch (error) {
+                    console.error('Error initializing practice mode:', error);
+                    alert('An error occurred while starting practice mode. Please try again.');
+                }
+            }
+            
+            // Load current word for practice mode
+            function loadPracticeWord() {
+                try {
+                    const currentWord = dictionary[practiceIndex];
+                    practiceEmoji.textContent = currentWord.image;
+                    practiceLetter.textContent = currentWord.sound.toUpperCase();
+                    prevBtn.disabled = practiceIndex === 0;
+                    nextBtn.disabled = practiceIndex === dictionary.length - 1;
+                    prevBtn.setAttribute('aria-disabled', practiceIndex === 0 ? 'true' : 'false');
+                    nextBtn.setAttribute('aria-disabled', practiceIndex === dictionary.length - 1 ? 'true' : 'false');
+                } catch (error) {
+                    console.error('Error loading practice word:', error);
+                }
+            }
+            
+            // Event listeners for game mode
+            startBtn.addEventListener('click', initGame);
+            gameNextBtn.addEventListener('click', () => {
+                gameActive = true;
+                showScreen(gameScreen);
+                loadWord();
+            });
+            restartBtn.addEventListener('click', initGame);
+            playAgainBtn.addEventListener('click', initGame);
+            audioBtn.addEventListener('click', () => {
+                if (gameActive) {
+                    speakWord(dictionary[currentWordIndex].word);
+                }
+            });
+            
+            // Event listeners for practice mode
+            practiceBtn.addEventListener('click', initPracticeMode);
+            practiceAudioBtn.addEventListener('click', () => {
+                speakWord(dictionary[practiceIndex].word);
+            });
+            prevBtn.addEventListener('click', () => {
+                try {
+                    if (practiceIndex > 0) {
+                        practiceIndex--;
+                        loadPracticeWord();
+                    }
+                } catch (error) {
+                    console.error('Error on Previous button click:', error);
+                }
+            });
+            nextBtn.addEventListener('click', () => {
+                try {
+                    if (practiceIndex < dictionary.length - 1) {
+                        practiceIndex++;
+                        loadPracticeWord();
+                    }
+                } catch (error) {
+                    console.error('Error on Next button click:', error);
+                }
+            });
+            backToStartBtn.addEventListener('click', () => {
+                showScreen(startScreen);
+            });
+            
+            // Keyboard navigation for accessibility
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && gameScreen.classList.contains('active')) {
+                    const options = optionsContainer.querySelectorAll('.option');
+                    if (options.length > 0) {
+                        options[0].focus();
+                        e.preventDefault();
+                    }
+                }
+            });
+            
+            // Initialize total display
+            totalDisplay.textContent = dictionary.length;
         });
-        document.getElementById('restart-btn').addEventListener('click', initGame);
-        document.getElementById('play-again-btn').addEventListener('click', initGame);
-        audioBtn.addEventListener('click', speakWord);
-        
-        // Initialize game instructions
-        totalDisplay.textContent = dictionary.length;
     </script>
 </body>
 </html>
