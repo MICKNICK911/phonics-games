@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Phonics - Learn Through Gaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --card-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-title: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s, visibility 0.8s;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-content {
+            text-align: center;
+            animation: fadeIn 1.5s ease;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            font-size: 60px;
+        }
+
+        .splash-title {
+            font-family: var(--font-title);
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .splash-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .progress-bar {
+            width: 250px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0;
+            background: var(--success);
+            border-radius: 10px;
+            animation: load 3s ease-in-out forwards;
+        }
+
+        /* Main App */
+        .app {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .app.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            box-shadow: 0 4px 15px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .nav-icon:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Screen Styles */
+        .screen {
+            display: none;
+            padding: 30px 20px;
+            min-height: calc(100vh - 70px);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .screen-title {
+            font-family: var(--font-title);
+            font-size: 2.2rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .screen-subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* Home Screen */
+        .author-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow);
+            max-width: 500px;
+            margin: 0 auto 40px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .author-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .author-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .author-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            margin: 0 auto 20px;
+            overflow: hidden;
+            background: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+        }
+
+        .author-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .author-title {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .author-details {
+            padding: 25px;
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-info:hover {
+            background: #eef5ff;
+            transform: translateX(5px);
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .contact-text {
+            flex: 1;
+        }
+
+        .contact-label {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 3px;
+        }
+
+        .contact-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            padding: 25px;
+            text-align: center;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-desc {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #555;
+            flex-grow: 1;
+        }
+
+        .card-button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .card-button:hover {
+            background: var(--secondary);
+        }
+
+        /* Lesson Screens */
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .lesson-image {
+            height: 160px;
+            background: linear-gradient(to right, #4cc9f0, #4895ef);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 3.5rem;
+        }
+
+        .lesson-content {
+            padding: 20px;
+        }
+
+        .lesson-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .lesson-desc {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .lesson-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .lesson-link:hover {
+            background: var(--secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .splash-title {
+                font-size: 2.8rem;
+            }
+            
+            .splash-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .screen-title {
+                font-size: 1.8rem;
+            }
+            
+            .author-name {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .splash-title {
+                font-size: 2.2rem;
+            }
+            
+            .nav-icons {
+                gap: 10px;
+            }
+            
+            .nav-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+            
+            .author-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 50px;
+            }
+            
+            .author-name {
+                font-size: 1.4rem;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .lesson-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes load {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-content">
+            <div class="logo">📚</div>
+            <h1 class="splash-title">Elite Phonics</h1>
+            <p class="splash-subtitle">Learn Through Gaming</p>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app" id="mainApp">
+        <!-- Header -->
+        <header>
+            <div class="app-title">Elite Phonics</div>
+            <div class="nav-icons">
+                <div class="nav-icon" data-screen="home">
+                    🏠
+                </div>
+                <div class="nav-icon" data-screen="lessons">
+                    📚
+                </div>
+                <div class="nav-icon" data-screen="practice">
+                    ✏️
+                </div>
+                <div class="nav-icon" data-screen="contest">
+                    🏆
+                </div>
+            </div>
+        </header>
+
+        <!-- Home Screen -->
+        <div class="screen active" id="homeScreen">
+            <h2 class="screen-title">Welcome to Elite Phonics</h2>
+            <p class="screen-subtitle">An interactive learning platform where children master phonics through engaging games and activities. Build reading skills while having fun!</p>
+            
+            <div class="author-card fade-in">
+                <div class="author-header">
+                    <div class="author-avatar">👨‍🏫</div>
+                    <h3 class="author-name">Sir Mike</h3>
+                    <p class="author-title">Phonics Specialist & Educator</p>
+                </div>
+                <div class="author-details">
+                    <div class="contact-info">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-text">
+                            <div class="contact-label">Call / WhatsApp</div>
+                            <div class="contact-value">0545800158</div>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-icon">✉️</div>
+                        <div class="contact-text">
+                            <div class="contact-label">Email</div>
+                            <div class="contact-value">sirmike@elitephonics.com</div>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-icon">📍</div>
+                        <div class="contact-text">
+                            <div class="contact-label">Location</div>
+                            <div class="contact-value">Accra, Ghana</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cards-grid">
+                <div class="card fade-in" data-screen="lessons">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            📚
+                        </div>
+                        <h3 class="card-title">Lessons</h3>
+                        <p class="card-subtitle">Learn the fundamentals</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">Interactive phonics lessons designed to build foundational reading skills through engaging activities.</p>
+                        <a class="card-button">Start Learning</a>
+                    </div>
+                </div>
+                
+                <div class="card fade-in" data-screen="practice" style="animation-delay: 0.2s;">
+                    <div class="card-header" style="background: linear-gradient(to right, #4cc9f0, #4895ef);">
+                        <div class="card-icon">
+                            ✏️
+                        </div>
+                        <h3 class="card-title">Practice</h3>
+                        <p class="card-subtitle">Reinforce your skills</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">Practice exercises to reinforce phonics concepts and improve reading fluency.</p>
+                        <a class="card-button">Start Practicing</a>
+                    </div>
+                </div>
+                
+                <div class="card fade-in" data-screen="contest" style="animation-delay: 0.4s;">
+                    <div class="card-header" style="background: linear-gradient(to right, #f72585, #b5179e);">
+                        <div class="card-icon">
+                            🏆
+                        </div>
+                        <h3 class="card-title">Contest</h3>
+                        <p class="card-subtitle">Test your knowledge</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-desc">Fun competitions and challenges to test phonics knowledge and win rewards.</p>
+                        <a class="card-button">Join Contest</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons Screen -->
+        <div class="screen" id="lessonsScreen">
+            <h2 class="screen-title">Phonics Lessons</h2>
+            <p class="screen-subtitle">Explore our comprehensive phonics lessons designed to build reading skills step by step.</p>
+            
+            <div class="lesson-grid">
+                <div class="lesson-card fade-in">
+                    <div class="lesson-image">
+                        🔤
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Alphabet Sounds</h3>
+                        <p class="lesson-desc">Master the sounds of all 26 letters with interactive activities.</p>
+                        <a href="alphabet.html" class="lesson-link">Start Lesson</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="lesson-image">
+                        🧩
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Blending Sounds</h3>
+                        <p class="lesson-desc">Learn to blend sounds together to form words.</p>
+                        <a href="blending.html" class="lesson-link">Start Lesson</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="lesson-image">
+                        🅰️
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Vowel Teams</h3>
+                        <p class="lesson-desc">Understand how vowels work together to create new sounds.</p>
+                        <a href="vowels.html" class="lesson-link">Start Lesson</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.3s;">
+                    <div class="lesson-image">
+                        👀
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Sight Words</h3>
+                        <p class="lesson-desc">Essential words that every reader should recognize instantly.</p>
+                        <a href="sight-words.html" class="lesson-link">Start Lesson</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.4s;">
+                    <div class="lesson-image">
+                        🔤
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Digraphs</h3>
+                        <p class="lesson-desc">Explore combinations of letters that create unique sounds.</p>
+                        <a href="digraphs.html" class="lesson-link">Start Lesson</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.5s;">
+                    <div class="lesson-image">
+                        📖
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Reading Fluency</h3>
+                        <p class="lesson-desc">Improve reading speed and accuracy with engaging exercises.</p>
+                        <a href="fluency.html" class="lesson-link">Start Lesson</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Screen -->
+        <div class="screen" id="practiceScreen">
+            <h2 class="screen-title">Practice Exercises</h2>
+            <p class="screen-subtitle">Reinforce your phonics knowledge with these interactive practice activities.</p>
+            
+            <div class="lesson-grid">
+                <div class="lesson-card fade-in">
+                    <div class="lesson-image">
+                        🎧
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Sound Matching</h3>
+                        <p class="lesson-desc">Match words to their corresponding sounds.</p>
+                        <a href="sound-matching.html" class="lesson-link">Start Practice</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="lesson-image">
+                        🧱
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Word Building</h3>
+                        <p class="lesson-desc">Build words using different phonics patterns.</p>
+                        <a href="word-building.html" class="lesson-link">Start Practice</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="lesson-image">
+                        🎤
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Pronunciation Practice</h3>
+                        <p class="lesson-desc">Improve your pronunciation with audio exercises.</p>
+                        <a href="pronunciation.html" class="lesson-link">Start Practice</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.3s;">
+                    <div class="lesson-image">
+                        👂
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Listening Skills</h3>
+                        <p class="lesson-desc">Develop your ability to distinguish phonics sounds.</p>
+                        <a href="listening.html" class="lesson-link">Start Practice</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.4s;">
+                    <div class="lesson-image">
+                        ✏️
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Spelling Challenges</h3>
+                        <p class="lesson-desc">Test your spelling skills with phonics-based words.</p>
+                        <a href="spelling.html" class="lesson-link">Start Practice</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.5s;">
+                    <div class="lesson-image">
+                        📝
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Reading Comprehension</h3>
+                        <p class="lesson-desc">Practice reading short passages and answering questions.</p>
+                        <a href="comprehension.html" class="lesson-link">Start Practice</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contest Screen -->
+        <div class="screen" id="contestScreen">
+            <h2 class="screen-title">Phonics Contests</h2>
+            <p class="screen-subtitle">Challenge yourself and compete with others in these fun phonics contests.</p>
+            
+            <div class="lesson-grid">
+                <div class="lesson-card fade-in">
+                    <div class="lesson-image">
+                        ⏱️
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Speed Reading</h3>
+                        <p class="lesson-desc">How fast can you read while maintaining accuracy?</p>
+                        <a href="speed-reading.html" class="lesson-link">Join Contest</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="lesson-image">
+                        🏆
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Phonics Master</h3>
+                        <p class="lesson-desc">Comprehensive contest covering all phonics concepts.</p>
+                        <a href="master-contest.html" class="lesson-link">Join Contest</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="lesson-image">
+                        👫
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Team Challenge</h3>
+                        <p class="lesson-desc">Compete in teams to solve phonics puzzles.</p>
+                        <a href="team-challenge.html" class="lesson-link">Join Contest</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.3s;">
+                    <div class="lesson-image">
+                        👑
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Weekly Champion</h3>
+                        <p class="lesson-desc">Compete for the top spot on our leaderboard.</p>
+                        <a href="weekly-champion.html" class="lesson-link">Join Contest</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.4s;">
+                    <div class="lesson-image">
+                        🧩
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Word Puzzle Contest</h3>
+                        <p class="lesson-desc">Solve word puzzles using phonics knowledge.</p>
+                        <a href="word-puzzle.html" class="lesson-link">Join Contest</a>
+                    </div>
+                </div>
+                
+                <div class="lesson-card fade-in" style="animation-delay: 0.5s;">
+                    <div class="lesson-image">
+                        🥇
+                    </div>
+                    <div class="lesson-content">
+                        <h3 class="lesson-title">Phonics Olympics</h3>
+                        <p class="lesson-desc">A series of challenges to test all your phonics skills.</p>
+                        <a href="olympics.html" class="lesson-link">Join Contest</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Splash screen transition
+        document.addEventListener('DOMContentLoaded', function() {
+            const splashScreen = document.getElementById('splashScreen');
+            const mainApp = document.getElementById('mainApp');
+            
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                setTimeout(() => {
+                    mainApp.classList.add('active');
+                }, 800);
+            }, 3500);
+            
+            // Navigation functionality
+            const navIcons = document.querySelectorAll('.nav-icon');
+            const cards = document.querySelectorAll('.card');
+            const screens = document.querySelectorAll('.screen');
+            
+            // Function to show a specific screen
+            function showScreen(screenId) {
+                screens.forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById(screenId).classList.add('active');
+            }
+            
+            // Add event listeners to navigation icons
+            navIcons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const screenName = icon.getAttribute('data-screen');
+                    showScreen(`${screenName}Screen`);
+                });
+            });
+            
+            // Add event listeners to card buttons
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const screenName = card.getAttribute('data-screen');
+                    showScreen(`${screenName}Screen`);
+                });
+            });
+            
+            // Initialize animations for elements
+            const animatedElements = document.querySelectorAll('.fade-in');
+            
+            function animateOnScroll() {
+                animatedElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementTop < windowHeight - 50) {
+                        element.style.opacity = 1;
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+            
+            // Initial check
+            animateOnScroll();
+            
+            // Listen for scroll events
+            window.addEventListener('scroll', animateOnScroll);
+        });
+    </script>
+</body>
+</html>
