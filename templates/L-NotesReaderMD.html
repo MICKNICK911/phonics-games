@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Notes</title>
+    <style>
+        /* Prevent touch highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        /* New splash screen styles */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .bullet-line {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: -25px;
+}
+
+.bullet {
+    display: flex;
+    margin-right: -20px;
+    color: var(--primary-color);
+    font-size: 20px;
+}
+        
+        .splash-content {
+            text-align: center;
+            padding: 30px;
+            max-width: 80%;
+        }
+        
+        .splash-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            border: 5px solid #ff9800;
+        }
+        
+        .splash-logo-inner {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            background-image: url('../assets/images/chislogo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .splash-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .splash-subtitle {
+            font-size: 24px;
+            font-weight: 500;
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 4px;
+            transition: width 5s linear;
+        }
+        
+        /* Updated theme colors to orange and gold */
+        :root {
+            --primary-color: #ff9800;
+            --secondary-color: #ffc107;
+            --accent-color: #ff5722;
+            --export-color: #4caf50;
+            --builder-color: #9c27b0;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+            --header-height: 70px;
+        }
+
+        .dark-theme {
+            --primary-color: #ffb74d;
+            --secondary-color: #ffd54f;
+            --accent-color: #ff8a65;
+            --export-color: #81c784;
+            --builder-color: #ba68c8;
+            --bg-color: #121212;
+            --text-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --border-color: #343a40;
+            --shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0) 25%);
+        }
+
+        .dark-theme body {
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 152, 0, 0.08) 0%, rgba(255, 152, 0, 0) 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 193, 7, 0.08) 0%, rgba(255, 193, 7, 0) 25%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            width: 100%;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--bg-color-rgb), 0.8);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .logo span {
+            font-size: 28px;
+        }
+
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .search-container input:focus {
+            outline: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .history-toggle, 
+        .topics-toggle, .help-toggle, .load-toggle,
+        .export-toggle, .slide-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover, 
+        .history-toggle:hover, .topics-toggle:hover,
+        .help-toggle:hover, .load-toggle:hover,
+        .export-toggle:hover, .slide-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .export-toggle:hover {
+            background: var(--export-color);
+        }
+
+        .results-container {
+            padding: 30px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .no-results span {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .entry-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 42px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 35px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            white-space: pre-line; /* Preserve line breaks */
+        }
+
+        /* Text formatting styles */
+        .formatted-text .bold {
+            font-weight: bold;
+        }
+
+        .formatted-text .italic {
+            font-style: italic;
+        }
+
+        .formatted-text .underline {
+            text-decoration: underline;
+        }
+
+        .formatted-text .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .formatted-text .bullet {
+            display: inline-block;
+            width: 1.5em;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 30px;
+            font-weight: 500;
+        }
+
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .example-item.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.03);
+        }
+
+        .instructions {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .search-history {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-item:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .history-panel.active {
+            transform: translateX(0);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item-panel {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-panel:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .history-item-panel .time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .close-history {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 80;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Topics Panel */
+        .topics-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background: var(--card-bg);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 9999;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .topics-panel.active {
+            transform: translateX(0);
+        }
+
+        .topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .topics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .topic-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .topic-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color-rgb), 0.1);
+            transform: translateX(5px);
+        }
+
+        .topic-item span {
+            font-size: 20px;
+        }
+
+        /* Instructions Modal */
+        .instructions-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            z-index: 200;
+            max-width: 600px;
+            width: 90%;
+            height: 50%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            overflow: auto;
+        }
+
+        .instructions-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-content {
+            line-height: 1.7;
+        }
+
+        .modal-content ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        .modal-content li {
+            margin-bottom: 10px;
+        }
+
+        .feature-highlight {
+            background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .feature-highlight h2 {
+            margin-bottom: 15px;
+        }
+        
+        /* Slideshow Styles */
+        .slideshow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slideshow-overlay.active {
+            display: flex;
+        }
+
+        .slideshow-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            cursor: pointer;
+        }
+
+        .slideshow-content {
+            font-size: 72px;
+            text-align: center;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 2;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .slideshow-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-color);
+            z-index: 2;
+        }
+
+        .slideshow-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 3;
+            box-shadow: var(--shadow);
+        }
+
+        .instruction-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            z-index: 200;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            display: none;
+        }
+
+        .instruction-modal.active {
+            display: block;
+        }
+
+        .instruction-modal h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .instruction-modal p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .instruction-modal button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .instruction-modal button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Dictionary load notification */
+        .dictionary-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .dictionary-notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .dictionary-notification.error {
+            background: #e74c3c;
+        }
+        
+        .dictionary-notification.success {
+            background: var(--export-color);
+        }
+        
+        /* Dictionary Builder */
+        .builder-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        .builder-container.active {
+            display: block;
+        }
+        
+        .builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .builder-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            color: var(--builder-color);
+        }
+        
+        .builder-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .builder-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .builder-cancel {
+            background: #e0e0e0;
+            color: var(--text-color);
+        }
+        
+        .builder-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        .builder-export {
+            background: var(--export-color);
+            color: white;
+        }
+        
+        .builder-export:hover {
+            background: #2d9249;
+            transform: translateY(-2px);
+        }
+        
+        .builder-form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: border 0.3s;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--builder-color);
+            box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.2);
+        }
+        
+        .builder-preview {
+            margin-top: 40px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .preview-title {
+            font-size: 22px;
+            color: var(--builder-color);
+        }
+        
+        .preview-clear {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .preview-clear:hover {
+            background: #d91a63;
+        }
+        
+        .preview-content {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        
+        .entry-count {
+            text-align: right;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .builder-add {
+            background: var(--builder-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px auto;
+            transition: var(--transition);
+        }
+        
+        .builder-add:hover {
+            background: #5a189a;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
+            
+            .slideshow-content {
+                font-size: 48px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .controls {
+                order: 2;
+            }
+            
+            .entry-header h1 {
+                font-size: 28px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .history-panel, .topics-panel {
+                width: 100%;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .builder-form {
+                padding: 20px;
+            }
+            
+            .splash-logo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .splash-logo-inner {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+            
+            .splash-title {
+                font-size: 28px;
+            }
+            
+            .splash-subtitle {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .entry-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .entry-header h1 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .entry-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            font-weight: 500;
+        }
+            .slideshow-content {
+                font-size: 36px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .slide-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .entry-card {
+                padding: 20px;
+            }
+            
+            .history-item {
+                padding: 6px 14px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .theme-toggle, 
+            .history-toggle, .topics-toggle,
+            .help-toggle, .load-toggle,
+            .export-toggle, .slide-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .builder-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .builder-btn {
+                width: 100%;
+            }
+            
+            .splash-title {
+                font-size: 24px;
+            }
+            
+            .splash-subtitle {
+                font-size: 18px;
+            }
+            
+            .loading-bar {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="splash-logo-inner"></div>
+            </div>
+            <h1 class="splash-title">Crystal Heights International School</h1>
+            <p class="splash-subtitle">Digital - Notes</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Dictionary Notification -->
+    <div class="dictionary-notification" id="dictionaryNotification">
+        <span id="notificationIcon">✅</span>
+        <span id="notificationText">Notes loaded successfully!</span>
+    </div>
+    
+    <!-- Hidden file input for dictionary loading -->
+    <input type="file" id="dictionaryFileInput" accept=".json" style="display: none;">
+    
+    <!-- Dictionary Builder -->
+    <div class="builder-container" id="builderContainer">
+        <div class="builder-header">
+            <div class="builder-title">
+                <span>📝</span>
+                <h2>Create Notes</h2>
+            </div>
+            <div class="builder-actions">
+                <button class="builder-btn builder-cancel" id="builderCancel">Cancel</button>
+                <button class="builder-btn builder-export" id="builderExport">Export as JSON</button>
+            </div>
+        </div>
+        
+        <div class="builder-form">
+            <div class="input-group">
+                <label for="builderTopic">Topic:</label>
+                <input type="text" id="builderTopic" placeholder="Enter topic name (e.g. vowels, consonants)">
+            </div>
+            
+            <div class="input-group">
+                <label for="builderDesc">Description:</label>
+                <textarea id="builderDesc" rows="3" placeholder="Enter description text (supports multi-line and formatting)"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="builderEx">Examples (comma separated):</label>
+                <input type="text" id="builderEx" placeholder="Enter examples (e.g. a,b,c)">
+            </div>
+            
+            <button class="builder-add" id="builderAdd">
+                <span>+</span> Add Entry
+            </button>
+            
+            <div class="builder-preview">
+                <div class="preview-header">
+                    <h3 class="preview-title">Notes Preview</h3>
+                    <button class="preview-clear" id="previewClear">Clear All</button>
+                </div>
+                <pre class="preview-content" id="builderPreview">No entries yet</pre>
+                <div class="entry-count" id="builderEntryCount">0 entries</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slideshow Elements -->
+    <div class="slideshow-overlay" id="slideshowOverlay">
+        <div class="slideshow-close" id="slideshowClose">❌</div>
+        <div class="slideshow-top" id="slideshowTop"></div>
+        <div class="slideshow-content" id="slideshowContent"></div>
+        <div class="slideshow-bottom" id="slideshowBottom"></div>
+        <div class="slideshow-indicator" id="slideshowIndicator">1/5</div>
+    </div>
+    
+    <div class="instruction-modal" id="instructionModal">
+        <h2>Slide Mode Instructions</h2>
+        <p>You are now in slide mode. The control panel is hidden to maximize your viewing experience.</p>
+        <p>Tap the <strong>top half</strong> of the screen to go to the next example.</p>
+        <p>Tap the <strong>bottom half</strong> of the screen to go to the previous example.</p>
+        <button id="closeInstruction">Start Slideshow</button>
+    </div>
+    
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h2>📜 Search History</h2>
+            <div class="close-history" id="closeHistory">❌</div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- History items will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Topics Panel -->
+    <div class="topics-panel" id="topicsPanel">
+        <div class="topics-header">
+            <h2>📚 All Topics</h2>
+            <div class="close-topics" id="closeTopics">❌</div>
+        </div>
+        <div class="topics-list" id="topicsList">
+            <!-- Topics will be added here dynamically -->
+        </div>
+    </div>
+    
+    <!-- Instructions Modal -->
+    <div class="instructions-modal" id="instructionsModal">
+        <div class="modal-header">
+            <h2><span>❓</span> How to Use This App</h2>
+            <div class="close-modal" id="closeModal">✕</div>
+        </div>
+        <div class="modal-content">
+            <p>Welcome to the Digital-Notes! Here's how to get started:</p>
+            <ul>
+                <li><strong>🔍 Search</strong> - Enter a topic in the search field to see its details</li>
+                <li><strong>📚 Topics</strong> - Click the topics button to browse all available topics</li>
+                <li><strong>🕒 History</strong> - View your recent searches with the history button</li>
+                <li><strong>🌙 Theme</strong> - Toggle between light and dark mode</li>
+                <li><strong>📂 Load</strong> - Import your own dictionary from a JSON file</li>
+                <li><strong>📝 Export</strong> - Create and export custom Notes</li>
+                <li><strong>❓ Help</strong> - Click the help button to see these instructions again</li>
+            </ul>
+            <p>You can click on examples to highlight them for better focus.</p>
+            <p><strong>Text Formatting Guide:</strong></p>
+            <ul>
+                <li><strong>*text*</strong> - <b>Bold text</b></li>
+                <li><strong>_text_</strong> - <i>Italic text</i></li>
+                <li><strong>-text-</strong> - <u>Underlined text</u></li>
+                <li><strong>[text]</strong> - <span class="highlight">Colored text</span></li>
+                <li><strong>+ text</strong> - Bullet point (must be at start of line with space after +)</li>
+            </ul>
+            <p>Start exploring by searching for a topic or browsing the available topics!</p>
+        </div>
+    </div>
+
+    <div class="container" id="appContainer">
+        <header>
+            <div class="header-content">
+                <div class="logo" id="appLogo">
+                    <span>📚</span>
+                    <span>Digital Notes</span>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for a topic (e.g. vowels, consonants)">
+                    <button class="search-btn" id="searchBtn">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <div class="controls">
+                    <div class="load-toggle" id="loadToggle" title="Load Dictionary">
+                        📂
+                    </div>
+                    <div class="export-toggle" id="exportToggle" title="Create Dictionary">
+                        📝
+                    </div>
+                    <div class="topics-toggle" id="topicsToggle" title="Browse Topics">
+                        📚
+                    </div>
+                    <div class="history-toggle" id="historyToggle" title="View History">
+                        🕒
+                    </div>
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                        🌙
+                    </div>
+                    <div class="help-toggle" id="helpToggle" title="Help">
+                        ❓
+                    </div>
+                    <div class="slide-toggle" id="slideToggle" title="Slide Show">
+                        ▶️
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-container" id="resultsContainer">
+            <div class="no-results">
+                <span>📖</span>
+                <h2>Digital Notes</h2>
+                <p>Search for topics to see their details and examples</p>
+                <p>Try these examples:</p>
+                <div class="search-history">
+                    <div class="history-item">🔍 noun</div>
+                    <div class="history-item">🔍 pronoun</div>
+                    <div class="history-item">🔍 adjective</div>
+                    <div class="history-item">🔍 adverb</div>
+                </div>
+            </div>
+            
+            <div class="feature-highlight">
+                <h2>📚 Browse All Topics</h2>
+                <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Show splash screen and animate loading bar
+        const splashScreen = document.getElementById('splashScreen');
+        const loadingProgress = document.getElementById('loadingProgress');
+        
+        // Start loading animation
+        loadingProgress.style.width = '100%';
+        
+        // Hide splash screen after 5 seconds
+        setTimeout(() => {
+            splashScreen.style.opacity = '0';
+            splashScreen.style.pointerEvents = 'none';
+            
+            // Remove splash screen after transition completes
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+            }, 800);
+        }, 5000);
+        
+        // Predefined dictionary
+        const DEFAULT_LESSONS = {
+            "noun": {
+                "desc": "A word that represents a person, place, thing, or idea. Can be subjects or objects in sentences.\n\n*[Examples]*:\n+ dog\n+ London\n+ book\n+ happiness\n+ teacher",
+                "ex": ["dog", "London", "book", "happiness", "teacher"]
+            },
+            "verb": {
+                "desc": "Expresses an action, occurrence, or state of being. Shows what the subject does or experiences.\n\n*[Examples]*:\n+ run\n+ think\n+ is\n+ become\n+ write",
+                "ex": ["run", "think", "is", "become", "write"]
+            },
+            "adjective": {
+                "desc": "Describes or modifies nouns/pronouns. Provides qualities, quantities, or states.\n\n*[Examples]*:\n+ happy\n+ blue\n+ tall\n+ five\n+ beautiful",
+                "ex": ["happy", "blue", "tall", "five", "beautiful"]
+            },
+            "adverb": {
+                "desc": "Modifies verbs, adjectives, or other adverbs. Often indicates manner, time, place, degree.\n\n*[Examples]*:\n+ quickly\n+ very\n+ here\n+ yesterday\n+ carefully",
+                "ex": ["quickly", "very", "here", "yesterday", "carefully"]
+            },
+            "pronoun": {
+                "desc": "Replaces nouns to avoid repetition. Refers to people, places, things without naming them.\n\n*[Examples]*:\n+ he\n+ it\n+ they\n+ this\n+ who",
+                "ex": ["he", "it", "they", "this", "who"]
+            },
+            "preposition": {
+                "desc": "Shows relationships between nouns/pronouns and other words. Indicates time, location, direction.\n\n*[Examples]*:\n+ in\n+ on\n+ at\n+ with\n+ between",
+                "ex": ["in", "on", "at", "with", "between"]
+            },
+            "conjunction": {
+                "desc": "Connects words, phrases, or clauses. Joins related ideas in a sentence.\n\n*Examples*:\n+ and\n+ but\n+ or\n+ because\n+ if",
+                "ex": ["and", "but", "or", "because", "if"]
+            },
+            "interjection": {
+                "desc": "Expresses sudden emotion or reaction. Often stands alone with exclamation points.\n\n*[Examples]*:\n+ wow\n+ ouch\n+ hey\n+ oh\n+ bravo",
+                "ex": ["wow", "ouch", "hey", "oh", "bravo"]
+            },
+            "article": {
+                "desc": "[_Special adjectives_] that mark definiteness _(the)_ or indefiniteness _(a/an)_ of nouns.\n\n*[Examples]*:\n+ the\n+ a\n+ an",
+                "ex": ["the", "a", "an"]
+            }
+        };
+
+        // Current dictionary
+        let lessons = { ...DEFAULT_LESSONS };
+        
+        // DOM Elements
+        const slideToggle = document.getElementById('slideToggle');
+        const loadToggle = document.getElementById('loadToggle');
+        const exportToggle = document.getElementById('exportToggle');
+        const dictionaryFileInput = document.getElementById('dictionaryFileInput');
+        const dictionaryNotification = document.getElementById('dictionaryNotification');
+        const notificationText = document.getElementById('notificationText');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const historyToggle = document.getElementById('historyToggle');
+        const topicsToggle = document.getElementById('topicsToggle');
+        const helpToggle = document.getElementById('helpToggle');
+        const appLogo = document.getElementById('appLogo');
+        const historyPanel = document.getElementById('historyPanel');
+        const topicsPanel = document.getElementById('topicsPanel');
+        const topicsList = document.getElementById('topicsList');
+        const historyList = document.getElementById('historyList');
+        const closeHistory = document.getElementById('closeHistory');
+        const closeTopics = document.getElementById('closeTopics');
+        const overlay = document.getElementById('overlay');
+        const instructionsModal = document.getElementById('instructionsModal');
+        const closeModal = document.getElementById('closeModal');
+        const appContainer = document.getElementById('appContainer');
+        
+        // Slideshow Elements
+        const slideshowOverlay = document.getElementById('slideshowOverlay');
+        const slideshowContent = document.getElementById('slideshowContent');
+        const slideshowTop = document.getElementById('slideshowTop');
+        const slideshowBottom = document.getElementById('slideshowBottom');
+        const slideshowClose = document.getElementById('slideshowClose');
+        const slideshowIndicator = document.getElementById('slideshowIndicator');
+        const instructionModal = document.getElementById('instructionModal');
+        const closeInstruction = document.getElementById('closeInstruction');
+        
+        // Dictionary Builder Elements
+        const builderContainer = document.getElementById('builderContainer');
+        const builderCancel = document.getElementById('builderCancel');
+        const builderExport = document.getElementById('builderExport');
+        const builderTopic = document.getElementById('builderTopic');
+        const builderDesc = document.getElementById('builderDesc');
+        const builderEx = document.getElementById('builderEx');
+        const builderAdd = document.getElementById('builderAdd');
+        const builderPreview = document.getElementById('builderPreview');
+        const builderEntryCount = document.getElementById('builderEntryCount');
+        const previewClear = document.getElementById('previewClear');
+
+        // State
+        let isDarkTheme = false;
+        const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
+        
+        // Slideshow state
+        let currentSlideshow = null;
+        let currentSlideIndex = 0;
+        
+        // Dictionary Builder state
+        let builderDictionary = {};
+
+        // Initialize
+        function init() {
+            // Try to load saved dictionary from localStorage
+            const savedDictionary = localStorage.getItem('customDictionary');
+            if (savedDictionary) {
+                try {
+                    lessons = JSON.parse(savedDictionary);
+                    showNotification('Custom Notes loaded successfully', '✅');
+                } catch (e) {
+                    console.error('Failed to load saved Notes:', e);
+                    showNotification('Error loading Notes', '❌', true);
+                }
+                
+                // Allow pressing Enter in builder inputs
+    [builderTopic, builderDesc, builderEx].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                builderAdd.click();
+            }
+        });
+    });
+
+    // ADD THIS NEW CODE FOR TEXTAREA LINE BREAKS:
+    builderDesc.addEventListener('keydown', function(e) {
+        // Allow Enter to create new lines in the description textarea
+        if (e.key === 'Enter' && e.target === builderDesc) {
+            e.preventDefault();
+            
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            this.value = this.value.substring(0, start) + '\n' + this.value.substring(end);
+            
+            this.selectionStart = this.selectionEnd = start + 1;
+        }
+    });
+
+            }
+            
+            // Add dictionary load event listener
+            loadToggle.addEventListener('click', () => {
+                dictionaryFileInput.click();
+            });
+            
+            // Add dictionary builder event listener
+            exportToggle.addEventListener('click', () => {
+                appContainer.style.display = 'none';
+                builderContainer.classList.add('active');
+            });
+            
+            // Builder cancel button
+            builderCancel.addEventListener('click', () => {
+                builderContainer.classList.remove('active');
+                appContainer.style.display = 'block';
+            });
+            
+            // Builder export button
+            builderExport.addEventListener('click', exportBuilderDictionary);
+            
+            // Builder add entry button
+            builderAdd.addEventListener('click', addBuilderEntry);
+            
+            // Builder clear preview button
+            previewClear.addEventListener('click', () => {
+                if (Object.keys(builderDictionary).length > 0 && confirm('Are you sure you want to clear all entries?')) {
+                    builderDictionary = {};
+                    updateBuilderPreview();
+                }
+            });
+            
+            // Allow pressing Enter in builder inputs
+            [builderTopic, builderDesc, builderEx].forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        builderAdd.click();
+                    }
+                });
+            });
+            
+            dictionaryFileInput.addEventListener('change', handleFileSelect);
+            
+            // Add slideshow event listeners
+            slideToggle.addEventListener('click', startSlideshow);
+            slideshowClose.addEventListener('click', closeSlideshow);
+            slideshowTop.addEventListener('click', nextSlide);
+            slideshowBottom.addEventListener('click', prevSlide);
+            closeInstruction.addEventListener('click', () => {
+                instructionModal.classList.remove('active');
+                overlay.classList.remove('active');
+                beginSlideshow();
+            });
+            
+            // Set theme from localStorage if available
+            const savedTheme = localStorage.getItem('dictionaryTheme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Check if instructions have been shown before
+            const instructionsShown = localStorage.getItem('instructionsShown');
+            if (!instructionsShown) {
+                // Show instructions after splash screen
+                setTimeout(() => {
+                    toggleInstructionsModal();
+                    localStorage.setItem('instructionsShown', 'true');
+                }, 5500);
+            }
+            
+            // Event listeners
+            searchBtn.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            themeToggle.addEventListener('click', toggleTheme);
+            historyToggle.addEventListener('click', toggleHistoryPanel);
+            topicsToggle.addEventListener('click', toggleTopicsPanel);
+            helpToggle.addEventListener('click', toggleInstructionsModal);
+            appLogo.addEventListener('click', () => {
+                // Reset to home screen
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>📖</span>
+                        <h2>Digital Notes</h2>
+                        <p>Search for topics to see their details and examples</p>
+                        <p>Try these examples:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+            });
+            
+            closeHistory.addEventListener('click', toggleHistoryPanel);
+            closeTopics.addEventListener('click', toggleTopicsPanel);
+            closeModal.addEventListener('click', toggleInstructionsModal);
+            overlay.addEventListener('click', closeAllPanels);
+            
+            // Add history item click handlers
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.textContent.trim().replace('🔍', '');
+                    handleSearch();
+                });
+            });
+            
+            // Render history panel
+            renderHistoryPanel();
+            
+            // Render topics list
+            renderTopicsList();
+        }
+        
+        // Format text with custom markers
+        function formatText(text) {
+    if (!text) return '';
+    
+    // Split text into lines
+    const lines = text.split('\n');
+    const formattedLines = lines.map(line => {
+        // Check for bullet points
+        if (line.trim().startsWith('+')) {
+            return `<div class="bullet-line"><span class="bullet">•</span> ${line.substring(1)}</div>`;
+        }
+        
+        // Apply inline formatting
+        let formattedLine = line;
+        const patterns = [
+            { regex: /\*(.*?)\*/g, replacement: '<span class="bold">$1</span>' },
+            { regex: /_(.*?)_/g, replacement: '<span class="italic">$1</span>' },
+            { regex: /-(.*?)-/g, replacement: '<span class="underline">$1</span>' },
+            { regex: /\[(.*?)\]/g, replacement: '<span class="highlight">$1</span>' }
+        ];
+        
+        patterns.forEach(pattern => {
+            formattedLine = formattedLine.replace(pattern.regex, pattern.replacement);
+        });
+        
+        return formattedLine;
+    });
+    
+    return `<div class="formatted-text">${formattedLines.join('<br>')}</div>`;
+}
+        
+        // Add entry to builder dictionary
+        function addBuilderEntry() {
+            const topic = builderTopic.value.trim();
+            const desc = builderDesc.value.trim();
+            const ex = builderEx.value.trim();
+            
+            // Allow pressing Enter in builder inputs
+    [builderTopic, builderDesc, builderEx].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                builderAdd.click();
+            }
+        });
+    });
+
+    // ADD THIS NEW CODE FOR TEXTAREA LINE BREAKS:
+    builderDesc.addEventListener('keydown', function(e) {
+        // Allow Enter to create new lines in the description textarea
+        if (e.key === 'Enter' && e.target === builderDesc) {
+            e.preventDefault();
+            
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            this.value = this.value.substring(0, start) + '\n' + this.value.substring(end);
+            
+            this.selectionStart = this.selectionEnd = start + 1;
+        }
+    });
+
+            
+            if (!topic || !desc || !ex) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Create or update topic
+            builderDictionary[topic] = {
+                desc: desc,
+                ex: ex.split(',').map(item => item.trim())
+            };
+            
+            // Update preview
+            updateBuilderPreview();
+            
+            // Clear inputs
+            builderTopic.value = '';
+            builderDesc.value = '';
+            builderEx.value = '';
+            
+            // Focus back to topic input
+            builderTopic.focus();
+        }
+        
+        // Update the builder preview panel
+        function updateBuilderPreview() {
+            if (Object.keys(builderDictionary).length === 0) {
+                builderPreview.textContent = 'No entries yet';
+            } else {
+                builderPreview.textContent = JSON.stringify(builderDictionary, null, 2);
+            }
+            builderEntryCount.textContent = `${Object.keys(builderDictionary).length} entries`;
+        }
+        
+        // Export builder dictionary
+        function exportBuilderDictionary() {
+            if (Object.keys(builderDictionary).length === 0) {
+                alert('No entries to export');
+                return;
+            }
+            
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const filename = `E_Notes_${dateStr}.json`;
+            
+            const jsonStr = JSON.stringify(builderDictionary, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification(`Notes exported as ${filename}`, '📤', false, true);
+        }
+
+        // Handle file selection for dictionary
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const newDictionary = JSON.parse(e.target.result);
+                    
+                    // Validate the dictionary structure
+                    let isValid = true;
+                    for (const key in newDictionary) {
+                        if (!newDictionary[key].desc || !Array.isArray(newDictionary[key].ex)) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!isValid) {
+                        throw new Error('Invalid Note structure');
+                    }
+                    
+                    // Update the dictionary
+                    lessons = newDictionary;
+                    
+                    // Save to localStorage for persistence
+                    localStorage.setItem('customDictionary', JSON.stringify(lessons));
+                    
+                    // Update UI
+                    renderTopicsList();
+                    showNotification('Notes loaded successfully!', '✅');
+                    
+                    // Clear the file input
+                    dictionaryFileInput.value = '';
+                    
+                    // Reset to home screen
+                    appLogo.click();
+                } catch (error) {
+                    console.error('Error loading No:', error);
+                    showNotification('Error loading Notes. Invalid format.', '❌', true);
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error reading file', '❌', true);
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Show notification
+        function showNotification(message, icon, isError = false, isSuccess = false) {
+            notificationText.textContent = message;
+            notificationIcon.textContent = icon;
+            
+            if (isError) {
+                dictionaryNotification.classList.add('error');
+                dictionaryNotification.classList.remove('success');
+            } else if (isSuccess) {
+                dictionaryNotification.classList.add('success');
+                dictionaryNotification.classList.remove('error');
+            } else {
+                dictionaryNotification.classList.remove('error', 'success');
+            }
+            
+            dictionaryNotification.classList.add('active');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                dictionaryNotification.classList.remove('active');
+            }, 3000);
+        }
+
+        // Search handler
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            // Add to search history if not already present
+            if (!searchHistory.some(item => item.term === searchTerm)) {
+                searchHistory.unshift({
+                    term: searchTerm,
+                    time: new Date().toISOString()
+                });
+                
+                // Keep only the last 10 searches
+                if (searchHistory.length > 10) {
+                    searchHistory.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
+                
+                // Update history panel
+                renderHistoryPanel();
+            }
+            
+            // Display results
+            displayResults(searchTerm);
+        }
+
+        // Display search results
+        function displayResults(term) {
+            const topic = lessons[term];
+            
+            if (!topic) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <span>🔍</span>
+                        <h2>Topic Not Found</h2>
+                        <p>No results found for "${term}". Try one of these:</p>
+                        <div class="search-history">
+                            ${Object.keys(lessons).map(key => 
+                                `<div class="history-item">🔍 ${key}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <h2>📚 Browse All Topics</h2>
+                        <p>Click the topics icon 📚 in the top right corner to view all available topics</p>
+                    </div>
+                `;
+                
+                // Add event listeners to new history items
+                document.querySelectorAll('.history-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        searchInput.value = item.textContent.trim().replace('🔍', '');
+                        handleSearch();
+                    });
+                });
+                return;
+            }
+            
+            resultsContainer.innerHTML = `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <h1>${term}</h1>
+                    </div>
+                    <div class="entry-desc">${formatText(topic.desc)}</div>
+                    
+                    <h3>Examples & Word Bank:</h3>
+                    <div class="examples-grid">
+                        ${topic.ex.map((example, index) => 
+                            `<div class="example-item" data-index="${index}">${example}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers to example items
+            document.querySelectorAll('.example-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+            });
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+            localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
+        }
+
+        // Toggle history panel
+        function toggleHistoryPanel() {
+            historyPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = historyPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            topicsPanel.classList.remove('active');
+        }
+        
+        // Toggle topics panel
+        function toggleTopicsPanel() {
+            topicsPanel.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = topicsPanel.classList.contains('active') ? 'hidden' : 'auto';
+            
+            // Close other panels
+            historyPanel.classList.remove('active');
+        }
+        
+        // Toggle instructions modal
+        function toggleInstructionsModal() {
+            instructionsModal.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = instructionsModal.classList.contains('active') ? 'hidden' : 'auto';
+        }
+        
+        // Close all panels and modals
+        function closeAllPanels() {
+            historyPanel.classList.remove('active');
+            topicsPanel.classList.remove('active');
+            instructionsModal.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Render history panel
+        function renderHistoryPanel() {
+            historyList.innerHTML = '';
+            
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<p>No search history yet</p>';
+                return;
+            }
+            
+            searchHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item-panel';
+                historyItem.innerHTML = `
+                    <div class="term">🔍 ${item.term}</div>
+                    <div class="time">${formatTime(item.time)}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    searchInput.value = item.term;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Render topics list
+        function renderTopicsList() {
+            topicsList.innerHTML = '';
+            
+            Object.keys(lessons).forEach(topic => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <span>📄</span>
+                    <div>${topic}</div>
+                `;
+                
+                topicItem.addEventListener('click', () => {
+                    searchInput.value = topic;
+                    handleSearch();
+                    closeAllPanels();
+                });
+                
+                topicsList.appendChild(topicItem);
+            });
+        }
+
+        // Format time for display
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Slideshow functions
+        function startSlideshow() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm || !lessons[searchTerm]) {
+                alert("Please search for a valid topic first");
+                return;
+            }
+            
+            const topic = lessons[searchTerm];
+            if (topic.ex.length === 0) {
+                alert("No examples available for this topic");
+                return;
+            }
+            
+            currentSlideshow = searchTerm;
+            currentSlideIndex = 0;
+            
+            // Show instruction modal
+            instructionModal.classList.add('active');
+            overlay.classList.add('active');
+        }
+        
+        function beginSlideshow() {
+            // Hide header and show slideshow
+            document.querySelector('header').style.display = 'none';
+            slideshowOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateSlideshow();
+        }
+        
+        function updateSlideshow() {
+            const examples = lessons[currentSlideshow].ex;
+            slideshowContent.textContent = examples[currentSlideIndex];
+            slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
+        }
+        
+        function nextSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex + 1) % examples.length;
+            updateSlideshow();
+        }
+        
+        function prevSlide() {
+            const examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
+            updateSlideshow();
+        }
+        
+        function closeSlideshow() {
+            slideshowOverlay.classList.remove('active');
+            document.querySelector('header').style.display = 'flex';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize app after splash screen
+        setTimeout(init, 5000);
+        
+        // Add keyboard navigation for slideshow
+        document.addEventListener('keydown', (e) => {
+            if (!slideshowOverlay.classList.contains('active')) return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'Escape') {
+                closeSlideshow();
+            }
+        });
+        
+    </script>
+</body>
+</html>

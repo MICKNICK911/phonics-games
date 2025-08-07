@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Quiz</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #333;
+            --text-color: #2c3e50;
+            --white: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .description {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .quiz-container {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .progress-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--medium-gray);
+            border-radius: 4px;
+            flex-grow: 1;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .timer-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .timer {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-left: 8px;
+        }
+        
+        .timer-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .timer-warning {
+            color: var(--warning-color);
+        }
+        
+        .timer-danger {
+            color: var(--error-color);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .question.active {
+            display: block;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 15px;
+            background-color: var(--white);
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+            padding-left: 50px;
+        }
+        
+        .option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .option.correct {
+            border-color: var(--success-color);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        .option.incorrect {
+            border-color: var(--error-color);
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .option-label {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .option.selected .option-label {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+        }
+        
+        .option.correct .option-label {
+            border-color: var(--success-color);
+            background-color: var(--success-color);
+        }
+        
+        .option.incorrect .option-label {
+            border-color: var(--error-color);
+            background-color: var(--error-color);
+        }
+        
+        .option.selected .option-label::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--white);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .instant-feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .feedback-correct {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color);
+        }
+        
+        .feedback-incorrect {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--error-color);
+            color: var(--error-color);
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.05);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .explanation-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        
+        .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .score-text {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .quiz-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .question {
+                padding: 15px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+            
+            .stat-item {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Machine Learning Quiz</h1>
+            <p class="description">Test your knowledge of machine learning concepts with this interactive quiz</p>
+        </header>
+        
+        <div class="quiz-container">
+            <div class="progress-container">
+                <span class="progress-text">Question <span id="current-question">1</span> of <span id="total-questions">10</span></span>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-bar"></div>
+                </div>
+            </div>
+            
+            <div class="timer-container">
+                <svg class="timer-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="timer" id="timer">30s</span>
+            </div>
+            
+            <div id="question-container">
+                <!-- Questions will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="instant-feedback" id="instant-feedback"></div>
+            
+            <div class="navigation">
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="next-btn">Next</button>
+                <button id="submit-btn" style="display: none;">Submit Quiz</button>
+            </div>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <h2 class="result-title">Quiz Completed!</h2>
+            <div class="score">Your Score: <span id="score">0</span>/<span id="max-score">10</span></div>
+            <p class="score-text" id="score-text">Great job! You have a solid understanding of machine learning fundamentals.</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="correct-answers">0</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="incorrect-answers">0</div>
+                    <div class="stat-label">Incorrect</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="average-time">0s</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            <button id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data - predefined dictionary of questions and answers
+        const quizData = [
+            {
+                question: "What is Machine Learning?",
+                options: [
+                    "A subset of AI that enables systems to learn and improve from experience without being explicitly programmed",
+                    "A programming language for robots",
+                    "A database technology for storing large datasets",
+                    "A type of computer hardware optimized for calculations"
+                ],
+                correctAnswer: 0,
+                explanation: "Machine Learning is a subset of artificial intelligence (AI) that focuses on building systems that can learn from data, identify patterns, and make decisions with minimal human intervention."
+            },
+            {
+                question: "Which of these is NOT a type of Machine Learning?",
+                options: [
+                    "Supervised Learning",
+                    "Unsupervised Learning",
+                    "Database Learning",
+                    "Reinforcement Learning"
+                ],
+                correctAnswer: 2,
+                explanation: "The main types of Machine Learning are Supervised Learning, Unsupervised Learning, and Reinforcement Learning. 'Database Learning' is not a recognized type of ML."
+            },
+            {
+                question: "What is the purpose of the 'training set' in Machine Learning?",
+                options: [
+                    "To test the final model",
+                    "To train the model by finding patterns in the data",
+                    "To store all the raw data",
+                    "To visualize the results"
+                ],
+                correctAnswer: 1,
+                explanation: "The training set is used to train the machine learning model by allowing it to discover and learn the patterns in the data. The model's performance is then evaluated on a separate test set."
+            },
+            {
+                question: "Which algorithm would you use for a classification problem?",
+                options: [
+                    "Linear Regression",
+                    "Decision Tree",
+                    "K-Means Clustering",
+                    "Principal Component Analysis"
+                ],
+                correctAnswer: 1,
+                explanation: "Decision Trees are commonly used for classification problems. Linear Regression is for regression problems, K-Means is for clustering (unsupervised learning), and PCA is for dimensionality reduction."
+            },
+            {
+                question: "What does 'overfitting' mean in Machine Learning?",
+                options: [
+                    "The model is too simple to capture patterns in the data",
+                    "The model learns the training data too well, including noise and outliers",
+                    "The model takes too long to train",
+                    "The model uses too many features"
+                ],
+                correctAnswer: 1,
+                explanation: "Overfitting occurs when a model learns the training data too well, including its noise and outliers, resulting in poor performance on new, unseen data."
+            },
+            {
+                question: "Which technique can help prevent overfitting?",
+                options: [
+                    "Using more features",
+                    "Training for more epochs",
+                    "Regularization",
+                    "Decreasing the training set size"
+                ],
+                correctAnswer: 2,
+                explanation: "Regularization techniques like L1 (Lasso) and L2 (Ridge) help prevent overfitting by adding a penalty for larger coefficients in the model, effectively simplifying the model."
+            },
+            {
+                question: "What is the role of activation functions in neural networks?",
+                options: [
+                    "To increase the speed of training",
+                    "To reduce memory usage",
+                    "To introduce non-linearity into the network",
+                    "To normalize the input data"
+                ],
+                correctAnswer: 2,
+                explanation: "Activation functions like ReLU, sigmoid, and tanh introduce non-linearities to the network, allowing it to learn complex patterns that linear models cannot."
+            },
+            {
+                question: "Which evaluation metric would you use for an imbalanced classification problem?",
+                options: [
+                    "Accuracy",
+                    "Mean Squared Error",
+                    "F1 Score",
+                    "R-squared"
+                ],
+                correctAnswer: 2,
+                explanation: "For imbalanced datasets, accuracy can be misleading. The F1 score (harmonic mean of precision and recall) provides a better measure of model performance in such cases."
+            },
+            {
+                question: "What is 'feature engineering' in Machine Learning?",
+                options: [
+                    "Designing the user interface for ML applications",
+                    "Creating new input features from raw data to improve model performance",
+                    "Building the hardware for ML systems",
+                    "Writing the code for ML algorithms"
+                ],
+                correctAnswer: 1,
+                explanation: "Feature engineering involves creating new features or transforming existing ones from raw data to help machine learning algorithms better understand the underlying problem."
+            },
+            {
+                question: "Which of these is an example of unsupervised learning?",
+                options: [
+                    "Predicting house prices based on historical data",
+                    "Classifying emails as spam or not spam",
+                    "Grouping customers based on purchasing behavior",
+                    "Recognizing handwritten digits"
+                ],
+                correctAnswer: 2,
+                explanation: "Grouping customers based on purchasing behavior is an example of clustering, which is an unsupervised learning technique as it doesn't require labeled training data."
+            }
+        ];
+
+        // Quiz settings
+        const TIME_PER_QUESTION = 30; // seconds
+        const WARNING_TIME = 10; // seconds when timer turns yellow
+        const DANGER_TIME = 5; // seconds when timer turns red and pulses
+
+        // DOM Elements
+        const questionContainer = document.getElementById('question-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const currentQuestionEl = document.getElementById('current-question');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        const progressBar = document.getElementById('progress-bar');
+        const resultContainer = document.getElementById('result-container');
+        const scoreEl = document.getElementById('score');
+        const maxScoreEl = document.getElementById('max-score');
+        const scoreTextEl = document.getElementById('score-text');
+        const feedbackEl = document.getElementById('feedback');
+        const timerEl = document.getElementById('timer');
+        const instantFeedbackEl = document.getElementById('instant-feedback');
+        const correctAnswersEl = document.getElementById('correct-answers');
+        const incorrectAnswersEl = document.getElementById('incorrect-answers');
+        const averageTimeEl = document.getElementById('average-time');
+
+        // Quiz state
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let quizSubmitted = false;
+        let timer;
+        let timeLeft;
+        let questionStartTime;
+        let timeSpentPerQuestion = new Array(quizData.length).fill(0);
+
+        // Initialize the quiz
+        function initQuiz() {
+            totalQuestionsEl.textContent = quizData.length;
+            maxScoreEl.textContent = quizData.length;
+            renderQuestion();
+            updateNavigation();
+            startTimer();
+        }
+
+        // Render the current question
+        function renderQuestion() {
+            const question = quizData[currentQuestionIndex];
+            
+            // Update progress
+            currentQuestionEl.textContent = currentQuestionIndex + 1;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+            
+            // Create question HTML
+            let questionHTML = `
+                <div class="question active">
+                    <div class="question-text">${question.question}</div>
+                    <div class="options">
+            `;
+            
+            // Add options
+            question.options.forEach((option, index) => {
+                let optionClass = '';
+                if (quizSubmitted) {
+                    if (index === question.correctAnswer) {
+                        optionClass = 'correct';
+                    } else if (userAnswers[currentQuestionIndex] === index && index !== question.correctAnswer) {
+                        optionClass = 'incorrect';
+                    }
+                } else if (userAnswers[currentQuestionIndex] === index) {
+                    optionClass = 'selected';
+                }
+                
+                questionHTML += `
+                    <div class="option ${optionClass}" data-index="${index}">
+                        <span class="option-label"></span>
+                        ${option}
+                    </div>
+                `;
+            });
+            
+            questionHTML += `
+                    </div>
+                    <div class="explanation" style="${quizSubmitted ? 'display: block;' : 'display: none;'}">
+                        <div class="explanation-title">Explanation:</div>
+                        ${question.explanation}
+                    </div>
+                </div>
+            `;
+            
+            questionContainer.innerHTML = questionHTML;
+            
+            // Add event listeners to options if quiz not submitted
+            if (!quizSubmitted) {
+                document.querySelectorAll('.option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        if (!quizSubmitted) {
+                            const selectedIndex = parseInt(option.dataset.index);
+                            userAnswers[currentQuestionIndex] = selectedIndex;
+                            
+                            // Record time spent on this question
+                            timeSpentPerQuestion[currentQuestionIndex] = TIME_PER_QUESTION - timeLeft;
+                            
+                            // Show instant feedback
+                            showInstantFeedback(selectedIndex === question.correctAnswer);
+                            
+                            renderQuestion();
+                            updateNavigation();
+                            
+                            // Stop timer since answer was selected
+                            stopTimer();
+                        }
+                    });
+                });
+            }
+        }
+
+        // Show instant feedback when an answer is selected
+        function showInstantFeedback(isCorrect) {
+            instantFeedbackEl.textContent = isCorrect 
+                ? "✅ Correct! Well done!" 
+                : "❌ Incorrect. Try the next question!";
+            
+            instantFeedbackEl.className = `instant-feedback ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`;
+            instantFeedbackEl.style.display = 'block';
+            
+            // Hide feedback after 3 seconds
+            setTimeout(() => {
+                instantFeedbackEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // Start timer for current question
+        function startTimer() {
+            // Clear any existing timer
+            stopTimer();
+            
+            timeLeft = TIME_PER_QUESTION;
+            questionStartTime = new Date().getTime();
+            updateTimerDisplay();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    handleTimeExpired();
+                }
+            }, 1000);
+        }
+
+        // Stop the timer
+        function stopTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        // Update timer display with color coding
+        function updateTimerDisplay() {
+            timerEl.textContent = `${timeLeft}s`;
+            
+            // Reset all timer classes
+            timerEl.classList.remove('timer-warning', 'timer-danger');
+            
+            if (timeLeft <= WARNING_TIME) {
+                timerEl.classList.add('timer-warning');
+            }
+            
+            if (timeLeft <= DANGER_TIME) {
+                timerEl.classList.add('timer-danger');
+            }
+        }
+
+        // Handle when time expires for a question
+        function handleTimeExpired() {
+            // Record that no answer was selected (time ran out)
+            userAnswers[currentQuestionIndex] = null;
+            timeSpentPerQuestion[currentQuestionIndex] = TIME_PER_QUESTION;
+            
+            // Show feedback that time expired
+            instantFeedbackEl.textContent = "⏰ Time's up! Moving to next question...";
+            instantFeedbackEl.className = "instant-feedback feedback-incorrect";
+            instantFeedbackEl.style.display = 'block';
+            
+            // Auto-advance to next question after 2 seconds
+            setTimeout(() => {
+                instantFeedbackEl.style.display = 'none';
+                goToNextQuestion();
+            }, 2000);
+        }
+
+        // Update navigation buttons
+        function updateNavigation() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+                submitBtn.disabled = userAnswers[currentQuestionIndex] === null;
+            } else {
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+                nextBtn.disabled = userAnswers[currentQuestionIndex] === null && !quizSubmitted;
+            }
+        }
+
+        // Go to previous question
+        function goToPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+                updateNavigation();
+                startTimer();
+            }
+        }
+
+        // Go to next question
+        function goToNextQuestion() {
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+                updateNavigation();
+                startTimer();
+            } else {
+                // If we're on the last question and next is pressed (shouldn't happen normally)
+                updateNavigation();
+            }
+        }
+
+        // Submit the quiz
+        function submitQuiz() {
+            quizSubmitted = true;
+            stopTimer();
+            
+            // Calculate score
+            let correctCount = 0;
+            let incorrectCount = 0;
+            quizData.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    correctCount++;
+                } else {
+                    incorrectCount++;
+                }
+            });
+            
+            // Calculate average time per question (only counting answered questions)
+            const answeredQuestions = userAnswers.filter(answer => answer !== null).length;
+            const totalTimeSpent = timeSpentPerQuestion.reduce((sum, time) => sum + time, 0);
+            const averageTime = answeredQuestions > 0 ? Math.round(totalTimeSpent / answeredQuestions) : 0;
+            
+            // Show results
+            document.querySelector('.quiz-container').style.display = 'none';
+            resultContainer.style.display = 'block';
+            scoreEl.textContent = correctCount;
+            correctAnswersEl.textContent = correctCount;
+            incorrectAnswersEl.textContent = incorrectCount;
+            averageTimeEl.textContent = `${averageTime}s`;
+            
+            // Set feedback based on score
+            const percentage = (correctCount / quizData.length) * 100;
+            let feedback = '';
+            
+            if (percentage >= 80) {
+                scoreTextEl.textContent = 'Excellent! You have a strong understanding of machine learning concepts.';
+                feedback = 'You demonstrated comprehensive knowledge across all major areas of machine learning. Keep exploring advanced topics to further enhance your skills.';
+            } else if (percentage >= 60) {
+                scoreTextEl.textContent = 'Good job! You have a solid foundation in machine learning.';
+                feedback = 'You understand the core concepts well. Consider reviewing some areas to strengthen your knowledge further.';
+            } else if (percentage >= 40) {
+                scoreTextEl.textContent = 'Not bad! You have some understanding of machine learning.';
+                feedback = 'You have a basic understanding but should review the fundamental concepts to build a stronger foundation.';
+            } else {
+                scoreTextEl.textContent = 'Keep learning! You have some work to do.';
+                feedback = 'Machine learning is a complex field. Start with the basics and gradually build your knowledge. Review the explanations for each question to understand where you went wrong.';
+            }
+            
+            feedbackEl.textContent = feedback;
+            
+            // Render all questions with explanations for review
+            renderAllQuestionsForReview();
+        }
+
+        // Render all questions for review after submission
+        function renderAllQuestionsForReview() {
+            let reviewHTML = '';
+            
+            quizData.forEach((question, index) => {
+                reviewHTML += `
+                    <div class="question" style="margin-bottom: 30px;">
+                        <div class="question-text">${index + 1}. ${question.question}</div>
+                        <div class="options">
+                `;
+                
+                // Add options with correct/incorrect highlighting
+                question.options.forEach((option, optIndex) => {
+                    let optionClass = '';
+                    if (optIndex === question.correctAnswer) {
+                        optionClass = 'correct';
+                    } else if (userAnswers[index] === optIndex && userAnswers[index] !== question.correctAnswer) {
+                        optionClass = 'incorrect';
+                    }
+                    
+                    reviewHTML += `
+                        <div class="option ${optionClass}">
+                            <span class="option-label"></span>
+                            ${option}
+                        </div>
+                    `;
+                });
+                
+                reviewHTML += `
+                        </div>
+                        <div class="explanation" style="display: block;">
+                            <div class="explanation-title">Explanation:</div>
+                            ${question.explanation}
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9rem; color: var(--dark-gray);">
+                            Time spent: ${timeSpentPerQuestion[index]}s | 
+                            ${userAnswers[index] === question.correctAnswer ? '✅ Correct' : '❌ Incorrect'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            feedbackEl.insertAdjacentHTML('beforeend', reviewHTML);
+        }
+
+        // Restart the quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = new Array(quizData.length).fill(null);
+            timeSpentPerQuestion = new Array(quizData.length).fill(0);
+            quizSubmitted = false;
+            
+            document.querySelector('.quiz-container').style.display = 'block';
+            resultContainer.style.display = 'none';
+            
+            // Clear any existing feedback
+            feedbackEl.innerHTML = '';
+            
+            renderQuestion();
+            updateNavigation();
+            startTimer();
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', goToPreviousQuestion);
+        nextBtn.addEventListener('click', goToNextQuestion);
+        submitBtn.addEventListener('click', submitQuiz);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        // Initialize the quiz when the page loads
+        window.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>
