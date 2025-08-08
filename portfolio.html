@@ -23,15 +23,44 @@
             --shadow: rgba(0, 0, 0, 0.1);
             --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --font-title: Georgia, 'Times New Roman', Times, serif;
+            
+            /* Backgrounds */
+            --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            --bg-header: #ffffff;
+            --bg-card: #ffffff;
+            --bg-splash: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --text-primary: #212529;
+            --text-secondary: #555;
+            --text-light: rgba(255, 255, 255, 0.9);
+            --text-card: #555;
+            --icon-bg: #f8f9fa;
+            --contact-bg: #f8f9fa;
+            --contact-hover: #eef5ff;
+        }
+
+        /* Dark mode variables */
+        body.dark-mode {
+            --bg-primary: linear-gradient(135deg, #121212 0%, #1a1a2e 100%);
+            --bg-header: #1a1a2e;
+            --bg-card: #1e293b;
+            --bg-splash: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --text-card: #cbd5e0;
+            --icon-bg: #2d3748;
+            --contact-bg: #2d3748;
+            --contact-hover: #2d3748;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         body {
             font-family: var(--font-main);
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-            color: var(--dark);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
             line-height: 1.6;
+            transition: background 0.4s ease, color 0.4s ease;
         }
 
         .container {
@@ -48,7 +77,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--bg-splash);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -91,7 +120,7 @@
 
         .splash-subtitle {
             font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-light);
             margin-bottom: 40px;
             font-weight: 300;
         }
@@ -131,11 +160,12 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background: white;
+            background: var(--bg-header);
             box-shadow: 0 4px 15px var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background 0.4s ease;
         }
 
         .app-title {
@@ -154,7 +184,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--light);
+            background: var(--icon-bg);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -187,20 +217,22 @@
             color: var(--secondary);
             margin-bottom: 20px;
             text-align: center;
+            transition: color 0.4s ease;
         }
 
         .screen-subtitle {
             font-size: 1.1rem;
-            color: #555;
+            color: var(--text-secondary);
             text-align: center;
             max-width: 700px;
             margin: 0 auto 40px;
             line-height: 1.6;
+            transition: color 0.4s ease;
         }
 
         /* Home Screen */
         .author-card {
-            background: white;
+            background: var(--bg-card);
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 30px var(--shadow);
@@ -257,13 +289,13 @@
             gap: 15px;
             margin-bottom: 20px;
             padding: 15px;
-            background: var(--light);
+            background: var(--contact-bg);
             border-radius: 12px;
             transition: all 0.3s ease;
         }
 
         .contact-info:hover {
-            background: #eef5ff;
+            background: var(--contact-hover);
             transform: translateX(5px);
         }
 
@@ -285,14 +317,14 @@
 
         .contact-label {
             font-size: 0.9rem;
-            color: #777;
+            color: var(--text-secondary);
             margin-bottom: 3px;
         }
 
         .contact-value {
             font-size: 1.1rem;
             font-weight: 500;
-            color: var(--dark);
+            color: var(--text-primary);
         }
 
         /* Cards Grid */
@@ -304,7 +336,7 @@
         }
 
         .card {
-            background: var(--card-bg);
+            background: var(--bg-card);
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 8px 25px var(--shadow);
@@ -353,7 +385,7 @@
         .card-desc {
             margin-bottom: 20px;
             line-height: 1.6;
-            color: #555;
+            color: var(--text-card);
             flex-grow: 1;
         }
 
@@ -386,7 +418,7 @@
         }
 
         .lesson-card {
-            background: white;
+            background: var(--bg-card);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 5px 15px var(--shadow);
@@ -417,12 +449,12 @@
             font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 10px;
-            color: var(--dark);
+            color: var(--text-primary);
         }
 
         .lesson-desc {
             font-size: 0.95rem;
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 15px;
             line-height: 1.5;
         }
@@ -463,6 +495,11 @@
             .author-name {
                 font-size: 1.5rem;
             }
+            
+            .nav-icons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -471,12 +508,12 @@
             }
             
             .nav-icons {
-                gap: 10px;
+                gap: 8px;
             }
             
             .nav-icon {
-                width: 36px;
-                height: 36px;
+                width: 34px;
+                height: 34px;
                 font-size: 16px;
             }
             
@@ -497,6 +534,10 @@
             
             .lesson-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .app-title {
+                font-size: 1.5rem;
             }
         }
 
@@ -536,6 +577,9 @@
         <header>
             <div class="app-title">Elite Phonics</div>
             <div class="nav-icons">
+                <div class="nav-icon" id="themeToggle">
+                    🌙
+                </div>
                 <div class="nav-icon" data-screen="home">
                     🏠
                 </div>
@@ -547,6 +591,12 @@
                 </div>
                 <div class="nav-icon" data-screen="contest">
                     🏆
+                </div>
+                <div class="nav-icon" id="phonicChampsBtn">
+                    ⭐
+                </div>
+                <div class="nav-icon" id="chatGptBtn">
+                    💡
                 </div>
             </div>
         </header>
@@ -986,6 +1036,27 @@
         document.addEventListener('DOMContentLoaded', function() {
             const splashScreen = document.getElementById('splashScreen');
             const mainApp = document.getElementById('mainApp');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Theme toggle functionality
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDarkMode);
+                themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+            }
+            
+            // Initialize theme
+            const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (savedDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+            } else {
+                themeToggle.textContent = '🌙';
+            }
+            
+            // Add event listener to theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
             
             setTimeout(() => {
                 splashScreen.classList.add('hidden');
@@ -1011,7 +1082,9 @@
             navIcons.forEach(icon => {
                 icon.addEventListener('click', () => {
                     const screenName = icon.getAttribute('data-screen');
-                    showScreen(`${screenName}Screen`);
+                    if (screenName) {
+                        showScreen(`${screenName}Screen`);
+                    }
                 });
             });
             
@@ -1043,6 +1116,15 @@
             
             // Listen for scroll events
             window.addEventListener('scroll', animateOnScroll);
+            
+            // Added button functionality
+            document.getElementById('phonicChampsBtn').addEventListener('click', function() {
+                window.open('https://micknick911.github.io/phonic-champs', '_blank');
+            });
+            
+            document.getElementById('chatGptBtn').addEventListener('click', function() {
+                window.open('https://chat.openai.com/', '_blank');
+            });
         });
     </script>
 </body>
