@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Slide Challenge</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            font-size: 4rem;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            top: 0;
+            left: 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
+        }
+
+        .clue-container {
+            background: white;
+            padding: 1.5rem 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .clue-text {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .letters-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90%;
+        }
+
+        .letter-card {
+            cursor: pointer;
+            padding: 2rem 3rem;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            text-align: center;
+            min-width: 120px;
+            font-weight: 700;
+            color: var(--primary);
+            border: 3px solid transparent;
+        }
+
+        .letter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+            border-color: var(--accent);
+        }
+
+        .letter-card.wrong {
+            animation: shake 0.5s;
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .stats-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 1.5rem;
+            z-index: 100;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-box i {
+            color: var(--accent);
+        }
+
+        /* Screens */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .screen h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .screen p {
+            font-size: 1.5rem;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .game-over-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--danger);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 1.5rem;
+            font-weight: 600;
+            z-index: 100;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .game-over-message.show {
+            opacity: 1;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 500px;
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .clue-text {
+                font-size: 1.4rem;
+            }
+            
+            .letter-card {
+                padding: 1.5rem 2rem;
+                min-width: 100px;
+                font-size: 3rem;
+            }
+            
+            .stats-container {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .stat-box {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+    
+    <div class="stats-container">
+        <div class="stat-box">
+            <i>⭐</i>
+            <span id="scoreDisplay">0</span>
+        </div>
+        <div class="stat-box">
+            <i>⏱️</i>
+            <span id="timeDisplay">0s</span>
+        </div>
+    </div>
+    
+    <div class="game-over-message" id="gameOverMessage">Wrong! Try again</div>
+    
+    <div class="screen" id="startScreen">
+        <h2>Letter Slide Challenge</h2>
+        <p>Read the clue and select the correct letter. Be quick and accurate to maximize your score!</p>
+        <div class="progress-container">
+            <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+    </div>
+    
+    <div class="screen" id="winScreen">
+        <h2>Congratulations! 🎉</h2>
+        <p>You've completed all the levels with flying colors!</p>
+        <div class="stat-box" style="margin: 1rem 0; background: rgba(255,255,255,0.2); color: white;">
+            <i>⭐</i>
+            <span id="winScore">0</span>
+        </div>
+        <div class="stat-box" style="margin: 1rem 0; background: rgba(255,255,255,0.2); color: white;">
+            <i>⏱️</i>
+            <span id="winTime">0s</span>
+        </div>
+        <button class="btn btn-primary" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        const levels = [
+            { 
+                list: ['A', 'B', 'C'], 
+                target: 'A',
+                clue: "Find the vowel" 
+            },
+            { 
+                list: ['D', 'E', 'F'], 
+                target: 'E',
+                clue: "Look for the vowel" 
+            },
+            { 
+                list: ['X', 'Z'], 
+                target: 'Z',
+                clue: "Find the last letter of the alphabet" 
+            },
+            { 
+                list: ['M', 'N', 'O'], 
+                target: 'O',
+                clue: "Select the vowel" 
+            },
+            { 
+                list: ['P', 'Q', 'R'], 
+                target: 'Q',
+                clue: "Find the letter after P" 
+            }
+        ];
+
+        // Game state
+        const gameState = {
+            currentLevelIndex: 0,
+            score: 0,
+            startTime: 0,
+            timerInterval: null,
+            colors: ['#4361ee', '#4895ef', '#4cc9f0', '#3f37c9', '#560bad'],
+            colorIndex: 0
+        };
+
+        // DOM Elements
+        const elements = {
+            container: document.getElementById('container'),
+            scoreDisplay: document.getElementById('scoreDisplay'),
+            timeDisplay: document.getElementById('timeDisplay'),
+            gameOverMessage: document.getElementById('gameOverMessage'),
+            startScreen: document.getElementById('startScreen'),
+            winScreen: document.getElementById('winScreen'),
+            winScore: document.getElementById('winScore'),
+            winTime: document.getElementById('winTime')
+        };
+
+        // Initialize game
+        function init() {
+            elements.startScreen.classList.add('active');
+            updateProgressBar(0);
+        }
+
+        // Start game
+        function startGame() {
+            elements.startScreen.classList.remove('active');
+            gameState.currentLevelIndex = 0;
+            gameState.score = 0;
+            updateScore();
+            
+            gameState.startTime = Date.now();
+            startTimer();
+            
+            elements.container.innerHTML = '';
+            loadLevel(gameState.currentLevelIndex);
+        }
+
+        // Load a level
+        function loadLevel(index) {
+            if (index >= levels.length) {
+                endGame(true);
+                return;
+            }
+            
+            const level = levels[index];
+            const page = document.createElement('div');
+            page.className = 'page';
+            page.style.backgroundColor = gameState.colors[gameState.colorIndex % gameState.colors.length];
+            gameState.colorIndex++;
+            
+            const clueContainer = document.createElement('div');
+            clueContainer.className = 'clue-container';
+            
+            const clueText = document.createElement('div');
+            clueText.className = 'clue-text';
+            clueText.textContent = level.clue;
+            clueContainer.appendChild(clueText);
+            
+            const lettersContainer = document.createElement('div');
+            lettersContainer.className = 'letters-container';
+            
+            level.list.forEach(letter => {
+                const letterCard = document.createElement('div');
+                letterCard.className = 'letter-card';
+                letterCard.textContent = letter;
+                letterCard.onclick = () => handleLetterClick(letter, level.target, letterCard);
+                lettersContainer.appendChild(letterCard);
+            });
+            
+            page.appendChild(clueContainer);
+            page.appendChild(lettersContainer);
+            
+            elements.container.innerHTML = '';
+            elements.container.appendChild(page);
+            
+            updateProgressBar((index + 1) / levels.length * 100);
+        }
+
+        // Handle letter click
+        function handleLetterClick(clickedLetter, target, element) {
+            if (clickedLetter === target) {
+                // Correct answer
+                gameState.score += 10;
+                updateScore();
+                
+                gameState.currentLevelIndex++;
+                loadLevel(gameState.currentLevelIndex);
+            } else {
+                // Wrong answer
+                element.classList.add('wrong');
+                showGameOverMessage();
+                
+                setTimeout(() => {
+                    element.classList.remove('wrong');
+                }, 500);
+            }
+        }
+
+        // Show temporary game over message
+        function showGameOverMessage() {
+            elements.gameOverMessage.classList.add('show');
+            
+            setTimeout(() => {
+                elements.gameOverMessage.classList.remove('show');
+            }, 1000);
+        }
+
+        // Update score display
+        function updateScore() {
+            elements.scoreDisplay.textContent = gameState.score;
+        }
+
+        // Start timer
+        function startTimer() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            
+            gameState.timerInterval = setInterval(() => {
+                const seconds = Math.floor((Date.now() - gameState.startTime) / 1000);
+                elements.timeDisplay.textContent = `${seconds}s`;
+            }, 1000);
+        }
+
+        // End game
+        function endGame(win) {
+            clearInterval(gameState.timerInterval);
+            
+            if (win) {
+                const timeSpent = Math.floor((Date.now() - gameState.startTime) / 1000);
+                elements.winScore.textContent = gameState.score;
+                elements.winTime.textContent = `${timeSpent}s`;
+                elements.winScreen.classList.add('active');
+            }
+        }
+
+        // Restart game
+        function restartGame() {
+            elements.winScreen.classList.remove('active');
+            startGame();
+        }
+
+        // Update progress bar
+        function updateProgressBar(percent) {
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+            }
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>
