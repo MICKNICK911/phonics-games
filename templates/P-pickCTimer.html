@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Letter Reflex Trainer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
@@ -25,7 +24,7 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--dark);
             overflow: hidden;
@@ -72,6 +71,12 @@
             text-align: center;
             background-color: white;
             box-shadow: var(--shadow);
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
 
         .letter:hover {
@@ -82,13 +87,13 @@
         .letter.correct {
             background-color: #4ade80;
             color: white;
-            animation: pulse 0.5s;
+            animation: pulse 0.5s, flashCorrect 0.3s;
         }
 
         .letter.incorrect {
             background-color: #f87171;
             color: white;
-            animation: shake 0.5s;
+            animation: shake 0.5s, flashIncorrect 0.3s;
         }
 
         @keyframes pulse {
@@ -101,6 +106,16 @@
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-5px); }
             40%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes flashCorrect {
+            0% { background-color: #22c55e; }
+            100% { background-color: #4ade80; }
+        }
+
+        @keyframes flashIncorrect {
+            0% { background-color: #ef4444; }
+            100% { background-color: #f87171; }
         }
 
         .overlay {
@@ -303,11 +318,13 @@
     <div class="controls">
         <button id="modeToggle" class="toggle-btn" onclick="toggleGameMode()">Consonants Safe</button>
         <button id="caseToggle" class="toggle-btn" onclick="toggleLetterCase()">UPPERCASE</button>
+        <button id="soundToggle" class="toggle-btn">🔊</button>
     </div>
     
     <div id="scoreBoard">
-        <span id="scoreDisplay">Score: 0</span>
-        <span id="timeDisplay">Time: 0s</span>
+        <span id="scoreDisplay">🏆 Score: 0</span>
+        <span id="timeDisplay">⏱️ Time: 0s</span>
+        <span id="highScoreDisplay">🏅 Best: 0</span>
     </div>
     
     <div class="container" id="container"></div>
@@ -318,8 +335,8 @@
             <p class="subtitle">Improve your cognitive reflexes by identifying letters quickly</p>
             
             <div class="form-group">
-                <label for="gameDuration" class="form-label">Game Duration (seconds)</label>
-                <input type="number" id="gameDuration" class="form-control" min="10" max="300" value="60">
+                <label for="gameDuration" class="form-label">Optional Max Duration (seconds, leave blank for unlimited)</label>
+                <input type="number" id="gameDuration" class="form-control" min="10" max="300" placeholder="Unlimited">
             </div>
             
             <button class="btn" onclick="startGame()">Start Training</button>
@@ -334,11 +351,16 @@
                 <div>Your Score</div>
                 <strong id="finalScore">0</strong>
                 
-                <div>Time</div>
+                <div>Time Played</div>
                 <strong id="finalTime">0</strong> seconds
                 
                 <div>Accuracy</div>
                 <strong id="accuracy">0</strong>%
+                
+                <div>Best Score</div>
+                <strong id="finalHighScore">0</strong>
+                
+                <div id="motivationalMessage"></div>
             </div>
             
             <button class="btn" onclick="startGame()">Try Again</button>
@@ -361,10 +383,13 @@
             correctAnswers: 0,
             totalAnswers: 0,
             startTime: null,
+            timePlayed: 0,
             timerInterval: null,
-            gameDuration: 60,
+            gameDuration: null,
             currentPage: null,
-            colorIndex: 0
+            colorIndex: 0,
+            highScore: localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0,
+            soundEnabled: true
         };
         
         // DOM elements
@@ -373,20 +398,41 @@
             scoreBoard: document.getElementById('scoreBoard'),
             scoreDisplay: document.getElementById('scoreDisplay'),
             timeDisplay: document.getElementById('timeDisplay'),
+            highScoreDisplay: document.getElementById('highScoreDisplay'),
             gameOver: document.getElementById('gameOver'),
             startScreen: document.getElementById('startScreen'),
             finalScore: document.getElementById('finalScore'),
             finalTime: document.getElementById('finalTime'),
             accuracy: document.getElementById('accuracy'),
+            finalHighScore: document.getElementById('finalHighScore'),
+            motivationalMessage: document.getElementById('motivationalMessage'),
             gameDuration: document.getElementById('gameDuration'),
             modeToggle: document.getElementById('modeToggle'),
-            caseToggle: document.getElementById('caseToggle')
+            caseToggle: document.getElementById('caseToggle'),
+            soundToggle: document.getElementById('soundToggle')
         };
+
+        // Audio context for sound effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, type = 'sine', duration = 0.1) {
+            if (!gameState.soundEnabled) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
 
         // Initialize game
         function initGame() {
             resetGameState();
             updateUI();
+            updateHighScore();
         }
         
         function resetGameState() {
@@ -396,16 +442,24 @@
                 correctAnswers: 0,
                 totalAnswers: 0,
                 startTime: null,
+                timePlayed: 0,
                 colorIndex: 0
             };
         }
         
         function updateUI() {
-            elements.scoreDisplay.textContent = `Score: ${gameState.score}`;
+            elements.scoreDisplay.textContent = `🏆 Score: ${gameState.score}`;
+            elements.timeDisplay.textContent = `⏱️ Time: ${gameState.timePlayed}s`;
             elements.modeToggle.textContent = gameState.isVowelSafe ? 'Vowels Safe' : 'Consonants Safe';
             elements.modeToggle.classList.toggle('active', gameState.isVowelSafe);
             elements.caseToggle.textContent = gameState.isLowerCase ? 'lowercase' : 'UPPERCASE';
             elements.caseToggle.classList.toggle('active', gameState.isLowerCase);
+            elements.soundToggle.textContent = gameState.soundEnabled ? '🔊' : '🔇';
+        }
+        
+        function updateHighScore() {
+            elements.highScoreDisplay.textContent = `🏅 Best: ${gameState.highScore}`;
+            elements.finalHighScore.textContent = gameState.highScore;
         }
         
         // Game functions
@@ -415,7 +469,6 @@
             page.style.backgroundColor = COLORS[gameState.colorIndex % COLORS.length];
             gameState.colorIndex++;
             
-            // Create letters (2 consonants and 1 vowel)
             const letters = [
                 randomConsonant(),
                 randomConsonant(),
@@ -437,12 +490,10 @@
         function updateTimer() {
             if (!gameState.startTime) return;
             
-            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
-            const remaining = Math.max(0, gameState.gameDuration - elapsed);
+            gameState.timePlayed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            elements.timeDisplay.textContent = `⏱️ Time: ${gameState.timePlayed}s`;
             
-            elements.timeDisplay.textContent = `Time: ${remaining}s`;
-            
-            if (remaining <= 0) {
+            if (gameState.gameDuration && gameState.timePlayed >= gameState.gameDuration) {
                 endGame();
             }
         }
@@ -466,6 +517,7 @@
                 element.classList.add('correct');
                 gameState.score += 10;
                 gameState.correctAnswers++;
+                playSound(440); // Correct sound (A4 note)
                 
                 const currentPage = element.closest('.page');
                 const newPage = createNewPage();
@@ -481,10 +533,12 @@
                 }, 10);
             } else {
                 element.classList.add('incorrect');
+                playSound(220, 'square', 0.2); // Incorrect sound (lower pitch, harsher tone)
                 endGame();
             }
             
             updateUI();
+            updateHighScore();
         }
         
         function toggleGameMode() {
@@ -496,16 +550,20 @@
             gameState.isLowerCase = !gameState.isLowerCase;
             updateUI();
             
-            // Update existing letters
             document.querySelectorAll('.letter').forEach(letter => {
                 const original = letter.dataset.original;
                 letter.textContent = gameState.isLowerCase ? original.toLowerCase() : original;
             });
         }
         
+        function toggleSound() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            updateUI();
+        }
+        
         function startGame() {
             resetGameState();
-            gameState.gameDuration = parseInt(elements.gameDuration.value) || 60;
+            gameState.gameDuration = parseInt(elements.gameDuration.value) || null;
             
             elements.container.innerHTML = '';
             elements.container.appendChild(createNewPage());
@@ -521,16 +579,29 @@
         function endGame() {
             clearInterval(gameState.timerInterval);
             
-            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
             const accuracy = gameState.totalAnswers > 0 
                 ? Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100)
                 : 0;
             
+            if (gameState.score > gameState.highScore) {
+                gameState.highScore = gameState.score;
+                localStorage.setItem('highScore', gameState.highScore);
+            }
+            
             elements.finalScore.textContent = gameState.score;
-            elements.finalTime.textContent = elapsed;
+            elements.finalTime.textContent = gameState.timePlayed;
             elements.accuracy.textContent = accuracy;
+            elements.finalHighScore.textContent = gameState.highScore;
+            elements.motivationalMessage.textContent = getMotivationalMessage(gameState.score);
             
             elements.gameOver.style.display = 'flex';
+        }
+        
+        function getMotivationalMessage(score) {
+            if (score >= 100) return "Outstanding! You're a reflex master!";
+            if (score >= 50) return "Great job! Your reflexes are sharp!";
+            if (score >= 20) return "Nice work! Keep practicing!";
+            return "Good effort! Try again to improve!";
         }
         
         function showStartScreen() {
@@ -542,8 +613,20 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && elements.gameOver.style.display !== 'flex') {
                 endGame();
+            } else if (e.key === 'Enter' && elements.startScreen.style.display === 'flex') {
+                startGame();
+            } else if (e.key === ' ' && elements.startScreen.style.display !== 'flex' && elements.gameOver.style.display !== 'flex') {
+                if (document.activeElement === elements.modeToggle) {
+                    toggleGameMode();
+                } else if (document.activeElement === elements.caseToggle) {
+                    toggleLetterCase();
+                } else if (document.activeElement === elements.soundToggle) {
+                    toggleSound();
+                }
             }
         });
+        
+        elements.soundToggle.addEventListener('click', toggleSound);
         
         // Initialize
         window.onload = initGame;
