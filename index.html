@@ -1,81 +1,334 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Template Router</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phonic Challenges</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fadd8e;
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    .button-list {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      padding: 20px;
-      list-style: decimal inside;
-      margin: 0;
+
+    body {
+      background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #1e293b;
     }
-    .button-list li {
-      background-color: #d5e920;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      padding: 20px;
+
+    header {
       text-align: center;
-      transition: transform 0.2s ease-in-out;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 1.5rem;
     }
-    .button-list li:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+
+    header h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #4f46e5, #7c3aed);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      position: relative;
+      display: inline-block;
     }
-    .button-list a {
-      text-decoration: none;
-      color: #337ab7;
-      font-size: 18px;
+
+    header h1::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(to right, #4f46e5, #7c3aed);
+      border-radius: 2px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .task-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .task-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.08);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #e5e7eb;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .task-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, #4f46e5, #7c3aed);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .task-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+    }
+
+    .task-card:hover::before {
+      opacity: 1;
+    }
+
+    .task-number {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3);
     }
-    .button-list a:hover {
-      color: #23527c;
+
+    .task-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+      transition: color 0.2s ease;
+    }
+
+    .task-description {
+      color: #64748b;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      flex-grow: 1;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 1rem;
+      text-align: center;
+      color: #4f46e5;
+      font-weight: 500;
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .loading::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(79, 70, 229, 0.2);
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .task-card.active {
+      background: #f8fafc;
+      border-color: #c7d2fe;
+    }
+
+    .task-card.active .loading {
+      display: block;
+    }
+
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      padding: 1.5rem 0 0;
+      border-top: 1px solid #e2e8f0;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.25rem;
+      }
+      
+      .task-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <ul class="button-list">
-    <li><a href="#" onclick="loadTemplate('templates/cvc-maker.html')">CVC MAKER</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/word_sorting.html')">SORTING OUT WORDS</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/word-war2o.html')">WORD WAR 1</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/sentence_formation.html')">SENTENCE FORMATION</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/word_sort_multi.html')">WORD SORT MULTI</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/21_consonant.html')">21 CONSONANT</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/shoot-bricks.html')">WORD-BRICK-BREAKER-1</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/shoot-brick2o.html')">WORD-BRICK-BREAKER-1o</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/shoot-brick2o1.html')">WORD-BRICK-BREAKER-2o</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/challenge/cha100.html')">CHALLENGE 1</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/challenge/midT3-Learn2.html')">CHALLENGE 2</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/challenge/midT3Learn3.html')">CHALLENGE 3</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/challenge/cha1000.html')">IRON-CHAMP-2</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/decode-5.html')">DECODE 5</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/decode-6.html')">DECODE 6</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/decode-7.html')">DECODE 7</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/gameLearnCheck.html')">GAME-LEARN-CHK</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/phonicsBoard-5555.html')">PHO-BOARD</a></li>
-    <!--<li><a href="#" onclick="loadTemplate('templates/create-lesson-T.html')">CREATE-LESSON-1</a></li>-->
-    <!--<li><a href="#" onclick="loadTemplate('templates/E-Notes-Reader.html')">E-NOTES-READER</a></li>-->
-    <li><a href="#" onclick="loadTemplate('templates/customCreateNote-1.html')">CREATE-CUSTOM-1</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/customBoard-1.html')">READ-CUSTOM-1</a></li>
-    <!--<li><a href="#" onclick="loadTemplate('templates/E-Notes-Create1.html')">CREATE-E-NOTE-1</a></li>-->
-    <!--<li><a href="#" onclick="loadTemplate('templates/challenge/midT3Learn3.html')">MID 3-L3</a></li>
-    <li><a href="#" onclick="loadTemplate('templates/challenge/cha3.html')">CHALLENGE 3</a></li> -->
-
-
-
-  </ul>
+  <header>
+    <h1>Task Router</h1>
+    <p class="subtitle">Quickly access all your tasks and activities</p>
+  </header>
+  
+  <div class="task-container" id="taskContainer">
+    <!-- Task cards will be generated here -->
+  </div>
+  
+  <div class="footer">
+    <p>Modern Task Router • Simple & Efficient • No external dependencies</p>
+  </div>
 
   <script>
-    function loadTemplate(templateName) {
-      window.location.href = templateName;
+    // Task data with descriptions
+    const tasks = [
+  { id: 1, title: "Challenge 1", description: "" },
+  { id: 2, title: "Challenge 2", description: "" },
+  { id: 3, title: "Challenge 3", description: "" },
+  { id: 4, title: "Challenge 4", description: "" },
+  { id: 5, title: "Challenge 5", description: "" },
+  { id: 6, title: "Challenge 6", description: "" },
+  { id: 7, title: "Challenge 7", description: "" },
+  { id: 8, title: "Challenge 8", description: "" },
+  { id: 9, title: "Challenge 9", description: "" },
+  { id: 10, title: "Challenge 10", description: "" },
+  { id: 11, title: "Challenge 11", description: "" },
+  { id: 12, title: "Challenge 12", description: "" },
+  { id: 13, title: "Challenge 13", description: "" },
+  { id: 14, title: "Challenge 14", description: "" },
+  { id: 15, title: "Challenge 15", description: "" },
+  { id: 16, title: "Challenge 16", description: "" },
+  { id: 17, title: "Challenge 17", description: "" },
+  { id: 18, title: "Challenge 18", description: "" },
+  { id: 19, title: "Challenge 19", description: "" },
+  { id: 20, title: "Challenge 20", description: "" },
+  { id: 21, title: "Challenge 21", description: "" },
+  { id: 22, title: "Challenge 22", description: "" },
+  { id: 23, title: "Challenge 23", description: "" },
+  { id: 24, title: "Challenge 24", description: "" },
+  { id: 25, title: "Challenge 25", description: "" },
+  { id: 26, title: "Challenge 26", description: "" },
+  { id: 27, title: "Challenge 27", description: "" },
+  { id: 28, title: "Challenge 28", description: "" },
+  { id: 29, title: "Challenge 29", description: "" }
+];
+
+    // Helper function to get template filename based on task ID
+    function getTemplateFileName(id) {
+      const filenames = [
+    "templates/P-pic-word.html",
+    "templates/P-pickVC.html",
+    "templates/P-pickVC2.html",
+    "templates/P-pickCTimer.html",
+    "templates/P-21-consonants.html",
+    "templates/P-cvc-maker.html",
+    "templates/P-shoot-bricks-Bl.html",
+    "templates/P-silente-Switch.html",
+    "templates/P-sight-word-fix.html",
+    "templates/P-missingLet.html",
+    "templates/P-word-sorting.html",
+    "templates/P-word-sort-multi.html",
+    "templates/P-basicSort-learn.html",
+    "templates/P-basicSort-learn2.html",
+    "templates/P-word-war2o.html",
+    "templates/P-word-war3o.html",
+    "templates/P-word-war4o.html",
+    "templates/P-pickCCLearn.html",
+    "templates/P-sentence-formation2o.html",
+    "templates/P-decode-5.html",
+    "templates/P-decode-8.html",
+    "templates/P-quizLearn.html",
+    "templates/P-sound-snake-game.html",
+    "templates/C-21-consonants.html",
+    "templates/C-shoot-brick2o.html",
+    "templates/C-shoot-brick2o1.html",
+    "templates/C-pickCCLetter.html",
+    "templates/C-decode-7.html",
+    "templates/C-sound-snake-game2.html"
+];
+      
+      return filenames[id - 1] || 'index.html';
     }
+
+    // Generate task cards
+    function generateTaskCards() {
+      const container = document.getElementById('taskContainer');
+      
+      tasks.forEach((task, index) => {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.innerHTML = `
+          <div class="task-number">${task.id}</div>
+          <div class="task-title">${task.title}</div>
+          <div class="task-description">${task.description}</div>
+          <div class="loading">Loading task...</div>
+        `;
+        
+        card.addEventListener('click', function() {
+          // Add active class and show loading
+          this.classList.add('active');
+          
+          // Simulate loading before navigation
+          setTimeout(() => {
+            window.location.href = getTemplateFileName(task.id);
+          }, 800);
+        });
+        
+        container.appendChild(card);
+      });
+    }
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', generateTaskCards);
   </script>
 </body>
 </html>
