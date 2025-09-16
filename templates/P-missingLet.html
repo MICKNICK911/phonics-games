@@ -94,6 +94,7 @@
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
+            position: relative;
         }
         
         .audio-btn:hover {
@@ -103,6 +104,26 @@
         
         .audio-btn:active {
             transform: scale(0.95);
+        }
+        
+        .audio-btn.loading {
+            opacity: 0.7;
+        }
+        
+        .audio-btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid transparent;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .options-container {
@@ -281,6 +302,7 @@
         let gameTimer = null;
         let elapsedTime = 0;
         let speechSupported = false;
+        let voicesReady = false;
 
         // DOM elements
         const gameScreen = document.getElementById('gameScreen');
@@ -307,9 +329,68 @@
             speechSupported = 'speechSynthesis' in window;
             if (!speechSupported) {
                 audioBtn.style.display = 'none';
+            } else {
+                // Preload voices to reduce TTS delay
+                preloadVoices();
             }
             
             startGame();
+        }
+
+        // Preload voices for TTS
+        function preloadVoices() {
+            // Show loading state for audio button
+            audioBtn.classList.add('loading');
+            
+            // Function to check if voices are loaded
+            const tryLoadVoices = () => {
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    voicesReady = true;
+                    audioBtn.classList.remove('loading');
+                    return true;
+                }
+                return false;
+            };
+            
+            // Try to load voices immediately
+            if (!tryLoadVoices()) {
+                // If not loaded, wait for voiceschanged event
+                speechSynthesis.addEventListener('voiceschanged', function() {
+                    tryLoadVoices();
+                    // Also pre-speak a short word to initialize the TTS engine
+                    prewarmTts();
+                });
+                
+                // Fallback: check again after a delay
+                setTimeout(() => {
+                    if (!voicesReady) {
+                        tryLoadVoices();
+                        prewarmTts();
+                    }
+                }, 1000);
+            } else {
+                prewarmTts();
+            }
+        }
+
+        // Prewarm the TTS engine by speaking a very short, silent word
+        function prewarmTts() {
+            if (!speechSupported) return;
+            
+            const utterance = new SpeechSynthesisUtterance("");
+            utterance.volume = 0;
+            utterance.onend = function() {
+                voicesReady = true;
+                audioBtn.classList.remove('loading');
+            };
+            
+            try {
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.log("TTS prewarming failed:", e);
+                audioBtn.classList.remove('loading');
+            }
         }
 
         // Start a new game
@@ -450,12 +531,39 @@
 
         // Speak the target word
         function speakWord() {
-            if (!speechSupported) return;
+            if (!speechSupported || !voicesReady) {
+                // Show loading state if TTS isn't ready
+                if (speechSupported && !voicesReady) {
+                    audioBtn.classList.add('loading');
+                    // Try to preload again if not ready
+                    setTimeout(preloadVoices, 100);
+                }
+                return;
+            }
             
             const currentWord = words[currentIndex];
-            const utterance = new SpeechSynthesisUtterance(currentWord.target);
-            utterance.rate = 0.9;
-            speechSynthesis.speak(utterance);
+            
+            // Show loading state briefly
+            audioBtn.classList.add('loading');
+            
+            try {
+                const utterance = new SpeechSynthesisUtterance(currentWord.target);
+                utterance.rate = 0.9;
+                
+                utterance.onend = function() {
+                    audioBtn.classList.remove('loading');
+                };
+                
+                utterance.onerror = function() {
+                    audioBtn.classList.remove('loading');
+                    console.error("Speech synthesis error");
+                };
+                
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.log("TTS error:", e);
+                audioBtn.classList.remove('loading');
+            }
         }
 
         // Event listeners
