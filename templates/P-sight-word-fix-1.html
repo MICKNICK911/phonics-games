@@ -160,6 +160,26 @@
             transform: none;
         }
         
+        .speaker-btn.loading {
+            opacity: 0.7;
+        }
+        
+        .speaker-btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid transparent;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .grid-container {
             display: flex;
             flex-direction: column;
@@ -602,7 +622,7 @@
         </div>
         
         <footer>
-            <p>Phonics Spelling Challenge © 2023 | Educational Game</p>
+            <p>Phonics Spelling Challenge © 2025 | Educational Game</p>
         </footer>
     </div>
 
@@ -617,6 +637,10 @@
         let gameStartTime = 0;
         let gameTimer = null;
         let totalTime = 0;
+        
+        // TTS state
+        let ttsReady = false;
+        let voicesLoaded = false;
         
         // DOM elements
         const speakerBtn = document.getElementById('speakerBtn');
@@ -640,6 +664,64 @@
         const synth = window.speechSynthesis;
         let utterance = new SpeechSynthesisUtterance();
         
+        // Preload voices and initialize TTS
+        function initTTS() {
+            if (!synth) {
+                console.warn("Speech synthesis not supported");
+                speakerBtn.disabled = true;
+                return;
+            }
+            
+            // Show loading state
+            speakerBtn.classList.add('loading');
+            
+            // Check if voices are already loaded
+            if (synth.getVoices().length > 0) {
+                voicesLoaded = true;
+                warmUpTTS();
+                return;
+            }
+            
+            // Wait for voices to be loaded
+            synth.addEventListener('voiceschanged', () => {
+                voicesLoaded = true;
+                warmUpTTS();
+            });
+            
+            // Set a timeout in case voices take too long to load
+            setTimeout(() => {
+                if (!voicesLoaded) {
+                    console.warn("Voices took too long to load");
+                    speakerBtn.classList.remove('loading');
+                    speakerBtn.disabled = true;
+                    message.textContent = 'Speech not supported in this browser';
+                    message.className = 'message error';
+                    message.style.display = 'block';
+                }
+            }, 3000);
+        }
+        
+        // Warm up TTS by speaking a silent utterance
+        function warmUpTTS() {
+            if (!voicesLoaded) return;
+            
+            try {
+                const warmUpUtterance = new SpeechSynthesisUtterance("");
+                warmUpUtterance.volume = 0;
+                warmUpUtterance.onend = () => {
+                    ttsReady = true;
+                    speakerBtn.classList.remove('loading');
+                    console.log("TTS warmed up and ready");
+                };
+                
+                synth.speak(warmUpUtterance);
+            } catch (error) {
+                console.error("TTS warmup failed:", error);
+                speakerBtn.classList.remove('loading');
+                speakerBtn.disabled = true;
+            }
+        }
+        
         // Initialize the game
         function initGame() {
             currentWordIndex = 0;
@@ -648,6 +730,9 @@
             grid1Filled = 0;
             isWordCompleted = false;
             totalTime = 0;
+            
+            // Initialize TTS
+            initTTS();
             
             // Hide result screens
             winScreen.style.display = 'none';
@@ -712,12 +797,17 @@
                 grid2.appendChild(box);
             });
             
-            // Enable speaker button
-            speakerBtn.disabled = false;
-            speakerBtn.classList.add('pulse');
+            // Enable speaker button if TTS is ready
+            speakerBtn.disabled = !ttsReady;
             
-            // Speak the word automatically
-            setTimeout(speakWord, 500);
+            if (ttsReady) {
+                speakerBtn.classList.add('pulse');
+            }
+            
+            // Speak the word automatically if TTS is ready
+            if (ttsReady) {
+                setTimeout(speakWord, 500);
+            }
         }
         
         // Handle letter clicks
@@ -813,6 +903,13 @@
         
         // Speak the current word
         function speakWord() {
+            if (!ttsReady || !synth) {
+                message.textContent = 'Speech not ready yet. Please wait...';
+                message.className = 'message error';
+                message.style.display = 'block';
+                return;
+            }
+            
             if (synth.speaking) {
                 synth.cancel();
             }
@@ -829,6 +926,13 @@
                 // Re-enable button after speaking is done
                 utterance.onend = () => {
                     speakerBtn.disabled = false;
+                };
+                
+                utterance.onerror = () => {
+                    speakerBtn.disabled = false;
+                    message.textContent = 'Error speaking word';
+                    message.className = 'message error';
+                    message.style.display = 'block';
                 };
             } catch (error) {
                 console.error('Speech synthesis error:', error);
