@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Builder Game</title>
+    <style>
+        :root {
+            --primary: #6a4c93;
+            --primary-light: #8a6dbe;
+            --primary-dark: #4a2c7a;
+            --secondary: #f9c74f;
+            --secondary-dark: #f8961e;
+            --accent: #f94144;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #43aa8b;
+            --warning: #f3722c;
+            --danger: #f94144;
+            --card-bg: #ffffff;
+            --text-dark: #2d3748;
+            --text-light: #f8f9fa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin: 1rem 0;
+            color: var(--text-dark);
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--secondary);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-light);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--dark);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--text-light);
+        }
+
+        .btn-danger:hover {
+            background: #e02d30;
+            transform: translateY(-2px);
+        }
+
+        #speaker {
+            font-size: 3rem;
+            cursor: pointer;
+            margin: 1.5rem 0;
+            background: var(--secondary);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        #speaker:hover {
+            transform: scale(1.1);
+            background: var(--secondary-dark);
+        }
+
+        #grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 2rem 0;
+        }
+
+        .word-btn {
+            padding: 15px 20px;
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .word-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: var(--primary);
+        }
+
+        .word-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(0.95);
+        }
+
+        .punctuation-btn {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .punctuation-btn:hover:not(:disabled) {
+            background: var(--secondary-dark);
+        }
+
+        #built {
+            margin: 2rem 0;
+            font-size: 1.8rem;
+            min-height: 80px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: var(--radius);
+            color: var(--text-dark);
+            font-weight: 600;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #instruction {
+            display: block;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stat-box {
+            background: var(--light);
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: var(--light);
+            border-radius: 50px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--secondary);
+            border-radius: 50px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .victory-animation {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #grid {
+                gap: 8px;
+            }
+            
+            .word-btn {
+                min-width: 80px;
+                padding: 12px 15px;
+                font-size: 1rem;
+            }
+            
+            #built {
+                font-size: 1.5rem;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="instruction" class="screen card">
+            <h1>Welcome to Sentence Builder! 📚</h1>
+            <p>Listen to the sentence by tapping the speaker button. Then, tap the word and punctuation buttons in the correct order to form the sentence. You have 3 attempts across the game. Complete all sentences to win!</p>
+            <div style="text-align: center;">
+                <button id="start" class="btn-primary">Start Game</button>
+            </div>
+        </div>
+
+        <div id="game" class="screen card">
+            <h1>Sentence Builder</h1>
+            
+            <div class="stats">
+                <div class="stat-box">Level: <span id="level">1</span>/5</div>
+                <div class="stat-box">Mistakes: <span id="mistakes-count">0</span>/3</div>
+                <div class="stat-box">Score: <span id="score">0</span></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="speaker">🔊</button>
+            </div>
+            
+            <div id="built"></div>
+            
+            <div id="grid"></div>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                <button id="reset" class="btn-secondary">Reset ♻️</button>
+                <button id="hint" class="btn-primary" style="display: none;">Hint 💡</button>
+            </div>
+        </div>
+
+        <div id="victory" class="screen card" style="text-align: center;">
+            <div class="victory-animation">🎉</div>
+            <h1>Victory!</h1>
+            <p>Congratulations! You've successfully built all the sentences.</p>
+            <div class="stat-box" style="display: inline-block; margin: 10px;">
+                Score: <span id="vscore">0</span>
+            </div>
+            <div class="stat-box" style="display: inline-block; margin: 10px;">
+                Duration: <span id="vdur">0</span> seconds
+            </div>
+            <div style="margin-top: 2rem;">
+                <button id="vrestart" class="btn-primary">Play Again</button>
+            </div>
+        </div>
+
+        <div id="gameover" class="screen card" style="text-align: center;">
+            <h1 style="color: var(--danger);">Game Over 😢</h1>
+            <p>You made too many mistakes. Try again!</p>
+            <div style="margin-top: 2rem;">
+                <button id="gorestart" class="btn-primary">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wordBank = ["Sam is sad", "The fat cat sat", "A big dog ran", "The man had a hat", "The jam is red", "A hot pot", "The log is on the rug", "The vet met a pig", "The kid hid the bag", "The fox is in the box", "The sun is hot", "The hen is in the pen", "A bug is on the jug", "The rat bit the net", "The cop got the man", "The cat hit the rat", "The dog dug in the mud", "The pup is on the bed", "The jet is up", "The man can run", "The hog is big", "The bin has a lid", "The cub is fun", "The mob got him", "The rod is for the fish", "She had a nap", "The fan is on", "The bus had a lot of men", "The bat hit the ball", "The vet has a pet"];
+        
+        let currentIndex = 0;
+        let mistakes = 0;
+        let score = 0;
+        let startTime;
+        let playerSequence = [];
+        let tokens = [];
+        let sentence = '';
+        let isChecking = false;
+
+        const instruction = document.getElementById('instruction');
+        const game = document.getElementById('game');
+        const victory = document.getElementById('victory');
+        const gameover = document.getElementById('gameover');
+        const startBtn = document.getElementById('start');
+        const speaker = document.getElementById('speaker');
+        const grid = document.getElementById('grid');
+        const built = document.getElementById('built');
+        const vscore = document.getElementById('vscore');
+        const vdur = document.getElementById('vdur');
+        const vrestart = document.getElementById('vrestart');
+        const gorestart = document.getElementById('gorestart');
+        const resetBtn = document.getElementById('reset');
+        const hintBtn = document.getElementById('hint');
+        const levelDisplay = document.getElementById('level');
+        const mistakesDisplay = document.getElementById('mistakes-count');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress');
+
+        function tokenize(sent) {
+            if (!sent || typeof sent !== 'string') return [];
+            return sent.match(/\w+|[^\w\s]+/g) || [];
+        }
+
+        function rebuild(seq) {
+            if (seq.length === 0) return '';
+            let s = seq.join(' ');
+            return s.replace(/\s+([^\w\s])/g, '$1');
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window && text) {
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 0.5;
+                speechSynthesis.speak(utter);
+            }
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex) / wordBank.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function updateStats() {
+            levelDisplay.textContent = currentIndex + 1;
+            mistakesDisplay.textContent = mistakes;
+            scoreDisplay.textContent = score;
+        }
+
+        function initLevel() {
+            if (currentIndex >= wordBank.length) {
+                showVictory();
+                return;
+            }
+            
+            sentence = wordBank[currentIndex] || '';
+            tokens = tokenize(sentence);
+            
+            if (tokens.length === 0) {
+                currentIndex++;
+                initLevel();
+                return;
+            }
+            
+            const shuffled = shuffle(tokens.slice());
+            grid.innerHTML = '';
+            playerSequence = [];
+            built.textContent = '';
+            built.style.animation = '';
+            
+            shuffled.forEach(word => {
+                const btn = document.createElement('button');
+                btn.textContent = word;
+                
+                // Check if it's a punctuation to style differently
+                if (/[^\w\s]/.test(word)) {
+                    btn.classList.add('word-btn', 'punctuation-btn');
+                } else {
+                    btn.classList.add('word-btn');
+                }
+                
+                btn.onclick = () => {
+                    if (!btn.disabled && !isChecking) {
+                        playerSequence.push(word);
+                        btn.disabled = true;
+                        built.textContent = rebuild(playerSequence);
+                        
+                        if (playerSequence.length === tokens.length) {
+                            checkSequence();
+                        }
+                    }
+                };
+                grid.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateStats();
+            speak(sentence);
+        }
+
+        function checkSequence() {
+            isChecking = true;
+            const isCorrect = playerSequence.every((val, idx) => val === tokens[idx]);
+            
+            if (isCorrect) {
+                // Correct sequence
+                score += 10;
+                built.style.color = 'var(--success)';
+                built.style.animation = 'celebrate 0.5s';
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    isChecking = false;
+                    initLevel();
+                }, 1000);
+            } else {
+                // Incorrect sequence
+                mistakes++;
+                built.style.color = 'var(--danger)';
+                
+                if (mistakes >= 3) {
+                    setTimeout(() => {
+                        showGameOver();
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        resetLevel();
+                        isChecking = false;
+                    }, 1000);
+                }
+            }
+            
+            updateStats();
+        }
+
+        function resetLevel() {
+            playerSequence = [];
+            built.textContent = '';
+            built.style.color = 'var(--text-dark)';
+            const buttons = grid.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+            });
+            speak(sentence);
+        }
+
+        function showVictory() {
+            const duration = Math.floor((Date.now() - startTime) / 1000);
+            vscore.textContent = score;
+            vdur.textContent = duration;
+            game.style.display = 'none';
+            victory.style.display = 'block';
+        }
+
+        function showGameOver() {
+            game.style.display = 'none';
+            gameover.style.display = 'block';
+        }
+
+        function provideHint() {
+            if (isChecking || playerSequence.length >= tokens.length) return;
+            
+            // Find the next correct word
+            const nextCorrectWord = tokens[playerSequence.length];
+            const buttons = grid.querySelectorAll('button');
+            
+            // Highlight the correct button
+            buttons.forEach(btn => {
+                if (btn.textContent === nextCorrectWord) {
+                    btn.style.animation = 'pulse 1s infinite';
+                    setTimeout(() => {
+                        btn.style.animation = '';
+                    }, 2000);
+                }
+            });
+            
+            // Penalty for using hint
+            score = Math.max(0, score - 2);
+            updateStats();
+        }
+
+        // Event listeners
+        startBtn.onclick = () => {
+            instruction.style.display = 'none';
+            game.style.display = 'block';
+            startTime = Date.now();
+            currentIndex = 0;
+            mistakes = 0;
+            score = 0;
+            initLevel();
+        };
+
+        speaker.onclick = () => {
+            if (!isChecking) {
+                speak(wordBank[currentIndex]);
+            }
+        };
+
+        resetBtn.onclick = () => {
+            if (!isChecking && game.style.display === 'block') {
+                resetLevel();
+            }
+        };
+
+        hintBtn.onclick = () => {
+            if (!isChecking && game.style.display === 'block') {
+                provideHint();
+            }
+        };
+
+        vrestart.onclick = () => {
+            victory.style.display = 'none';
+            instruction.style.display = 'block';
+        };
+
+        gorestart.onclick = () => {
+            gameover.style.display = 'none';
+            instruction.style.display = 'block';
+        };
+
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 199, 79, 0.7); }
+                70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(249, 199, 79, 0); }
+                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 199, 79, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
