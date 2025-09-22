@@ -131,6 +131,25 @@
             flex: 1;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        
+        #start-practice-btn {
+            margin-top: 15px;
+            padding: 14px 35px;
+            font-size: 1.1em;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(106, 142, 251, 0.4);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        #start-practice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 142, 251, 0.5);
+        }
 
         .nav button:hover {
             transform: translateY(-2px);
@@ -249,6 +268,7 @@
             <div class="nav">
                 <button id="prev-btn" aria-label="Previous word">Previous</button>
                 <button id="next-btn" aria-label="Next word">Next</button>
+                <button id="game-btn" aria-label="Play Game">Play Game</button>
             </div>
         </div>
         
@@ -341,6 +361,9 @@
             document.getElementById('prev-btn').disabled = state.practice.currentIndex === 0;
             document.getElementById('next-btn').disabled = state.practice.currentIndex === wordBank.length - 1;
             speak(state.practice.currentWord);
+            
+            document.getElementById('game-btn').style.display = state.practice.currentIndex === wordBank.length - 1? "block": "none";
+            
         }
 
         // Speak a word using text-to-speech
@@ -392,6 +415,10 @@
             // Back button
             document.getElementById('back-button').addEventListener('click', () => {
                 showScreen('instructions-screen');
+            });
+            
+            document.getElementById('game-btn').addEventListener('click', function() {
+                window.open('P-sight-pick.html', '_blank');
             });
         }
 
