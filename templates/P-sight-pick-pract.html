@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Recognition Practice</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, #78909c, #546e7a);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0,0,0,0.15);
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .speaker {
+            font-size: 3rem;
+            cursor: pointer;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+
+        .speaker:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+        }
+
+        .speaker:active {
+            transform: scale(0.95);
+        }
+
+        .word-display {
+            font-size: 3rem;
+            margin: 25px 0;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+            padding: 20px 35px;
+            border-radius: 12px;
+            width: 100%;
+            border: 2px solid #e3e8f0;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .nav button {
+            padding: 16px 25px;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .nav button:disabled {
+            background: #b0bec5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .instructions-content {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 25px;
+            margin: 25px 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            line-height: 1.7;
+            border: 2px solid #e3e8f0;
+        }
+
+        .instructions-content p {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #2196f3;
+            font-weight: bold;
+        }
+
+        ul {
+            text-align: left;
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* Improved accessibility and responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+                border-radius: 16px;
+            }
+            
+            .speaker {
+                font-size: 2.8rem;
+                width: 80px;
+                height: 80px;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+                padding: 15px 25px;
+            }
+            
+            .instructions-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .back-button {
+                position: relative;
+                top: 0;
+                right: 0;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Scrollbar styling */
+        .instructions-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .instructions-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .instructions-content::-webkit-scrollbar-thumb {
+            background: #a777e3;
+            border-radius: 10px;
+        }
+        
+        .instructions-content::-webkit-scrollbar-thumb:hover {
+            background: #6e8efb;
+        }
+
+        /* Accessibility improvements */
+        button:focus {
+            outline: 2px solid #2196f3;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="back-button" class="back-button hidden">Back to Instructions</button>
+        
+        <!-- Practice Mode Screen -->
+        <div id="practice-screen" class="screen hidden">
+            <div id="practice-speaker" class="speaker" aria-label="Play sound" role="button" tabindex="0">🔊</div>
+            <div id="practice-word-display" class="word-display" aria-live="polite"></div>
+            <div class="nav">
+                <button id="prev-btn" aria-label="Previous word">Previous</button>
+                <button id="next-btn" aria-label="Next word">Next</button>
+            </div>
+        </div>
+        
+        <!-- Instructions Screen -->
+        <div id="instructions-screen" class="screen">
+            <h2>Word Recognition Practice</h2>
+            <div class="instructions-content">
+                <p><span class="highlight">Practice Mode:</span> Listen to words using the speaker button. Navigate through the word list with previous and next buttons.</p>
+                <p>This tool helps develop reading and listening skills by connecting spoken words with their written forms.</p>
+                <p>Educational tips:</p>
+                <ul>
+                    <li>Repeat the words after hearing them</li>
+                    <li>Try to spell the words as you hear them</li>
+                    <li>Master difficult words by repeating them</li>
+                    <li>Focus on words that are challenging for you</li>
+                </ul>
+            </div>
+            <div class="button-group">
+                <button id="start-practice-btn">Start Practice</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Word bank
+        const wordBank = ["all", "am", "are", "at", "ate", "be", "black", "brown", "but", "came", "did", "do", "eat", "four", "get", "good", "have", "he", "into", "like", "must", "new", "no", "now", "on", "our", "out", "please", "pretty", "ran", "ride", "saw", "say", "she", "so", "soon", "that", "there", "they", "this", "too", "under", "want", "was", "well", "went", "what", "white", "who", "will", "with", "yes"];
+
+        // Game state (simplified for practice only)
+        const state = {
+            currentMode: 'instructions',
+            practice: {
+                currentIndex: 0,
+                currentWord: ''
+            }
+        };
+
+        // Voices cache for better speech selection
+        let voices = [];
+
+        // Load voices asynchronously
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            // Prefer a natural-sounding voice if available (e.g., Google US English)
+            const preferredVoice = voices.find(voice => voice.name.includes('Google') || voice.name.includes('English'));
+            return preferredVoice || voices[0];
+        }
+
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices(); // Initial load
+        }
+
+        // Initialize the app
+        function init() {
+            showScreen('instructions-screen');
+            setupEventListeners();
+        }
+
+        // Show a specific screen and hide others
+        function showScreen(screenId) {
+            // Hide all screens
+            document.getElementById('practice-screen').classList.add('hidden');
+            document.getElementById('instructions-screen').classList.add('hidden');
+            
+            // Show requested screen
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update back button visibility
+            const backButton = document.getElementById('back-button');
+            if (screenId === 'practice-screen') {
+                backButton.classList.remove('hidden');
+                state.currentMode = 'practice';
+            } else {
+                backButton.classList.add('hidden');
+                state.currentMode = 'instructions';
+            }
+        }
+
+        // Start practice mode
+        function startPractice() {
+            showScreen('practice-screen');
+            state.practice.currentIndex = 0;
+            renderPractice();
+        }
+
+        // Render practice mode
+        function renderPractice() {
+            state.practice.currentWord = wordBank[state.practice.currentIndex];
+            document.getElementById('practice-word-display').textContent = state.practice.currentWord;
+            document.getElementById('prev-btn').disabled = state.practice.currentIndex === 0;
+            document.getElementById('next-btn').disabled = state.practice.currentIndex === wordBank.length - 1;
+            speak(state.practice.currentWord);
+        }
+
+        // Speak a word using text-to-speech
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.7; // Slightly slower for clarity
+                utterance.pitch = 1.0;
+                utterance.voice = loadVoices(); // Select preferred voice
+                utterance.onerror = (e) => console.warn('Speech error:', e);
+                speechSynthesis.speak(utterance);
+            } else {
+                console.warn('Speech synthesis not supported');
+            }
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Speaker button with keyboard support
+            const practiceSpeaker = document.getElementById('practice-speaker');
+            practiceSpeaker.addEventListener('click', () => speak(state.practice.currentWord));
+            practiceSpeaker.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    speak(state.practice.currentWord);
+                }
+            });
+            
+            // Practice mode navigation
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (state.practice.currentIndex > 0) {
+                    state.practice.currentIndex--;
+                    renderPractice();
+                }
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                if (state.practice.currentIndex < wordBank.length - 1) {
+                    state.practice.currentIndex++;
+                    renderPractice();
+                }
+            });
+            
+            // Start button
+            document.getElementById('start-practice-btn').addEventListener('click', startPractice);
+            
+            // Back button
+            document.getElementById('back-button').addEventListener('click', () => {
+                showScreen('instructions-screen');
+            });
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
