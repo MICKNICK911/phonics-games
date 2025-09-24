@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Recognition Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            padding: 20px;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+        }
+
+        #instructions {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        #instructions h2 {
+            color: #6e8efb;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        #instructions ul {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
+        #instructions li {
+            margin-bottom: 10px;
+        }
+
+        #instructions .highlight {
+            color: #6e8efb;
+            font-weight: 600;
+        }
+
+        .startBtn {
+            margin-top: 15px;
+            padding: 14px 35px;
+            font-size: 1.1em;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(106, 142, 251, 0.4);
+            transition: all 0.3s;
+            font-weight: 600;
+            margin: 10px;
+        }
+
+        .startBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 142, 251, 0.5);
+        }
+
+        #speaker {
+            font-size: 2.8em;
+            cursor: pointer;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(106, 142, 251, 0.4);
+            transition: all 0.3s;
+        }
+
+        #speaker:hover {
+            transform: scale(1.05);
+        }
+
+        #speaker:active {
+            transform: scale(0.95);
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .word-btn {
+            padding: 18px 10px;
+            font-size: 1.5em;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .word-btn:hover {
+            border-color: #6e8efb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-btn:active {
+            transform: translateY(0);
+        }
+
+        .word-btn.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .word-btn.incorrect {
+            background: #ff5252;
+            color: white;
+            border-color: #ff5252;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        #level-info {
+            color: #6e8efb;
+        }
+
+        #score {
+            color: #4caf50;
+        }
+
+        #lives {
+            color: #ff5252;
+        }
+
+        .end-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .end-content {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .end-screen h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .end-screen p {
+            font-size: 1.4em;
+            margin: 10px 0;
+        }
+
+        .end-screen button {
+            margin-top: 25px;
+            padding: 15px 35px;
+            font-size: 1.2em;
+            background: white;
+            color: #6e8efb;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .end-screen button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Animation for correct answer */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 500px) {
+            #grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .word-btn {
+                padding: 15px;
+            }
+            
+            #speaker {
+                width: 70px;
+                height: 70px;
+                font-size: 2.5em;
+            }
+            
+            .end-content {
+                padding: 25px;
+            }
+            
+            .end-screen h2 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="instructions">
+            <h2>Word Recognition Game</h2>
+            <p>Listen to the word and select the correct spelling from the options!</p>
+            <ul>
+                <li>Tap the <span class="highlight">speaker icon</span> to hear the word</li>
+                <li>Select the <span class="highlight">correct spelling</span> from the options</li>
+                <li>You have <span class="highlight">3 lives</span> - be careful!</li>
+                <li>Complete each level to advance to the next one!</li>
+            </ul>
+            <button class="startBtn" id="start-btn">Start Game</button>
+            <button class="startBtn" id="level-select-btn">Select Level</button>
+        </div>
+
+        <div id="level-select" class="hidden">
+            <h2>Select Level</h2>
+            <div id="level-buttons"></div>
+            <button class="startBtn" id="back-to-instructions">Back</button>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <h2 id="level-title">Level 1</h2>
+            <div id="speaker">🔊</div>
+            <div id="grid"></div>
+            <div id="status">
+                <span id="level-info">Level: 1/3</span>
+                <span id="score">Score: 0</span>
+                <span id="lives">Lives: 3</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="level-complete" class="end-screen hidden">
+        <div class="end-content">
+            <h2>Level Complete! 🎉</h2>
+            <p>Score: <span id="lc-score"></span></p>
+            <p>Words Correct: <span id="lc-words"></span></p>
+            <button id="next-level">Next Level</button>
+            <button id="back-to-menu">Back to Menu</button>
+        </div>
+    </div>
+
+    <div id="victory" class="end-screen hidden">
+        <div class="end-content">
+            <h2>Victory! 🏆</h2>
+            <p>You completed all levels!</p>
+            <p>Final Score: <span id="v-score"></span></p>
+            <p>Time: <span id="v-time"></span> seconds</p>
+            <button id="restart-v">Play Again</button>
+        </div>
+    </div>
+
+    <div id="gameover" class="end-screen hidden">
+        <div class="end-content">
+            <h2>Game Over 🔄</h2>
+            <p>Try again to improve your score!</p>
+            <button id="restart-go">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Level definitions - using the requested format
+        const levels = [
+            ["all", "am", "are", "at", "ate", "be", "black", "brown", "but", "came"],
+            ["did", "do", "eat", "four", "get", "good", "have", "he", "into", "like"],
+            ["must", "new", "no", "now", "on", "our", "out", "please", "pretty", "ran"],
+            ["ride", "saw", "say", "she", "so", "soon", "that", "there", "they", "this"],
+            ["too", "under", "want", "was", "well", "went", "what", "white", "who", "will"]
+        ];
+
+        // Game state variables
+        let currentLevel = 0;
+        let remainingWords = [];
+        let currentWord;
+        let score = 0;
+        let mistakes = 0;
+        let startTime;
+        let gameStarted = false;
+        let levelComplete = false;
+
+        // DOM elements
+        const instructionsEl = document.getElementById('instructions');
+        const levelSelectEl = document.getElementById('level-select');
+        const gameAreaEl = document.getElementById('game-area');
+        const levelTitleEl = document.getElementById('level-title');
+        const levelInfoEl = document.getElementById('level-info');
+        const levelButtonsEl = document.getElementById('level-buttons');
+        const victoryEl = document.getElementById('victory');
+        const gameoverEl = document.getElementById('gameover');
+        const levelCompleteEl = document.getElementById('level-complete');
+
+        // Initialize level selection buttons
+        function initLevelSelect() {
+            levelButtonsEl.innerHTML = '';
+            levels.forEach((levelWords, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'startBtn';
+                btn.textContent = `Level ${index + 1} - ${levelWords.length} words`;
+                btn.onclick = () => startLevel(index);
+                levelButtonsEl.appendChild(btn);
+            });
+        }
+
+        // Start a specific level
+        function startLevel(levelIndex) {
+            currentLevel = levelIndex;
+            remainingWords = [...levels[currentLevel]];
+            score = 0;
+            mistakes = 0;
+            levelComplete = false;
+            startTime = Date.now();
+            
+            levelTitleEl.textContent = `Level ${currentLevel + 1}`;
+            updateStatus();
+            nextWord();
+            
+            levelSelectEl.classList.add('hidden');
+            gameAreaEl.classList.remove('hidden');
+            hideEndScreens();
+            
+            gameStarted = true;
+        }
+
+        // Start game from the beginning
+        function init() {
+            instructionsEl.classList.add('hidden');
+            levelSelectEl.classList.remove('hidden');
+            initLevelSelect();
+        }
+
+        // Proceed to the next word in the current level
+        function nextWord() {
+            if (remainingWords.length === 0) {
+                completeLevel();
+                return;
+            }
+
+            const index = Math.floor(Math.random() * remainingWords.length);
+            currentWord = remainingWords.splice(index, 1)[0];
+
+            // Create options for the current word
+            let options = [currentWord];
+            
+            // Get all words from all levels for potential distractors
+            const allWords = levels.flat();
+            const others = allWords.filter(w => w !== currentWord);
+
+            while (options.length < 4) {
+                const randIndex = Math.floor(Math.random() * others.length);
+                const randWord = others[randIndex];
+                if (!options.includes(randWord)) {
+                    options.push(randWord);
+                }
+            }
+
+            shuffle(options);
+            renderGrid(options);
+            speak(currentWord);
+        }
+
+        // Render the word selection grid
+        function renderGrid(options) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            options.forEach(word => {
+                const btn = document.createElement('button');
+                btn.className = 'word-btn';
+                btn.textContent = word;
+                btn.onclick = () => handleClick(word, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        // Handle word selection
+        function handleClick(selectedWord, buttonElement) {
+            if (!gameStarted || levelComplete) return;
+            
+            if (selectedWord === currentWord) {
+                // Correct answer
+                score++;
+                buttonElement.classList.add('correct');
+                updateStatus();
+                setTimeout(() => {
+                    buttonElement.classList.remove('correct');
+                    nextWord();
+                }, 500);
+            } else {
+                // Wrong answer
+                mistakes++;
+                buttonElement.classList.add('incorrect');
+                updateStatus();
+                
+                if (mistakes >= 3) {
+                    setTimeout(() => {
+                        buttonElement.classList.remove('incorrect');
+                        showGameOver();
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        buttonElement.classList.remove('incorrect');
+                        speak(currentWord); // Repeat the word for learning
+                    }, 500);
+                }
+            }
+        }
+
+        // Speak the word using browser's speech synthesis
+        function speak(word) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.rate = 0.8; // Slower for education
+                speechSynthesis.speak(utterance);
+                
+                // Add pulse animation to speaker
+                const speaker = document.getElementById('speaker');
+                speaker.classList.add('pulse');
+                setTimeout(() => speaker.classList.remove('pulse'), 500);
+            } else {
+                console.warn('Speech synthesis not supported');
+            }
+        }
+
+        // Update the status display
+        function updateStatus() {
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('lives').textContent = `Lives: ${3 - mistakes}`;
+            levelInfoEl.textContent = `Level: ${currentLevel + 1}/${levels.length}`;
+        }
+
+        // Handle level completion
+        function completeLevel() {
+            levelComplete = true;
+            document.getElementById('lc-score').textContent = score;
+            document.getElementById('lc-words').textContent = `${score}/${levels[currentLevel].length}`;
+            levelCompleteEl.classList.remove('hidden');
+        }
+
+        // Proceed to the next level
+        function nextLevel() {
+            if (currentLevel < levels.length - 1) {
+                startLevel(currentLevel + 1);
+            } else {
+                showVictory();
+            }
+        }
+
+        // Show victory screen
+        function showVictory() {
+            const time = ((Date.now() - startTime) / 1000).toFixed(2);
+            document.getElementById('v-score').textContent = score;
+            document.getElementById('v-time').textContent = time;
+            victoryEl.classList.remove('hidden');
+        }
+
+        // Show game over screen
+        function showGameOver() {
+            gameoverEl.classList.remove('hidden');
+        }
+
+        // Hide all end screens
+        function hideEndScreens() {
+            victoryEl.classList.add('hidden');
+            gameoverEl.classList.add('hidden');
+            levelCompleteEl.classList.add('hidden');
+        }
+
+        // Utility function to shuffle an array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Event listeners
+        document.getElementById('speaker').onclick = () => {
+            if (gameStarted && !levelComplete) speak(currentWord);
+        };
+        
+        document.getElementById('start-btn').onclick = init;
+        document.getElementById('level-select-btn').onclick = () => {
+            instructionsEl.classList.add('hidden');
+            levelSelectEl.classList.remove('hidden');
+            initLevelSelect();
+        };
+        document.getElementById('back-to-instructions').onclick = () => {
+            levelSelectEl.classList.add('hidden');
+            instructionsEl.classList.remove('hidden');
+        };
+        document.getElementById('next-level').onclick = nextLevel;
+        document.getElementById('back-to-menu').onclick = () => {
+            levelCompleteEl.classList.add('hidden');
+            instructionsEl.classList.remove('hidden');
+            gameAreaEl.classList.add('hidden');
+            gameStarted = false;
+        };
+        document.getElementById('restart-v').onclick = init;
+        document.getElementById('restart-go').onclick = init;
+    </script>
+</body>
+</html>
