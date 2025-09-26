@@ -630,10 +630,11 @@
   
   <div id="victory-overlay" class="overlay congrats">
     <div class="message-box pulse">
-      <h2>VICTORY!</h2>
+      <h2>CONTINUE!</h2>
       <p>You've completed all vowels!</p>
       <p>You're a CVC Word Master!</p>
-      <button id="victory-btn" class="btn btn-success">Play Again</button>
+      <button id="victory-btn" class="btn btn-success" style="display: none;">Play Again</button>
+      <button class="btn btn-success" id="PracBtn">Next Task</button>
     </div>
   </div>
 
@@ -643,7 +644,7 @@
     let word = '';
     let usedKeys = [];
     let mistakes = 0;
-    let maxMistakes = 5;
+    let maxMistakes = 3;
     let foundWords = {
       'a': [],
       'e': [],
@@ -707,7 +708,7 @@
     // Update UI elements
     function updateUI() {
       //const totalWords = cvcWords[currentVowel].length;
-      const totalWords = 20;
+      const totalWords = 5;
       wordsFoundEl.textContent = `${foundWords[currentVowel].length}/${totalWords}`;
       totalWordsEl.textContent = totalWords;
       wordCountEl.textContent = `${foundWords[currentVowel].length} words found out of ${totalWords}`;
@@ -821,10 +822,10 @@
           }, 2000);
           
           // Check if level is complete
-          if (foundWords[currentVowel].length === 20) {
+          if (foundWords[currentVowel].length === 5) {
             // Check if all vowels are complete
             const allComplete = vowelOrder.every(vowel => 
-              foundWords[vowel].length === 20
+              foundWords[vowel].length === 5
             );
             
             if (allComplete) {
@@ -925,6 +926,10 @@
       hideOverlay(levelUpOverlay);
       nextLevel();
     });
+    
+    document.getElementById('PracBtn').addEventListener('click', function() {
+                window.open('C-sight-pick-g1.html', '_blank');
+            });
     
     // Keyboard support
     document.addEventListener('keydown', (e) => {

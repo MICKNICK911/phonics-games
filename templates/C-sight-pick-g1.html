@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Recognition Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -90,7 +91,6 @@
             box-shadow: 0 4px 10px rgba(106, 142, 251, 0.4);
             transition: all 0.3s;
             font-weight: 600;
-            margin: 10px;
         }
 
         .startBtn:hover {
@@ -173,10 +173,6 @@
             justify-content: space-between;
             width: 100%;
             padding: 0 10px;
-        }
-
-        #level-info {
-            color: #6e8efb;
         }
 
         #score {
@@ -293,45 +289,25 @@
                 <li>Tap the <span class="highlight">speaker icon</span> to hear the word</li>
                 <li>Select the <span class="highlight">correct spelling</span> from the options</li>
                 <li>You have <span class="highlight">3 lives</span> - be careful!</li>
-                <li>Complete each level to advance to the next one!</li>
+                <li>Try to complete all words for victory!</li>
             </ul>
             <button class="startBtn" id="start-btn">Start Game</button>
-            <button class="startBtn" id="level-select-btn">Select Level</button>
+            <!--hidden link button-->
+            <button class="startBtn" id="PracBtn" style="display: none;">Practice</button>
         </div>
 
-        <div id="level-select" class="hidden">
-            <h2>Select Level</h2>
-            <div id="level-buttons"></div>
-            <button class="startBtn" id="back-to-instructions">Back</button>
-        </div>
-
-        <div id="game-area" class="hidden">
-            <h2 id="level-title">Level 1</h2>
-            <div id="speaker">🔊</div>
-            <div id="grid"></div>
-            <div id="status">
-                <span id="level-info">Level: 1/3</span>
-                <span id="score">Score: 0</span>
-                <span id="lives">Lives: 3</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="level-complete" class="end-screen hidden">
-        <div class="end-content">
-            <h2>Level Complete! 🎉</h2>
-            <p>Score: <span id="lc-score"></span></p>
-            <p>Words Correct: <span id="lc-words"></span></p>
-            <button id="next-level">Next Level</button>
-            <button id="back-to-menu">Back to Menu</button>
+        <div id="speaker"><i class="fas fa-volume-up"></i></div>
+        <div id="grid"></div>
+        <div id="status">
+            <span id="score">Score: 0</span>
+            <span id="lives">Lives: 3</span>
         </div>
     </div>
 
     <div id="victory" class="end-screen hidden">
         <div class="end-content">
-            <h2>Victory! 🏆</h2>
-            <p>You completed all levels!</p>
-            <p>Final Score: <span id="v-score"></span></p>
+            <h2>WINNER! <i class="fas fa-trophy"></i></h2>
+            <p>Score: <span id="v-score"></span></p>
             <p>Time: <span id="v-time"></span> seconds</p>
             <button id="restart-v">Play Again</button>
         </div>
@@ -339,101 +315,45 @@
 
     <div id="gameover" class="end-screen hidden">
         <div class="end-content">
-            <h2>Game Over 🔄</h2>
+            <h2>Game Over <i class="fas fa-redo"></i></h2>
             <p>Try again to improve your score!</p>
             <button id="restart-go">Try Again</button>
         </div>
     </div>
 
     <script>
-        // Level definitions - using the requested format
-        const levels = [
-  ["a", "and", "away", "big", "blue", "can", "come", "down", "find", "for", "funny", "go", "help", "here", "I", "in", "is", "it", "jump", "little", "look", "make", "me", "my", "not", "one", "play", "red", "run", "said", "see", "the", "three", "to", "two", "up", "we", "where", "yellow", "you"],
-  ["all", "am", "are", "at", "ate", "be", "black", "brown", "but", "came", "did", "do", "eat", "four", "get", "good", "have", "he", "into", "like", "must", "new", "no", "now", "on", "our", "out", "please", "pretty", "ran", "ride", "saw", "say", "she", "so", "soon", "that", "there", "they", "this", "too", "under", "want", "was", "well", "went", "what", "white", "who", "will", "with", "yes"],
-  ["after", "again", "an", "any", "as", "ask", "by", "could", "every", "fly", "from", "give", "going", "had", "has", "her", "him", "his", "how", "just", "know", "let", "live", "may", "of", "old", "once", "open", "over", "put", "round", "some", "stop", "take", "thank", "them", "then", "think", "walk", "were", "when"],
-  ["always", "around", "because", "been", "before", "best", "both", "buy", "call", "cold", "does", "don't", "fast", "first", "five", "found", "gave", "goes", "green", "its", "made", "many", "off", "or", "pull", "read", "right", "sing", "sit", "sleep", "tell", "their", "these", "those", "upon", "us", "use", "very", "wash", "which", "why", "wish", "work", "would", "write", "your"],
-  ["about", "better", "bring", "carry", "clean", "cut", "done", "draw", "drink", "eight", "fall", "far", "full", "got", "grow", "hold", "hot", "hurt", "if", "keep", "kind", "laugh", "light", "long", "much", "myself", "never", "only", "own", "pick", "seven", "shall", "show", "six", "small", "start", "ten", "today", "together", "try", "warm"],
-  ["apple", "baby", "back", "ball", "bear", "bed", "bell", "bird", "birthday", "boat", "box", "boy", "bread", "brother", "cake", "car", "cat", "chair", "chicken", "children", "Christmas", "coat", "corn", "cow", "day", "dog", "doll", "door", "duck", "egg", "eye", "farm", "farmer", "father", "feet", "fire", "fish", "floor", "flower", "game", "garden", "girl", "goodbye", "grass", "ground", "hand", "head", "hill", "home", "horse", "house", "kitty", "leg", "letter", "man", "men", "milk", "money", "morning", "mother", "name", "nest", "night", "paper", "party", "picture", "pig", "rabbit", "rain", "ring", "robin", "Santa", "Claus", "school", "seed", "sheep", "shoe", "sister", "snow", "song", "squirrel", "stick", "street", "sun", "table", "thing", "time", "top", "toy", "tree", "watch", "water", "way", "wind", "window", "wood"]
-];
+        const wordBank = ["all", "am", "are", "at", "ate", "be", "black", "brown", "but", "came", "did", "do", "eat", "four", "get", "good", "have", "he", "into", "like", "must", "new", "no", "now", "on", "our", "out", "please", "pretty", "ran", "ride", "saw", "say", "she", "so", "soon", "that", "there", "they", "this", "too", "under", "want", "was", "well", "went", "what", "white", "who", "will", "with", "yes"];
 
-        // Game state variables
-        let currentLevel = 0;
-        let remainingWords = [];
+        let remainingWords = [...wordBank];
         let currentWord;
         let score = 0;
         let mistakes = 0;
         let startTime;
         let gameStarted = false;
-        let levelComplete = false;
 
-        // DOM elements
-        const instructionsEl = document.getElementById('instructions');
-        const levelSelectEl = document.getElementById('level-select');
-        const gameAreaEl = document.getElementById('game-area');
-        const levelTitleEl = document.getElementById('level-title');
-        const levelInfoEl = document.getElementById('level-info');
-        const levelButtonsEl = document.getElementById('level-buttons');
-        const victoryEl = document.getElementById('victory');
-        const gameoverEl = document.getElementById('gameover');
-        const levelCompleteEl = document.getElementById('level-complete');
-
-        // Initialize level selection buttons
-        function initLevelSelect() {
-            levelButtonsEl.innerHTML = '';
-            levels.forEach((levelWords, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'startBtn';
-                btn.textContent = `Level ${index + 1} - ${levelWords.length} words`;
-                btn.onclick = () => startLevel(index);
-                levelButtonsEl.appendChild(btn);
-            });
-        }
-
-        // Start a specific level
-        function startLevel(levelIndex) {
-            currentLevel = levelIndex;
-            remainingWords = [...levels[currentLevel]];
+        function init() {
+            gameStarted = true;
+            document.getElementById('instructions').classList.add('hidden');
+            remainingWords = [...wordBank];
             score = 0;
             mistakes = 0;
-            levelComplete = false;
             startTime = Date.now();
-            
-            levelTitleEl.textContent = `Level ${currentLevel + 1}`;
             updateStatus();
             nextWord();
-            
-            levelSelectEl.classList.add('hidden');
-            gameAreaEl.classList.remove('hidden');
             hideEndScreens();
-            
-            gameStarted = true;
         }
 
-        // Start game from the beginning
-        function init() {
-            hideEndScreens();
-            gameAreaEl.classList.add('hidden');
-            instructionsEl.classList.add('hidden');
-            levelSelectEl.classList.remove('hidden');
-            initLevelSelect();
-        }
-
-        // Proceed to the next word in the current level
         function nextWord() {
             if (remainingWords.length === 0) {
-                completeLevel();
+                showVictory();
                 return;
             }
 
             const index = Math.floor(Math.random() * remainingWords.length);
             currentWord = remainingWords.splice(index, 1)[0];
 
-            // Create options for the current word
             let options = [currentWord];
-            
-            // Get all words from all levels for potential distractors
-            const allWords = levels.flat();
-            const others = allWords.filter(w => w !== currentWord);
+            const others = wordBank.filter(w => w !== currentWord);
 
             while (options.length < 4) {
                 const randIndex = Math.floor(Math.random() * others.length);
@@ -448,7 +368,6 @@
             speak(currentWord);
         }
 
-        // Render the word selection grid
         function renderGrid(options) {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -461,9 +380,8 @@
             });
         }
 
-        // Handle word selection
         function handleClick(selectedWord, buttonElement) {
-            if (!gameStarted || levelComplete) return;
+            if (!gameStarted) return;
             
             if (selectedWord === currentWord) {
                 // Correct answer
@@ -494,7 +412,6 @@
             }
         }
 
-        // Speak the word using browser's speech synthesis
         function speak(word) {
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(word);
@@ -510,51 +427,27 @@
             }
         }
 
-        // Update the status display
         function updateStatus() {
             document.getElementById('score').textContent = `Score: ${score}`;
             document.getElementById('lives').textContent = `Lives: ${3 - mistakes}`;
-            levelInfoEl.textContent = `Level: ${currentLevel + 1}/${levels.length}`;
         }
 
-        // Handle level completion
-        function completeLevel() {
-            levelComplete = true;
-            document.getElementById('lc-score').textContent = score;
-            document.getElementById('lc-words').textContent = `${score}/${levels[currentLevel].length}`;
-            levelCompleteEl.classList.remove('hidden');
-        }
-
-        // Proceed to the next level
-        function nextLevel() {
-            if (currentLevel < levels.length - 1) {
-                startLevel(currentLevel + 1);
-            } else {
-                showVictory();
-            }
-        }
-
-        // Show victory screen
         function showVictory() {
             const time = ((Date.now() - startTime) / 1000).toFixed(2);
             document.getElementById('v-score').textContent = score;
             document.getElementById('v-time').textContent = time;
-            victoryEl.classList.remove('hidden');
+            document.getElementById('victory').classList.remove('hidden');
         }
 
-        // Show game over screen
         function showGameOver() {
-            gameoverEl.classList.remove('hidden');
+            document.getElementById('gameover').classList.remove('hidden');
         }
 
-        // Hide all end screens
         function hideEndScreens() {
-            victoryEl.classList.add('hidden');
-            gameoverEl.classList.add('hidden');
-            levelCompleteEl.classList.add('hidden');
+            document.getElementById('victory').classList.add('hidden');
+            document.getElementById('gameover').classList.add('hidden');
         }
 
-        // Utility function to shuffle an array
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -564,28 +457,16 @@
 
         // Event listeners
         document.getElementById('speaker').onclick = () => {
-            if (gameStarted && !levelComplete) speak(currentWord);
+            if (gameStarted) speak(currentWord);
         };
         
         document.getElementById('start-btn').onclick = init;
-        document.getElementById('level-select-btn').onclick = () => {
-            instructionsEl.classList.add('hidden');
-            levelSelectEl.classList.remove('hidden');
-            initLevelSelect();
-        };
-        document.getElementById('back-to-instructions').onclick = () => {
-            levelSelectEl.classList.add('hidden');
-            instructionsEl.classList.remove('hidden');
-        };
-        document.getElementById('next-level').onclick = nextLevel;
-        document.getElementById('back-to-menu').onclick = () => {
-            levelCompleteEl.classList.add('hidden');
-            instructionsEl.classList.remove('hidden');
-            gameAreaEl.classList.add('hidden');
-            gameStarted = false;
-        };
         document.getElementById('restart-v').onclick = init;
         document.getElementById('restart-go').onclick = init;
+        
+        document.getElementById('PracBtn').addEventListener('click', function() {
+                window.open('P-sight-pick-pract.html', '_blank');
+            });
     </script>
 </body>
 </html>
