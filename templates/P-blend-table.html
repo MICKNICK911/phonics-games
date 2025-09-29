@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Blends - Educational Resource</title>
+    <style>
+        :root {
+            /* Light mode variables */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f5f9ff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-muted: #6c757d;
+            --accent-primary: #3498db;
+            --accent-secondary: #2980b9;
+            --accent-success: #2ecc71;
+            --border-color: #e9ecef;
+            --shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.05);
+            --beginning-blend-bg: #e3f2fd;
+            --beginning-blend-color: #1976d2;
+            --beginning-blend-border: #1976d2;
+            --ending-blend-bg: #ffebee;
+            --ending-blend-color: #d32f2f;
+            --ending-blend-border: #d32f2f;
+            --beginning-highlight-bg: #bbdefb;
+            --beginning-highlight-color: #0d47a1;
+            --ending-highlight-bg: #ffcdd2;
+            --ending-highlight-color: #b71c1c;
+            --example-word-color: #000000;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode variables */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d3748;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --text-muted: #6c757d;
+            --accent-primary: #4dabf7;
+            --accent-secondary: #339af0;
+            --accent-success: #51cf66;
+            --border-color: #343a40;
+            --shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.2);
+            --beginning-blend-bg: #1a3c5a;
+            --beginning-blend-color: #90caf9;
+            --beginning-blend-border: #42a5f5;
+            --ending-blend-bg: #4a1c2a;
+            --ending-blend-color: #ef9a9a;
+            --ending-blend-border: #e57373;
+            --beginning-highlight-bg: #0d3b66;
+            --beginning-highlight-color: #bbdefb;
+            --ending-highlight-bg: #5c1c2a;
+            --ending-highlight-color: #ffcdd2;
+            --example-word-color: #e9ecef;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header-content {
+            flex: 1;
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-button {
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .control-button:hover {
+            background-color: var(--accent-secondary);
+            transform: scale(1.05);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        
+        .instructions h2 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .instructions p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .blend-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 1.2rem;
+        }
+        
+        .beginning-blend {
+            background-color: var(--beginning-blend-bg);
+            color: var(--beginning-blend-color);
+            border-left: 5px solid var(--beginning-blend-border);
+        }
+        
+        .ending-blend {
+            background-color: var(--ending-blend-bg);
+            color: var(--ending-blend-color);
+            border-left: 5px solid var(--ending-blend-border);
+        }
+        
+        .blend-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .blend-table th, .blend-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        .blend-table th {
+            background-color: var(--bg-tertiary);
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 1.6rem; /* Larger font for blend sounds */
+        }
+        
+        .beginning-blend-cell {
+            background-color: var(--beginning-blend-bg);
+            color: var(--beginning-blend-color);
+            font-weight: bold;
+        }
+        
+        .ending-blend-cell {
+            background-color: var(--ending-blend-bg);
+            color: var(--ending-blend-color);
+            font-weight: bold;
+        }
+        
+        .example-cell {
+            background-color: var(--bg-secondary);
+            color: var(--example-word-color);
+            font-size: 1.1rem; /* Smaller font for example words */
+        }
+        
+        .interactive-section {
+            background-color: var(--bg-tertiary);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 40px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .interactive-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        
+        .word-display {
+            font-size: 2rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+        
+        .blend-highlight {
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 2.2rem; /* Slightly larger for emphasis */
+        }
+        
+        .beginning-highlight {
+            background-color: var(--beginning-highlight-bg);
+            color: var(--beginning-highlight-color);
+        }
+        
+        .ending-highlight {
+            background-color: var(--ending-highlight-bg);
+            color: var(--ending-highlight-color);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background-color: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+        
+        .practice-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .word-btn {
+            padding: 8px 15px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .word-btn:hover {
+            background-color: var(--accent-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        /* Progress indicator */
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 5px;
+        }
+        
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            transition: background-color 0.3s;
+        }
+        
+        .progress-dot.active {
+            background-color: var(--accent-primary);
+        }
+        
+        /* Stats section */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background-color: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .blend-table th, .blend-table td {
+                padding: 8px 10px;
+            }
+            
+            .blend-table th {
+                font-size: 1.4rem; /* Slightly smaller on mobile */
+            }
+            
+            .example-cell {
+                font-size: 1rem;
+            }
+            
+            .word-display {
+                font-size: 1.5rem;
+            }
+            
+            .blend-highlight {
+                font-size: 1.7rem; /* Adjusted for mobile */
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .blend-table {
+                font-size: 0.8rem;
+            }
+            
+            .blend-table th {
+                font-size: 1.2rem; /* Further adjustment for small screens */
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Phonics Blends</h1>
+                <p class="subtitle">Master consonant blends to improve reading and spelling skills</p>
+            </div>
+            <div class="header-controls">
+                <button class="control-button" id="themeToggle" title="Toggle dark/light mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="control-button" id="infoButton" title="Show instructions">
+                    <i class="fas fa-info"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Modal for Instructions -->
+        <div class="modal" id="instructionsModal">
+            <div class="modal-content">
+                <button class="close-button" id="closeModal">&times;</button>
+                <div class="instructions">
+                    <h2>How to Use This Resource</h2>
+                    <p>Welcome to the Phonics Blends educational tool! This resource helps you learn and practice consonant blends, which are two or three consonants that appear together in a word while keeping their individual sounds.</p>
+                    
+                    <h3>Understanding Blends</h3>
+                    <ul>
+                        <li><strong>Beginning Blends</strong> (in blue) appear at the start of words.</li>
+                        <li><strong>Ending Blends</strong> (in red) appear at the end of words.</li>
+                        <li>Some blends like "st", "sk", and "sp" can appear at both the beginning and end of words.</li>
+                    </ul>
+                    
+                    <h3>How to Practice</h3>
+                    <ul>
+                        <li>Read the words in the tables aloud, focusing on the blend sounds.</li>
+                        <li>Use the interactive practice section to test your knowledge.</li>
+                        <li>Click "Next Word" to cycle through words randomly.</li>
+                        <li>Click "Show Blend" to highlight the blend in the current word.</li>
+                        <li>Click on any word button to practice that specific word.</li>
+                    </ul>
+                    
+                    <h3>Tips for Success</h3>
+                    <ul>
+                        <li>Practice a little every day for best results.</li>
+                        <li>Say the words out loud to reinforce the sounds.</li>
+                        <li>Try to think of other words that use the same blends.</li>
+                        <li>Toggle between light and dark mode using the moon button.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <section class="blend-section">
+            <div class="section-title beginning-blend">
+                <i class="fas fa-play-circle"></i>
+                Beginning Blends
+            </div>
+            
+            <table class="blend-table">
+                <tr>
+                    <th class="beginning-blend-cell">bl</th>
+                    <th class="beginning-blend-cell">cl</th>
+                    <th class="beginning-blend-cell">fl</th>
+                    <th class="beginning-blend-cell">gl</th>
+                    <th class="beginning-blend-cell">pl</th>
+                    <th class="beginning-blend-cell">sl</th>
+                    <th class="beginning-blend-cell">br</th>
+                    <th class="beginning-blend-cell">cr</th>
+                    <th class="beginning-blend-cell">dr</th>
+                    <th class="beginning-blend-cell">fr</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">blast</td>
+                    <td class="example-cell">class</td>
+                    <td class="example-cell">flip</td>
+                    <td class="example-cell">glass</td>
+                    <td class="example-cell">plus</td>
+                    <td class="example-cell">slip</td>
+                    <td class="example-cell">brown</td>
+                    <td class="example-cell">crab</td>
+                    <td class="example-cell">drop</td>
+                    <td class="example-cell">from</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">black</td>
+                    <td class="example-cell">clip</td>
+                    <td class="example-cell">flat</td>
+                    <td class="example-cell">glow</td>
+                    <td class="example-cell">play</td>
+                    <td class="example-cell">slow</td>
+                    <td class="example-cell">brush</td>
+                    <td class="example-cell">crash</td>
+                    <td class="example-cell">drink</td>
+                    <td class="example-cell">fresh</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">blue</td>
+                    <td class="example-cell">click</td>
+                    <td class="example-cell">flask</td>
+                    <td class="example-cell">glue</td>
+                    <td class="example-cell">plant</td>
+                    <td class="example-cell">slide</td>
+                    <td class="example-cell">bring</td>
+                    <td class="example-cell">crop</td>
+                    <td class="example-cell">draw</td>
+                    <td class="example-cell">frame</td>
+                </tr>
+            </table>
+            
+            <table class="blend-table">
+                <tr>
+                    <th class="beginning-blend-cell">gr</th>
+                    <th class="beginning-blend-cell">pr</th>
+                    <th class="beginning-blend-cell">tr</th>
+                    <th class="beginning-blend-cell">sc</th>
+                    <th class="beginning-blend-cell">sk</th>
+                    <th class="beginning-blend-cell">squ</th>
+                    <th class="beginning-blend-cell">st</th>
+                    <th class="beginning-blend-cell">sm</th>
+                    <th class="beginning-blend-cell">sn</th>
+                    <th class="beginning-blend-cell">sp</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">grape</td>
+                    <td class="example-cell">prune</td>
+                    <td class="example-cell">tree</td>
+                    <td class="example-cell">scale</td>
+                    <td class="example-cell">skull</td>
+                    <td class="example-cell">squat</td>
+                    <td class="example-cell">start</td>
+                    <td class="example-cell">small</td>
+                    <td class="example-cell">snake</td>
+                    <td class="example-cell">spine</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">grip</td>
+                    <td class="example-cell">pray</td>
+                    <td class="example-cell">try</td>
+                    <td class="example-cell">scan</td>
+                    <td class="example-cell">skin</td>
+                    <td class="example-cell">squeeze</td>
+                    <td class="example-cell">stop</td>
+                    <td class="example-cell">smart</td>
+                    <td class="example-cell">snap</td>
+                    <td class="example-cell">space</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">grow</td>
+                    <td class="example-cell">pride</td>
+                    <td class="example-cell">trust</td>
+                    <td class="example-cell">scalp</td>
+                    <td class="example-cell">skill</td>
+                    <td class="example-cell">square</td>
+                    <td class="example-cell">stone</td>
+                    <td class="example-cell">smile</td>
+                    <td class="example-cell">sneeze</td>
+                    <td class="example-cell">spend</td>
+                </tr>
+            </table>
+            
+            <table class="blend-table">
+                <tr>
+                    <th class="beginning-blend-cell">sw</th>
+                    <th class="beginning-blend-cell">tw</th>
+                    <th class="beginning-blend-cell">dw</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">sweet</td>
+                    <td class="example-cell">twist</td>
+                    <td class="example-cell">dwell</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">swim</td>
+                    <td class="example-cell">twin</td>
+                    <td class="example-cell">dwarf</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">swing</td>
+                    <td class="example-cell">twine</td>
+                    <td class="example-cell">dwine</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section class="blend-section">
+            <div class="section-title ending-blend">
+                <i class="fas fa-stop-circle"></i>
+                Ending Blends
+            </div>
+            
+            <table class="blend-table">
+                <tr>
+                    <th class="ending-blend-cell">st</th>
+                    <th class="ending-blend-cell">sk</th>
+                    <th class="ending-blend-cell">sp</th>
+                    <th class="ending-blend-cell">nd</th>
+                    <th class="ending-blend-cell">nt</th>
+                    <th class="ending-blend-cell">nk</th>
+                    <th class="ending-blend-cell">mp</th>
+                    <th class="ending-blend-cell">ld</th>
+                    <th class="ending-blend-cell">lp</th>
+                    <th class="ending-blend-cell">pt</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">list</td>
+                    <td class="example-cell">flask</td>
+                    <td class="example-cell">rasp</td>
+                    <td class="example-cell">hand</td>
+                    <td class="example-cell">plant</td>
+                    <td class="example-cell">sink</td>
+                    <td class="example-cell">jump</td>
+                    <td class="example-cell">wild</td>
+                    <td class="example-cell">help</td>
+                    <td class="example-cell">kept</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">fast</td>
+                    <td class="example-cell">husk</td>
+                    <td class="example-cell">grasp</td>
+                    <td class="example-cell">land</td>
+                    <td class="example-cell">went</td>
+                    <td class="example-cell">blink</td>
+                    <td class="example-cell">camp</td>
+                    <td class="example-cell">hold</td>
+                    <td class="example-cell">gulp</td>
+                    <td class="example-cell">wept</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">best</td>
+                    <td class="example-cell">desk</td>
+                    <td class="example-cell">gasp</td>
+                    <td class="example-cell">blend</td>
+                    <td class="example-cell">rent</td>
+                    <td class="example-cell">bank</td>
+                    <td class="example-cell">pump</td>
+                    <td class="example-cell">child</td>
+                    <td class="example-cell">scalp</td>
+                    <td class="example-cell">slept</td>
+                </tr>
+            </table>
+            
+            <table class="blend-table">
+                <tr>
+                    <th class="ending-blend-cell">ft</th>
+                    <th class="ending-blend-cell">ct</th>
+                    <th class="ending-blend-cell">lk</th>
+                    <th class="ending-blend-cell">lt</th>
+                    <th class="ending-blend-cell">xt</th>
+                    <th class="ending-blend-cell">ts</th>
+                    <th class="ending-blend-cell">rd</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">left</td>
+                    <td class="example-cell">fact</td>
+                    <td class="example-cell">milk</td>
+                    <td class="example-cell">salt</td>
+                    <td class="example-cell">text</td>
+                    <td class="example-cell">pets</td>
+                    <td class="example-cell">hard</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">soft</td>
+                    <td class="example-cell">erect</td>
+                    <td class="example-cell">walk</td>
+                    <td class="example-cell">felt</td>
+                    <td class="example-cell">next</td>
+                    <td class="example-cell">pots</td>
+                    <td class="example-cell">word</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">swift</td>
+                    <td class="example-cell">sect</td>
+                    <td class="example-cell">talk</td>
+                    <td class="example-cell">malt</td>
+                    <td class="example-cell">Ext</td>
+                    <td class="example-cell">cats</td>
+                    <td class="example-cell">herd</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section class="interactive-section">
+            <h2 class="interactive-title">Practice Reading Words with Blends</h2>
+            
+            <div class="word-display" id="wordDisplay">
+                Click "Next Word" to start practicing!
+            </div>
+            
+            <div class="progress-indicator" id="progressIndicator">
+                <!-- Progress dots will be added by JavaScript -->
+            </div>
+            
+            <div class="controls">
+                <button id="nextWordBtn">
+                    <i class="fas fa-arrow-right"></i> Next Word
+                </button>
+                <button id="showBlendBtn">
+                    <i class="fas fa-highlighter"></i> Show Blend
+                </button>
+                <button id="resetBtn">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="wordsPracticed">0</div>
+                    <div class="stat-label">Words Practiced</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="blendsIdentified">0</div>
+                    <div class="stat-label">Blends Identified</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyRate">0%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+            </div>
+            
+            <div class="practice-words" id="practiceWords">
+                <!-- Word buttons will be added here by JavaScript -->
+            </div>
+        </section>
+        
+        <footer>
+            <p>Phonics Blends Educational Resource &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('i');
+            
+            // Check for saved theme preference or default to light
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            
+            // Update icon based on current theme
+            updateThemeIcon(currentTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                // Toggle between light and dark
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.className = 'fas fa-sun';
+                    themeToggle.title = 'Switch to light mode';
+                } else {
+                    themeIcon.className = 'fas fa-moon';
+                    themeToggle.title = 'Switch to dark mode';
+                }
+            }
+            
+            // Modal functionality
+            const modal = document.getElementById('instructionsModal');
+            const infoButton = document.getElementById('infoButton');
+            const closeModal = document.getElementById('closeModal');
+            
+            // Show modal when info button is clicked
+            infoButton.addEventListener('click', function() {
+                modal.style.display = 'flex';
+            });
+            
+            // Close modal when X is clicked
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside the modal content
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Collect all words from the tables
+            const allWords = [];
+            const exampleCells = document.querySelectorAll('.example-cell');
+            
+            exampleCells.forEach(cell => {
+                const word = cell.textContent.trim();
+                if (word && !allWords.includes(word)) {
+                    allWords.push(word);
+                }
+            });
+            
+            // Initialize variables for the interactive section
+            let currentWordIndex = -1;
+            let practiceStats = {
+                wordsPracticed: 0,
+                blendsIdentified: 0,
+                correctAttempts: 0
+            };
+            
+            const wordDisplay = document.getElementById('wordDisplay');
+            const nextWordBtn = document.getElementById('nextWordBtn');
+            const showBlendBtn = document.getElementById('showBlendBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const practiceWordsContainer = document.getElementById('practiceWords');
+            const progressIndicator = document.getElementById('progressIndicator');
+            
+            // Stats elements
+            const wordsPracticedElement = document.getElementById('wordsPracticed');
+            const blendsIdentifiedElement = document.getElementById('blendsIdentified');
+            const accuracyRateElement = document.getElementById('accuracyRate');
+            
+            // Create word buttons for quick access (limited to 30 to avoid overcrowding)
+            const displayWords = allWords.length > 30 ? allWords.slice(0, 30) : allWords;
+            displayWords.forEach((word, index) => {
+                const button = document.createElement('button');
+                button.textContent = word;
+                button.className = 'word-btn';
+                button.addEventListener('click', () => {
+                    displayWord(word, true);
+                    practiceStats.wordsPracticed++;
+                    updateStats();
+                });
+                practiceWordsContainer.appendChild(button);
+            });
+            
+            // Create progress indicator dots
+            for (let i = 0; i < 10; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                progressIndicator.appendChild(dot);
+            }
+            
+            // Function to update progress indicator
+            function updateProgressIndicator() {
+                const dots = progressIndicator.querySelectorAll('.progress-dot');
+                dots.forEach((dot, index) => {
+                    if (index < practiceStats.wordsPracticed % 10) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Function to update stats display
+            function updateStats() {
+                wordsPracticedElement.textContent = practiceStats.wordsPracticed;
+                blendsIdentifiedElement.textContent = practiceStats.blendsIdentified;
+                
+                const accuracyRate = practiceStats.wordsPracticed > 0 ? 
+                    Math.round((practiceStats.correctAttempts / practiceStats.wordsPracticed) * 100) : 0;
+                accuracyRateElement.textContent = `${accuracyRate}%`;
+                
+                updateProgressIndicator();
+            }
+            
+            // Function to display a word and optionally highlight its blend
+            function displayWord(word, highlightBlend = false) {
+                wordDisplay.innerHTML = '';
+                
+                if (!highlightBlend) {
+                    wordDisplay.textContent = word;
+                    return;
+                }
+                
+                // Determine if it's a beginning or ending blend
+                const beginningBlends = ['bl', 'cl', 'fl', 'gl', 'pl', 'sl', 'br', 'cr', 'dr', 'fr', 
+                                        'gr', 'pr', 'tr', 'sc', 'sk', 'squ', 'st', 'sm', 'sn', 'sp', 
+                                        'sw', 'tw', 'dw'];
+                const endingBlends = ['ld', 'lp', 'pt', 'ft', 'ct', 'lk', 'lt', 'xt', 'ts', 'rd', 
+                                     'nd', 'nt', 'nk', 'mp', 'st', 'sk', 'sp'];
+                
+                let blendFound = false;
+                
+                // Check for beginning blends
+                for (const blend of beginningBlends) {
+                    if (word.startsWith(blend)) {
+                        const blendSpan = document.createElement('span');
+                        blendSpan.className = 'blend-highlight beginning-highlight';
+                        blendSpan.textContent = blend;
+                        
+                        const restOfWord = document.createTextNode(word.substring(blend.length));
+                        
+                        wordDisplay.appendChild(blendSpan);
+                        wordDisplay.appendChild(restOfWord);
+                        blendFound = true;
+                        practiceStats.blendsIdentified++;
+                        practiceStats.correctAttempts++;
+                        break;
+                    }
+                }
+                
+                // If no beginning blend found, check for ending blends
+                if (!blendFound) {
+                    for (const blend of endingBlends) {
+                        if (word.endsWith(blend)) {
+                            const blendIndex = word.length - blend.length;
+                            const beginningOfWord = document.createTextNode(word.substring(0, blendIndex));
+                            
+                            const blendSpan = document.createElement('span');
+                            blendSpan.className = 'blend-highlight ending-highlight';
+                            blendSpan.textContent = blend;
+                            
+                            wordDisplay.appendChild(beginningOfWord);
+                            wordDisplay.appendChild(blendSpan);
+                            blendFound = true;
+                            practiceStats.blendsIdentified++;
+                            practiceStats.correctAttempts++;
+                            break;
+                        }
+                    }
+                }
+                
+                // If no blend found, just display the word normally
+                if (!blendFound) {
+                    wordDisplay.textContent = word;
+                }
+                
+                updateStats();
+            }
+            
+            // Event listeners for buttons
+            nextWordBtn.addEventListener('click', function() {
+                currentWordIndex = (currentWordIndex + 1) % allWords.length;
+                displayWord(allWords[currentWordIndex], false);
+                practiceStats.wordsPracticed++;
+                updateStats();
+            });
+            
+            showBlendBtn.addEventListener('click', function() {
+                if (currentWordIndex >= 0) {
+                    displayWord(allWords[currentWordIndex], true);
+                } else {
+                    alert('Please select a word first!');
+                }
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                currentWordIndex = -1;
+                wordDisplay.textContent = 'Click "Next Word" to start practicing!';
+                practiceStats = {
+                    wordsPracticed: 0,
+                    blendsIdentified: 0,
+                    correctAttempts: 0
+                };
+                updateStats();
+            });
+            
+            // Initialize stats
+            updateStats();
+        });
+    </script>
+</body>
+</html>
