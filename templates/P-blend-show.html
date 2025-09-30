@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Blends Game</title>
+    <style>
+        :root {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e3f2fd;
+            --text-primary: #1a237e;
+            --text-secondary: #5c6bc0;
+            --text-muted: #9fa8da;
+            --accent-primary: #2196f3;
+            --accent-secondary: #1976d2;
+            --accent-success: #4caf50;
+            --accent-warning: #ff9800;
+            --accent-danger: #f44336;
+            --border-color: #c5cae9;
+            --shadow: 0 8px 24px rgba(33, 150, 243, 0.15);
+            --shadow-light: 0 4px 12px rgba(33, 150, 243, 0.1);
+            --beginning-blend-color: #1565c0;
+            --ending-blend-color: #c62828;
+            --highlight-color: #ffeb3b;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #4D0026 100%);
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 25%;
+            width: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+            border-radius: 2px;
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .game-area {
+            margin-bottom: 30px;
+        }
+        
+        .word-display {
+            font-size: 3.5rem;
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .word-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .letter {
+            display: inline-block;
+            padding: 12px 18px;
+            margin: 6px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            border: 2px solid transparent;
+            font-size: 2.8rem;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .letter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .letter:hover {
+            background: rgba(33, 150, 243, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .letter:hover::before {
+            left: 100%;
+        }
+        
+        .letter.selected {
+            background: var(--highlight-color);
+            border-color: #ffc107;
+            transform: scale(1.08);
+            box-shadow: 0 8px 16px rgba(255, 193, 7, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(33, 150, 243, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:active {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: linear-gradient(135deg, var(--text-muted), #b0bec5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #checkWordBtn {
+            background: linear-gradient(135deg, var(--accent-success), #2e7d32);
+            box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
+        }
+        
+        #checkWordBtn:hover {
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: var(--glass-bg);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            flex: 1;
+            min-width: 140px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .attempts {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .attempt {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .attempt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-danger);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .attempt.used::before {
+            transform: scale(1);
+        }
+        
+        .feedback-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            max-width: 90%;
+            width: 400px;
+        }
+        
+        .feedback-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .feedback-popup.correct {
+            border-top: 6px solid var(--accent-success);
+        }
+        
+        .feedback-popup.incorrect {
+            border-top: 6px solid var(--accent-danger);
+        }
+        
+        .feedback-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .feedback-popup.correct .feedback-icon {
+            color: var(--accent-success);
+        }
+        
+        .feedback-popup.incorrect .feedback-icon {
+            color: var(--accent-danger);
+        }
+        
+        .feedback-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .feedback-popup.correct .feedback-title {
+            color: var(--accent-success);
+        }
+        
+        .feedback-popup.incorrect .feedback-title {
+            color: var(--accent-danger);
+        }
+        
+        .feedback-message {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .game-over, .victory {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .game-over-content, .victory-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 50px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+        }
+        
+        .game-over h2, .victory h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .game-over p, .victory p {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+        }
+        
+        .instructions {
+            margin-top: 40px;
+            padding: 25px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            text-align: left;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        @media (max-width: 768px) {
+            .word-display {
+                font-size: 2.8rem;
+            }
+            
+            .letter {
+                font-size: 2.2rem;
+                padding: 10px 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .stat-card {
+                min-width: 120px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .word-display {
+                font-size: 2.2rem;
+                padding: 20px;
+            }
+            
+            .letter {
+                font-size: 1.8rem;
+                padding: 8px 12px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>Phonics Blends Game</h1>
+            <p class="subtitle">Identify consonant blends in words</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="word-display" id="wordDisplay">
+                <!-- Letters will be added here by JavaScript -->
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div class="controls">
+                <button id="checkWordBtn" disabled>Check Selection</button>
+                <button id="clearSelectionBtn">Clear Selection</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="wordsCompleted">0</div>
+                    <div class="stat-label">Words Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="blendsFound">0</div>
+                    <div class="stat-label">Blends Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyRate">100%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+            </div>
+            
+            <div class="attempts" id="attempts">
+                <!-- Attempt indicators will be added here by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <ul>
+                <li>Tap on a single letter to highlight it</li>
+                <li>Tap on two letters to highlight all letters between them</li>
+                <li>Click "Check Selection" to verify if your selection is a valid blend</li>
+                <li>Find all blends in the word to advance to the next word</li>
+                <li>You have 3 attempts per word</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="feedback-popup" id="feedbackPopup">
+        <div class="feedback-icon" id="feedbackIcon"></div>
+        <h2 class="feedback-title" id="feedbackTitle"></h2>
+        <p class="feedback-message" id="feedbackMessage"></p>
+    </div>
+    
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2>Game Over</h2>
+            <p>You've used all your attempts!</p>
+            <p>Words Completed: <span id="finalScore">0</span></p>
+            <button id="restartGameBtn">Play Again</button>
+        </div>
+    </div>
+    
+    <div class="victory" id="victory">
+        <div class="victory-content">
+            <h2>VICTORY!</h2>
+            <p>You've successfully identified all blends!</p>
+            <p>Words Completed: <span id="victoryScore">0</span></p>
+            <button id="playAgainBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game data - all blends and examples from the previous app
+            const gameData = {
+    beginningBlends: {
+        'bl': ['blast', 'black', 'blue', 'blob', 'blot', 'blur', 'blip', 'blend', 'blink', 'bluff'],
+        'cl': ['class', 'clip', 'click', 'clap', 'clog', 'cluck', 'clamp', 'clasp', 'cliff', 'clank'],
+        'fl': ['flip', 'flat', 'flask', 'flop', 'fluff', 'flock', 'flame', 'flute', 'flash', 'fling'],
+        'gl': ['glass', 'glow', 'glue', 'glad', 'globe', 'glide', 'gloss', 'glint', 'glare', 'glaze'],
+        'pl': ['plus', 'play', 'plant', 'plop', 'pluck', 'plum', 'plank', 'plaza', 'plead', 'plump'],
+        'sl': ['slip', 'slow', 'slide', 'slap', 'slop', 'slush', 'slab', 'sleek', 'slate', 'sling'],
+        'br': ['brown', 'brush', 'bring', 'brass', 'brick', 'brim', 'brook', 'brave', 'bride', 'brunt'],
+        'cr': ['crab', 'crash', 'crop', 'cram', 'crisp', 'crank', 'crust', 'crest', 'crunch', 'crate'],
+        'dr': ['drop', 'drink', 'draw', 'drum', 'drill', 'dress', 'drift', 'drone', 'draft', 'drain'],
+        'fr': ['from', 'fresh', 'frame', 'frog', 'frost', 'frill', 'frock', 'frond', 'frizz', 'frown'],
+        'gr': ['grape', 'grip', 'grow', 'grin', 'grub', 'grill', 'grump', 'grate', 'grind', 'grout'],
+        'pr': ['prune', 'pray', 'pride', 'prom', 'prong', 'prank', 'print', 'prism', 'probe', 'prone'],
+        'tr': ['tree', 'try', 'trust', 'trap', 'truck', 'trick', 'trunk', 'trout', 'tract', 'trump'],
+        'sc': ['scale', 'scan', 'scalp', 'scum', 'scuff', 'scamp', 'scold', 'scrap', 'scout', 'scowl'],
+        'sk': ['skull', 'skin', 'skill', 'skid', 'skimp', 'skate', 'skunk', 'skirt', 'skiff', 'skulk'],
+        'squ': ['squat', 'squeeze', 'square', 'squid', 'squash', 'squint', 'squirm', 'squeak', 'squeal', 'squall'],
+        'st': ['start', 'stop', 'stone', 'stamp', 'stunt', 'sting', 'stunk', 'stiff', 'stalk', 'stomp'],
+        'sm': ['small', 'smart', 'smile', 'smell', 'smack', 'smock', 'smash', 'smelt', 'smite', 'smoke'],
+        'sn': ['snake', 'snap', 'sneeze', 'snip', 'snob', 'snug', 'snack', 'snort', 'snout', 'snarl'],
+        'sp': ['spine', 'space', 'spend', 'spit', 'spun', 'spell', 'spent', 'spoil', 'spout', 'spark'],
+        'sw': ['sweet', 'swim', 'swing', 'swell', 'swamp', 'swift', 'swung', 'swept', 'sworn', 'swish'],
+        'tw': ['twist', 'twin', 'twine', 'tweet', 'tweed', 'twang', 'twerp', 'twirl', 'twice', 'twist'],
+        'dw': ['dwell', 'dwarf', 'dwine', 'dwelt', 'dwang', 'dwaum', 'dwarf', 'dwell', 'dwelt', 'dwale']
+    },
+    endingBlends: {
+        'st': ['list', 'fast', 'best', 'last', 'past', 'cost', 'dust', 'just', 'must', 'rest'],
+        'sk': ['flask', 'husk', 'desk', 'task', 'mask', 'risk', 'brisk', 'cask', 'disk', 'dusk'],
+        'sp': ['rasp', 'grasp', 'gasp', 'clasp', 'crisp', 'lisp', 'wasp', 'hasp', 'risp', 'gisp'],
+        'nd': ['hand', 'land', 'blend', 'band', 'end', 'fond', 'gland', 'pond', 'sand', 'wind'],
+        'nt': ['plant', 'went', 'rent', 'ant', 'bent', 'cent', 'dent', 'gent', 'hint', 'lint'],
+        'mp': ['jump', 'camp', 'pump', 'bump', 'dump', 'hump', 'lump', 'plump', 'rump', 'sump'],
+        'ld': ['wild', 'hold', 'child', 'bold', 'cold', 'fold', 'gold', 'mold', 'told', 'weld'],
+        'lp': ['help', 'gulp', 'scalp', 'pulp', 'yelp', 'kelp', 'whelp', 'skelp', 'palp', 'milp'],
+        'pt': ['kept', 'wept', 'slept', 'crept', 'swept', 'lept', 'apt', 'opt', 'rapt', 'sept'],
+        'ft': ['left', 'soft', 'swift', 'craft', 'drift', 'gift', 'lift', 'sift', 'tuft', 'waft'],
+        'ct': ['fact', 'erect', 'sect', 'act', 'duct', 'lect', 'pact', 'tact', 'rict', 'fict'],
+        'lk': ['milk', 'walk', 'talk', 'chalk', 'stalk', 'bulk', 'hulk', 'sulk', 'elk', 'ilka'],
+        'lt': ['salt', 'felt', 'malt', 'belt', 'celta', 'gilt', 'jolt', 'kilt', 'lilt', 'milt'],
+        'xt': ['text', 'next', 'Ext', 'fixt', 'mixt', 'sext', 'vext', 'coxt', 'prext', 'tuxt'],
+        'ts': ['pets', 'pots', 'cats', 'bats', 'rats', 'hats', 'mats', 'pats', 'vats', 'gets'],
+        'rd': ['hard', 'word', 'herd', 'bard', 'card', 'ford', 'lord', 'sard', 'ward', 'yard']
+    }
+};
+            
+            // Flatten all words into a single array
+            const allWords = [];
+            for (const blend in gameData.beginningBlends) {
+                allWords.push(...gameData.beginningBlends[blend]);
+            }
+            for (const blend in gameData.endingBlends) {
+                allWords.push(...gameData.endingBlends[blend]);
+            }
+            
+            // Remove duplicates
+            const uniqueWords = [...new Set(allWords)];
+            
+            // Game state
+            let gameState = {
+                currentWord: '',
+                selectedLetters: [],
+                wordsCompleted: 0,
+                blendsFound: 0,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                attemptsRemaining: 3,
+                gameActive: true,
+                allBlendsInWord: [],
+                totalWords: uniqueWords.length
+            };
+            
+            const numwords = 40;
+            
+            // DOM elements
+            const wordDisplay = document.getElementById('wordDisplay');
+            const checkWordBtn = document.getElementById('checkWordBtn');
+            const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+            const feedbackPopup = document.getElementById('feedbackPopup');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+            const wordsCompletedElement = document.getElementById('wordsCompleted');
+            const blendsFoundElement = document.getElementById('blendsFound');
+            const accuracyRateElement = document.getElementById('accuracyRate');
+            const attemptsContainer = document.getElementById('attempts');
+            const gameOverScreen = document.getElementById('gameOver');
+            const victoryScreen = document.getElementById('victory');
+            const finalScoreElement = document.getElementById('finalScore');
+            const victoryScoreElement = document.getElementById('victoryScore');
+            const restartGameBtn = document.getElementById('restartGameBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Initialize the game
+            initGame();
+            
+            function initGame() {
+                // Reset game state
+                gameState.wordsCompleted = 0;
+                gameState.blendsFound = 0;
+                gameState.totalAttempts = 0;
+                gameState.correctAttempts = 0;
+                gameState.attemptsRemaining = 3;
+                gameState.gameActive = true;
+                
+                // Update UI
+                updateStats();
+                updateAttemptsDisplay();
+                updateProgressBar();
+                
+                // Hide game over and victory screens
+                gameOverScreen.style.display = 'none';
+                victoryScreen.style.display = 'none';
+                
+                // Start with a new word
+                nextWord();
+            }
+            
+            function nextWord() {
+                if (!gameState.gameActive) return;
+                
+                // Reset for new word
+                gameState.selectedLetters = [];
+                gameState.attemptsRemaining = 3;
+                updateAttemptsDisplay();
+                
+                // Select a random word
+                const randomIndex = Math.floor(Math.random() * uniqueWords.length);
+                gameState.currentWord = uniqueWords[randomIndex];
+                
+                // Find all blends in the word
+                gameState.allBlendsInWord = findAllBlendsInWord(gameState.currentWord);
+                
+                // Display the word
+                displayWord(gameState.currentWord);
+                
+                // Reset UI
+                checkWordBtn.disabled = true;
+                feedbackPopup.classList.remove('show');
+            }
+            
+            function displayWord(word) {
+                wordDisplay.innerHTML = '';
+                
+                for (let i = 0; i < word.length; i++) {
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = word[i];
+                    letter.dataset.index = i;
+                    
+                    letter.addEventListener('click', function() {
+                        if (!gameState.gameActive) return;
+                        
+                        const index = parseInt(this.dataset.index);
+                        
+                        // If no letters selected yet, select this one
+                        if (gameState.selectedLetters.length === 0) {
+                            gameState.selectedLetters = [index];
+                            updateLetterSelection();
+                        } 
+                        // If one letter is already selected, select range
+                        else if (gameState.selectedLetters.length === 1) {
+                            const firstIndex = gameState.selectedLetters[0];
+                            const start = Math.min(firstIndex, index);
+                            const end = Math.max(firstIndex, index);
+                            
+                            gameState.selectedLetters = [];
+                            for (let i = start; i <= end; i++) {
+                                gameState.selectedLetters.push(i);
+                            }
+                            
+                            updateLetterSelection();
+                        }
+                        // If multiple letters are selected, start new selection
+                        else {
+                            gameState.selectedLetters = [index];
+                            updateLetterSelection();
+                        }
+                    });
+                    
+                    wordDisplay.appendChild(letter);
+                }
+            }
+            
+            function updateLetterSelection() {
+                // Clear all selections
+                const letters = wordDisplay.querySelectorAll('.letter');
+                letters.forEach(letter => {
+                    letter.classList.remove('selected');
+                });
+                
+                // Apply new selections
+                gameState.selectedLetters.forEach(index => {
+                    letters[index].classList.add('selected');
+                });
+                
+                // Enable/disable check button
+                checkWordBtn.disabled = gameState.selectedLetters.length === 0;
+            }
+            
+            function findAllBlendsInWord(word) {
+                const blends = [];
+                
+                // Check for beginning blends
+                for (const blend in gameData.beginningBlends) {
+                    if (word.startsWith(blend)) {
+                        blends.push({
+                            blend: blend,
+                            indices: Array.from({length: blend.length}, (_, i) => i),
+                            type: 'beginning'
+                        });
+                    }
+                }
+                
+                // Check for ending blends
+                for (const blend in gameData.endingBlends) {
+                    if (word.endsWith(blend)) {
+                        const startIndex = word.length - blend.length;
+                        blends.push({
+                            blend: blend,
+                            indices: Array.from({length: blend.length}, (_, i) => startIndex + i),
+                            type: 'ending'
+                        });
+                    }
+                }
+                
+                return blends;
+            }
+            
+            function checkSelection() {
+                if (!gameState.gameActive || gameState.selectedLetters.length === 0) return;
+                
+                gameState.totalAttempts++;
+                
+                // Check if selection matches any blend
+                const selectedText = gameState.selectedLetters
+                    .map(index => gameState.currentWord[index])
+                    .join('');
+                
+                const isBeginningBlend = gameData.beginningBlends.hasOwnProperty(selectedText);
+                const isEndingBlend = gameData.endingBlends.hasOwnProperty(selectedText);
+                const isBlend = isBeginningBlend || isEndingBlend;
+                
+                // Check if this blend is in the current word
+                const blendInWord = gameState.allBlendsInWord.some(blend => 
+                    blend.blend === selectedText && 
+                    JSON.stringify(blend.indices) === JSON.stringify(gameState.selectedLetters)
+                );
+                
+                if (isBlend && blendInWord) {
+                    // Correct selection
+                    gameState.correctAttempts++;
+                    gameState.blendsFound++;
+                    
+                    // Show correct feedback
+                    showFeedback(
+                        'Correct!', 
+                        `"${selectedText}" is a ${isBeginningBlend ? 'beginning' : 'ending'} blend.`,
+                        'correct',
+                        '✓'
+                    );
+                    
+                    // Mark this blend as found
+                    const foundBlendIndex = gameState.allBlendsInWord.findIndex(blend => 
+                        blend.blend === selectedText
+                    );
+                    
+                    if (foundBlendIndex !== -1) {
+                        gameState.allBlendsInWord.splice(foundBlendIndex, 1);
+                    }
+                    
+                    // Check if all blends have been found
+                    if (gameState.allBlendsInWord.length === 0) {
+                        gameState.wordsCompleted++;
+                        updateStats();
+                        updateProgressBar();
+                        
+                        // Show victory if all words completed
+                        if (gameState.wordsCompleted >= numwords) {
+                            setTimeout(() => {
+                                showVictory();
+                            }, 2000);
+                        } else {
+                            // Automatically advance to next word after 2 seconds
+                            setTimeout(() => {
+                                nextWord();
+                            }, 2000);
+                        }
+                    }
+                } else {
+                    // Incorrect selection
+                    gameState.attemptsRemaining--;
+                    updateAttemptsDisplay();
+                    
+                    // Show incorrect feedback
+                    if (isBlend) {
+                        showFeedback(
+                            'Incorrect!', 
+                            `"${selectedText}" is a blend, but not in this position.`,
+                            'incorrect',
+                            '✗'
+                        );
+                    } else {
+                        showFeedback(
+                            'Incorrect!', 
+                            `"${selectedText}" is not a valid blend.`,
+                            'incorrect',
+                            '✗'
+                        );
+                    }
+                    
+                    // Check if game over
+                    if (gameState.attemptsRemaining <= 0) {
+                        setTimeout(() => {
+                            showGameOver();
+                        }, 2000);
+                    }
+                }
+                
+                updateStats();
+                gameState.selectedLetters = [];
+                updateLetterSelection();
+            }
+            
+            function showFeedback(title, message, type, icon) {
+                feedbackTitle.textContent = title;
+                feedbackMessage.textContent = message;
+                feedbackIcon.textContent = icon;
+                
+                // Set the type (correct/incorrect)
+                feedbackPopup.className = 'feedback-popup';
+                feedbackPopup.classList.add(type);
+                
+                // Show the popup
+                feedbackPopup.classList.add('show');
+                
+                // Automatically hide after 2 seconds
+                setTimeout(() => {
+                    feedbackPopup.classList.remove('show');
+                }, 2000);
+            }
+            
+            function updateStats() {
+                wordsCompletedElement.textContent = gameState.wordsCompleted;
+                blendsFoundElement.textContent = gameState.blendsFound;
+                
+                const accuracyRate = gameState.totalAttempts > 0 ? 
+                    Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100) : 100;
+                accuracyRateElement.textContent = `${accuracyRate}%`;
+            }
+            
+            function updateProgressBar() {
+                const progress = (gameState.wordsCompleted / numwords) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+            
+            function updateAttemptsDisplay() {
+                attemptsContainer.innerHTML = '';
+                
+                for (let i = 0; i < 3; i++) {
+                    const attempt = document.createElement('div');
+                    attempt.className = i < gameState.attemptsRemaining ? 'attempt' : 'attempt used';
+                    attemptsContainer.appendChild(attempt);
+                }
+            }
+            
+            function showGameOver() {
+                gameState.gameActive = false;
+                finalScoreElement.textContent = gameState.wordsCompleted;
+                gameOverScreen.style.display = 'flex';
+            }
+            
+            function showVictory() {
+                gameState.gameActive = false;
+                victoryScoreElement.textContent = gameState.wordsCompleted;
+                victoryScreen.style.display = 'flex';
+            }
+            
+            // Event listeners
+            checkWordBtn.addEventListener('click', checkSelection);
+            
+            clearSelectionBtn.addEventListener('click', function() {
+                gameState.selectedLetters = [];
+                updateLetterSelection();
+            });
+            
+            restartGameBtn.addEventListener('click', initGame);
+            
+            playAgainBtn.addEventListener('click', initGame);
+        });
+    </script>
+</body>
+</html>
