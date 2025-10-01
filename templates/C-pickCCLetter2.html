@@ -6,15 +6,27 @@
     <title>Letter Slide Challenge</title>
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4895ef;
-            --danger: #f72585;
-            --success: #4cc9f0;
-            --light: #f8f9fa;
-            --dark: #212529;
+            --primary-light: #4361ee;
+            --secondary-light: #3f37c9;
+            --accent-light: #4895ef;
+            --danger-light: #f72585;
+            --success-light: #4cc9f0;
+            --bg-light: #f5f7ff;
+            --card-light: #ffffff;
+            --text-light: #212529;
+            --shadow-light: 0 8px 16px rgba(0,0,0,0.1);
+            
+            --primary-dark: #6c63ff;
+            --secondary-dark: #5649ff;
+            --accent-dark: #7b8cde;
+            --danger-dark: #ff4d6d;
+            --success-dark: #52b788;
+            --bg-dark: #121212;
+            --card-dark: #1e1e1e;
+            --text-dark: #f8f9fa;
+            --shadow-dark: 0 8px 16px rgba(0,0,0,0.3);
+
             --border-radius: 12px;
-            --box-shadow: 0 8px 16px rgba(0,0,0,0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
@@ -26,9 +38,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7ff;
-            color: var(--dark);
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -52,23 +65,25 @@
             top: 0;
             left: 0;
             padding: 2rem;
-            background: linear-gradient(135deg, #f5f7ff 0%, #e8ecff 100%);
+            background: var(--bg);
         }
 
         .clue-container {
-            background: white;
+            background: var(--card);
             padding: 1.5rem 3rem;
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--shadow);
             text-align: center;
             max-width: 90%;
+            transition: var(--transition);
         }
 
         .clue-text {
             font-size: 1.8rem;
             font-weight: 600;
-            color: var(--secondary);
+            color: var(--primary);
             margin: 0;
+            transition: var(--transition);
         }
 
         .letters-container {
@@ -79,13 +94,14 @@
             max-width: 90%;
         }
 
+        /* Circular avatar styles */
         .letter-avatar {
             cursor: pointer;
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: white;
-            box-shadow: var(--box-shadow);
+            background: var(--card);
+            box-shadow: var(--shadow);
             transition: var(--transition);
             display: flex;
             justify-content: center;
@@ -98,14 +114,14 @@
 
         .letter-avatar:hover {
             transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
             border-color: var(--accent);
         }
 
         .letter-avatar.wrong {
             animation: shake 0.5s;
-            background-color: #ffebee;
-            color: var(--danger);
+            background-color: var(--danger);
+            color: white;
         }
 
         @keyframes shake {
@@ -124,15 +140,38 @@
         }
 
         .stat-box {
-            background: white;
+            background: var(--card);
             padding: 0.75rem 1.5rem;
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--shadow);
             font-size: 1.2rem;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--card);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
         }
 
         /* Screens */
@@ -147,7 +186,7 @@
             align-items: center;
             flex-direction: column;
             z-index: 1000;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
             color: white;
             text-align: center;
             padding: 2rem;
@@ -195,11 +234,6 @@
             transform: translateY(0);
         }
 
-        .btn-primary {
-            background: white;
-            color: var(--primary);
-        }
-
         .game-over-message {
             position: fixed;
             top: 50%;
@@ -212,7 +246,7 @@
             font-size: 1.5rem;
             font-weight: 600;
             z-index: 100;
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--shadow);
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -251,7 +285,7 @@
             }
             
             .stats-container {
-                top: 10px;
+                top: 80px;
                 right: 10px;
                 flex-direction: column;
                 gap: 0.5rem;
@@ -261,11 +295,21 @@
                 padding: 0.5rem 1rem;
                 font-size: 1rem;
             }
+            
+            .theme-toggle {
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container" id="container"></div>
+    
+    <button class="theme-toggle" id="themeToggle">
+        <span>🌙</span>
+    </button>
     
     <div class="stats-container">
         <div class="stat-box">
@@ -278,15 +322,15 @@
         </div>
     </div>
     
-    <div class="game-over-message" id="gameOverMessage">Wrong! Try again</div>
+    <div class="game-over-message" id="gameOverMessage">Game Over! Restarting...</div>
     
     <div class="screen" id="startScreen">
         <h2>Letter Slide Challenge</h2>
-        <p>Read the clue and select the correct letter. Be quick and accurate to maximize your score!</p>
+        <p>Read the clue and select the correct letter. Wrong answers will restart the game!</p>
         <div class="progress-container">
             <div class="progress-bar" style="width: 0%"></div>
         </div>
-        <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+        <button class="btn" onclick="startGame()">Start Game</button>
     </div>
     
     <div class="screen" id="winScreen">
@@ -300,7 +344,7 @@
             <span>⏱️</span>
             <span id="winTime">0s</span>
         </div>
-        <button class="btn btn-primary" onclick="restartGame()">Play Again</button>
+        <button class="btn" onclick="restartGame()">Play Again</button>
     </div>
 
     <script>
@@ -459,7 +503,9 @@
             startTime: 0,
             timerInterval: null,
             colors: ['#4361ee', '#4895ef', '#4cc9f0', '#3f37c9', '#560bad'],
-            colorIndex: 0
+            colorIndex: 0,
+            isDarkMode: false,
+            shuffledLevels: []
         };
 
         // DOM Elements
@@ -471,13 +517,68 @@
             startScreen: document.getElementById('startScreen'),
             winScreen: document.getElementById('winScreen'),
             winScore: document.getElementById('winScore'),
-            winTime: document.getElementById('winTime')
+            winTime: document.getElementById('winTime'),
+            themeToggle: document.getElementById('themeToggle')
         };
+
+        // Shuffle function using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
 
         // Initialize game
         function init() {
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                toggleTheme(true);
+            } else {
+                toggleTheme(false);
+            }
+            
             elements.startScreen.classList.add('active');
             updateProgressBar(0);
+            
+            // Theme toggle event
+            elements.themeToggle.addEventListener('click', () => {
+                toggleTheme(!gameState.isDarkMode);
+                localStorage.setItem('theme', gameState.isDarkMode ? 'dark' : 'light');
+            });
+        }
+
+        // Toggle between light and dark theme
+        function toggleTheme(isDark) {
+            gameState.isDarkMode = isDark;
+            const root = document.documentElement;
+            
+            if (isDark) {
+                root.style.setProperty('--primary', 'var(--primary-dark)');
+                root.style.setProperty('--secondary', 'var(--secondary-dark)');
+                root.style.setProperty('--accent', 'var(--accent-dark)');
+                root.style.setProperty('--danger', 'var(--danger-dark)');
+                root.style.setProperty('--success', 'var(--success-dark)');
+                root.style.setProperty('--bg', 'var(--bg-dark)');
+                root.style.setProperty('--card', 'var(--card-dark)');
+                root.style.setProperty('--text', 'var(--text-dark)');
+                root.style.setProperty('--shadow', 'var(--shadow-dark)');
+                elements.themeToggle.innerHTML = '<span>☀️</span>';
+            } else {
+                root.style.setProperty('--primary', 'var(--primary-light)');
+                root.style.setProperty('--secondary', 'var(--secondary-light)');
+                root.style.setProperty('--accent', 'var(--accent-light)');
+                root.style.setProperty('--danger', 'var(--danger-light)');
+                root.style.setProperty('--success', 'var(--success-light)');
+                root.style.setProperty('--bg', 'var(--bg-light)');
+                root.style.setProperty('--card', 'var(--card-light)');
+                root.style.setProperty('--text', 'var(--text-light)');
+                root.style.setProperty('--shadow', 'var(--shadow-light)');
+                elements.themeToggle.innerHTML = '<span>🌙</span>';
+            }
         }
 
         // Start game
@@ -491,17 +592,20 @@
             startTimer();
             
             elements.container.innerHTML = '';
+            
+            // Shuffle levels for this game session
+            gameState.shuffledLevels = shuffleArray(levels);
             loadLevel(gameState.currentLevelIndex);
         }
 
         // Load a level
         function loadLevel(index) {
-            if (index >= levels.length) {
+            if (index >= gameState.shuffledLevels.length) {
                 endGame(true);
                 return;
             }
             
-            const level = levels[index];
+            const level = gameState.shuffledLevels[index];
             const page = document.createElement('div');
             page.className = 'page';
             page.style.backgroundColor = gameState.colors[gameState.colorIndex % gameState.colors.length];
@@ -532,7 +636,7 @@
             elements.container.innerHTML = '';
             elements.container.appendChild(page);
             
-            updateProgressBar((index + 1) / levels.length * 100);
+            updateProgressBar((index + 1) / gameState.shuffledLevels.length * 100);
         }
 
         // Handle letter click
@@ -549,19 +653,16 @@
                 element.classList.add('wrong');
                 showGameOverMessage();
                 
+                // Restart game after delay
                 setTimeout(() => {
-                    element.classList.remove('wrong');
-                }, 500);
+                    restartGame();
+                }, 1000);
             }
         }
 
-        // Show temporary game over message
+        // Show game over message and restart
         function showGameOverMessage() {
             elements.gameOverMessage.classList.add('show');
-            
-            setTimeout(() => {
-                elements.gameOverMessage.classList.remove('show');
-            }, 1000);
         }
 
         // Update score display
@@ -593,6 +694,7 @@
 
         // Restart game
         function restartGame() {
+            elements.gameOverMessage.classList.remove('show');
             elements.winScreen.classList.remove('active');
             startGame();
         }
