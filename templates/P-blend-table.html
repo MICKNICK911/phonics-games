@@ -6,7 +6,6 @@
     <title>Phonics Blends - Educational Resource</title>
     <style>
         :root {
-            /* Light mode variables */
             --bg-primary: #f8f9fa;
             --bg-secondary: #ffffff;
             --bg-tertiary: #f5f9ff;
@@ -16,24 +15,19 @@
             --accent-primary: #3498db;
             --accent-secondary: #2980b9;
             --accent-success: #2ecc71;
+            --accent-danger: #e74c3c;
+            --accent-warning: #f39c12;
             --border-color: #e9ecef;
             --shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.05);
-            --beginning-blend-bg: #e3f2fd;
             --beginning-blend-color: #1976d2;
-            --beginning-blend-border: #1976d2;
-            --ending-blend-bg: #ffebee;
             --ending-blend-color: #d32f2f;
-            --ending-blend-border: #d32f2f;
-            --beginning-highlight-bg: #bbdefb;
-            --beginning-highlight-color: #0d47a1;
-            --ending-highlight-bg: #ffcdd2;
-            --ending-highlight-color: #b71c1c;
-            --example-word-color: #000000;
+            --highlight-color: #ffeb3b;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
         }
 
         [data-theme="dark"] {
-            /* Dark mode variables */
             --bg-primary: #121212;
             --bg-secondary: #1e1e1e;
             --bg-tertiary: #2d3748;
@@ -43,26 +37,23 @@
             --accent-primary: #4dabf7;
             --accent-secondary: #339af0;
             --accent-success: #51cf66;
+            --accent-danger: #ff6b6b;
+            --accent-warning: #ffd43b;
             --border-color: #343a40;
             --shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.2);
-            --beginning-blend-bg: #1a3c5a;
-            --beginning-blend-color: #90caf9;
-            --beginning-blend-border: #42a5f5;
-            --ending-blend-bg: #4a1c2a;
-            --ending-blend-color: #ef9a9a;
-            --ending-blend-border: #e57373;
-            --beginning-highlight-bg: #0d3b66;
-            --beginning-highlight-color: #bbdefb;
-            --ending-highlight-bg: #5c1c2a;
-            --ending-highlight-color: #ffcdd2;
-            --example-word-color: #e9ecef;
+            --beginning-blend-color: #64b5f6;
+            --ending-blend-color: #ef5350;
+            --highlight-color: #ffeb3b;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
         
@@ -71,7 +62,6 @@
             padding: 20px;
             line-height: 1.6;
             color: var(--text-primary);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .container {
@@ -208,20 +198,16 @@
             gap: 10px;
         }
         
-        .section-title i {
-            font-size: 1.2rem;
-        }
-        
         .beginning-blend {
-            background-color: var(--beginning-blend-bg);
+            background-color: rgba(25, 118, 210, 0.1);
             color: var(--beginning-blend-color);
-            border-left: 5px solid var(--beginning-blend-border);
+            border-left: 5px solid var(--beginning-blend-color);
         }
         
         .ending-blend {
-            background-color: var(--ending-blend-bg);
+            background-color: rgba(211, 47, 47, 0.1);
             color: var(--ending-blend-color);
-            border-left: 5px solid var(--ending-blend-border);
+            border-left: 5px solid var(--ending-blend-color);
         }
         
         .blend-table {
@@ -243,28 +229,28 @@
             background-color: var(--bg-tertiary);
             font-weight: bold;
             color: var(--text-primary);
-            font-size: 1.6rem; /* Larger font for blend sounds */
+            font-size: 1.6rem;
         }
         
         .beginning-blend-cell {
-            background-color: var(--beginning-blend-bg);
+            background-color: rgba(25, 118, 210, 0.1);
             color: var(--beginning-blend-color);
             font-weight: bold;
         }
         
         .ending-blend-cell {
-            background-color: var(--ending-blend-bg);
+            background-color: rgba(211, 47, 47, 0.1);
             color: var(--ending-blend-color);
             font-weight: bold;
         }
         
         .example-cell {
             background-color: var(--bg-secondary);
-            color: var(--example-word-color);
-            font-size: 1.1rem; /* Smaller font for example words */
+            color: var(--text-primary);
+            font-size: 1.1rem;
         }
         
-        .interactive-section {
+        .game-section {
             background-color: var(--bg-tertiary);
             padding: 25px;
             border-radius: 10px;
@@ -272,42 +258,48 @@
             border: 1px solid var(--border-color);
         }
         
-        .interactive-title {
+        .game-title {
             text-align: center;
             margin-bottom: 20px;
             color: var(--text-primary);
         }
         
         .word-display {
-            font-size: 2rem;
+            font-size: 3rem;
             text-align: center;
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             background-color: var(--bg-secondary);
             border-radius: 8px;
             box-shadow: var(--shadow-light);
-            min-height: 80px;
+            min-height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-primary);
+            flex-wrap: wrap;
+            gap: 5px;
         }
         
-        .blend-highlight {
+        .letter {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
             font-weight: bold;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 2.2rem; /* Slightly larger for emphasis */
+            border: 2px solid transparent;
+            font-size: 2.5rem;
         }
         
-        .beginning-highlight {
-            background-color: var(--beginning-highlight-bg);
-            color: var(--beginning-highlight-color);
+        .letter:hover {
+            background-color: rgba(52, 152, 219, 0.1);
         }
         
-        .ending-highlight {
-            background-color: var(--ending-highlight-bg);
-            color: var(--ending-highlight-color);
+        .letter.selected {
+            background-color: var(--highlight-color);
+            border-color: #ffc107;
+            transform: scale(1.05);
         }
         
         .controls {
@@ -335,59 +327,20 @@
             transform: translateY(-2px);
         }
         
-        .practice-words {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
+        button:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
         }
         
-        .word-btn {
-            padding: 8px 15px;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
+        #checkWordBtn {
+            background-color: var(--accent-success);
         }
         
-        .word-btn:hover {
-            background-color: var(--accent-primary);
-            color: white;
-            transform: translateY(-2px);
+        #checkWordBtn:hover {
+            background-color: #27ae60;
         }
         
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-secondary);
-        }
-        
-        /* Progress indicator */
-        .progress-indicator {
-            display: flex;
-            justify-content: center;
-            margin-top: 15px;
-            gap: 5px;
-        }
-        
-        .progress-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--border-color);
-            transition: background-color 0.3s;
-        }
-        
-        .progress-dot.active {
-            background-color: var(--accent-primary);
-        }
-        
-        /* Stats section */
         .stats {
             display: flex;
             justify-content: space-around;
@@ -417,14 +370,93 @@
             color: var(--text-secondary);
         }
         
-        /* Responsive adjustments */
+        .attempts {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .attempt {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+        
+        .attempt.used {
+            background-color: var(--accent-danger);
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--accent-success);
+            display: block;
+        }
+        
+        .feedback.incorrect {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--accent-danger);
+            display: block;
+        }
+        
+        .game-over, .victory {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .game-over-content, .victory-content {
+            background-color: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .game-over h2, .victory h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .game-over p, .victory p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
         @media (max-width: 768px) {
             .blend-table th, .blend-table td {
                 padding: 8px 10px;
             }
             
             .blend-table th {
-                font-size: 1.4rem; /* Slightly smaller on mobile */
+                font-size: 1.4rem;
             }
             
             .example-cell {
@@ -432,11 +464,12 @@
             }
             
             .word-display {
-                font-size: 1.5rem;
+                font-size: 2.5rem;
             }
             
-            .blend-highlight {
-                font-size: 1.7rem; /* Adjusted for mobile */
+            .letter {
+                font-size: 2rem;
+                padding: 8px 12px;
             }
             
             header {
@@ -470,7 +503,7 @@
             }
             
             .blend-table th {
-                font-size: 1.2rem; /* Further adjustment for small screens */
+                font-size: 1.2rem;
             }
             
             .section-title {
@@ -480,9 +513,17 @@
             h1 {
                 font-size: 1.5rem;
             }
+            
+            .word-display {
+                font-size: 2rem;
+            }
+            
+            .letter {
+                font-size: 1.5rem;
+                padding: 6px 10px;
+            }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -493,10 +534,10 @@
             </div>
             <div class="header-controls">
                 <button class="control-button" id="themeToggle" title="Toggle dark/light mode">
-                    <i class="fas fa-moon"></i>
+                    <span id="themeIcon">🌙</span>
                 </button>
                 <button class="control-button" id="infoButton" title="Show instructions">
-                    <i class="fas fa-info"></i>
+                    <span>ℹ️</span>
                 </button>
             </div>
         </header>
@@ -504,7 +545,7 @@
         <!-- Modal for Instructions -->
         <div class="modal" id="instructionsModal">
             <div class="modal-content">
-                <button class="close-button" id="closeModal">&times;</button>
+                <button class="close-button" id="closeModal">✖️</button>
                 <div class="instructions">
                     <h2>How to Use This Resource</h2>
                     <p>Welcome to the Phonics Blends educational tool! This resource helps you learn and practice consonant blends, which are two or three consonants that appear together in a word while keeping their individual sounds.</p>
@@ -519,10 +560,9 @@
                     <h3>How to Practice</h3>
                     <ul>
                         <li>Read the words in the tables aloud, focusing on the blend sounds.</li>
-                        <li>Use the interactive practice section to test your knowledge.</li>
-                        <li>Click "Next Word" to cycle through words randomly.</li>
-                        <li>Click "Show Blend" to highlight the blend in the current word.</li>
-                        <li>Click on any word button to practice that specific word.</li>
+                        <li>Use the interactive game section to test your knowledge.</li>
+                        <li>Click on letters to highlight them, then click "Check Word" to see if you've found a blend.</li>
+                        <li>You have 3 attempts per word to find all blends.</li>
                     </ul>
                     
                     <h3>Tips for Success</h3>
@@ -530,7 +570,6 @@
                         <li>Practice a little every day for best results.</li>
                         <li>Say the words out loud to reinforce the sounds.</li>
                         <li>Try to think of other words that use the same blends.</li>
-                        <li>Toggle between light and dark mode using the moon button.</li>
                     </ul>
                 </div>
             </div>
@@ -538,7 +577,7 @@
         
         <section class="blend-section">
             <div class="section-title beginning-blend">
-                <i class="fas fa-play-circle"></i>
+                <span>▶️</span>
                 Beginning Blends
             </div>
             
@@ -670,7 +709,7 @@
         
         <section class="blend-section">
             <div class="section-title ending-blend">
-                <i class="fas fa-stop-circle"></i>
+                <span>⏹️</span>
                 Ending Blends
             </div>
             
@@ -681,7 +720,7 @@
                     <th class="ending-blend-cell">sp</th>
                     <th class="ending-blend-cell">nd</th>
                     <th class="ending-blend-cell">nt</th>
-                    <!--<th class="ending-blend-cell">nk</th>-->
+                    <th class="ending-blend-cell">nk</th>
                     <th class="ending-blend-cell">mp</th>
                     <th class="ending-blend-cell">ld</th>
                     <th class="ending-blend-cell">lp</th>
@@ -693,7 +732,7 @@
                     <td class="example-cell">rasp</td>
                     <td class="example-cell">hand</td>
                     <td class="example-cell">plant</td>
-                    <!--<td class="example-cell">sink</td>-->
+                    <td class="example-cell">sink</td>
                     <td class="example-cell">jump</td>
                     <td class="example-cell">wild</td>
                     <td class="example-cell">help</td>
@@ -705,7 +744,7 @@
                     <td class="example-cell">grasp</td>
                     <td class="example-cell">land</td>
                     <td class="example-cell">went</td>
-                    <!--<td class="example-cell">blink</td>-->
+                    <td class="example-cell">blink</td>
                     <td class="example-cell">camp</td>
                     <td class="example-cell">hold</td>
                     <td class="example-cell">gulp</td>
@@ -717,7 +756,7 @@
                     <td class="example-cell">gasp</td>
                     <td class="example-cell">blend</td>
                     <td class="example-cell">rent</td>
-                    <!--<td class="example-cell">bank</td>-->
+                    <td class="example-cell">bank</td>
                     <td class="example-cell">pump</td>
                     <td class="example-cell">child</td>
                     <td class="example-cell">scalp</td>
@@ -765,46 +804,38 @@
             </table>
         </section>
         
-        <section class="interactive-section">
-            <h2 class="interactive-title">Practice Reading Words with Blends</h2>
+        <section class="game-section">
+            <h2 class="game-title">🎮 Blends Game - Find the Blends</h2>
             
             <div class="word-display" id="wordDisplay">
-                Click "Next Word" to start practicing!
-            </div>
-            
-            <div class="progress-indicator" id="progressIndicator">
-                <!-- Progress dots will be added by JavaScript -->
+                Click "Start Game" to begin!
             </div>
             
             <div class="controls">
-                <button id="nextWordBtn">
-                    <i class="fas fa-arrow-right"></i> Next Word
-                </button>
-                <button id="showBlendBtn">
-                    <i class="fas fa-highlighter"></i> Show Blend
-                </button>
-                <button id="resetBtn">
-                    <i class="fas fa-redo"></i> Reset
-                </button>
+                <button id="checkWordBtn" disabled>✅ Check Word</button>
+                <button id="clearSelectionBtn">🔄 Clear Selection</button>
+                <button id="startGameBtn">🚀 Start Game</button>
             </div>
+            
+            <div class="feedback" id="feedback"></div>
             
             <div class="stats">
                 <div class="stat-card">
-                    <div class="stat-value" id="wordsPracticed">0</div>
-                    <div class="stat-label">Words Practiced</div>
+                    <div class="stat-value" id="wordsCompleted">0</div>
+                    <div class="stat-label">Words Completed</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="blendsIdentified">0</div>
-                    <div class="stat-label">Blends Identified</div>
+                    <div class="stat-value" id="blendsFound">0</div>
+                    <div class="stat-label">Blends Found</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="accuracyRate">0%</div>
+                    <div class="stat-value" id="accuracyRate">100%</div>
                     <div class="stat-label">Accuracy Rate</div>
                 </div>
             </div>
             
-            <div class="practice-words" id="practiceWords">
-                <!-- Word buttons will be added here by JavaScript -->
+            <div class="attempts" id="attempts">
+                <!-- Attempt indicators will be added here by JavaScript -->
             </div>
         </section>
         
@@ -812,12 +843,30 @@
             <p>Phonics Blends Educational Resource &copy; 2023</p>
         </footer>
     </div>
+    
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2>💀 Game Over</h2>
+            <p>You've used all your attempts!</p>
+            <p>Words Completed: <span id="finalScore">0</span></p>
+            <button id="restartGameBtn">🔄 Play Again</button>
+        </div>
+    </div>
+    
+    <div class="victory" id="victory">
+        <div class="victory-content">
+            <h2>🏆 Congratulations!</h2>
+            <p>You've successfully identified all blends!</p>
+            <p>Words Completed: <span id="victoryScore">0</span></p>
+            <button id="playAgainBtn">🔄 Play Again</button>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Theme toggle functionality
             const themeToggle = document.getElementById('themeToggle');
-            const themeIcon = themeToggle.querySelector('i');
+            const themeIcon = document.getElementById('themeIcon');
             
             // Check for saved theme preference or default to light
             const currentTheme = localStorage.getItem('theme') || 'light';
@@ -839,13 +888,104 @@
             
             function updateThemeIcon(theme) {
                 if (theme === 'dark') {
-                    themeIcon.className = 'fas fa-sun';
+                    themeIcon.textContent = '☀️';
                     themeToggle.title = 'Switch to light mode';
                 } else {
-                    themeIcon.className = 'fas fa-moon';
+                    themeIcon.textContent = '🌙';
                     themeToggle.title = 'Switch to dark mode';
                 }
             }
+            
+            // Game data - all blends and examples
+            const gameData = {
+                beginningBlends: {
+                    'bl': ['blast', 'black', 'blue'],
+                    'cl': ['class', 'clip', 'click'],
+                    'fl': ['flip', 'flat', 'flask'],
+                    'gl': ['glass', 'glow', 'glue'],
+                    'pl': ['plus', 'play', 'plant'],
+                    'sl': ['slip', 'slow', 'slide'],
+                    'br': ['brown', 'brush', 'bring'],
+                    'cr': ['crab', 'crash', 'crop'],
+                    'dr': ['drop', 'drink', 'draw'],
+                    'fr': ['from', 'fresh', 'frame'],
+                    'gr': ['grape', 'grip', 'grow'],
+                    'pr': ['prune', 'pray', 'pride'],
+                    'tr': ['tree', 'try', 'trust'],
+                    'sc': ['scale', 'scan', 'scalp'],
+                    'sk': ['skull', 'skin', 'skill'],
+                    'squ': ['squat', 'squeeze', 'square'],
+                    'st': ['start', 'stop', 'stone'],
+                    'sm': ['small', 'smart', 'smile'],
+                    'sn': ['snake', 'snap', 'sneeze'],
+                    'sp': ['spine', 'space', 'spend'],
+                    'sw': ['sweet', 'swim', 'swing'],
+                    'tw': ['twist', 'twin', 'twine'],
+                    'dw': ['dwell', 'dwarf', 'dwine']
+                },
+                endingBlends: {
+                    'st': ['list', 'fast', 'best'],
+                    'sk': ['flask', 'husk', 'desk'],
+                    'sp': ['rasp', 'grasp', 'gasp'],
+                    'nd': ['hand', 'land', 'blend'],
+                    'nt': ['plant', 'went', 'rent'],
+                    'nk': ['sink', 'blink', 'bank'],
+                    'mp': ['jump', 'camp', 'pump'],
+                    'ld': ['wild', 'hold', 'child'],
+                    'lp': ['help', 'gulp', 'scalp'],
+                    'pt': ['kept', 'wept', 'slept'],
+                    'ft': ['left', 'soft', 'swift'],
+                    'ct': ['fact', 'erect', 'sect'],
+                    'lk': ['milk', 'walk', 'talk'],
+                    'lt': ['salt', 'felt', 'malt'],
+                    'xt': ['text', 'next', 'Ext'],
+                    'ts': ['pets', 'pots', 'cats'],
+                    'rd': ['hard', 'word', 'herd']
+                }
+            };
+            
+            // Flatten all words into a single array
+            const allWords = [];
+            for (const blend in gameData.beginningBlends) {
+                allWords.push(...gameData.beginningBlends[blend]);
+            }
+            for (const blend in gameData.endingBlends) {
+                allWords.push(...gameData.endingBlends[blend]);
+            }
+            
+            // Remove duplicates
+            const uniqueWords = [...new Set(allWords)];
+            
+            // Game state
+            let gameState = {
+                currentWord: '',
+                selectedLetters: [],
+                wordsCompleted: 0,
+                blendsFound: 0,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                attemptsRemaining: 3,
+                gameActive: false,
+                allBlendsInWord: [],
+                foundBlendsInWord: []
+            };
+            
+            // DOM elements
+            const wordDisplay = document.getElementById('wordDisplay');
+            const checkWordBtn = document.getElementById('checkWordBtn');
+            const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const feedback = document.getElementById('feedback');
+            const wordsCompletedElement = document.getElementById('wordsCompleted');
+            const blendsFoundElement = document.getElementById('blendsFound');
+            const accuracyRateElement = document.getElementById('accuracyRate');
+            const attemptsContainer = document.getElementById('attempts');
+            const gameOverScreen = document.getElementById('gameOver');
+            const victoryScreen = document.getElementById('victory');
+            const finalScoreElement = document.getElementById('finalScore');
+            const victoryScoreElement = document.getElementById('victoryScore');
+            const restartGameBtn = document.getElementById('restartGameBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
             
             // Modal functionality
             const modal = document.getElementById('instructionsModal');
@@ -869,176 +1009,320 @@
                 }
             });
             
-            // Collect all words from the tables
-            const allWords = [];
-            const exampleCells = document.querySelectorAll('.example-cell');
+            // Initialize the game
+            initGame();
             
-            exampleCells.forEach(cell => {
-                const word = cell.textContent.trim();
-                if (word && !allWords.includes(word)) {
-                    allWords.push(word);
-                }
-            });
-            
-            // Initialize variables for the interactive section
-            let currentWordIndex = -1;
-            let practiceStats = {
-                wordsPracticed: 0,
-                blendsIdentified: 0,
-                correctAttempts: 0
-            };
-            
-            const wordDisplay = document.getElementById('wordDisplay');
-            const nextWordBtn = document.getElementById('nextWordBtn');
-            const showBlendBtn = document.getElementById('showBlendBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const practiceWordsContainer = document.getElementById('practiceWords');
-            const progressIndicator = document.getElementById('progressIndicator');
-            
-            // Stats elements
-            const wordsPracticedElement = document.getElementById('wordsPracticed');
-            const blendsIdentifiedElement = document.getElementById('blendsIdentified');
-            const accuracyRateElement = document.getElementById('accuracyRate');
-            
-            // Create word buttons for quick access (limited to 30 to avoid overcrowding)
-            const displayWords = allWords.length > 30 ? allWords.slice(0, 30) : allWords;
-            displayWords.forEach((word, index) => {
-                const button = document.createElement('button');
-                button.textContent = word;
-                button.className = 'word-btn';
-                button.addEventListener('click', () => {
-                    displayWord(word, true);
-                    practiceStats.wordsPracticed++;
-                    updateStats();
-                });
-                practiceWordsContainer.appendChild(button);
-            });
-            
-            // Create progress indicator dots
-            for (let i = 0; i < 10; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'progress-dot';
-                progressIndicator.appendChild(dot);
-            }
-            
-            // Function to update progress indicator
-            function updateProgressIndicator() {
-                const dots = progressIndicator.querySelectorAll('.progress-dot');
-                dots.forEach((dot, index) => {
-                    if (index < practiceStats.wordsPracticed % 10) {
-                        dot.classList.add('active');
-                    } else {
-                        dot.classList.remove('active');
-                    }
-                });
-            }
-            
-            // Function to update stats display
-            function updateStats() {
-                wordsPracticedElement.textContent = practiceStats.wordsPracticed;
-                blendsIdentifiedElement.textContent = practiceStats.blendsIdentified;
+            function initGame() {
+                // Reset game state
+                gameState.wordsCompleted = 0;
+                gameState.blendsFound = 0;
+                gameState.totalAttempts = 0;
+                gameState.correctAttempts = 0;
+                gameState.attemptsRemaining = 3;
+                gameState.gameActive = false;
+                gameState.foundBlendsInWord = [];
                 
-                const accuracyRate = practiceStats.wordsPracticed > 0 ? 
-                    Math.round((practiceStats.correctAttempts / practiceStats.wordsPracticed) * 100) : 0;
-                accuracyRateElement.textContent = `${accuracyRate}%`;
+                // Update UI
+                updateStats();
+                updateAttemptsDisplay();
                 
-                updateProgressIndicator();
+                // Hide game over and victory screens
+                gameOverScreen.style.display = 'none';
+                victoryScreen.style.display = 'none';
+                
+                // Reset word display
+                wordDisplay.innerHTML = 'Click "Start Game" to begin!';
+                
+                // Reset UI elements
+                checkWordBtn.disabled = true;
+                startGameBtn.style.display = 'block';
+                feedback.className = 'feedback';
+                feedback.textContent = '';
             }
             
-            // Function to display a word and optionally highlight its blend
-            function displayWord(word, highlightBlend = false) {
+            function startGame() {
+                gameState.gameActive = true;
+                startGameBtn.style.display = 'none';
+                nextWord();
+            }
+            
+            function nextWord() {
+                if (!gameState.gameActive) return;
+                
+                // Reset for new word
+                gameState.selectedLetters = [];
+                gameState.attemptsRemaining = 3;
+                gameState.foundBlendsInWord = [];
+                updateAttemptsDisplay();
+                
+                // Select a random word
+                const randomIndex = Math.floor(Math.random() * uniqueWords.length);
+                gameState.currentWord = uniqueWords[randomIndex];
+                
+                // Find all blends in the word
+                gameState.allBlendsInWord = findAllBlendsInWord(gameState.currentWord);
+                
+                // Display the word
+                displayWord(gameState.currentWord);
+                
+                // Reset UI
+                checkWordBtn.disabled = true;
+                feedback.className = 'feedback';
+                feedback.textContent = '';
+            }
+            
+            function displayWord(word) {
                 wordDisplay.innerHTML = '';
                 
-                if (!highlightBlend) {
-                    wordDisplay.textContent = word;
-                    return;
+                for (let i = 0; i < word.length; i++) {
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = word[i];
+                    letter.dataset.index = i;
+                    
+                    // Check if this letter is part of a found blend
+                    const isInFoundBlend = gameState.foundBlendsInWord.some(blend => 
+                        blend.indices.includes(i)
+                    );
+                    
+                    if (isInFoundBlend) {
+                        letter.classList.add('selected');
+                        letter.style.backgroundColor = 'var(--accent-success)';
+                        letter.style.color = 'white';
+                        letter.style.cursor = 'default';
+                    } else {
+                        letter.addEventListener('click', function() {
+                            if (!gameState.gameActive) return;
+                            
+                            const index = parseInt(this.dataset.index);
+                            
+                            // If no letters selected yet, select this one
+                            if (gameState.selectedLetters.length === 0) {
+                                gameState.selectedLetters = [index];
+                                updateLetterSelection();
+                            } 
+                            // If one letter is already selected, select range
+                            else if (gameState.selectedLetters.length === 1) {
+                                const firstIndex = gameState.selectedLetters[0];
+                                const start = Math.min(firstIndex, index);
+                                const end = Math.max(firstIndex, index);
+                                
+                                gameState.selectedLetters = [];
+                                for (let i = start; i <= end; i++) {
+                                    gameState.selectedLetters.push(i);
+                                }
+                                
+                                updateLetterSelection();
+                            }
+                            // If multiple letters are selected, start new selection
+                            else {
+                                gameState.selectedLetters = [index];
+                                updateLetterSelection();
+                            }
+                        });
+                    }
+                    
+                    wordDisplay.appendChild(letter);
                 }
+            }
+            
+            function updateLetterSelection() {
+                // Clear all selections (except for found blends)
+                const letters = wordDisplay.querySelectorAll('.letter');
+                letters.forEach(letter => {
+                    if (!letter.style.backgroundColor || letter.style.backgroundColor !== 'var(--accent-success)') {
+                        letter.classList.remove('selected');
+                    }
+                });
                 
-                // Determine if it's a beginning or ending blend
-                const beginningBlends = ['bl', 'cl', 'fl', 'gl', 'pl', 'sl', 'br', 'cr', 'dr', 'fr', 
-                                        'gr', 'pr', 'tr', 'sc', 'sk', 'squ', 'st', 'sm', 'sn', 'sp', 
-                                        'sw', 'tw', 'dw'];
-                const endingBlends = ['ld', 'lp', 'pt', 'ft', 'ct', 'lk', 'lt', 'xt', 'ts', 'rd', 
-                                     'nd', 'nt', 'nk', 'mp', 'st', 'sk', 'sp'];
+                // Apply new selections
+                gameState.selectedLetters.forEach(index => {
+                    const letter = wordDisplay.querySelector(`.letter[data-index="${index}"]`);
+                    if (letter && !letter.style.backgroundColor) {
+                        letter.classList.add('selected');
+                    }
+                });
                 
-                let blendFound = false;
+                // Enable/disable check button
+                checkWordBtn.disabled = gameState.selectedLetters.length === 0;
+            }
+            
+            function findAllBlendsInWord(word) {
+                const blends = [];
                 
                 // Check for beginning blends
-                for (const blend of beginningBlends) {
+                for (const blend in gameData.beginningBlends) {
                     if (word.startsWith(blend)) {
-                        const blendSpan = document.createElement('span');
-                        blendSpan.className = 'blend-highlight beginning-highlight';
-                        blendSpan.textContent = blend;
-                        
-                        const restOfWord = document.createTextNode(word.substring(blend.length));
-                        
-                        wordDisplay.appendChild(blendSpan);
-                        wordDisplay.appendChild(restOfWord);
-                        blendFound = true;
-                        practiceStats.blendsIdentified++;
-                        practiceStats.correctAttempts++;
+                        blends.push({
+                            blend: blend,
+                            indices: Array.from({length: blend.length}, (_, i) => i),
+                            type: 'beginning'
+                        });
+                    }
+                }
+                
+                // Check for ending blends
+                for (const blend in gameData.endingBlends) {
+                    if (word.endsWith(blend)) {
+                        const startIndex = word.length - blend.length;
+                        blends.push({
+                            blend: blend,
+                            indices: Array.from({length: blend.length}, (_, i) => startIndex + i),
+                            type: 'ending'
+                        });
+                    }
+                }
+                
+                return blends;
+            }
+            
+            function checkSelection() {
+                if (!gameState.gameActive || gameState.selectedLetters.length === 0) return;
+                
+                gameState.totalAttempts++;
+                
+                // Check if selection matches any blend
+                const selectedText = gameState.selectedLetters
+                    .map(index => gameState.currentWord[index])
+                    .join('');
+                
+                // Check if this is a valid blend
+                let isValidBlend = false;
+                let blendType = '';
+                
+                // Check beginning blends
+                for (const blend in gameData.beginningBlends) {
+                    if (blend === selectedText) {
+                        isValidBlend = true;
+                        blendType = 'beginning';
                         break;
                     }
                 }
                 
-                // If no beginning blend found, check for ending blends
-                if (!blendFound) {
-                    for (const blend of endingBlends) {
-                        if (word.endsWith(blend)) {
-                            const blendIndex = word.length - blend.length;
-                            const beginningOfWord = document.createTextNode(word.substring(0, blendIndex));
-                            
-                            const blendSpan = document.createElement('span');
-                            blendSpan.className = 'blend-highlight ending-highlight';
-                            blendSpan.textContent = blend;
-                            
-                            wordDisplay.appendChild(beginningOfWord);
-                            wordDisplay.appendChild(blendSpan);
-                            blendFound = true;
-                            practiceStats.blendsIdentified++;
-                            practiceStats.correctAttempts++;
+                // Check ending blends
+                if (!isValidBlend) {
+                    for (const blend in gameData.endingBlends) {
+                        if (blend === selectedText) {
+                            isValidBlend = true;
+                            blendType = 'ending';
                             break;
                         }
                     }
                 }
                 
-                // If no blend found, just display the word normally
-                if (!blendFound) {
-                    wordDisplay.textContent = word;
+                // Check if this blend is in the current word
+                const blendInWord = gameState.allBlendsInWord.some(blend => 
+                    blend.blend === selectedText && 
+                    JSON.stringify(blend.indices) === JSON.stringify(gameState.selectedLetters)
+                );
+                
+                if (isValidBlend && blendInWord) {
+                    // Correct selection
+                    gameState.correctAttempts++;
+                    gameState.blendsFound++;
+                    
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = `Correct! "${selectedText}" is a ${blendType} blend.`;
+                    
+                    // Add to found blends
+                    const foundBlend = gameState.allBlendsInWord.find(blend => 
+                        blend.blend === selectedText
+                    );
+                    
+                    if (foundBlend) {
+                        gameState.foundBlendsInWord.push(foundBlend);
+                        
+                        // Remove from all blends
+                        const foundIndex = gameState.allBlendsInWord.indexOf(foundBlend);
+                        if (foundIndex !== -1) {
+                            gameState.allBlendsInWord.splice(foundIndex, 1);
+                        }
+                    }
+                    
+                    // Check if all blends have been found
+                    if (gameState.allBlendsInWord.length === 0) {
+                        gameState.wordsCompleted++;
+                        updateStats();
+                        
+                        // Show victory if all words completed (for demo, using 5 words)
+                        if (gameState.wordsCompleted >= 5) {
+                            setTimeout(showVictory, 1000);
+                        } else {
+                            feedback.textContent = `Great! All blends found. Moving to next word...`;
+                            setTimeout(nextWord, 1500);
+                        }
+                    } else {
+                        // Update the display to show the found blend
+                        displayWord(gameState.currentWord);
+                    }
+                } else {
+                    // Incorrect selection
+                    gameState.attemptsRemaining--;
+                    updateAttemptsDisplay();
+                    
+                    feedback.className = 'feedback incorrect';
+                    
+                    if (isValidBlend) {
+                        feedback.textContent = `"${selectedText}" is a blend, but not in this position. Try again!`;
+                    } else {
+                        feedback.textContent = `"${selectedText}" is not a valid blend. Try again!`;
+                    }
+                    
+                    // Check if game over
+                    if (gameState.attemptsRemaining <= 0) {
+                        setTimeout(showGameOver, 1000);
+                    }
                 }
                 
                 updateStats();
+                gameState.selectedLetters = [];
+                updateLetterSelection();
             }
             
-            // Event listeners for buttons
-            nextWordBtn.addEventListener('click', function() {
-                currentWordIndex = (currentWordIndex + 1) % allWords.length;
-                displayWord(allWords[currentWordIndex], false);
-                practiceStats.wordsPracticed++;
-                updateStats();
-            });
+            function updateStats() {
+                wordsCompletedElement.textContent = gameState.wordsCompleted;
+                blendsFoundElement.textContent = gameState.blendsFound;
+                
+                const accuracyRate = gameState.totalAttempts > 0 ? 
+                    Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100) : 100;
+                accuracyRateElement.textContent = `${accuracyRate}%`;
+            }
             
-            showBlendBtn.addEventListener('click', function() {
-                if (currentWordIndex >= 0) {
-                    displayWord(allWords[currentWordIndex], true);
-                } else {
-                    alert('Please select a word first!');
+            function updateAttemptsDisplay() {
+                attemptsContainer.innerHTML = '';
+                
+                for (let i = 0; i < 3; i++) {
+                    const attempt = document.createElement('div');
+                    attempt.className = i < gameState.attemptsRemaining ? 'attempt' : 'attempt used';
+                    attemptsContainer.appendChild(attempt);
                 }
+            }
+            
+            function showGameOver() {
+                gameState.gameActive = false;
+                finalScoreElement.textContent = gameState.wordsCompleted;
+                gameOverScreen.style.display = 'flex';
+            }
+            
+            function showVictory() {
+                gameState.gameActive = false;
+                victoryScoreElement.textContent = gameState.wordsCompleted;
+                victoryScreen.style.display = 'flex';
+            }
+            
+            // Event listeners
+            checkWordBtn.addEventListener('click', checkSelection);
+            
+            clearSelectionBtn.addEventListener('click', function() {
+                gameState.selectedLetters = [];
+                updateLetterSelection();
             });
             
-            resetBtn.addEventListener('click', function() {
-                currentWordIndex = -1;
-                wordDisplay.textContent = 'Click "Next Word" to start practicing!';
-                practiceStats = {
-                    wordsPracticed: 0,
-                    blendsIdentified: 0,
-                    correctAttempts: 0
-                };
-                updateStats();
-            });
+            startGameBtn.addEventListener('click', startGame);
             
-            // Initialize stats
-            updateStats();
+            restartGameBtn.addEventListener('click', initGame);
+            
+            playAgainBtn.addEventListener('click', initGame);
         });
     </script>
 </body>
