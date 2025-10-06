@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digraphs Game - Phonics Learning</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --correct-color: #2ecc71;
+            --incorrect-color: #e74c3c;
+            --highlight-color: #ffeb3b;
+            --card-bg: #ffffff;
+            --bg-color: #f0f2f5;
+            --text-color: #333333;
+            --muted-text: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #5e72e4;
+            --secondary-color: #825ee4;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --light-color: #343a40;
+            --dark-color: #f8f9fa;
+            --card-bg: #2d3748;
+            --bg-color: #1a202c;
+            --text-color: #e2e8f0;
+            --muted-text: #a0aec0;
+            --border-color: #4a5568;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: var(--transition);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .header-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .game-area {
+            padding: 30px;
+        }
+
+        .word-display {
+            font-size: 3.5rem;
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px 20px;
+            background-color: var(--light-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .letter {
+            display: inline-block;
+            padding: 12px 18px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            border: 2px solid transparent;
+            font-size: 2.8rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .letter:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .letter.selected {
+            background-color: var(--highlight-color);
+            border-color: #ffc107;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .letter.found {
+            background-color: var(--correct-color);
+            color: white;
+            cursor: default;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 28px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: var(--muted-text);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #checkWordBtn {
+            background-color: var(--success-color);
+        }
+
+        #checkWordBtn:hover:not(:disabled) {
+            background-color: #3aa8d5;
+        }
+
+        #clearSelectionBtn {
+            background-color: var(--warning-color);
+        }
+
+        #clearSelectionBtn:hover {
+            background-color: #e1156d;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 150px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            font-weight: 500;
+        }
+
+        .attempts {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .attempt {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+
+        .attempt.used {
+            background-color: var(--incorrect-color);
+        }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--correct-color);
+            display: block;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .feedback.incorrect {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--incorrect-color);
+            display: block;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .game-over, .victory {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-over-content, .victory-content {
+            background-color: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 2px solid var(--primary-color);
+        }
+
+        .game-over h2, .victory h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .game-over p, .victory p {
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            color: var(--text-color);
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: var(--light-color);
+            border-radius: 12px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .digraph-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .digraph-tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--muted-text);
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .word-display {
+                font-size: 2.8rem;
+                padding: 20px 15px;
+                min-height: 150px;
+            }
+            
+            .letter {
+                font-size: 2.2rem;
+                padding: 10px 14px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .stat-card {
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px 0;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            .game-area {
+                padding: 20px 15px;
+            }
+            
+            .word-display {
+                font-size: 2.2rem;
+                min-height: 130px;
+            }
+            
+            .letter {
+                font-size: 1.8rem;
+                padding: 8px 12px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .game-over-content, .victory-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔤 Digraphs Game</h1>
+            <p class="subtitle">Find the consonant digraphs in each word</p>
+            <div class="header-controls">
+                <button class="control-button" id="themeToggle" title="Toggle dark/light mode">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button class="control-button" id="infoButton" title="Show instructions">
+                    <span>ℹ️</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="game-area">
+            <div class="word-display" id="wordDisplay">
+                Click "Start Game" to begin!
+            </div>
+            
+            <div class="controls">
+                <button id="checkWordBtn" disabled>✅ Check Selection</button>
+                <button id="clearSelectionBtn">🔄 Clear Selection</button>
+                <button id="startGameBtn">🚀 Start Game</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="wordsCompleted">0</div>
+                    <div class="stat-label">Words Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="digraphsFound">0</div>
+                    <div class="stat-label">Digraphs Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyRate">100%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+            </div>
+            
+            <div class="attempts" id="attempts">
+                <!-- Attempt indicators will be added here by JavaScript -->
+            </div>
+            
+            <div class="instructions">
+                <h3>🎯 How to Play</h3>
+                <ul>
+                    <li>Click on letters to highlight them (single tap or drag to select multiple)</li>
+                    <li>Click "Check Selection" to verify if your selection is a valid digraph</li>
+                    <li>Find all digraphs in the word to advance to the next word</li>
+                    <li>You have 3 attempts per word</li>
+                </ul>
+                <div class="digraph-list">
+                    <span class="digraph-tag">sh</span>
+                    <span class="digraph-tag">ch</span>
+                    <span class="digraph-tag">th</span>
+                    <span class="digraph-tag">wh</span>
+                    <span class="digraph-tag">ph</span>
+                    <span class="digraph-tag">ck</span>
+                    <span class="digraph-tag">ng</span>
+                    <span class="digraph-tag">nk</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2>💀 Game Over</h2>
+            <p>You've used all your attempts!</p>
+            <p>Words Completed: <span id="finalScore">0</span></p>
+            <button id="restartGameBtn">🔄 Play Again</button>
+        </div>
+    </div>
+    
+    <div class="victory" id="victory">
+        <div class="victory-content">
+            <h2>🏆 Congratulations!</h2>
+            <p>You've successfully identified all digraphs!</p>
+            <p>Words Completed: <span id="victoryScore">0</span></p>
+            <button id="playAgainBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>Digraphs Game - Educational Phonics App &copy; 2023</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            // Check for saved theme preference or default to light
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            
+            // Update icon based on current theme
+            updateThemeIcon(currentTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                // Toggle between light and dark
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.textContent = '☀️';
+                    themeToggle.title = 'Switch to light mode';
+                } else {
+                    themeIcon.textContent = '🌙';
+                    themeToggle.title = 'Switch to dark mode';
+                }
+            }
+            
+            // Game data - all digraphs and examples
+            const gameData = {
+                'sh': ['ship', 'shot', 'trash', 'crash'],
+                'ch': ['chat', 'chop', 'branch', 'much'],
+                'tch': ['match', 'fetch', 'switch', 'scratch'],
+                'th': ['that', 'the', 'them', 'this'], // voiced th
+                'th2': ['thin', 'thank', 'both', 'with'], // unvoiced th
+                'ng': ['song', 'long', 'wing', 'string'],
+                'nk': ['pink', 'link', 'sink', 'drink'],
+                'wh': ['which', 'what', 'white', 'when'],
+                'ph': ['phone', 'photo', 'graph', 'Rapha'],
+                'ck': ['track', 'back', 'black', 'sack'],
+                'wr': ['write', 'wrote', 'wrap', 'wrath'],
+                'kn': ['know', 'knap', 'knot', 'knob'],
+                'gn': ['gnash', 'gnome', 'gnat', 'gnaw'],
+                'gh': ['ghost', 'Ghana', 'ghetto', 'ghastly']
+            };
+            
+            // Flatten all words into a single array
+            const allWords = [];
+            for (const digraph in gameData) {
+                allWords.push(...gameData[digraph]);
+            }
+            
+            // Remove duplicates
+            const uniqueWords = [...new Set(allWords)];
+            
+            // Game state
+            let gameState = {
+                currentWord: '',
+                selectedLetters: [],
+                wordsCompleted: 0,
+                digraphsFound: 0,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                attemptsRemaining: 3,
+                gameActive: false,
+                allDigraphsInWord: [],
+                foundDigraphsInWord: []
+            };
+            
+            // DOM elements
+            const wordDisplay = document.getElementById('wordDisplay');
+            const checkWordBtn = document.getElementById('checkWordBtn');
+            const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const feedback = document.getElementById('feedback');
+            const wordsCompletedElement = document.getElementById('wordsCompleted');
+            const digraphsFoundElement = document.getElementById('digraphsFound');
+            const accuracyRateElement = document.getElementById('accuracyRate');
+            const attemptsContainer = document.getElementById('attempts');
+            const gameOverScreen = document.getElementById('gameOver');
+            const victoryScreen = document.getElementById('victory');
+            const finalScoreElement = document.getElementById('finalScore');
+            const victoryScoreElement = document.getElementById('victoryScore');
+            const restartGameBtn = document.getElementById('restartGameBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            const infoButton = document.getElementById('infoButton');
+            
+            // Initialize the game
+            initGame();
+            
+            function initGame() {
+                // Reset game state
+                gameState.wordsCompleted = 0;
+                gameState.digraphsFound = 0;
+                gameState.totalAttempts = 0;
+                gameState.correctAttempts = 0;
+                gameState.attemptsRemaining = 3;
+                gameState.gameActive = false;
+                gameState.foundDigraphsInWord = [];
+                
+                // Update UI
+                updateStats();
+                updateAttemptsDisplay();
+                
+                // Hide game over and victory screens
+                gameOverScreen.style.display = 'none';
+                victoryScreen.style.display = 'none';
+                
+                // Reset word display
+                wordDisplay.innerHTML = 'Click "Start Game" to begin!';
+                
+                // Reset UI elements
+                checkWordBtn.disabled = true;
+                startGameBtn.style.display = 'block';
+                feedback.className = 'feedback';
+                feedback.textContent = '';
+            }
+            
+            function startGame() {
+                gameState.gameActive = true;
+                startGameBtn.style.display = 'none';
+                nextWord();
+            }
+            
+            function nextWord() {
+                if (!gameState.gameActive) return;
+                
+                // Reset for new word
+                gameState.selectedLetters = [];
+                gameState.attemptsRemaining = 3;
+                gameState.foundDigraphsInWord = [];
+                updateAttemptsDisplay();
+                
+                // Select a random word
+                const randomIndex = Math.floor(Math.random() * uniqueWords.length);
+                gameState.currentWord = uniqueWords[randomIndex];
+                
+                // Find all digraphs in the word
+                gameState.allDigraphsInWord = findAllDigraphsInWord(gameState.currentWord);
+                
+                // Display the word
+                displayWord(gameState.currentWord);
+                
+                // Reset UI
+                checkWordBtn.disabled = true;
+                feedback.className = 'feedback';
+                feedback.textContent = '';
+            }
+            
+            function displayWord(word) {
+                wordDisplay.innerHTML = '';
+                
+                for (let i = 0; i < word.length; i++) {
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = word[i];
+                    letter.dataset.index = i;
+                    
+                    // Check if this letter is part of a found digraph
+                    const isInFoundDigraph = gameState.foundDigraphsInWord.some(digraph => 
+                        digraph.indices.includes(i)
+                    );
+                    
+                    if (isInFoundDigraph) {
+                        letter.classList.add('found');
+                    } else {
+                        letter.addEventListener('click', function() {
+                            if (!gameState.gameActive) return;
+                            
+                            const index = parseInt(this.dataset.index);
+                            
+                            // If no letters selected yet, select this one
+                            if (gameState.selectedLetters.length === 0) {
+                                gameState.selectedLetters = [index];
+                                updateLetterSelection();
+                            } 
+                            // If one letter is already selected, select range
+                            else if (gameState.selectedLetters.length === 1) {
+                                const firstIndex = gameState.selectedLetters[0];
+                                const start = Math.min(firstIndex, index);
+                                const end = Math.max(firstIndex, index);
+                                
+                                gameState.selectedLetters = [];
+                                for (let i = start; i <= end; i++) {
+                                    gameState.selectedLetters.push(i);
+                                }
+                                
+                                updateLetterSelection();
+                            }
+                            // If multiple letters are selected, start new selection
+                            else {
+                                gameState.selectedLetters = [index];
+                                updateLetterSelection();
+                            }
+                        });
+                    }
+                    
+                    wordDisplay.appendChild(letter);
+                }
+            }
+            
+            function updateLetterSelection() {
+                // Clear all selections (except for found digraphs)
+                const letters = wordDisplay.querySelectorAll('.letter');
+                letters.forEach(letter => {
+                    if (!letter.classList.contains('found')) {
+                        letter.classList.remove('selected');
+                    }
+                });
+                
+                // Apply new selections
+                gameState.selectedLetters.forEach(index => {
+                    const letter = wordDisplay.querySelector(`.letter[data-index="${index}"]`);
+                    if (letter && !letter.classList.contains('found')) {
+                        letter.classList.add('selected');
+                    }
+                });
+                
+                // Enable/disable check button
+                checkWordBtn.disabled = gameState.selectedLetters.length === 0;
+            }
+            
+            function findAllDigraphsInWord(word) {
+                const digraphs = [];
+                
+                // Check for all possible digraphs in the word
+                for (const digraph in gameData) {
+                    // Handle the special case for 'th' which appears twice in our data
+                    const searchDigraph = digraph === 'th2' ? 'th' : digraph;
+                    
+                    // Check if the digraph appears in the word
+                    let index = word.indexOf(searchDigraph);
+                    while (index !== -1) {
+                        // Make sure we're not counting partial matches
+                        const isCompleteMatch = word.substring(index, index + searchDigraph.length) === searchDigraph;
+                        
+                        if (isCompleteMatch) {
+                            digraphs.push({
+                                digraph: searchDigraph,
+                                indices: Array.from({length: searchDigraph.length}, (_, i) => index + i),
+                                type: 'digraph'
+                            });
+                        }
+                        
+                        // Find next occurrence
+                        index = word.indexOf(searchDigraph, index + 1);
+                    }
+                }
+                
+                return digraphs;
+            }
+            
+            function checkSelection() {
+                if (!gameState.gameActive || gameState.selectedLetters.length === 0) return;
+                
+                gameState.totalAttempts++;
+                
+                // Check if selection matches any digraph
+                const selectedText = gameState.selectedLetters
+                    .map(index => gameState.currentWord[index])
+                    .join('');
+                
+                // Check if this is a valid digraph
+                let isValidDigraph = false;
+                for (const digraph in gameData) {
+                    const checkDigraph = digraph === 'th2' ? 'th' : digraph;
+                    if (checkDigraph === selectedText) {
+                        isValidDigraph = true;
+                        break;
+                    }
+                }
+                
+                // Check if this digraph is in the current word
+                const digraphInWord = gameState.allDigraphsInWord.some(digraph => 
+                    digraph.digraph === selectedText && 
+                    JSON.stringify(digraph.indices) === JSON.stringify(gameState.selectedLetters)
+                );
+                
+                if (isValidDigraph && digraphInWord) {
+                    // Correct selection
+                    gameState.correctAttempts++;
+                    gameState.digraphsFound++;
+                    
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = `Correct! "${selectedText}" is a digraph.`;
+                    
+                    // Add to found digraphs
+                    const foundDigraph = gameState.allDigraphsInWord.find(digraph => 
+                        digraph.digraph === selectedText
+                    );
+                    
+                    if (foundDigraph) {
+                        gameState.foundDigraphsInWord.push(foundDigraph);
+                        
+                        // Remove from all digraphs
+                        const foundIndex = gameState.allDigraphsInWord.indexOf(foundDigraph);
+                        if (foundIndex !== -1) {
+                            gameState.allDigraphsInWord.splice(foundIndex, 1);
+                        }
+                    }
+                    
+                    // Check if all digraphs have been found
+                    if (gameState.allDigraphsInWord.length === 0) {
+                        gameState.wordsCompleted++;
+                        updateStats();
+                        
+                        // Show victory if all words completed (for demo, using 5 words)
+                        if (gameState.wordsCompleted >= 5) {
+                            setTimeout(showVictory, 1000);
+                        } else {
+                            feedback.textContent = `Great! All digraphs found. Moving to next word...`;
+                            setTimeout(nextWord, 1500);
+                        }
+                    } else {
+                        // Update the display to show the found digraph
+                        displayWord(gameState.currentWord);
+                    }
+                } else {
+                    // Incorrect selection
+                    gameState.attemptsRemaining--;
+                    updateAttemptsDisplay();
+                    
+                    feedback.className = 'feedback incorrect';
+                    
+                    if (isValidDigraph) {
+                        feedback.textContent = `"${selectedText}" is a digraph, but not in this position. Try again!`;
+                    } else {
+                        feedback.textContent = `"${selectedText}" is not a valid digraph. Try again!`;
+                    }
+                    
+                    // Check if game over
+                    if (gameState.attemptsRemaining <= 0) {
+                        setTimeout(showGameOver, 1000);
+                    }
+                }
+                
+                updateStats();
+                gameState.selectedLetters = [];
+                updateLetterSelection();
+            }
+            
+            function updateStats() {
+                wordsCompletedElement.textContent = gameState.wordsCompleted;
+                digraphsFoundElement.textContent = gameState.digraphsFound;
+                
+                const accuracyRate = gameState.totalAttempts > 0 ? 
+                    Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100) : 100;
+                accuracyRateElement.textContent = `${accuracyRate}%`;
+            }
+            
+            function updateAttemptsDisplay() {
+                attemptsContainer.innerHTML = '';
+                
+                for (let i = 0; i < 3; i++) {
+                    const attempt = document.createElement('div');
+                    attempt.className = i < gameState.attemptsRemaining ? 'attempt' : 'attempt used';
+                    attemptsContainer.appendChild(attempt);
+                }
+            }
+            
+            function showGameOver() {
+                gameState.gameActive = false;
+                finalScoreElement.textContent = gameState.wordsCompleted;
+                gameOverScreen.style.display = 'flex';
+            }
+            
+            function showVictory() {
+                gameState.gameActive = false;
+                victoryScoreElement.textContent = gameState.wordsCompleted;
+                victoryScreen.style.display = 'flex';
+            }
+            
+            // Event listeners
+            checkWordBtn.addEventListener('click', checkSelection);
+            
+            clearSelectionBtn.addEventListener('click', function() {
+                gameState.selectedLetters = [];
+                updateLetterSelection();
+            });
+            
+            startGameBtn.addEventListener('click', startGame);
+            
+            restartGameBtn.addEventListener('click', initGame);
+            
+            playAgainBtn.addEventListener('click', initGame);
+            
+            infoButton.addEventListener('click', function() {
+                alert("Digraphs Game Instructions:\n\n1. Click on letters to highlight them\n2. Click 'Check Selection' to verify if your selection is a valid digraph\n3. Find all digraphs in the word to advance\n4. You have 3 attempts per word\n\nCommon digraphs: sh, ch, th, wh, ph, ck, ng, nk");
+            });
+        });
+    </script>
+</body>
+</html>
