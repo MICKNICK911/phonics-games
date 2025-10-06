@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digraphs - Educational Resource</title>
+    <style>
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f5f9ff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-muted: #6c757d;
+            --accent-primary: #3498db;
+            --accent-secondary: #2980b9;
+            --accent-success: #2ecc71;
+            --accent-danger: #e74c3c;
+            --accent-warning: #f39c12;
+            --border-color: #e9ecef;
+            --shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.05);
+            --digraph-color: #9b59b6;
+            --highlight-color: #ffeb3b;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header-content {
+            flex: 1;
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-button {
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .control-button:hover {
+            background-color: var(--accent-secondary);
+            transform: scale(1.05);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        
+        .instructions h2 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .instructions p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .digraph-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: rgba(155, 89, 182, 0.1);
+            color: var(--digraph-color);
+            border-left: 5px solid var(--digraph-color);
+        }
+        
+        .digraph-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .digraph-table th, .digraph-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        .digraph-table th {
+            background-color: var(--bg-tertiary);
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 1.6rem;
+        }
+        
+        .digraph-cell {
+            background-color: rgba(155, 89, 182, 0.1);
+            color: var(--digraph-color);
+            font-weight: bold;
+        }
+        
+        .example-cell {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+        
+        .game-section {
+            background-color: var(--bg-tertiary);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 40px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .game-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        
+        .word-display {
+            font-size: 3rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow-light);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .letter {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            border: 2px solid transparent;
+            font-size: 2.5rem;
+        }
+        
+        .letter:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .letter.selected {
+            background-color: var(--highlight-color);
+            border-color: #ffc107;
+            transform: scale(1.05);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background-color: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #checkWordBtn {
+            background-color: var(--accent-success);
+        }
+        
+        #checkWordBtn:hover {
+            background-color: #27ae60;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background-color: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .attempts {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .attempt {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+        
+        .attempt.used {
+            background-color: var(--accent-danger);
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--accent-success);
+            display: block;
+        }
+        
+        .feedback.incorrect {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--accent-danger);
+            display: block;
+        }
+        
+        .game-over, .victory {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .game-over-content, .victory-content {
+            background-color: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .game-over h2, .victory h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .game-over p, .victory p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .digraph-table th, .digraph-table td {
+                padding: 8px 10px;
+            }
+            
+            .digraph-table th {
+                font-size: 1.4rem;
+            }
+            
+            .example-cell {
+                font-size: 1rem;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+            }
+            
+            .letter {
+                font-size: 2rem;
+                padding: 8px 12px;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .digraph-table {
+                font-size: 0.8rem;
+            }
+            
+            .digraph-table th {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .word-display {
+                font-size: 2rem;
+            }
+            
+            .letter {
+                font-size: 1.5rem;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Digraphs</h1>
+                <p class="subtitle">Master consonant digraphs to improve reading and spelling skills</p>
+            </div>
+            <div class="header-controls">
+                <button class="control-button" id="infoButton" title="Show instructions">
+                    <i class="fas fa-info"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Modal for Instructions -->
+        <div class="modal" id="instructionsModal">
+            <div class="modal-content">
+                <button class="close-button" id="closeModal">&times;</button>
+                <div class="instructions">
+                    <h2>How to Use This Resource</h2>
+                    <p>Welcome to the Digraphs educational tool! This resource helps you learn and practice consonant digraphs, which are two or more letters that together represent a single sound.</p>
+                    
+                    <h3>Understanding Digraphs</h3>
+                    <ul>
+                        <li><strong>Digraphs</strong> are combinations of two letters that make one sound.</li>
+                        <li>Some common digraphs include: sh, ch, th, wh, ph, ck</li>
+                        <li>Some digraphs like "th" can make different sounds (as in "that" vs "thin")</li>
+                    </ul>
+                    
+                    <h3>How to Practice</h3>
+                    <ul>
+                        <li>Read the words in the tables aloud, focusing on the digraph sounds.</li>
+                        <li>Use the interactive game section to test your knowledge.</li>
+                        <li>Click on letters to highlight them, then click "Check Word" to see if you've found a digraph.</li>
+                        <li>You have 3 attempts per word to find all digraphs.</li>
+                    </ul>
+                    
+                    <h3>Tips for Success</h3>
+                    <ul>
+                        <li>Practice a little every day for best results.</li>
+                        <li>Say the words out loud to reinforce the sounds.</li>
+                        <li>Try to think of other words that use the same digraphs.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <section class="digraph-section">
+            <div class="section-title">
+                <i class="fas fa-font"></i>
+                Common Digraphs
+            </div>
+            
+            <table class="digraph-table">
+                <tr>
+                    <th class="digraph-cell">sh</th>
+                    <th class="digraph-cell">ch</th>
+                    <th class="digraph-cell">tch</th>
+                    <th class="digraph-cell">th</th>
+                    <th class="digraph-cell">th</th>
+                    <th class="digraph-cell">ng</th>
+                    <th class="digraph-cell">nk</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">ship</td>
+                    <td class="example-cell">chat</td>
+                    <td class="example-cell">match</td>
+                    <td class="example-cell">that</td>
+                    <td class="example-cell">thin</td>
+                    <td class="example-cell">song</td>
+                    <td class="example-cell">pink</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">shot</td>
+                    <td class="example-cell">chop</td>
+                    <td class="example-cell">fetch</td>
+                    <td class="example-cell">the</td>
+                    <td class="example-cell">thank</td>
+                    <td class="example-cell">long</td>
+                    <td class="example-cell">link</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">trash</td>
+                    <td class="example-cell">branch</td>
+                    <td class="example-cell">switch</td>
+                    <td class="example-cell">them</td>
+                    <td class="example-cell">both</td>
+                    <td class="example-cell">wing</td>
+                    <td class="example-cell">sink</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">crash</td>
+                    <td class="example-cell">much</td>
+                    <td class="example-cell">scratch</td>
+                    <td class="example-cell">this</td>
+                    <td class="example-cell">with</td>
+                    <td class="example-cell">string</td>
+                    <td class="example-cell">drink</td>
+                </tr>
+            </table>
+            
+            <table class="digraph-table">
+                <tr>
+                    <th class="digraph-cell">wh</th>
+                    <th class="digraph-cell">ph</th>
+                    <th class="digraph-cell">ck</th>
+                    <th class="digraph-cell">wr</th>
+                    <th class="digraph-cell">kn</th>
+                    <th class="digraph-cell">gn</th>
+                    <th class="digraph-cell">gh</th>
+                </tr>
+                <tr>
+                    <td class="example-cell">which</td>
+                    <td class="example-cell">phone</td>
+                    <td class="example-cell">track</td>
+                    <td class="example-cell">write</td>
+                    <td class="example-cell">know</td>
+                    <td class="example-cell">gnash</td>
+                    <td class="example-cell">ghost</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">what</td>
+                    <td class="example-cell">photo</td>
+                    <td class="example-cell">back</td>
+                    <td class="example-cell">wrote</td>
+                    <td class="example-cell">knap</td>
+                    <td class="example-cell">gnome</td>
+                    <td class="example-cell">Ghana</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">white</td>
+                    <td class="example-cell">graph</td>
+                    <td class="example-cell">black</td>
+                    <td class="example-cell">wrap</td>
+                    <td class="example-cell">knot</td>
+                    <td class="example-cell">gnat</td>
+                    <td class="example-cell">ghetto</td>
+                </tr>
+                <tr>
+                    <td class="example-cell">when</td>
+                    <td class="example-cell">Rapha</td>
+                    <td class="example-cell">sack</td>
+                    <td class="example-cell">wrath</td>
+                    <td class="example-cell">knob</td>
+                    <td class="example-cell">gnaw</td>
+                    <td class="example-cell">ghastly</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section class="game-section">
+            <h2 class="game-title">Digraphs Game - Find the Digraphs</h2>
+            
+            <div class="word-display" id="wordDisplay">
+                Click "Next Word" to start playing!
+            </div>
+            
+            <div class="controls">
+                <button id="checkWordBtn" disabled>Check Word</button>
+                <button id="clearSelectionBtn">Clear Selection</button>
+                <button id="nextWordBtn">Next Word</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="wordsCompleted">0</div>
+                    <div class="stat-label">Words Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="digraphsFound">0</div>
+                    <div class="stat-label">Digraphs Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyRate">100%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+            </div>
+            
+            <div class="attempts" id="attempts">
+                <!-- Attempt indicators will be added here by JavaScript -->
+            </div>
+        </section>
+        
+        <footer>
+            <p>Digraphs Educational Resource &copy; 2023</p>
+        </footer>
+    </div>
+    
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2>Game Over</h2>
+            <p>You've used all your attempts!</p>
+            <p>Words Completed: <span id="finalScore">0</span></p>
+            <button id="restartGameBtn">Play Again</button>
+        </div>
+    </div>
+    
+    <div class="victory" id="victory">
+        <div class="victory-content">
+            <h2>Congratulations!</h2>
+            <p>You've successfully identified all digraphs!</p>
+            <p>Words Completed: <span id="victoryScore">0</span></p>
+            <button id="playAgainBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game data - all digraphs and examples from the PDF
+            const gameData = {
+                'sh': ['ship', 'shot', 'trash', 'crash'],
+                'ch': ['chat', 'chop', 'branch', 'much'],
+                'tch': ['match', 'fetch', 'switch', 'scratch'],
+                'th': ['that', 'the', 'them', 'this'], // voiced th
+                'th2': ['thin', 'thank', 'both', 'with'], // unvoiced th
+                'ng': ['song', 'long', 'wing', 'string'],
+                'nk': ['pink', 'link', 'sink', 'drink'],
+                'wh': ['which', 'what', 'white', 'when'],
+                'ph': ['phone', 'photo', 'graph', 'Rapha'],
+                'ck': ['track', 'back', 'black', 'sack'],
+                'wr': ['write', 'wrote', 'wrap', 'wrath'],
+                'kn': ['know', 'knap', 'knot', 'knob'],
+                'gn': ['gnash', 'gnome', 'gnat', 'gnaw'],
+                'gh': ['ghost', 'Ghana', 'ghetto', 'ghastly']
+            };
+            
+            // Flatten all words into a single array
+            const allWords = [];
+            for (const digraph in gameData) {
+                allWords.push(...gameData[digraph]);
+            }
+            
+            // Remove duplicates
+            const uniqueWords = [...new Set(allWords)];
+            
+            // Game state
+            let gameState = {
+                currentWord: '',
+                selectedLetters: [],
+                wordsCompleted: 0,
+                digraphsFound: 0,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                attemptsRemaining: 3,
+                gameActive: true,
+                allDigraphsInWord: []
+            };
+            
+            // DOM elements
+            const wordDisplay = document.getElementById('wordDisplay');
+            const checkWordBtn = document.getElementById('checkWordBtn');
+            const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+            const nextWordBtn = document.getElementById('nextWordBtn');
+            const feedback = document.getElementById('feedback');
+            const wordsCompletedElement = document.getElementById('wordsCompleted');
+            const digraphsFoundElement = document.getElementById('digraphsFound');
+            const accuracyRateElement = document.getElementById('accuracyRate');
+            const attemptsContainer = document.getElementById('attempts');
+            const gameOverScreen = document.getElementById('gameOver');
+            const victoryScreen = document.getElementById('victory');
+            const finalScoreElement = document.getElementById('finalScore');
+            const victoryScoreElement = document.getElementById('victoryScore');
+            const restartGameBtn = document.getElementById('restartGameBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            
+            // Modal functionality
+            const modal = document.getElementById('instructionsModal');
+            const infoButton = document.getElementById('infoButton');
+            const closeModal = document.getElementById('closeModal');
+            
+            // Show modal when info button is clicked
+            infoButton.addEventListener('click', function() {
+                modal.style.display = 'flex';
+            });
+            
+            // Close modal when X is clicked
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside the modal content
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Initialize the game
+            initGame();
+            
+            function initGame() {
+                // Reset game state
+                gameState.wordsCompleted = 0;
+                gameState.digraphsFound = 0;
+                gameState.totalAttempts = 0;
+                gameState.correctAttempts = 0;
+                gameState.attemptsRemaining = 3;
+                gameState.gameActive = true;
+                
+                // Update UI
+                updateStats();
+                updateAttemptsDisplay();
+                
+                // Hide game over and victory screens
+                gameOverScreen.style.display = 'none';
+                victoryScreen.style.display = 'none';
+                
+                // Start with a new word
+                nextWord();
+            }
+            
+            function nextWord() {
+                if (!gameState.gameActive) return;
+                
+                // Reset for new word
+                gameState.selectedLetters = [];
+                gameState.attemptsRemaining = 3;
+                updateAttemptsDisplay();
+                
+                // Select a random word
+                const randomIndex = Math.floor(Math.random() * uniqueWords.length);
+                gameState.currentWord = uniqueWords[randomIndex];
+                
+                // Find all digraphs in the word
+                gameState.allDigraphsInWord = findAllDigraphsInWord(gameState.currentWord);
+                
+                // Display the word
+                displayWord(gameState.currentWord);
+                
+                // Reset UI
+                checkWordBtn.disabled = true;
+                nextWordBtn.style.display = 'none';
+                feedback.className = 'feedback';
+                feedback.textContent = '';
+            }
+            
+            function displayWord(word) {
+                wordDisplay.innerHTML = '';
+                
+                for (let i = 0; i < word.length; i++) {
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = word[i];
+                    letter.dataset.index = i;
+                    
+                    letter.addEventListener('click', function() {
+                        if (!gameState.gameActive) return;
+                        
+                        const index = parseInt(this.dataset.index);
+                        
+                        // If no letters selected yet, select this one
+                        if (gameState.selectedLetters.length === 0) {
+                            gameState.selectedLetters = [index];
+                            updateLetterSelection();
+                        } 
+                        // If one letter is already selected, select range
+                        else if (gameState.selectedLetters.length === 1) {
+                            const firstIndex = gameState.selectedLetters[0];
+                            const start = Math.min(firstIndex, index);
+                            const end = Math.max(firstIndex, index);
+                            
+                            gameState.selectedLetters = [];
+                            for (let i = start; i <= end; i++) {
+                                gameState.selectedLetters.push(i);
+                            }
+                            
+                            updateLetterSelection();
+                        }
+                        // If multiple letters are selected, start new selection
+                        else {
+                            gameState.selectedLetters = [index];
+                            updateLetterSelection();
+                        }
+                    });
+                    
+                    wordDisplay.appendChild(letter);
+                }
+            }
+            
+            function updateLetterSelection() {
+                // Clear all selections
+                const letters = wordDisplay.querySelectorAll('.letter');
+                letters.forEach(letter => {
+                    letter.classList.remove('selected');
+                });
+                
+                // Apply new selections
+                gameState.selectedLetters.forEach(index => {
+                    letters[index].classList.add('selected');
+                });
+                
+                // Enable/disable check button
+                checkWordBtn.disabled = gameState.selectedLetters.length === 0;
+            }
+            
+            function findAllDigraphsInWord(word) {
+                const digraphs = [];
+                
+                // Check for all possible digraphs in the word
+                for (const digraph in gameData) {
+                    // Handle the special case for 'th' which appears twice in our data
+                    const searchDigraph = digraph === 'th2' ? 'th' : digraph;
+                    
+                    // Check if the digraph appears in the word
+                    let index = word.indexOf(searchDigraph);
+                    while (index !== -1) {
+                        // Make sure we're not counting partial matches
+                        const isCompleteMatch = word.substring(index, index + searchDigraph.length) === searchDigraph;
+                        
+                        if (isCompleteMatch) {
+                            digraphs.push({
+                                digraph: searchDigraph,
+                                indices: Array.from({length: searchDigraph.length}, (_, i) => index + i),
+                                type: 'digraph'
+                            });
+                        }
+                        
+                        // Find next occurrence
+                        index = word.indexOf(searchDigraph, index + 1);
+                    }
+                }
+                
+                return digraphs;
+            }
+            
+            function checkSelection() {
+                if (!gameState.gameActive || gameState.selectedLetters.length === 0) return;
+                
+                gameState.totalAttempts++;
+                
+                // Check if selection matches any digraph
+                const selectedText = gameState.selectedLetters
+                    .map(index => gameState.currentWord[index])
+                    .join('');
+                
+                // Check if this is a valid digraph
+                let isValidDigraph = false;
+                for (const digraph in gameData) {
+                    const checkDigraph = digraph === 'th2' ? 'th' : digraph;
+                    if (checkDigraph === selectedText) {
+                        isValidDigraph = true;
+                        break;
+                    }
+                }
+                
+                // Check if this digraph is in the current word
+                const digraphInWord = gameState.allDigraphsInWord.some(digraph => 
+                    digraph.digraph === selectedText && 
+                    JSON.stringify(digraph.indices) === JSON.stringify(gameState.selectedLetters)
+                );
+                
+                if (isValidDigraph && digraphInWord) {
+                    // Correct selection
+                    gameState.correctAttempts++;
+                    gameState.digraphsFound++;
+                    
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = `Correct! "${selectedText}" is a digraph.`;
+                    
+                    // Mark this digraph as found
+                    const foundDigraphIndex = gameState.allDigraphsInWord.findIndex(digraph => 
+                        digraph.digraph === selectedText
+                    );
+                    
+                    if (foundDigraphIndex !== -1) {
+                        gameState.allDigraphsInWord.splice(foundDigraphIndex, 1);
+                    }
+                    
+                    // Check if all digraphs have been found
+                    if (gameState.allDigraphsInWord.length === 0) {
+                        gameState.wordsCompleted++;
+                        updateStats();
+                        
+                        // Show victory if all words completed (for demo, using 5 words)
+                        if (gameState.wordsCompleted >= 5) {
+                            showVictory();
+                        } else {
+                            nextWordBtn.style.display = 'block';
+                            checkWordBtn.disabled = true;
+                        }
+                    }
+                } else {
+                    // Incorrect selection
+                    gameState.attemptsRemaining--;
+                    updateAttemptsDisplay();
+                    
+                    feedback.className = 'feedback incorrect';
+                    
+                    if (isValidDigraph) {
+                        feedback.textContent = `"${selectedText}" is a digraph, but not in this position. Try again!`;
+                    } else {
+                        feedback.textContent = `"${selectedText}" is not a valid digraph. Try again!`;
+                    }
+                    
+                    // Check if game over
+                    if (gameState.attemptsRemaining <= 0) {
+                        showGameOver();
+                    }
+                }
+                
+                updateStats();
+                gameState.selectedLetters = [];
+                updateLetterSelection();
+            }
+            
+            function updateStats() {
+                wordsCompletedElement.textContent = gameState.wordsCompleted;
+                digraphsFoundElement.textContent = gameState.digraphsFound;
+                
+                const accuracyRate = gameState.totalAttempts > 0 ? 
+                    Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100) : 100;
+                accuracyRateElement.textContent = `${accuracyRate}%`;
+            }
+            
+            function updateAttemptsDisplay() {
+                attemptsContainer.innerHTML = '';
+                
+                for (let i = 0; i < 3; i++) {
+                    const attempt = document.createElement('div');
+                    attempt.className = i < gameState.attemptsRemaining ? 'attempt' : 'attempt used';
+                    attemptsContainer.appendChild(attempt);
+                }
+            }
+            
+            function showGameOver() {
+                gameState.gameActive = false;
+                finalScoreElement.textContent = gameState.wordsCompleted;
+                gameOverScreen.style.display = 'flex';
+            }
+            
+            function showVictory() {
+                gameState.gameActive = false;
+                victoryScoreElement.textContent = gameState.wordsCompleted;
+                victoryScreen.style.display = 'flex';
+            }
+            
+            // Event listeners
+            checkWordBtn.addEventListener('click', checkSelection);
+            
+            clearSelectionBtn.addEventListener('click', function() {
+                gameState.selectedLetters = [];
+                updateLetterSelection();
+            });
+            
+            nextWordBtn.addEventListener('click', nextWord);
+            
+            restartGameBtn.addEventListener('click', initGame);
+            
+            playAgainBtn.addEventListener('click', initGame);
+        });
+    </script>
+</body>
+</html>
