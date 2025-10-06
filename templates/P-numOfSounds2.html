@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Segmenter - Phoneme Identification Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin: 20px 0;
+        }
+        
+        .word-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .letter {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            min-width: 60px;
+        }
+        
+        .letter.selected {
+            background-color: #4CAF50;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+        
+        .letter.sound-0 { background-color: #FF5252; }
+        .letter.sound-1 { background-color: #FF9800; }
+        .letter.sound-2 { background-color: #FFEB3B; color: #333; }
+        .letter.sound-3 { background-color: #4CAF50; }
+        .letter.sound-4 { background-color: #2196F3; }
+        .letter.sound-5 { background-color: #9C27B0; }
+        .letter.sound-6 { background-color: #00BCD4; }
+        .letter.sound-7 { background-color: #E91E63; }
+        .letter.sound-8 { background-color: #8BC34A; }
+        .letter.sound-9 { background-color: #795548; }
+        
+        .letter.marked {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: linear-gradient(to right, #cccccc, #999999);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #foundBtn {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+        }
+        
+        #checkBtn {
+            background: linear-gradient(to right, #2196F3, #0D47A1);
+        }
+        
+        #resetBtn {
+            background: linear-gradient(to right, #9C27B0, #6A1B9A);
+        }
+        
+        .score-area {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .instructions h2 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .modal p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .sound-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+            }
+            
+            .letter {
+                padding: 8px 12px;
+                font-size: 1.8rem;
+                min-width: 50px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .sound-legend {
+                gap: 10px;
+            }
+            
+            .legend-item {
+                font-size: 0.8rem;
+            }
+            
+            .legend-avatar {
+                width: 20px;
+                height: 20px;
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sound Segmenter</h1>
+        <p class="subtitle">Tap letter combinations to identify sounds in words</p>
+        
+        <div class="game-area">
+            <div class="word-display" id="wordDisplay">
+                <!-- Letters will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="sound-legend" id="soundLegend">
+                <!-- Sound legend will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div class="controls">
+                <button id="foundBtn">Found Sound</button>
+                <button id="checkBtn">Check Sounds</button>
+                <button id="resetBtn">Reset Selection</button>
+                <button id="hintBtn">Show Hint</button>
+            </div>
+            
+            <div class="score-area">
+                <div>Score: <span id="score">0</span></div>
+                <div>Words: <span id="wordCount">0</span>/10</div>
+                <div>Lives: <span id="lives">3</span></div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>How to Play</h2>
+            <ol>
+                <li>Tap on individual letters or letter combinations that make a single sound</li>
+                <li>Click "Found Sound" to highlight your selection with a color</li>
+                <li>Continue until you've identified all sounds in the word</li>
+                <li>Click "Check Sounds" to see if your segmentation is correct</li>
+                <li>Correct answers advance to the next word</li>
+                <li>Incorrect answers cost a life - game ends when lives reach zero</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Modal for correct answer -->
+    <div class="modal" id="correctModal">
+        <div class="modal-content">
+            <h2>Correct! 🎉</h2>
+            <p>Well done! You correctly identified the sounds in the word.</p>
+            <button id="correctNextBtn">Next Word</button>
+        </div>
+    </div>
+
+    <!-- Modal for incorrect answer -->
+    <div class="modal" id="incorrectModal">
+        <div class="modal-content">
+            <h2>Incorrect 😞</h2>
+            <p id="incorrectMessage">The correct segmentation is: </p>
+            <button id="incorrectNextBtn">Continue</button>
+        </div>
+    </div>
+
+    <!-- Modal for game over -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2>Game Over</h2>
+            <p>Your final score: <span id="finalScore">0</span></p>
+            <button id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Modal for victory -->
+    <div class="modal" id="victoryModal">
+        <div class="modal-content">
+            <h2>Congratulations! 🏆</h2>
+            <p>You've successfully completed all words with a score of <span id="victoryScore">0</span>!</p>
+            <button id="victoryRestartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game data - words with their sound breakdown
+        const wordList = [
+            { word: "start", sounds: ["st", "ar", "t"] },
+            { word: "sheep", sounds: ["sh", "ee", "p"] },
+            { word: "bright", sounds: ["br", "igh", "t"] },
+            { word: "chair", sounds: ["ch", "air"] },
+            { word: "phone", sounds: ["ph", "o", "n", "e"] },
+            { word: "splash", sounds: ["s", "p", "l", "a", "sh"] },
+            { word: "through", sounds: ["th", "r", "ough"] },
+            { word: "choice", sounds: ["ch", "oi", "ce"] },
+            { word: "knight", sounds: ["kn", "igh", "t"] },
+            { word: "eight", sounds: ["eigh", "t"] }
+        ];
+
+        // Game state
+        let currentWordIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let gameWords = [...wordList];
+        let currentSelections = [];
+        let currentSoundIndex = 0;
+        let markedSounds = [];
+        
+        // DOM elements
+        const wordDisplay = document.getElementById('wordDisplay');
+        const soundLegend = document.getElementById('soundLegend');
+        const foundBtn = document.getElementById('foundBtn');
+        const checkBtn = document.getElementById('checkBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const hintBtn = document.getElementById('hintBtn');
+        const scoreDisplay = document.getElementById('score');
+        const wordCountDisplay = document.getElementById('wordCount');
+        const livesDisplay = document.getElementById('lives');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Modal elements
+        const correctModal = document.getElementById('correctModal');
+        const incorrectModal = document.getElementById('incorrectModal');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const victoryModal = document.getElementById('victoryModal');
+        const correctNextBtn = document.getElementById('correctNextBtn');
+        const incorrectNextBtn = document.getElementById('incorrectNextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const victoryRestartBtn = document.getElementById('victoryRestartBtn');
+        const incorrectMessage = document.getElementById('incorrectMessage');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const victoryScoreDisplay = document.getElementById('victoryScore');
+        
+        // Initialize the game
+        function initGame() {
+            // Reset game state
+            currentWordIndex = 0;
+            score = 0;
+            lives = 3;
+            gameWords = [...wordList];
+            currentSelections = [];
+            currentSoundIndex = 0;
+            markedSounds = [];
+            
+            // Shuffle words for variety
+            shuffleArray(gameWords);
+            
+            // Update UI
+            updateScore();
+            updateLives();
+            loadWord();
+            
+            // Hide all modals
+            hideAllModals();
+        }
+        
+        // Load the current word
+        function loadWord() {
+            const currentWord = gameWords[currentWordIndex];
+            wordDisplay.innerHTML = '';
+            soundLegend.innerHTML = '';
+            
+            // Create letter elements
+            for (let i = 0; i < currentWord.word.length; i++) {
+                const letter = document.createElement('span');
+                letter.className = 'letter';
+                letter.textContent = currentWord.word[i];
+                letter.dataset.index = i;
+                letter.addEventListener('click', handleLetterClick);
+                wordDisplay.appendChild(letter);
+            }
+            
+            // Update progress
+            progressBar.style.width = `${(currentWordIndex / gameWords.length) * 100}%`;
+            wordCountDisplay.textContent = `${currentWordIndex + 1}/${gameWords.length}`;
+            
+            // Reset selection state
+            currentSelections = [];
+            currentSoundIndex = 0;
+            markedSounds = [];
+            
+            // Enable/disable buttons
+            foundBtn.disabled = true;
+            checkBtn.disabled = false;
+            resetBtn.disabled = true;
+            hintBtn.disabled = false;
+            
+            // Create sound legend
+            createSoundLegend();
+        }
+        
+        // Create sound legend with circular avatars
+        function createSoundLegend() {
+            const colors = [
+                { name: "Sound 1", class: "sound-0", color: "#FF5252" },
+                { name: "Sound 2", class: "sound-1", color: "#FF9800" },
+                { name: "Sound 3", class: "sound-2", color: "#FFEB3B" },
+                { name: "Sound 4", class: "sound-3", color: "#4CAF50" },
+                { name: "Sound 5", class: "sound-4", color: "#2196F3" },
+                { name: "Sound 6", class: "sound-5", color: "#9C27B0" },
+                { name: "Sound 7", class: "sound-6", color: "#00BCD4" },
+                { name: "Sound 8", class: "sound-7", color: "#E91E63" },
+                { name: "Sound 9", class: "sound-8", color: "#8BC34A" },
+                { name: "Sound 10", class: "sound-9", color: "#795548" }
+            ];
+            
+            colors.forEach((color, index) => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                
+                const avatar = document.createElement('div');
+                avatar.className = `legend-avatar ${color.class}`;
+                avatar.style.backgroundColor = color.color;
+                avatar.textContent = index + 1;
+                
+                const label = document.createElement('span');
+                label.textContent = color.name;
+                
+                legendItem.appendChild(avatar);
+                legendItem.appendChild(label);
+                soundLegend.appendChild(legendItem);
+            });
+        }
+        
+        // Handle letter clicks
+        function handleLetterClick(event) {
+            const clickedLetter = event.target;
+            const index = parseInt(clickedLetter.dataset.index);
+            
+            // Check if the letter is already part of a selection
+            if (clickedLetter.classList.contains('selected')) {
+                // Deselect if it's the last selected letter in sequence
+                const lastSelection = currentSelections[currentSelections.length - 1];
+                if (lastSelection && lastSelection.includes(index)) {
+                    // Remove from selection
+                    const selectionIndex = lastSelection.indexOf(index);
+                    if (selectionIndex !== -1) {
+                        lastSelection.splice(selectionIndex, 1);
+                        
+                        // Update visual state
+                        clickedLetter.classList.remove('selected');
+                        
+                        // If selection is now empty, remove it
+                        if (lastSelection.length === 0) {
+                            currentSelections.pop();
+                            currentSoundIndex--;
+                        }
+                        
+                        // Update button states
+                        foundBtn.disabled = currentSelections.length === 0;
+                        resetBtn.disabled = currentSelections.length === 0;
+                    }
+                }
+            } else {
+                // Check if we can add to the current selection (must be adjacent)
+                if (currentSelections.length === 0) {
+                    // Start a new selection
+                    currentSelections.push([index]);
+                    clickedLetter.classList.add('selected');
+                    currentSoundIndex++;
+                } else {
+                    const lastSelection = currentSelections[currentSelections.length - 1];
+                    const lastIndex = lastSelection[lastSelection.length - 1];
+                    
+                    // Check if the clicked letter is adjacent to the last selected letter
+                    if (index === lastIndex + 1) {
+                        lastSelection.push(index);
+                        clickedLetter.classList.add('selected');
+                    } else {
+                        // Start a new selection if not adjacent
+                        currentSelections.push([index]);
+                        clickedLetter.classList.add('selected');
+                        currentSoundIndex++;
+                    }
+                }
+                
+                // Update button states
+                foundBtn.disabled = false;
+                resetBtn.disabled = false;
+            }
+        }
+        
+        // Mark the current selection as a found sound
+        function markFoundSound() {
+            if (currentSelections.length === 0) return;
+            
+            const lastSelection = currentSelections[currentSelections.length - 1];
+            
+            // Mark all letters in the last selection with the current sound index
+            lastSelection.forEach(index => {
+                const letter = wordDisplay.querySelector(`[data-index="${index}"]`);
+                letter.classList.add(`sound-${markedSounds.length % 10}`);
+                letter.classList.add('marked');
+                letter.classList.remove('selected');
+            });
+            
+            // Store the marked sound
+            markedSounds.push({
+                indices: [...lastSelection],
+                soundIndex: markedSounds.length
+            });
+            
+            // Reset for next selection
+            currentSelections = [];
+            
+            // Update button states
+            foundBtn.disabled = true;
+            resetBtn.disabled = true;
+        }
+        
+        // Reset the current selection
+        function resetSelection() {
+            // Clear all current selections
+            currentSelections.forEach(selection => {
+                selection.forEach(index => {
+                    const letter = wordDisplay.querySelector(`[data-index="${index}"]`);
+                    letter.classList.remove('selected');
+                });
+            });
+            
+            currentSelections = [];
+            currentSoundIndex = 0;
+            
+            // Update button states
+            foundBtn.disabled = true;
+            resetBtn.disabled = true;
+        }
+        
+        // Check if the player's segmentation matches the expected sounds
+        function checkSegmentation() {
+            const currentWord = gameWords[currentWordIndex];
+            const playerSegmentation = getPlayerSegmentation();
+            const expectedSegmentation = currentWord.sounds;
+            
+            // Check if the segmentation matches
+            const isCorrect = JSON.stringify(playerSegmentation) === JSON.stringify(expectedSegmentation);
+            
+            if (isCorrect) {
+                // Correct segmentation
+                score += 10;
+                updateScore();
+                
+                // Show correct modal
+                showModal(correctModal);
+            } else {
+                // Incorrect segmentation
+                incorrectMessage.textContent = `The correct segmentation is: ${expectedSegmentation.join('-')}`;
+                lives--;
+                updateLives();
+                
+                if (lives <= 0) {
+                    // Game over
+                    finalScoreDisplay.textContent = score;
+                    showModal(gameOverModal);
+                } else {
+                    // Show incorrect modal
+                    showModal(incorrectModal);
+                }
+            }
+        }
+        
+        // Reset the game for the current word
+        function resetGameForCurrentWord() {
+            // Clear all marked sounds
+            markedSounds = [];
+            
+            // Reset all letters to default state
+            const letters = wordDisplay.querySelectorAll('.letter');
+            letters.forEach(letter => {
+                letter.className = 'letter';
+                letter.addEventListener('click', handleLetterClick);
+            });
+            
+            // Reset selection state
+            currentSelections = [];
+            currentSoundIndex = 0;
+            
+            // Update button states
+            foundBtn.disabled = true;
+            resetBtn.disabled = true;
+        }
+        
+        // Get the player's segmentation based on their selections
+        function getPlayerSegmentation() {
+            const segments = [];
+            
+            // Sort marked sounds by their first index
+            markedSounds.sort((a, b) => a.indices[0] - b.indices[0]);
+            
+            // Create segments from marked sounds
+            markedSounds.forEach(sound => {
+                let segmentText = '';
+                sound.indices.forEach(index => {
+                    const letter = wordDisplay.querySelector(`[data-index="${index}"]`);
+                    segmentText += letter.textContent;
+                });
+                segments.push(segmentText);
+            });
+            
+            return segments;
+        }
+        
+        // Show a hint
+        function showHint() {
+            const currentWord = gameWords[currentWordIndex];
+            
+            // Show hint in a modal
+            incorrectMessage.textContent = `Hint: This word has ${currentWord.sounds.length} sounds`;
+            showModal(incorrectModal);
+            
+            // Disable hint button after use
+            hintBtn.disabled = true;
+            
+            // Small penalty for using hint
+            if (score > 2) score -= 2;
+            updateScore();
+        }
+        
+        // Update score display
+        function updateScore() {
+            scoreDisplay.textContent = score;
+        }
+        
+        // Update lives display
+        function updateLives() {
+            livesDisplay.textContent = lives;
+        }
+        
+        // Show a modal
+        function showModal(modal) {
+            hideAllModals();
+            modal.style.display = 'flex';
+        }
+        
+        // Hide all modals
+        function hideAllModals() {
+            correctModal.style.display = 'none';
+            incorrectModal.style.display = 'none';
+            gameOverModal.style.display = 'none';
+            victoryModal.style.display = 'none';
+        }
+        
+        // Move to the next word
+        function nextWord() {
+            currentWordIndex++;
+            if (currentWordIndex < gameWords.length) {
+                loadWord();
+            } else {
+                // Game completed successfully
+                victoryScoreDisplay.textContent = score;
+                showModal(victoryModal);
+            }
+        }
+        
+        // Utility function to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Event listeners
+        foundBtn.addEventListener('click', markFoundSound);
+        checkBtn.addEventListener('click', checkSegmentation);
+        resetBtn.addEventListener('click', resetSelection);
+        hintBtn.addEventListener('click', showHint);
+        
+        // Modal button event listeners
+        correctNextBtn.addEventListener('click', () => {
+            hideAllModals();
+            nextWord();
+        });
+        
+        incorrectNextBtn.addEventListener('click', () => {
+            hideAllModals();
+            resetGameForCurrentWord();
+        });
+        
+        restartBtn.addEventListener('click', initGame);
+        victoryRestartBtn.addEventListener('click', initGame);
+        
+        // Initialize the game when page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
