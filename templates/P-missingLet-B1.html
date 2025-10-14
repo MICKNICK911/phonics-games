@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Gap: Missing Letters Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background-color: yellow;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            min-height: 400px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            color: #2575fc;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Game Screen */
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin: 25px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dash {
+            display: inline-block;
+            width: 30px;
+            margin: 0 5px;
+            text-align: center;
+            color: transparent;
+            border-bottom: 3px solid red;
+        }
+        
+        .audio-btn {
+            background-color: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .audio-btn:hover {
+            background-color: #1a5fd0;
+            transform: scale(1.05);
+        }
+        
+        .audio-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .audio-btn.loading {
+            opacity: 0.7;
+        }
+        
+        .audio-btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid transparent;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .option-btn {
+            background-color: #f0f8ff;
+            border: 2px solid #2575fc;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option-btn:hover {
+            background-color: #e0f0ff;
+            transform: translateY(-3px);
+        }
+        
+        .option-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .progress {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2575fc;
+        }
+        
+        /* Game Over & Congrats Screens */
+        .result-screen {
+            padding: 30px;
+        }
+        
+        .result-icon {
+            font-size: 5rem;
+            margin: 20px 0;
+        }
+        
+        .success {
+            color: #4caf50;
+        }
+        
+        .error {
+            color: #f44336;
+        }
+        
+        .result-text {
+            font-size: 1.8rem;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .score-display {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .btn {
+            background-color: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            background-color: #1a5fd0;
+            transform: translateY(-3px);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .correct-word {
+            font-size: 2rem;
+            color: #4caf50;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 10px;
+        }
+        
+        .timer {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2575fc;
+            margin-top: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .word-display {
+                font-size: 2rem;
+                padding: 10px;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spelling Gap: Missing Letters</h1>
+        
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen active">
+            <div class="word-display" id="wordDisplay"></div>
+            <button class="audio-btn" id="audioBtn">🔊</button>
+            <div class="options-container" id="optionsContainer"></div>
+            <div class="progress" id="progress">Question 1 of 5</div>
+            <div class="timer" id="timer">Time: 0s</div>
+        </div>
+        
+        <!-- Correct Answer Screen -->
+        <div id="correctScreen" class="screen">
+            <div class="result-icon success">✓</div>
+            <div class="correct-word" id="correctWordDisplay"></div>
+            <p class="result-text">Correct! Well done!</p>
+            <button class="btn" id="nextBtn">Next Word</button>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen">
+            <div class="result-icon error">✗</div>
+            <p class="result-text">Game Over!</p>
+            <div class="score-display">Your score: <span id="finalScore">0</span></div>
+            <button class="btn" id="restartBtn">Play Again</button>
+        </div>
+        
+        <!-- Congrats Screen -->
+        <div id="congratsScreen" class="screen">
+            <div class="result-icon success">🏆</div>
+            <p class="result-text">YOU HAVE PASSED THE TEST!</p>
+            <div class="score-display">Final Score: <span id="totalScore">0</span>/5</div>
+            <div class="score-display">Total Time: <span id="totalTime">0</span> seconds</div>
+            <button class="btn" id="playAgainBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const words = [
+  {
+    "target": "clap",
+    "missing letters": "cl",
+    "options": ["cl", "sn", "sp"]
+  },
+  {
+    "target": "snap",
+    "missing letters": "sn",
+    "options": ["sn", "sw", "cl"]
+  },
+  {
+    "target": "swim",
+    "missing letters": "sw",
+    "options": ["sw", "sl", "mp"]
+  },
+  {
+    "target": "tests",
+    "missing letters": "ts",
+    "options": ["ts", "nt", "ct"]
+  },
+  {
+    "target": "slip",
+    "missing letters": "sl",
+    "options": ["sl", "cl", "sn"]
+  },
+  {
+    "target": "jump",
+    "missing letters": "mp",
+    "options": ["mp", "nt", "ct"]
+  },
+  {
+    "target": "hunt",
+    "missing letters": "nt",
+    "options": ["nt", "mp", "ts"]
+  },
+  {
+    "target": "text",
+    "missing letters": "xt",
+    "options": ["xt", "ct", "nt"]
+  },
+  {
+    "target": "fact",
+    "missing letters": "ct",
+    "options": ["ct", "xt", "mp"]
+  },
+  {
+    "target": "spin",
+    "missing letters": "sp",
+    "options": ["sp", "sn", "sw"]
+  },
+  {
+    "target": "club",
+    "missing letters": "cl",
+    "options": ["cl", "sl", "sp"]
+  },
+  {
+    "target": "snow",
+    "missing letters": "sn",
+    "options": ["sn", "sw", "sl"]
+  },
+  {
+    "target": "swan",
+    "missing letters": "sw",
+    "options": ["sw", "sn", "sp"]
+  },
+  {
+    "target": "boats",
+    "missing letters": "ts",
+    "options": ["ts", "nt", "mp"]
+  },
+  {
+    "target": "sled",
+    "missing letters": "sl",
+    "options": ["sl", "cl", "sn"]
+  },
+  {
+    "target": "lamp",
+    "missing letters": "mp",
+    "options": ["mp", "nt", "ct"]
+  },
+  {
+    "target": "rent",
+    "missing letters": "nt",
+    "options": ["nt", "mp", "ts"]
+  },
+  {
+    "target": "next",
+    "missing letters": "xt",
+    "options": ["xt", "ct", "nt"]
+  },
+  {
+    "target": "pact",
+    "missing letters": "ct",
+    "options": ["ct", "xt", "mp"]
+  },
+  {
+    "target": "spot",
+    "missing letters": "sp",
+    "options": ["sp", "sn", "sw"]
+  },
+  {
+    "target": "claw",
+    "missing letters": "cl",
+    "options": ["cl", "sl", "sp"]
+  },
+  {
+    "target": "snip",
+    "missing letters": "sn",
+    "options": ["sn", "sw", "cl"]
+  },
+  {
+    "target": "sway",
+    "missing letters": "sw",
+    "options": ["sw", "sn", "sl"]
+  },
+  {
+    "target": "gifts",
+    "missing letters": "ts",
+    "options": ["ts", "nt", "ct"]
+  },
+  {
+    "target": "slid",
+    "missing letters": "sl",
+    "options": ["sl", "cl", "sn"]
+  },
+  {
+    "target": "camp",
+    "missing letters": "mp",
+    "options": ["mp", "nt", "ts"]
+  },
+  {
+    "target": "sent",
+    "missing letters": "nt",
+    "options": ["nt", "mp", "ct"]
+  },
+  {
+    "target": "context",
+    "missing letters": "xt",
+    "options": ["xt", "ct", "nt"]
+  },
+  {
+    "target": "react",
+    "missing letters": "ct",
+    "options": ["ct", "xt", "mp"]
+  },
+  {
+    "target": "spat",
+    "missing letters": "sp",
+    "options": ["sp", "sn", "sw"]
+  }
+];
+
+        // Game state
+        let currentIndex = 0;
+        let score = 0;
+        let startTime = 0;
+        let gameTimer = null;
+        let elapsedTime = 0;
+        let speechSupported = false;
+        let voicesReady = false;
+
+        // DOM elements
+        const gameScreen = document.getElementById('gameScreen');
+        const correctScreen = document.getElementById('correctScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const congratsScreen = document.getElementById('congratsScreen');
+        
+        const wordDisplay = document.getElementById('wordDisplay');
+        const audioBtn = document.getElementById('audioBtn');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const progress = document.getElementById('progress');
+        const timer = document.getElementById('timer');
+        const correctWordDisplay = document.getElementById('correctWordDisplay');
+        const nextBtn = document.getElementById('nextBtn');
+        const finalScore = document.getElementById('finalScore');
+        const restartBtn = document.getElementById('restartBtn');
+        const totalScore = document.getElementById('totalScore');
+        const totalTime = document.getElementById('totalTime');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+
+        // Initialize game
+        function initGame() {
+            // Check if Speech Synthesis API is available
+            speechSupported = 'speechSynthesis' in window;
+            if (!speechSupported) {
+                audioBtn.style.display = 'none';
+            } else {
+                // Preload voices to reduce TTS delay
+                preloadVoices();
+            }
+            
+            startGame();
+        }
+
+        // Preload voices for TTS
+        function preloadVoices() {
+            // Show loading state for audio button
+            audioBtn.classList.add('loading');
+            
+            // Function to check if voices are loaded
+            const tryLoadVoices = () => {
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    voicesReady = true;
+                    audioBtn.classList.remove('loading');
+                    return true;
+                }
+                return false;
+            };
+            
+            // Try to load voices immediately
+            if (!tryLoadVoices()) {
+                // If not loaded, wait for voiceschanged event
+                speechSynthesis.addEventListener('voiceschanged', function() {
+                    tryLoadVoices();
+                    // Also pre-speak a short word to initialize the TTS engine
+                    prewarmTts();
+                });
+                
+                // Fallback: check again after a delay
+                setTimeout(() => {
+                    if (!voicesReady) {
+                        tryLoadVoices();
+                        prewarmTts();
+                    }
+                }, 1000);
+            } else {
+                prewarmTts();
+            }
+        }
+
+        // Prewarm the TTS engine by speaking a very short, silent word
+        function prewarmTts() {
+            if (!speechSupported) return;
+            
+            const utterance = new SpeechSynthesisUtterance("");
+            utterance.volume = 0;
+            utterance.onend = function() {
+                voicesReady = true;
+                audioBtn.classList.remove('loading');
+            };
+            
+            try {
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.log("TTS prewarming failed:", e);
+                audioBtn.classList.remove('loading');
+            }
+        }
+
+        // Start a new game
+        function startGame() {
+            currentIndex = 0;
+            score = 0;
+            elapsedTime = 0;
+            clearInterval(gameTimer);
+            startTime = Date.now();
+            
+            // Start timer
+            gameTimer = setInterval(() => {
+                elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                timer.textContent = `Time: ${elapsedTime}s`;
+            }, 1000);
+            
+            showGameScreen();
+            loadWord();
+        }
+
+        // Load current word
+        function loadWord() {
+            const currentWord = words[currentIndex];
+            const { target, missing } = extractWordData(currentWord);
+            
+            // Display word with missing letters replaced by dashes
+            const displayText = target.replace(missing, '_'.repeat(missing.length));
+            wordDisplay.innerHTML = displayText
+                .split('')
+                .map(char => char === '_' ? `<span class="dash">${char}</span>` : char)
+                .join('');
+            
+            // Update progress
+            progress.textContent = `Question ${currentIndex + 1} of ${words.length}`;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add option buttons
+            currentWord.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option, currentWord));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Extract word data with validation
+        function extractWordData(word) {
+            const target = word.target || '';
+            const missing = word["missing letters"] || '';
+            
+            // Validate that missing letters exist in the target word
+            if (!target.includes(missing)) {
+                console.error(`Missing letters "${missing}" not found in "${target}"`);
+                return { target, missing: '' };
+            }
+            
+            return { target, missing };
+        }
+
+        // Check if selected answer is correct
+        function checkAnswer(selectedOption, currentWord) {
+            const { target, missing } = extractWordData(currentWord);
+            
+            if (selectedOption === missing) {
+                // Correct answer
+                score++;
+                showCorrectScreen(target);
+            } else {
+                // Wrong answer - game over
+                showGameOverScreen();
+            }
+        }
+
+        // Show correct answer screen
+        function showCorrectScreen(targetWord) {
+            // Show correct screen
+            hideAllScreens();
+            correctScreen.classList.add('active');
+            
+            // Display the correct word
+            correctWordDisplay.textContent = targetWord;
+            
+            // Set timeout to automatically advance if user doesn't click
+            setTimeout(() => {
+                if (correctScreen.classList.contains('active')) {
+                    nextWord();
+                }
+            }, 2000);
+        }
+
+        // Advance to next word
+        function nextWord() {
+            currentIndex++;
+            
+            if (currentIndex < words.length) {
+                hideAllScreens();
+                gameScreen.classList.add('active');
+                loadWord();
+            } else {
+                // Game completed successfully
+                showCongratsScreen();
+            }
+        }
+
+        // Show game over screen
+        function showGameOverScreen() {
+            hideAllScreens();
+            gameOverScreen.classList.add('active');
+            finalScore.textContent = score;
+            clearInterval(gameTimer);
+        }
+
+        // Show congratulations screen
+        function showCongratsScreen() {
+            hideAllScreens();
+            congratsScreen.classList.add('active');
+            totalScore.textContent = score;
+            totalTime.textContent = elapsedTime;
+            clearInterval(gameTimer);
+        }
+
+        // Show game screen
+        function showGameScreen() {
+            hideAllScreens();
+            gameScreen.classList.add('active');
+        }
+
+        // Hide all screens
+        function hideAllScreens() {
+            gameScreen.classList.remove('active');
+            correctScreen.classList.remove('active');
+            gameOverScreen.classList.remove('active');
+            congratsScreen.classList.remove('active');
+        }
+
+        // Speak the target word
+        function speakWord() {
+            if (!speechSupported || !voicesReady) {
+                // Show loading state if TTS isn't ready
+                if (speechSupported && !voicesReady) {
+                    audioBtn.classList.add('loading');
+                    // Try to preload again if not ready
+                    setTimeout(preloadVoices, 100);
+                }
+                return;
+            }
+            
+            const currentWord = words[currentIndex];
+            
+            // Show loading state briefly
+            audioBtn.classList.add('loading');
+            
+            try {
+                const utterance = new SpeechSynthesisUtterance(currentWord.target);
+                utterance.rate = 0.9;
+                
+                utterance.onend = function() {
+                    audioBtn.classList.remove('loading');
+                };
+                
+                utterance.onerror = function() {
+                    audioBtn.classList.remove('loading');
+                    console.error("Speech synthesis error");
+                };
+                
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.log("TTS error:", e);
+                audioBtn.classList.remove('loading');
+            }
+        }
+
+        // Event listeners
+        audioBtn.addEventListener('click', speakWord);
+        
+        nextBtn.addEventListener('click', nextWord);
+        
+        restartBtn.addEventListener('click', () => {
+            startGame();
+        });
+        
+        playAgainBtn.addEventListener('click', () => {
+            startGame();
+        });
+
+        // Initialize the game when page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
