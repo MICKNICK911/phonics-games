@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CVC Word Builder - Complete Edition</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #2c3e50;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(to right, #4e54c8, #8f94fb);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    h1 {
+      font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .game-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .game-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .game-area {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 10px 0;
+      border-bottom: 2px dashed #eee;
+    }
+    
+    .stat-box {
+      text-align: center;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 10px;
+      flex: 1;
+      margin: 0 5px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #4e54c8;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ff7e5f;
+    }
+    
+    .vowel-selector {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .vowel-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .vowel-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .vowel-btn.active {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+    
+    .vowel-btn.completed {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .vowel-btn.completed::after {
+      content: "✓";
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #2ecc71;
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    #a-button { background: #ff6b6b; }
+    #e-button { background: #48dbfb; }
+    #i-button { background: #1dd1a1; }
+    #o-button { background: #feca57; }
+    #u-button { background: #ff9ff3; }
+    
+    .word-display {
+      background: linear-gradient(to right, #f6d365, #fda085);
+      border-radius: 15px;
+      padding: 30px;
+      margin: 20px 0;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .word-display::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 100px 100px;
+      z-index: 0;
+    }
+    
+    #word {
+      font-size: 5rem;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      letter-spacing: 10px;
+      position: relative;
+      z-index: 1;
+      font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+    }
+    
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+    
+    @media (max-width: 992px) {
+      .keyboard {
+        grid-template-columns: repeat(7, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .keyboard {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .keyboard {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+    
+    .key {
+      background: #4e54c8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 5px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .key:hover {
+      background: #3a40b0;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .key:active {
+      transform: translateY(1px);
+    }
+    
+    .key.used {
+      background: #bdc3c7;
+      transform: scale(0.95);
+      box-shadow: none;
+    }
+    
+    #reset {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #reset:hover {
+      transform: rotate(90deg);
+      background: #c0392b;
+    }
+    
+    .words-list {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      height: 100%;
+      overflow-y: auto;
+      max-height: 600px;
+    }
+    
+    .words-list h2 {
+      text-align: center;
+      color: #4e54c8;
+      margin-bottom: 20px;
+      font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+      font-size: 1.8rem;
+      border-bottom: 3px solid #f9d342;
+      padding-bottom: 10px;
+    }
+    
+    #correct-words-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      padding: 10px;
+    }
+    
+    #correct-words-list li {
+      background: linear-gradient(to right, #ff7e5f, #ff9a8b);
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      animation: popIn 0.4s ease-out;
+      font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .message-box {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      max-width: 90%;
+      width: 500px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+    }
+    
+    .overlay.active .message-box {
+      transform: scale(1);
+    }
+    
+    .message-box h2 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #4e54c8;
+      font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+    }
+    
+    .message-box p {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    
+    .btn {
+      background: #4e54c8;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn:hover {
+      background: #3a40b0;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+    
+    .btn-warning {
+      background: #e74c3c;
+    }
+    
+    .btn-success {
+      background: #2ecc71;
+    }
+    
+    .btn-accent {
+      background: #f9d342;
+      color: #2c3e50;
+    }
+    
+    .congrats .message-box {
+      background: linear-gradient(135deg, #2ecc71, #1abc9c);
+      color: white;
+    }
+    
+    .congrats h2, .congrats p {
+      color: white;
+    }
+    
+    .wrong .message-box {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+    }
+    
+    .wrong h2, .wrong p {
+      color: white;
+    }
+    
+    .exists .message-box {
+      background: linear-gradient(135deg, #f1c40f, #f39c12);
+      color: white;
+    }
+    
+    .exists h2, .exists p {
+      color: white;
+    }
+    
+    .intro .message-box {
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+      color: white;
+    }
+    
+    .intro h2, .intro p {
+      color: white;
+    }
+    
+    .level-up .message-box {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+    }
+    
+    .level-up h2, .level-up p {
+      color: white;
+    }
+    
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #ecf0f1;
+      border-radius: 10px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, #2ecc71, #1abc9c);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+    
+    .word-count {
+      text-align: center;
+      font-weight: 600;
+      color: #4e54c8;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>CVC Word Builder</h1>
+      <p>Complete all words for each vowel to advance!</p>
+    </header>
+    
+    <div class="game-container">
+      <div class="game-area">
+        <div class="stats">
+          <div class="stat-box">
+            <div class="stat-label">LEVEL</div>
+            <div id="current-level" class="stat-value">A</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">WORDS FOUND</div>
+            <div id="words-found" class="stat-value">0/<span id="total-words">0</span></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">MISTAKES</div>
+            <div id="mistakes" class="stat-value">0/3</div>
+          </div>
+        </div>
+        
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        
+        <div class="word-count" id="word-count">0 words found out of 0</div>
+        
+        <div class="vowel-selector" style="display: none;">
+          <button id="a-button" class="vowel-btn active">A</button>
+          <button id="e-button" class="vowel-btn">E</button>
+          <button id="i-button" class="vowel-btn">I</button>
+          <button id="o-button" class="vowel-btn">O</button>
+          <button id="u-button" class="vowel-btn">U</button>
+        </div>
+        
+        <div class="word-display">
+          <p id="word">_ _ _</p>
+        </div>
+        
+        <div class="keyboard" id="alpha-keys">
+          <button class="key" data-key="a">A</button>
+          <button class="key" data-key="e">E</button>
+          <button class="key" data-key="i">I</button>
+          <button class="key" data-key="o">O</button>
+          <button class="key" data-key="u">U</button>
+          
+          <button class="key" data-key="b">B</button>
+          <button class="key" data-key="c">C</button>
+          <button class="key" data-key="d">D</button>
+          <button class="key" data-key="f">F</button>
+          <button class="key" data-key="g">G</button>
+          <button class="key" data-key="h">H</button>
+          <button class="key" data-key="j">J</button>
+          <button class="key" data-key="k">K</button>
+          <button class="key" data-key="l">L</button>
+          <button class="key" data-key="m">M</button>
+          <button class="key" data-key="n">N</button>
+          <button class="key" data-key="p">P</button>
+          <button class="key" data-key="q">Q</button>
+          <button class="key" data-key="r">R</button>
+          <button class="key" data-key="s">S</button>
+          <button class="key" data-key="t">T</button>
+          <button class="key" data-key="v">V</button>
+          <button class="key" data-key="w">W</button>
+          <button class="key" data-key="x">X</button>
+          <button class="key" data-key="y">Y</button>
+          <button class="key" data-key="z">Z</button>
+        </div>
+        
+        <div style="margin: 20px auto;">
+          <button id="reset">↺</button>
+        </div>
+      </div>
+      
+      <div class="words-list">
+        <h2>Found Words</h2>
+        <ul id="correct-words-list"></ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay screens -->
+  <div id="intro-overlay" class="overlay intro active">
+    <div class="message-box floating">
+      <h2>Welcome!</h2>
+      <p>Complete all words for each vowel to advance to the next level.</p>
+      <p>You have 3 mistakes allowed before game over.</p>
+      <button id="start-btn" class="btn">Let's Play!</button>
+    </div>
+  </div>
+  
+  <div id="game-over-overlay" class="overlay wrong">
+    <div class="message-box">
+      <h2>Game Over!</h2>
+      <p>You've made too many mistakes.</p>
+      <button id="restart-button" class="btn btn-warning">Start Over</button>
+    </div>
+  </div>
+  
+  <div id="win-overlay" class="overlay">
+    <div class="message-box">
+      <h2>Great Job!</h2>
+      <p>You found: <span id="word1"></span></p>
+      <button id="continue-btn" class="btn btn-accent">Continue</button>
+    </div>
+  </div>
+  
+  <div id="exists-overlay" class="overlay exists">
+    <div class="message-box">
+      <h2>Already Found!</h2>
+      <p>You've already found that word.</p>
+      <button id="ok-btn" class="btn">OK</button>
+    </div>
+  </div>
+  
+  <div id="level-up-overlay" class="overlay level-up">
+    <div class="message-box">
+      <h2>Level Complete!</h2>
+      <p>You've found all words for vowel <span id="completed-vowel"></span>!</p>
+      <p>Get ready for the next vowel.</p>
+      <button id="next-level-btn" class="btn btn-success">Next Level</button>
+    </div>
+  </div>
+  
+  <div id="victory-overlay" class="overlay congrats">
+    <div class="message-box pulse">
+      <h2>CONTINUE!</h2>
+      <p>You've completed all vowels!</p>
+      <p>You're a CVC Word Master!</p>
+      <button id="victory-btn" class="btn btn-success" style="display: none;">Play Again</button>
+      <button class="btn btn-success" id="PracBtn">Next Task</button>
+    </div>
+  </div>
+
+  <script>
+    // Game state
+    let currentVowel = 'a';
+    let word = '';
+    let usedKeys = [];
+    let mistakes = 0;
+    let maxMistakes = 3;
+    let foundWords = {
+      'a': [],
+      'e': [],
+      'i': [],
+      'o': [],
+      'u': []
+    };
+    
+    // Vowel order for levels
+    const vowelOrder = ['a', 'e', 'i', 'o', 'u'];
+    let currentLevelIndex = 0;
+    
+    // CVC words for each vowel (complete word bank)
+    const cvcWords = {
+      'a': 'has dab gab jab lab nab tab bad dad fad had lad mad pad sad tad bag gag hag lag mag nag rag sag tag wag bam dam ham jam ram yam ban can fan man pan ran tan van cap gap lap map nap rap sap tap yap zap bat cat fat hat mat pat rat sat vat max tax wax pal gal gas mal pal bam cam ham jam ram sam tam zap bar tar car far par jar'.split(' '),
+      'e': 'meg vex fen mer per her fet ben ken gel beg yet gem zed ret sex bed fed red wed zed beg keg leg peg den hen men pen ten bet get jet let met net pet set vet wet web gem hem yes'.split(' '),
+      'i': 'hin yin zit his nim lit bib zip vim wit hit pit pin sin min win bin tin wig big pig bid did hid kid lid rid big dig fig gig pig rig wig zig dim him rim bin din fin sin tin win dip hip lip nip rip sip tip zip bit fit hit kit sit wit fix mix six pix kin'.split(' '),
+      'o': 'won cod lob nod bot log dot hop fog pod hog bob pop rot sot top mog job cot lot for cob gob job mob rob sob bog cog dog fog hog jog log bop cop hop mop pop top cot dot got hot jot lot not pot rot tot box fox pox rod sod mom god'.split(' '),
+      'u': 'buy hub rub sub tub gus yum yup nub pub cud lug cum pus bud cub dud mud bug dug hug jug lug mug pug rug tug bum gum hum mum sum tum bun fun gun nun pun run sun but cut gut hut jut nut rut bus cup pup'.split(' ')
+    };
+    
+    // DOM Elements
+    const vowelButtons = document.querySelectorAll('.vowel-btn');
+    const keyboard = document.getElementById('alpha-keys');
+    const wordsFoundEl = document.getElementById('words-found');
+    const mistakesEl = document.getElementById('mistakes');
+    const currentLevelEl = document.getElementById('current-level');
+    const wordEl = document.getElementById('word');
+    const progressFillEl = document.getElementById('progress-fill');
+    const correctWordsList = document.getElementById('correct-words-list');
+    const resetBtn = document.getElementById('reset');
+    const completedVowelEl = document.getElementById('completed-vowel');
+    const totalWordsEl = document.getElementById('total-words');
+    const wordCountEl = document.getElementById('word-count');
+    
+    // Overlays
+    const introOverlay = document.getElementById('intro-overlay');
+    const gameOverOverlay = document.getElementById('game-over-overlay');
+    const winOverlay = document.getElementById('win-overlay');
+    const existsOverlay = document.getElementById('exists-overlay');
+    const levelUpOverlay = document.getElementById('level-up-overlay');
+    const victoryOverlay = document.getElementById('victory-overlay');
+    
+    // Initialize game
+    function initGame() {
+      currentLevelIndex = 0;
+      mistakes = 0;
+      foundWords = {
+        'a': [],
+        'e': [],
+        'i': [],
+        'o': [],
+        'u': []
+      };
+      
+      updateUI();
+      activateVowel(vowelOrder[currentLevelIndex]);
+      introOverlay.classList.remove('active');
+    }
+    
+    // Update UI elements
+    function updateUI() {
+      //const totalWords = cvcWords[currentVowel].length;
+      const totalWords = 5;
+      wordsFoundEl.textContent = `${foundWords[currentVowel].length}/${totalWords}`;
+      totalWordsEl.textContent = totalWords;
+      wordCountEl.textContent = `${foundWords[currentVowel].length} words found out of ${totalWords}`;
+      mistakesEl.textContent = `${mistakes}/${maxMistakes}`;
+      currentLevelEl.textContent = currentVowel.toUpperCase();
+      
+      // Update progress bar
+      const progress = (foundWords[currentVowel].length / totalWords) * 100;
+      progressFillEl.style.width = `${progress}%`;
+      
+      // Update vowel buttons
+      vowelButtons.forEach(btn => {
+        const vowel = btn.textContent.toLowerCase();
+        if (foundWords[vowel].length === cvcWords[vowel].length) {
+          btn.classList.add('completed');
+        } else {
+          btn.classList.remove('completed');
+        }
+      });
+      
+      // Update correct words list
+      correctWordsList.innerHTML = '';
+      foundWords[currentVowel].forEach(word => {
+        const li = document.createElement('li');
+        li.textContent = word;
+        correctWordsList.appendChild(li);
+      });
+    }
+    
+    // Activate vowel button
+    function activateVowel(vowel) {
+      currentVowel = vowel;
+      
+      vowelButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.transform = '';
+      });
+      
+      const activeBtn = document.getElementById(`${vowel}-button`);
+      activeBtn.classList.add('active');
+      activeBtn.style.transform = 'scale(1.1)';
+      
+      updateUI();
+      resetWord();
+    }
+    
+    // Reset current word
+    function resetWord() {
+      word = '';
+      wordEl.textContent = '_ _ _';
+      resetKeyboard();
+    }
+    
+    // Reset keyboard appearance
+    function resetKeyboard() {
+      document.querySelectorAll('.key').forEach(key => {
+        key.classList.remove('used');
+        key.style.transform = '';
+      });
+      usedKeys = [];
+    }
+    
+    // Add letter to word
+    function addLetter(letter) {
+      if (word.length < 3) {
+        word += letter;
+        updateWordDisplay();
+        
+        // Add used class to key
+        const key = document.querySelector(`.key[data-key="${letter}"]`);
+        if (key) {
+          key.classList.add('used');
+          usedKeys.push(key);
+        }
+      }
+      
+      if (word.length === 3) {
+        setTimeout(checkWord, 500);
+      }
+    }
+    
+    // Update word display
+    function updateWordDisplay() {
+      let display = '';
+      for (let i = 0; i < 3; i++) {
+        display += word[i] ? word[i] : '_';
+        if (i < 2) display += ' ';
+      }
+      wordEl.textContent = display;
+    }
+    
+    // Check if word is valid
+    function checkWord() {
+      if (cvcWords[currentVowel].includes(word.toLowerCase())) {
+        if (foundWords[currentVowel].includes(word.toLowerCase())) {
+          showOverlay(existsOverlay);
+          setTimeout(() => hideOverlay(existsOverlay), 1500);
+        } else {
+          // Add to found words
+          foundWords[currentVowel].push(word.toLowerCase());
+          updateUI();
+          
+          document.getElementById('word1').textContent = word.toUpperCase();
+          showOverlay(winOverlay);
+          
+          // Auto-hide the win overlay after 2 seconds
+          setTimeout(() => {
+            if (winOverlay.classList.contains('active')) {
+              hideOverlay(winOverlay);
+            }
+          }, 2000);
+          
+          // Check if level is complete
+          if (foundWords[currentVowel].length === 5) {
+            // Check if all vowels are complete
+            const allComplete = vowelOrder.every(vowel => 
+              foundWords[vowel].length === 5
+            );
+            
+            if (allComplete) {
+              setTimeout(() => {
+                hideOverlay(winOverlay);
+                showOverlay(victoryOverlay);
+              }, 1500);
+            } else {
+              setTimeout(() => {
+                hideOverlay(winOverlay);
+                completedVowelEl.textContent = currentVowel.toUpperCase();
+                showOverlay(levelUpOverlay);
+              }, 1500);
+            }
+          }
+        }
+      } else {
+        mistakes++;
+        updateUI();
+        
+        if (mistakes >= maxMistakes) {
+          showOverlay(gameOverOverlay);
+        } else {
+          showOverlay(gameOverOverlay);
+          setTimeout(() => {
+            hideOverlay(gameOverOverlay);
+            resetWord();
+          }, 1000);
+        }
+      }
+    }
+    
+    // Move to next level
+    function nextLevel() {
+      currentLevelIndex++;
+      if (currentLevelIndex < vowelOrder.length) {
+        activateVowel(vowelOrder[currentLevelIndex]);
+      }
+    }
+    
+    // Show overlay
+    function showOverlay(overlay) {
+      overlay.classList.add('active');
+    }
+    
+    // Hide overlay
+    function hideOverlay(overlay) {
+      overlay.classList.remove('active');
+      resetWord();
+    }
+    
+    // Event Listeners
+    vowelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const vowel = button.textContent.toLowerCase();
+        // Only allow clicking on current level or completed levels
+        const vowelIndex = vowelOrder.indexOf(vowel);
+        if (vowelIndex <= currentLevelIndex) {
+          activateVowel(vowel);
+        }
+      });
+    });
+    
+    keyboard.addEventListener('click', (e) => {
+      if (e.target.classList.contains('key')) {
+        const letter = e.target.dataset.key;
+        addLetter(letter);
+      }
+    });
+    
+    resetBtn.addEventListener('click', resetWord);
+    
+    // Start button
+    document.getElementById('start-btn').addEventListener('click', initGame);
+    
+    // Restart buttons
+    document.getElementById('restart-button').addEventListener('click', () => {
+      hideOverlay(gameOverOverlay);
+      initGame();
+    });
+    
+    document.getElementById('victory-btn').addEventListener('click', () => {
+      hideOverlay(victoryOverlay);
+      initGame();
+    });
+    
+    // Continue buttons
+    document.getElementById('continue-btn').addEventListener('click', () => {
+      hideOverlay(winOverlay);
+    });
+    
+    document.getElementById('ok-btn').addEventListener('click', () => {
+      hideOverlay(existsOverlay);
+    });
+    
+    // Next level button
+    document.getElementById('next-level-btn').addEventListener('click', () => {
+      hideOverlay(levelUpOverlay);
+      nextLevel();
+    });
+    
+    document.getElementById('PracBtn').addEventListener('click', function() {
+                window.open('C-sight-pick-G1.html', '_blank');
+            });
+    
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      
+      // Consonant keys
+      if (key.match(/[bcdfghjklmnpqrstvwxyz]/)) {
+        const keyBtn = document.querySelector(`.key[data-key="${key}"]`);
+        if (keyBtn && !keyBtn.classList.contains('used')) {
+          addLetter(key);
+          // Visual feedback
+          keyBtn.style.transform = 'scale(0.9)';
+          setTimeout(() => {
+            if (!keyBtn.classList.contains('used')) {
+              keyBtn.style.transform = '';
+            }
+          }, 100);
+        }
+      }
+      
+      // Reset key
+      if (key === 'r') {
+        resetBtn.click();
+      }
+    });
+    
+    // Initialize
+    activateVowel('a');
+  </script>
+</body>
+</html>
