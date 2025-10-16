@@ -117,6 +117,15 @@
             background-color: #5a08a0;
         }
 
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
         .table-container {
             background-color: white;
             border-radius: 10px;
@@ -236,6 +245,138 @@
             color: var(--success);
         }
 
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--primary);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Clickable student names in statistics */
+        .clickable-name {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            transition: all 0.2s;
+        }
+
+        .clickable-name:hover {
+            color: var(--secondary);
+        }
+
+        /* Terminal report styles */
+        .terminal-report {
+            width: 100%;
+        }
+
+        .terminal-report table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .terminal-report th {
+            background-color: #f1f5fd;
+        }
+
+        .terminal-report .remarks-cell {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .remarks-excellent {
+            color: #28a745;
+        }
+
+        .remarks-very-good {
+            color: #20c997;
+        }
+
+        .remarks-good {
+            color: #17a2b8;
+        }
+
+        .remarks-pass {
+            color: #ffc107;
+        }
+
+        .remarks-fail {
+            color: #dc3545;
+        }
+
+        .comments-section {
+            margin-top: 20px;
+        }
+
+        .comments-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .comments-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .terminal-report-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         /* Print-specific styles */
         @media print {
             body * {
@@ -307,6 +448,7 @@
                     <button id="addTableBtn" class="btn-primary">📋 Add New Table</button>
                     <button id="importBtn" class="btn-success">📁 Import Data</button>
                     <button id="exportBtn" class="btn-warning">💾 Export Data</button>
+                    <button id="statisticsBtn" class="btn-info">📈 Statistics</button>
                     <button id="clearDataBtn" class="btn-danger">🗑️ Clear All Data</button>
                 </div>
                 <div class="status-indicator" id="statusIndicator">
@@ -330,6 +472,36 @@
 
     <input type="file" id="fileInput" class="file-input" accept=".json">
 
+    <!-- Statistics Modal -->
+    <div id="statisticsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 Overall Statistics</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="statisticsContainer">
+                    <!-- Statistics table will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminal Report Modal -->
+    <div id="terminalReportModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Student Terminal Report</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="terminalReportContainer">
+                    <!-- Terminal report will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let tables = [];
@@ -344,9 +516,15 @@
         const initialAddTableBtn = document.getElementById('initialAddTable');
         const importBtn = document.getElementById('importBtn');
         const exportBtn = document.getElementById('exportBtn');
+        const statisticsBtn = document.getElementById('statisticsBtn');
         const clearDataBtn = document.getElementById('clearDataBtn');
         const fileInput = document.getElementById('fileInput');
         const saveStatus = document.getElementById('saveStatus');
+        const statisticsModal = document.getElementById('statisticsModal');
+        const terminalReportModal = document.getElementById('terminalReportModal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const statisticsContainer = document.getElementById('statisticsContainer');
+        const terminalReportContainer = document.getElementById('terminalReportContainer');
 
         // Sample data for initial table
         const initialStudents = [
@@ -359,8 +537,24 @@
         initialAddTableBtn.addEventListener('click', addNewTable);
         importBtn.addEventListener('click', () => fileInput.click());
         exportBtn.addEventListener('click', exportData);
+        statisticsBtn.addEventListener('click', showStatistics);
         clearDataBtn.addEventListener('click', clearAllData);
         fileInput.addEventListener('change', handleFileImport);
+        
+        // Close modal events
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modal = e.target.closest('.modal-overlay');
+                if (modal) modal.style.display = 'none';
+            });
+        });
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.style.display = 'none';
+            }
+        });
 
         // Initialize app
         function init() {
@@ -450,6 +644,33 @@
             saveToLocalStorage();
         }
 
+        // Create a new table with names from an existing table
+        function createTableFromNames(sourceTableId) {
+            const sourceTable = tables.find(t => t.id === sourceTableId);
+            if (!sourceTable) return;
+            
+            const tableId = `table-${tableCounter++}`;
+            const tableData = {
+                id: tableId,
+                name: `${sourceTable.name} (Copy)`,
+                students: sourceTable.students.map(student => ({
+                    name: student.name,
+                    cat1: 0,
+                    cat2: 0,
+                    cat3: 0,
+                    exam: 0,
+                    catTotal: 0,
+                    total: 0,
+                    position: 0
+                }))
+            };
+            
+            tables.push(tableData);
+            renderTables();
+            hideEmptyState();
+            saveToLocalStorage();
+        }
+
         // Render all tables
         function renderTables() {
             tablesContainer.innerHTML = '';
@@ -495,6 +716,12 @@
             printBtn.innerHTML = '🖨️ Print';
             printBtn.addEventListener('click', () => printTable(tableData.id));
             
+            const cloneBtn = document.createElement('button');
+            cloneBtn.className = 'btn-secondary';
+            cloneBtn.innerHTML = '📝 Clone Names';
+            cloneBtn.title = 'Create new table with these names';
+            cloneBtn.addEventListener('click', () => createTableFromNames(tableData.id));
+            
             const renameBtn = document.createElement('button');
             renameBtn.className = 'btn-success';
             renameBtn.innerHTML = '✏️ Edit Name';
@@ -514,6 +741,7 @@
             deleteBtn.addEventListener('click', () => deleteTable(tableData.id));
             
             tableActions.appendChild(printBtn);
+            tableActions.appendChild(cloneBtn);
             tableActions.appendChild(renameBtn);
             tableActions.appendChild(deleteBtn);
             
@@ -812,6 +1040,467 @@
                 saveStatus.textContent = 'All data cleared';
                 saveStatus.className = '';
             }
+        }
+
+        // Show statistics modal
+        function showStatistics() {
+            if (tables.length === 0) {
+                alert('No tables available. Please create tables first.');
+                return;
+            }
+            
+            renderStatisticsTable();
+            statisticsModal.style.display = 'flex';
+        }
+
+        // Render statistics table
+        function renderStatisticsTable() {
+            // Get all unique student names across all tables
+            const allStudentNames = [...new Set(
+                tables.flatMap(table => table.students.map(student => student.name))
+            )].sort();
+            
+            // Create statistics data structure
+            const statisticsData = allStudentNames.map(name => {
+                const studentData = { name, totals: [] };
+                
+                // For each table, find the student's total score
+                tables.forEach(table => {
+                    const student = table.students.find(s => s.name === name);
+                    studentData.totals.push(student ? student.total : 0);
+                });
+                
+                // Calculate overall total
+                studentData.overallTotal = studentData.totals.reduce((sum, total) => sum + total, 0);
+                
+                return studentData;
+            });
+            
+            // Sort by overall total (descending) for positioning
+            statisticsData.sort((a, b) => b.overallTotal - a.overallTotal);
+            
+            // Assign positions
+            let currentPosition = 1;
+            let previousTotal = null;
+            
+            statisticsData.forEach((student, index) => {
+                if (previousTotal !== null && student.overallTotal === previousTotal) {
+                    student.position = currentPosition;
+                } else {
+                    currentPosition = index + 1;
+                    student.position = currentPosition;
+                }
+                previousTotal = student.overallTotal;
+            });
+            
+            // Create the statistics table
+            statisticsContainer.innerHTML = '';
+            
+            if (allStudentNames.length === 0) {
+                statisticsContainer.innerHTML = '<p>No student data available.</p>';
+                return;
+            }
+            
+            const statsTable = document.createElement('table');
+            statsTable.style.width = '100%';
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            const nameHeader = document.createElement('th');
+            nameHeader.textContent = 'NAMES';
+            headerRow.appendChild(nameHeader);
+            
+            // Add table name headers
+            tables.forEach(table => {
+                const tableHeader = document.createElement('th');
+                tableHeader.textContent = table.name;
+                tableHeader.className = 'numeric';
+                headerRow.appendChild(tableHeader);
+            });
+            
+            // Add totals and position headers
+            const totalsHeader = document.createElement('th');
+            totalsHeader.textContent = 'TOTALS';
+            totalsHeader.className = 'numeric';
+            headerRow.appendChild(totalsHeader);
+            
+            const positionHeader = document.createElement('th');
+            positionHeader.textContent = 'POSITION';
+            positionHeader.className = 'position-cell';
+            headerRow.appendChild(positionHeader);
+            
+            statsTable.appendChild(headerRow);
+            
+            // Create data rows
+            statisticsData.forEach(student => {
+                const row = document.createElement('tr');
+                
+                // Name cell (clickable)
+                const nameCell = document.createElement('td');
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = student.name;
+                nameSpan.className = 'clickable-name';
+                nameSpan.addEventListener('click', () => showTerminalReport(student.name));
+                nameCell.appendChild(nameSpan);
+                row.appendChild(nameCell);
+                
+                // Table score cells
+                student.totals.forEach(total => {
+                    const scoreCell = document.createElement('td');
+                    scoreCell.textContent = total;
+                    scoreCell.className = 'numeric';
+                    row.appendChild(scoreCell);
+                });
+                
+                // Overall total cell
+                const totalCell = document.createElement('td');
+                totalCell.textContent = student.overallTotal;
+                totalCell.className = 'numeric';
+                row.appendChild(totalCell);
+                
+                // Position cell
+                const positionCell = document.createElement('td');
+                positionCell.textContent = student.position;
+                positionCell.className = 'position-cell';
+                row.appendChild(positionCell);
+                
+                statsTable.appendChild(row);
+            });
+            
+            statisticsContainer.appendChild(statsTable);
+        }
+
+        // Show terminal report for a student
+        function showTerminalReport(studentName) {
+            // Close statistics modal first
+            statisticsModal.style.display = 'none';
+            
+            // Generate terminal report
+            renderTerminalReport(studentName);
+            terminalReportModal.style.display = 'flex';
+        }
+
+        // Render terminal report for a student
+        function renderTerminalReport(studentName) {
+            terminalReportContainer.innerHTML = '';
+            
+            // Create terminal report container
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'terminal-report';
+            
+            // Create report header
+            const headerDiv = document.createElement('div');
+            headerDiv.style.textAlign = 'center';
+            headerDiv.style.marginBottom = '20px';
+            headerDiv.style.paddingBottom = '15px';
+            headerDiv.style.borderBottom = '2px solid var(--primary)';
+            
+            const studentNameHeading = document.createElement('h2');
+            studentNameHeading.textContent = `Terminal Report: ${studentName}`;
+            studentNameHeading.style.color = 'var(--primary)';
+            headerDiv.appendChild(studentNameHeading);
+            
+            const reportDate = document.createElement('p');
+            reportDate.textContent = `Generated on: ${new Date().toLocaleDateString()}`;
+            reportDate.style.color = 'var(--gray)';
+            headerDiv.appendChild(reportDate);
+            
+            reportDiv.appendChild(headerDiv);
+            
+            // Create results table
+            const resultsTable = document.createElement('table');
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            const headers = ['SUBJECT', 'CAT TOTAL', 'EXAM', 'SUBJECT TOTAL', 'REMARKS'];
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            resultsTable.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            let grandTotal = 0;
+            let totalPossible = 0;
+            
+            // Add rows for each table (subject)
+            tables.forEach(table => {
+                const student = table.students.find(s => s.name === studentName);
+                if (student) {
+                    const row = document.createElement('tr');
+                    
+                    // Subject name
+                    const subjectCell = document.createElement('td');
+                    subjectCell.textContent = table.name;
+                    row.appendChild(subjectCell);
+                    
+                    // CAT Total
+                    const catTotalCell = document.createElement('td');
+                    catTotalCell.textContent = student.catTotal;
+                    catTotalCell.className = 'numeric';
+                    row.appendChild(catTotalCell);
+                    
+                    // Exam
+                    const examCell = document.createElement('td');
+                    examCell.textContent = student.exam;
+                    examCell.className = 'numeric';
+                    row.appendChild(examCell);
+                    
+                    // Subject Total
+                    const subjectTotalCell = document.createElement('td');
+                    subjectTotalCell.textContent = student.total;
+                    subjectTotalCell.className = 'numeric';
+                    row.appendChild(subjectTotalCell);
+                    
+                    // Remarks for subject
+                    const remarksCell = document.createElement('td');
+                    const subjectRemarks = getRemarks(student.total, 100);
+                    remarksCell.textContent = subjectRemarks.text;
+                    remarksCell.className = `remarks-cell ${subjectRemarks.class}`;
+                    row.appendChild(remarksCell);
+                    
+                    tbody.appendChild(row);
+                    
+                    // Update grand total
+                    grandTotal += student.total;
+                    totalPossible += 100; // Each subject is out of 100
+                }
+            });
+            
+            // Add grand total row
+            const grandTotalRow = document.createElement('tr');
+            grandTotalRow.style.fontWeight = 'bold';
+            grandTotalRow.style.backgroundColor = '#f1f5fd';
+            
+            const grandTotalLabelCell = document.createElement('td');
+            grandTotalLabelCell.textContent = 'GRAND TOTAL';
+            grandTotalLabelCell.colSpan = 3;
+            grandTotalRow.appendChild(grandTotalLabelCell);
+            
+            const grandTotalCell = document.createElement('td');
+            grandTotalCell.textContent = grandTotal;
+            grandTotalCell.className = 'numeric';
+            grandTotalRow.appendChild(grandTotalCell);
+            
+            const overallRemarksCell = document.createElement('td');
+            const overallPercentage = (grandTotal / totalPossible) * 100;
+            const overallRemarks = getRemarks(overallPercentage, 100);
+            overallRemarksCell.textContent = overallRemarks.text;
+            overallRemarksCell.className = `remarks-cell ${overallRemarks.class}`;
+            grandTotalRow.appendChild(overallRemarksCell);
+            
+            tbody.appendChild(grandTotalRow);
+            
+            resultsTable.appendChild(tbody);
+            reportDiv.appendChild(resultsTable);
+            
+            // Add comments section
+            const commentsSection = document.createElement('div');
+            commentsSection.className = 'comments-section';
+            
+            const commentsHeading = document.createElement('h3');
+            commentsHeading.textContent = 'Teacher Comments:';
+            commentsSection.appendChild(commentsHeading);
+            
+            const commentsTextarea = document.createElement('textarea');
+            commentsTextarea.className = 'comments-textarea';
+            commentsTextarea.placeholder = 'Enter teacher comments here...';
+            commentsSection.appendChild(commentsTextarea);
+            
+            reportDiv.appendChild(commentsSection);
+            
+            // Add action buttons
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'terminal-report-actions';
+            
+            const printReportBtn = document.createElement('button');
+            printReportBtn.className = 'btn-info';
+            printReportBtn.innerHTML = '🖨️ Print Report';
+            printReportBtn.addEventListener('click', () => printTerminalReport(studentName, commentsTextarea.value));
+            
+            const closeReportBtn = document.createElement('button');
+            closeReportBtn.className = 'btn-secondary';
+            closeReportBtn.innerHTML = '❌ Close';
+            closeReportBtn.addEventListener('click', () => {
+                terminalReportModal.style.display = 'none';
+            });
+            
+            actionsDiv.appendChild(printReportBtn);
+            actionsDiv.appendChild(closeReportBtn);
+            
+            reportDiv.appendChild(actionsDiv);
+            
+            terminalReportContainer.appendChild(reportDiv);
+        }
+
+        // Get remarks based on score
+        function getRemarks(score, maxScore) {
+            const percentage = (score / maxScore) * 100;
+            
+            if (percentage >= 90) {
+                return { text: 'Distinction', class: 'remarks-excellent' };
+            } else if (percentage >= 80) {
+                return { text: 'Excellent', class: 'remarks-excellent' };
+            } else if (percentage >= 70) {
+                return { text: 'Very Good', class: 'remarks-very-good' };
+            } else if (percentage >= 60) {
+                return { text: 'Good', class: 'remarks-good' };
+            } else if (percentage >= 50) {
+                return { text: 'Pass', class: 'remarks-pass' };
+            } else {
+                return { text: 'Fail', class: 'remarks-fail' };
+            }
+        }
+
+        // Print terminal report
+        function printTerminalReport(studentName, comments) {
+            // Create a print-friendly version of the terminal report
+            const printWindow = window.open('', '_blank');
+            
+            // Get the student data
+            let grandTotal = 0;
+            let totalPossible = 0;
+            let subjectRows = '';
+            
+            tables.forEach(table => {
+                const student = table.students.find(s => s.name === studentName);
+                if (student) {
+                    const subjectRemarks = getRemarks(student.total, 100);
+                    subjectRows += `
+                        <tr>
+                            <td>${table.name}</td>
+                            <td class="numeric">${student.catTotal}</td>
+                            <td class="numeric">${student.exam}</td>
+                            <td class="numeric">${student.total}</td>
+                            <td class="remarks-cell ${subjectRemarks.class}">${subjectRemarks.text}</td>
+                        </tr>
+                    `;
+                    
+                    grandTotal += student.total;
+                    totalPossible += 100;
+                }
+            });
+            
+            const overallPercentage = (grandTotal / totalPossible) * 100;
+            const overallRemarks = getRemarks(overallPercentage, 100);
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Terminal Report - ${studentName}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .print-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #333;
+                            padding-bottom: 10px;
+                        }
+                        .print-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 14px;
+                            margin-bottom: 20px;
+                        }
+                        .print-table th, .print-table td {
+                            border: 1px solid #ddd;
+                            padding: 8px 10px;
+                            text-align: left;
+                        }
+                        .print-table th {
+                            background-color: #f5f5f5;
+                            font-weight: bold;
+                        }
+                        .print-table .numeric {
+                            text-align: right;
+                        }
+                        .print-table .remarks-cell {
+                            text-align: center;
+                            font-weight: bold;
+                        }
+                        .remarks-excellent {
+                            color: #28a745;
+                        }
+                        .remarks-very-good {
+                            color: #20c997;
+                        }
+                        .remarks-good {
+                            color: #17a2b8;
+                        }
+                        .remarks-pass {
+                            color: #ffc107;
+                        }
+                        .remarks-fail {
+                            color: #dc3545;
+                        }
+                        .comments-section {
+                            margin-top: 20px;
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                        }
+                        @page {
+                            size: A4 portrait;
+                            margin: 0.5cm;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <h1>Terminal Report</h1>
+                        <h2>${studentName}</h2>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th>SUBJECT</th>
+                                <th>CAT TOTAL</th>
+                                <th>EXAM</th>
+                                <th>SUBJECT TOTAL</th>
+                                <th>REMARKS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${subjectRows}
+                            <tr style="font-weight: bold; background-color: #f1f5fd;">
+                                <td colspan="3">GRAND TOTAL</td>
+                                <td class="numeric">${grandTotal}</td>
+                                <td class="remarks-cell ${overallRemarks.class}">${overallRemarks.text}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="comments-section">
+                        <h3>Teacher Comments:</h3>
+                        <p>${comments || 'No comments provided.'}</p>
+                    </div>
+                    <div style="margin-top: 20px; font-size: 12px; text-align: center;">
+                        School Stamp & Signature: _________________________
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            
+            // Wait for content to load before printing
+            printWindow.onload = function() {
+                printWindow.print();
+                // Optional: close the window after printing
+                // printWindow.close();
+            };
         }
 
         // Print a specific table
