@@ -236,13 +236,6 @@
             color: var(--success);
         }
 
-        .input-hint {
-            font-size: 0.75rem;
-            color: var(--gray);
-            margin-top: 3px;
-            font-style: italic;
-        }
-
         /* Print-specific styles */
         @media print {
             body * {
@@ -332,7 +325,6 @@
 
         <footer class="footer">
             <p>Student Results Manager &copy; 2023 | All changes are automatically saved to your device</p>
-            <p class="input-hint">Tip: You can enter marks in any format (e.g., 45/50) and they will be converted automatically</p>
         </footer>
     </div>
 
@@ -361,14 +353,6 @@
             "Augustine", "Nhyiraba", "Daniella", "Melvina", "Godsway", 
             "Agyeiwaa", "Boatemaa", "Nana Kofi", "Ginko", "Ariana"
         ];
-
-        // Maximum marks for each category
-        const maxMarks = {
-            cat1: 15,
-            cat2: 20,
-            cat3: 15,
-            exam: 50
-        };
 
         // Event listeners
         addTableBtn.addEventListener('click', addNewTable);
@@ -440,58 +424,6 @@
                     saveStatus.className = '';
                 }
             }, 500);
-        }
-
-        // Parse mark input and convert to appropriate scale
-        function parseMarkInput(input, maxMark) {
-            if (input === '' || input === null || input === undefined) {
-                return 0;
-            }
-            
-            // Convert to string and trim
-            const strInput = String(input).trim();
-            
-            // Handle fraction format (e.g., "45/50")
-            if (strInput.includes('/')) {
-                const parts = strInput.split('/');
-                if (parts.length === 2) {
-                    const numerator = parseFloat(parts[0]);
-                    const denominator = parseFloat(parts[1]);
-                    
-                    // Check for valid numbers and avoid division by zero
-                    if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-                        // Calculate the percentage and apply to maxMark
-                        const percentage = numerator / denominator;
-                        const convertedMark = percentage * maxMark;
-                        
-                        // Round to nearest integer
-                        return Math.min(Math.max(Math.round(convertedMark), 0), maxMark);
-                    }
-                }
-            }
-            
-            // Handle percentage format (e.g., "90%")
-            if (strInput.includes('%')) {
-                const percentage = parseFloat(strInput);
-                if (!isNaN(percentage)) {
-                    const convertedMark = (percentage / 100) * maxMark;
-                    return Math.min(Math.max(Math.round(convertedMark), 0), maxMark);
-                }
-            }
-            
-            // Handle decimal numbers
-            const numValue = parseFloat(strInput);
-            if (!isNaN(numValue)) {
-                // If the number is greater than maxMark, assume it's already in the correct scale
-                if (numValue > maxMark) {
-                    return maxMark;
-                }
-                // Otherwise, return the number rounded to nearest integer
-                return Math.min(Math.max(Math.round(numValue), 0), maxMark);
-            }
-            
-            // If we can't parse the input, return 0
-            return 0;
         }
 
         // Create a new table
@@ -640,8 +572,7 @@
                 cat1Input.textContent = student.cat1;
                 cat1Input.setAttribute('contenteditable', 'true');
                 cat1Input.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat1);
-                    updateStudentMark(tableData.id, index, 'cat1', convertedMark);
+                    updateStudentMark(tableData.id, index, 'cat1', parseFloat(e.target.textContent) || 0);
                 });
                 cat1Cell.appendChild(cat1Input);
                 row.appendChild(cat1Cell);
@@ -654,8 +585,7 @@
                 cat2Input.textContent = student.cat2;
                 cat2Input.setAttribute('contenteditable', 'true');
                 cat2Input.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat2);
-                    updateStudentMark(tableData.id, index, 'cat2', convertedMark);
+                    updateStudentMark(tableData.id, index, 'cat2', parseFloat(e.target.textContent) || 0);
                 });
                 cat2Cell.appendChild(cat2Input);
                 row.appendChild(cat2Cell);
@@ -668,8 +598,7 @@
                 cat3Input.textContent = student.cat3;
                 cat3Input.setAttribute('contenteditable', 'true');
                 cat3Input.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat3);
-                    updateStudentMark(tableData.id, index, 'cat3', convertedMark);
+                    updateStudentMark(tableData.id, index, 'cat3', parseFloat(e.target.textContent) || 0);
                 });
                 cat3Cell.appendChild(cat3Input);
                 row.appendChild(cat3Cell);
@@ -688,8 +617,7 @@
                 examInput.textContent = student.exam;
                 examInput.setAttribute('contenteditable', 'true');
                 examInput.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.exam);
-                    updateStudentMark(tableData.id, index, 'exam', convertedMark);
+                    updateStudentMark(tableData.id, index, 'exam', parseFloat(e.target.textContent) || 0);
                 });
                 examCell.appendChild(examInput);
                 row.appendChild(examCell);
@@ -764,6 +692,22 @@
         function updateStudentMark(tableId, studentIndex, markType, value) {
             const table = tables.find(t => t.id === tableId);
             if (table && table.students[studentIndex]) {
+                // Validate mark limits
+                const maxValues = {
+                    cat1: 15,
+                    cat2: 20,
+                    cat3: 15,
+                    exam: 50
+                };
+                
+                if (value > maxValues[markType]) {
+                    value = maxValues[markType];
+                    // Show a visual feedback that value was capped
+                    alert(`Maximum value for ${markType.toUpperCase()} is ${maxValues[markType]}`);
+                }
+                
+                if (value < 0) value = 0;
+                
                 table.students[studentIndex][markType] = value;
                 
                 // Recalculate totals
