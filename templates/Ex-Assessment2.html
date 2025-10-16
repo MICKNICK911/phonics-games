@@ -126,6 +126,15 @@
             background-color: #5a6268;
         }
 
+        .btn-help {
+            background-color: #f8961e;
+            color: white;
+        }
+
+        .btn-help:hover {
+            background-color: #e0861b;
+        }
+
         .table-container {
             background-color: white;
             border-radius: 10px;
@@ -243,6 +252,13 @@
 
         .saved-indicator {
             color: var(--success);
+        }
+
+        .input-hint {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 3px;
+            font-style: italic;
         }
 
         /* Modal styles */
@@ -377,6 +393,74 @@
             margin-top: 20px;
         }
 
+        /* Help content styles */
+        .help-section {
+            margin-bottom: 25px;
+        }
+
+        .help-section h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .help-section ul {
+            padding-left: 20px;
+        }
+
+        .help-section li {
+            margin-bottom: 8px;
+        }
+
+        .help-section code {
+            background-color: #f1f5fd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .feature-card h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        /* Import summary styles */
+        .import-summary {
+            background-color: #e8f5e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .import-summary h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .import-summary ul {
+            padding-left: 20px;
+        }
+
+        .import-summary li {
+            margin-bottom: 5px;
+        }
+
         /* Print-specific styles */
         @media print {
             body * {
@@ -436,6 +520,10 @@
             table {
                 min-width: 800px;
             }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -449,6 +537,7 @@
                     <button id="importBtn" class="btn-success">📁 Import Data</button>
                     <button id="exportBtn" class="btn-warning">💾 Export Data</button>
                     <button id="statisticsBtn" class="btn-info">📈 Statistics</button>
+                    <button id="helpBtn" class="btn-help">❓ Help</button>
                     <button id="clearDataBtn" class="btn-danger">🗑️ Clear All Data</button>
                 </div>
                 <div class="status-indicator" id="statusIndicator">
@@ -466,7 +555,8 @@
         </main>
 
         <footer class="footer">
-            <p>Student Results Manager &copy; 2023 | All changes are automatically saved to your device</p>
+            <p>Student Results Manager &copy; 2025 | Designed by Sir Mick | +233545800158</p>
+            <p class="input-hint">Tip: You can enter marks in any format (e.g., 45/50, 90%, 14) and they will be converted automatically</p>
         </footer>
     </div>
 
@@ -502,12 +592,35 @@
         </div>
     </div>
 
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">❓ Student Results Manager - Help Guide</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="helpContainer">
+                    <!-- Help content will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let tables = [];
         let tableCounter = 1;
         let saveTimeout = null;
         const STORAGE_KEY = 'studentResultsData';
+
+        // Maximum marks for each category
+        const maxMarks = {
+            cat1: 15,
+            cat2: 20,
+            cat3: 15,
+            exam: 50
+        };
 
         // DOM elements
         const tablesContainer = document.getElementById('tablesContainer');
@@ -517,19 +630,22 @@
         const importBtn = document.getElementById('importBtn');
         const exportBtn = document.getElementById('exportBtn');
         const statisticsBtn = document.getElementById('statisticsBtn');
+        const helpBtn = document.getElementById('helpBtn');
         const clearDataBtn = document.getElementById('clearDataBtn');
         const fileInput = document.getElementById('fileInput');
         const saveStatus = document.getElementById('saveStatus');
         const statisticsModal = document.getElementById('statisticsModal');
         const terminalReportModal = document.getElementById('terminalReportModal');
+        const helpModal = document.getElementById('helpModal');
         const closeModalBtns = document.querySelectorAll('.close-modal');
         const statisticsContainer = document.getElementById('statisticsContainer');
         const terminalReportContainer = document.getElementById('terminalReportContainer');
+        const helpContainer = document.getElementById('helpContainer');
 
         // Sample data for initial table
         const initialStudents = [
-            "student 1", "student 2", "student 3", "student 4", "student 5", 
-            "student 6", "student 7", "student 8", "student 9", "student 10"
+            "name 1", "name 2", "name 3", "name 4", "name 5", 
+            "name 6", "name 7", "name 8", "name 9", "name 10"
         ];
 
         // Event listeners
@@ -538,6 +654,7 @@
         importBtn.addEventListener('click', () => fileInput.click());
         exportBtn.addEventListener('click', exportData);
         statisticsBtn.addEventListener('click', showStatistics);
+        helpBtn.addEventListener('click', showHelp);
         clearDataBtn.addEventListener('click', clearAllData);
         fileInput.addEventListener('change', handleFileImport);
         
@@ -618,6 +735,58 @@
                     saveStatus.className = '';
                 }
             }, 500);
+        }
+
+        // Parse mark input and convert to appropriate scale
+        function parseMarkInput(input, maxMark) {
+            if (input === '' || input === null || input === undefined) {
+                return 0;
+            }
+            
+            // Convert to string and trim
+            const strInput = String(input).trim();
+            
+            // Handle fraction format (e.g., "45/50")
+            if (strInput.includes('/')) {
+                const parts = strInput.split('/');
+                if (parts.length === 2) {
+                    const numerator = parseFloat(parts[0]);
+                    const denominator = parseFloat(parts[1]);
+                    
+                    // Check for valid numbers and avoid division by zero
+                    if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+                        // Calculate the percentage and apply to maxMark
+                        const percentage = numerator / denominator;
+                        const convertedMark = percentage * maxMark;
+                        
+                        // Round to nearest integer
+                        return Math.min(Math.max(Math.round(convertedMark), 0), maxMark);
+                    }
+                }
+            }
+            
+            // Handle percentage format (e.g., "90%")
+            if (strInput.includes('%')) {
+                const percentage = parseFloat(strInput);
+                if (!isNaN(percentage)) {
+                    const convertedMark = (percentage / 100) * maxMark;
+                    return Math.min(Math.max(Math.round(convertedMark), 0), maxMark);
+                }
+            }
+            
+            // Handle decimal numbers
+            const numValue = parseFloat(strInput);
+            if (!isNaN(numValue)) {
+                // If the number is greater than maxMark, assume it's already in the correct scale
+                if (numValue > maxMark) {
+                    return maxMark;
+                }
+                // Otherwise, return the number rounded to nearest integer
+                return Math.min(Math.max(Math.round(numValue), 0), maxMark);
+            }
+            
+            // If we can't parse the input, return 0
+            return 0;
         }
 
         // Create a new table
@@ -800,7 +969,8 @@
                 cat1Input.textContent = student.cat1;
                 cat1Input.setAttribute('contenteditable', 'true');
                 cat1Input.addEventListener('blur', (e) => {
-                    updateStudentMark(tableData.id, index, 'cat1', parseFloat(e.target.textContent) || 0);
+                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat1);
+                    updateStudentMark(tableData.id, index, 'cat1', convertedMark);
                 });
                 cat1Cell.appendChild(cat1Input);
                 row.appendChild(cat1Cell);
@@ -813,7 +983,8 @@
                 cat2Input.textContent = student.cat2;
                 cat2Input.setAttribute('contenteditable', 'true');
                 cat2Input.addEventListener('blur', (e) => {
-                    updateStudentMark(tableData.id, index, 'cat2', parseFloat(e.target.textContent) || 0);
+                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat2);
+                    updateStudentMark(tableData.id, index, 'cat2', convertedMark);
                 });
                 cat2Cell.appendChild(cat2Input);
                 row.appendChild(cat2Cell);
@@ -826,7 +997,8 @@
                 cat3Input.textContent = student.cat3;
                 cat3Input.setAttribute('contenteditable', 'true');
                 cat3Input.addEventListener('blur', (e) => {
-                    updateStudentMark(tableData.id, index, 'cat3', parseFloat(e.target.textContent) || 0);
+                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat3);
+                    updateStudentMark(tableData.id, index, 'cat3', convertedMark);
                 });
                 cat3Cell.appendChild(cat3Input);
                 row.appendChild(cat3Cell);
@@ -845,7 +1017,8 @@
                 examInput.textContent = student.exam;
                 examInput.setAttribute('contenteditable', 'true');
                 examInput.addEventListener('blur', (e) => {
-                    updateStudentMark(tableData.id, index, 'exam', parseFloat(e.target.textContent) || 0);
+                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.exam);
+                    updateStudentMark(tableData.id, index, 'exam', convertedMark);
                 });
                 examCell.appendChild(examInput);
                 row.appendChild(examCell);
@@ -920,22 +1093,6 @@
         function updateStudentMark(tableId, studentIndex, markType, value) {
             const table = tables.find(t => t.id === tableId);
             if (table && table.students[studentIndex]) {
-                // Validate mark limits
-                const maxValues = {
-                    cat1: 15,
-                    cat2: 20,
-                    cat3: 15,
-                    exam: 50
-                };
-                
-                if (value > maxValues[markType]) {
-                    value = maxValues[markType];
-                    // Show a visual feedback that value was capped
-                    alert(`Maximum value for ${markType.toUpperCase()} is ${maxValues[markType]}`);
-                }
-                
-                if (value < 0) value = 0;
-                
                 table.students[studentIndex][markType] = value;
                 
                 // Recalculate totals
@@ -1503,6 +1660,134 @@
             };
         }
 
+        // Show help modal
+        function showHelp() {
+            renderHelpContent();
+            helpModal.style.display = 'flex';
+        }
+
+        // Render help content
+        function renderHelpContent() {
+            helpContainer.innerHTML = `
+                <div class="help-section">
+                    <h3>📋 Getting Started</h3>
+                    <p>Welcome to the Student Results Manager! This application helps teachers and school administrators manage student grades efficiently.</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>➕ Add New Table</h4>
+                            <p>Create a new class or subject table with default student names.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📝 Clone Names</h4>
+                            <p>Create a new table with student names from an existing table (marks reset to 0).</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✏️ Edit Content</h4>
+                            <p>Click on any cell to edit student names or marks. Changes save automatically.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>➕ Add Student</h4>
+                            <p>Add new students to any table using the button at the bottom of each table.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>🔢 Flexible Mark Input</h3>
+                    <p>You can enter marks in several formats and they will be automatically converted:</p>
+                    <ul>
+                        <li><strong>Fractions:</strong> e.g., "45/50" will be converted to the equivalent mark out of the category maximum</li>
+                        <li><strong>Percentages:</strong> e.g., "90%" will be converted to 90% of the category maximum</li>
+                        <li><strong>Direct numbers:</strong> e.g., "14" will be used directly (if within the allowed maximum)</li>
+                    </ul>
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li>For CAT1 (max 15): "12/15" → 12, "80%" → 12, "14" → 14</li>
+                        <li>For EXAM (max 50): "45/50" → 45, "90%" → 45, "48" → 48</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>📊 Data Management</h3>
+                    <ul>
+                        <li><strong>Automatic Saving:</strong> All changes are automatically saved to your browser's storage.</li>
+                        <li><strong>Export Data:</strong> Download all your data as a JSON file for backup or transfer.</li>
+                        <li><strong>Import Data:</strong> Merge data from JSON files with your existing data:
+                            <ul>
+                                <li>Tables with the same name will be merged (students updated/added)</li>
+                                <li>New tables will be added to your existing data</li>
+                                <li>Student records with the same name will be updated</li>
+                            </ul>
+                        </li>
+                        <li><strong>Clear Data:</strong> Remove all tables and start fresh (use with caution!).</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>📈 Statistics & Reports</h3>
+                    <ul>
+                        <li><strong>Statistics View:</strong> See an overview of all students across all tables with their total scores and positions.</li>
+                        <li><strong>Terminal Reports:</strong> Click on any student name in the statistics view to generate a detailed report card.</li>
+                        <li><strong>Print Reports:</strong> Generate professional A4-sized reports for parent meetings or student records.</li>
+                        <li><strong>Automatic Calculations:</strong> CAT totals, overall scores, and positions are calculated automatically.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🖨️ Printing</h3>
+                    <ul>
+                        <li><strong>Table Printing:</strong> Print individual class tables using the print button on each table.</li>
+                        <li><strong>Report Printing:</strong> Generate and print professional terminal reports for students.</li>
+                        <li><strong>A4 Optimization:</strong> All print outputs are optimized for standard A4 paper size.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🎯 Grading System</h3>
+                    <ul>
+                        <li><strong>CAT Marks:</strong> CAT1 (max 15), CAT2 (max 20), CAT3 (max 15)</li>
+                        <li><strong>Exam Marks:</strong> Maximum of 50 marks per subject</li>
+                        <li><strong>Total Calculation:</strong> CAT Total + Exam = Subject Total (out of 100)</li>
+                        <li><strong>Automatic Remarks:</strong>
+                            <ul>
+                                <li>Distinction: 90% and above</li>
+                                <li>Excellent: 80% - 89%</li>
+                                <li>Very Good: 70% - 79%</li>
+                                <li>Good: 60% - 69%</li>
+                                <li>Pass: 50% - 59%</li>
+                                <li>Fail: Below 50%</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 Tips & Best Practices</h3>
+                    <ul>
+                        <li>Use descriptive table names (e.g., "Mathematics Grade 7" instead of "Class 1")</li>
+                        <li>Regularly export your data as backup</li>
+                        <li>Use the statistics view to identify students who need extra help</li>
+                        <li>Add personalized comments in terminal reports for better parent communication</li>
+                        <li>Use the clone feature to create similar classes with the same student roster</li>
+                        <li>Take advantage of flexible mark input to enter marks in your preferred format</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🛠️ Technical Information</h3>
+                    <ul>
+                        <li>This app works entirely in your browser - no server required</li>
+                        <li>Data is stored locally in your browser's storage</li>
+                        <li>Works offline once loaded</li>
+                        <li>Compatible with modern browsers (Chrome, Firefox, Safari, Edge)</li>
+                        <li>Responsive design works on desktop, tablet, and mobile devices</li>
+                        <li>Contact the Author, Sir Mick - +233545800158, for assistance.</li>
+                    </ul>
+                </div>
+            `;
+        }
+
         // Print a specific table
         function printTable(tableId) {
             const table = tables.find(t => t.id === tableId);
@@ -1639,7 +1924,7 @@
             URL.revokeObjectURL(url);
         }
 
-        // Handle file import
+        // Handle file import with merging
         function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1653,12 +1938,13 @@
                     if (Array.isArray(importedData.tables) && importedData.tables.every(item => 
                         item.id && item.name && Array.isArray(item.students))) {
                         
-                        tables = importedData.tables;
-                        tableCounter = importedData.tableCounter || tables.length + 1;
+                        const importSummary = mergeImportedData(importedData);
                         renderTables();
                         hideEmptyState();
                         saveToLocalStorage();
-                        alert('Data imported successfully!');
+                        
+                        // Show import summary
+                        showImportSummary(importSummary);
                     } else {
                         throw new Error('Invalid data format');
                     }
@@ -1671,6 +1957,89 @@
             reader.readAsText(file);
             // Reset file input
             event.target.value = '';
+        }
+
+        // Merge imported data with existing data
+        function mergeImportedData(importedData) {
+            const summary = {
+                tablesAdded: 0,
+                tablesUpdated: 0,
+                studentsAdded: 0,
+                studentsUpdated: 0
+            };
+            
+            // Update table counter to avoid ID conflicts
+            const maxExistingId = tables.reduce((max, table) => {
+                const idNum = parseInt(table.id.replace('table-', ''));
+                return idNum > max ? idNum : max;
+            }, 0);
+            
+            tableCounter = Math.max(tableCounter, maxExistingId + 1);
+            
+            // Process each imported table
+            importedData.tables.forEach(importedTable => {
+                // Check if table with same name exists
+                const existingTable = tables.find(t => t.name === importedTable.name);
+                
+                if (existingTable) {
+                    // Merge students into existing table
+                    summary.tablesUpdated++;
+                    
+                    importedTable.students.forEach(importedStudent => {
+                        const existingStudent = existingTable.students.find(s => s.name === importedStudent.name);
+                        
+                        if (existingStudent) {
+                            // Update existing student
+                            Object.assign(existingStudent, importedStudent);
+                            summary.studentsUpdated++;
+                        } else {
+                            // Add new student
+                            existingTable.students.push(importedStudent);
+                            summary.studentsAdded++;
+                        }
+                    });
+                    
+                    // Update positions for the merged table
+                    updatePositions(existingTable.id);
+                } else {
+                    // Add new table
+                    // Generate new ID to avoid conflicts
+                    const newTableId = `table-${tableCounter++}`;
+                    importedTable.id = newTableId;
+                    tables.push(importedTable);
+                    summary.tablesAdded++;
+                    summary.studentsAdded += importedTable.students.length;
+                }
+            });
+            
+            return summary;
+        }
+
+        // Show import summary
+        function showImportSummary(summary) {
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'import-summary';
+            
+            summaryDiv.innerHTML = `
+                <h4>✅ Data Import Successful</h4>
+                <ul>
+                    <li>Tables added: ${summary.tablesAdded}</li>
+                    <li>Tables updated: ${summary.tablesUpdated}</li>
+                    <li>Students added: ${summary.studentsAdded}</li>
+                    <li>Students updated: ${summary.studentsUpdated}</li>
+                </ul>
+                <p>Your data has been merged successfully. All changes have been saved automatically.</p>
+            `;
+            
+            // Insert at the top of the tables container
+            tablesContainer.insertBefore(summaryDiv, tablesContainer.firstChild);
+            
+            // Remove the summary after 5 seconds
+            setTimeout(() => {
+                if (summaryDiv.parentNode) {
+                    summaryDiv.parentNode.removeChild(summaryDiv);
+                }
+            }, 5000);
         }
 
         // Initialize the app when the page loads
