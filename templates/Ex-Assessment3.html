@@ -642,6 +642,7 @@
                     <button id="statisticsBtn" class="btn-info">📈 Statistics</button>
                     <button id="helpBtn" class="btn-help">❓ Help</button>
                     <button id="clearDataBtn" class="btn-danger">🗑️ Clear All Data</button>
+                    <button id="reloadBtn" class="btn-secondary">🔄 Reload Page</button>
                 </div>
                 <div class="status-indicator" id="statusIndicator">
                     <span id="saveStatus">All changes saved</span>
@@ -718,6 +719,7 @@
         const STORAGE_KEY = 'studentResultsData';
 
         // DOM elements
+        const reloadBtn = document.getElementById('reloadBtn');
         const tablesContainer = document.getElementById('tablesContainer');
         const emptyState = document.getElementById('emptyState');
         const addTableBtn = document.getElementById('addTableBtn');
@@ -751,6 +753,7 @@
         ];
 
         // Event listeners
+        reloadBtn.addEventListener('click', reloadPage);
         addTableBtn.addEventListener('click', addNewTable);
         initialAddTableBtn.addEventListener('click', addNewTable);
         importBtn.addEventListener('click', () => fileInput.click());
@@ -1566,6 +1569,8 @@
                 }
                 saveToLocalStorage();
             }
+
+            
         }
 
         // Clear all data
@@ -1578,6 +1583,8 @@
                 saveStatus.textContent = 'All data cleared';
                 saveStatus.className = '';
             }
+
+            location.reload(true);
         }
 
         // Show statistics modal
@@ -2424,6 +2431,13 @@
                     summaryDiv.parentNode.removeChild(summaryDiv);
                 }
             }, 5000);
+        }
+
+        // Reload function with confirmation
+        function reloadPage() {
+            if (confirm('Reload the page? All unsaved changes will be lost.')) {
+                location.reload(true);
+            }
         }
 
         // Initialize the app when the page loads
