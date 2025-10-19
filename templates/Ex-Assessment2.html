@@ -1489,9 +1489,35 @@
                 saveToLocalStorage();
             }
         }
-
-        // Update positions based on total marks
+        
+        //update positions new formula
         function updatePositions(tableId) {
+            const table = tables.find(t => t.id === tableId);
+            if (table) {
+                // Sort students by total marks in descending order
+                const sortedStudents = [...table.students].sort((a, b) => b.total - a.total);
+                
+                // Assign positions
+                let currentPosition = 1;
+                let previousTotal = null;
+                
+                sortedStudents.forEach((student, index) => {
+                    // If this student has the same total as the previous, they share the position
+                    if (previousTotal !== null && student.total === previousTotal) {
+                        // Same position as previous student
+                        student.position = currentPosition;
+                    } else {
+                        currentPosition = index + 1;
+                        student.position = currentPosition;
+                    }
+                    
+                    previousTotal = student.total;
+                });
+            }
+        }
+
+        // Update positions based on total marks old
+        /*function updatePositions(tableId) {
             const table = tables.find(t => t.id === tableId);
             if (table) {
                 // Sort students by total marks in descending order
@@ -1516,7 +1542,7 @@
                     previousTotal = student.total;
                 });
             }
-        }
+        }*/
 
         // Add a new student to a table
         function addStudent(tableId) {
