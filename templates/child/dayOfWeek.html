@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Days of the Week Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #8A2BE2, #4B0082);
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10%),
+                radial-gradient(circle, rgba(255,255,255,0.05) 15%, transparent 15%);
+            background-size: 50px 50px, 70px 70px;
+            background-position: 0 0, 25px 25px;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+        
+        header {
+            margin-bottom: 10px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #FFD700, #FFA500, #FF69B4, #9370DB, #00BFFF, #32CD32, #FF4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .instructions {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            margin-bottom: 20px;
+            max-width: 600px;
+            line-height: 1.5;
+            background-color: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .game-area {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+                gap: 40px;
+            }
+        }
+        
+        .slots-container, .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .slot {
+            padding: 20px 30px;
+            border-radius: 50px;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            color: #000;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);
+            text-align: center;
+            width: 100%;
+            border: 3px dashed rgba(255,255,255,0.7);
+            background-color: rgba(255,255,255,0.1);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slot.filled {
+            border: none;
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.7);
+        }
+        
+        .slot::before {
+            content: attr(data-index);
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            font-size: 0.8rem;
+            color: rgba(0,0,0,0.4);
+            font-weight: bold;
+        }
+        
+        .day-button {
+            padding: 20px 30px;
+            border-radius: 50px;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            color: #000;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 100%;
+            border: none;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .day-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        .day-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .day-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.2), transparent);
+            pointer-events: none;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        #undo {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            padding: 15px 30px;
+            background: linear-gradient(to right, #FF4500, #FF6347);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        #undo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        #undo:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        #undo:disabled {
+            background: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .progress {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.3);
+            transition: background-color 0.3s ease;
+        }
+        
+        .progress-dot.filled {
+            background-color: #00FF00;
+            box-shadow: 0 0 8px #00FF00;
+        }
+        
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .message-box {
+            background: linear-gradient(135deg, #8A2BE2, #4B0082);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 90%;
+            animation: popIn 0.5s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        #overlay h2 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #FFD700, #FFA500, #FF69B4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        #overlay p {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        #overlay button {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            padding: 15px 30px;
+            background: linear-gradient(to right, #00FF00, #32CD32);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        #overlay button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 101;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Arrange the Days of the Week! 🌈</h1>
+            <div class="instructions">
+                Drag and drop the days of the week into the correct order from Sunday to Saturday. Click on a day to place it in the next available slot.
+            </div>
+        </header>
+        
+        <div class="game-area">
+            <div class="slots-container">
+                <h2>Order Slots</h2>
+                <div id="slots"></div>
+            </div>
+            
+            <div class="buttons-container">
+                <h2>Days to Arrange</h2>
+                <div id="buttons"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="undo">Undo Last Move 🔙</button>
+            <div class="progress">
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+            </div>
+        </div>
+        
+        <footer>
+            Drag and drop or click to arrange the days in correct order
+        </footer>
+    </div>
+
+    <script>
+        const days = [
+            { name: 'Sunday', color: '#FFFF00' },
+            { name: 'Monday', color: '#FF8000' },
+            { name: 'Tuesday', color: '#00FF00' },
+            { name: 'Wednesday', color: '#00FFFF' },
+            { name: 'Thursday', color: '#FF00FF' },
+            { name: 'Friday', color: '#FFFF80' },
+            { name: 'Saturday', color: '#8000FF' }
+        ];
+
+        const correctOrder = days.map(d => d.name);
+        let shuffled = [...days].sort(() => Math.random() - 0.5);
+        const slotsContainer = document.getElementById('slots');
+        const buttonsContainer = document.getElementById('buttons');
+        const undoButton = document.getElementById('undo');
+        let moveHistory = [];
+        
+        // Initialize the game
+        function initGame() {
+            createSlots();
+            renderButtons();
+            updateProgress();
+            undoButton.disabled = true;
+        }
+        
+        function createSlots() {
+            slotsContainer.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.setAttribute('data-index', i + 1);
+                slot.setAttribute('data-day', '');
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('drop', handleDrop);
+                slotsContainer.appendChild(slot);
+            }
+        }
+
+        function renderButtons() {
+            buttonsContainer.innerHTML = '';
+            shuffled.forEach(day => {
+                const button = document.createElement('button');
+                button.className = 'day-button';
+                button.textContent = day.name;
+                button.style.background = `linear-gradient(135deg, ${day.color}, ${lightenColor(day.color, 30)})`;
+                button.setAttribute('draggable', 'true');
+                button.addEventListener('click', handleButtonClick);
+                button.addEventListener('dragstart', handleDragStart);
+                buttonsContainer.appendChild(button);
+            });
+        }
+        
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace("#", ""), 16),
+                amt = Math.round(2.55 * percent),
+                R = (num >> 16) + amt,
+                G = (num >> 8 & 0x00FF) + amt,
+                B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+        }
+
+        function handleButtonClick(e) {
+            const button = e.target;
+            const dayName = button.textContent;
+            const color = button.style.background;
+            placeDayInSlot(dayName, color, button);
+        }
+        
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            e.dataTransfer.setData('color', e.target.style.background);
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            const dayName = e.dataTransfer.getData('text/plain');
+            const color = e.dataTransfer.getData('color');
+            const button = Array.from(buttonsContainer.children).find(btn => btn.textContent === dayName);
+            
+            if (button) {
+                placeDayInSlot(dayName, color, button);
+            }
+        }
+        
+        function placeDayInSlot(dayName, color, button) {
+            const slots = document.querySelectorAll('.slot');
+            let filled = false;
+            
+            for (let slot of slots) {
+                if (!slot.textContent) {
+                    // Record move for undo functionality
+                    moveHistory.push({
+                        dayName: dayName,
+                        color: color,
+                        button: button.cloneNode(true)
+                    });
+                    
+                    // Update slot
+                    slot.textContent = dayName;
+                    slot.style.background = color;
+                    slot.classList.add('filled');
+                    slot.setAttribute('data-day', dayName);
+                    
+                    // Remove button
+                    button.remove();
+                    filled = true;
+                    
+                    // Update UI
+                    updateProgress();
+                    undoButton.disabled = false;
+                    checkIfComplete();
+                    break;
+                }
+            }
+            
+            if (!filled) {
+                console.log('No empty slots available');
+            }
+        }
+
+        function checkIfComplete() {
+            const slots = document.querySelectorAll('.slot');
+            const allFilled = Array.from(slots).every(s => s.textContent);
+            
+            if (allFilled) {
+                const currentOrder = Array.from(slots).map(s => s.textContent);
+                if (currentOrder.join(',') === correctOrder.join(',')) {
+                    showWinScreen();
+                } else {
+                    showGameOverScreen();
+                }
+            }
+        }
+
+        function showWinScreen() {
+            createConfetti();
+            const overlay = document.createElement('div');
+            overlay.id = 'overlay';
+            overlay.innerHTML = `
+                <div class="message-box">
+                    <h2>Great job! 🎉🥳</h2>
+                    <p>You correctly arranged all the days of the week!</p>
+                    <button id="reset">Play Again 🔄</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            document.getElementById('reset').addEventListener('click', resetGame);
+        }
+
+        function showGameOverScreen() {
+            const overlay = document.createElement('div');
+            overlay.id = 'overlay';
+            overlay.innerHTML = `
+                <div class="message-box">
+                    <h2>Oops! Try again 😊</h2>
+                    <p>The days are not in the correct order. Keep trying!</p>
+                    <button id="reset">Try Again 🔄</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            document.getElementById('reset').addEventListener('click', resetGame);
+        }
+        
+        function createConfetti() {
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        function resetGame() {
+            const overlay = document.getElementById('overlay');
+            if (overlay) overlay.remove();
+            
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach(slot => {
+                slot.textContent = '';
+                slot.style.background = '';
+                slot.classList.remove('filled');
+                slot.setAttribute('data-day', '');
+            });
+            
+            shuffled = [...days].sort(() => Math.random() - 0.5);
+            renderButtons();
+            moveHistory = [];
+            updateProgress();
+            undoButton.disabled = true;
+        }
+        
+        function updateProgress() {
+            const progressDots = document.querySelectorAll('.progress-dot');
+            const filledSlots = document.querySelectorAll('.slot.filled').length;
+            
+            progressDots.forEach((dot, index) => {
+                if (index < filledSlots) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+        }
+
+        function handleUndo() {
+            if (moveHistory.length === 0) return;
+            
+            const lastMove = moveHistory.pop();
+            const slots = Array.from(document.querySelectorAll('.slot'));
+            const lastFilledSlot = slots.reverse().find(slot => slot.textContent);
+            
+            if (lastFilledSlot) {
+                // Clear the slot
+                lastFilledSlot.textContent = '';
+                lastFilledSlot.style.background = '';
+                lastFilledSlot.classList.remove('filled');
+                lastFilledSlot.setAttribute('data-day', '');
+                
+                // Restore the button
+                const restoredButton = lastMove.button;
+                restoredButton.addEventListener('click', handleButtonClick);
+                restoredButton.addEventListener('dragstart', handleDragStart);
+                buttonsContainer.appendChild(restoredButton);
+                
+                // Update UI
+                updateProgress();
+                undoButton.disabled = moveHistory.length === 0;
+            }
+        }
+
+        undoButton.addEventListener('click', handleUndo);
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
