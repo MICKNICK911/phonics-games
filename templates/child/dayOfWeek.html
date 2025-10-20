@@ -45,6 +45,7 @@
             flex-direction: column;
             align-items: center;
             gap: 25px;
+            min-height: calc(100vh - 40px);
         }
         
         header {
@@ -80,23 +81,16 @@
             align-items: center;
             gap: 25px;
             width: 100%;
+            flex-grow: 1;
         }
         
-        @media (min-width: 768px) {
-            .game-area {
-                flex-direction: row;
-                align-items: flex-start;
-                justify-content: center;
-                gap: 40px;
-            }
-        }
-        
-        .slots-container, .buttons-container {
+        .slots-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
             width: 100%;
             max-width: 400px;
+            margin-bottom: 20px;
         }
         
         .slot {
@@ -133,6 +127,40 @@
             font-size: 0.8rem;
             color: rgba(0,0,0,0.4);
             font-weight: bold;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .buttons-container {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                max-width: 90%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .day-button {
+                flex: 0 0 calc(25% - 10px);
+                max-width: 200px;
+                padding: 15px 20px;
+                font-size: 1.5rem;
+            }
+            
+            .container {
+                padding-bottom: 180px; /* Make space for the fixed buttons */
+            }
         }
         
         .day-button {
@@ -320,6 +348,26 @@
             font-size: 0.9rem;
             color: rgba(255,255,255,0.7);
         }
+        
+        /* Ensure mobile view fits in viewport */
+        @media (max-width: 767px) {
+            .container {
+                min-height: auto;
+            }
+            
+            .game-area {
+                gap: 15px;
+            }
+            
+            .slot, .day-button {
+                padding: 15px 25px;
+                min-height: 60px;
+            }
+            
+            .controls {
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -341,18 +389,18 @@
                 <h2>Days to Arrange</h2>
                 <div id="buttons"></div>
             </div>
-        </div>
-        
-        <div class="controls">
-            <button id="undo">Undo Last Move 🔙</button>
-            <div class="progress">
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
+            
+            <div class="controls">
+                <button id="undo">Undo Last Move 🔙</button>
+                <div class="progress">
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                </div>
             </div>
         </div>
         
