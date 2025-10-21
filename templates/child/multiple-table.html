@@ -7,25 +7,44 @@
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #4cc9f0;
+            --success: #4bb543;
+            --danger: #e63946;
+            --warning: #ff9e00;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
         
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #6ecbf5, #059ee3);
+            background: var(--bg-gradient);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Times New Roman', serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
         }
         
         .container {
-            width: 90%;
-            max-width: 800px;
+            width: 95%;
+            max-width: 900px;
             background-color: white;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--card-shadow);
             overflow: hidden;
             position: relative;
         }
@@ -33,6 +52,12 @@
         .screen {
             padding: 30px;
             display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .active {
@@ -40,23 +65,25 @@
         }
         
         h1 {
-            color: #ff6b6b;
+            color: var(--primary);
             text-align: center;
             margin-top: 0;
             font-size: 2.5rem;
-            text-shadow: 2px 2px 0 #ffd166;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
         
         h2 {
-            color: #118ab2;
+            color: var(--primary-dark);
             text-align: center;
-            font-family: 'Times New Roman', serif;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
         
         p {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.5;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 20px;
         }
         
         .menu-buttons {
@@ -67,97 +94,97 @@
         }
         
         button {
-            background-color: #06d6a0;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 16px 30px;
             font-size: 1.2rem;
-            border-radius: 50px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 0 #04a37c;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            transition: var(--transition);
+            box-shadow: var(--btn-shadow);
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
         
         button:hover {
-            background-color: #05c290;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0 #04a37c;
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         
         button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #04a37c;
+            transform: translateY(1px);
         }
         
         .back-button {
-            background-color: #ffd166;
-            box-shadow: 0 4px 0 #e6b84c;
-            color: #333;
+            background-color: var(--gray);
+            color: white;
         }
         
         .back-button:hover {
-            background-color: #ffca52;
-            box-shadow: 0 6px 0 #e6b84c;
-        }
-        
-        .back-button:active {
-            box-shadow: 0 2px 0 #e6b84c;
+            background-color: #5a6268;
         }
         
         .question {
-            font-size: 3rem;
+            font-size: 3.5rem;
             text-align: center;
             margin: 30px 0;
-            color: #073b4c;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            color: var(--primary-dark);
+            font-weight: 700;
         }
         
         .answer-buttons {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 30px 0;
+            gap: 20px;
+            margin: 40px 0;
         }
         
         .answer-btn {
-            background-color: #118ab2;
-            color: white;
-            border: none;
+            background-color: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
             padding: 20px 10px;
-            font-size: 1.5rem;
-            border-radius: 15px;
+            font-size: 1.8rem;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 0 #0c6b8a;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            transition: var(--transition);
+            font-weight: 600;
+            box-shadow: var(--btn-shadow);
         }
         
         .answer-btn:hover {
-            background-color: #0f7ea1;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0 #0c6b8a;
+            background-color: #f0f4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
         
         .answer-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #0c6b8a;
+            transform: translateY(1px);
         }
         
         .answer-btn.correct {
-            background-color: #06d6a0;
-            box-shadow: 0 4px 0 #04a37c;
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
         }
         
         .answer-btn.incorrect {
-            background-color: #ef476f;
-            box-shadow: 0 4px 0 #d43d63;
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .answer-btn.disabled {
+            pointer-events: none;
+            opacity: 0.7;
         }
         
         .game-controls {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         
         .stats {
@@ -165,38 +192,65 @@
             justify-content: space-around;
             margin: 20px 0;
             font-size: 1.2rem;
-            font-family: 'Times New Roman', serif;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+        
+        .progress-container {
+            margin: 25px 0;
         }
         
         .progress-bar {
-            height: 20px;
-            background-color: #e0e0e0;
+            height: 12px;
+            background-color: #e9ecef;
             border-radius: 10px;
-            margin: 20px 0;
             overflow: hidden;
+            margin: 10px 0;
         }
         
         .progress {
             height: 100%;
-            background-color: #06d6a0;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             width: 0%;
-            transition: width 0.5s;
+            transition: width 0.5s ease;
+            border-radius: 10px;
         }
         
         .timer {
             font-size: 1.5rem;
             text-align: center;
-            color: #ef476f;
+            color: var(--danger);
             margin: 10px 0;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-weight: 600;
+            background-color: #ffe6e6;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 0 auto;
         }
         
         .score {
             font-size: 1.5rem;
             text-align: center;
-            color: #118ab2;
+            color: var(--primary);
             margin: 10px 0;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-weight: 600;
+            background-color: #e6f7ff;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 0 auto;
         }
         
         .results {
@@ -205,7 +259,7 @@
         }
         
         .results h2 {
-            color: #06d6a0;
+            color: var(--success);
         }
         
         .results p {
@@ -215,27 +269,23 @@
         .table-selection {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 20px 0;
+            gap: 12px;
+            margin: 25px 0;
         }
         
         .table-button {
-            background-color: #118ab2;
-            box-shadow: 0 4px 0 #0c6b8a;
+            background-color: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
         }
         
         .table-button:hover {
-            background-color: #0f7ea1;
-            box-shadow: 0 6px 0 #0c6b8a;
+            background-color: #f0f4ff;
         }
         
-        .table-button:active {
-            box-shadow: 0 2px 0 #0c6b8a;
-        }
-        
-        .selected {
-            background-color: #06d6a0;
-            box-shadow: 0 4px 0 #04a37c;
+        .table-button.selected {
+            background-color: var(--primary);
+            color: white;
         }
         
         /* Modal Styles */
@@ -250,21 +300,35 @@
             z-index: 100;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(5px);
         }
         
         .modal-content {
             background-color: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 20px;
             text-align: center;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalAppear 0.3s ease-out;
+        }
+        
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         .modal h2 {
             font-size: 2.5rem;
             margin-top: 0;
+            margin-bottom: 20px;
         }
         
         .emoji {
@@ -276,16 +340,84 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 25px;
         }
         
-        @media (max-width: 600px) {
+        .feedback-text {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 15px 0;
+            min-height: 30px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .practice-feedback {
+            color: var(--danger);
+            background-color: #ffe6e6;
+        }
+        
+        /* Specific modal styles */
+        #game-over-modal .modal-content {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        #game-over-modal h2,
+        #game-over-modal p {
+            color: white;
+        }
+        
+        #game-over-modal button {
+            background-color: white;
+            color: var(--danger);
+        }
+        
+        #game-over-modal button:hover {
+            background-color: #f8f9fa;
+        }
+        
+        #win-modal .modal-content {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        #win-modal h2,
+        #win-modal p {
+            color: white;
+        }
+        
+        #win-modal button {
+            background-color: white;
+            color: var(--success);
+        }
+        
+        #win-modal button:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .header-icon {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
             .table-selection {
                 grid-template-columns: repeat(3, 1fr);
             }
             
             .question {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
             }
             
             .answer-buttons {
@@ -293,7 +425,39 @@
             }
             
             h1 {
+                font-size: 2.2rem;
+            }
+            
+            .container {
+                width: 98%;
+            }
+            
+            .screen {
+                padding: 20px;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .answer-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .question {
+                font-size: 2.5rem;
+            }
+            
+            h1 {
                 font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -302,6 +466,7 @@
     <div class="container">
         <!-- Main Menu Screen -->
         <div id="main-menu" class="screen active">
+            <div class="header-icon">🧮</div>
             <h1>Math Master</h1>
             <h2>Learn Multiplication Tables</h2>
             <div class="menu-buttons">
@@ -312,6 +477,7 @@
         
         <!-- Table Selection Screen -->
         <div id="table-selection" class="screen">
+            <div class="header-icon">✅</div>
             <h1>Select Tables</h1>
             <p>Choose which multiplication tables you want to practice:</p>
             <div class="table-selection" id="tables-container">
@@ -326,31 +492,51 @@
         
         <!-- Practice Mode Screen -->
         <div id="practice-mode" class="screen">
+            <div class="header-icon">📚</div>
             <h1>Practice Mode</h1>
-            <div class="stats">
-                <div>Current Table: <span id="current-table">1</span></div>
-                <div>Progress: <span id="practice-progress-text">0/12</span></div>
+            <div class="game-info">
+                <div class="stats">
+                    <div class="stat-item">
+                        <div>Current Table</div>
+                        <div class="stat-value" id="current-table">1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Progress</div>
+                        <div class="stat-value" id="practice-progress-text">0/12</div>
+                    </div>
+                </div>
+                <button class="back-button" id="back-from-practice">Back</button>
             </div>
-            <div class="progress-bar">
-                <div class="progress" id="practice-progress"></div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" id="practice-progress"></div>
+                </div>
             </div>
             <div class="question" id="practice-question">5 × 3 = ?</div>
             <div class="answer-buttons" id="practice-answers">
                 <!-- Answer buttons will be generated here -->
             </div>
-            <div class="game-controls">
-                <button class="back-button" id="back-from-practice">Back</button>
-            </div>
+            <div class="feedback-text practice-feedback" id="practice-feedback"></div>
         </div>
         
         <!-- Play Mode Screen -->
         <div id="play-mode" class="screen">
+            <div class="header-icon">🎮</div>
             <h1>Play Mode</h1>
-            <div class="timer" id="timer">Time: 60s</div>
-            <div class="score" id="score">Score: 0</div>
+            <div class="game-info">
+                <div class="timer" id="timer">Time: 120s</div>
+                <div class="score" id="score">Score: 0</div>
+                <button class="back-button" id="back-from-play">Back</button>
+            </div>
             <div class="stats">
-                <div>Current Table: <span id="play-current-table">1</span></div>
-                <div>Progress: <span id="play-progress-text">0/12</span></div>
+                <div class="stat-item">
+                    <div>Current Table</div>
+                    <div class="stat-value" id="play-current-table">1</div>
+                </div>
+                <div class="stat-item">
+                    <div>Progress</div>
+                    <div class="stat-value" id="play-progress-text">0/12</div>
+                </div>
             </div>
             <div class="question" id="play-question">5 × 3 = ?</div>
             <div class="answer-buttons" id="play-answers">
@@ -360,6 +546,7 @@
         
         <!-- Results Screen -->
         <div id="results" class="screen">
+            <div class="header-icon">🏆</div>
             <h1>Game Over!</h1>
             <div class="results">
                 <h2 id="final-score">Your Score: 0</h2>
@@ -377,11 +564,8 @@
     <div id="practice-feedback-modal" class="modal">
         <div class="modal-content">
             <h2 id="practice-feedback-title">Correct!</h2>
-            <div class="emoji" id="practice-feedback-emoji">😊</div>
+            <div class="emoji" id="practice-feedback-emoji">👍</div>
             <p id="practice-feedback-text">Well done! You got it right!</p>
-            <div class="modal-buttons">
-                <button id="practice-next-btn">Next Question</button>
-            </div>
         </div>
     </div>
     
@@ -389,11 +573,8 @@
     <div id="play-feedback-modal" class="modal">
         <div class="modal-content">
             <h2 id="play-feedback-title">Correct!</h2>
-            <div class="emoji" id="play-feedback-emoji">😊</div>
+            <div class="emoji" id="play-feedback-emoji">👍</div>
             <p id="play-feedback-text">Well done! You got it right!</p>
-            <div class="modal-buttons">
-                <button id="play-next-btn">Next Question</button>
-            </div>
         </div>
     </div>
     
@@ -413,7 +594,7 @@
     <!-- Win Modal -->
     <div id="win-modal" class="modal">
         <div class="modal-content">
-            <h2>Congratulations!</h2>
+            <h2>CONGRATS!</h2>
             <div class="emoji">🎉</div>
             <p>You've completed the multiplication table!</p>
             <div class="modal-buttons">
@@ -433,90 +614,121 @@
                 correct: 0,
                 total: 0,
                 currentTable: 1,
-                currentMultiplier: 1
+                currentMultiplier: 1,
+                waitingForCorrectAnswer: false
             },
             playStats: {
                 score: 0,
                 correct: 0,
                 total: 0,
-                timeLeft: 60,
+                timeLeft: 120,
                 currentTable: 1,
                 currentMultiplier: 1
             },
             currentQuestion: null,
             timerInterval: null,
-            answerButtons: []
+            answerButtons: [],
+            practiceModalTimeout: null,
+            playModalTimeout: null
         };
 
-        // DOM elements
-        const screens = {
-            'main-menu': document.getElementById('main-menu'),
-            'table-selection': document.getElementById('table-selection'),
-            'practice-mode': document.getElementById('practice-mode'),
-            'play-mode': document.getElementById('play-mode'),
-            'results': document.getElementById('results')
-        };
-
-        // Modals
-        const modals = {
-            practiceFeedback: document.getElementById('practice-feedback-modal'),
-            playFeedback: document.getElementById('play-feedback-modal'),
-            gameOver: document.getElementById('game-over-modal'),
-            win: document.getElementById('win-modal')
+        // DOM elements cache
+        const elements = {
+            screens: {
+                'main-menu': document.getElementById('main-menu'),
+                'table-selection': document.getElementById('table-selection'),
+                'practice-mode': document.getElementById('practice-mode'),
+                'play-mode': document.getElementById('play-mode'),
+                'results': document.getElementById('results')
+            },
+            modals: {
+                practiceFeedback: document.getElementById('practice-feedback-modal'),
+                playFeedback: document.getElementById('play-feedback-modal'),
+                gameOver: document.getElementById('game-over-modal'),
+                win: document.getElementById('win-modal')
+            },
+            tablesContainer: document.getElementById('tables-container'),
+            practiceAnswers: document.getElementById('practice-answers'),
+            playAnswers: document.getElementById('play-answers'),
+            practiceQuestion: document.getElementById('practice-question'),
+            playQuestion: document.getElementById('play-question'),
+            practiceFeedback: document.getElementById('practice-feedback'),
+            currentTable: document.getElementById('current-table'),
+            playCurrentTable: document.getElementById('play-current-table'),
+            practiceProgressText: document.getElementById('practice-progress-text'),
+            playProgressText: document.getElementById('play-progress-text'),
+            practiceProgress: document.getElementById('practice-progress'),
+            timer: document.getElementById('timer'),
+            score: document.getElementById('score'),
+            finalScore: document.getElementById('final-score'),
+            correctAnswers: document.getElementById('correct-answers'),
+            accuracy: document.getElementById('accuracy')
         };
 
         // Initialize the game
         function init() {
             // Create table selection buttons
-            const tablesContainer = document.getElementById('tables-container');
+            createTableButtons();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        // Create table selection buttons
+        function createTableButtons() {
             for (let i = 1; i <= 12; i++) {
                 const button = document.createElement('button');
                 button.className = 'table-button';
                 button.textContent = i;
                 button.dataset.table = i;
                 button.addEventListener('click', toggleTableSelection);
-                tablesContainer.appendChild(button);
+                elements.tablesContainer.appendChild(button);
             }
+        }
 
-            // Set up event listeners
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Mode selection
             document.getElementById('practice-mode-btn').addEventListener('click', () => showScreen('table-selection'));
             document.getElementById('play-mode-btn').addEventListener('click', () => showScreen('table-selection'));
             
+            // Game start
             document.getElementById('start-practice-btn').addEventListener('click', startPractice);
             document.getElementById('start-play-btn').addEventListener('click', startPlay);
             
+            // Navigation
             document.getElementById('back-from-tables').addEventListener('click', () => showScreen('main-menu'));
-            document.getElementById('back-from-practice').addEventListener('click', () => showScreen('table-selection'));
+            document.getElementById('back-from-practice').addEventListener('click', () => {
+                clearTimeout(gameState.practiceModalTimeout);
+                showScreen('table-selection');
+            });
+            document.getElementById('back-from-play').addEventListener('click', stopGame);
             document.getElementById('back-from-results').addEventListener('click', () => showScreen('main-menu'));
             
-            document.getElementById('practice-next-btn').addEventListener('click', nextPracticeQuestion);
-            document.getElementById('play-next-btn').addEventListener('click', nextPlayQuestion);
-            
+            // Modal buttons
             document.getElementById('try-again-btn').addEventListener('click', tryAgain);
             document.getElementById('back-to-menu-from-gameover').addEventListener('click', () => {
-                modals.gameOver.style.display = 'none';
+                elements.modals.gameOver.style.display = 'none';
                 showScreen('main-menu');
             });
-            
             document.getElementById('next-level-btn').addEventListener('click', nextLevel);
             document.getElementById('play-again-win').addEventListener('click', playAgainWin);
             document.getElementById('back-to-menu-from-win').addEventListener('click', () => {
-                modals.win.style.display = 'none';
+                elements.modals.win.style.display = 'none';
                 showScreen('main-menu');
             });
-            
             document.getElementById('play-again').addEventListener('click', () => showScreen('table-selection'));
         }
 
         // Show a specific screen
         function showScreen(screenId) {
             // Hide all screens
-            Object.values(screens).forEach(screen => {
+            Object.values(elements.screens).forEach(screen => {
                 screen.classList.remove('active');
             });
             
             // Show the requested screen
-            screens[screenId].classList.add('active');
+            elements.screens[screenId].classList.add('active');
             gameState.currentScreen = screenId;
         }
 
@@ -542,14 +754,20 @@
             }
             
             // Reset practice stats
-            gameState.practiceStats.correct = 0;
-            gameState.practiceStats.total = 0;
-            gameState.practiceStats.currentTable = gameState.selectedTables[0];
-            gameState.practiceStats.currentMultiplier = 1;
+            resetPracticeStats();
             
             updatePracticeStats();
             showScreen('practice-mode');
             generatePracticeQuestion();
+        }
+
+        // Reset practice stats
+        function resetPracticeStats() {
+            gameState.practiceStats.correct = 0;
+            gameState.practiceStats.total = 0;
+            gameState.practiceStats.currentTable = gameState.selectedTables[0];
+            gameState.practiceStats.currentMultiplier = 1;
+            gameState.practiceStats.waitingForCorrectAnswer = false;
         }
 
         // Generate a new practice question
@@ -567,15 +785,21 @@
             };
             
             // Display question
-            document.getElementById('practice-question').textContent = `${table} × ${multiplier} = ?`;
+            elements.practiceQuestion.textContent = `${table} × ${multiplier} = ?`;
+            
+            // Clear feedback
+            elements.practiceFeedback.textContent = '';
             
             // Generate answer options
-            generateAnswerButtons('practice-answers', table * multiplier, handlePracticeAnswer);
+            generateAnswerButtons('practice', table * multiplier);
+            
+            // Reset waiting state
+            gameState.practiceStats.waitingForCorrectAnswer = false;
         }
 
         // Generate answer buttons for a question
-        function generateAnswerButtons(containerId, correctAnswer, clickHandler) {
-            const container = document.getElementById(containerId);
+        function generateAnswerButtons(mode, correctAnswer) {
+            const container = mode === 'practice' ? elements.practiceAnswers : elements.playAnswers;
             container.innerHTML = '';
             gameState.answerButtons = [];
             
@@ -594,7 +818,7 @@
                 button.className = 'answer-btn';
                 button.textContent = answer;
                 button.dataset.value = answer;
-                button.addEventListener('click', () => clickHandler(answer, button));
+                button.addEventListener('click', () => handleAnswer(mode, answer, button));
                 container.appendChild(button);
                 gameState.answerButtons.push(button);
             });
@@ -603,16 +827,20 @@
         // Generate wrong answers for a question
         function generateWrongAnswers(correctAnswer, count) {
             const wrongAnswers = new Set();
+            const attemptsLimit = 20; // Prevent infinite loop
+            let attempts = 0;
             
-            while (wrongAnswers.size < count) {
+            while (wrongAnswers.size < count && attempts < attemptsLimit) {
                 // Generate a wrong answer that's within a reasonable range
-                const offset = Math.floor(Math.random() * 10) - 5; // -5 to +5
+                const offset = Math.floor(Math.random() * 10) - 5;
                 let wrongAnswer = correctAnswer + offset;
                 
                 // Make sure it's not the correct answer and is positive
-                if (wrongAnswer !== correctAnswer && wrongAnswer > 0 && wrongAnswer !== correctAnswer - 1 && wrongAnswer !== correctAnswer + 1) {
+                if (wrongAnswer !== correctAnswer && wrongAnswer > 0 && 
+                    wrongAnswer !== correctAnswer - 1 && wrongAnswer !== correctAnswer + 1) {
                     wrongAnswers.add(wrongAnswer);
                 }
+                attempts++;
             }
             
             return Array.from(wrongAnswers);
@@ -626,8 +854,20 @@
             }
         }
 
+        // Handle answer selection
+        function handleAnswer(mode, selectedAnswer, button) {
+            if (mode === 'practice') {
+                handlePracticeAnswer(selectedAnswer, button);
+            } else {
+                handlePlayAnswer(selectedAnswer, button);
+            }
+        }
+
         // Handle practice answer selection
         function handlePracticeAnswer(selectedAnswer, button) {
+            // If we're already waiting for the correct answer, ignore additional clicks
+            if (gameState.practiceStats.waitingForCorrectAnswer) return;
+            
             const isCorrect = selectedAnswer === gameState.currentQuestion.answer;
             
             if (isCorrect) {
@@ -641,6 +881,15 @@
                 
                 // Update stats
                 updatePracticeStats();
+                
+                // Set waiting state
+                gameState.practiceStats.waitingForCorrectAnswer = true;
+                
+                // Auto-advance after 2 seconds
+                gameState.practiceModalTimeout = setTimeout(() => {
+                    elements.modals.practiceFeedback.style.display = 'none';
+                    nextPracticeQuestion();
+                }, 1000);
             } else {
                 // Wrong answer
                 button.classList.add('incorrect');
@@ -652,35 +901,30 @@
                     }
                 });
                 
-                // Show failure modal
-                showPracticeFeedback(false);
+                // Show feedback text
+                elements.practiceFeedback.textContent = 
+                    `Try again! The correct answer is ${gameState.currentQuestion.answer}.`;
             }
         }
 
         // Show practice feedback modal
         function showPracticeFeedback(isCorrect) {
-            const modal = modals.practiceFeedback;
+            const modal = elements.modals.practiceFeedback;
             const title = document.getElementById('practice-feedback-title');
             const emoji = document.getElementById('practice-feedback-emoji');
             const text = document.getElementById('practice-feedback-text');
             
             if (isCorrect) {
                 title.textContent = 'Correct!';
-                emoji.textContent = '🎉';
+                emoji.textContent = '👍';
                 text.textContent = 'Well done! You got it right!';
-            } else {
-                title.textContent = 'Try Again!';
-                emoji.textContent = '😟';
-                text.textContent = `The correct answer is ${gameState.currentQuestion.answer}.`;
+                modal.style.display = 'flex';
             }
-            
-            modal.style.display = 'flex';
+            // No modal for incorrect answers
         }
 
         // Move to next practice question
         function nextPracticeQuestion() {
-            modals.practiceFeedback.style.display = 'none';
-            
             // Move to next multiplier or next table
             gameState.practiceStats.currentMultiplier++;
             
@@ -695,7 +939,7 @@
                     gameState.practiceStats.currentMultiplier = 1;
                 } else {
                     // All tables completed - show win modal
-                    modals.win.style.display = 'flex';
+                    elements.modals.win.style.display = 'flex';
                     return;
                 }
             }
@@ -706,12 +950,12 @@
 
         // Update practice stats display
         function updatePracticeStats() {
-            document.getElementById('current-table').textContent = gameState.practiceStats.currentTable;
-            document.getElementById('practice-progress-text').textContent = 
+            elements.currentTable.textContent = gameState.practiceStats.currentTable;
+            elements.practiceProgressText.textContent = 
                 `${gameState.practiceStats.currentMultiplier}/12`;
             
             const progress = (gameState.practiceStats.currentMultiplier / 12) * 100;
-            document.getElementById('practice-progress').style.width = `${progress}%`;
+            elements.practiceProgress.style.width = `${progress}%`;
         }
 
         // Start play mode
@@ -722,17 +966,22 @@
             }
             
             // Reset play stats
-            gameState.playStats.score = 0;
-            gameState.playStats.correct = 0;
-            gameState.playStats.total = 0;
-            gameState.playStats.timeLeft = 60;
-            gameState.playStats.currentTable = gameState.selectedTables[0];
-            gameState.playStats.currentMultiplier = 1;
+            resetPlayStats();
             
             updatePlayStats();
             showScreen('play-mode');
             generatePlayQuestion();
             startTimer();
+        }
+
+        // Reset play stats
+        function resetPlayStats() {
+            gameState.playStats.score = 0;
+            gameState.playStats.correct = 0;
+            gameState.playStats.total = 0;
+            gameState.playStats.timeLeft = 120;
+            gameState.playStats.currentTable = gameState.selectedTables[0];
+            gameState.playStats.currentMultiplier = 1;
         }
 
         // Start the game timer
@@ -743,12 +992,12 @@
             }
             
             // Update timer display
-            document.getElementById('timer').textContent = `Time: ${gameState.playStats.timeLeft}s`;
+            elements.timer.textContent = `Time: ${gameState.playStats.timeLeft}s`;
             
             // Start countdown
             gameState.timerInterval = setInterval(() => {
                 gameState.playStats.timeLeft--;
-                document.getElementById('timer').textContent = `Time: ${gameState.playStats.timeLeft}s`;
+                elements.timer.textContent = `Time: ${gameState.playStats.timeLeft}s`;
                 
                 if (gameState.playStats.timeLeft <= 0) {
                     endGame();
@@ -771,10 +1020,10 @@
             };
             
             // Display question
-            document.getElementById('play-question').textContent = `${table} × ${multiplier} = ?`;
+            elements.playQuestion.textContent = `${table} × ${multiplier} = ?`;
             
             // Generate answer options
-            generateAnswerButtons('play-answers', table * multiplier, handlePlayAnswer);
+            generateAnswerButtons('play', table * multiplier);
         }
 
         // Handle play answer selection
@@ -793,6 +1042,12 @@
                 
                 // Update stats
                 updatePlayStats();
+                
+                // Auto-advance after 2 seconds
+                gameState.playModalTimeout = setTimeout(() => {
+                    elements.modals.playFeedback.style.display = 'none';
+                    nextPlayQuestion();
+                }, 2000);
             } else {
                 // Wrong answer - game over
                 button.classList.add('incorrect');
@@ -804,6 +1059,11 @@
                     }
                 });
                 
+                // Disable all buttons
+                gameState.answerButtons.forEach(btn => {
+                    btn.classList.add('disabled');
+                });
+                
                 // Show game over modal after a short delay
                 setTimeout(() => {
                     endGame();
@@ -813,24 +1073,21 @@
 
         // Show play feedback modal
         function showPlayFeedback(isCorrect) {
-            const modal = modals.playFeedback;
+            const modal = elements.modals.playFeedback;
             const title = document.getElementById('play-feedback-title');
             const emoji = document.getElementById('play-feedback-emoji');
             const text = document.getElementById('play-feedback-text');
             
             if (isCorrect) {
                 title.textContent = 'Correct!';
-                emoji.textContent = '🎉';
+                emoji.textContent = '👍';
                 text.textContent = 'Well done! You got it right!';
+                modal.style.display = 'flex';
             }
-            
-            modal.style.display = 'flex';
         }
 
         // Move to next play question
         function nextPlayQuestion() {
-            modals.playFeedback.style.display = 'none';
-            
             // Move to next multiplier or next table
             gameState.playStats.currentMultiplier++;
             
@@ -846,7 +1103,7 @@
                 } else {
                     // All tables completed - show win modal
                     clearInterval(gameState.timerInterval);
-                    modals.win.style.display = 'flex';
+                    elements.modals.win.style.display = 'flex';
                     return;
                 }
             }
@@ -857,9 +1114,9 @@
 
         // Update play stats display
         function updatePlayStats() {
-            document.getElementById('score').textContent = `Score: ${gameState.playStats.score}`;
-            document.getElementById('play-current-table').textContent = gameState.playStats.currentTable;
-            document.getElementById('play-progress-text').textContent = 
+            elements.score.textContent = `Score: ${gameState.playStats.score}`;
+            elements.playCurrentTable.textContent = gameState.playStats.currentTable;
+            elements.playProgressText.textContent = 
                 `${gameState.playStats.currentMultiplier}/12`;
         }
 
@@ -868,28 +1125,46 @@
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = null;
             
+            // Calculate accuracy
+            const accuracy = gameState.playStats.total > 0 ? 
+                Math.round((gameState.playStats.correct / gameState.playStats.total) * 100) : 0;
+            
+            // Update results screen
+            elements.finalScore.textContent = `Your Score: ${gameState.playStats.score}`;
+            elements.correctAnswers.textContent = 
+                `Correct Answers: ${gameState.playStats.correct}/${gameState.playStats.total}`;
+            elements.accuracy.textContent = `Accuracy: ${accuracy}%`;
+            
             // Show game over modal
-            modals.gameOver.style.display = 'flex';
+            elements.modals.gameOver.style.display = 'flex';
+        }
+
+        // Stop the game (when user goes back)
+        function stopGame() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            showScreen('table-selection');
         }
 
         // Try again after game over
         function tryAgain() {
-            modals.gameOver.style.display = 'none';
+            elements.modals.gameOver.style.display = 'none';
             startPlay();
         }
 
         // Move to next level after winning
         function nextLevel() {
-            modals.win.style.display = 'none';
+            elements.modals.win.style.display = 'none';
             
             // For simplicity, we'll just restart the game
-            // In a more advanced version, you could implement actual levels
             startPlay();
         }
 
         // Play again after winning
         function playAgainWin() {
-            modals.win.style.display = 'none';
+            elements.modals.win.style.display = 'none';
             startPlay();
         }
 
