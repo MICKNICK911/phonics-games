@@ -104,6 +104,11 @@
             border-radius: 10px;
             margin: 0 10px;
             vertical-align: middle;
+            text-align: center;
+            line-height: 60px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #343a40;
         }
 
         .problem-controls {
@@ -191,9 +196,14 @@
             color: white;
         }
 
-        .reset-btn {
-            background-color: #ffc107;
-            color: #212529;
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
             padding: 12px 25px;
             border: none;
             border-radius: 10px;
@@ -203,9 +213,22 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin: 0 auto;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .check-btn {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .reset-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .check-btn:hover {
+            background-color: #138496;
         }
 
         .reset-btn:hover {
@@ -281,6 +304,69 @@
             border-bottom: none;
         }
 
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .feedback-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .feedback-popup {
+            background-color: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.7);
+            transition: transform 0.3s;
+        }
+
+        .feedback-overlay.active .feedback-popup {
+            transform: scale(1);
+        }
+
+        .feedback-emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .feedback-message {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .feedback-detail {
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+
+        .correct-feedback {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 4px solid #28a745;
+        }
+
+        .incorrect-feedback {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border: 4px solid #dc3545;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -317,7 +403,7 @@
                 <div>
                     <h2 class="section-title">📝 Math Problem</h2>
                     <div class="problem-display">
-                        <div class="problem-text" id="problem-text">3 + 2 = <span class="placeholder"></span></div>
+                        <div class="problem-text" id="problem-text">3 + 2 = <span class="placeholder" id="answer-placeholder">?</span></div>
                         <div class="problem-controls">
                             <div class="control-group">
                                 <label for="operation">Operation:</label>
@@ -360,10 +446,16 @@
                         <button class="counter-btn add-btn" id="add-btn">+</button>
                         <button class="counter-btn subtract-btn" id="subtract-btn">-</button>
                     </div>
-                    <button class="reset-btn" id="reset-btn">
-                        <span>Reset</span>
-                        <span>🔄</span>
-                    </button>
+                    <div class="action-buttons">
+                        <button class="action-btn check-btn" id="check-btn">
+                            <span>Check Answer</span>
+                            <span>✅</span>
+                        </button>
+                        <button class="action-btn reset-btn" id="reset-btn">
+                            <span>Reset</span>
+                            <span>🔄</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="circles-container" id="circles-container">
@@ -381,6 +473,15 @@
         </footer>
     </div>
 
+    <!-- Feedback Popups -->
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-popup" id="feedback-popup">
+            <div class="feedback-emoji" id="feedback-emoji">✅</div>
+            <div class="feedback-message" id="feedback-message">Correct!</div>
+            <div class="feedback-detail" id="feedback-detail">Great job! Let's try another problem.</div>
+        </div>
+    </div>
+
     <script>
         // App state
         const appState = {
@@ -393,11 +494,13 @@
 
         // DOM elements
         const problemTextElement = document.getElementById('problem-text');
+        const answerPlaceholderElement = document.getElementById('answer-placeholder');
         const counterValueElement = document.getElementById('counter-value');
         const circlesContainer = document.getElementById('circles-container');
         const addButton = document.getElementById('add-btn');
         const subtractButton = document.getElementById('subtract-btn');
         const resetButton = document.getElementById('reset-btn');
+        const checkButton = document.getElementById('check-btn');
         const operationSelect = document.getElementById('operation');
         const firstNumberInput = document.getElementById('first-number');
         const secondNumberInput = document.getElementById('second-number');
@@ -406,6 +509,11 @@
         const factItem1 = document.getElementById('fact-item-1');
         const factItem2 = document.getElementById('fact-item-2');
         const factItem3 = document.getElementById('fact-item-3');
+        const feedbackOverlay = document.getElementById('feedback-overlay');
+        const feedbackPopup = document.getElementById('feedback-popup');
+        const feedbackEmoji = document.getElementById('feedback-emoji');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const feedbackDetail = document.getElementById('feedback-detail');
 
         // Initialize the app
         function initApp() {
@@ -420,6 +528,7 @@
             addButton.addEventListener('click', addCircle);
             subtractButton.addEventListener('click', removeCircle);
             resetButton.addEventListener('click', resetCounter);
+            checkButton.addEventListener('click', checkAnswer);
             operationSelect.addEventListener('change', handleOperationChange);
             firstNumberInput.addEventListener('change', handleNumberChange);
             secondNumberInput.addEventListener('change', handleNumberChange);
@@ -457,7 +566,7 @@
             
             if (operation === 'addition') {
                 appState.correctAnswer = firstNumber + secondNumber;
-                problemTextElement.innerHTML = `${firstNumber} + ${secondNumber} = <span class="placeholder"></span>`;
+                problemTextElement.innerHTML = `${firstNumber} + ${secondNumber} = <span class="placeholder" id="answer-placeholder">?</span>`;
                 instructionTextElement.textContent = `Add counters to show ${firstNumber} + ${secondNumber}. The answer should be ${appState.correctAnswer}.`;
             } else {
                 // Ensure we don't have negative results for educational purposes
@@ -467,7 +576,7 @@
                 }
                 
                 appState.correctAnswer = appState.firstNumber - appState.secondNumber;
-                problemTextElement.innerHTML = `${appState.firstNumber} - ${appState.secondNumber} = <span class="placeholder"></span>`;
+                problemTextElement.innerHTML = `${appState.firstNumber} - ${appState.secondNumber} = <span class="placeholder" id="answer-placeholder">?</span>`;
                 instructionTextElement.textContent = `Start with ${appState.firstNumber} counters, then remove ${appState.secondNumber}. The answer should be ${appState.correctAnswer}.`;
             }
             
@@ -522,6 +631,7 @@
             appState.counter = 0;
             updateCounter();
             circlesContainer.innerHTML = '';
+            answerPlaceholderElement.textContent = '?';
             updateCounterHint();
         }
 
@@ -554,6 +664,88 @@
             }
             
             counterHintElement.style.color = '#495057';
+        }
+
+        // Check the answer
+        function checkAnswer() {
+            // Fill the placeholder with the current counter value
+            answerPlaceholderElement.textContent = appState.counter;
+            
+            // Check if the answer is correct
+            const isCorrect = appState.counter === appState.correctAnswer;
+            
+            // Show feedback
+            showFeedback(isCorrect);
+            
+            // If correct, generate a new problem after a delay
+            if (isCorrect) {
+                setTimeout(() => {
+                    hideFeedback();
+                    generateRandomProblem();
+                    resetCounter();
+                }, 1500);
+            } else {
+                // If incorrect, just hide the feedback after a delay
+                setTimeout(() => {
+                    hideFeedback();
+                }, 1500);
+            }
+        }
+
+        // Show feedback popup
+        function showFeedback(isCorrect) {
+            if (isCorrect) {
+                feedbackPopup.className = 'feedback-popup correct-feedback';
+                feedbackEmoji.textContent = '🎉';
+                feedbackMessage.textContent = 'Correct!';
+                feedbackDetail.textContent = 'Great job! Moving to the next problem.';
+            } else {
+                feedbackPopup.className = 'feedback-popup incorrect-feedback';
+                feedbackEmoji.textContent = '❌';
+                feedbackMessage.textContent = 'Try Again';
+                feedbackDetail.textContent = `Your answer is ${appState.counter}, but the correct answer is ${appState.correctAnswer}.`;
+            }
+            
+            feedbackOverlay.classList.add('active');
+        }
+
+        // Hide feedback popup
+        function hideFeedback() {
+            feedbackOverlay.classList.remove('active');
+        }
+
+        // Generate a random problem
+        function generateRandomProblem() {
+            // Randomly choose operation
+            const operations = ['addition', 'subtraction'];
+            const randomOperation = operations[Math.floor(Math.random() * operations.length)];
+            
+            // Generate random numbers based on operation
+            let firstNum, secondNum;
+            
+            if (randomOperation === 'addition') {
+                firstNum = Math.floor(Math.random() * 10) + 1; // 1-10
+                secondNum = Math.floor(Math.random() * 10) + 1; // 1-10
+            } else {
+                // For subtraction, ensure first number is larger than second
+                secondNum = Math.floor(Math.random() * 10) + 1; // 1-10
+                firstNum = Math.floor(Math.random() * 10) + secondNum; // 2-20
+                if (firstNum > 20) firstNum = 20;
+            }
+            
+            // Update the app state
+            appState.operation = randomOperation;
+            appState.firstNumber = firstNum;
+            appState.secondNumber = secondNum;
+            
+            // Update UI elements
+            operationSelect.value = randomOperation;
+            firstNumberInput.value = firstNum;
+            secondNumberInput.value = secondNum;
+            
+            // Update the problem display
+            updateProblem();
+            updateMathFacts();
         }
 
         // Initialize the app when the page loads
