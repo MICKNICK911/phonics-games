@@ -288,6 +288,19 @@
             color: white;
         }
         
+        .timer-preview {
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--primary-dark);
+            margin: 15px 0;
+            font-weight: 600;
+            background-color: #f0f4ff;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
         /* Modal Styles */
         .modal {
             display: none;
@@ -480,6 +493,9 @@
             <div class="header-icon">✅</div>
             <h1>Select Tables</h1>
             <p>Choose which multiplication tables you want to practice:</p>
+            <div class="timer-preview" id="timer-preview">
+                Game time: 0 seconds (select tables to increase time)
+            </div>
             <div class="table-selection" id="tables-container">
                 <!-- Table buttons will be generated here -->
             </div>
@@ -524,7 +540,7 @@
             <div class="header-icon">🎮</div>
             <h1>Play Mode</h1>
             <div class="game-info">
-                <div class="timer" id="timer">Time: 120s</div>
+                <div class="timer" id="timer">Time: 0s</div>
                 <div class="score" id="score">Score: 0</div>
                 <button class="back-button" id="back-from-play">Back</button>
             </div>
@@ -621,7 +637,7 @@
                 score: 0,
                 correct: 0,
                 total: 0,
-                timeLeft: 120,
+                timeLeft: 0,
                 currentTable: 1,
                 currentMultiplier: 1
             },
@@ -648,6 +664,7 @@
                 win: document.getElementById('win-modal')
             },
             tablesContainer: document.getElementById('tables-container'),
+            timerPreview: document.getElementById('timer-preview'),
             practiceAnswers: document.getElementById('practice-answers'),
             playAnswers: document.getElementById('play-answers'),
             practiceQuestion: document.getElementById('practice-question'),
@@ -743,6 +760,24 @@
             } else {
                 gameState.selectedTables.splice(index, 1);
                 e.target.classList.remove('selected');
+            }
+            
+            // Update timer preview
+            updateTimerPreview();
+        }
+
+        // Update timer preview based on selected tables
+        function updateTimerPreview() {
+            const totalTime = gameState.selectedTables.length * 60;
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            
+            if (gameState.selectedTables.length === 0) {
+                elements.timerPreview.textContent = "Game time: 0 seconds (select tables to increase time)";
+                elements.timerPreview.style.backgroundColor = "#ffe6e6";
+            } else {
+                elements.timerPreview.textContent = `Game time: ${totalTime} seconds (${minutes}:${seconds < 10 ? '0' : ''}${seconds})`;
+                elements.timerPreview.style.backgroundColor = "#e6f7ff";
             }
         }
 
@@ -979,7 +1014,7 @@
             gameState.playStats.score = 0;
             gameState.playStats.correct = 0;
             gameState.playStats.total = 0;
-            gameState.playStats.timeLeft = 120;
+            gameState.playStats.timeLeft = gameState.selectedTables.length * 60; // Dynamic timer
             gameState.playStats.currentTable = gameState.selectedTables[0];
             gameState.playStats.currentMultiplier = 1;
         }
@@ -992,17 +1027,24 @@
             }
             
             // Update timer display
-            elements.timer.textContent = `Time: ${gameState.playStats.timeLeft}s`;
+            updateTimerDisplay();
             
             // Start countdown
             gameState.timerInterval = setInterval(() => {
                 gameState.playStats.timeLeft--;
-                elements.timer.textContent = `Time: ${gameState.playStats.timeLeft}s`;
+                updateTimerDisplay();
                 
                 if (gameState.playStats.timeLeft <= 0) {
                     endGame();
                 }
             }, 1000);
+        }
+
+        // Update the timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(gameState.playStats.timeLeft / 60);
+            const seconds = gameState.playStats.timeLeft % 60;
+            elements.timer.textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
         // Generate a new play question
@@ -1135,8 +1177,8 @@
                 `Correct Answers: ${gameState.playStats.correct}/${gameState.playStats.total}`;
             elements.accuracy.textContent = `Accuracy: ${accuracy}%`;
             
-            // Show game over modal
-            elements.modals.gameOver.style.display = 'flex';
+            // Show results screen
+            showScreen('results');
         }
 
         // Stop the game (when user goes back)
