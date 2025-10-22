@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Helper: Learn Addition & Subtraction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, #2575fc, #6a11cb);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 500px;
+        }
+
+        .problem-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 30px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .working-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-left: 2px dashed #e9ecef;
+        }
+
+        .section-title {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .problem-display {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .problem-text {
+            font-size: 2.2rem;
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+
+        .placeholder {
+            display: inline-block;
+            width: 100px;
+            height: 60px;
+            background-color: #e9ecef;
+            border: 2px dashed #6a11cb;
+            border-radius: 10px;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+
+        .problem-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            border-color: #6a11cb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+
+        .counter-display {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .counter-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #6a11cb;
+            margin: 10px 0;
+        }
+
+        .counter-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .counter-btn {
+            width: 70px;
+            height: 70px;
+            border: none;
+            border-radius: 50%;
+            font-size: 2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .counter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .add-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .subtract-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .reset-btn {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .reset-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .circles-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            min-height: 150px;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            animation: pop-in 0.3s ease-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .hint-area {
+            background-color: #e7f3ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #2575fc;
+        }
+
+        .hint-text {
+            color: #495057;
+            font-size: 1rem;
+        }
+
+        .math-facts {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .facts-title {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .fact-item {
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+            color: #6c757d;
+        }
+
+        .fact-item:last-child {
+            border-bottom: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .working-section {
+                border-left: none;
+                border-top: 2px dashed #e9ecef;
+            }
+            
+            .problem-text {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Math Helper 🧮</h1>
+            <p class="subtitle">Learn Addition & Subtraction with Interactive Counters</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="problem-section">
+                <div>
+                    <h2 class="section-title">📝 Math Problem</h2>
+                    <div class="problem-display">
+                        <div class="problem-text" id="problem-text">3 + 2 = <span class="placeholder"></span></div>
+                        <div class="problem-controls">
+                            <div class="control-group">
+                                <label for="operation">Operation:</label>
+                                <select id="operation">
+                                    <option value="addition">Addition (+)</option>
+                                    <option value="subtraction">Subtraction (-)</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="first-number">First Number:</label>
+                                <input type="number" id="first-number" min="1" max="20" value="3">
+                            </div>
+                            <div class="control-group">
+                                <label for="second-number">Second Number:</label>
+                                <input type="number" id="second-number" min="1" max="20" value="2">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="math-facts">
+                        <h3 class="facts-title">💡 Math Facts</h3>
+                        <div class="fact-item" id="fact-item-1">Addition is combining groups</div>
+                        <div class="fact-item" id="fact-item-2">Subtraction is taking away</div>
+                        <div class="fact-item" id="fact-item-3">Counters help visualize numbers</div>
+                    </div>
+                </div>
+                
+                <div class="hint-area">
+                    <p class="hint-text" id="instruction-text">Use the buttons to add or remove counters. Match the total counters to the answer!</p>
+                </div>
+            </section>
+            
+            <section class="working-section">
+                <h2 class="section-title">🛠️ Working Area</h2>
+                
+                <div class="counter-display">
+                    <div>Current Count:</div>
+                    <div class="counter-value" id="counter-value">0</div>
+                    <div class="counter-controls">
+                        <button class="counter-btn add-btn" id="add-btn">+</button>
+                        <button class="counter-btn subtract-btn" id="subtract-btn">-</button>
+                    </div>
+                    <button class="reset-btn" id="reset-btn">
+                        <span>Reset</span>
+                        <span>🔄</span>
+                    </button>
+                </div>
+                
+                <div class="circles-container" id="circles-container">
+                    <!-- Circles will be added here dynamically -->
+                </div>
+                
+                <div class="hint-area">
+                    <p class="hint-text" id="counter-hint">Add counters using the + button. Remove with - button.</p>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>Math Helper - Visual Learning Tool for Addition & Subtraction</p>
+        </footer>
+    </div>
+
+    <script>
+        // App state
+        const appState = {
+            counter: 0,
+            operation: 'addition',
+            firstNumber: 3,
+            secondNumber: 2,
+            correctAnswer: 5
+        };
+
+        // DOM elements
+        const problemTextElement = document.getElementById('problem-text');
+        const counterValueElement = document.getElementById('counter-value');
+        const circlesContainer = document.getElementById('circles-container');
+        const addButton = document.getElementById('add-btn');
+        const subtractButton = document.getElementById('subtract-btn');
+        const resetButton = document.getElementById('reset-btn');
+        const operationSelect = document.getElementById('operation');
+        const firstNumberInput = document.getElementById('first-number');
+        const secondNumberInput = document.getElementById('second-number');
+        const instructionTextElement = document.getElementById('instruction-text');
+        const counterHintElement = document.getElementById('counter-hint');
+        const factItem1 = document.getElementById('fact-item-1');
+        const factItem2 = document.getElementById('fact-item-2');
+        const factItem3 = document.getElementById('fact-item-3');
+
+        // Initialize the app
+        function initApp() {
+            updateProblem();
+            updateCounter();
+            updateMathFacts();
+            setupEventListeners();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            addButton.addEventListener('click', addCircle);
+            subtractButton.addEventListener('click', removeCircle);
+            resetButton.addEventListener('click', resetCounter);
+            operationSelect.addEventListener('change', handleOperationChange);
+            firstNumberInput.addEventListener('change', handleNumberChange);
+            secondNumberInput.addEventListener('change', handleNumberChange);
+        }
+
+        // Handle operation change
+        function handleOperationChange() {
+            appState.operation = operationSelect.value;
+            updateProblem();
+            updateMathFacts();
+            resetCounter();
+        }
+
+        // Handle number changes
+        function handleNumberChange() {
+            appState.firstNumber = parseInt(firstNumberInput.value) || 1;
+            appState.secondNumber = parseInt(secondNumberInput.value) || 1;
+            
+            // Ensure numbers are within bounds
+            if (appState.firstNumber < 1) appState.firstNumber = 1;
+            if (appState.firstNumber > 20) appState.firstNumber = 20;
+            if (appState.secondNumber < 1) appState.secondNumber = 1;
+            if (appState.secondNumber > 20) appState.secondNumber = 20;
+            
+            firstNumberInput.value = appState.firstNumber;
+            secondNumberInput.value = appState.secondNumber;
+            
+            updateProblem();
+            resetCounter();
+        }
+
+        // Update the math problem display
+        function updateProblem() {
+            const { firstNumber, secondNumber, operation } = appState;
+            
+            if (operation === 'addition') {
+                appState.correctAnswer = firstNumber + secondNumber;
+                problemTextElement.innerHTML = `${firstNumber} + ${secondNumber} = <span class="placeholder"></span>`;
+                instructionTextElement.textContent = `Add counters to show ${firstNumber} + ${secondNumber}. The answer should be ${appState.correctAnswer}.`;
+            } else {
+                // Ensure we don't have negative results for educational purposes
+                if (firstNumber < secondNumber) {
+                    appState.firstNumber = secondNumber;
+                    firstNumberInput.value = secondNumber;
+                }
+                
+                appState.correctAnswer = appState.firstNumber - appState.secondNumber;
+                problemTextElement.innerHTML = `${appState.firstNumber} - ${appState.secondNumber} = <span class="placeholder"></span>`;
+                instructionTextElement.textContent = `Start with ${appState.firstNumber} counters, then remove ${appState.secondNumber}. The answer should be ${appState.correctAnswer}.`;
+            }
+            
+            updateCounterHint();
+        }
+
+        // Update math facts based on operation
+        function updateMathFacts() {
+            if (appState.operation === 'addition') {
+                factItem1.textContent = "Addition means putting together or adding to.";
+                factItem2.textContent = "The numbers you add are called addends.";
+                factItem3.textContent = "The result of addition is called the sum.";
+            } else {
+                factItem1.textContent = "Subtraction means taking away or comparing.";
+                factItem2.textContent = "The first number is the minuend, the second is the subtrahend.";
+                factItem3.textContent = "The result of subtraction is called the difference.";
+            }
+        }
+
+        // Add a circle to the working area
+        function addCircle() {
+            if (appState.counter < 30) { // Limit to prevent overflow
+                appState.counter++;
+                updateCounter();
+                
+                const circle = document.createElement('div');
+                circle.className = 'circle';
+                circle.textContent = appState.counter;
+                circlesContainer.appendChild(circle);
+                
+                updateCounterHint();
+            }
+        }
+
+        // Remove a circle from the working area
+        function removeCircle() {
+            if (appState.counter > 0) {
+                appState.counter--;
+                updateCounter();
+                
+                const circles = circlesContainer.querySelectorAll('.circle');
+                if (circles.length > 0) {
+                    circles[circles.length - 1].remove();
+                }
+                
+                updateCounterHint();
+            }
+        }
+
+        // Reset the counter
+        function resetCounter() {
+            appState.counter = 0;
+            updateCounter();
+            circlesContainer.innerHTML = '';
+            updateCounterHint();
+        }
+
+        // Update the counter display
+        function updateCounter() {
+            counterValueElement.textContent = appState.counter;
+            
+            // Change color based on relationship to correct answer
+            if (appState.counter === appState.correctAnswer) {
+                counterValueElement.style.color = '#28a745';
+            } else if (appState.counter > appState.correctAnswer) {
+                counterValueElement.style.color = '#dc3545';
+            } else {
+                counterValueElement.style.color = '#6a11cb';
+            }
+        }
+
+        // Update the counter hint
+        function updateCounterHint() {
+            if (appState.counter === 0) {
+                counterHintElement.textContent = "Add counters using the + button.";
+            } else if (appState.counter < appState.correctAnswer) {
+                counterHintElement.textContent = `Add ${appState.correctAnswer - appState.counter} more counter(s) to reach ${appState.correctAnswer}.`;
+            } else if (appState.counter > appState.correctAnswer) {
+                counterHintElement.textContent = `Remove ${appState.counter - appState.correctAnswer} counter(s) to reach ${appState.correctAnswer}.`;
+            } else {
+                counterHintElement.textContent = `Perfect! You have exactly ${appState.correctAnswer} counters.`;
+                counterHintElement.style.color = '#28a745';
+                return;
+            }
+            
+            counterHintElement.style.color = '#495057';
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
