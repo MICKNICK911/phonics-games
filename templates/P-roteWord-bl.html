@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Quiz Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .screen {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+        
+        h2 {
+            color: #444;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Game area */
+        #game-area {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #top-half, #bottom-half {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+        
+        #top-half:hover {
+            background-color: rgba(106, 17, 203, 0.05);
+        }
+        
+        #bottom-half:hover {
+            background-color: rgba(37, 117, 252, 0.05);
+        }
+        
+        #word-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        #score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 15px;
+        }
+        
+        #progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .progress-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            border: 2px solid #ccc;
+        }
+        
+        .progress-circle.correct {
+            background-color: #4CAF50;
+            border-color: #388E3C;
+        }
+        
+        .progress-circle.incorrect {
+            background-color: #F44336;
+            border-color: #D32F2F;
+        }
+        
+        /* Setup screen */
+        #target-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        #target-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #6a11cb;
+            margin: 20px 0;
+        }
+        
+        .instruction {
+            font-size: 1.1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        /* Feedback modal */
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            color: white;
+        }
+        
+        .modal-content {
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%);
+        }
+        
+        .failure {
+            background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
+        }
+        
+        .emoji {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            #word-display {
+                font-size: 2.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen">
+            <h1>🎮 Vocabulary Quiz 🎮</h1>
+            <p>Test your vocabulary knowledge with this interactive quiz!</p>
+            <p>Tap the top half for correct answers (+1 point) and the bottom half for incorrect answers (-1 point).</p>
+            <button id="start-btn" class="btn">Start Game 🚀</button>
+        </div>
+        
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="screen hidden">
+            <h2>Select Target Words</h2>
+            <p>Choose how many words you want to practice:</p>
+            <div id="target-selection">
+                <div id="target-display">5</div>
+                <p class="instruction">Tap top half to increase, bottom half to decrease</p>
+            </div>
+            <button id="confirm-target" class="btn">Confirm & Start 🎯</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div id="score-display">Score: 0</div>
+            <div id="progress-indicator"></div>
+            <div id="game-area">
+                <div id="top-half">
+                    <div class="instruction">👍</div>
+                </div>
+                <div id="word-display">Word</div>
+                <div id="bottom-half">
+                    <div class="instruction">👎</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feedback Modal -->
+        <div id="feedback-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="emoji" id="feedback-emoji">🎉</div>
+                <h2 id="feedback-title">Great Job!</h2>
+                <p id="feedback-message">You scored 4 out of 5 points!</p>
+                <button id="next-btn" class="btn">Next Round 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Word list
+        const wordList = ["blow", "grass", "twin", "part", "text", "clap", "pray", "dwell", "cold", "pets", "flap", "trap", "squat", "help", "last", "glad", "scan", "task", "work", "plan", "skin", "rasp", "half", "slap", "smart", "sand", "wept", "brass", "snip", "went", "soft", "scrap", "crab", "spin", "pink", "fact", "split", "drop", "step", "jump", "milk", "spray", "frog", "swim", "hard", "salt", "strap"];
+        
+        // Game state
+        let gameState = {
+            currentScreen: 'welcome',
+            score: 0,
+            currentWordIndex: 0,
+            targetWords: 5,
+            sessionWords: [],
+            progress: [],
+            hasSelectedTarget: false
+        };
+        
+        // DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const feedbackModal = document.getElementById('feedback-modal');
+        
+        const startBtn = document.getElementById('start-btn');
+        const confirmTargetBtn = document.getElementById('confirm-target');
+        const nextBtn = document.getElementById('next-btn');
+        
+        const targetDisplay = document.getElementById('target-display');
+        const wordDisplay = document.getElementById('word-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const progressIndicator = document.getElementById('progress-indicator');
+        
+        const topHalf = document.getElementById('top-half');
+        const bottomHalf = document.getElementById('bottom-half');
+        
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const feedbackEmoji = document.getElementById('feedback-emoji');
+        
+        // Initialize game
+        function initGame() {
+            // Set up event listeners
+            startBtn.addEventListener('click', showSetupScreen);
+            confirmTargetBtn.addEventListener('click', startGame);
+            nextBtn.addEventListener('click', resetGame);
+            
+            // Game area event listeners
+            topHalf.addEventListener('click', () => handleAnswer(true));
+            bottomHalf.addEventListener('click', () => handleAnswer(false));
+            
+            // Setup screen target selection
+            setupScreen.addEventListener('click', (e) => {
+                const rect = setupScreen.getBoundingClientRect();
+                const isTopHalf = e.clientY - rect.top < rect.height / 2;
+                
+                if (isTopHalf) {
+                    gameState.targetWords = Math.min(gameState.targetWords + 1, wordList.length);
+                } else {
+                    gameState.targetWords = Math.max(gameState.targetWords - 1, 1);
+                }
+                
+                targetDisplay.textContent = gameState.targetWords;
+            });
+        }
+        
+        // Show setup screen
+        function showSetupScreen() {
+            hideAllScreens();
+            setupScreen.classList.remove('hidden');
+            gameState.currentScreen = 'setup';
+            
+            // Reset target to default if it's out of bounds
+            if (gameState.targetWords < 1 || gameState.targetWords > wordList.length) {
+                gameState.targetWords = 5;
+            }
+            
+            targetDisplay.textContent = gameState.targetWords;
+        }
+        
+        // Start the game
+        function startGame() {
+            hideAllScreens();
+            gameScreen.classList.remove('hidden');
+            gameState.currentScreen = 'game';
+            
+            // Reset game state
+            gameState.score = 0;
+            gameState.currentWordIndex = 0;
+            gameState.progress = [];
+            gameState.hasSelectedTarget = true;
+            
+            // Generate session words
+            generateSessionWords();
+            
+            // Initialize progress indicator with the correct number of circles
+            updateProgressIndicator();
+            
+            // Display first word
+            displayNextWord();
+            
+            // Update score display
+            updateScoreDisplay();
+        }
+        
+        // Generate words for this session
+        function generateSessionWords() {
+            // Create a copy of the word list
+            let availableWords = [...wordList];
+            gameState.sessionWords = [];
+            
+            // Fill session words with random words
+            for (let i = 0; i < gameState.targetWords; i++) {
+                if (availableWords.length === 0) {
+                    // If we've exhausted all words, reset available words
+                    availableWords = [...wordList];
+                }
+                
+                // Pick a random word from available words
+                const randomIndex = Math.floor(Math.random() * availableWords.length);
+                const word = availableWords.splice(randomIndex, 1)[0];
+                gameState.sessionWords.push(word);
+            }
+        }
+        
+        // Handle user answer
+        function handleAnswer(isCorrect) {
+            // Update score
+            if (isCorrect) {
+                gameState.score++;
+                gameState.progress.push('correct');
+            } else {
+                gameState.score--;
+                gameState.progress.push('incorrect');
+            }
+            
+            // Update progress indicator
+            updateProgressIndicator();
+            
+            // Update score display
+            updateScoreDisplay();
+            
+            // Move to next word or end game
+            gameState.currentWordIndex++;
+            
+            if (gameState.currentWordIndex >= gameState.targetWords) {
+                endGame();
+            } else {
+                displayNextWord();
+            }
+        }
+        
+        // Display next word
+        function displayNextWord() {
+            // Get the next word from session words
+            const word = gameState.sessionWords[gameState.currentWordIndex];
+            
+            // Display the word
+            wordDisplay.textContent = word;
+        }
+        
+        // Update progress indicator
+        function updateProgressIndicator() {
+            progressIndicator.innerHTML = '';
+            
+            // Create exactly targetWords number of circles
+            for (let i = 0; i < gameState.targetWords; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'progress-circle';
+                
+                // Set correct/incorrect class if we have progress data for this index
+                if (i < gameState.progress.length) {
+                    circle.classList.add(gameState.progress[i]);
+                }
+                
+                progressIndicator.appendChild(circle);
+            }
+        }
+        
+        // Update score display
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = `Score: ${gameState.score}`;
+        }
+        
+        // End the game and show feedback
+        function endGame() {
+            // Calculate correct answers (number of 'correct' in progress array)
+            const correctAnswers = gameState.progress.filter(item => item === 'correct').length;
+            const percentage = (correctAnswers / gameState.targetWords) * 100;
+            
+            // Get modal element
+            const modal = document.getElementById('feedback-modal');
+            
+            // Remove all color classes
+            modal.classList.remove('success', 'warning', 'failure');
+            
+            // Set feedback based on performance
+            if (percentage === 100) {
+                feedbackTitle.textContent = "Perfect! 🏆";
+                feedbackMessage.textContent = `You got all ${gameState.targetWords} words correct!`;
+                feedbackEmoji.textContent = "🏆";
+                modal.classList.add('success');
+            } else if (percentage >= 70) {
+                feedbackTitle.textContent = "Good Effort! 🌟";
+                feedbackMessage.textContent = `You got ${correctAnswers} out of ${gameState.targetWords} words correct.`;
+                feedbackEmoji.textContent = "🌟";
+                modal.classList.add('warning');
+            } else {
+                feedbackTitle.textContent = "Keep Practicing! 💪";
+                feedbackMessage.textContent = `You got ${correctAnswers} out of ${gameState.targetWords} words correct.`;
+                feedbackEmoji.textContent = "💪";
+                modal.classList.add('failure');
+            }
+            
+            // Show feedback modal
+            modal.classList.remove('hidden');
+        }
+        
+        // Reset game for next round
+        function resetGame() {
+            feedbackModal.classList.add('hidden');
+            
+            // If user has already selected target, go directly to game
+            if (gameState.hasSelectedTarget) {
+                startGame();
+            } else {
+                showSetupScreen();
+            }
+        }
+        
+        // Hide all screens
+        function hideAllScreens() {
+            welcomeScreen.classList.add('hidden');
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+            feedbackModal.classList.add('hidden');
+        }
+        
+        // Initialize the game when the page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
