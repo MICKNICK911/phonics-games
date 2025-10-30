@@ -61,8 +61,8 @@
         }
         
         .btn {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
+            background: white;
+            color: #333;
             border: none;
             padding: 12px 30px;
             border-radius: 50px;
@@ -71,11 +71,12 @@
             transition: transform 0.2s, box-shadow 0.2s;
             margin-top: 15px;
             font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .btn:active {
@@ -179,29 +180,30 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.7);
             z-index: 10;
+            color: white;
         }
         
         .modal-content {
-            background-color: white;
             padding: 30px;
             border-radius: 15px;
             text-align: center;
             max-width: 90%;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
         
         .success {
-            border-top: 8px solid #4CAF50;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
         }
         
         .warning {
-            border-top: 8px solid #FFC107;
+            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%);
         }
         
         .failure {
-            border-top: 8px solid #F44336;
+            background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
         }
         
         .emoji {
@@ -369,7 +371,7 @@
             // Generate session words
             generateSessionWords();
             
-            // Initialize progress indicator
+            // Initialize progress indicator with the correct number of circles
             updateProgressIndicator();
             
             // Display first word
@@ -439,10 +441,12 @@
         function updateProgressIndicator() {
             progressIndicator.innerHTML = '';
             
+            // Create exactly targetWords number of circles
             for (let i = 0; i < gameState.targetWords; i++) {
                 const circle = document.createElement('div');
                 circle.className = 'progress-circle';
                 
+                // Set correct/incorrect class if we have progress data for this index
                 if (i < gameState.progress.length) {
                     circle.classList.add(gameState.progress[i]);
                 }
@@ -462,32 +466,32 @@
             const correctAnswers = gameState.progress.filter(item => item === 'correct').length;
             const percentage = (correctAnswers / gameState.targetWords) * 100;
             
-            // Get modal content element
-            const modalContent = feedbackModal.querySelector('.modal-content');
+            // Get modal element
+            const modal = document.getElementById('feedback-modal');
+            
+            // Remove all color classes
+            modal.classList.remove('success', 'warning', 'failure');
             
             // Set feedback based on performance
             if (percentage === 100) {
                 feedbackTitle.textContent = "Perfect! 🏆";
                 feedbackMessage.textContent = `You got all ${gameState.targetWords} words correct!`;
                 feedbackEmoji.textContent = "🏆";
-                modalContent.classList.add('success');
-                modalContent.classList.remove('warning', 'failure');
+                modal.classList.add('success');
             } else if (percentage >= 70) {
                 feedbackTitle.textContent = "Good Effort! 🌟";
                 feedbackMessage.textContent = `You got ${correctAnswers} out of ${gameState.targetWords} words correct.`;
                 feedbackEmoji.textContent = "🌟";
-                modalContent.classList.add('warning');
-                modalContent.classList.remove('success', 'failure');
+                modal.classList.add('warning');
             } else {
                 feedbackTitle.textContent = "Keep Practicing! 💪";
                 feedbackMessage.textContent = `You got ${correctAnswers} out of ${gameState.targetWords} words correct.`;
                 feedbackEmoji.textContent = "💪";
-                modalContent.classList.add('failure');
-                modalContent.classList.remove('success', 'warning');
+                modal.classList.add('failure');
             }
             
             // Show feedback modal
-            feedbackModal.classList.remove('hidden');
+            modal.classList.remove('hidden');
         }
         
         // Reset game for next round
