@@ -196,6 +196,10 @@
             border-top: 8px solid #4CAF50;
         }
         
+        .warning {
+            border-top: 8px solid #FFC107;
+        }
+        
         .failure {
             border-top: 8px solid #F44336;
         }
@@ -454,21 +458,32 @@
         
         // End the game and show feedback
         function endGame() {
-            const percentage = (gameState.score / gameState.targetWords) * 100;
+            // Calculate correct answers (number of 'correct' in progress array)
+            const correctAnswers = gameState.progress.filter(item => item === 'correct').length;
+            const percentage = (correctAnswers / gameState.targetWords) * 100;
+            
+            // Get modal content element
+            const modalContent = feedbackModal.querySelector('.modal-content');
             
             // Set feedback based on performance
-            if (percentage >= 70) {
-                feedbackTitle.textContent = "Great Job! 🎉";
-                feedbackMessage.textContent = `You scored ${gameState.score} out of ${gameState.targetWords} points!`;
-                feedbackEmoji.textContent = "🎉";
-                feedbackModal.querySelector('.modal-content').classList.add('success');
-                feedbackModal.querySelector('.modal-content').classList.remove('failure');
+            if (percentage === 100) {
+                feedbackTitle.textContent = "Perfect! 🏆";
+                feedbackMessage.textContent = `You got all ${gameState.targetWords} words correct!`;
+                feedbackEmoji.textContent = "🏆";
+                modalContent.classList.add('success');
+                modalContent.classList.remove('warning', 'failure');
+            } else if (percentage >= 70) {
+                feedbackTitle.textContent = "Good Effort! 🌟";
+                feedbackMessage.textContent = `You got ${correctAnswers} out of ${gameState.targetWords} words correct.`;
+                feedbackEmoji.textContent = "🌟";
+                modalContent.classList.add('warning');
+                modalContent.classList.remove('success', 'failure');
             } else {
                 feedbackTitle.textContent = "Keep Practicing! 💪";
-                feedbackMessage.textContent = `You scored ${gameState.score} out of ${gameState.targetWords} points.`;
+                feedbackMessage.textContent = `You got ${correctAnswers} out of ${gameState.targetWords} words correct.`;
                 feedbackEmoji.textContent = "💪";
-                feedbackModal.querySelector('.modal-content').classList.add('failure');
-                feedbackModal.querySelector('.modal-content').classList.remove('success');
+                modalContent.classList.add('failure');
+                modalContent.classList.remove('success', 'warning');
             }
             
             // Show feedback modal
