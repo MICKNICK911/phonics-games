@@ -283,9 +283,9 @@
             score: 0,
             currentWordIndex: 0,
             targetWords: 5,
-            usedWords: [],
-            availableWords: [...wordList],
-            progress: []
+            sessionWords: [],
+            progress: [],
+            hasSelectedTarget: false
         };
         
         // DOM elements
@@ -360,12 +360,10 @@
             gameState.score = 0;
             gameState.currentWordIndex = 0;
             gameState.progress = [];
+            gameState.hasSelectedTarget = true;
             
-            // Reset available words if all have been used
-            if (gameState.availableWords.length === 0) {
-                gameState.availableWords = [...wordList];
-                gameState.usedWords = [];
-            }
+            // Generate session words
+            generateSessionWords();
             
             // Initialize progress indicator
             updateProgressIndicator();
@@ -375,6 +373,26 @@
             
             // Update score display
             updateScoreDisplay();
+        }
+        
+        // Generate words for this session
+        function generateSessionWords() {
+            // Create a copy of the word list
+            let availableWords = [...wordList];
+            gameState.sessionWords = [];
+            
+            // Fill session words with random words
+            for (let i = 0; i < gameState.targetWords; i++) {
+                if (availableWords.length === 0) {
+                    // If we've exhausted all words, reset available words
+                    availableWords = [...wordList];
+                }
+                
+                // Pick a random word from available words
+                const randomIndex = Math.floor(Math.random() * availableWords.length);
+                const word = availableWords.splice(randomIndex, 1)[0];
+                gameState.sessionWords.push(word);
+            }
         }
         
         // Handle user answer
@@ -406,13 +424,8 @@
         
         // Display next word
         function displayNextWord() {
-            // Get a random word from available words
-            const randomIndex = Math.floor(Math.random() * gameState.availableWords.length);
-            const word = gameState.availableWords[randomIndex];
-            
-            // Move word from available to used
-            gameState.availableWords.splice(randomIndex, 1);
-            gameState.usedWords.push(word);
+            // Get the next word from session words
+            const word = gameState.sessionWords[gameState.currentWordIndex];
             
             // Display the word
             wordDisplay.textContent = word;
@@ -465,7 +478,13 @@
         // Reset game for next round
         function resetGame() {
             feedbackModal.classList.add('hidden');
-            showSetupScreen();
+            
+            // If user has already selected target, go directly to game
+            if (gameState.hasSelectedTarget) {
+                startGame();
+            } else {
+                showSetupScreen();
+            }
         }
         
         // Hide all screens
