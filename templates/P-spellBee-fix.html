@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Spelling Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 10;
+            margin: 20px auto;
+            transform: scale(0.95);
+            animation: scaleIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes scaleIn {
+            to { transform: scale(1); }
+        }
+        
+        header {
+            background: linear-gradient(90deg, #4a00e0, #8e2de2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 0 10px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin: 5px;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
+            min-width: 80px;
+            backdrop-filter: blur(5px);
+            margin: 5px;
+        }
+        
+        .stat-box h3 {
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+        
+        .stat-box p {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .game-area {
+            padding: 20px;
+            position: relative;
+        }
+        
+        .target-word {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .target-word::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #4a00e0, #8e2de2);
+        }
+        
+        .target-word h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .word-info {
+            margin: 15px 0;
+            text-align: left;
+            padding: 0 10px;
+        }
+        
+        .definition {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .example {
+            font-size: 1rem;
+            color: #555;
+            font-style: italic;
+            line-height: 1.4;
+        }
+        
+        .speaker-btn {
+            background: #4a00e0;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            margin: 10px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(74, 0, 224, 0.6);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .speaker-btn:hover {
+            transform: scale(1.1);
+            background: #8e2de2;
+            box-shadow: 0 8px 25px rgba(142, 45, 226, 0.8);
+        }
+        
+        .speaker-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .speaker-btn.loading {
+            opacity: 0.7;
+        }
+        
+        .speaker-btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid transparent;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .letter-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            min-height: 100px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .letter-box {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            user-select: none;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #grid1 .letter-box {
+            background: #e0e7ff;
+            border: 3px solid #a78bfa;
+            color: #4a00e0;
+        }
+        
+        #grid2 .letter-box {
+            background: #ede9fe;
+            border: 3px solid #c4b5fd;
+            color: #7c3aed;
+        }
+        
+        #grid2 .letter-box:hover {
+            transform: translateY(-5px);
+            background: #d8d1ff;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        #grid2 .letter-box.used {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            display: none;
+            animation: popIn 0.5s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            color: #c62828;
+            display: block;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .instructions h3 {
+            color: #1565c0;
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #333;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            position: relative;
+            z-index: 2;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .result-content {
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 25px;
+            color: #4a00e0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .result-stats {
+            background: #f0f7ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stat-item {
+            margin: 15px 0;
+            font-size: 1.6rem;
+            color: #333;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #4a00e0;
+            font-size: 1.8rem;
+        }
+        
+        .restart-btn {
+            padding: 12px 35px;
+            font-size: 1.3rem;
+            background: linear-gradient(90deg, #00c853, #00e676);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 0, 224, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(74, 0, 224, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 0, 224, 0); }
+        }
+        
+        /* Level Selection Styles */
+        .level-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .level-title {
+            font-size: 2rem;
+            color: #4a00e0;
+            margin-bottom: 20px;
+        }
+        
+        .level-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .level-btn {
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            background: linear-gradient(90deg, #4a00e0, #8e2de2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-width: 150px;
+        }
+        
+        .level-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .level-btn.completed {
+            background: linear-gradient(90deg, #00c853, #00e676);
+        }
+        
+        .level-btn.locked {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        /* Level Complete Screen */
+        .level-complete {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+            
+            .letter-box {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 90%;
+                justify-content: center;
+            }
+            
+            .result-title {
+                font-size: 2.5rem;
+            }
+            
+            .stat-item {
+                font-size: 1.3rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .game-area {
+                padding: 15px;
+            }
+            
+            .level-btn {
+                min-width: 120px;
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-box {
+                min-width: 70px;
+                padding: 6px 10px;
+            }
+            
+            .stat-box p {
+                font-size: 1.1rem;
+            }
+            
+            .letter-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+            
+            .speaker-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            
+            .result-title {
+                font-size: 2rem;
+            }
+            
+            .stat-item {
+                font-size: 1.1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .restart-btn {
+                font-size: 1.1rem;
+                padding: 10px 25px;
+            }
+            
+            .level-title {
+                font-size: 1.5rem;
+            }
+            
+            .level-btn {
+                min-width: 100px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🔤 Phonics Challenge</h1>
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <h3>SCORE</h3>
+                        <p id="score">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>LEVEL</h3>
+                        <p id="level">1</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>TIME</h3>
+                        <p id="timer">0s</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Level Selection Screen -->
+        <div class="level-selection" id="levelSelection">
+            <h2 class="level-title">Select a Level</h2>
+            <div class="level-buttons" id="levelButtons">
+                <!-- Level buttons will be generated here -->
+            </div>
+            <div class="instructions">
+                <h3>📝 How to Play:</h3>
+                <ul>
+                    <li>Click 🔊 to hear the word</li>
+                    <li>Use letters below to spell the word</li>
+                    <li>Clear your attempt with 🧹 if needed</li>
+                    <li>Complete all words in a level to advance! 🏆</li>
+                    <li>❌ Incorrect spelling ends the game</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Game Area (Hidden Initially) -->
+        <div class="game-area" id="gameArea" style="display: none;">
+            <div class="target-word">
+                <h2>Spell the word you hear:</h2>
+                <div class="word-info">
+                    <div class="definition" id="definition"></div>
+                    <div class="example" id="example"></div>
+                </div>
+                <button class="speaker-btn pulse" id="speakerBtn">
+                    🔊
+                </button>
+            </div>
+            
+            <div class="grid-container">
+                <div class="letter-grid" id="grid1"></div>
+                <div class="letter-grid" id="grid2"></div>
+            </div>
+            
+            <div class="message" id="message"></div>
+            
+            <div class="controls">
+                <button class="btn clear-btn" id="clearBtn">
+                    🧹 Clear
+                </button>
+                <button class="btn" id="backToLevelsBtn" style="background: linear-gradient(90deg, #ff9800, #ff5722); color: white;">
+                    ↩️ Back to Levels
+                </button>
+            </div>
+        </div>
+        
+        <!-- Level Complete Screen -->
+        <div class="level-complete" id="levelCompleteScreen">
+            <div class="result-content">
+                <h2 class="result-title">🎉 Level Complete! 🎉</h2>
+                <div class="result-stats">
+                    <div class="stat-item">Level Score: <span class="stat-value" id="levelScore">0</span></div>
+                    <div class="stat-item">Time Taken: <span class="stat-value" id="levelTime">0s</span></div>
+                    <div class="stat-item">Words Completed: <span class="stat-value" id="levelWords">0</span></div>
+                </div>
+                <button class="restart-btn" id="nextLevelBtn">
+                    ➡️ Next Level
+                </button>
+                <button class="restart-btn" id="backToLevelsBtn2" style="background: linear-gradient(90deg, #ff9800, #ff5722); margin-top: 10px;">
+                    ↩️ Back to Levels
+                </button>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div class="result-screen" id="gameOver">
+            <div class="result-content">
+                <h2 class="result-title">❌ Game Over</h2>
+                <div class="result-stats">
+                    <div class="stat-item">Score: <span class="stat-value" id="endScore">0</span></div>
+                    <div class="stat-item">Time: <span class="stat-value" id="endTime">0s</span></div>
+                    <div class="stat-item">Words Completed: <span class="stat-value" id="completedWords">0</span></div>
+                </div>
+                <button class="restart-btn" onclick="restartGame()">
+                    🔄 Try Again
+                </button>
+            </div>
+        </div>
+        
+        <!-- Victory Screen -->
+        <div class="result-screen" id="victoryScreen">
+            <div class="result-content">
+                <h2 class="result-title">🏆 Victory! 🏆</h2>
+                <div class="result-stats">
+                    <div class="stat-item">Total Score: <span class="stat-value" id="finalScore">0</span></div>
+                    <div class="stat-item">Time Taken: <span class="stat-value" id="finalTime">0s</span></div>
+                    <div class="stat-item">Levels Completed: <span class="stat-value" id="levelsCompleted">0</span></div>
+                </div>
+                <button class="restart-btn" onclick="restartGame()">
+                    🔄 Play Again
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Phonics Spelling Challenge © 2025 | Educational Game</p>
+        </footer>
+    </div>
+
+    <script>
+        // Game Levels - Extended with definitions and example sentences
+        const levels = [
+            [
+  {
+    "word": "deep",
+    "definition": "extending far from some surface or area",
+    "example": "The ocean was very ______ at that point."
+  },
+  {
+    "word": "happy",
+    "definition": "feeling or showing pleasure or contentment",
+    "example": "She felt very ______ after receiving the good news."
+  },
+  {
+    "word": "bump",
+    "definition": "a relatively abrupt convexity or protuberance on a surface",
+    "example": "There was a small ______ on the smooth road."
+  },
+  {
+    "word": "bear",
+    "definition": "any of a family of large heavy mammals that have long shaggy hair and small tails and feed largely on fruit and insects",
+    "example": "We saw a ______ in the forest during our hike."
+  },
+  {
+    "word": "count",
+    "definition": "to add one by one in order to find the total number",
+    "example": "Please ______ how many people are in the room."
+  },
+  {
+    "word": "dunk",
+    "definition": "to dip (something, such as a piece of bread) into a beverage while eating",
+    "example": "He likes to ______ his cookies in milk."
+  },
+  {
+    "word": "feet",
+    "definition": "the terminal part of the vertebrate leg upon which an individual stands",
+    "example": "My ______ were tired after walking all day."
+  },
+  {
+    "word": "cold",
+    "definition": "having or being a temperature that is uncomfortably low for humans",
+    "example": "The weather turned ______ overnight."
+  },
+  {
+    "word": "alone",
+    "definition": "separated from others",
+    "example": "She preferred to be ______ with her thoughts."
+  },
+  {
+    "word": "click",
+    "definition": "to strike, move, or produce with a click",
+    "example": "______ the button to submit your answer."
+  },
+  {
+    "word": "miss",
+    "definition": "to fail to hit, reach, or contact",
+    "example": "I will ______ you when you're gone."
+  },
+  {
+    "word": "shirt",
+    "definition": "a garment for the upper part of the body",
+    "example": "He wore a blue ______ to the interview."
+  },
+  {
+    "word": "roof",
+    "definition": "the cover of a building",
+    "example": "The rain was loud on the ______."
+  },
+  {
+    "word": "here",
+    "definition": "in or at this place",
+    "example": "Please come ______ immediately."
+  },
+  {
+    "word": "lamp",
+    "definition": "any of various devices for producing light or sometimes heat",
+    "example": "She turned on the ______ to read her book."
+  },
+  {
+    "word": "lost",
+    "definition": "not made use of, won, or claimed",
+    "example": "We got ______ in the unfamiliar city."
+  },
+  {
+    "word": "lunch",
+    "definition": "a light meal usually eaten in the middle of the day",
+    "example": "Let's meet for ______ at noon."
+  },
+  {
+    "word": "drift",
+    "definition": "to become driven or carried along by a current of air or water",
+    "example": "The boat began to ______ with the current."
+  },
+  {
+    "word": "please",
+    "definition": "to afford or give pleasure or satisfaction",
+    "example": "______ remember to clean your room."
+  },
+  {
+    "word": "spill",
+    "definition": "to cause or allow to fall, flow, or run out so as to be lost or wasted",
+    "example": "Be careful not to ______ your drink."
+  },
+  {
+    "word": "tired",
+    "definition": "drained of strength and energy",
+    "example": "I felt too ______ to continue working."
+  },
+  {
+    "word": "large",
+    "definition": "exceeding most other things of like kind especially in quantity or size",
+    "example": "They ordered a ______ pizza for the party."
+  },
+  {
+    "word": "lake",
+    "definition": "a considerable inland body of standing water",
+    "example": "We went swimming in the ______."
+  },
+  {
+    "word": "grab",
+    "definition": "to take or seize by or as if by a sudden motion or grasp",
+    "example": "He tried to ______ the last cookie."
+  },
+  {
+    "word": "juice",
+    "definition": "the extractable fluid contents of cells or tissues",
+    "example": "I would like orange ______ with my breakfast."
+  },
+  {
+    "word": "nook",
+    "definition": "a right-angled corner",
+    "example": "She found a quiet ______ to read her book."
+  },
+  {
+    "word": "shops",
+    "definition": "a place of business for retail goods",
+    "example": "All the ______ were closed on Sunday."
+  },
+  {
+    "word": "spot",
+    "definition": "a small area visibly different from the surrounding area",
+    "example": "There was a red ______ on his shirt."
+  },
+  {
+    "word": "World",
+    "definition": "the earthly state of human existence",
+    "example": "She wanted to travel around the ______."
+  },
+  {
+    "word": "math",
+    "definition": "the science of numbers and their operations",
+    "example": "______ was my favorite subject in school."
+  },
+  {
+    "word": "pick",
+    "definition": "to choose or select from a group",
+    "example": "You can ______ any color you like."
+  },
+  {
+    "word": "soap",
+    "definition": "a cleansing and emulsifying agent made usually by action of alkali on fat or fatty acids",
+    "example": "Wash your hands with ______ and water."
+  },
+  {
+    "word": "tools",
+    "definition": "a handheld device that aids in accomplishing a task",
+    "example": "He organized his ______ in the garage."
+  },
+  {
+    "word": "green",
+    "definition": "of the color green",
+    "example": "The grass was very ______ after the rain."
+  },
+  {
+    "word": "muddy",
+    "definition": "filled or covered with mud",
+    "example": "His shoes were ______ after walking through the field."
+  },
+  {
+    "word": "ripe",
+    "definition": "fully grown and developed",
+    "example": "The bananas were finally ______ enough to eat."
+  },
+  {
+    "word": "sign",
+    "definition": "a motion or gesture by which a thought is expressed",
+    "example": "Please ______ your name on the dotted line."
+  },
+  {
+    "word": "Soup",
+    "definition": "a liquid food especially with a meat, fish, or vegetable stock as a base",
+    "example": "She made chicken ______ for dinner."
+  },
+  {
+    "word": "Warm",
+    "definition": "having or giving out heat to a moderate or adequate degree",
+    "example": "The blanket felt ______ and cozy."
+  },
+  {
+    "word": "fresh",
+    "definition": "having its original qualities unimpaired",
+    "example": "We bought ______ bread from the bakery."
+  },
+  {
+    "word": "learn",
+    "definition": "to gain knowledge or understanding of or skill in by study, instruction, or experience",
+    "example": "Children ______ quickly when they're young."
+  },
+  {
+    "word": "frosty",
+    "definition": "attended with or producing frost",
+    "example": "The morning was ______ and cold."
+  },
+  {
+    "word": "crisp",
+    "definition": "easily crumbled",
+    "example": "The apple was ______ and juicy."
+  },
+  {
+    "word": "shape",
+    "definition": "the visible makeup characteristic of a particular item or kind of item",
+    "example": "Cut the dough into a star ______."
+  },
+  {
+    "word": "splash",
+    "definition": "to strike and dash about a liquid or semiliquid substance",
+    "example": "The kids love to ______ in the puddles."
+  },
+  {
+    "word": "mushy",
+    "definition": "having the consistency of mush",
+    "example": "The vegetables were ______ after being overcooked."
+  },
+  {
+    "word": "group",
+    "definition": "two or more figures forming a complete unit in a composition",
+    "example": "Our ______ will meet at 3 PM."
+  },
+  {
+    "word": "spine",
+    "definition": "the series of vertebrae extending from the skull to the tailbone",
+    "example": "He injured his ______ in the accident."
+  },
+  {
+    "word": "straps",
+    "definition": "a narrow usually flat strip of flexible material and especially leather used for securing, holding together, or wrapping",
+    "example": "The ______ on her backpack were adjustable."
+  },
+  {
+    "word": "feast",
+    "definition": "an elaborate meal often accompanied by ceremony or entertainment",
+    "example": "The wedding ______ was magnificent."
+  },
+  {
+    "word": "eagle",
+    "definition": "any of various large diurnal birds of prey noted for their strength, size, and keen vision",
+    "example": "An ______ soared high above the mountains."
+  },
+  {
+    "word": "berries",
+    "definition": "a small pulpy and often edible fruit",
+    "example": "We picked fresh ______ from the garden."
+  },
+  {
+    "word": "Caves",
+    "definition": "a natural chamber or series of chambers in the earth or in the side of a hill or cliff",
+    "example": "We explored the limestone ______."
+  },
+  {
+    "word": "blanket",
+    "definition": "a large usually oblong piece of woven fabric used as a bed covering",
+    "example": "She wrapped herself in a warm ______."
+  },
+  {
+    "word": "catch",
+    "definition": "to capture or seize especially after pursuit",
+    "example": "Try to ______ the ball when I throw it."
+  },
+  {
+    "word": "updo",
+    "definition": "a hairdo in which the hair is piled on top of the head",
+    "example": "She wore an elegant ______ to the wedding."
+  },
+  {
+    "word": "mule",
+    "definition": "a hybrid between a horse and a donkey",
+    "example": "The ______ carried supplies up the mountain."
+  },
+  {
+    "word": "glow",
+    "definition": "to shine with or as if with an intense heat",
+    "example": "The embers continued to ______ in the fireplace."
+  },
+  {
+    "word": "quick",
+    "definition": "acting or capable of acting with speed",
+    "example": "Please give me a ______ response."
+  },
+  {
+    "word": "cotton",
+    "definition": "a soft usually white fibrous substance composed of the hairs surrounding the seeds of various plants of the mallow family",
+    "example": "Her shirt was made of 100% ______."
+  },
+  {
+    "word": "seats",
+    "definition": "something on which one sits",
+    "example": "All the ______ in the theater were taken."
+  },
+  {
+    "word": "baseball",
+    "definition": "a game played with a bat and ball between two teams of nine players each",
+    "example": "He played ______ every summer."
+  },
+  {
+    "word": "great",
+    "definition": "notably large in size",
+    "example": "It was a ______ achievement for the team."
+  },
+  {
+    "word": "playground",
+    "definition": "a piece of land used for and usually equipped with facilities for recreation especially by children",
+    "example": "The children ran to the ______ after school."
+  },
+  {
+    "word": "monster",
+    "definition": "an animal or plant of abnormal form or structure",
+    "example": "The movie featured a scary ______."
+  },
+  {
+    "word": "enjoy",
+    "definition": "to have a good time",
+    "example": "I hope you ______ the party."
+  },
+  {
+    "word": "jazzy",
+    "definition": "having the characteristics of jazz",
+    "example": "They played ______ music all night."
+  },
+  {
+    "word": "jeans",
+    "definition": "pants of sturdy cotton twill made in a variety of fits and styles",
+    "example": "She wore blue ______ to the casual event."
+  },
+  {
+    "word": "partner",
+    "definition": "one associated with another especially in action",
+    "example": "My business ______ and I work well together."
+  },
+  {
+    "word": "raindrop",
+    "definition": "a drop of rain",
+    "example": "A single ______ fell on her nose."
+  },
+  {
+    "word": "office",
+    "definition": "a place where a particular kind of business is transacted or a service is supplied",
+    "example": "He went to the ______ early this morning."
+  },
+  {
+    "word": "young",
+    "definition": "being in the first or an early stage of life, growth, or development",
+    "example": "The ______ puppy was full of energy."
+  },
+  {
+    "word": "outside",
+    "definition": "a place or region beyond an enclosure or boundary",
+    "example": "The children were playing ______."
+  },
+  {
+    "word": "poem",
+    "definition": "a composition in verse",
+    "example": "She wrote a beautiful ______ about nature."
+  },
+  {
+    "word": "pillow",
+    "definition": "a support for the head of a reclining person",
+    "example": "He fluffed his ______ before going to sleep."
+  },
+  {
+    "word": "steady",
+    "definition": "firm in position",
+    "example": "Keep the camera ______ while taking photos."
+  },
+  {
+    "word": "Saturday",
+    "definition": "the seventh day of the week",
+    "example": "We're having a party on ______."
+  },
+  {
+    "word": "needle",
+    "definition": "a small slender usually steel instrument that has an eye for thread and is used for sewing",
+    "example": "She threaded the ______ carefully."
+  },
+  {
+    "word": "above",
+    "definition": "in or to a higher place than",
+    "example": "The picture hung ______ the fireplace."
+  },
+  {
+    "word": "honking",
+    "definition": "making the characteristic cry of a goose",
+    "example": "The geese were ______ as they flew overhead."
+  },
+  {
+    "word": "strange",
+    "definition": "different from what is usual, ordinary, or expected",
+    "example": "There was a ______ noise coming from the basement."
+  },
+  {
+    "word": "noisy",
+    "definition": "making noise",
+    "example": "The ______ construction site made it hard to concentrate."
+  },
+  {
+    "word": "video",
+    "definition": "a recording of a motion picture or television program for playing through a television set",
+    "example": "We watched a ______ of the wedding."
+  },
+  {
+    "word": "timer",
+    "definition": "one that times",
+    "example": "Set the ______ for 20 minutes."
+  },
+  {
+    "word": "topics",
+    "definition": "the subject of a discourse or of a section of a discourse",
+    "example": "We discussed various ______ during the meeting."
+  },
+  {
+    "word": "layer",
+    "definition": "one that lays",
+    "example": "Add another ______ of paint to the wall."
+  },
+  {
+    "word": "token",
+    "definition": "a piece resembling a coin issued for use",
+    "example": "He used a ______ to play the arcade game."
+  },
+  {
+    "word": "Control",
+    "definition": "to exercise restraining or directing influence over",
+    "example": "You need to ______ your temper."
+  },
+  {
+    "word": "Summer",
+    "definition": "the season between spring and autumn comprising in the northern hemisphere usually the months of June, July, and August",
+    "example": "We always go to the beach in ______."
+  },
+  {
+    "word": "across",
+    "definition": "from one side to the opposite side of",
+    "example": "We walked ______ the bridge."
+  },
+  {
+    "word": "stiff",
+    "definition": "not easily bent",
+    "example": "The new shoes were ______ and uncomfortable."
+  },
+  {
+    "word": "running",
+    "definition": "the action of running",
+    "example": "She goes ______ every morning."
+  },
+  {
+    "word": "field",
+    "definition": "an open land area free of woods and buildings",
+    "example": "The children played in the ______."
+  },
+  {
+    "word": "behind",
+    "definition": "in the place or situation that is being or has been departed from",
+    "example": "He stood ______ me in line."
+  },
+  {
+    "word": "trace",
+    "definition": "a minute and often barely detectable amount or indication",
+    "example": "There wasn't a ______ of evidence left."
+  },
+  {
+    "word": "below",
+    "definition": "in or to a lower place than",
+    "example": "The temperature dropped ______ freezing."
+  },
+  {
+    "word": "loose",
+    "definition": "not rigidly fastened or securely attached",
+    "example": "The button was ______ on his shirt."
+  },
+  {
+    "word": "spare",
+    "definition": "not being used",
+    "example": "Do you have a ______ pencil I could borrow?"
+  },
+  {
+    "word": "cling",
+    "definition": "to hold together",
+    "example": "The wet shirt ______ to his skin."
+  },
+  {
+    "word": "grins",
+    "definition": "smiles broadly",
+    "example": "He ______ whenever he tells that joke."
+  },
+  {
+    "word": "giraffe",
+    "definition": "a large fleet African ruminant mammal that is the tallest of living quadrupeds",
+    "example": "The ______ stretched its neck to reach the leaves."
+  },
+  {
+    "word": "groceries",
+    "definition": "food and household supplies sold by a grocer",
+    "example": "We need to buy ______ for the week."
+  },
+  {
+    "word": "huddling",
+    "definition": "to gather in a close-packed group",
+    "example": "The puppies were ______ together for warmth."
+  },
+  {
+    "word": "jigsaw",
+    "definition": "a light portable power saw with a vertically reciprocating blade",
+    "example": "He used a ______ to cut the wooden pieces."
+  },
+  {
+    "word": "neighbors",
+    "definition": "one living or located near another",
+    "example": "Our ______ are very friendly."
+  },
+  {
+    "word": "gasped",
+    "definition": "caught the breath convulsively and audibly",
+    "example": "She ______ when she saw the surprise."
+  },
+  {
+    "word": "mansion",
+    "definition": "a large imposing residence",
+    "example": "The old ______ had twenty rooms."
+  },
+  {
+    "word": "midday",
+    "definition": "the middle of the day",
+    "example": "We agreed to meet at ______."
+  },
+  {
+    "word": "powwow",
+    "definition": "a social gathering of Native Americans",
+    "example": "The tribe held a ______ to discuss important matters."
+  },
+  {
+    "word": "bazaar",
+    "definition": "a market (as in the Middle East) consisting of rows of shops or stalls",
+    "example": "We found many interesting items at the ______."
+  },
+  {
+    "word": "astray",
+    "definition": "off the right path or route",
+    "example": "The hikers went ______ in the dense forest."
+  },
+  {
+    "word": "liquid",
+    "definition": "flowing freely like water",
+    "example": "Water is the most common ______."
+  },
+  {
+    "word": "fuel",
+    "definition": "a material used to produce heat or power by burning",
+    "example": "We need to stop for ______ soon."
+  },
+  {
+    "word": "massive",
+    "definition": "forming or consisting of a large mass",
+    "example": "They faced a ______ challenge."
+  },
+  {
+    "word": "women",
+    "definition": "adult female human beings",
+    "example": "The ______ in the group organized the event."
+  },
+  {
+    "word": "chuckle",
+    "definition": "to laugh inwardly or quietly",
+    "example": "He couldn't help but ______ at the memory."
+  },
+  {
+    "word": "handstand",
+    "definition": "an act of supporting the body on the hands with the trunk and legs balanced in the air",
+    "example": "The gymnast performed a perfect ______."
+  },
+  {
+    "word": "machine",
+    "definition": "a mechanically, electrically, or electronically operated device for performing a task",
+    "example": "This washing ______ is very efficient."
+  },
+  {
+    "word": "leaking",
+    "definition": "to enter or escape through an opening usually by a fault or mistake",
+    "example": "The roof was ______ during the storm."
+  },
+  {
+    "word": "snazzy",
+    "definition": "attractively smart or stylish",
+    "example": "He wore a ______ new suit to the party."
+  },
+  {
+    "word": "whee",
+    "definition": "used to express delight or enthusiasm",
+    "example": "\"______!\" she shouted as she slid down the slide."
+  },
+  {
+    "word": "welcome",
+    "definition": "to greet hospitably and with courtesy or cordiality",
+    "example": "We ______ you to our home."
+  },
+  {
+    "word": "pretend",
+    "definition": "to give a false appearance of being, possessing, or performing",
+    "example": "The children like to ______ they're pirates."
+  },
+  {
+    "word": "should",
+    "definition": "used in auxiliary function to express condition",
+    "example": "You ______ drink more water."
+  },
+  {
+    "word": "sideways",
+    "definition": "from the side",
+    "example": "He glanced ______ at her."
+  },
+  {
+    "word": "muster",
+    "definition": "to call together",
+    "example": "He tried to ______ enough courage to speak."
+  },
+  {
+    "word": "include",
+    "definition": "to take in or comprise as a part of a whole or group",
+    "example": "The price will ______ tax and shipping."
+  },
+  {
+    "word": "sandwich",
+    "definition": "two or more slices of bread or a split roll having a filling in between",
+    "example": "I'll have a turkey ______ for lunch."
+  },
+  {
+    "word": "Saturn",
+    "definition": "a planet that is sixth in order from the sun",
+    "example": "______ is known for its beautiful rings."
+  },
+  {
+    "word": "violet",
+    "definition": "any of a genus of herbs with often showy flowers",
+    "example": "She planted ______ in her garden."
+  },
+  {
+    "word": "mighty",
+    "definition": "possessing might",
+    "example": "The ______ river flowed rapidly."
+  },
+  {
+    "word": "solution",
+    "definition": "an action or process of solving a problem",
+    "example": "We need to find a ______ to this issue."
+  },
+  {
+    "word": "spiral",
+    "definition": "winding around a center or pole and gradually receding from or approaching it",
+    "example": "The staircase had a ______ design."
+  },
+  {
+    "word": "thread",
+    "definition": "a filament, a group of filaments twisted together, or a filamentous mass formed by spinning and twisting short textile fibers into a continuous strand",
+    "example": "She sewed the button with red ______."
+  },
+  {
+    "word": "velvet",
+    "definition": "a clothing and upholstery fabric with a short soft dense warp pile",
+    "example": "The ______ curtains felt luxurious."
+  },
+  {
+    "word": "breathe",
+    "definition": "to draw air into and expel it from the lungs",
+    "example": "It's difficult to ______ at high altitudes."
+  },
+  {
+    "word": "taxicab",
+    "definition": "an automobile that carries passengers for a fare usually determined by the distance traveled",
+    "example": "We took a ______ to the airport."
+  },
+  {
+    "word": "report",
+    "definition": "to give an account of",
+    "example": "Please ______ your findings to the committee."
+  },
+  {
+    "word": "cobweb",
+    "definition": "the network spread by a spider",
+    "example": "There was a dusty ______ in the corner."
+  },
+  {
+    "word": "rodent",
+    "definition": "any of an order of relatively small gnawing mammals that have in both jaws a single pair of incisors with a chisel-shaped edge",
+    "example": "A small ______ scurried across the path."
+  },
+  {
+    "word": "spying",
+    "definition": "to watch secretly usually for hostile purposes",
+    "example": "He was accused of ______ on the company."
+  },
+  {
+    "word": "showed",
+    "definition": "to cause or permit to be seen",
+    "example": "She ______ her artwork at the gallery."
+  },
+  {
+    "word": "scribbly",
+    "definition": "written hastily or carelessly",
+    "example": "His handwriting was ______ and hard to read."
+  },
+  {
+    "word": "recess",
+    "definition": "the action of receding",
+    "example": "The children played during ______."
+  },
+  {
+    "word": "highway",
+    "definition": "a public way",
+    "example": "We drove on the ______ for hours."
+  },
+  {
+    "word": "reeds",
+    "definition": "any of various tall grasses with slender stems",
+    "example": "The ______ swayed in the breeze by the river."
+  },
+  {
+    "word": "bolts",
+    "definition": "a lightning stroke",
+    "example": "The ______ of lightning lit up the sky."
+  },
+  {
+    "word": "squeeze",
+    "definition": "to exert pressure especially on opposite sides of",
+    "example": "______ the lemon to get the juice out."
+  },
+  {
+    "word": "softly",
+    "definition": "in a soft manner",
+    "example": "She spoke ______ to the baby."
+  },
+  {
+    "word": "wriggle",
+    "definition": "to move the body or a bodily part to and fro with short writhing motions like a worm",
+    "example": "The worm tried to ______ free."
+  }
+],
+
+        ];
+
+        // Game state variables
+        let currentLevelIndex = 0;
+        let currentWordIndex = 0;
+        let score = 0;
+        let levelScore = 0;
+        let gameStartTime = 0;
+        let levelStartTime = 0;
+        let gameTimer = null;
+        let totalTime = 0;
+        let levelTime = 0;
+        let grid1Filled = 0;
+        let isWordCompleted = false;
+        let completedLevels = 0;
+        
+        // TTS state
+        let ttsReady = false;
+        let voicesLoaded = false;
+        
+        // DOM elements
+        const levelSelection = document.getElementById('levelSelection');
+        const gameArea = document.getElementById('gameArea');
+        const levelButtons = document.getElementById('levelButtons');
+        const levelCompleteScreen = document.getElementById('levelCompleteScreen');
+        const victoryScreen = document.getElementById('victoryScreen');
+        const speakerBtn = document.getElementById('speakerBtn');
+        const grid1 = document.getElementById('grid1');
+        const grid2 = document.getElementById('grid2');
+        const message = document.getElementById('message');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const timerDisplay = document.getElementById('timer');
+        const clearBtn = document.getElementById('clearBtn');
+        const gameOver = document.getElementById('gameOver');
+        const finalScore = document.getElementById('finalScore');
+        const finalTime = document.getElementById('finalTime');
+        const levelsCompleted = document.getElementById('levelsCompleted');
+        const endScore = document.getElementById('endScore');
+        const endTime = document.getElementById('endTime');
+        const completedWords = document.getElementById('completedWords');
+        const levelScoreDisplay = document.getElementById('levelScore');
+        const levelTimeDisplay = document.getElementById('levelTime');
+        const levelWordsDisplay = document.getElementById('levelWords');
+        const backToLevelsBtn = document.getElementById('backToLevelsBtn');
+        const backToLevelsBtn2 = document.getElementById('backToLevelsBtn2');
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        const definitionDisplay = document.getElementById('definition');
+        const exampleDisplay = document.getElementById('example');
+        
+        // Track completed levels
+        const levelCompletedStatus = new Array(levels.length).fill(false);
+        
+        // Initialize speech synthesis
+        const synth = window.speechSynthesis;
+        let utterance = new SpeechSynthesisUtterance();
+        
+        // Initialize the game
+        function initGame() {
+            // Reset game state
+            currentLevelIndex = 0;
+            currentWordIndex = 0;
+            score = 0;
+            levelScore = 0;
+            totalTime = 0;
+            levelTime = 0;
+            grid1Filled = 0;
+            isWordCompleted = false;
+            completedLevels = 0;
+            
+            // Reset level completion status
+            levelCompletedStatus.fill(false);
+            
+            // Initialize TTS
+            initTTS();
+            
+            // Hide game screens
+            gameArea.style.display = 'none';
+            levelCompleteScreen.style.display = 'none';
+            victoryScreen.style.display = 'none';
+            gameOver.style.display = 'none';
+            
+            // Show level selection
+            levelSelection.style.display = 'block';
+            
+            // Create level buttons
+            createLevelButtons();
+            
+            // Update stats
+            updateStats();
+        }
+        
+        // Create level selection buttons
+        function createLevelButtons() {
+            levelButtons.innerHTML = '';
+            
+            levels.forEach((levelWords, index) => {
+                const button = document.createElement('button');
+                button.className = 'level-btn';
+                button.textContent = `Level ${index + 1} - ${levelWords.length} words`;
+                
+                // First level is always unlocked
+                if (index === 0) {
+                    button.onclick = () => startLevel(index);
+                } else {
+                    // Check if previous level is completed
+                    if (levelCompletedStatus[index - 1]) {
+                        button.onclick = () => startLevel(index);
+                    } else {
+                        button.classList.add('locked');
+                        // Improvise: Allow clicking anyway for testing
+                        button.onclick = () => startLevel(index);
+                    }
+                }
+                
+                // Mark completed levels
+                if (levelCompletedStatus[index]) {
+                    button.classList.add('completed');
+                }
+                
+                levelButtons.appendChild(button);
+            });
+        }
+        
+        // Start a specific level
+        function startLevel(levelIndex) {
+            currentLevelIndex = levelIndex;
+            currentWordIndex = 0;
+            levelScore = 0;
+            levelStartTime = Date.now();
+            
+            // Hide level selection and show game area
+            levelSelection.style.display = 'none';
+            gameArea.style.display = 'block';
+            levelCompleteScreen.style.display = 'none';
+            victoryScreen.style.display = 'none';
+            gameOver.style.display = 'none';
+            
+            // Start game timer if not already started
+            if (!gameTimer) {
+                gameStartTime = Date.now();
+                startTimer();
+            }
+            
+            // Load the first word of the level
+            loadWord(levels[currentLevelIndex][currentWordIndex]);
+            updateStats();
+            
+            // Add event listeners
+            grid2.addEventListener('click', handleLetterClick);
+            speakerBtn.addEventListener('click', speakWord);
+            clearBtn.addEventListener('click', clearGrid);
+            backToLevelsBtn.addEventListener('click', showLevelSelection);
+            backToLevelsBtn2.addEventListener('click', showLevelSelection);
+            nextLevelBtn.addEventListener('click', startNextLevel);
+        }
+        
+        // Show level selection screen
+        function showLevelSelection() {
+            // Stop the game
+            stopTimer();
+            
+            // Hide game screens
+            gameArea.style.display = 'none';
+            levelCompleteScreen.style.display = 'none';
+            victoryScreen.style.display = 'none';
+            gameOver.style.display = 'none';
+            
+            // Show level selection
+            levelSelection.style.display = 'block';
+            
+            // Update level buttons
+            createLevelButtons();
+        }
+        
+        // Start the next level
+        function startNextLevel() {
+            if (currentLevelIndex < levels.length - 1) {
+                startLevel(currentLevelIndex + 1);
+            } else {
+                // All levels completed - show victory screen
+                showVictory();
+            }
+        }
+        
+        // Preload voices and initialize TTS
+        function initTTS() {
+            if (!synth) {
+                console.warn("Speech synthesis not supported");
+                speakerBtn.disabled = true;
+                return;
+            }
+            
+            // Show loading state
+            speakerBtn.classList.add('loading');
+            
+            // Check if voices are already loaded
+            if (synth.getVoices().length > 0) {
+                voicesLoaded = true;
+                warmUpTTS();
+                return;
+            }
+            
+            // Wait for voices to be loaded
+            synth.addEventListener('voiceschanged', () => {
+                voicesLoaded = true;
+                warmUpTTS();
+            });
+            
+            // Set a timeout in case voices take too long to load
+            setTimeout(() => {
+                if (!voicesLoaded) {
+                    console.warn("Voices took too long to load");
+                    speakerBtn.classList.remove('loading');
+                    speakerBtn.disabled = true;
+                    message.textContent = 'Speech not supported in this browser';
+                    message.className = 'message error';
+                    message.style.display = 'block';
+                }
+            }, 3000);
+        }
+        
+        // Warm up TTS by speaking a silent utterance
+        function warmUpTTS() {
+            if (!voicesLoaded) return;
+            
+            try {
+                const warmUpUtterance = new SpeechSynthesisUtterance("");
+                warmUpUtterance.volume = 0;
+                warmUpUtterance.onend = () => {
+                    ttsReady = true;
+                    speakerBtn.classList.remove('loading');
+                    console.log("TTS warmed up and ready");
+                };
+                
+                synth.speak(warmUpUtterance);
+            } catch (error) {
+                console.error("TTS warmup failed:", error);
+                speakerBtn.classList.remove('loading');
+                speakerBtn.disabled = true;
+            }
+        }
+        
+        // Start game timer
+        function startTimer() {
+            gameStartTime = Date.now();
+            clearInterval(gameTimer);
+            
+            gameTimer = setInterval(() => {
+                totalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+                levelTime = Math.floor((Date.now() - levelStartTime) / 1000);
+                timerDisplay.textContent = `${totalTime}s`;
+            }, 1000);
+        }
+        
+        // Stop game timer
+        function stopTimer() {
+            clearInterval(gameTimer);
+            gameTimer = null;
+        }
+        
+        // Load a word into the game
+        function loadWord(wordObj) {
+            const word = wordObj.word;
+            grid1.innerHTML = '';
+            grid2.innerHTML = '';
+            grid1Filled = 0;
+            isWordCompleted = false;
+            message.style.display = 'none';
+            
+            // Display definition and example
+            definitionDisplay.textContent = `Definition: ${wordObj.definition}`;
+            exampleDisplay.textContent = `Example: ${wordObj.example}`;
+            
+            // Create empty boxes for target word
+            for (let i = 0; i < word.length; i++) {
+                const box = document.createElement('div');
+                box.classList.add('letter-box');
+                box.textContent = '';
+                grid1.appendChild(box);
+            }
+            
+            // Create shuffled letters
+            let letters = word.split('');
+            shuffleArray(letters);
+            
+            letters.forEach(letter => {
+                const box = document.createElement('div');
+                box.classList.add('letter-box');
+                box.textContent = letter;
+                box.dataset.letter = letter;
+                grid2.appendChild(box);
+            });
+            
+            // Enable speaker button if TTS is ready
+            speakerBtn.disabled = !ttsReady;
+            
+            if (ttsReady) {
+                speakerBtn.classList.add('pulse');
+            }
+            
+            // Speak the word automatically if TTS is ready
+            if (ttsReady) {
+                setTimeout(speakWord, 500);
+            }
+        }
+        
+        // Handle letter clicks
+        function handleLetterClick(event) {
+            if (isWordCompleted) return;
+            
+            const target = event.target;
+            if (target.classList.contains('letter-box') && 
+                !target.classList.contains('used') && 
+                grid1Filled < levels[currentLevelIndex][currentWordIndex].word.length) {
+                
+                const letter = target.dataset.letter;
+                moveLetter(letter, target);
+            }
+        }
+        
+        // Move a letter to the target grid
+        function moveLetter(letter, sourceBox) {
+            const targetBox = grid1.children[grid1Filled];
+            targetBox.textContent = letter;
+            grid1Filled++;
+            
+            sourceBox.classList.add('used');
+            
+            checkWord();
+        }
+        
+        // Check if the word is correctly spelled
+        function checkWord() {
+            if (grid1Filled === levels[currentLevelIndex][currentWordIndex].word.length) {
+                const userWord = Array.from(grid1.children).map(box => box.textContent).join('');
+                const targetWord = levels[currentLevelIndex][currentWordIndex].word;
+                
+                if (userWord === targetWord) {
+                    // Correct word
+                    message.textContent = '✅ Correct! Well done!';
+                    message.className = 'message success';
+                    message.style.display = 'block';
+                    score += 10;
+                    levelScore += 10;
+                    isWordCompleted = true;
+                    updateStats();
+                    
+                    // Remove pulse effect
+                    speakerBtn.classList.remove('pulse');
+                    
+                    // Move to next word after delay
+                    setTimeout(() => {
+                        currentWordIndex++;
+                        
+                        if (currentWordIndex < levels[currentLevelIndex].length) {
+                            loadWord(levels[currentLevelIndex][currentWordIndex]);
+                        } else {
+                            // Level completed
+                            completeLevel();
+                        }
+                    }, 1500);
+                } else {
+                    // Incorrect word
+                    message.textContent = '❌ Incorrect! Game Over';
+                    message.className = 'message error';
+                    message.style.display = 'block';
+                    
+                    // End game after delay
+                    setTimeout(() => {
+                        endGame(false);
+                    }, 1500);
+                }
+            }
+        }
+        
+        // Complete the current level
+        function completeLevel() {
+            levelCompletedStatus[currentLevelIndex] = true;
+            completedLevels++;
+            
+            // Show level complete screen
+            levelScoreDisplay.textContent = levelScore;
+            levelTimeDisplay.textContent = `${levelTime}s`;
+            levelWordsDisplay.textContent = levels[currentLevelIndex].length;
+            
+            gameArea.style.display = 'flex';
+            levelCompleteScreen.style.display = 'flex';
+            
+            // Check if all levels are completed
+            if (completedLevels === levels.length) {
+                showVictory();
+            }
+        }
+        
+        // Show victory screen
+        function showVictory() {
+            stopTimer();
+            
+            victoryScreen.style.display = 'flex';
+            levelCompleteScreen.style.display = 'none';
+            gameArea.style.display = 'flex';
+            
+            finalScore.textContent = score;
+            finalTime.textContent = `${totalTime}s`;
+            levelsCompleted.textContent = completedLevels;
+        }
+        
+        // Clear the target grid
+        function clearGrid() {
+            Array.from(grid1.children).forEach(box => {
+                box.textContent = '';
+            });
+            
+            Array.from(grid2.children).forEach(box => {
+                if (box.classList.contains('used')) {
+                    box.classList.remove('used');
+                }
+            });
+            
+            grid1Filled = 0;
+            message.style.display = 'none';
+            isWordCompleted = false;
+        }
+        
+        // Speak the current word
+        function speakWord() {
+            if (!ttsReady || !synth) {
+                message.textContent = 'Speech not ready yet. Please wait...';
+                message.className = 'message error';
+                message.style.display = 'block';
+                return;
+            }
+            
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            const word = levels[currentLevelIndex][currentWordIndex].word;
+            utterance.text = word;
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            
+            try {
+                synth.speak(utterance);
+                speakerBtn.disabled = true;
+                
+                // Re-enable button after speaking is done
+                utterance.onend = () => {
+                    speakerBtn.disabled = false;
+                };
+                
+                utterance.onerror = () => {
+                    speakerBtn.disabled = false;
+                    message.textContent = 'Error speaking word';
+                    message.className = 'message error';
+                    message.style.display = 'block';
+                };
+            } catch (error) {
+                console.error('Speech synthesis error:', error);
+                message.textContent = 'Speech not supported in this browser';
+                message.className = 'message error';
+                message.style.display = 'block';
+                speakerBtn.disabled = true;
+            }
+        }
+        
+        // Update score and level display
+        function updateStats() {
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = currentLevelIndex + 1;
+        }
+        
+        // Utility function to shuffle array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // End the game
+        function endGame(isWin) {
+            stopTimer();
+            
+            if (isWin) {
+                // Show victory screen
+                victoryScreen.style.display = 'flex';
+                finalScore.textContent = score;
+                finalTime.textContent = `${totalTime}s`;
+                levelsCompleted.textContent = completedLevels;
+            } else {
+                // Show game over screen
+                gameOver.style.display = 'flex';
+                endScore.textContent = score;
+                endTime.textContent = `${totalTime}s`;
+                completedWords.textContent = currentWordIndex;
+            }
+        }
+        
+        // Restart the game
+        function restartGame() {
+            initGame();
+        }
+        
+        // Initialize the game
+        window.onload = initGame;
+    </script>
+</body>
+</html>

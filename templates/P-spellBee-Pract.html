@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Recognition Practice</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, #78909c, #546e7a);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0,0,0,0.15);
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .speaker {
+            font-size: 3rem;
+            cursor: pointer;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+
+        .speaker:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+        }
+
+        .speaker:active {
+            transform: scale(0.95);
+        }
+
+        .word-display {
+            font-size: 3rem;
+            margin: 25px 0 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+            padding: 20px 35px;
+            border-radius: 12px;
+            width: 100%;
+            border: 2px solid #e3e8f0;
+        }
+
+        .word-info {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px 20px;
+            border: 2px solid #e3e8f0;
+        }
+
+        .definition {
+            font-size: 1rem;
+            color: #546e7a;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .sentence {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-style: italic;
+            line-height: 1.5;
+            padding-left: 15px;
+            border-left: 3px solid #a777e3;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .nav button {
+            padding: 16px 25px;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        #start-practice-btn {
+            margin-top: 15px;
+            padding: 14px 35px;
+            font-size: 1.1em;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(106, 142, 251, 0.4);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        #start-practice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 142, 251, 0.5);
+        }
+
+        .nav button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .nav button:disabled {
+            background: #b0bec5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .instructions-content {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 25px;
+            margin: 25px 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            line-height: 1.7;
+            border: 2px solid #e3e8f0;
+        }
+
+        .instructions-content p {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #2196f3;
+            font-weight: bold;
+        }
+
+        ul {
+            text-align: left;
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* Level selector styles */
+        .level-selector {
+            width: 100%;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .level-selector h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .level-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .level-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+
+        .level-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0,0,0,0.15);
+        }
+
+        .level-btn.active {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Level info display */
+        .level-info {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Improved accessibility and responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+                border-radius: 16px;
+            }
+            
+            .speaker {
+                font-size: 2.8rem;
+                width: 80px;
+                height: 80px;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+                padding: 15px 25px;
+            }
+            
+            .instructions-content {
+                padding: 20px;
+            }
+            
+            .level-buttons {
+                flex-direction: column;
+            }
+            
+            .level-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .back-button {
+                position: relative;
+                top: 0;
+                right: 0;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Scrollbar styling */
+        .instructions-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .instructions-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .instructions-content::-webkit-scrollbar-thumb {
+            background: #a777e3;
+            border-radius: 10px;
+        }
+        
+        .instructions-content::-webkit-scrollbar-thumb:hover {
+            background: #6e8efb;
+        }
+
+        /* Accessibility improvements */
+        button:focus {
+            outline: 2px solid #2196f3;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="back-button" class="back-button hidden">Back to Instructions</button>
+        
+        <!-- Practice Mode Screen -->
+        <div id="practice-screen" class="screen hidden">
+            <div id="practice-speaker" class="speaker" aria-label="Play sound" role="button" tabindex="0">🔊</div>
+            <div id="practice-word-display" class="word-display" aria-live="polite"></div>
+            <div class="word-info">
+                <div id="practice-definition" class="definition"></div>
+                <div id="practice-sentence" class="sentence"></div>
+            </div>
+            <div class="nav">
+                <button id="prev-btn" aria-label="Previous word">Previous</button>
+                <button id="next-btn" aria-label="Next word">Next</button>
+                <button id="game-btn" aria-label="Play Game">Play Game</button>
+            </div>
+            <div class="level-info" id="current-level-info"></div>
+        </div>
+        
+        <!-- Instructions Screen -->
+        <div id="instructions-screen" class="screen">
+            <h2>Word Recognition Practice</h2>
+            <div class="instructions-content">
+                <p><span class="highlight">Practice Mode:</span> Listen to words using the speaker button. Navigate through the word list with previous and next buttons.</p>
+                <p>This tool helps develop reading and listening skills by connecting spoken words with their written forms.</p>
+                <p>Educational tips:</p>
+                <ul>
+                    <li>Repeat the words after hearing them</li>
+                    <li>Try to spell the words as you hear them</li>
+                    <li>Master difficult words by repeating them</li>
+                    <li>Focus on words that are challenging for you</li>
+                    <li>Read the definition and example sentence to better understand each word</li>
+                </ul>
+                
+                <div class="level-selector">
+                    <h3>Select Difficulty Level</h3>
+                    <div class="level-buttons" id="level-buttons">
+                        <!-- Level buttons will be generated here -->
+                    </div>
+                    <div class="level-info" id="selected-level-info">Select a level to begin</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="start-practice-btn" disabled>Start Practice</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Word bank organized by levels with definitions and sentences
+        const wordBank = [
+            
+            [
+  {
+    "word": "deep",
+    "definition": "extending far from some surface or area",
+    "example": "The ocean was very ______ at that point."
+  },
+  {
+    "word": "happy",
+    "definition": "feeling or showing pleasure or contentment",
+    "example": "She felt very ______ after receiving the good news."
+  },
+  {
+    "word": "bump",
+    "definition": "a relatively abrupt convexity or protuberance on a surface",
+    "example": "There was a small ______ on the smooth road."
+  },
+  {
+    "word": "bear",
+    "definition": "any of a family of large heavy mammals that have long shaggy hair and small tails and feed largely on fruit and insects",
+    "example": "We saw a ______ in the forest during our hike."
+  },
+  {
+    "word": "count",
+    "definition": "to add one by one in order to find the total number",
+    "example": "Please ______ how many people are in the room."
+  },
+  {
+    "word": "dunk",
+    "definition": "to dip (something, such as a piece of bread) into a beverage while eating",
+    "example": "He likes to ______ his cookies in milk."
+  },
+  {
+    "word": "feet",
+    "definition": "the terminal part of the vertebrate leg upon which an individual stands",
+    "example": "My ______ were tired after walking all day."
+  },
+  {
+    "word": "cold",
+    "definition": "having or being a temperature that is uncomfortably low for humans",
+    "example": "The weather turned ______ overnight."
+  },
+  {
+    "word": "alone",
+    "definition": "separated from others",
+    "example": "She preferred to be ______ with her thoughts."
+  },
+  {
+    "word": "click",
+    "definition": "to strike, move, or produce with a click",
+    "example": "______ the button to submit your answer."
+  },
+  {
+    "word": "miss",
+    "definition": "to fail to hit, reach, or contact",
+    "example": "I will ______ you when you're gone."
+  },
+  {
+    "word": "shirt",
+    "definition": "a garment for the upper part of the body",
+    "example": "He wore a blue ______ to the interview."
+  },
+  {
+    "word": "roof",
+    "definition": "the cover of a building",
+    "example": "The rain was loud on the ______."
+  },
+  {
+    "word": "here",
+    "definition": "in or at this place",
+    "example": "Please come ______ immediately."
+  },
+  {
+    "word": "lamp",
+    "definition": "any of various devices for producing light or sometimes heat",
+    "example": "She turned on the ______ to read her book."
+  },
+  {
+    "word": "lost",
+    "definition": "not made use of, won, or claimed",
+    "example": "We got ______ in the unfamiliar city."
+  },
+  {
+    "word": "lunch",
+    "definition": "a light meal usually eaten in the middle of the day",
+    "example": "Let's meet for ______ at noon."
+  },
+  {
+    "word": "drift",
+    "definition": "to become driven or carried along by a current of air or water",
+    "example": "The boat began to ______ with the current."
+  },
+  {
+    "word": "please",
+    "definition": "to afford or give pleasure or satisfaction",
+    "example": "______ remember to clean your room."
+  },
+  {
+    "word": "spill",
+    "definition": "to cause or allow to fall, flow, or run out so as to be lost or wasted",
+    "example": "Be careful not to ______ your drink."
+  },
+  {
+    "word": "tired",
+    "definition": "drained of strength and energy",
+    "example": "I felt too ______ to continue working."
+  },
+  {
+    "word": "large",
+    "definition": "exceeding most other things of like kind especially in quantity or size",
+    "example": "They ordered a ______ pizza for the party."
+  },
+  {
+    "word": "lake",
+    "definition": "a considerable inland body of standing water",
+    "example": "We went swimming in the ______."
+  },
+  {
+    "word": "grab",
+    "definition": "to take or seize by or as if by a sudden motion or grasp",
+    "example": "He tried to ______ the last cookie."
+  },
+  {
+    "word": "juice",
+    "definition": "the extractable fluid contents of cells or tissues",
+    "example": "I would like orange ______ with my breakfast."
+  },
+  {
+    "word": "nook",
+    "definition": "a right-angled corner",
+    "example": "She found a quiet ______ to read her book."
+  },
+  {
+    "word": "shops",
+    "definition": "a place of business for retail goods",
+    "example": "All the ______ were closed on Sunday."
+  },
+  {
+    "word": "spot",
+    "definition": "a small area visibly different from the surrounding area",
+    "example": "There was a red ______ on his shirt."
+  },
+  {
+    "word": "World",
+    "definition": "the earthly state of human existence",
+    "example": "She wanted to travel around the ______."
+  },
+  {
+    "word": "math",
+    "definition": "the science of numbers and their operations",
+    "example": "______ was my favorite subject in school."
+  },
+  {
+    "word": "pick",
+    "definition": "to choose or select from a group",
+    "example": "You can ______ any color you like."
+  },
+  {
+    "word": "soap",
+    "definition": "a cleansing and emulsifying agent made usually by action of alkali on fat or fatty acids",
+    "example": "Wash your hands with ______ and water."
+  },
+  {
+    "word": "tools",
+    "definition": "a handheld device that aids in accomplishing a task",
+    "example": "He organized his ______ in the garage."
+  },
+  {
+    "word": "green",
+    "definition": "of the color green",
+    "example": "The grass was very ______ after the rain."
+  },
+  {
+    "word": "muddy",
+    "definition": "filled or covered with mud",
+    "example": "His shoes were ______ after walking through the field."
+  },
+  {
+    "word": "ripe",
+    "definition": "fully grown and developed",
+    "example": "The bananas were finally ______ enough to eat."
+  },
+  {
+    "word": "sign",
+    "definition": "a motion or gesture by which a thought is expressed",
+    "example": "Please ______ your name on the dotted line."
+  },
+  {
+    "word": "Soup",
+    "definition": "a liquid food especially with a meat, fish, or vegetable stock as a base",
+    "example": "She made chicken ______ for dinner."
+  },
+  {
+    "word": "Warm",
+    "definition": "having or giving out heat to a moderate or adequate degree",
+    "example": "The blanket felt ______ and cozy."
+  },
+  {
+    "word": "fresh",
+    "definition": "having its original qualities unimpaired",
+    "example": "We bought ______ bread from the bakery."
+  },
+  {
+    "word": "learn",
+    "definition": "to gain knowledge or understanding of or skill in by study, instruction, or experience",
+    "example": "Children ______ quickly when they're young."
+  },
+  {
+    "word": "frosty",
+    "definition": "attended with or producing frost",
+    "example": "The morning was ______ and cold."
+  },
+  {
+    "word": "crisp",
+    "definition": "easily crumbled",
+    "example": "The apple was ______ and juicy."
+  },
+  {
+    "word": "shape",
+    "definition": "the visible makeup characteristic of a particular item or kind of item",
+    "example": "Cut the dough into a star ______."
+  },
+  {
+    "word": "splash",
+    "definition": "to strike and dash about a liquid or semiliquid substance",
+    "example": "The kids love to ______ in the puddles."
+  },
+  {
+    "word": "mushy",
+    "definition": "having the consistency of mush",
+    "example": "The vegetables were ______ after being overcooked."
+  },
+  {
+    "word": "group",
+    "definition": "two or more figures forming a complete unit in a composition",
+    "example": "Our ______ will meet at 3 PM."
+  },
+  {
+    "word": "spine",
+    "definition": "the series of vertebrae extending from the skull to the tailbone",
+    "example": "He injured his ______ in the accident."
+  },
+  {
+    "word": "straps",
+    "definition": "a narrow usually flat strip of flexible material and especially leather used for securing, holding together, or wrapping",
+    "example": "The ______ on her backpack were adjustable."
+  },
+  {
+    "word": "feast",
+    "definition": "an elaborate meal often accompanied by ceremony or entertainment",
+    "example": "The wedding ______ was magnificent."
+  },
+  {
+    "word": "eagle",
+    "definition": "any of various large diurnal birds of prey noted for their strength, size, and keen vision",
+    "example": "An ______ soared high above the mountains."
+  },
+  {
+    "word": "berries",
+    "definition": "a small pulpy and often edible fruit",
+    "example": "We picked fresh ______ from the garden."
+  },
+  {
+    "word": "Caves",
+    "definition": "a natural chamber or series of chambers in the earth or in the side of a hill or cliff",
+    "example": "We explored the limestone ______."
+  },
+  {
+    "word": "blanket",
+    "definition": "a large usually oblong piece of woven fabric used as a bed covering",
+    "example": "She wrapped herself in a warm ______."
+  },
+  {
+    "word": "catch",
+    "definition": "to capture or seize especially after pursuit",
+    "example": "Try to ______ the ball when I throw it."
+  },
+  {
+    "word": "updo",
+    "definition": "a hairdo in which the hair is piled on top of the head",
+    "example": "She wore an elegant ______ to the wedding."
+  },
+  {
+    "word": "mule",
+    "definition": "a hybrid between a horse and a donkey",
+    "example": "The ______ carried supplies up the mountain."
+  },
+  {
+    "word": "glow",
+    "definition": "to shine with or as if with an intense heat",
+    "example": "The embers continued to ______ in the fireplace."
+  },
+  {
+    "word": "quick",
+    "definition": "acting or capable of acting with speed",
+    "example": "Please give me a ______ response."
+  },
+  {
+    "word": "cotton",
+    "definition": "a soft usually white fibrous substance composed of the hairs surrounding the seeds of various plants of the mallow family",
+    "example": "Her shirt was made of 100% ______."
+  },
+  {
+    "word": "seats",
+    "definition": "something on which one sits",
+    "example": "All the ______ in the theater were taken."
+  },
+  {
+    "word": "baseball",
+    "definition": "a game played with a bat and ball between two teams of nine players each",
+    "example": "He played ______ every summer."
+  },
+  {
+    "word": "great",
+    "definition": "notably large in size",
+    "example": "It was a ______ achievement for the team."
+  },
+  {
+    "word": "playground",
+    "definition": "a piece of land used for and usually equipped with facilities for recreation especially by children",
+    "example": "The children ran to the ______ after school."
+  },
+  {
+    "word": "monster",
+    "definition": "an animal or plant of abnormal form or structure",
+    "example": "The movie featured a scary ______."
+  },
+  {
+    "word": "enjoy",
+    "definition": "to have a good time",
+    "example": "I hope you ______ the party."
+  },
+  {
+    "word": "jazzy",
+    "definition": "having the characteristics of jazz",
+    "example": "They played ______ music all night."
+  },
+  {
+    "word": "jeans",
+    "definition": "pants of sturdy cotton twill made in a variety of fits and styles",
+    "example": "She wore blue ______ to the casual event."
+  },
+  {
+    "word": "partner",
+    "definition": "one associated with another especially in action",
+    "example": "My business ______ and I work well together."
+  },
+  {
+    "word": "raindrop",
+    "definition": "a drop of rain",
+    "example": "A single ______ fell on her nose."
+  },
+  {
+    "word": "office",
+    "definition": "a place where a particular kind of business is transacted or a service is supplied",
+    "example": "He went to the ______ early this morning."
+  },
+  {
+    "word": "young",
+    "definition": "being in the first or an early stage of life, growth, or development",
+    "example": "The ______ puppy was full of energy."
+  },
+  {
+    "word": "outside",
+    "definition": "a place or region beyond an enclosure or boundary",
+    "example": "The children were playing ______."
+  },
+  {
+    "word": "poem",
+    "definition": "a composition in verse",
+    "example": "She wrote a beautiful ______ about nature."
+  },
+  {
+    "word": "pillow",
+    "definition": "a support for the head of a reclining person",
+    "example": "He fluffed his ______ before going to sleep."
+  },
+  {
+    "word": "steady",
+    "definition": "firm in position",
+    "example": "Keep the camera ______ while taking photos."
+  },
+  {
+    "word": "Saturday",
+    "definition": "the seventh day of the week",
+    "example": "We're having a party on ______."
+  },
+  {
+    "word": "needle",
+    "definition": "a small slender usually steel instrument that has an eye for thread and is used for sewing",
+    "example": "She threaded the ______ carefully."
+  },
+  {
+    "word": "above",
+    "definition": "in or to a higher place than",
+    "example": "The picture hung ______ the fireplace."
+  },
+  {
+    "word": "honking",
+    "definition": "making the characteristic cry of a goose",
+    "example": "The geese were ______ as they flew overhead."
+  },
+  {
+    "word": "strange",
+    "definition": "different from what is usual, ordinary, or expected",
+    "example": "There was a ______ noise coming from the basement."
+  },
+  {
+    "word": "noisy",
+    "definition": "making noise",
+    "example": "The ______ construction site made it hard to concentrate."
+  },
+  {
+    "word": "video",
+    "definition": "a recording of a motion picture or television program for playing through a television set",
+    "example": "We watched a ______ of the wedding."
+  },
+  {
+    "word": "timer",
+    "definition": "one that times",
+    "example": "Set the ______ for 20 minutes."
+  },
+  {
+    "word": "topics",
+    "definition": "the subject of a discourse or of a section of a discourse",
+    "example": "We discussed various ______ during the meeting."
+  },
+  {
+    "word": "layer",
+    "definition": "one that lays",
+    "example": "Add another ______ of paint to the wall."
+  },
+  {
+    "word": "token",
+    "definition": "a piece resembling a coin issued for use",
+    "example": "He used a ______ to play the arcade game."
+  },
+  {
+    "word": "Control",
+    "definition": "to exercise restraining or directing influence over",
+    "example": "You need to ______ your temper."
+  },
+  {
+    "word": "Summer",
+    "definition": "the season between spring and autumn comprising in the northern hemisphere usually the months of June, July, and August",
+    "example": "We always go to the beach in ______."
+  },
+  {
+    "word": "across",
+    "definition": "from one side to the opposite side of",
+    "example": "We walked ______ the bridge."
+  },
+  {
+    "word": "stiff",
+    "definition": "not easily bent",
+    "example": "The new shoes were ______ and uncomfortable."
+  },
+  {
+    "word": "running",
+    "definition": "the action of running",
+    "example": "She goes ______ every morning."
+  },
+  {
+    "word": "field",
+    "definition": "an open land area free of woods and buildings",
+    "example": "The children played in the ______."
+  },
+  {
+    "word": "behind",
+    "definition": "in the place or situation that is being or has been departed from",
+    "example": "He stood ______ me in line."
+  },
+  {
+    "word": "trace",
+    "definition": "a minute and often barely detectable amount or indication",
+    "example": "There wasn't a ______ of evidence left."
+  },
+  {
+    "word": "below",
+    "definition": "in or to a lower place than",
+    "example": "The temperature dropped ______ freezing."
+  },
+  {
+    "word": "loose",
+    "definition": "not rigidly fastened or securely attached",
+    "example": "The button was ______ on his shirt."
+  },
+  {
+    "word": "spare",
+    "definition": "not being used",
+    "example": "Do you have a ______ pencil I could borrow?"
+  },
+  {
+    "word": "cling",
+    "definition": "to hold together",
+    "example": "The wet shirt ______ to his skin."
+  },
+  {
+    "word": "grins",
+    "definition": "smiles broadly",
+    "example": "He ______ whenever he tells that joke."
+  },
+  {
+    "word": "giraffe",
+    "definition": "a large fleet African ruminant mammal that is the tallest of living quadrupeds",
+    "example": "The ______ stretched its neck to reach the leaves."
+  },
+  {
+    "word": "groceries",
+    "definition": "food and household supplies sold by a grocer",
+    "example": "We need to buy ______ for the week."
+  },
+  {
+    "word": "huddling",
+    "definition": "to gather in a close-packed group",
+    "example": "The puppies were ______ together for warmth."
+  },
+  {
+    "word": "jigsaw",
+    "definition": "a light portable power saw with a vertically reciprocating blade",
+    "example": "He used a ______ to cut the wooden pieces."
+  },
+  {
+    "word": "neighbors",
+    "definition": "one living or located near another",
+    "example": "Our ______ are very friendly."
+  },
+  {
+    "word": "gasped",
+    "definition": "caught the breath convulsively and audibly",
+    "example": "She ______ when she saw the surprise."
+  },
+  {
+    "word": "mansion",
+    "definition": "a large imposing residence",
+    "example": "The old ______ had twenty rooms."
+  },
+  {
+    "word": "midday",
+    "definition": "the middle of the day",
+    "example": "We agreed to meet at ______."
+  },
+  {
+    "word": "powwow",
+    "definition": "a social gathering of Native Americans",
+    "example": "The tribe held a ______ to discuss important matters."
+  },
+  {
+    "word": "bazaar",
+    "definition": "a market (as in the Middle East) consisting of rows of shops or stalls",
+    "example": "We found many interesting items at the ______."
+  },
+  {
+    "word": "astray",
+    "definition": "off the right path or route",
+    "example": "The hikers went ______ in the dense forest."
+  },
+  {
+    "word": "liquid",
+    "definition": "flowing freely like water",
+    "example": "Water is the most common ______."
+  },
+  {
+    "word": "fuel",
+    "definition": "a material used to produce heat or power by burning",
+    "example": "We need to stop for ______ soon."
+  },
+  {
+    "word": "massive",
+    "definition": "forming or consisting of a large mass",
+    "example": "They faced a ______ challenge."
+  },
+  {
+    "word": "women",
+    "definition": "adult female human beings",
+    "example": "The ______ in the group organized the event."
+  },
+  {
+    "word": "chuckle",
+    "definition": "to laugh inwardly or quietly",
+    "example": "He couldn't help but ______ at the memory."
+  },
+  {
+    "word": "handstand",
+    "definition": "an act of supporting the body on the hands with the trunk and legs balanced in the air",
+    "example": "The gymnast performed a perfect ______."
+  },
+  {
+    "word": "machine",
+    "definition": "a mechanically, electrically, or electronically operated device for performing a task",
+    "example": "This washing ______ is very efficient."
+  },
+  {
+    "word": "leaking",
+    "definition": "to enter or escape through an opening usually by a fault or mistake",
+    "example": "The roof was ______ during the storm."
+  },
+  {
+    "word": "snazzy",
+    "definition": "attractively smart or stylish",
+    "example": "He wore a ______ new suit to the party."
+  },
+  {
+    "word": "whee",
+    "definition": "used to express delight or enthusiasm",
+    "example": "\"______!\" she shouted as she slid down the slide."
+  },
+  {
+    "word": "welcome",
+    "definition": "to greet hospitably and with courtesy or cordiality",
+    "example": "We ______ you to our home."
+  },
+  {
+    "word": "pretend",
+    "definition": "to give a false appearance of being, possessing, or performing",
+    "example": "The children like to ______ they're pirates."
+  },
+  {
+    "word": "should",
+    "definition": "used in auxiliary function to express condition",
+    "example": "You ______ drink more water."
+  },
+  {
+    "word": "sideways",
+    "definition": "from the side",
+    "example": "He glanced ______ at her."
+  },
+  {
+    "word": "muster",
+    "definition": "to call together",
+    "example": "He tried to ______ enough courage to speak."
+  },
+  {
+    "word": "include",
+    "definition": "to take in or comprise as a part of a whole or group",
+    "example": "The price will ______ tax and shipping."
+  },
+  {
+    "word": "sandwich",
+    "definition": "two or more slices of bread or a split roll having a filling in between",
+    "example": "I'll have a turkey ______ for lunch."
+  },
+  {
+    "word": "Saturn",
+    "definition": "a planet that is sixth in order from the sun",
+    "example": "______ is known for its beautiful rings."
+  },
+  {
+    "word": "violet",
+    "definition": "any of a genus of herbs with often showy flowers",
+    "example": "She planted ______ in her garden."
+  },
+  {
+    "word": "mighty",
+    "definition": "possessing might",
+    "example": "The ______ river flowed rapidly."
+  },
+  {
+    "word": "solution",
+    "definition": "an action or process of solving a problem",
+    "example": "We need to find a ______ to this issue."
+  },
+  {
+    "word": "spiral",
+    "definition": "winding around a center or pole and gradually receding from or approaching it",
+    "example": "The staircase had a ______ design."
+  },
+  {
+    "word": "thread",
+    "definition": "a filament, a group of filaments twisted together, or a filamentous mass formed by spinning and twisting short textile fibers into a continuous strand",
+    "example": "She sewed the button with red ______."
+  },
+  {
+    "word": "velvet",
+    "definition": "a clothing and upholstery fabric with a short soft dense warp pile",
+    "example": "The ______ curtains felt luxurious."
+  },
+  {
+    "word": "breathe",
+    "definition": "to draw air into and expel it from the lungs",
+    "example": "It's difficult to ______ at high altitudes."
+  },
+  {
+    "word": "taxicab",
+    "definition": "an automobile that carries passengers for a fare usually determined by the distance traveled",
+    "example": "We took a ______ to the airport."
+  },
+  {
+    "word": "report",
+    "definition": "to give an account of",
+    "example": "Please ______ your findings to the committee."
+  },
+  {
+    "word": "cobweb",
+    "definition": "the network spread by a spider",
+    "example": "There was a dusty ______ in the corner."
+  },
+  {
+    "word": "rodent",
+    "definition": "any of an order of relatively small gnawing mammals that have in both jaws a single pair of incisors with a chisel-shaped edge",
+    "example": "A small ______ scurried across the path."
+  },
+  {
+    "word": "spying",
+    "definition": "to watch secretly usually for hostile purposes",
+    "example": "He was accused of ______ on the company."
+  },
+  {
+    "word": "showed",
+    "definition": "to cause or permit to be seen",
+    "example": "She ______ her artwork at the gallery."
+  },
+  {
+    "word": "scribbly",
+    "definition": "written hastily or carelessly",
+    "example": "His handwriting was ______ and hard to read."
+  },
+  {
+    "word": "recess",
+    "definition": "the action of receding",
+    "example": "The children played during ______."
+  },
+  {
+    "word": "highway",
+    "definition": "a public way",
+    "example": "We drove on the ______ for hours."
+  },
+  {
+    "word": "reeds",
+    "definition": "any of various tall grasses with slender stems",
+    "example": "The ______ swayed in the breeze by the river."
+  },
+  {
+    "word": "bolts",
+    "definition": "a lightning stroke",
+    "example": "The ______ of lightning lit up the sky."
+  },
+  {
+    "word": "squeeze",
+    "definition": "to exert pressure especially on opposite sides of",
+    "example": "______ the lemon to get the juice out."
+  },
+  {
+    "word": "softly",
+    "definition": "in a soft manner",
+    "example": "She spoke ______ to the baby."
+  },
+  {
+    "word": "wriggle",
+    "definition": "to move the body or a bodily part to and fro with short writhing motions like a worm",
+    "example": "The worm tried to ______ free."
+  }
+]
+        ];
+
+        // Game state
+        const state = {
+            currentMode: 'instructions',
+            currentLevel: null,
+            practice: {
+                currentIndex: 0,
+                currentWord: ''
+            }
+        };
+
+        // Voices cache for better speech selection
+        let voices = [];
+
+        // Load voices asynchronously
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            // Prefer a natural-sounding voice if available (e.g., Google US English)
+            const preferredVoice = voices.find(voice => voice.name.includes('Google') || voice.name.includes('English'));
+            return preferredVoice || voices[0];
+        }
+
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices(); // Initial load
+        }
+
+        // Initialize the app
+        function init() {
+            showScreen('instructions-screen');
+            setupEventListeners();
+            generateLevelButtons();
+        }
+
+        // Generate level selection buttons
+        function generateLevelButtons() {
+            const levelButtonsContainer = document.getElementById('level-buttons');
+            levelButtonsContainer.innerHTML = '';
+            
+            wordBank.forEach((levelWords, index) => {
+                const button = document.createElement('button');
+                button.className = 'level-btn';
+                button.textContent = `Level ${index + 1}`;
+                button.dataset.level = index;
+                button.addEventListener('click', () => selectLevel(index));
+                levelButtonsContainer.appendChild(button);
+            });
+        }
+
+        // Handle level selection
+        function selectLevel(levelIndex) {
+            state.currentLevel = levelIndex;
+            
+            // Update UI
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.level-btn[data-level="${levelIndex}"]`).classList.add('active');
+            
+            // Update level info
+            document.getElementById('selected-level-info').textContent = `Contains ${wordBank[levelIndex].length} words`;
+            
+            // Enable start button
+            document.getElementById('start-practice-btn').disabled = false;
+        }
+
+        // Show a specific screen and hide others
+        function showScreen(screenId) {
+            // Hide all screens
+            document.getElementById('practice-screen').classList.add('hidden');
+            document.getElementById('instructions-screen').classList.add('hidden');
+            
+            // Show requested screen
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update back button visibility
+            const backButton = document.getElementById('back-button');
+            if (screenId === 'practice-screen') {
+                backButton.classList.remove('hidden');
+                state.currentMode = 'practice';
+            } else {
+                backButton.classList.add('hidden');
+                state.currentMode = 'instructions';
+            }
+        }
+
+        // Start practice mode
+        function startPractice() {
+            if (state.currentLevel === null) return;
+            
+            showScreen('practice-screen');
+            state.practice.currentIndex = 0;
+            renderPractice();
+        }
+
+        // Render practice mode
+        function renderPractice() {
+            const currentLevelWords = wordBank[state.currentLevel];
+            const currentWordObj = currentLevelWords[state.practice.currentIndex];
+            
+            state.practice.currentWord = currentWordObj.word;
+            document.getElementById('practice-word-display').textContent = currentWordObj.word;
+            document.getElementById('practice-definition').textContent = `Definition: ${currentWordObj.definition}`;
+            document.getElementById('practice-sentence').textContent = `Example: ${currentWordObj.sentence}`;
+            
+            document.getElementById('prev-btn').disabled = state.practice.currentIndex === 0;
+            document.getElementById('next-btn').disabled = state.practice.currentIndex === currentLevelWords.length - 1;
+            
+            // Update level info
+            document.getElementById('current-level-info').textContent = 
+                `Level ${state.currentLevel + 1} - Word ${state.practice.currentIndex + 1} of ${currentLevelWords.length}`;
+            
+            speak(currentWordObj.word);
+            
+            // Show game button only on last word
+            document.getElementById('game-btn').style.display = 
+                state.practice.currentIndex === currentLevelWords.length - 1 ? "block" : "none";
+        }
+
+        // Speak a word using text-to-speech
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.7; // Slightly slower for clarity
+                utterance.pitch = 1.0;
+                utterance.voice = loadVoices(); // Select preferred voice
+                utterance.onerror = (e) => console.warn('Speech error:', e);
+                speechSynthesis.speak(utterance);
+            } else {
+                console.warn('Speech synthesis not supported');
+            }
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Speaker button with keyboard support
+            const practiceSpeaker = document.getElementById('practice-speaker');
+            practiceSpeaker.addEventListener('click', () => speak(state.practice.currentWord));
+            practiceSpeaker.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    speak(state.practice.currentWord);
+                }
+            });
+            
+            // Practice mode navigation
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (state.practice.currentIndex > 0) {
+                    state.practice.currentIndex--;
+                    renderPractice();
+                }
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                const currentLevelWords = wordBank[state.currentLevel];
+                if (state.practice.currentIndex < currentLevelWords.length - 1) {
+                    state.practice.currentIndex++;
+                    renderPractice();
+                }
+            });
+            
+            // Start button
+            document.getElementById('start-practice-btn').addEventListener('click', startPractice);
+            
+            // Back button
+            document.getElementById('back-button').addEventListener('click', () => {
+                showScreen('instructions-screen');
+            });
+            
+            // Game button
+            document.getElementById('game-btn').addEventListener('click', function() {
+                 window.open('P-sight-pick-multi-D.html', '_blank');
+            });
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
