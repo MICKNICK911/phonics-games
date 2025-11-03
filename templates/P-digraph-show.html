@@ -280,28 +280,40 @@
             background-color: var(--incorrect-color);
         }
 
-        .feedback {
-            margin-top: 25px;
-            padding: 18px;
-            border-radius: 10px;
+        .feedback-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 25px 40px;
+            border-radius: 12px;
             font-weight: bold;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            z-index: 2000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             display: none;
         }
 
-        .feedback.correct {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: var(--correct-color);
+        .feedback-popup.correct {
+            background-color: var(--correct-color);
+            color: white;
             display: block;
-            border: 1px solid rgba(46, 204, 113, 0.3);
+            animation: popupFade 1s ease forwards;
         }
 
-        .feedback.incorrect {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: var(--incorrect-color);
+        .feedback-popup.incorrect {
+            background-color: var(--incorrect-color);
+            color: white;
             display: block;
-            border: 1px solid rgba(231, 76, 60, 0.3);
+            animation: popupFade 1s ease forwards;
+        }
+
+        @keyframes popupFade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); display: none; }
         }
 
         .game-over, .victory {
@@ -425,6 +437,11 @@
             .stat-card {
                 min-width: 120px;
             }
+            
+            .feedback-popup {
+                font-size: 1.2rem;
+                padding: 20px 30px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -461,6 +478,11 @@
             .game-over-content, .victory-content {
                 padding: 30px 20px;
             }
+            
+            .feedback-popup {
+                font-size: 1.1rem;
+                padding: 15px 25px;
+            }
         }
     </style>
 </head>
@@ -490,7 +512,7 @@
                 <button id="startGameBtn">🚀 Start Game</button>
             </div>
             
-            <div class="feedback" id="feedback"></div>
+            <div class="feedback-popup" id="feedbackPopup"></div>
             
             <div class="stats">
                 <div class="stat-card">
@@ -516,7 +538,7 @@
                 <ul>
                     <li>Click on letters to highlight them (single tap or drag to select multiple)</li>
                     <li>Click "Check Selection" to verify if your selection is a valid digraph</li>
-                    <li>Find all digraphs in the word to advance to the next word</li>
+                    <li>Find a digraph in the word to advance to the next word</li>
                     <li>You have 3 attempts per word</li>
                 </ul>
                 <div class="digraph-list">
@@ -635,7 +657,7 @@
             const checkWordBtn = document.getElementById('checkWordBtn');
             const clearSelectionBtn = document.getElementById('clearSelectionBtn');
             const startGameBtn = document.getElementById('startGameBtn');
-            const feedback = document.getElementById('feedback');
+            const feedbackPopup = document.getElementById('feedbackPopup');
             const wordsCompletedElement = document.getElementById('wordsCompleted');
             const digraphsFoundElement = document.getElementById('digraphsFound');
             const accuracyRateElement = document.getElementById('accuracyRate');
@@ -675,8 +697,8 @@
                 // Reset UI elements
                 checkWordBtn.disabled = true;
                 startGameBtn.style.display = 'block';
-                feedback.className = 'feedback';
-                feedback.textContent = '';
+                feedbackPopup.className = 'feedback-popup';
+                feedbackPopup.textContent = '';
             }
             
             function startGame() {
@@ -706,8 +728,8 @@
                 
                 // Reset UI
                 checkWordBtn.disabled = true;
-                feedback.className = 'feedback';
-                feedback.textContent = '';
+                feedbackPopup.className = 'feedback-popup';
+                feedbackPopup.textContent = '';
             }
             
             function displayWord(word) {
@@ -813,6 +835,22 @@
                 return digraphs;
             }
             
+            function showFeedback(message, isCorrect) {
+                feedbackPopup.textContent = message;
+                feedbackPopup.className = `feedback-popup ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                // Reset animation
+                feedbackPopup.style.animation = 'none';
+                setTimeout(() => {
+                    feedbackPopup.style.animation = 'popupFade 1s ease forwards';
+                }, 10);
+                
+                // Hide the popup after animation completes
+                setTimeout(() => {
+                    feedbackPopup.className = 'feedback-popup';
+                }, 1000);
+            }
+            
             function checkSelection() {
                 if (!gameState.gameActive || gameState.selectedLetters.length === 0) return;
                 
@@ -844,8 +882,7 @@
                     gameState.correctAttempts++;
                     gameState.digraphsFound++;
                     
-                    feedback.className = 'feedback correct';
-                    feedback.textContent = `Correct! "${selectedText}" is a digraph.`;
+                    showFeedback(`Correct! "${selectedText}" is a digraph.`, true);
                     
                     // Add to found digraphs
                     const foundDigraph = gameState.allDigraphsInWord.find(digraph => 
@@ -862,33 +899,25 @@
                         }
                     }
                     
-                    // Check if all digraphs have been found
-                    if (gameState.allDigraphsInWord.length === 0) {
-                        gameState.wordsCompleted++;
-                        updateStats();
-                        
-                        // Show victory if all words completed (for demo, using 5 words)
-                        if (gameState.wordsCompleted >= 5) {
-                            setTimeout(showVictory, 1000);
-                        } else {
-                            feedback.textContent = `Great! All digraphs found. Moving to next word...`;
-                            setTimeout(nextWord, 1500);
-                        }
+                    // Advance to next word after finding one digraph
+                    gameState.wordsCompleted++;
+                    updateStats();
+                    
+                    // Show victory if all words completed (for demo, using 5 words)
+                    if (gameState.wordsCompleted >= 5) {
+                        setTimeout(showVictory, 1000);
                     } else {
-                        // Update the display to show the found digraph
-                        displayWord(gameState.currentWord);
+                        setTimeout(nextWord, 1000);
                     }
                 } else {
                     // Incorrect selection
                     gameState.attemptsRemaining--;
                     updateAttemptsDisplay();
                     
-                    feedback.className = 'feedback incorrect';
-                    
                     if (isValidDigraph) {
-                        feedback.textContent = `"${selectedText}" is a digraph, but not in this position. Try again!`;
+                        showFeedback(`"${selectedText}" is a digraph, but not in this position. Try again!`, false);
                     } else {
-                        feedback.textContent = `"${selectedText}" is not a valid digraph. Try again!`;
+                        showFeedback(`"${selectedText}" is not a valid digraph. Try again!`, false);
                     }
                     
                     // Check if game over
@@ -948,7 +977,7 @@
             playAgainBtn.addEventListener('click', initGame);
             
             infoButton.addEventListener('click', function() {
-                alert("Digraphs Game Instructions:\n\n1. Click on letters to highlight them\n2. Click 'Check Selection' to verify if your selection is a valid digraph\n3. Find all digraphs in the word to advance\n4. You have 3 attempts per word\n\nCommon digraphs: sh, ch, th, wh, ph, ck, ng, nk");
+                alert("Digraphs Game Instructions:\n\n1. Click on letters to highlight them\n2. Click 'Check Selection' to verify if your selection is a valid digraph\n3. Find a digraph in the word to advance to the next word\n4. You have 3 attempts per word\n\nCommon digraphs: sh, ch, th, wh, ph, ck, ng, nk");
             });
         });
     </script>
