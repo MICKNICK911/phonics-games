@@ -424,7 +424,8 @@
             selectedWordBankIndex: 0,
             nextWordCount: 0,
             maxNextWords: 3, // Maximum number of times player can use "Next Word" per round
-            availableWords: [] // Words available for the current word bank
+            availableWords: [], // Words available for the current word bank
+            originalWordIndex: 0 // Track the original word index when using "Next Word"
         };
         
         // DOM elements
@@ -588,7 +589,6 @@
             gameState.nextWordCount = 0;
             
             // Get the selected word bank
-            const selectedBank = wordBanks[gameState.selectedWordBankIndex];
             gameState.availableWords = [...selectedBank.list];
             
             // Generate session words
@@ -664,6 +664,9 @@
             
             // Display the word
             wordDisplay.textContent = word;
+            
+            // Save the original word index for "Next Word" functionality
+            gameState.originalWordIndex = gameState.currentWordIndex;
         }
         
         // Show a different word (not from sessionWords)
