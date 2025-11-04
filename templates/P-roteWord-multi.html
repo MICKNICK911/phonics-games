@@ -471,21 +471,28 @@
             bottomHalf.addEventListener('click', () => handleAnswer(false));
             
             // Setup screen target selection
-            setupScreen.addEventListener('click', (e) => {
-                const rect = setupScreen.getBoundingClientRect();
-                const isTopHalf = e.clientY - rect.top < rect.height / 2;
-                
-                if (isTopHalf) {
-                    gameState.targetWords = Math.min(gameState.targetWords + 1, gameState.availableWords.length);
-                } else {
-                    gameState.targetWords = Math.max(gameState.targetWords - 1, 1);
-                }
-                
-                targetDisplay.textContent = gameState.targetWords;
-            });
+            setupScreen.addEventListener('click', handleTargetSelection);
             
             // Initialize word bank selection
             populateWordBankOptions();
+        }
+        
+        // Handle target selection in setup screen
+        function handleTargetSelection(e) {
+            const rect = setupScreen.getBoundingClientRect();
+            const isTopHalf = e.clientY - rect.top < rect.height / 2;
+            
+            // Get the selected word bank
+            const selectedBank = wordBanks[gameState.selectedWordBankIndex];
+            const maxWords = selectedBank.list.length;
+            
+            if (isTopHalf) {
+                gameState.targetWords = Math.min(gameState.targetWords + 1, maxWords);
+            } else {
+                gameState.targetWords = Math.max(gameState.targetWords - 1, 1);
+            }
+            
+            targetDisplay.textContent = gameState.targetWords;
         }
         
         // Populate word bank options
@@ -551,9 +558,10 @@
             selectedWordBankName.textContent = selectedBank.listName;
             availableWordsCount.textContent = selectedBank.list.length;
             
-            // Reset target to default if it's out of bounds
-            if (gameState.targetWords < 1 || gameState.targetWords > selectedBank.list.length) {
-                gameState.targetWords = Math.min(5, selectedBank.list.length);
+            // Reset target to a valid value based on selected word bank
+            const maxWords = selectedBank.list.length;
+            if (gameState.targetWords < 1 || gameState.targetWords > maxWords) {
+                gameState.targetWords = Math.min(5, maxWords);
             }
             
             targetDisplay.textContent = gameState.targetWords;
@@ -562,6 +570,13 @@
         
         // Start the game
         function startGame() {
+            // Validate target words
+            const selectedBank = wordBanks[gameState.selectedWordBankIndex];
+            if (gameState.targetWords < 1 || gameState.targetWords > selectedBank.list.length) {
+                alert(`Please select a valid number of words between 1 and ${selectedBank.list.length}`);
+                return;
+            }
+            
             hideAllScreens();
             gameScreen.classList.remove('hidden');
             gameState.currentScreen = 'game';
