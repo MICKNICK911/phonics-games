@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Tap Challenge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            touch-action: manipulation;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            top: 0;
+            left: 0;
+        }
+
+        .letter {
+            cursor: pointer;
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            transition: all 0.2s ease, opacity 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #4fc3f7;
+            color: white;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .letter:hover, .letter:active {
+            transform: scale(1.05);
+        }
+
+        .correct {
+            animation: flashCorrect 0.2s ease;
+        }
+
+        .incorrect {
+            animation: flashIncorrect 0.2s ease;
+        }
+
+        @keyframes flashCorrect {
+            0% { background-color: #66bb6a; }
+            100% { background-color: #4fc3f7; }
+        }
+
+        @keyframes flashIncorrect {
+            0% { background-color: #ef5350; }
+            100% { background-color: #4fc3f7; }
+        }
+
+        #gameOver {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 2rem;
+            z-index: 100;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        #gameOver h2 {
+            margin-bottom: 1rem;
+            font-size: 3rem;
+        }
+
+        #gameOver p {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            margin: 0.5rem;
+            cursor: pointer;
+            background: #fff;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background-color: #4fc3f7;
+            color: white;
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-display, .time-display, .high-score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background-color: #e3f2fd;
+        }
+
+        #soundToggle {
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            background-color: #66bb6a;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #modeToggle {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.8rem 1.5rem;
+            background-color: #66bb6a;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .letter {
+                width: 4rem;
+                height: 4rem;
+                font-size: 2rem;
+            }
+
+            .page {
+                gap: 1rem;
+            }
+
+            #header {
+                padding: 0.5rem;
+            }
+
+            .score-display, .time-display, .high-score-display {
+                font-size: 1.2rem;
+                padding: 0.3rem 0.8rem;
+            }
+
+            #gameOver h2 {
+                font-size: 2rem;
+            }
+
+            #gameOver p {
+                font-size: 1.2rem;
+            }
+
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+                min-width: 160px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .letter {
+                width: 3.5rem;
+                height: 3.5rem;
+                font-size: 1.8rem;
+            }
+
+            .page {
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer"></div>
+    
+    <div id="header">
+        <div class="score-display">🏆 Score: <span id="scoreValue">0</span></div>
+        <div class="time-display">⏱️ Time: <span id="timeValue">0</span>s</div>
+        <div class="high-score-display">🏅 Best: <span id="highScoreValue">0</span></div>
+        <button id="soundToggle">🔊</button>
+    </div>
+
+    <button id="modeToggle">Target: Digraphs</button>
+
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Your score: <span id="finalScore">0</span></p>
+        <p>Time played: <span id="finalTime">0</span>s</p>
+        <p>Best score: <span id="finalHighScore">0</span></p>
+        <p id="motivationalMessage"></p>
+        <button class="btn btn-primary" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Game configuration
+        const digraphs = ["ch", "tch", "th", "ng", "nk", "sh", "ck", "ph", "wh", "gn", "kn", "gh", "wr"];
+        const blends = ["bl", "cl", "fl", "gl", "pl", "nd", "nt", "sl", "br", "cr", "dr", "fr", "mp", "rd", "ld", "lp", "gr", "pr", "tr", "sc", "sk", "rk", "lf", "pt", "ft", "ct", "squ", "st", "sm", "sn", "sp", "lk", "lt", "xt", "ts", "sw", "tw", "dw"];
+        const bgColors = [
+            '#FFEBEE', '#E8F5E9', '#E3F2FD', '#EDE7F6', '#FFF8E1',
+            '#FCE4EC', '#E0F7FA', '#E8EAF6', '#F1F8E9', '#FFFDE7',
+            '#EFEBE9', '#E0F2F1', '#F3E5F5', '#FBE9E7', '#EEEEEE'
+        ];
+        let colorIndex = 0;
+        
+        // Game state
+        let score = 0;
+        let timePlayed = 0;
+        let timer;
+        let currentMode = 'digraph';
+        let currentPage = null;
+        let gameActive = true;
+        let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
+        let soundEnabled = true;
+
+        // DOM elements
+        const gameContainer = document.getElementById('gameContainer');
+        const scoreValue = document.getElementById('scoreValue');
+        const timeValue = document.getElementById('timeValue');
+        const highScoreValue = document.getElementById('highScoreValue');
+        const finalScore = document.getElementById('finalScore');
+        const finalTime = document.getElementById('finalTime');
+        const finalHighScore = document.getElementById('finalHighScore');
+        const motivationalMessage = document.getElementById('motivationalMessage');
+        const gameOver = document.getElementById('gameOver');
+        const modeToggle = document.getElementById('modeToggle');
+        const soundToggle = document.getElementById('soundToggle');
+
+        // Audio context for sound effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, type = 'sine', duration = 0.1) {
+            if (!soundEnabled) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        // Initialize game
+        function initGame() {
+            score = 0;
+            timePlayed = 0;
+            gameActive = true;
+            colorIndex = 0;
+            updateScore();
+            updateHighScore();
+            startTimer();
+            gameContainer.innerHTML = '';
+            createNewPage();
+        }
+
+        // Create a new page with letters
+        function createNewPage() {
+            const page = document.createElement('div');
+            page.className = 'page';
+            page.style.backgroundColor = bgColors[colorIndex % bgColors.length];
+            colorIndex++;
+            
+            const targetLetters = currentMode === 'digraph' ? digraphs : blends;
+            const avoidLetters = currentMode === 'digraph' ? blends : digraphs;
+            
+            const letters = [
+                randomLetter(targetLetters),
+                randomLetter(targetLetters),
+                randomLetter(avoidLetters)
+            ].sort(() => Math.random() - 0.5);
+
+            letters.forEach(letter => {
+                const letterElement = document.createElement('div');
+                letterElement.className = 'letter';
+                letterElement.textContent = letter;
+                
+                // Adjust font size for longer letter combinations
+                if (letter.length === 2) {
+                    letterElement.style.fontSize = '2.2rem';
+                } else if (letter.length === 3) {
+                    letterElement.style.fontSize = '1.8rem';
+                }
+                
+                letterElement.onclick = () => handleLetterClick(letter, page, letterElement);
+                page.appendChild(letterElement);
+            });
+
+            gameContainer.appendChild(page);
+            
+            if (currentPage) {
+                currentPage.style.transform = 'translateY(-100%)';
+            }
+            
+            currentPage = page;
+            return page;
+        }
+
+        // Get random letter from array
+        function randomLetter(letterArray) {
+            return letterArray[Math.floor(Math.random() * letterArray.length)];
+        }
+
+        // Check if letter is digraph
+        function isDigraph(letter) {
+            return digraphs.includes(letter);
+        }
+
+        // Handle letter click
+        function handleLetterClick(letter, currentPage, letterElement) {
+            if (!gameActive) return;
+            
+            const isCorrect = (currentMode === 'digraph' && isDigraph(letter)) || 
+                              (currentMode === 'blend' && !isDigraph(letter));
+            
+            if (isCorrect) {
+                score++;
+                playSound(440); // Correct sound (A4 note)
+                letterElement.classList.add('correct');
+                updateScore();
+                const newPage = createNewPage();
+                newPage.style.transform = 'translateY(100%)';
+                
+                setTimeout(() => {
+                    currentPage.style.transform = 'translateY(-100%)';
+                    newPage.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                playSound(220, 'square', 0.2); // Incorrect sound (lower pitch, harsher tone)
+                letterElement.classList.add('incorrect');
+                endGame();
+            }
+        }
+
+        // Update score display and high score
+        function updateScore() {
+            scoreValue.textContent = score;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+                updateHighScore();
+            }
+        }
+
+        // Update high score display
+        function updateHighScore() {
+            highScoreValue.textContent = highScore;
+            finalHighScore.textContent = highScore;
+        }
+
+        // Start duration timer
+        function startTimer() {
+            clearInterval(timer);
+            timeValue.textContent = timePlayed;
+            
+            timer = setInterval(() => {
+                timePlayed++;
+                timeValue.textContent = timePlayed;
+            }, 1000);
+        }
+
+        // End the game
+        function endGame() {
+            gameActive = false;
+            clearInterval(timer);
+            finalScore.textContent = score;
+            finalTime.textContent = timePlayed;
+            finalHighScore.textContent = highScore;
+            motivationalMessage.textContent = getMotivationalMessage(score);
+            gameOver.style.display = 'flex';
+        }
+
+        // Get motivational message based on score
+        function getMotivationalMessage(score) {
+            if (score >= 50) return "Incredible! You're a letter-tapping legend!";
+            if (score >= 30) return "Amazing job! Keep up the great work!";
+            if (score >= 15) return "Nice work! You're getting the hang of it!";
+            return "Good try! Practice makes perfect!";
+        }
+
+        // Restart game
+        function restartGame() {
+            gameOver.style.display = 'none';
+            initGame();
+        }
+
+        // Toggle target mode
+        function toggleMode() {
+            currentMode = currentMode === 'digraph' ? 'blend' : 'digraph';
+            modeToggle.textContent = `Target: ${currentMode === 'digraph' ? 'Digraphs' : 'Blends'}`;
+            if (gameActive) {
+                createNewPage();
+            }
+        }
+
+        // Toggle sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+        }
+
+        // Event listeners
+        modeToggle.addEventListener('click', toggleMode);
+        soundToggle.addEventListener('click', toggleSound);
+        window.addEventListener('load', () => {
+            updateHighScore();
+            initGame();
+        });
+        window.addEventListener('touchstart', function() {}, { passive: true });
+    </script>
+</body>
+</html>
