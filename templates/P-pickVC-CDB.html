@@ -366,10 +366,21 @@
         const targetProgressFill = document.getElementById('targetProgressFill');
 
         // Audio context for sound effects
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioCtx = null;
 
         function playSound(frequency, type = 'sine', duration = 0.1) {
             if (!soundEnabled) return;
+            
+            // Initialize audio context on first use
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // Resume audio context if suspended
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             oscillator.connect(gainNode);
@@ -377,6 +388,7 @@
             oscillator.type = type;
             oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
             oscillator.start();
             oscillator.stop(audioCtx.currentTime + duration);
         }
@@ -416,13 +428,24 @@
             colorIndex++;
             
             const targetLetters = currentMode === 'digraph' ? digraphs : blends;
-            const avoidLetters = currentMode === 'digraph' ? blends : digraphs;
+            const oppositeLetters = currentMode === 'digraph' ? blends : digraphs;
             
-            const letters = [
-                randomLetter(targetLetters),
-                randomLetter(targetLetters),
-                randomLetter(avoidLetters)
-            ].sort(() => Math.random() - 0.5);
+            // Get one correct letter from target list
+            const correctLetter = getRandomItem(targetLetters);
+            
+            // Get two unique wrong letters from opposite list
+            const wrongLetters = [];
+            while (wrongLetters.length < 2) {
+                const wrongLetter = getRandomItem(oppositeLetters);
+                // Ensure uniqueness
+                if (!wrongLetters.includes(wrongLetter) && wrongLetter !== correctLetter) {
+                    wrongLetters.push(wrongLetter);
+                }
+            }
+            
+            // Combine and shuffle letters
+            const letters = [correctLetter, ...wrongLetters];
+            shuffleArray(letters);
 
             letters.forEach(letter => {
                 const letterElement = document.createElement('div');
@@ -450,9 +473,18 @@
             return page;
         }
 
-        // Get random letter from array
-        function randomLetter(letterArray) {
-            return letterArray[Math.floor(Math.random() * letterArray.length)];
+        // Get random item from array
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Shuffle array using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
         // Check if letter is digraph
