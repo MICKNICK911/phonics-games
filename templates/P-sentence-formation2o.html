@@ -171,13 +171,19 @@
       -webkit-text-fill-color: transparent;
     }
     
+    .input-with-enter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: stretch;
+    }
+    
     #input-field {
       padding: 15px;
       font-size: 16px;
       border: 2px solid #4a4e69;
       border-radius: 12px;
-      width: 100%;
-      margin-bottom: 15px;
+      flex: 1;
       background: #2a2e3b;
       color: #e0e0e0;
       transition: all 0.3s ease;
@@ -188,6 +194,42 @@
       outline: none;
       border-color: #5c7cfa;
       box-shadow: 0 0 0 3px rgba(92, 124, 250, 0.2);
+    }
+    
+    #enter-button {
+      background: linear-gradient(to right, #ff9e00, #ff7b00);
+      color: white;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      min-width: 120px;
+      white-space: nowrap;
+    }
+    
+    #enter-button:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(255, 158, 0, 0.4);
+    }
+    
+    #enter-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    #enter-button:disabled {
+      background: #4a4e69;
+      color: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
     
     .input-buttons {
@@ -235,11 +277,6 @@
     
     #slideshow-button {
       background: linear-gradient(to right, #f72585, #b5179e);
-      color: white;
-    }
-    
-    #enter-button {
-      background: linear-gradient(to right, #ff9e00, #ff7b00);
       color: white;
     }
     
@@ -535,6 +572,15 @@
         font-size: 2rem;
       }
       
+      .input-with-enter {
+        flex-direction: column;
+      }
+      
+      #enter-button {
+        width: 100%;
+        min-width: auto;
+      }
+      
       .control-btn {
         min-width: calc(50% - 10px);
       }
@@ -624,19 +670,21 @@
           <span class="emoji-icon">✏️</span>
           <div class="game-title">Sentence Formation</div>
         </div>
-        <input
-          class="input-field"
-          id="input-field"
-          type="text"
-          placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
-          aria-label="Enter words separated by commas"
-          maxlength="100"
-        >
-        <div class="input-buttons" id="input-buttons">
+        <div class="input-with-enter">
+          <input
+            class="input-field"
+            id="input-field"
+            type="text"
+            placeholder="Enter words separated by comma (e.g., cat, dog, runs)"
+            aria-label="Enter words separated by commas"
+            maxlength="100"
+          >
           <button class="control-btn" id="enter-button">
             <span>⏎</span>
             Enter
           </button>
+        </div>
+        <div class="input-buttons" id="input-buttons">
           <button class="control-btn" id="clear-button">
             <span>🗑️</span>
             Clear
@@ -797,6 +845,14 @@
       
       isProcessing = true;
       const input = inputField.value.trim();
+      
+      // Edge case: empty input
+      if (!input) {
+        showPopup('Please enter some words before processing.');
+        isProcessing = false;
+        return;
+      }
+      
       const error = validateInput(input);
       
       if (error) {
@@ -806,17 +862,42 @@
       }
       
       const words = input.split(',').map(word => word.trim()).filter(word => word);
+      
+      // Edge case: all words were filtered out (only commas entered)
+      if (words.length === 0) {
+        showPopup('No valid words found. Please enter actual words separated by commas.');
+        isProcessing = false;
+        return;
+      }
+      
       generateButtons(words);
       inputField.value = '';
       inputButtons.style.display = 'flex';
       isProcessing = false;
-      buttonGrid.querySelector('.word-button')?.focus();
+      
+      // Focus first word button for keyboard navigation
+      setTimeout(() => {
+        const firstButton = buttonGrid.querySelector('.word-button');
+        if (firstButton) firstButton.focus();
+      }, 100);
     }
 
     // Generate word buttons
     function generateButtons(words) {
       buttonGrid.innerHTML = '';
       const allWords = words.concat(['.', '?', ',', '!', ';']);
+      
+      // Edge case: no words provided
+      if (allWords.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.textContent = 'No words available';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.padding = '20px';
+        emptyMsg.style.color = '#6c757d';
+        buttonGrid.appendChild(emptyMsg);
+        return;
+      }
+      
       allWords.forEach(word => {
         const button = document.createElement('button');
         button.classList.add('word-button');
@@ -1118,9 +1199,32 @@
       if (e.key === 'Escape') closePopup();
     });
 
+    // Input field validation for real-time feedback
+    inputField.addEventListener('input', () => {
+      const input = inputField.value.trim();
+      
+      // Enable/disable enter button based on input
+      if (input.length > 0) {
+        enterButton.disabled = false;
+      } else {
+        enterButton.disabled = true;
+      }
+      
+      // Show character count warning
+      if (input.length > MAX_INPUT_LENGTH - 10) {
+        inputField.style.borderColor = '#ff6b6b';
+      } else {
+        inputField.style.borderColor = '#4a4e69';
+      }
+    });
+
     // Initialize
     window.onload = () => {
       renderSentences();
+      
+      // Initially disable enter button if no input
+      enterButton.disabled = inputField.value.trim().length === 0;
+      
       showPopup(
         'Welcome to the Sentence Formation App!\n\n' +
         'HOW TO USE:\n' +
