@@ -238,6 +238,11 @@
       color: white;
     }
     
+    #enter-button {
+      background: linear-gradient(to right, #ff9e00, #ff7b00);
+      color: white;
+    }
+    
     .control-btn:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
@@ -245,6 +250,14 @@
     
     .control-btn:active {
       transform: translateY(0);
+    }
+    
+    .control-btn:disabled {
+      background: #4a4e69;
+      color: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
     
     #button-grid {
@@ -488,6 +501,10 @@
       #button-grid {
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
       }
+      
+      .control-btn {
+        min-width: 110px;
+      }
     }
     
     @media only screen and (min-width: 1200px) {
@@ -519,7 +536,7 @@
       }
       
       .control-btn {
-        min-width: 100%;
+        min-width: calc(50% - 10px);
       }
       
       #button-grid {
@@ -616,6 +633,10 @@
           maxlength="100"
         >
         <div class="input-buttons" id="input-buttons">
+          <button class="control-btn" id="enter-button">
+            <span>⏎</span>
+            Enter
+          </button>
           <button class="control-btn" id="clear-button">
             <span>🗑️</span>
             Clear
@@ -673,6 +694,7 @@
     const inputField = document.getElementById('input-field');
     const buttonGrid = document.getElementById('button-grid');
     const inputButtons = document.getElementById('input-buttons');
+    const enterButton = document.getElementById('enter-button');
     const clearButton = document.getElementById('clear-button');
     const addButton = document.getElementById('add-button');
     const saveButton = document.getElementById('save-button');
@@ -767,6 +789,28 @@
         return 'Individual words cannot exceed 20 characters.';
       }
       return null;
+    }
+
+    // Process input (common function for Enter key and Enter button)
+    function processInput() {
+      if (isProcessing) return;
+      
+      isProcessing = true;
+      const input = inputField.value.trim();
+      const error = validateInput(input);
+      
+      if (error) {
+        showPopup(error);
+        isProcessing = false;
+        return;
+      }
+      
+      const words = input.split(',').map(word => word.trim()).filter(word => word);
+      generateButtons(words);
+      inputField.value = '';
+      inputButtons.style.display = 'flex';
+      isProcessing = false;
+      buttonGrid.querySelector('.word-button')?.focus();
     }
 
     // Generate word buttons
@@ -996,21 +1040,12 @@
     // Event Listeners
     inputField.addEventListener('keyup', (e) => {
       if (e.key === 'Enter' && !isProcessing) {
-        isProcessing = true;
-        const input = inputField.value.trim();
-        const error = validateInput(input);
-        if (error) {
-          showPopup(error);
-          isProcessing = false;
-          return;
-        }
-        const words = input.split(',').map(word => word.trim()).filter(word => word);
-        generateButtons(words);
-        inputField.value = '';
-        inputButtons.style.display = 'flex';
-        isProcessing = false;
-        buttonGrid.querySelector('.word-button')?.focus();
+        processInput();
       }
+    });
+
+    enterButton.addEventListener('click', () => {
+      processInput();
     });
 
     clearButton.addEventListener('click', () => {
@@ -1090,7 +1125,7 @@
         'Welcome to the Sentence Formation App!\n\n' +
         'HOW TO USE:\n' +
         '1. Enter words separated by commas (e.g., cat, dog, runs)\n' +
-        '2. Press Enter to create word buttons\n' +
+        '2. Press Enter or click the Enter button to create word buttons\n' +
         '3. Click buttons to form sentences\n' +
         '4. Save sentences to the list\n' +
         '5. Use saved sentences for practice or start a slideshow\n\n' +
