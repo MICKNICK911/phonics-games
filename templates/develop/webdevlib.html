@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Library</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --sidebar-width: 300px;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar/Drawer Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #e1e5eb;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .search-container {
+            padding: 1rem;
+            border-bottom: 1px solid #e1e5eb;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .categories {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .category {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-list {
+            list-style: none;
+        }
+
+        .topic-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .topic-item:hover {
+            background: #f8f9fa;
+        }
+
+        .topic-item.active {
+            background: #eef2ff;
+            border-left-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .topic-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .topic-item.active .topic-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .add-topic-btn {
+            margin: 1rem;
+            padding: 0.75rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .add-topic-btn:hover {
+            background: #27ae60;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 1rem 1.5rem;
+            background: white;
+            border-bottom: 1px solid #e1e5eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .topic-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .topic-description {
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #3a56e4;
+        }
+
+        .content-body {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .demo-area {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+
+        .code-info {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .info-list li:before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            background: #3a56e4;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            background: var(--dark);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .code-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6c757d;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .code-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: white;
+        }
+
+        .code-container {
+            height: 400px;
+            overflow: auto;
+        }
+
+        .code-block {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .code-block.active {
+            display: block;
+        }
+
+        .html-code { background: #fff3e0; }
+        .css-code { background: #e3f2fd; }
+        .js-code { background: #e8f5e9; }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .content-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .fab {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar/Drawer -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-title">Code Library</h1>
+                <p class="sidebar-subtitle">Your personal collection of code features</p>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search features...">
+            </div>
+
+            <div class="categories">
+                <div class="category">
+                    <h3 class="category-title">HTML & CSS</h3>
+                    <ul class="topic-list">
+                        <li class="topic-item active" data-topic="flexbox">
+                            <span class="topic-icon">F</span>
+                            <span>Flexbox Layout</span>
+                        </li>
+                        <li class="topic-item" data-topic="grid">
+                            <span class="topic-icon">G</span>
+                            <span>CSS Grid</span>
+                        </li>
+                        <li class="topic-item" data-topic="animations">
+                            <span class="topic-icon">A</span>
+                            <span>CSS Animations</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category">
+                    <h3 class="category-title">JavaScript</h3>
+                    <ul class="topic-list">
+                        <li class="topic-item" data-topic="fetch">
+                            <span class="topic-icon">F</span>
+                            <span>Fetch API</span>
+                        </li>
+                        <li class="topic-item" data-topic="localstorage">
+                            <span class="topic-icon">L</span>
+                            <span>Local Storage</span>
+                        </li>
+                        <li class="topic-item" data-topic="events">
+                            <span class="topic-icon">E</span>
+                            <span>Event Handling</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="category">
+                    <h3 class="category-title">UI Components</h3>
+                    <ul class="topic-list">
+                        <li class="topic-item" data-topic="modal">
+                            <span class="topic-icon">M</span>
+                            <span>Modal Dialog</span>
+                        </li>
+                        <li class="topic-item" data-topic="carousel">
+                            <span class="topic-icon">C</span>
+                            <span>Image Carousel</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="add-topic-btn" id="add-topic-btn">
+                <span>+</span> Add New Topic
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <div>
+                    <h1 class="topic-title">Flexbox Layout</h1>
+                    <p class="topic-description">Create flexible and responsive layouts with CSS Flexbox</p>
+                </div>
+                <div class="content-actions">
+                    <button class="btn">
+                        <span>★</span> Favorite
+                    </button>
+                    <button class="btn">
+                        <span>↻</span> Refresh
+                    </button>
+                    <button class="btn btn-primary">
+                        <span>✎</span> Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="code-info">
+                    <h3 class="info-title">About This Feature</h3>
+                    <ul class="info-list">
+                        <li>Flexbox is a one-dimensional layout method for arranging items in rows or columns</li>
+                        <li>Items flex to fill additional space or shrink to fit into smaller spaces</li>
+                        <li>Perfect for responsive design and component alignment</li>
+                    </ul>
+                </div>
+
+                <div class="demo-area">
+                    <h3 class="demo-title">Flexbox Demo</h3>
+                    <div id="flexbox-demo" style="display: flex; gap: 10px; flex-wrap: wrap; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <div style="flex: 1; min-width: 100px; background: #4361ee; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 1</div>
+                        <div style="flex: 2; min-width: 100px; background: #3a0ca3; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 2</div>
+                        <div style="flex: 1; min-width: 100px; background: #4cc9f0; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 3</div>
+                    </div>
+                    <p style="margin-top: 1rem;">Try resizing the window to see how the flex items adjust.</p>
+                </div>
+
+                <div class="empty-state hidden" id="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <h3 class="empty-title">No Topic Selected</h3>
+                    <p>Select a topic from the sidebar to view its details and code.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="code-fab">
+        <span>{"</>"}</span>
+    </button>
+
+    <!-- Code Modal -->
+    <div class="modal hidden" id="code-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Flexbox Layout - Complete Code</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="code-tabs">
+                    <button class="code-tab active" data-tab="html">HTML</button>
+                    <button class="code-tab" data-tab="css">CSS</button>
+                    <button class="code-tab" data-tab="js">JavaScript</button>
+                </div>
+                <div class="code-container">
+                    <pre class="code-block html-code active" id="html-code"></pre>
+                    <pre class="code-block css-code" id="css-code"></pre>
+                    <pre class="code-block js-code" id="js-code"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn">Copy Code</button>
+                <button class="btn btn-primary" id="apply-code">Apply Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for our code library
+        const libraryData = {
+            flexbox: {
+                title: "Flexbox Layout",
+                description: "Create flexible and responsive layouts with CSS Flexbox",
+                category: "HTML & CSS",
+                html: `<div class="flex-container">
+  <div class="flex-item">Item 1</div>
+  <div class="flex-item">Item 2</div>
+  <div class="flex-item">Item 3</div>
+</div>`,
+                css: `.flex-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.flex-item {
+  flex: 1;
+  min-width: 100px;
+  padding: 1rem;
+  background: #4361ee;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+}`,
+                js: `// JavaScript for interactive flexbox example
+const container = document.querySelector('.flex-container');
+const items = document.querySelectorAll('.flex-item');
+
+items.forEach((item, index) => {
+  item.addEventListener('click', () => {
+    alert(\`You clicked item \${index + 1}\`);
+  });
+});`,
+                demo: `<div style="display: flex; gap: 10px; flex-wrap: wrap; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+  <div style="flex: 1; min-width: 100px; background: #4361ee; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 1</div>
+  <div style="flex: 2; min-width: 100px; background: #3a0ca3; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 2</div>
+  <div style="flex: 1; min-width: 100px; background: #4cc9f0; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 3</div>
+</div>
+<p style="margin-top: 1rem;">Try resizing the window to see how the flex items adjust.</p>`
+            },
+            grid: {
+                title: "CSS Grid",
+                description: "Create two-dimensional layouts with CSS Grid",
+                category: "HTML & CSS",
+                html: `<div class="grid-container">
+  <div class="grid-item header">Header</div>
+  <div class="grid-item sidebar">Sidebar</div>
+  <div class="grid-item main">Main Content</div>
+  <div class="grid-item footer">Footer</div>
+</div>`,
+                css: `.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer footer";
+  gap: 10px;
+  height: 300px;
+}
+
+.header { grid-area: header; background: #4361ee; }
+.sidebar { grid-area: sidebar; background: #3a0ca3; }
+.main { grid-area: main; background: #4cc9f0; }
+.footer { grid-area: footer; background: #7209b7; }
+
+.grid-item {
+  padding: 1rem;
+  color: white;
+  border-radius: 4px;
+}`,
+                js: `// JavaScript for grid layout example
+const gridItems = document.querySelectorAll('.grid-item');
+
+gridItems.forEach(item => {
+  item.addEventListener('mouseenter', () => {
+    item.style.opacity = '0.9';
+    item.style.transform = 'scale(1.02)';
+  });
+  
+  item.addEventListener('mouseleave', () => {
+    item.style.opacity = '1';
+    item.style.transform = 'scale(1)';
+  });
+});`,
+                demo: `<div style="display: grid; grid-template-columns: 1fr 3fr; grid-template-rows: auto 1fr auto; grid-template-areas: 'header header' 'sidebar main' 'footer footer'; gap: 10px; height: 300px;">
+  <div style="grid-area: header; background: #4361ee; color: white; padding: 1rem; border-radius: 4px;">Header</div>
+  <div style="grid-area: sidebar; background: #3a0ca3; color: white; padding: 1rem; border-radius: 4px;">Sidebar</div>
+  <div style="grid-area: main; background: #4cc9f0; color: white; padding: 1rem; border-radius: 4px;">Main Content</div>
+  <div style="grid-area: footer; background: #7209b7; color: white; padding: 1rem; border-radius: 4px;">Footer</div>
+</div>
+<p style="margin-top: 1rem;">This demonstrates a classic website layout using CSS Grid.</p>`
+            },
+            // More topics would be defined here...
+        };
+
+        // DOM Elements
+        const topicItems = document.querySelectorAll('.topic-item');
+        const topicTitle = document.querySelector('.topic-title');
+        const topicDescription = document.querySelector('.topic-description');
+        const contentBody = document.querySelector('.content-body');
+        const codeFab = document.getElementById('code-fab');
+        const codeModal = document.getElementById('code-modal');
+        const closeModal = document.getElementById('close-modal');
+        const codeTabs = document.querySelectorAll('.code-tab');
+        const htmlCode = document.getElementById('html-code');
+        const cssCode = document.getElementById('css-code');
+        const jsCode = document.getElementById('js-code');
+        const emptyState = document.getElementById('empty-state');
+        const addTopicBtn = document.getElementById('add-topic-btn');
+
+        // Current active topic
+        let currentTopic = 'flexbox';
+
+        // Initialize the app
+        function initApp() {
+            // Set the first topic as active
+            updateContent(currentTopic);
+            
+            // Add event listeners
+            topicItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Update active state
+                    topicItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Update content
+                    currentTopic = item.getAttribute('data-topic');
+                    updateContent(currentTopic);
+                });
+            });
+
+            // Code FAB click
+            codeFab.addEventListener('click', () => {
+                showCodeModal(currentTopic);
+            });
+
+            // Close modal
+            closeModal.addEventListener('click', () => {
+                codeModal.classList.add('hidden');
+            });
+
+            // Code tab switching
+            codeTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    codeTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding code
+                    document.querySelectorAll('.code-block').forEach(block => {
+                        block.classList.remove('active');
+                    });
+                    document.getElementById(`${tabName}-code`).classList.add('active');
+                });
+            });
+
+            // Add new topic button
+            addTopicBtn.addEventListener('click', () => {
+                alert('In a full implementation, this would open a form to add a new topic to your library.');
+            });
+        }
+
+        // Update the main content based on selected topic
+        function updateContent(topicId) {
+            const topic = libraryData[topicId];
+            
+            if (!topic) {
+                // Show empty state if topic not found
+                contentBody.querySelector('.code-info').classList.add('hidden');
+                contentBody.querySelector('.demo-area').classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            // Hide empty state
+            emptyState.classList.add('hidden');
+            contentBody.querySelector('.code-info').classList.remove('hidden');
+            contentBody.querySelector('.demo-area').classList.remove('hidden');
+            
+            // Update title and description
+            topicTitle.textContent = topic.title;
+            topicDescription.textContent = topic.description;
+            
+            // Update demo area
+            const demoArea = contentBody.querySelector('.demo-area');
+            demoArea.innerHTML = `
+                <h3 class="demo-title">${topic.title} Demo</h3>
+                ${topic.demo}
+            `;
+        }
+
+        // Show code modal with the current topic's code
+        function showCodeModal(topicId) {
+            const topic = libraryData[topicId];
+            
+            if (!topic) return;
+            
+            // Update modal title
+            document.querySelector('.modal-title').textContent = `${topic.title} - Complete Code`;
+            
+            // Update code blocks
+            htmlCode.textContent = topic.html;
+            cssCode.textContent = topic.css;
+            jsCode.textContent = topic.js;
+            
+            // Show modal
+            codeModal.classList.remove('hidden');
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
