@@ -1,708 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Playground - Real-time HTML/CSS/JS Testing</title>
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #4cc9f0;
-            --dark: #212529;
-            --light: #f8f9fa;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --border-radius: 8px;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
+<meta charset="UTF-8">
+<title>Code Playground • Ultra-Stable Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root {
+        --bg: #f7f9fc;
+        --panel: #ffffff;
+        --text: #2d3748;
+        --primary: #4361ee;
+        --border: #e2e8f0;
+        --console-bg: #1e1e1e;
+        --console-text: #e2e8f0;
+        --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+    header { background:linear-gradient(135deg, #4361ee, #3a0ca3); color:white; padding:1rem 1.5rem; box-shadow:var(--shadow); z-index:10; }
+    .header-inner { max-width:1600px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+    h1 { font-size:1.7rem; font-weight:700; }
+    .subtitle { font-size:0.95rem; opacity:0.92; }
+    .buttons { display:flex; gap:0.8rem; flex-wrap:wrap; }
+    button { background:rgba(255,255,255,0.22); border:none; color:white; padding:0.65rem 1.1rem; border-radius:8px; cursor:pointer; font-weight:600; transition:all .2s; }
+    button:hover { background:rgba(255,255,255,0.32); transform:translateY(-1px); }
+    button.primary { background:#4cc9f0; }
+    button.primary:hover { background:#3ab8e0; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .split-h { flex:1; display:flex; position:relative; }
+    .editor-panel, .preview-panel { background:var(--panel); display:flex; flex-direction:column; box-shadow:var(--shadow); }
+    .editor-panel { flex:1; min-width:240px; border-right:1px solid var(--border); }
+    .preview-panel { flex:1; min-width:240px; }
 
-        body {
-            background-color: #f5f7fb;
-            color: var(--dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+    .tabs { display:flex; background:#f8fafc; border-bottom:1px solid var(--border); user-select:none; }
+    .tab { padding:0.9rem 1.6rem; cursor:pointer; font-weight:600; color:#64748b; transition:all .2s; }
+    .tab.active { color:var(--primary); background:white; border-bottom:3px solid var(--primary); }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 100%;
-        }
+    textarea { flex:1; padding:1.2rem; font-family: 'Menlo', 'Consolas', monospace; font-size:14.5px; line-height:1.6; border:none; outline:none; resize:none; background:transparent; }
+    textarea:focus { background:white; }
 
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: var(--shadow);
-            z-index: 100;
-        }
+    .preview-header { padding:0.8rem 1.2rem; background:#f8fafc; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-weight:600; }
+    iframe { flex:1; border:none; background:white; }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .console { height:200px; background:var(--console-bg); color:var(--console-text); font-family: 'Menlo', monospace; font-size:13px; display:flex; flex-direction:column; border-top:1px solid var(--border); }
+    .console-header { padding:0.6rem 1rem; background:#0d0d0d; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+    .console-body { flex:1; padding:0.8rem 1rem; overflow-y:auto; white-space:pre-wrap; word-break:break-all; }
+    .log-log { color:#94a3b8; }
+    .log-warn { color:#fbbf24; }
+    .log-error { color:#f87171; }
 
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
+    .splitter { width:7px; background:#cbd5e1; cursor:col-resize; transition:background .2s; }
+    .splitter:hover, .splitter.drag { background:var(--primary); }
+    .vsplit { height:7px; background:#cbd5e1; cursor:row-resize; position:relative; }
+    .vsplit:hover { background:var(--primary); }
 
-        .subtitle {
-            opacity: 0.9;
-            font-size: 1rem;
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-        }
-
-        .btn-primary:hover {
-            background: #3aa8d8;
-        }
-
-        .main-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .editor-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: white;
-            border-right: 1px solid #e1e5eb;
-        }
-
-        .editor-tabs {
-            display: flex;
-            background: #e9ecef;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .editor-tab {
-            padding: 0.75rem 1.5rem;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #6c757d;
-            transition: var(--transition);
-            border-bottom: 3px solid transparent;
-        }
-
-        .editor-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: white;
-        }
-
-        .editor-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .editor {
-            width: 100%;
-            height: 100%;
-            border: none;
-            padding: 1rem;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: none;
-            outline: none;
-            background: #f8f9fa;
-            line-height: 1.5;
-            tab-size: 4;
-        }
-
-        .editor:focus {
-            background: white;
-        }
-
-        .preview-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: white;
-        }
-
-        .preview-header {
-            padding: 1rem;
-            background: #e9ecef;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .preview-title {
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .preview-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .preview-content {
-            flex: 1;
-            padding: 1rem;
-            overflow: auto;
-            background: white;
-        }
-
-        #preview-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .console-panel {
-            height: 200px;
-            background: #2d3748;
-            color: #e2e8f0;
-            border-top: 1px solid #4a5568;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .console-header {
-            padding: 0.5rem 1rem;
-            background: #1a202c;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .console-title {
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-
-        .console-content {
-            flex: 1;
-            padding: 0.5rem 1rem;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-
-        .console-log {
-            margin-bottom: 0.25rem;
-            padding: 0.25rem 0;
-        }
-
-        .log-info {
-            color: #63b3ed;
-        }
-
-        .log-warn {
-            color: #faf089;
-        }
-
-        .log-error {
-            color: #fc8181;
-        }
-
-        .status-bar {
-            padding: 0.5rem 1rem;
-            background: var(--dark);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-        }
-
-        .splitter {
-            width: 8px;
-            background: #e1e5eb;
-            cursor: col-resize;
-            transition: var(--transition);
-        }
-
-        .splitter:hover {
-            background: var(--primary);
-        }
-
-        .resize-handle {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: #e1e5eb;
-            cursor: row-resize;
-            transition: var(--transition);
-        }
-
-        .resize-handle:hover {
-            background: var(--primary);
-        }
-
-        .welcome-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-body {
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-list {
-            list-style: none;
-            margin: 1rem 0;
-        }
-
-        .feature-list li {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .feature-list li:before {
-            content: "✓";
-            color: var(--success);
-            font-weight: bold;
-            margin-right: 0.75rem;
-        }
-
-        .code-example {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            font-family: 'Courier New', monospace;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            overflow-x: auto;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .editor-panel {
-                height: 50%;
-            }
-            
-            .preview-panel {
-                height: 50%;
-            }
-            
-            .splitter {
-                display: none;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-            
-            .controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+        .split-h { flex-direction:column; }
+        .splitter { display:none; }
+        .editor-panel, .preview-panel { height:50%; }
+    }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <div>
-                    <h1>Code Playground</h1>
-                    <p class="subtitle">Real-time HTML, CSS & JavaScript Testing Environment</p>
-                </div>
-                <div class="controls">
-                    <button class="btn" id="reset-btn">
-                        <span>↺</span> Reset
-                    </button>
-                    <button class="btn" id="help-btn">
-                        <span>?</span> Help
-                    </button>
-                    <button class="btn btn-primary" id="run-btn">
-                        <span>▶</span> Run Code
-                    </button>
-                </div>
-            </div>
-        </header>
 
-        <div class="main-content">
-            <div class="editor-panel">
-                <div class="editor-tabs">
-                    <button class="editor-tab active" data-tab="html">HTML</button>
-                    <button class="editor-tab" data-tab="css">CSS</button>
-                    <button class="editor-tab" data-tab="js">JavaScript</button>
-                </div>
-                <div class="editor-container">
-                    <textarea class="editor" id="html-editor" placeholder="Write your HTML code here...">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-    &lt;title&gt;My Page&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;Welcome to Code Playground&lt;/h1&gt;
-    &lt;p&gt;Start editing to see your changes in real-time!&lt;/p&gt;
-    &lt;button id="demo-btn"&gt;Click Me!&lt;/button&gt;
-    &lt;div id="output"&gt;&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;</textarea>
-                    <textarea class="editor hidden" id="css-editor" placeholder="Write your CSS code here...">body {
-    font-family: 'Segoe UI', sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: #f5f7fb;
-    color: #333;
-}
-
-h1 {
-    color: #4361ee;
-    border-bottom: 2px solid #4361ee;
-    padding-bottom: 0.5rem;
-}
-
-#demo-btn {
-    background: #4361ee;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-#demo-btn:hover {
-    background: #3a0ca3;
-    transform: translateY(-2px);
-}
-
-#output {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}</textarea>
-                    <textarea class="editor hidden" id="js-editor" placeholder="Write your JavaScript code here...">// Get the button and output elements
-const button = document.getElementById('demo-btn');
-const output = document.getElementById('output');
-
-// Add click event listener to the button
-button.addEventListener('click', function() {
-    // Create a new element
-    const newElement = document.createElement('div');
-    newElement.textContent = `Button clicked at ${new Date().toLocaleTimeString()}`;
-    newElement.style.padding = '0.5rem';
-    newElement.style.margin = '0.5rem 0';
-    newElement.style.background = '#e9ecef';
-    newElement.style.borderRadius = '4px';
-    
-    // Add the new element to the output
-    output.appendChild(newElement);
-    
-    // Log to console
-    console.log('Button clicked!');
-});
-
-// Additional example: Change text on mouseover
-button.addEventListener('mouseover', function() {
-    button.textContent = 'Click Me Now!';
-});
-
-button.addEventListener('mouseout', function() {
-    button.textContent = 'Click Me!';
-});
-
-console.log('JavaScript loaded successfully!');</textarea>
-                </div>
-                <div class="resize-handle"></div>
-            </div>
-
-            <div class="splitter"></div>
-
-            <div class="preview-panel">
-                <div class="preview-header">
-                    <div class="preview-title">Preview</div>
-                    <div class="preview-actions">
-                        <button class="btn" id="refresh-btn">
-                            <span>⟳</span> Refresh
-                        </button>
-                    </div>
-                </div>
-                <div class="preview-content">
-                    <iframe id="preview-frame"></iframe>
-                </div>
-            </div>
+<header>
+    <div class="header-inner">
+        <div>
+            <h1>Code Playground</h1>
+            <div class="subtitle">Ultra-stable • Real-time • No crashes guaranteed</div>
         </div>
-
-        <div class="console-panel">
-            <div class="console-header">
-                <div class="console-title">Console</div>
-                <div class="preview-actions">
-                    <button class="btn" id="clear-console-btn">
-                        <span>×</span> Clear
-                    </button>
-                </div>
-            </div>
-            <div class="console-content" id="console-output">
-                <div class="console-log log-info">Console ready. Start coding to see output here.</div>
-            </div>
-        </div>
-
-        <div class="status-bar">
-            <div>Code Playground - Real-time Testing Environment</div>
-            <div id="status-message">Ready</div>
+        <div class="buttons">
+            <button id="reset">Reset</button>
+            <button id="copy">Copy All</button>
+            <button id="clear">Clear Console</button>
+            <button class="primary" id="run">Run →</button>
         </div>
     </div>
+</header>
 
-    <div class="welcome-modal" id="welcome-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Welcome to Code Playground</h2>
-                <p>Your interactive environment for testing HTML, CSS, and JavaScript code</p>
+<main>
+    <div class="split-h">
+        <section class="editor-panel">
+            <div class="tabs">
+                <div class="tab active" data-lang="html">HTML</div>
+                <div class="tab" data-lang="css">CSS</div>
+                <div class="tab" data-lang="js">JavaScript</div>
             </div>
-            <div class="modal-body">
-                <p>This playground allows you to:</p>
-                <ul class="feature-list">
-                    <li>Write and test HTML, CSS, and JavaScript code in real-time</li>
-                    <li>See immediate visual feedback as you type</li>
-                    <li>Use the console to debug your code</li>
-                    <li>Save and reset your work</li>
-                </ul>
-                
-                <h3>Getting Started</h3>
-                <p>Begin by editing the code in any of the three tabs. Your changes will automatically update the preview.</p>
-                
-                <div class="code-example">
-                    // Example: Try changing the button color in CSS<br>
-                    #demo-btn {<br>
-                    &nbsp;&nbsp;background: #e74c3c;<br>
-                    }
-                </div>
-                
-                <p>Check the console tab for any JavaScript output or errors.</p>
+            <textarea id="html" spellcheck="false"></textarea>
+            <textarea id="css" spellcheck="false" class="hidden"></textarea>
+            <textarea id="js" spellcheck="false" class="hidden"></textarea>
+            <div class="vsplit"></div>
+        </section>
+
+            <div class="splitter" id="hsplit"></div>
+
+        <section class="preview-panel">
+            <div class="preview-header">
+                <span>Preview</span>
+                <button id="refresh">Refresh</button>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="close-modal-btn">Get Started</button>
-            </div>
-        </div>
+            <iframe id="preview" sandbox="allow-scripts allow-modals"></iframe>
+        </section>
     </div>
 
-    <script>
-        // DOM Elements
-        const htmlEditor = document.getElementById('html-editor');
-        const cssEditor = document.getElementById('css-editor');
-        const jsEditor = document.getElementById('js-editor');
-        const previewFrame = document.getElementById('preview-frame');
-        const consoleOutput = document.getElementById('console-output');
-        const editorTabs = document.querySelectorAll('.editor-tab');
-        const editors = document.querySelectorAll('.editor');
-        const runBtn = document.getElementById('run-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const refreshBtn = document.getElementById('refresh-btn');
-        const helpBtn = document.getElementById('help-btn');
-        const clearConsoleBtn = document.getElementById('clear-console-btn');
-        const welcomeModal = document.getElementById('welcome-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const statusMessage = document.getElementById('status-message');
+    <section class="console">
+        <div class="console-header">
+            <span>Console</span>
+        </div>
+        <div class="console-body" id="console">Console ready.</div>
+    </section>
+</main>
 
-        // Default code templates
-        const defaultHTML = `<!DOCTYPE html>
-<html>
+<script>
+"use strict";
+
+// Elements
+const editors = {
+    html: document.getElementById('html'),
+    css:  document.getElementById('css'),
+    js:   document.getElementById('js')
+};
+const tabs = document.querySelectorAll('.tab');
+const iframe = document.getElementById('preview');
+const consoleEl = document.getElementById('console');
+
+// Default beautiful starter code
+const defaults = {
+    html: `<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>My Page</title>
 </head>
 <body>
-    <h1>Welcome to Code Playground</h1>
-    <p>Start editing to see your changes in real-time!</p>
-    <button id="demo-btn">Click Me!</button>
-    <div id="output"></div>
+    <h1>Hello from the Playground!</h1>
+    <p>Edit freely — nothing can break this app.</p>
+    <button id="clickme">Click Me</button>
+    <div id="log"></div>
 </body>
-</html>`;
+</html>`.trim(),
 
-        const defaultCSS = `body {
-    font-family: 'Segoe UI', sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: #f5f7fb;
-    color: #333;
-}
+    css: `body { font-family: system-ui, sans-serif; max-width: 720px; margin: 3rem auto; padding: 2rem; background: #f8fafc; line-height: 1.7; color: #333; }
+h1 { color: #4361ee; }
+#clickme { background: #4361ee; color: white; border: none; padding: 0.9rem 1.8rem; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+#clickme:hover { background: #3a0ca3; }
+#log > div { margin: 0.5rem 0; padding: 0.8rem; background: white; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }`.trim(),
 
-h1 {
-    color: #4361ee;
-    border-bottom: 2px solid #4361ee;
-    padding-bottom: 0.5rem;
-}
-
-#demo-btn {
-    background: #4361ee;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-#demo-btn:hover {
-    background: #3a0ca3;
-    transform: translateY(-2px);
-}
-
-#output {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}`;
-
-        const defaultJS = `// Get the button and output elements
-const button = document.getElementById('demo-btn');
-const output = document.getElementById('output');
-
-// Add click event listener to the button
-button.addEventListener('click', function() {
-    // Create a new element
-    const newElement = document.createElement('div');
-    newElement.textContent = \`Button clicked at \${new Date().toLocaleTimeString()}\`;
-    newElement.style.padding = '0.5rem';
-    newElement.style.margin = '0.5rem 0';
-    newElement.style.background = '#e9ecef';
-    newElement.style.borderRadius = '4px';
-    
-    // Add the new element to the output
-    output.appendChild(newElement);
-    
-    // Log to console
+    js: `document.getElementById('clickme')?.addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.textContent = 'Clicked at ' + new Date().toLocaleTimeString();
+    document.getElementById('log').appendChild(div);
     console.log('Button clicked!');
 });
+console.log('%cPlayground ready!', 'color:#4cc9f0; font-size:14px; font-weight:bold;');`.trim()
+};
 
-// Additional example: Change text on mouseover
-button.addEventListener('mouseover', function() {
-    button.textContent = 'Click Me Now!';
-});
-
-button.addEventListener('mouseout', function() {
-    button.textContent = 'Click Me!';
-});
-
-console.log('JavaScript loaded successfully!');`;
-
-        // Initialize editors with default content
-        htmlEditor.value = defaultHTML;
-        cssEditor.value = defaultCSS;
-        jsEditor.value = defaultJS;
-
-        // Tab switching functionality
-        editorTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabName = tab.getAttribute('data-tab');
-                
-                // Update active tab
-                editorTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // Show corresponding editor
-                editors.forEach(editor => editor.classList.add('hidden'));
-                document.getElementById(`${tabName}-editor`).classList.remove('hidden');
-            });
+// Load from localStorage safely
+function load() {
+    try {
+        Object.keys(editors).forEach(k => {
+            const saved = localStorage.getItem('pg_' + k);
+            editors[k].value = saved ?? defaults[k];
         });
+    } catch(e) {
+        Object.keys(editors).forEach(k => editors[k].value = defaults[k]);
+    }
+}
+load();
 
-        // Update preview function
-        function updatePreview() {
-            const html = htmlEditor.value;
-            const css = cssEditor.value;
-            const js = jsEditor.value;
-            
-            // Create a complete HTML document
-            const fullHTML = `
+// Tab switching
+tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(tab => tab.classList.remove('active'));
+    t.classList.add('active');
+    Object.values(editors).forEach(ed => ed.classList.add('hidden'));
+    editors[t.dataset.lang].classList.remove('hidden');
+}));
+
+// Safe console logging
+function log(msg, type = 'log') {
+    const line = document.createElement('div');
+    line.className = 'log-' + type;
+    if (typeof msg === 'object') msg = JSON.stringify(msg, null, 2);
+    line.textContent = msg;
+    consoleEl.appendChild(line);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+function clearConsole() { consoleEl.innerHTML = ''; }
+
+// Render using srcdoc (safest & fastest method)
+function render() {
+    clearConsole();
+    log('Rendering…', 'log');
+
+    const html = editors.html.value || '<body></body>';
+    const css = editors.css.value;
+    const js = editors.js.value;
+
+    const full = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -711,119 +206,108 @@ console.log('JavaScript loaded successfully!');`;
     <style>${css}</style>
 </head>
 <body>
-    ${html}
-    <script>
-        // Override console methods to capture output
-        const originalLog = console.log;
-        const originalWarn = console.warn;
-        const originalError = console.error;
-        
-        console.log = function(...args) {
-            originalLog.apply(console, args);
-            window.parent.postMessage({ type: 'console', method: 'log', args: args }, '*');
-        };
-        
-        console.warn = function(...args) {
-            originalWarn.apply(console, args);
-            window.parent.postMessage({ type: 'console', method: 'warn', args: args }, '*');
-        };
-        
-        console.error = function(...args) {
-            originalError.apply(console, args);
-            window.parent.postMessage({ type: 'console', method: 'error', args: args }, '*');
-        };
-        
-        // Error handling
-        window.addEventListener('error', function(e) {
-            window.parent.postMessage({ 
-                type: 'console', 
-                method: 'error', 
-                args: [`Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`] 
-            }, '*');
-        });
-        
-        // Execute the user's JavaScript
-        ${js}
-    <\/script>
+${html}
+<script>
+(() => {
+    const orig = { log: console.log, warn: console.warn, error: console.error };
+    const send = (type, args) => parent.postMessage({type, args}, '*');
+    console.log = (...a) => { orig.log(...a); send('log', a); };
+    console.warn = (...a) => { orig.warn(...a); send('warn', a); };
+    console.error = (...a) => { orig.error(...a); send('error', a); };
+    window.onerror = (m, s, l, c, e) => send('error', [m + ' (line ' + l + ')']);
+    try { ${js} } catch(e) { send('error', [e.message]); }
+})();
+<\/script>
 </body>
 </html>`;
-            
-            // Update the iframe
-            previewFrame.srcdoc = fullHTML;
-            statusMessage.textContent = 'Preview updated';
-            
-            // Clear status message after 2 seconds
-            setTimeout(() => {
-                statusMessage.textContent = 'Ready';
-            }, 2000);
-        }
 
-        // Console message handler
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'console') {
-                const logElement = document.createElement('div');
-                logElement.className = `console-log log-${event.data.method}`;
-                
-                // Format the log message
-                const formattedArgs = event.data.args.map(arg => {
-                    if (typeof arg === 'object') {
-                        try {
-                            return JSON.stringify(arg);
-                        } catch (e) {
-                            return String(arg);
-                        }
-                    }
-                    return String(arg);
-                }).join(' ');
-                
-                logElement.textContent = `> ${formattedArgs}`;
-                consoleOutput.appendChild(logElement);
-                
-                // Auto-scroll to bottom
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    iframe.srcdoc = full;
+}
+
+// Receive console messages
+window.addEventListener('message', e => {
+    if (e.data && e.data.type && e.data.args) {
+        const msg = e.data.args.map(a => 
+            typeof a === 'object' ? JSON.stringify(a) : String(a)
+        ).join(' ');
+        log(msg, e.data.type);
+    }
+});
+
+// Auto-save + auto-render (debounced)
+let timer;
+function changed() {
+    clearTimeout(timer);
+    timer = setTimeout(render, 500);
+    try {
+        localStorage.setItem('pg_html', editors.html.value);
+        localStorage.setItem('pg_css',  editors.css.value);
+        localStorage.setItem('pg_js',   editors.js.value);
+    } catch(e) {}
+}
+Object.values(editors).forEach(ed => ed.addEventListener('input', changed));
+
+// Buttons
+document.getElementById('run').onclick = render;
+document.getElementById('refresh').onclick = render;
+document.getElementById('clear').onclick = clearConsole;
+document.getElementById('reset').onclick = () => {
+    if (confirm('Reset everything to defaults?')) {
+        Object.keys(defaults).forEach(k => {
+            editors[k].value = defaults[k];
+            localStorage.setItem('pg_' + k, defaults[k]);
+        });
+        render();
+    }
+};
+document.getElementById('copy').onclick = async () => {
+    const code = `<!-- HTML -->\n${editors.html.value}\n\n<!-- CSS -->\n<style>\n${editors.css.value}\n</style>\n\n<!-- JS -->\n<script>\n${editors.js.value}\n<\/script>`;
+    await navigator.clipboard.writeText(code);
+    log('Copied full code to clipboard!', 'log');
+};
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'Enter') { e.preventDefault(); render(); }
+        if (e.key === 's') { e.preventDefault(); document.getElementById('copy').click(); }
+    }
+});
+
+// Resizers (horizontal & vertical)
+function createResizer(el, horizontal = true) {
+    el.addEventListener('mousedown', e => {
+        e.preventDefault();
+        el.classList.add('drag');
+        const start = horizontal ? e.clientX : e.clientY;
+        const startSize = horizontal 
+            ? document.querySelector('.editor-panel').offsetWidth
+            : document.querySelector('.console').offsetHeight;
+
+        const move = e => {
+            const delta = (horizontal ? e.clientX : e.clientY) - start;
+            if (horizontal) {
+                const w = Math.max(200, startSize + delta);
+                document.querySelector('.editor-panel').style.flex = `0 0 ${w}px`;
+            } else {
+                const h = Math.max(100, Math.min(500, startSize - delta));
+                document.querySelector('.console').style.height = h + 'px';
             }
-        });
+        };
+        const up = () => {
+            el.classList.remove('drag');
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+}
+createResizer(document.getElementById('hsplit'), true);
+createResizer(document.querySelector('.vsplit'), false);
 
-        // Event listeners
-        runBtn.addEventListener('click', updatePreview);
-        refreshBtn.addEventListener('click', updatePreview);
-        
-        resetBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to reset all code to the default examples?')) {
-                htmlEditor.value = defaultHTML;
-                cssEditor.value = defaultCSS;
-                jsEditor.value = defaultJS;
-                updatePreview();
-                statusMessage.textContent = 'Code reset to defaults';
-            }
-        });
-        
-        clearConsoleBtn.addEventListener('click', function() {
-            consoleOutput.innerHTML = '<div class="console-log log-info">Console cleared</div>';
-        });
-        
-        helpBtn.addEventListener('click', function() {
-            welcomeModal.classList.remove('hidden');
-        });
-        
-        closeModalBtn.addEventListener('click', function() {
-            welcomeModal.classList.add('hidden');
-        });
-
-        // Auto-update preview with debouncing
-        let updateTimeout;
-        function scheduleUpdate() {
-            clearTimeout(updateTimeout);
-            updateTimeout = setTimeout(updatePreview, 1000);
-            statusMessage.textContent = 'Updating preview...';
-        }
-
-        htmlEditor.addEventListener('input', scheduleUpdate);
-        cssEditor.addEventListener('input', scheduleUpdate);
-        jsEditor.addEventListener('input', scheduleUpdate);
-
-        // Initialize the preview
-        updatePreview();
-    </script>
+// Initial render
+render();
+</script>
 </body>
 </html>

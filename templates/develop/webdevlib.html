@@ -1,1373 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Library</title>
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #4cc9f0;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --dark: #212529;
-            --light: #f8f9fa;
-            --sidebar-width: 300px;
-            --border-radius: 8px;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeVault Offline • Fixed & Perfect</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --primary: #4361ee;
+      --primary-hover: #3a56e4;
+      --border: #e2e8f0;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --transition: all 0.22s ease;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
 
-        body {
-            background-color: #f5f7fb;
-            color: var(--dark);
-            line-height: 1.6;
-        }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: var(--transition);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: white;
-            border-bottom: 1px solid #e1e5eb;
-            display: flex;
-            align-items: center;
-            padding: 0 1rem;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 68px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      gap: 1rem;
+    }
 
-        .menu-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 4px;
-            transition: var(--transition);
-        }
+    .logo { font-weight: 800; font-size: 1.6rem; color: var(--primary); }
+    .menu-btn, .theme-btn {
+      font-size: 1.6rem; background:none; border:none; cursor:pointer; padding:8px; border-radius:8px; transition:var(--transition);
+    }
+    .menu-btn:hover, .theme-btn:hover { background:rgba(67,97,238,0.1); }
 
-        .menu-btn:hover {
-            background: #f0f0f0;
-        }
+    /* Sidebar with close button on mobile */
+    .sidebar {
+      position:fixed;
+      top:0; bottom:0; left:0;
+      width:340px;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      overflow-y:auto;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
+      z-index: 1100;
+      transform: translateX(0);
+    }
 
-        .app-title {
-            margin-left: 1rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
+    .sidebar-header {
+      height: 68px;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-        /* Sidebar/Drawer */
-        .sidebar {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: white;
-            border-right: 1px solid #e1e5eb;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            transform: translateX(-100%);
-            z-index: 90;
-            box-shadow: var(--shadow);
-        }
+    .close-drawer {
+      font-size: 1.8rem;
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
 
-        .sidebar.open {
-            transform: translateX(0);
-        }
+    @media (max-width: 868px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .close-drawer { display: block; }
+      main { margin-left: 0 !important; padding: 1rem; }
+    }
 
-        .sidebar-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
+    .search {
+      padding:1rem;
+      border-bottom:1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 68px;
+      z-index: 9;
+    }
+    .search input {
+      width:100%; padding:0.85rem 1rem;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:1rem;
+      background:var(--bg);
+      color:var(--text);
+      outline:none;
+    }
+    .search input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67,97,238,0.15);
+    }
 
-        .sidebar-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
+    .categories { padding:0.5rem 0; }
+    .cat-title {
+      padding:0.8rem 1.5rem;
+      font-weight:700;
+      font-size:0.88rem;
+      text-transform:uppercase;
+      letter-spacing:0.8px;
+      color:var(--primary);
+    }
+    .topic {
+      padding:0.85rem 1.5rem;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      cursor:pointer;
+      transition:var(--transition);
+      border-left:4px solid transparent;
+    }
+    .topic:hover { background:rgba(67,97,238,0.08); }
+    .topic.active {
+      background:rgba(67,97,238,0.14);
+      border-left-color:var(--primary);
+      font-weight:600;
+    }
+    .topic-icon {
+      width:40px; height:40px;
+      background:var(--primary);
+      color:#fff;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      font-weight:bold;
+      font-size:1rem;
+    }
 
-        .sidebar-subtitle {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
+    main {
+      margin-left:340px;
+      margin-top:68px;
+      padding:2.5rem;
+      min-height: calc(100vh - 68px);
+    }
 
-        .search-container {
-            padding: 1rem;
-            border-bottom: 1px solid #e1e5eb;
-        }
+    .card {
+      background:var(--surface);
+      border-radius:var(--radius);
+      padding:2.5rem;
+      max-width:1000px;
+      margin:0 auto;
+      box-shadow:var(--shadow);
+    }
+    .title { font-size:2rem; margin-bottom:0.5rem; }
+    .desc { color:var(--text-muted); font-size:1.1rem; margin-bottom:2rem; }
 
-        .search-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-        }
+    .preview {
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      min-height:420px;
+      background:#fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .preview iframe { width:100%; height:620px; border:0; }
 
-        .categories {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem 0;
-        }
+    .fab {
+      position:fixed;
+      bottom:30px; right:30px;
+      width:68px; height:68px;
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      border-radius:50%;
+      font-size:2rem;
+      cursor:pointer;
+      box-shadow:0 10px 30px rgba(67,97,238,0.4);
+      transition:var(--transition);
+      z-index:999;
+    }
+    .fab:hover { transform:scale(1.12); background:var(--primary-hover); }
+    .fab:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
-        .category {
-            margin-bottom: 1.5rem;
-        }
+    .modal {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.85);
+      display:grid; place-items:center;
+      z-index:2000;
+      opacity:0; visibility:hidden;
+      transition:var(--transition);
+      backdrop-filter: blur(8px);
+    }
+    .modal.open { opacity:1; visibility:visible; }
+    .modal-content {
+      background:var(--surface);
+      width:94%; max-width:1100px;
+      max-height:92vh;
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      display:flex; flex-direction:column;
+    }
+    .modal-header {
+      padding:1.5rem 2rem;
+      background:var(--primary);
+      color:#fff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:1.4rem;
+      font-weight:600;
+    }
+    .close { font-size:2.2rem; background:none; border:none; color:#fff; cursor:pointer; padding:0 4px; border-radius:6px; }
+    .close:hover { background: rgba(255,255,255,0.1); }
 
-        .category-title {
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            color: var(--primary);
-            border-bottom: 1px solid #e9ecef;
-            margin-bottom: 0.5rem;
-        }
+    .code {
+      flex:1;
+      overflow:auto;
+      padding:2rem;
+      background:#1e1e1e;
+      color:#d4d4d4;
+      font-family:'Consolas','Courier New',monospace;
+      font-size:0.98rem;
+      line-height:1.7;
+      white-space: pre;
+    }
+    .code .tag { color:#569cd6; }
+    .code .attr { color:#9cdcfe; }
+    .code .val { color:#ce9178; }
+    .code .com { color:#6a9955; font-style:italic; }
+    .code .key { color:#c586c0; }
 
-        .topic-list {
-            list-style: none;
-        }
-
-        .topic-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            border-left: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .topic-item:hover {
-            background: #f8f9fa;
-        }
-
-        .topic-item.active {
-            background: #eef2ff;
-            border-left-color: var(--primary);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .topic-icon {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #e9ecef;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-
-        .topic-item.active .topic-icon {
-            background: var(--primary);
-            color: white;
-        }
-
-        .sidebar-footer {
-            padding: 1rem;
-            border-top: 1px solid #e1e5eb;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .sidebar-btn {
-            flex: 1;
-            padding: 0.75rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .sidebar-btn:hover {
-            background: #3a56e4;
-        }
-
-        .sidebar-btn.export {
-            background: var(--success);
-        }
-
-        .sidebar-btn.export:hover {
-            background: #27ae60;
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-top: 60px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 60px);
-        }
-
-        .demo-area {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 2rem;
-        }
-
-        .demo-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--dark);
-            border-bottom: 1px solid #e9ecef;
-            padding-bottom: 0.5rem;
-        }
-
-        .demo-container {
-            width: 100%;
-            min-height: 300px;
-            border: 1px solid #e1e5eb;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-        }
-
-        .demo-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Floating Action Button */
-        .fab {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: var(--transition);
-            z-index: 1000;
-        }
-
-        .fab:hover {
-            background: #3a56e4;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            background: var(--dark);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .close-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: var(--transition);
-        }
-
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-body {
-            flex: 1;
-            padding: 1.5rem;
-            overflow: auto;
-        }
-
-        .code-block {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            line-height: 1.5;
-            max-height: 400px;
-            overflow: auto;
-        }
-
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            background: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-        }
-
-        .btn:hover {
-            background: #f8f9fa;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: #3a56e4;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: #6c757d;
-        }
-
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-title {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-            }
-
-            .fab {
-                bottom: 1rem;
-                right: 1rem;
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    .modal-footer {
+      padding:1rem 2rem;
+      background:var(--bg);
+      border-top:1px solid var(--border);
+      text-align:right;
+    }
+    .btn {
+      padding:0.85rem 2.2rem;
+      background:#10b981;
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:1rem;
+    }
+    .btn:hover { background:#059669; }
+  </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <button class="menu-btn" id="menu-btn">☰</button>
-        <h1 class="app-title">Code Library</h1>
+
+<header>
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <div class="logo">CodeVault</div>
+  <div style="flex:1"></div>
+  <button class="theme-btn" id="themeBtn">🌙</button>
+</header>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div style="font-weight:600; font-size:1.1rem;">Snippets</div>
+    <button class="close-drawer" id="closeDrawer">&times;</button>
+  </div>
+  <div class="search"><input type="text" id="search" placeholder="Search snippets… (Ctrl+K)" /></div>
+  <div class="categories" id="cats"></div>
+</aside>
+
+<main>
+  <div class="card" id="demo">
+    <div style="text-align:center;padding:5rem 2rem;color:var(--text-muted);">
+      <div style="font-size:5rem;margin-bottom:1.5rem;">⚡</div>
+      <h2>Select a snippet from the sidebar</h2>
+      <p style="margin-top:1rem;">Use Ctrl+K to search • Ctrl+Shift+C to view code</p>
     </div>
+  </div>
+</main>
 
-    <!-- Sidebar/Drawer -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h1 class="sidebar-title">Code Library</h1>
-            <p class="sidebar-subtitle">Your personal collection of code features</p>
-        </div>
-
-        <div class="search-container">
-            <input type="text" class="search-input" id="search-input" placeholder="Search features...">
-        </div>
-
-        <div class="categories" id="categories">
-            <!-- Categories and topics will be populated by JavaScript -->
-        </div>
-
-        <div class="sidebar-footer">
-            <button class="sidebar-btn" id="import-btn">Import</button>
-            <button class="sidebar-btn export" id="export-btn">Export</button>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="demo-area" id="demo-area">
-            <!-- Demo content will be populated by JavaScript -->
-        </div>
-    </div>
-
-    <!-- Floating Action Button -->
-    <button class="fab" id="code-fab">
-        <span>{"</>"}</span>
-    </button>
-
-    <!-- Code Modal -->
-    <div class="modal hidden" id="code-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modal-title">Code</h2>
-                <button class="close-btn" id="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <pre class="code-block" id="code-block"></pre>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" id="copy-code">Copy Code</button>
-                <button class="btn btn-primary" id="close-code-btn">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Import Modal -->
-    <div class="modal hidden" id="import-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Import Library Data</h2>
-                <button class="close-btn" id="close-import-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <textarea id="import-data" placeholder="Paste your library data here..." style="width: 100%; height: 300px; padding: 1rem; border: 1px solid #ddd; border-radius: var(--border-radius); font-family: monospace;"></textarea>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" id="cancel-import">Cancel</button>
-                <button class="btn btn-primary" id="confirm-import">Import</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Enhanced library data structure with categories
-        const defaultLibraryData = {
-            "HTML & CSS": {
-                "Flexbox Layout": {
-                    html: `<div class="flex-container">
-  <div class="flex-item">Item 1</div>
-  <div class="flex-item">Item 2</div>
-  <div class="flex-item">Item 3</div>
-</div>`,
-                    css: `.flex-container {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.flex-item {
-  flex: 1;
-  min-width: 100px;
-  padding: 1rem;
-  background: #4361ee;
-  color: white;
-  border-radius: 4px;
-  text-align: center;
-}`,
-                    js: `// JavaScript for interactive flexbox example
-const container = document.querySelector('.flex-container');
-const items = document.querySelectorAll('.flex-item');
-
-items.forEach((item, index) => {
-  item.addEventListener('click', () => {
-    alert(\`You clicked item \${index + 1}\`);
-  });
-});`,
-                    description: "Create flexible and responsive layouts with CSS Flexbox"
-                },
-                "CSS Grid": {
-                    html: `<div class="grid-container">
-  <div class="grid-item header">Header</div>
-  <div class="grid-item sidebar">Sidebar</div>
-  <div class="grid-item main">Main Content</div>
-  <div class="grid-item footer">Footer</div>
-</div>`,
-                    css: `.grid-container {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  grid-template-rows: auto 1fr auto;
-  grid-template-areas:
-    "header header"
-    "sidebar main"
-    "footer footer";
-  gap: 10px;
-  height: 300px;
-}
-
-.header { grid-area: header; background: #4361ee; }
-.sidebar { grid-area: sidebar; background: #3a0ca3; }
-.main { grid-area: main; background: #4cc9f0; }
-.footer { grid-area: footer; background: #7209b7; }
-
-.grid-item {
-  padding: 1rem;
-  color: white;
-  border-radius: 4px;
-}`,
-                    js: `// JavaScript for grid layout example
-const gridItems = document.querySelectorAll('.grid-item');
-
-gridItems.forEach(item => {
-  item.addEventListener('mouseenter', () => {
-    item.style.opacity = '0.9';
-    item.style.transform = 'scale(1.02)';
-    item.style.transition = 'all 0.3s ease';
-  });
-  
-  item.addEventListener('mouseleave', () => {
-    item.style.opacity = '1';
-    item.style.transform = 'scale(1)';
-  });
-});`,
-                    description: "Create two-dimensional layouts with CSS Grid"
-                },
-                "Responsive Navigation": {
-                    html: `<nav class="navbar">
-  <div class="nav-brand">My Site</div>
-  <button class="nav-toggle" id="nav-toggle">☰</button>
-  <ul class="nav-menu" id="nav-menu">
-    <li><a href="#">Home</a></li>
-    <li><a href="#">About</a></li>
-    <li><a href="#">Services</a></li>
-    <li><a href="#">Contact</a></li>
-  </ul>
-</nav>`,
-                    css: `.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: #4361ee;
-  color: white;
-}
-
-.nav-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.nav-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.nav-menu {
-  display: flex;
-  list-style: none;
-  gap: 1.5rem;
-}
-
-.nav-menu a {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background 0.3s ease;
-}
-
-.nav-menu a:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-@media (max-width: 768px) {
-  .nav-toggle {
-    display: block;
-  }
-  
-  .nav-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #4361ee;
-    flex-direction: column;
-    padding: 1rem;
-    display: none;
-  }
-  
-  .nav-menu.active {
-    display: flex;
-  }
-}`,
-                    js: `// JavaScript for responsive navigation
-const navToggle = document.getElementById('nav-toggle');
-const navMenu = document.getElementById('nav-menu');
-
-navToggle.addEventListener('click', () => {
-  navMenu.classList.toggle('active');
-});`,
-                    description: "A responsive navigation bar that adapts to mobile screens"
-                }
-            },
-            "JavaScript": {
-                "Modal Dialog": {
-                    html: `<button id="open-modal">Open Modal</button>
+<button class="fab" id="fab" disabled>⚡</button>
 
 <div class="modal" id="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Modal Title</h2>
-      <button class="close-modal">&times;</button>
+      <div id="modalTitle">Code</div>
+      <button class="close">×</button>
     </div>
-    <div class="modal-body">
-      <p>This is a modal dialog example.</p>
-    </div>
+    <pre class="code" id="codeBlock"><code></code></pre>
     <div class="modal-footer">
-      <button class="btn">Cancel</button>
-      <button class="btn btn-primary">Save</button>
+      <button class="btn" id="copy">Copy All</button>
     </div>
   </div>
-</div>`,
-                    css: `.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-}
+</div>
 
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+<script>
+  const snippets = {
+    "Layout": {
+      "Perfect Center": {
+        desc: "Center anything with CSS Grid",
+        html: `<div class="center">Perfectly Centered</div>`,
+        css: `.center{display:grid;place-items:center;height:100vh;margin:0;background:#4361ee;color:#fff;font-size:2.5rem;font-family:system-ui;`,
+        js: ""
+      },
+      "Holy Grail": {
+        desc: "Classic header + sidebar + footer layout",
+        html: `<div class="holy"><header>Header</header><aside>Sidebar</aside><main>Main</main><footer>Footer</footer></div>`,
+        css: `.holy{display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:260px 1fr;min-height:100vh;gap:1rem;padding:1rem;background:#f8fafc;font-family:system-ui}.holy>*{padding:2rem;background:#4361ee;color:#fff;border-radius:12px;text-align:center}@media(max-width:768px){.holy{grid-template-columns:1fr}}`,
+        js: ""
+      },
+      "Responsive Cards": {
+        desc: "Auto-fit card grid with hover lift",
+        html: `<div class="cards">${Array(6).fill('<div class="card">Card Content</div>').join('')}</div>`,
+        css: `.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2rem;padding:2rem}.card{background:#fff;padding:2.5rem;border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,0.1);transition:0.3s;text-align:center;font-size:1.2rem}.card:hover{transform:translateY(-12px);box-shadow:0 20px 40px rgba(0,0,0,0.15)}`,
+        js: ""
+      }
+    },
+    "Components": {
+      "Glassmorphism": {
+        desc: "Frosted glass card effect",
+        html: `<div class="glass">Glassmorphism<br><small>Beautiful blur effect</small></div>`,
+        css: `body{background:linear-gradient(135deg,#667eea,#764ba2);margin:0;display:grid;place-items:center;min-height:100vh}.glass{padding:3rem 2rem;background:rgba(255,255,255,0.15);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.3);color:#fff;text-align:center;font-family:system-ui;font-size:2rem;font-weight:300}`,
+        js: ""
+      },
+      "Neumorphism Button": {
+        desc: "Soft UI pressed effect",
+        html: `<button class="neuro">Press Me</button>`,
+        css: `.neuro{padding:1.5rem 3.5rem;font-size:1.3rem;border:none;border-radius:20px;background:#e0e5ec;box-shadow:12px 12px 24px #bec3c9,-12px -12px 24px #ffffff;cursor:pointer;transition:0.2s;font-weight:600;outline:none}.neuro:active{box-shadow:inset 8px 8px 16px #bec3c9,inset -8px -8px 16px #ffffff}`,
+        js: ""
+      },
+      "Toast Notification": {
+        desc: "Click anywhere → toast appears",
+        html: `<div class="toast" id="toast">Hello from CodeVault! 👋</div>`,
+        css: `.toast{position:fixed;bottom:30px;right:30px;padding:1.2rem 2rem;background:#333;color:#fff;border-radius:12px;opacity:0;transform:translateY(100px);transition:0.4s ease;z-index:1000;box-shadow:0 10px 30px rgba(0,0,0,0.3);font-family:system-ui}.toast.show{opacity:1;transform:translateY(0)}`,
+        js: `document.body.onclick=()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)};`
+      }
+    },
+    "JavaScript": {
+      "Copy to Clipboard": {
+        desc: "Modern Clipboard API",
+        html: `<textarea id="txt" style="width:100%;padding:1rem;font-size:1rem;">This text will be copied!</textarea><br><br><button onclick="copy()">Copy Text</button>`,
+        css: `button{padding:1rem 2rem;background:#4361ee;color:white;border:none;border-radius:10px;font-size:1.1rem;cursor:pointer}`,
+        js: `function copy(){const t=document.getElementById('txt').value;navigator.clipboard.writeText(t).then(()=>alert('Copied!'))}`
+      },
+      "Dark Mode Toggle": {
+        desc: "Persistent with localStorage",
+        html: `<button id="toggle" style="padding:1rem 2rem;font-size:1.1rem;">Toggle Theme</button>`,
+        css: `button{border:none;border-radius:10px;background:#4361ee;color:#fff;cursor:pointer;padding:1rem 2rem;font-size:1.1rem;}`,
+        js: `const b=document.getElementById('toggle');const t=localStorage.getItem('theme')||'light';document.body.dataset.theme=t;b.textContent=t==='dark'?'☀️ Light Mode':'🌙 Dark Mode';b.onclick=()=>{const n=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=n;localStorage.setItem('theme',n);b.textContent=n==='dark'?'☀️ Light Mode':'🌙 Dark Mode';}`
+      }
+    }
+  };
 
-.modal-header {
-  padding: 1rem 1.5rem;
-  background: #212529;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 8px 8px 0 0;
-}
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
 
-.modal-body {
-  padding: 1.5rem;
-}
+  let currentSnippet = null;
 
-.modal-footer {
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  border-radius: 0 0 8px 8px;
-}
+  // Load saved theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) document.body.dataset.theme = savedTheme;
+  $('#themeBtn').textContent = document.body.dataset.theme === 'dark' ? '☀️' : '🌙';
 
-.btn {
-  padding: 0.5rem 1rem;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: #4361ee;
-  color: white;
-  border-color: #4361ee;
-}`,
-                    js: `const openModalBtn = document.getElementById('open-modal');
-const modal = document.getElementById('modal');
-const closeModalBtn = document.querySelector('.close-modal');
-
-openModalBtn.addEventListener('click', () => {
-  modal.style.display = 'flex';
-});
-
-closeModalBtn.addEventListener('click', () => {
-  modal.style.display = 'none';
-});
-
-modal.addEventListener('click', (e) => {
-  if (e.target === modal) {
-    modal.style.display = 'none';
+  // Render sidebar
+  const cats = $('#cats');
+  const frag = document.createDocumentFragment();
+  for (const [cat, items] of Object.entries(snippets)) {
+    const section = document.createElement('div');
+    section.innerHTML = `<div class="cat-title">${cat}</div>`;
+    const list = document.createElement('div');
+    for (const [name, data] of Object.entries(items)) {
+      const topic = document.createElement('div');
+      topic.className = 'topic';
+      topic.dataset.cat = cat;
+      topic.dataset.name = name;
+      topic.innerHTML = `
+        <span class="topic-icon">${name[0]}</span>
+        <div>
+          <div style="font-weight:600">${name}</div>
+          <small style="color:var(--text-muted);font-size:0.88rem;">${data.desc}</small>
+        </div>
+      `;
+      topic.onclick = () => {
+        $$('.topic').forEach(t => t.classList.remove('active'));
+        topic.classList.add('active');
+        loadSnippet(cat, name, data);
+        $('#sidebar').classList.remove('open'); // auto-close on mobile
+      };
+      list.appendChild(topic);
+    }
+    section.appendChild(list);
+    frag.appendChild(section);
   }
-});`,
-                    description: "Create a reusable modal dialog component"
-                },
-                "Fetch API": {
-                    html: `<div class="api-demo">
-  <button id="fetch-data">Fetch Data</button>
-  <div id="result" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
-</div>`,
-                    css: `.api-demo {
-  padding: 1rem;
-}
+  cats.appendChild(frag);
 
-button {
-  padding: 0.5rem 1rem;
-  background: #4361ee;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+  // Load snippet into iframe
+  function loadSnippet(cat, name, data) {
+    currentSnippet = data;
+    $('#demo').innerHTML = `
+      <h2 class="title">${name}</h2>
+      <p class="desc">${data.desc}</p>
+      <div class="preview"><iframe sandbox="allow-scripts allow-modals"></iframe></div>
+    `;
+    const iframe = $('#demo iframe');
+    const doc = iframe.contentDocument;
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html><head>
+        <meta charset="utf-8">
+        <style>${data.css || ''}</style>
+      </head>
+      <body style="margin:0;">
+        ${data.html || ''}
+        <script>${data.js || ''}<\/script>
+      </body></html>
+    `);
+    doc.close();
 
-button:hover {
-  background: #3a56e4;
-}`,
-                    js: `const fetchBtn = document.getElementById('fetch-data');
-const resultDiv = document.getElementById('result');
-
-fetchBtn.addEventListener('click', async () => {
-  try {
-    resultDiv.textContent = 'Loading...';
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
-    const data = await response.json();
-    resultDiv.textContent = JSON.stringify(data, null, 2);
-  } catch (error) {
-    resultDiv.textContent = 'Error fetching data: ' + error.message;
+    // Enable FAB button
+    $('#fab').disabled = false;
   }
-});`,
-                    description: "Make HTTP requests using the Fetch API"
-                },
-                "Form Validation": {
-                    html: `<form id="validation-form">
-  <div class="form-group">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-    <div class="error-message" id="name-error"></div>
-  </div>
-  
-  <div class="form-group">
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    <div class="error-message" id="email-error"></div>
-  </div>
-  
-  <div class="form-group">
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required minlength="6">
-    <div class="error-message" id="password-error"></div>
-  </div>
-  
-  <button type="submit">Submit</button>
-</form>
-<div id="form-result" style="margin-top: 1rem;"></div>`,
-                    css: `.form-group {
-  margin-bottom: 1rem;
-}
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
+  // Show code modal
+  $('#fab').onclick = () => {
+    if (!currentSnippet) return;
+    const code = $('#codeBlock code');
+    let full = '';
+    if (currentSnippet.html) full += `<!-- HTML -->\n${currentSnippet.html.trim()}\n\n`;
+    if (currentSnippet.css) full += `/* CSS */\n${currentSnippet.css.trim()}\n\n`;
+    if (currentSnippet.js) full += `// JavaScript\n${currentSnippet.js.trim()}`;
+    code.innerHTML = full.trim()
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/&(?!#[0-9]+;)/g, '&amp;')
+      .replace(/<span class="tag">/g, '<span class="tag">')
+      .replace(/(\.[\w-]+|:[\w-]+\([^)]*\)|[\w-]+\s*\{)/g, '<span class="key">$1</span>')
+      .replace(/(".*?")|('.*?')/g, '<span class="val">$1$2</span>')
+      .replace(/(&lt;!--.*?--&gt;)/g, '<span class="com">$1</span>');
+    $('#modalTitle').textContent = currentSnippet.name || 'Code';
+    $('#modal').classList.add('open');
+  };
 
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
+  // Copy button
+  $('#copy').onclick = () => {
+    navigator.clipboard.writeText($('#codeBlock code').textContent).then(() => {
+      $('#copy').textContent = 'Copied!';
+      setTimeout(() => $('#copy').textContent = 'Copy All', 2000);
+    });
+  };
 
-input:focus {
-  outline: none;
-  border-color: #4361ee;
-}
+  // Controls
+  $('#menuBtn').onclick = () => $('#sidebar').classList.add('open');
+  $('#closeDrawer').onclick = () => $('#sidebar').classList.remove('open');
+  $('.close').onclick = () => $('#modal').classList.remove('open');
+  $('#modal').onclick = e => e.target === $('#modal') && $('#modal').classList.remove('open');
 
-.error-message {
-  color: #e74c3c;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: none;
-}
+  $('#themeBtn').onclick = () => {
+    const isDark = document.body.dataset.theme === 'dark';
+    document.body.dataset.theme = isDark ? 'light' : 'dark';
+    localStorage.setItem('theme', document.body.dataset.theme);
+    $('#themeBtn').textContent = isDark ? '🌙' : '☀️';
+  };
 
-button {
-  padding: 0.75rem 1.5rem;
-  background: #4361ee;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-}
+  // Search
+  $('#search').oninput = e => {
+    const term = e.target.value.toLowerCase();
+    $$('.topic').forEach(t => {
+      const text = t.textContent.toLowerCase();
+      t.style.display = text.includes(term) ? '' : 'none';
+    });
+  };
 
-button:hover {
-  background: #3a56e4;
-}`,
-                    js: `const form = document.getElementById('validation-form');
-const nameInput = document.getElementById('name');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const nameError = document.getElementById('name-error');
-const emailError = document.getElementById('email-error');
-const passwordError = document.getElementById('password-error');
-const formResult = document.getElementById('form-result');
+  // Click outside sidebar to close (mobile)
+  document.addEventListener('click', e => {
+    if (window.innerWidth <= 868 && $('#sidebar').classList.contains('open')) {
+      if (!e.target.closest('.sidebar') && !e.target.closest('#menuBtn')) {
+        $('#sidebar').classList.remove('open');
+      }
+    }
+  });
 
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  
-  let isValid = true;
-  
-  // Name validation
-  if (nameInput.value.trim() === '') {
-    nameError.textContent = 'Name is required';
-    nameError.style.display = 'block';
-    isValid = false;
-  } else {
-    nameError.style.display = 'none';
-  }
-  
-  // Email validation
-  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-  if (!emailRegex.test(emailInput.value)) {
-    emailError.textContent = 'Please enter a valid email';
-    emailError.style.display = 'block';
-    isValid = false;
-  } else {
-    emailError.style.display = 'none';
-  }
-  
-  // Password validation
-  if (passwordInput.value.length < 6) {
-    passwordError.textContent = 'Password must be at least 6 characters';
-    passwordError.style.display = 'block';
-    isValid = false;
-  } else {
-    passwordError.style.display = 'none';
-  }
-  
-  if (isValid) {
-    formResult.textContent = 'Form submitted successfully!';
-    formResult.style.color = '#2ecc71';
-    form.reset();
-  } else {
-    formResult.textContent = 'Please fix the errors above';
-    formResult.style.color = '#e74c3c';
-  }
-});`,
-                    description: "Client-side form validation with custom error messages"
-                }
-            }
-        };
+  // Keyboard shortcuts
+  document.onkeydown = e => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'k') {
+        e.preventDefault();
+        $('#search').focus();
+      $('#search').select();
+      }
+      if (e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        if (!currentSnippet) return;
+        $('#fab').click();
+      }
+    }
+    if (e.key === 'Escape') {
+      $('#modal').classList.remove('open');
+      $('#sidebar').classList.remove('open');
+    }
+  };
 
-        // DOM Elements
-        const menuBtn = document.getElementById('menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        const categoriesContainer = document.getElementById('categories');
-        const demoArea = document.getElementById('demo-area');
-        const codeFab = document.getElementById('code-fab');
-        const codeModal = document.getElementById('code-modal');
-        const closeModal = document.getElementById('close-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const codeBlock = document.getElementById('code-block');
-        const copyCodeBtn = document.getElementById('copy-code');
-        const closeCodeBtn = document.getElementById('close-code-btn');
-        const importBtn = document.getElementById('import-btn');
-        const exportBtn = document.getElementById('export-btn');
-        const importModal = document.getElementById('import-modal');
-        const closeImportModal = document.getElementById('close-import-modal');
-        const cancelImport = document.getElementById('cancel-import');
-        const confirmImport = document.getElementById('confirm-import');
-        const importData = document.getElementById('import-data');
-        const searchInput = document.getElementById('search-input');
+  // Auto-select first topic
+  setTimeout(() => {
+    const first = $('.topic');
+    if (first) first.click();
+  }, 100);
 
-        // Current active topic
-        let currentTopic = null;
-        let libraryData = {};
-
-        // Initialize the app
-        function initApp() {
-            // Load library data from localStorage if available
-            const savedData = localStorage.getItem('codeLibrary');
-            if (savedData) {
-                try {
-                    libraryData = JSON.parse(savedData);
-                } catch (e) {
-                    console.error('Error loading saved data:', e);
-                    // Use default data if saved data is corrupted
-                    libraryData = JSON.parse(JSON.stringify(defaultLibraryData));
-                }
-            } else {
-                // Use default data if no saved data
-                libraryData = JSON.parse(JSON.stringify(defaultLibraryData));
-            }
-            
-            // Populate categories and topics
-            populateCategories();
-            
-            // Set the first topic as active if available
-            const firstTopic = getFirstTopic();
-            if (firstTopic) {
-                currentTopic = firstTopic;
-                updateContent(currentTopic.category, currentTopic.name);
-            } else {
-                showEmptyState();
-            }
-            
-            // Add event listeners
-            addEventListeners();
-        }
-
-        // Get the first available topic
-        function getFirstTopic() {
-            for (const category in libraryData) {
-                for (const topicName in libraryData[category]) {
-                    return { category, name: topicName };
-                }
-            }
-            return null;
-        }
-
-        // Populate categories and topics
-        function populateCategories() {
-            // Clear existing content
-            categoriesContainer.innerHTML = '';
-            
-            // Check if we have any data
-            if (Object.keys(libraryData).length === 0) {
-                categoriesContainer.innerHTML = '<div class="empty-state"><p>No topics available</p></div>';
-                return;
-            }
-            
-            // Add each category and its topics
-            for (const categoryName in libraryData) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'category';
-                
-                const categoryTitle = document.createElement('h3');
-                categoryTitle.className = 'category-title';
-                categoryTitle.textContent = categoryName;
-                categoryDiv.appendChild(categoryTitle);
-                
-                const topicList = document.createElement('ul');
-                topicList.className = 'topic-list';
-                
-                // Add each topic to the list
-                for (const topicName in libraryData[categoryName]) {
-                    const topicItem = document.createElement('li');
-                    topicItem.className = 'topic-item';
-                    
-                    // Check if this is the current active topic
-                    if (currentTopic && 
-                        currentTopic.category === categoryName && 
-                        currentTopic.name === topicName) {
-                        topicItem.classList.add('active');
-                    }
-                    
-                    topicItem.setAttribute('data-category', categoryName);
-                    topicItem.setAttribute('data-topic', topicName);
-                    
-                    const topicIcon = document.createElement('span');
-                    topicIcon.className = 'topic-icon';
-                    topicIcon.textContent = topicName.charAt(0);
-                    
-                    const topicText = document.createElement('span');
-                    topicText.textContent = topicName;
-                    
-                    topicItem.appendChild(topicIcon);
-                    topicItem.appendChild(topicText);
-                    
-                    topicList.appendChild(topicItem);
-                }
-                
-                categoryDiv.appendChild(topicList);
-                categoriesContainer.appendChild(categoryDiv);
-            }
-            
-            // Add event listeners to topic items
-            const topicItems = document.querySelectorAll('.topic-item');
-            topicItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    // Update active state
-                    topicItems.forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-                    
-                    // Update content
-                    const category = item.getAttribute('data-category');
-                    const topicName = item.getAttribute('data-topic');
-                    currentTopic = { category, name: topicName };
-                    updateContent(category, topicName);
-                    
-                    // Close sidebar on mobile
-                    if (window.innerWidth <= 768) {
-                        sidebar.classList.remove('open');
-                    }
-                });
-            });
-        }
-
-        // Update the main content based on selected topic
-        function updateContent(category, topicName) {
-            const topic = libraryData[category] && libraryData[category][topicName];
-            
-            if (!topic) {
-                showEmptyState();
-                return;
-            }
-            
-            // Create demo content
-            demoArea.innerHTML = `
-                <h3 class="demo-title">${topicName}</h3>
-                <p>${topic.description || 'No description available.'}</p>
-                <div class="demo-container">
-                    <iframe class="demo-iframe" id="demo-iframe"></iframe>
-                </div>
-            `;
-            
-            // Create the iframe content
-            const iframe = document.getElementById('demo-iframe');
-            const iframeContent = generateIframeContent(topic);
-            
-            // Write the content to the iframe
-            iframe.onload = function() {
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                iframeDoc.open();
-                iframeDoc.write(iframeContent);
-                iframeDoc.close();
-            };
-            
-            // Set the iframe content
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            iframeDoc.open();
-            iframeDoc.write(iframeContent);
-            iframeDoc.close();
-        }
-
-        // Generate HTML content for the iframe
-        function generateIframeContent(topic) {
-            return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }
-        ${topic.css || ''}
-    </style>
-</head>
-<body>
-    ${topic.html || ''}
-    <script>
-        ${topic.js || ''}
-    </script>
-</body>
-</html>`;
-        }
-
-        // Show empty state when no topics available
-        function showEmptyState() {
-            demoArea.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📚</div>
-                    <h3 class="empty-title">No Code Examples</h3>
-                    <p>Add some code examples to your library to get started.</p>
-                </div>
-            `;
-        }
-
-        // Show code modal with the current topic's code
-        function showCodeModal() {
-            if (!currentTopic) {
-                alert('Please select a topic first');
-                return;
-            }
-            
-            const topic = libraryData[currentTopic.category] && libraryData[currentTopic.category][currentTopic.name];
-            
-            if (!topic) return;
-            
-            // Create combined code
-            const combinedCode = generateIframeContent(topic);
-            
-            // Update modal title and code content
-            modalTitle.textContent = `${currentTopic.name} - Code`;
-            codeBlock.textContent = combinedCode || 'No code available for this topic.';
-            
-            // Show modal
-            codeModal.classList.remove('hidden');
-        }
-
-        // Export library data
-        function exportLibrary() {
-            const dataStr = JSON.stringify(libraryData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'code-library.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('open');
-            }
-        }
-
-        // Import library data
-        function importLibrary() {
-            importModal.classList.remove('hidden');
-            importData.value = '';
-        }
-
-        // Confirm import
-        function confirmImportLibrary() {
-            const data = importData.value.trim();
-            
-            if (!data) {
-                alert('Please paste library data to import.');
-                return;
-            }
-            
-            try {
-                const parsedData = JSON.parse(data);
-                
-                // Validate the data structure
-                if (typeof parsedData !== 'object' || Array.isArray(parsedData)) {
-                    throw new Error('Invalid data format. Expected an object.');
-                }
-                
-                // Clear existing data and merge with imported data
-                libraryData = parsedData;
-                
-                // Save to localStorage
-                localStorage.setItem('codeLibrary', JSON.stringify(libraryData));
-                
-                // Update UI
-                populateCategories();
-                
-                // Set first topic as active if available
-                const firstTopic = getFirstTopic();
-                if (firstTopic) {
-                    currentTopic = firstTopic;
-                    updateContent(currentTopic.category, currentTopic.name);
-                } else {
-                    showEmptyState();
-                }
-                
-                // Close modals
-                importModal.classList.add('hidden');
-                sidebar.classList.remove('open');
-                
-                alert('Library data imported successfully!');
-            } catch (e) {
-                alert('Error importing data: ' + e.message);
-            }
-        }
-
-        // Search functionality
-        function handleSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            
-            if (!searchTerm) {
-                // Reset to show all topics
-                const topicItems = document.querySelectorAll('.topic-item');
-                topicItems.forEach(item => {
-                    item.style.display = 'flex';
-                });
-                return;
-            }
-            
-            // Filter topics
-            const topicItems = document.querySelectorAll('.topic-item');
-            topicItems.forEach(item => {
-                const topicName = item.getAttribute('data-topic').toLowerCase();
-                if (topicName.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        // Add all event listeners
-        function addEventListeners() {
-            // Menu button toggles sidebar
-            menuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('open');
-            });
-            
-            // Code FAB click
-            codeFab.addEventListener('click', showCodeModal);
-            
-            // Close modals
-            closeModal.addEventListener('click', () => {
-                codeModal.classList.add('hidden');
-            });
-            
-            closeCodeBtn.addEventListener('click', () => {
-                codeModal.classList.add('hidden');
-            });
-            
-            closeImportModal.addEventListener('click', () => {
-                importModal.classList.add('hidden');
-            });
-            
-            cancelImport.addEventListener('click', () => {
-                importModal.classList.add('hidden');
-            });
-            
-            // Copy code button
-            copyCodeBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(codeBlock.textContent)
-                    .then(() => {
-                        // Show feedback
-                        const originalText = copyCodeBtn.textContent;
-                        copyCodeBtn.textContent = 'Copied!';
-                        copyCodeBtn.style.background = 'var(--success)';
-                        copyCodeBtn.style.borderColor = 'var(--success)';
-                        
-                        setTimeout(() => {
-                            copyCodeBtn.textContent = originalText;
-                            copyCodeBtn.style.background = '';
-                            copyCodeBtn.style.borderColor = '';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy code: ', err);
-                        // Fallback for older browsers
-                        const textArea = document.createElement('textarea');
-                        textArea.value = codeBlock.textContent;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        
-                        // Show feedback
-                        const originalText = copyCodeBtn.textContent;
-                        copyCodeBtn.textContent = 'Copied!';
-                        copyCodeBtn.style.background = 'var(--success)';
-                        copyCodeBtn.style.borderColor = 'var(--success)';
-                        
-                        setTimeout(() => {
-                            copyCodeBtn.textContent = originalText;
-                            copyCodeBtn.style.background = '';
-                            copyCodeBtn.style.borderColor = '';
-                        }, 2000);
-                    });
-            });
-            
-            // Import/Export buttons
-            importBtn.addEventListener('click', importLibrary);
-            exportBtn.addEventListener('click', exportLibrary);
-            
-            // Confirm import
-            confirmImport.addEventListener('click', confirmImportLibrary);
-            
-            // Search input
-            searchInput.addEventListener('input', handleSearch);
-            
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768 && 
-                    sidebar.classList.contains('open') && 
-                    !sidebar.contains(e.target) && 
-                    e.target !== menuBtn) {
-                    sidebar.classList.remove('open');
-                }
-            });
-            
-            // Close modals when clicking outside
-            document.addEventListener('click', (e) => {
-                if (e.target === codeModal) {
-                    codeModal.classList.add('hidden');
-                }
-                if (e.target === importModal) {
-                    importModal.classList.add('hidden');
-                }
-            });
-            
-            // Handle Escape key to close modals
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    codeModal.classList.add('hidden');
-                    importModal.classList.add('hidden');
-                }
-            });
-        }
-
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+  console.log("CodeVault Fixed Edition Ready ⚡ | Ctrl+K → Search | Ctrl+Shift+C → Code | Esc → Close");
+</script>
 </body>
 </html>
