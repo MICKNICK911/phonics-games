@@ -45,7 +45,7 @@
             display: flex;
             align-items: center;
             padding: 0 1rem;
-            z-index: 9999;
+            z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
@@ -561,6 +561,7 @@ gridItems.forEach(item => {
   item.addEventListener('mouseenter', () => {
     item.style.opacity = '0.9';
     item.style.transform = 'scale(1.02)';
+    item.style.transition = 'all 0.3s ease';
   });
   
   item.addEventListener('mouseleave', () => {
@@ -569,6 +570,87 @@ gridItems.forEach(item => {
   });
 });`,
                     description: "Create two-dimensional layouts with CSS Grid"
+                },
+                "Responsive Navigation": {
+                    html: `<nav class="navbar">
+  <div class="nav-brand">My Site</div>
+  <button class="nav-toggle" id="nav-toggle">☰</button>
+  <ul class="nav-menu" id="nav-menu">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</nav>`,
+                    css: `.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #4361ee;
+  color: white;
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.nav-menu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: block;
+  }
+  
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #4361ee;
+    flex-direction: column;
+    padding: 1rem;
+    display: none;
+  }
+  
+  .nav-menu.active {
+    display: flex;
+  }
+}`,
+                    js: `// JavaScript for responsive navigation
+const navToggle = document.getElementById('nav-toggle');
+const navMenu = document.getElementById('nav-menu');
+
+navToggle.addEventListener('click', () => {
+  navMenu.classList.toggle('active');
+});`,
+                    description: "A responsive navigation bar that adapts to mobile screens"
                 }
             },
             "JavaScript": {
@@ -701,6 +783,125 @@ fetchBtn.addEventListener('click', async () => {
   }
 });`,
                     description: "Make HTTP requests using the Fetch API"
+                },
+                "Form Validation": {
+                    html: `<form id="validation-form">
+  <div class="form-group">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <div class="error-message" id="name-error"></div>
+  </div>
+  
+  <div class="form-group">
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <div class="error-message" id="email-error"></div>
+  </div>
+  
+  <div class="form-group">
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required minlength="6">
+    <div class="error-message" id="password-error"></div>
+  </div>
+  
+  <button type="submit">Submit</button>
+</form>
+<div id="form-result" style="margin-top: 1rem;"></div>`,
+                    css: `.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4361ee;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: none;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  background: #4361ee;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  background: #3a56e4;
+}`,
+                    js: `const form = document.getElementById('validation-form');
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const nameError = document.getElementById('name-error');
+const emailError = document.getElementById('email-error');
+const passwordError = document.getElementById('password-error');
+const formResult = document.getElementById('form-result');
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  let isValid = true;
+  
+  // Name validation
+  if (nameInput.value.trim() === '') {
+    nameError.textContent = 'Name is required';
+    nameError.style.display = 'block';
+    isValid = false;
+  } else {
+    nameError.style.display = 'none';
+  }
+  
+  // Email validation
+  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  if (!emailRegex.test(emailInput.value)) {
+    emailError.textContent = 'Please enter a valid email';
+    emailError.style.display = 'block';
+    isValid = false;
+  } else {
+    emailError.style.display = 'none';
+  }
+  
+  // Password validation
+  if (passwordInput.value.length < 6) {
+    passwordError.textContent = 'Password must be at least 6 characters';
+    passwordError.style.display = 'block';
+    isValid = false;
+  } else {
+    passwordError.style.display = 'none';
+  }
+  
+  if (isValid) {
+    formResult.textContent = 'Form submitted successfully!';
+    formResult.style.color = '#2ecc71';
+    form.reset();
+  } else {
+    formResult.textContent = 'Please fix the errors above';
+    formResult.style.color = '#e74c3c';
+  }
+});`,
+                    description: "Client-side form validation with custom error messages"
                 }
             }
         };
@@ -729,6 +930,7 @@ fetchBtn.addEventListener('click', async () => {
         // Current active topic
         let currentTopic = null;
         let libraryData = {};
+        let demoStyles = [];
 
         // Initialize the app
         function initApp() {
@@ -860,6 +1062,9 @@ fetchBtn.addEventListener('click', async () => {
                 return;
             }
             
+            // Clear previous demo styles
+            clearDemoStyles();
+            
             // Create demo content
             demoArea.innerHTML = `
                 <h3 class="demo-title">${topicName}</h3>
@@ -878,7 +1083,9 @@ fetchBtn.addEventListener('click', async () => {
             if (topic.css) {
                 const style = document.createElement('style');
                 style.textContent = topic.css;
+                style.id = `demo-style-${category}-${topicName.replace(/\s+/g, '-')}`;
                 document.head.appendChild(style);
+                demoStyles.push(style.id);
             }
             
             // Execute JavaScript
@@ -894,6 +1101,17 @@ fetchBtn.addEventListener('click', async () => {
             }
         }
 
+        // Clear demo styles to prevent CSS conflicts
+        function clearDemoStyles() {
+            demoStyles.forEach(styleId => {
+                const styleElement = document.getElementById(styleId);
+                if (styleElement) {
+                    styleElement.remove();
+                }
+            });
+            demoStyles = [];
+        }
+
         // Show empty state when no topics available
         function showEmptyState() {
             demoArea.innerHTML = `
@@ -907,7 +1125,10 @@ fetchBtn.addEventListener('click', async () => {
 
         // Show code modal with the current topic's code
         function showCodeModal() {
-            if (!currentTopic) return;
+            if (!currentTopic) {
+                alert('Please select a topic first');
+                return;
+            }
             
             const topic = libraryData[currentTopic.category] && libraryData[currentTopic.category][currentTopic.name];
             
@@ -1060,7 +1281,17 @@ fetchBtn.addEventListener('click', async () => {
             copyCodeBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(codeBlock.textContent)
                     .then(() => {
-                        alert('Code copied to clipboard!');
+                        // Show feedback
+                        const originalText = copyCodeBtn.textContent;
+                        copyCodeBtn.textContent = 'Copied!';
+                        copyCodeBtn.style.background = 'var(--success)';
+                        copyCodeBtn.style.borderColor = 'var(--success)';
+                        
+                        setTimeout(() => {
+                            copyCodeBtn.textContent = originalText;
+                            copyCodeBtn.style.background = '';
+                            copyCodeBtn.style.borderColor = '';
+                        }, 2000);
                     })
                     .catch(err => {
                         console.error('Failed to copy code: ', err);
@@ -1071,7 +1302,18 @@ fetchBtn.addEventListener('click', async () => {
                         textArea.select();
                         document.execCommand('copy');
                         document.body.removeChild(textArea);
-                        alert('Code copied to clipboard!');
+                        
+                        // Show feedback
+                        const originalText = copyCodeBtn.textContent;
+                        copyCodeBtn.textContent = 'Copied!';
+                        copyCodeBtn.style.background = 'var(--success)';
+                        copyCodeBtn.style.borderColor = 'var(--success)';
+                        
+                        setTimeout(() => {
+                            copyCodeBtn.textContent = originalText;
+                            copyCodeBtn.style.background = '';
+                            copyCodeBtn.style.borderColor = '';
+                        }, 2000);
                     });
             });
             
@@ -1101,6 +1343,14 @@ fetchBtn.addEventListener('click', async () => {
                     codeModal.classList.add('hidden');
                 }
                 if (e.target === importModal) {
+                    importModal.classList.add('hidden');
+                }
+            });
+            
+            // Handle Escape key to close modals
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    codeModal.classList.add('hidden');
                     importModal.classList.add('hidden');
                 }
             });
