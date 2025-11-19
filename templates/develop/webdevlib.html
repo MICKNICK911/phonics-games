@@ -33,21 +33,62 @@
             line-height: 1.6;
         }
 
-        .container {
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e1e5eb;
             display: flex;
-            min-height: 100vh;
+            align-items: center;
+            padding: 0 1rem;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Sidebar/Drawer Styles */
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .menu-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .app-title {
+            margin-left: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Sidebar/Drawer */
         .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
             width: var(--sidebar-width);
             background: white;
             border-right: 1px solid #e1e5eb;
             display: flex;
             flex-direction: column;
             transition: var(--transition);
+            transform: translateX(-100%);
+            z-index: 90;
             box-shadow: var(--shadow);
-            z-index: 100;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
         }
 
         .sidebar-header {
@@ -138,90 +179,46 @@
             color: white;
         }
 
-        .add-topic-btn {
-            margin: 1rem;
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #e1e5eb;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .sidebar-btn {
+            flex: 1;
             padding: 0.75rem;
-            background: var(--success);
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
             transition: var(--transition);
         }
 
-        .add-topic-btn:hover {
-            background: #27ae60;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .content-header {
-            padding: 1rem 1.5rem;
-            background: white;
-            border-bottom: 1px solid #e1e5eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .topic-title {
-            font-size: 1.5rem;
-            color: var(--dark);
-        }
-
-        .topic-description {
-            color: #6c757d;
-            margin-top: 0.25rem;
-        }
-
-        .content-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            background: #f8f9fa;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .btn-primary:hover {
+        .sidebar-btn:hover {
             background: #3a56e4;
         }
 
-        .content-body {
-            flex: 1;
+        .sidebar-btn.export {
+            background: var(--success);
+        }
+
+        .sidebar-btn.export:hover {
+            background: #27ae60;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
             padding: 1.5rem;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
         }
 
         .demo-area {
@@ -229,7 +226,9 @@
             border-radius: var(--border-radius);
             padding: 1.5rem;
             box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 2rem;
         }
 
         .demo-title {
@@ -238,36 +237,6 @@
             color: var(--dark);
             border-bottom: 1px solid #e9ecef;
             padding-bottom: 0.5rem;
-        }
-
-        .code-info {
-            background: #f8f9fa;
-            border-radius: var(--border-radius);
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .info-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-        }
-
-        .info-list {
-            list-style: none;
-        }
-
-        .info-list li {
-            padding: 0.25rem 0;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .info-list li:before {
-            content: "•";
-            color: var(--primary);
-            font-weight: bold;
-            margin-right: 0.5rem;
         }
 
         /* Floating Action Button */
@@ -359,54 +328,21 @@
 
         .modal-body {
             flex: 1;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .code-tabs {
-            display: flex;
-            background: #e9ecef;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .code-tab {
-            padding: 0.75rem 1.5rem;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #6c757d;
-            transition: var(--transition);
-            border-bottom: 3px solid transparent;
-        }
-
-        .code-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: white;
-        }
-
-        .code-container {
-            height: 400px;
+            padding: 1.5rem;
             overflow: auto;
         }
 
         .code-block {
-            padding: 1.5rem;
             background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
             line-height: 1.5;
-            display: none;
+            max-height: 400px;
+            overflow: auto;
         }
-
-        .code-block.active {
-            display: block;
-        }
-
-        .html-code { background: #fff3e0; }
-        .css-code { background: #e3f2fd; }
-        .js-code { background: #e8f5e9; }
 
         .modal-footer {
             padding: 1rem 1.5rem;
@@ -415,6 +351,30 @@
             display: flex;
             justify-content: flex-end;
             gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #3a56e4;
         }
 
         /* Empty State */
@@ -437,25 +397,8 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
             .sidebar {
                 width: 100%;
-                height: auto;
-                max-height: 50vh;
-            }
-
-            .content-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .content-actions {
-                width: 100%;
-                justify-content: space-between;
             }
 
             .fab {
@@ -470,121 +413,37 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar/Drawer -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h1 class="sidebar-title">Code Library</h1>
-                <p class="sidebar-subtitle">Your personal collection of code features</p>
-            </div>
+    <!-- Header -->
+    <div class="header">
+        <button class="menu-btn" id="menu-btn">☰</button>
+        <h1 class="app-title">Code Library</h1>
+    </div>
 
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search features...">
-            </div>
-
-            <div class="categories">
-                <div class="category">
-                    <h3 class="category-title">HTML & CSS</h3>
-                    <ul class="topic-list">
-                        <li class="topic-item active" data-topic="flexbox">
-                            <span class="topic-icon">F</span>
-                            <span>Flexbox Layout</span>
-                        </li>
-                        <li class="topic-item" data-topic="grid">
-                            <span class="topic-icon">G</span>
-                            <span>CSS Grid</span>
-                        </li>
-                        <li class="topic-item" data-topic="animations">
-                            <span class="topic-icon">A</span>
-                            <span>CSS Animations</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="category">
-                    <h3 class="category-title">JavaScript</h3>
-                    <ul class="topic-list">
-                        <li class="topic-item" data-topic="fetch">
-                            <span class="topic-icon">F</span>
-                            <span>Fetch API</span>
-                        </li>
-                        <li class="topic-item" data-topic="localstorage">
-                            <span class="topic-icon">L</span>
-                            <span>Local Storage</span>
-                        </li>
-                        <li class="topic-item" data-topic="events">
-                            <span class="topic-icon">E</span>
-                            <span>Event Handling</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="category">
-                    <h3 class="category-title">UI Components</h3>
-                    <ul class="topic-list">
-                        <li class="topic-item" data-topic="modal">
-                            <span class="topic-icon">M</span>
-                            <span>Modal Dialog</span>
-                        </li>
-                        <li class="topic-item" data-topic="carousel">
-                            <span class="topic-icon">C</span>
-                            <span>Image Carousel</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <button class="add-topic-btn" id="add-topic-btn">
-                <span>+</span> Add New Topic
-            </button>
+    <!-- Sidebar/Drawer -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1 class="sidebar-title">Code Library</h1>
+            <p class="sidebar-subtitle">Your personal collection of code features</p>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="content-header">
-                <div>
-                    <h1 class="topic-title">Flexbox Layout</h1>
-                    <p class="topic-description">Create flexible and responsive layouts with CSS Flexbox</p>
-                </div>
-                <div class="content-actions">
-                    <button class="btn">
-                        <span>★</span> Favorite
-                    </button>
-                    <button class="btn">
-                        <span>↻</span> Refresh
-                    </button>
-                    <button class="btn btn-primary">
-                        <span>✎</span> Edit
-                    </button>
-                </div>
-            </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search features...">
+        </div>
 
-            <div class="content-body">
-                <div class="code-info">
-                    <h3 class="info-title">About This Feature</h3>
-                    <ul class="info-list">
-                        <li>Flexbox is a one-dimensional layout method for arranging items in rows or columns</li>
-                        <li>Items flex to fill additional space or shrink to fit into smaller spaces</li>
-                        <li>Perfect for responsive design and component alignment</li>
-                    </ul>
-                </div>
+        <div class="categories" id="categories">
+            <!-- Categories and topics will be populated by JavaScript -->
+        </div>
 
-                <div class="demo-area">
-                    <h3 class="demo-title">Flexbox Demo</h3>
-                    <div id="flexbox-demo" style="display: flex; gap: 10px; flex-wrap: wrap; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                        <div style="flex: 1; min-width: 100px; background: #4361ee; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 1</div>
-                        <div style="flex: 2; min-width: 100px; background: #3a0ca3; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 2</div>
-                        <div style="flex: 1; min-width: 100px; background: #4cc9f0; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 3</div>
-                    </div>
-                    <p style="margin-top: 1rem;">Try resizing the window to see how the flex items adjust.</p>
-                </div>
+        <div class="sidebar-footer">
+            <button class="sidebar-btn" id="import-btn">Import</button>
+            <button class="sidebar-btn export" id="export-btn">Export</button>
+        </div>
+    </div>
 
-                <div class="empty-state hidden" id="empty-state">
-                    <div class="empty-icon">📚</div>
-                    <h3 class="empty-title">No Topic Selected</h3>
-                    <p>Select a topic from the sidebar to view its details and code.</p>
-                </div>
-            </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="demo-area" id="demo-area">
+            <!-- Demo content will be populated by JavaScript -->
         </div>
     </div>
 
@@ -597,44 +456,53 @@
     <div class="modal hidden" id="code-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Flexbox Layout - Complete Code</h2>
+                <h2 class="modal-title" id="modal-title">Code</h2>
                 <button class="close-btn" id="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="code-tabs">
-                    <button class="code-tab active" data-tab="html">HTML</button>
-                    <button class="code-tab" data-tab="css">CSS</button>
-                    <button class="code-tab" data-tab="js">JavaScript</button>
-                </div>
-                <div class="code-container">
-                    <pre class="code-block html-code active" id="html-code"></pre>
-                    <pre class="code-block css-code" id="css-code"></pre>
-                    <pre class="code-block js-code" id="js-code"></pre>
-                </div>
+                <pre class="code-block" id="code-block"></pre>
             </div>
             <div class="modal-footer">
-                <button class="btn">Copy Code</button>
-                <button class="btn btn-primary" id="apply-code">Apply Code</button>
+                <button class="btn" id="copy-code">Copy Code</button>
+                <button class="btn btn-primary" id="close-code-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal hidden" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Import Library Data</h2>
+                <button class="close-btn" id="close-import-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="import-data" placeholder="Paste your library data here..." style="width: 100%; height: 300px; padding: 1rem; border: 1px solid #ddd; border-radius: var(--border-radius); font-family: monospace;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-import">Cancel</button>
+                <button class="btn btn-primary" id="confirm-import">Import</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Sample data for our code library
+        // Simple library data structure
         const libraryData = {
-            flexbox: {
-                title: "Flexbox Layout",
-                description: "Create flexible and responsive layouts with CSS Flexbox",
-                category: "HTML & CSS",
-                html: `<div class="flex-container">
+            "Flexbox Layout": `<div class="flex-container">
   <div class="flex-item">Item 1</div>
   <div class="flex-item">Item 2</div>
   <div class="flex-item">Item 3</div>
-</div>`,
-                css: `.flex-container {
+</div>
+
+<style>
+.flex-container {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
 .flex-item {
@@ -645,8 +513,11 @@
   color: white;
   border-radius: 4px;
   text-align: center;
-}`,
-                js: `// JavaScript for interactive flexbox example
+}
+</style>
+
+<script>
+// JavaScript for interactive flexbox example
 const container = document.querySelector('.flex-container');
 const items = document.querySelectorAll('.flex-item');
 
@@ -654,25 +525,18 @@ items.forEach((item, index) => {
   item.addEventListener('click', () => {
     alert(\`You clicked item \${index + 1}\`);
   });
-});`,
-                demo: `<div style="display: flex; gap: 10px; flex-wrap: wrap; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-  <div style="flex: 1; min-width: 100px; background: #4361ee; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 1</div>
-  <div style="flex: 2; min-width: 100px; background: #3a0ca3; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 2</div>
-  <div style="flex: 1; min-width: 100px; background: #4cc9f0; color: white; padding: 1rem; border-radius: 4px; text-align: center;">Item 3</div>
-</div>
-<p style="margin-top: 1rem;">Try resizing the window to see how the flex items adjust.</p>`
-            },
-            grid: {
-                title: "CSS Grid",
-                description: "Create two-dimensional layouts with CSS Grid",
-                category: "HTML & CSS",
-                html: `<div class="grid-container">
+});
+<\/script>`,
+
+            "CSS Grid": `<div class="grid-container">
   <div class="grid-item header">Header</div>
   <div class="grid-item sidebar">Sidebar</div>
   <div class="grid-item main">Main Content</div>
   <div class="grid-item footer">Footer</div>
-</div>`,
-                css: `.grid-container {
+</div>
+
+<style>
+.grid-container {
   display: grid;
   grid-template-columns: 1fr 3fr;
   grid-template-rows: auto 1fr auto;
@@ -693,8 +557,11 @@ items.forEach((item, index) => {
   padding: 1rem;
   color: white;
   border-radius: 4px;
-}`,
-                js: `// JavaScript for grid layout example
+}
+</style>
+
+<script>
+// JavaScript for grid layout example
 const gridItems = document.querySelectorAll('.grid-item');
 
 gridItems.forEach(item => {
@@ -707,42 +574,202 @@ gridItems.forEach(item => {
     item.style.opacity = '1';
     item.style.transform = 'scale(1)';
   });
-});`,
-                demo: `<div style="display: grid; grid-template-columns: 1fr 3fr; grid-template-rows: auto 1fr auto; grid-template-areas: 'header header' 'sidebar main' 'footer footer'; gap: 10px; height: 300px;">
-  <div style="grid-area: header; background: #4361ee; color: white; padding: 1rem; border-radius: 4px;">Header</div>
-  <div style="grid-area: sidebar; background: #3a0ca3; color: white; padding: 1rem; border-radius: 4px;">Sidebar</div>
-  <div style="grid-area: main; background: #4cc9f0; color: white; padding: 1rem; border-radius: 4px;">Main Content</div>
-  <div style="grid-area: footer; background: #7209b7; color: white; padding: 1rem; border-radius: 4px;">Footer</div>
+});
+<\/script>`,
+
+            "Modal Dialog": `<button id="open-modal">Open Modal</button>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Modal Title</h2>
+      <button class="close-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>This is a modal dialog example.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn">Cancel</button>
+      <button class="btn btn-primary">Save</button>
+    </div>
+  </div>
 </div>
-<p style="margin-top: 1rem;">This demonstrates a classic website layout using CSS Grid.</p>`
-            },
-            // More topics would be defined here...
+
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+  padding: 1rem 1.5rem;
+  background: #212529;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-radius: 0 0 8px 8px;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #4361ee;
+  color: white;
+  border-color: #4361ee;
+}
+</style>
+
+<script>
+const openModalBtn = document.getElementById('open-modal');
+const modal = document.getElementById('modal');
+const closeModalBtn = document.querySelector('.close-modal');
+
+openModalBtn.addEventListener('click', () => {
+  modal.style.display = 'flex';
+});
+
+closeModalBtn.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+<\/script>`
         };
 
         // DOM Elements
-        const topicItems = document.querySelectorAll('.topic-item');
-        const topicTitle = document.querySelector('.topic-title');
-        const topicDescription = document.querySelector('.topic-description');
-        const contentBody = document.querySelector('.content-body');
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const categoriesContainer = document.getElementById('categories');
+        const demoArea = document.getElementById('demo-area');
         const codeFab = document.getElementById('code-fab');
         const codeModal = document.getElementById('code-modal');
         const closeModal = document.getElementById('close-modal');
-        const codeTabs = document.querySelectorAll('.code-tab');
-        const htmlCode = document.getElementById('html-code');
-        const cssCode = document.getElementById('css-code');
-        const jsCode = document.getElementById('js-code');
-        const emptyState = document.getElementById('empty-state');
-        const addTopicBtn = document.getElementById('add-topic-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const codeBlock = document.getElementById('code-block');
+        const copyCodeBtn = document.getElementById('copy-code');
+        const closeCodeBtn = document.getElementById('close-code-btn');
+        const importBtn = document.getElementById('import-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const importModal = document.getElementById('import-modal');
+        const closeImportModal = document.getElementById('close-import-modal');
+        const cancelImport = document.getElementById('cancel-import');
+        const confirmImport = document.getElementById('confirm-import');
+        const importData = document.getElementById('import-data');
 
         // Current active topic
-        let currentTopic = 'flexbox';
+        let currentTopic = Object.keys(libraryData)[0] || null;
 
         // Initialize the app
         function initApp() {
+            // Load library data from localStorage if available
+            const savedData = localStorage.getItem('codeLibrary');
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    Object.assign(libraryData, parsedData);
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                }
+            }
+            
+            // Populate categories and topics
+            populateCategories();
+            
             // Set the first topic as active
-            updateContent(currentTopic);
+            if (currentTopic) {
+                updateContent(currentTopic);
+            } else {
+                showEmptyState();
+            }
             
             // Add event listeners
+            addEventListeners();
+        }
+
+        // Populate categories and topics
+        function populateCategories() {
+            // Clear existing content
+            categoriesContainer.innerHTML = '';
+            
+            // Create a single category for all topics
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+            
+            const categoryTitle = document.createElement('h3');
+            categoryTitle.className = 'category-title';
+            categoryTitle.textContent = 'All Topics';
+            categoryDiv.appendChild(categoryTitle);
+            
+            const topicList = document.createElement('ul');
+            topicList.className = 'topic-list';
+            
+            // Add each topic to the list
+            Object.keys(libraryData).forEach(topicName => {
+                const topicItem = document.createElement('li');
+                topicItem.className = 'topic-item';
+                if (topicName === currentTopic) {
+                    topicItem.classList.add('active');
+                }
+                topicItem.setAttribute('data-topic', topicName);
+                
+                const topicIcon = document.createElement('span');
+                topicIcon.className = 'topic-icon';
+                topicIcon.textContent = topicName.charAt(0);
+                
+                const topicText = document.createElement('span');
+                topicText.textContent = topicName;
+                
+                topicItem.appendChild(topicIcon);
+                topicItem.appendChild(topicText);
+                
+                topicList.appendChild(topicItem);
+            });
+            
+            categoryDiv.appendChild(topicList);
+            categoriesContainer.appendChild(categoryDiv);
+            
+            // Add event listeners to topic items
+            const topicItems = document.querySelectorAll('.topic-item');
             topicItems.forEach(item => {
                 item.addEventListener('click', () => {
                     // Update active state
@@ -752,87 +779,207 @@ gridItems.forEach(item => {
                     // Update content
                     currentTopic = item.getAttribute('data-topic');
                     updateContent(currentTopic);
-                });
-            });
-
-            // Code FAB click
-            codeFab.addEventListener('click', () => {
-                showCodeModal(currentTopic);
-            });
-
-            // Close modal
-            closeModal.addEventListener('click', () => {
-                codeModal.classList.add('hidden');
-            });
-
-            // Code tab switching
-            codeTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabName = tab.getAttribute('data-tab');
                     
-                    // Update active tab
-                    codeTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Show corresponding code
-                    document.querySelectorAll('.code-block').forEach(block => {
-                        block.classList.remove('active');
-                    });
-                    document.getElementById(`${tabName}-code`).classList.add('active');
+                    // Close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
                 });
-            });
-
-            // Add new topic button
-            addTopicBtn.addEventListener('click', () => {
-                alert('In a full implementation, this would open a form to add a new topic to your library.');
             });
         }
 
         // Update the main content based on selected topic
-        function updateContent(topicId) {
-            const topic = libraryData[topicId];
+        function updateContent(topicName) {
+            const topicCode = libraryData[topicName];
             
-            if (!topic) {
-                // Show empty state if topic not found
-                contentBody.querySelector('.code-info').classList.add('hidden');
-                contentBody.querySelector('.demo-area').classList.add('hidden');
-                emptyState.classList.remove('hidden');
+            if (!topicCode) {
+                showEmptyState();
                 return;
             }
             
-            // Hide empty state
-            emptyState.classList.add('hidden');
-            contentBody.querySelector('.code-info').classList.remove('hidden');
-            contentBody.querySelector('.demo-area').classList.remove('hidden');
+            // Extract HTML from the code (everything before the first <style> tag)
+            const htmlMatch = topicCode.match(/^(.*?)(?=<style|$)/s);
+            const htmlContent = htmlMatch ? htmlMatch[1].trim() : '';
             
-            // Update title and description
-            topicTitle.textContent = topic.title;
-            topicDescription.textContent = topic.description;
-            
-            // Update demo area
-            const demoArea = contentBody.querySelector('.demo-area');
+            // Create demo content
             demoArea.innerHTML = `
-                <h3 class="demo-title">${topic.title} Demo</h3>
-                ${topic.demo}
+                <h3 class="demo-title">${topicName}</h3>
+                <div id="demo-content">${htmlContent}</div>
+            `;
+            
+            // Execute any JavaScript in the demo
+            try {
+                // Extract and execute JS (everything between <script> tags)
+                const jsMatches = topicCode.match(/<script>([\s\S]*?)<\/script>/g);
+                if (jsMatches) {
+                    jsMatches.forEach(scriptTag => {
+                        const jsCode = scriptTag.replace(/<\/?script>/g, '');
+                        // Create a function and execute the code
+                        const executeCode = new Function(jsCode);
+                        executeCode();
+                    });
+                }
+            } catch (e) {
+                console.error('Error executing demo JavaScript:', e);
+            }
+        }
+
+        // Show empty state when no topics available
+        function showEmptyState() {
+            demoArea.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <h3 class="empty-title">No Code Examples</h3>
+                    <p>Add some code examples to your library to get started.</p>
+                </div>
             `;
         }
 
         // Show code modal with the current topic's code
-        function showCodeModal(topicId) {
-            const topic = libraryData[topicId];
+        function showCodeModal() {
+            if (!currentTopic) return;
             
-            if (!topic) return;
+            const topicCode = libraryData[currentTopic];
             
-            // Update modal title
-            document.querySelector('.modal-title').textContent = `${topic.title} - Complete Code`;
+            if (!topicCode) return;
             
-            // Update code blocks
-            htmlCode.textContent = topic.html;
-            cssCode.textContent = topic.css;
-            jsCode.textContent = topic.js;
+            // Update modal title and code content
+            modalTitle.textContent = `${currentTopic} - Code`;
+            codeBlock.textContent = topicCode;
             
             // Show modal
             codeModal.classList.remove('hidden');
+        }
+
+        // Export library data
+        function exportLibrary() {
+            const dataStr = JSON.stringify(libraryData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'code-library.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+            }
+        }
+
+        // Import library data
+        function importLibrary() {
+            importModal.classList.remove('hidden');
+        }
+
+        // Confirm import
+        function confirmImportLibrary() {
+            const data = importData.value.trim();
+            
+            if (!data) {
+                alert('Please paste library data to import.');
+                return;
+            }
+            
+            try {
+                const parsedData = JSON.parse(data);
+                
+                // Validate the data structure
+                if (typeof parsedData !== 'object' || Array.isArray(parsedData)) {
+                    throw new Error('Invalid data format. Expected an object.');
+                }
+                
+                // Clear existing data and merge with imported data
+                Object.keys(libraryData).forEach(key => {
+                    delete libraryData[key];
+                });
+                
+                Object.assign(libraryData, parsedData);
+                
+                // Save to localStorage
+                localStorage.setItem('codeLibrary', JSON.stringify(libraryData));
+                
+                // Update UI
+                populateCategories();
+                
+                // Set first topic as active if available
+                const topics = Object.keys(libraryData);
+                if (topics.length > 0) {
+                    currentTopic = topics[0];
+                    updateContent(currentTopic);
+                } else {
+                    showEmptyState();
+                }
+                
+                // Close modals
+                importModal.classList.add('hidden');
+                sidebar.classList.remove('open');
+                
+                alert('Library data imported successfully!');
+            } catch (e) {
+                alert('Error importing data: ' + e.message);
+            }
+        }
+
+        // Add all event listeners
+        function addEventListeners() {
+            // Menu button toggles sidebar
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+            
+            // Code FAB click
+            codeFab.addEventListener('click', showCodeModal);
+            
+            // Close modals
+            closeModal.addEventListener('click', () => {
+                codeModal.classList.add('hidden');
+            });
+            
+            closeCodeBtn.addEventListener('click', () => {
+                codeModal.classList.add('hidden');
+            });
+            
+            closeImportModal.addEventListener('click', () => {
+                importModal.classList.add('hidden');
+            });
+            
+            cancelImport.addEventListener('click', () => {
+                importModal.classList.add('hidden');
+            });
+            
+            // Copy code button
+            copyCodeBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(codeBlock.textContent)
+                    .then(() => {
+                        alert('Code copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy code: ', err);
+                        alert('Failed to copy code. Please try again.');
+                    });
+            });
+            
+            // Import/Export buttons
+            importBtn.addEventListener('click', importLibrary);
+            exportBtn.addEventListener('click', exportLibrary);
+            
+            // Confirm import
+            confirmImport.addEventListener('click', confirmImportLibrary);
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuBtn) {
+                    sidebar.classList.remove('open');
+                }
+            });
         }
 
         // Initialize the app when DOM is loaded
