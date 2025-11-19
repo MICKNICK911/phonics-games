@@ -239,6 +239,20 @@
             padding-bottom: 0.5rem;
         }
 
+        .demo-container {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid #e1e5eb;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .demo-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         /* Floating Action Button */
         .fab {
             position: fixed;
@@ -930,7 +944,6 @@ form.addEventListener('submit', (e) => {
         // Current active topic
         let currentTopic = null;
         let libraryData = {};
-        let demoStyles = [];
 
         // Initialize the app
         function initApp() {
@@ -1062,54 +1075,60 @@ form.addEventListener('submit', (e) => {
                 return;
             }
             
-            // Clear previous demo styles
-            clearDemoStyles();
-            
             // Create demo content
             demoArea.innerHTML = `
                 <h3 class="demo-title">${topicName}</h3>
                 <p>${topic.description || 'No description available.'}</p>
-                <div id="demo-content" style="margin-top: 1rem;"></div>
+                <div class="demo-container">
+                    <iframe class="demo-iframe" id="demo-iframe"></iframe>
+                </div>
             `;
             
-            const demoContent = document.getElementById('demo-content');
+            // Create the iframe content
+            const iframe = document.getElementById('demo-iframe');
+            const iframeContent = generateIframeContent(topic);
             
-            // Inject HTML
-            if (topic.html) {
-                demoContent.innerHTML += topic.html;
-            }
+            // Write the content to the iframe
+            iframe.onload = function() {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(iframeContent);
+                iframeDoc.close();
+            };
             
-            // Inject CSS
-            if (topic.css) {
-                const style = document.createElement('style');
-                style.textContent = topic.css;
-                style.id = `demo-style-${category}-${topicName.replace(/\s+/g, '-')}`;
-                document.head.appendChild(style);
-                demoStyles.push(style.id);
-            }
-            
-            // Execute JavaScript
-            if (topic.js) {
-                try {
-                    // Create a function and execute the code
-                    const executeCode = new Function(topic.js);
-                    executeCode();
-                } catch (e) {
-                    console.error('Error executing demo JavaScript:', e);
-                    demoContent.innerHTML += `<p style="color: red;">Error executing JavaScript: ${e.message}</p>`;
-                }
-            }
+            // Set the iframe content
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(iframeContent);
+            iframeDoc.close();
         }
 
-        // Clear demo styles to prevent CSS conflicts
-        function clearDemoStyles() {
-            demoStyles.forEach(styleId => {
-                const styleElement = document.getElementById(styleId);
-                if (styleElement) {
-                    styleElement.remove();
-                }
-            });
-            demoStyles = [];
+        // Generate HTML content for the iframe
+        function generateIframeContent(topic) {
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        ${topic.css || ''}
+    </style>
+</head>
+<body>
+    ${topic.html || ''}
+    <script>
+        ${topic.js || ''}
+    </script>
+</body>
+</html>`;
         }
 
         // Show empty state when no topics available
@@ -1135,16 +1154,7 @@ form.addEventListener('submit', (e) => {
             if (!topic) return;
             
             // Create combined code
-            let combinedCode = '';
-            if (topic.html) {
-                combinedCode += `<!-- HTML -->\n${topic.html}\n\n`;
-            }
-            if (topic.css) {
-                combinedCode += `<!-- CSS -->\n${topic.css}\n\n`;
-            }
-            if (topic.js) {
-                combinedCode += `<!-- JavaScript -->\n${topic.js}`;
-            }
+            const combinedCode = generateIframeContent(topic);
             
             // Update modal title and code content
             modalTitle.textContent = `${currentTopic.name} - Code`;
