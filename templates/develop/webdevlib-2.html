@@ -117,7 +117,7 @@
         </div>
         
         <footer>
-            <p>Interactive Web App with Template Navigation</p>
+            <p>Simple Web App with Template Navigation</p>
         </footer>
     </div>
 
@@ -147,10 +147,9 @@
             
             // Add click event to navigate to template
             button.addEventListener('click', () => {
+                // In a real app, this would navigate to the actual template file
+                // For demo purposes, we'll create a simple template page on the fly
                 openTemplatePage(template);
-                
-            // if templates exist use this
-            //window.location.href = template.file;
             });
             
             buttonContainer.appendChild(button);
@@ -179,7 +178,6 @@
                             align-items: center;
                             justify-content: center;
                             text-align: center;
-                            transition: background 0.5s ease;
                         }
                         .container {
                             max-width: 600px;
@@ -211,37 +209,9 @@
                             font-size: 1rem;
                             cursor: pointer;
                             transition: all 0.3s ease;
-                            margin: 10px;
                         }
                         .back-button:hover {
                             background: rgba(255, 255, 255, 0.3);
-                        }
-                        .counter {
-                            font-size: 2rem;
-                            margin: 20px 0;
-                            padding: 10px;
-                            background: rgba(255, 255, 255, 0.1);
-                            border-radius: 8px;
-                            min-width: 100px;
-                            transition: color 0.3s ease;
-                        }
-                        .button-group {
-                            display: flex;
-                            gap: 10px;
-                            justify-content: center;
-                            flex-wrap: wrap;
-                            margin: 15px 0;
-                        }
-                        .feature-list {
-                            text-align: left;
-                            margin: 20px 0;
-                            background: rgba(255, 255, 255, 0.1);
-                            padding: 15px;
-                            border-radius: 10px;
-                        }
-                        .feature-list li {
-                            margin: 10px 0;
-                            padding-left: 10px;
                         }
                     </style>
                 </head>
@@ -251,98 +221,8 @@
                         <h1>${template.name}</h1>
                         <p>This is the ${template.name} template page. In a real application, this would be a separate HTML file located in the root folder.</p>
                         <p>The file name would be: <strong>${template.file}</strong></p>
-                        
-                        <!-- Interactive elements -->
-                        <div class="counter" id="counter">0</div>
-                        <div class="button-group">
-                            <button class="back-button" onclick="incrementCounter()">Increment Counter</button>
-                            <button class="back-button" onclick="decrementCounter()">Decrement Counter</button>
-                            <button class="back-button" onclick="resetCounter()">Reset Counter</button>
-                        </div>
-                        
-                        <div class="button-group">
-                            <button class="back-button" onclick="changeBackground()">Change Background</button>
-                            <button class="back-button" onclick="showAlert()">Show Alert</button>
-                            <button class="back-button" onclick="window.history.back()">Go Back</button>
-                        </div>
-                        
-                        <div class="feature-list">
-                            <h3>Interactive Features:</h3>
-                            <ul>
-                                <li>Counter with increment/decrement functionality</li>
-                                <li>Visual feedback for counter values</li>
-                                <li>Dynamic background color changer</li>
-                                <li>Interactive alert messages</li>
-                                <li>Button click animations</li>
-                            </ul>
-                        </div>
+                        <button class="back-button" onclick="window.history.back()">Go Back</button>
                     </div>
-
-                    <script>
-                        let count = 0;
-                        const counterElement = document.getElementById('counter');
-                        
-                        function incrementCounter() {
-                            count++;
-                            updateCounter();
-                        }
-                        
-                        function decrementCounter() {
-                            count--;
-                            updateCounter();
-                        }
-                        
-                        function resetCounter() {
-                            count = 0;
-                            updateCounter();
-                        }
-                        
-                        function updateCounter() {
-                            counterElement.textContent = count;
-                            // Change color based on value
-                            if (count > 0) {
-                                counterElement.style.color = '#90EE90'; // Light green
-                            } else if (count < 0) {
-                                counterElement.style.color = '#FFB6C1'; // Light red
-                            } else {
-                                counterElement.style.color = 'white';
-                            }
-                        }
-                        
-                        function changeBackground() {
-                            const colors = [
-                                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                                'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-                                'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
-                                'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)'
-                            ];
-                            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                            document.body.style.background = randomColor;
-                        }
-                        
-                        function showAlert() {
-                            alert('Hello from the ${template.name} template!\\nThis alert is generated by JavaScript.\\nCurrent counter value: ' + count);
-                        }
-                        
-                        // Initialize counter display
-                        updateCounter();
-                        
-                        // Add some interactive effects
-                        document.addEventListener('click', function(e) {
-                            if (e.target.classList.contains('back-button')) {
-                                // Add click animation
-                                e.target.style.transform = 'scale(0.95)';
-                                setTimeout(() => {
-                                    e.target.style.transform = '';
-                                }, 150);
-                            }
-                        });
-                        
-                        console.log('${template.name} template loaded successfully!');
-                    </script>
                 </body>
                 </html>
             `;
