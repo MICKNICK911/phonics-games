@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Results Manager</title>
     <style>
+        /* Your existing CSS remains the same */
         :root {
             --primary: #4361ee;
             --primary-light: #4895ef;
@@ -117,6 +118,24 @@
             background-color: #5a08a0;
         }
 
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-help {
+            background-color: #f8961e;
+            color: white;
+        }
+
+        .btn-help:hover {
+            background-color: #e0861b;
+        }
+
         .table-container {
             background-color: white;
             border-radius: 10px;
@@ -161,7 +180,7 @@
 
         th, td {
             padding: 12px 15px;
-            text-align: left;
+            text-align: center;
             border-bottom: 1px solid var(--border);
         }
 
@@ -184,6 +203,7 @@
             border-radius: 4px;
             transition: all 0.2s;
             width: 100%;
+            text-align: center;
         }
 
         .editable:focus {
@@ -191,13 +211,8 @@
             background-color: #f0f4ff;
         }
 
-        .numeric {
-            text-align: right;
-        }
-
         .position-cell {
             font-weight: 600;
-            text-align: center;
         }
 
         .empty-state {
@@ -243,6 +258,296 @@
             font-style: italic;
         }
 
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--primary);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Clickable student names in statistics */
+        .clickable-name {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            transition: all 0.2s;
+        }
+
+        .clickable-name:hover {
+            color: var(--secondary);
+        }
+
+        /* Terminal report styles */
+        .terminal-report {
+            width: 100%;
+        }
+
+        .terminal-report table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .terminal-report th {
+            background-color: #f1f5fd;
+        }
+
+        .terminal-report .remarks-cell {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .remarks-excellent {
+            color: #28a745;
+        }
+
+        .remarks-very-good {
+            color: #20c997;
+        }
+
+        .remarks-good {
+            color: #17a2b8;
+        }
+
+        .remarks-pass {
+            color: #ffc107;
+        }
+
+        .remarks-fail {
+            color: #dc3545;
+        }
+
+        .comments-section {
+            margin-top: 20px;
+        }
+
+        .comments-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .comments-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .terminal-report-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* CAT Configuration styles */
+        .cat-config {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            background-color: #f8f9fa;
+        }
+
+        .cat-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cat-config-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .cat-columns-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .cat-column-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .cat-column-name {
+            font-weight: 600;
+        }
+
+        .cat-column-max {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .cat-column-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .cat-column-actions button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        .add-cat-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .add-cat-form input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .add-cat-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .cat-name-input {
+            min-width: 120px;
+        }
+
+        .cat-max-input {
+            width: 80px;
+        }
+
+        /* Help content styles */
+        .help-section {
+            margin-bottom: 25px;
+        }
+
+        .help-section h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .help-section ul {
+            padding-left: 20px;
+        }
+
+        .help-section li {
+            margin-bottom: 8px;
+        }
+
+        .help-section code {
+            background-color: #f1f5fd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            text-align: center;
+        }
+
+        .feature-card h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        /* Import summary styles */
+        .import-summary {
+            background-color: #e8f5e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            text-align: center;
+        }
+
+        .import-summary h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .import-summary ul {
+            padding-left: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .import-summary li {
+            margin-bottom: 5px;
+        }
+
         /* Print-specific styles */
         @media print {
             body * {
@@ -270,6 +575,7 @@
             .print-table td {
                 padding: 8px 10px;
                 border: 1px solid #ddd;
+                text-align: center;
             }
             
             .print-table th {
@@ -302,6 +608,25 @@
             table {
                 min-width: 800px;
             }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cat-config-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .add-cat-form {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .add-cat-form input {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -314,7 +639,10 @@
                     <button id="addTableBtn" class="btn-primary">📋 Add New Table</button>
                     <button id="importBtn" class="btn-success">📁 Import Data</button>
                     <button id="exportBtn" class="btn-warning">💾 Export Data</button>
+                    <button id="statisticsBtn" class="btn-info">📈 Statistics</button>
+                    <button id="helpBtn" class="btn-help">❓ Help</button>
                     <button id="clearDataBtn" class="btn-danger">🗑️ Clear All Data</button>
+                    <button id="reloadBtn" class="btn-secondary">🔄 Reload Page</button>
                 </div>
                 <div class="status-indicator" id="statusIndicator">
                     <span id="saveStatus">All changes saved</span>
@@ -331,12 +659,57 @@
         </main>
 
         <footer class="footer">
-            <p>Student Results Manager &copy; 2023 | All changes are automatically saved to your device</p>
-            <p class="input-hint">Tip: You can enter marks in any format (e.g., 45/50) and they will be converted automatically</p>
+            <p>Student Results Manager &copy; 2023 | Developed by Sir Mick | Contact: 0545800158</p>
+            <p class="input-hint">Tip: You can enter marks in any format (e.g., 45/50, 90%, 14) and they will be converted automatically</p>
         </footer>
     </div>
 
     <input type="file" id="fileInput" class="file-input" accept=".json">
+
+    <!-- Statistics Modal -->
+    <div id="statisticsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 Overall Statistics</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="statisticsContainer">
+                    <!-- Statistics table will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminal Report Modal -->
+    <div id="terminalReportModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Student Terminal Report</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="terminalReportContainer">
+                    <!-- Terminal report will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">❓ Student Results Manager - Help Guide</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="helpContainer">
+                    <!-- Help content will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Global state
@@ -346,37 +719,64 @@
         const STORAGE_KEY = 'studentResultsData';
 
         // DOM elements
+        const reloadBtn = document.getElementById('reloadBtn');
         const tablesContainer = document.getElementById('tablesContainer');
         const emptyState = document.getElementById('emptyState');
         const addTableBtn = document.getElementById('addTableBtn');
         const initialAddTableBtn = document.getElementById('initialAddTable');
         const importBtn = document.getElementById('importBtn');
         const exportBtn = document.getElementById('exportBtn');
+        const statisticsBtn = document.getElementById('statisticsBtn');
+        const helpBtn = document.getElementById('helpBtn');
         const clearDataBtn = document.getElementById('clearDataBtn');
         const fileInput = document.getElementById('fileInput');
         const saveStatus = document.getElementById('saveStatus');
+        const statisticsModal = document.getElementById('statisticsModal');
+        const terminalReportModal = document.getElementById('terminalReportModal');
+        const helpModal = document.getElementById('helpModal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const statisticsContainer = document.getElementById('statisticsContainer');
+        const terminalReportContainer = document.getElementById('terminalReportContainer');
+        const helpContainer = document.getElementById('helpContainer');
 
         // Sample data for initial table
         const initialStudents = [
-            "Augustine", "Nhyiraba", "Daniella", "Melvina", "Godsway", 
-            "Agyeiwaa", "Boatemaa", "Nana Kofi", "Ginko", "Ariana"
+            "Student 1", "Student 2", "Student 3", "Student 4", "Student 5", 
+            "Student 6", "Student 7", "Student 8", "Student 9", "Student 10"
         ];
 
-        // Maximum marks for each category
-        const maxMarks = {
-            cat1: 15,
-            cat2: 20,
-            cat3: 15,
-            exam: 50
-        };
+        // Default CAT columns configuration
+        const defaultCatColumns = [
+            { id: 'cat1', name: 'CAT1', maxScore: 15 },
+            { id: 'cat2', name: 'CAT2', maxScore: 20 },
+            { id: 'cat3', name: 'CAT3', maxScore: 15 }
+        ];
 
         // Event listeners
+        reloadBtn.addEventListener('click', reloadPage);
         addTableBtn.addEventListener('click', addNewTable);
         initialAddTableBtn.addEventListener('click', addNewTable);
         importBtn.addEventListener('click', () => fileInput.click());
         exportBtn.addEventListener('click', exportData);
+        statisticsBtn.addEventListener('click', showStatistics);
+        helpBtn.addEventListener('click', showHelp);
         clearDataBtn.addEventListener('click', clearAllData);
         fileInput.addEventListener('change', handleFileImport);
+        
+        // Close modal events
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modal = e.target.closest('.modal-overlay');
+                if (modal) modal.style.display = 'none';
+            });
+        });
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.style.display = 'none';
+            }
+        });
 
         // Initialize app
         function init() {
@@ -398,10 +798,27 @@
                     tables = parsedData.tables || [];
                     tableCounter = parsedData.tableCounter || 1;
                     console.log('Data loaded from localStorage');
+                    
+                    // Ensure all tables have catColumns and students have catMarks
+                    tables.forEach(table => {
+                        if (!table.catColumns) {
+                            table.catColumns = [...defaultCatColumns];
+                        }
+                        table.students.forEach(student => {
+                            if (!student.catMarks) {
+                                student.catMarks = {};
+                                table.catColumns.forEach(cat => {
+                                    student.catMarks[cat.id] = student[cat.id] || 0;
+                                });
+                            }
+                            // Ensure catTotal and total are calculated
+                            recalculateStudentTotals(table, student);
+                        });
+                        updatePositions(table.id);
+                    });
                 }
             } catch (error) {
                 console.error('Error loading data from localStorage:', error);
-                // If there's an error, start with empty state
                 tables = [];
                 tableCounter = 1;
             }
@@ -409,16 +826,13 @@
 
         // Save data to localStorage with debouncing
         function saveToLocalStorage() {
-            // Clear any pending save
             if (saveTimeout) {
                 clearTimeout(saveTimeout);
             }
             
-            // Update status
             saveStatus.textContent = 'Saving...';
             saveStatus.className = '';
             
-            // Debounce the save to prevent too frequent writes
             saveTimeout = setTimeout(() => {
                 try {
                     const dataToSave = {
@@ -429,7 +843,6 @@
                     
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
                     
-                    // Update status
                     saveStatus.textContent = 'All changes saved';
                     saveStatus.className = 'saved-indicator';
                     
@@ -448,7 +861,6 @@
                 return 0;
             }
             
-            // Convert to string and trim
             const strInput = String(input).trim();
             
             // Handle fraction format (e.g., "45/50")
@@ -458,13 +870,9 @@
                     const numerator = parseFloat(parts[0]);
                     const denominator = parseFloat(parts[1]);
                     
-                    // Check for valid numbers and avoid division by zero
                     if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-                        // Calculate the percentage and apply to maxMark
                         const percentage = numerator / denominator;
                         const convertedMark = percentage * maxMark;
-                        
-                        // Round to nearest integer
                         return Math.min(Math.max(Math.round(convertedMark), 0), maxMark);
                     }
                 }
@@ -482,34 +890,78 @@
             // Handle decimal numbers
             const numValue = parseFloat(strInput);
             if (!isNaN(numValue)) {
-                // If the number is greater than maxMark, assume it's already in the correct scale
                 if (numValue > maxMark) {
                     return maxMark;
                 }
-                // Otherwise, return the number rounded to nearest integer
                 return Math.min(Math.max(Math.round(numValue), 0), maxMark);
             }
             
-            // If we can't parse the input, return 0
             return 0;
         }
 
         // Create a new table
         function addNewTable() {
             const tableId = `table-${tableCounter++}`;
-            const tableData = {
-                id: tableId,
-                name: `Class ${tableCounter - 1}`,
-                students: initialStudents.map(name => ({
+            
+            const students = initialStudents.map(name => {
+                const student = {
                     name,
-                    cat1: 0,
-                    cat2: 0,
-                    cat3: 0,
                     exam: 0,
                     catTotal: 0,
                     total: 0,
-                    position: 0
-                }))
+                    position: 0,
+                    catMarks: {}
+                };
+                
+                defaultCatColumns.forEach(cat => {
+                    student.catMarks[cat.id] = 0;
+                });
+                
+                return student;
+            });
+            
+            const tableData = {
+                id: tableId,
+                name: `Class ${tableCounter - 1}`,
+                catColumns: JSON.parse(JSON.stringify(defaultCatColumns)),
+                students: students
+            };
+            
+            tables.push(tableData);
+            renderTables();
+            hideEmptyState();
+            saveToLocalStorage();
+        }
+
+        // Create a new table with names from an existing table
+        function createTableFromNames(sourceTableId) {
+            const sourceTable = tables.find(t => t.id === sourceTableId);
+            if (!sourceTable) return;
+            
+            const tableId = `table-${tableCounter++}`;
+            
+            const students = sourceTable.students.map(student => {
+                const newStudent = {
+                    name: student.name,
+                    exam: 0,
+                    catTotal: 0,
+                    total: 0,
+                    position: 0,
+                    catMarks: {}
+                };
+                
+                sourceTable.catColumns.forEach(cat => {
+                    newStudent.catMarks[cat.id] = 0;
+                });
+                
+                return newStudent;
+            });
+            
+            const tableData = {
+                id: tableId,
+                name: `${sourceTable.name} (Copy)`,
+                catColumns: JSON.parse(JSON.stringify(sourceTable.catColumns)),
+                students: students
             };
             
             tables.push(tableData);
@@ -527,7 +979,6 @@
                 tablesContainer.appendChild(tableElement);
             });
             
-            // Update positions for all tables
             tables.forEach(table => updatePositions(table.id));
         }
 
@@ -563,12 +1014,17 @@
             printBtn.innerHTML = '🖨️ Print';
             printBtn.addEventListener('click', () => printTable(tableData.id));
             
+            const cloneBtn = document.createElement('button');
+            cloneBtn.className = 'btn-secondary';
+            cloneBtn.innerHTML = '📝 Clone Names';
+            cloneBtn.title = 'Create new table with these names';
+            cloneBtn.addEventListener('click', () => createTableFromNames(tableData.id));
+            
             const renameBtn = document.createElement('button');
             renameBtn.className = 'btn-success';
             renameBtn.innerHTML = '✏️ Edit Name';
             renameBtn.addEventListener('click', () => {
                 tableTitle.focus();
-                // Select all text for easier editing
                 const range = document.createRange();
                 range.selectNodeContents(tableTitle);
                 const selection = window.getSelection();
@@ -582,11 +1038,113 @@
             deleteBtn.addEventListener('click', () => deleteTable(tableData.id));
             
             tableActions.appendChild(printBtn);
+            tableActions.appendChild(cloneBtn);
             tableActions.appendChild(renameBtn);
             tableActions.appendChild(deleteBtn);
             
             tableHeader.appendChild(tableTitle);
             tableHeader.appendChild(tableActions);
+            
+            // CAT Configuration section
+            const catConfigSection = document.createElement('div');
+            catConfigSection.className = 'cat-config';
+            
+            const catConfigHeader = document.createElement('div');
+            catConfigHeader.className = 'cat-config-header';
+            
+            const catConfigTitle = document.createElement('div');
+            catConfigTitle.className = 'cat-config-title';
+            catConfigTitle.textContent = 'CAT Columns Configuration';
+            catConfigHeader.appendChild(catConfigTitle);
+            
+            const addCatBtn = document.createElement('button');
+            addCatBtn.className = 'btn-primary';
+            addCatBtn.innerHTML = '➕ Add CAT Column';
+            addCatBtn.addEventListener('click', () => showAddCatForm(tableData.id));
+            catConfigHeader.appendChild(addCatBtn);
+            
+            catConfigSection.appendChild(catConfigHeader);
+            
+            // CAT columns list
+            const catColumnsList = document.createElement('div');
+            catColumnsList.className = 'cat-columns-list';
+            
+            tableData.catColumns.forEach((catColumn, index) => {
+                const catColumnItem = document.createElement('div');
+                catColumnItem.className = 'cat-column-item';
+                
+                const catColumnName = document.createElement('span');
+                catColumnName.className = 'cat-column-name';
+                catColumnName.textContent = catColumn.name;
+                
+                const catColumnMax = document.createElement('span');
+                catColumnMax.className = 'cat-column-max';
+                catColumnMax.textContent = `Max: ${catColumn.maxScore}`;
+                
+                const catColumnActions = document.createElement('div');
+                catColumnActions.className = 'cat-column-actions';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-secondary';
+                editBtn.innerHTML = '✏️';
+                editBtn.title = 'Edit CAT Column';
+                editBtn.addEventListener('click', () => editCatColumn(tableData.id, index));
+                
+                const deleteCatBtn = document.createElement('button');
+                deleteCatBtn.className = 'btn-danger';
+                deleteCatBtn.innerHTML = '🗑️';
+                deleteCatBtn.title = 'Delete CAT Column';
+                deleteCatBtn.addEventListener('click', () => deleteCatColumn(tableData.id, index));
+                
+                catColumnActions.appendChild(editBtn);
+                catColumnActions.appendChild(deleteCatBtn);
+                
+                catColumnItem.appendChild(catColumnName);
+                catColumnItem.appendChild(catColumnMax);
+                catColumnItem.appendChild(catColumnActions);
+                
+                catColumnsList.appendChild(catColumnItem);
+            });
+            
+            catConfigSection.appendChild(catColumnsList);
+            
+            // Add CAT form (initially hidden)
+            const addCatForm = document.createElement('div');
+            addCatForm.className = 'add-cat-form';
+            addCatForm.id = `add-cat-form-${tableData.id}`;
+            addCatForm.style.display = 'none';
+            
+            const catNameInput = document.createElement('input');
+            catNameInput.type = 'text';
+            catNameInput.className = 'cat-name-input';
+            catNameInput.placeholder = 'CAT Name';
+            
+            const catMaxInput = document.createElement('input');
+            catMaxInput.type = 'number';
+            catMaxInput.className = 'cat-max-input';
+            catMaxInput.placeholder = 'Max Score';
+            catMaxInput.min = '1';
+            catMaxInput.value = '10';
+            
+            const saveCatBtn = document.createElement('button');
+            saveCatBtn.className = 'btn-success';
+            saveCatBtn.innerHTML = '💾 Save';
+            saveCatBtn.addEventListener('click', () => {
+                addCatColumn(tableData.id, catNameInput.value, parseInt(catMaxInput.value));
+                hideAddCatForm(tableData.id);
+            });
+            
+            const cancelCatBtn = document.createElement('button');
+            cancelCatBtn.className = 'btn-secondary';
+            cancelCatBtn.innerHTML = '❌ Cancel';
+            cancelCatBtn.addEventListener('click', () => hideAddCatForm(tableData.id));
+            
+            addCatForm.appendChild(catNameInput);
+            addCatForm.appendChild(catMaxInput);
+            addCatForm.appendChild(saveCatBtn);
+            addCatForm.appendChild(cancelCatBtn);
+            
+            catConfigSection.appendChild(addCatForm);
             
             // Create the table
             const table = document.createElement('table');
@@ -595,18 +1153,39 @@
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
             
-            const headers = [
-                'NAMES', 'CAT1 Marks 15', 'CAT2 Marks 20', 'CAT3 Marks 15', 
-                'CAT Totals 50', 'EXAM Marks 50', 'TOTAL CAT+ EXAM Marks 100', 'POSITION'
-            ];
+            // Name header
+            const nameHeader = document.createElement('th');
+            nameHeader.textContent = 'NAMES';
+            headerRow.appendChild(nameHeader);
             
-            headers.forEach(headerText => {
-                const th = document.createElement('th');
-                th.textContent = headerText;
-                headerRow.appendChild(th);
+            // CAT column headers
+            tableData.catColumns.forEach(catColumn => {
+                const catHeader = document.createElement('th');
+                catHeader.textContent = `${catColumn.name} Marks ${catColumn.maxScore}`;
+                headerRow.appendChild(catHeader);
             });
             
-            // Add actions header
+            // CAT Total header
+            const catTotalHeader = document.createElement('th');
+            catTotalHeader.textContent = 'CAT Totals 50';
+            headerRow.appendChild(catTotalHeader);
+            
+            // Exam header
+            const examHeader = document.createElement('th');
+            examHeader.textContent = 'EXAM Marks 50';
+            headerRow.appendChild(examHeader);
+            
+            // Total header
+            const totalHeader = document.createElement('th');
+            totalHeader.textContent = 'TOTAL CAT+ EXAM Marks 100';
+            headerRow.appendChild(totalHeader);
+            
+            // Position header
+            const positionHeader = document.createElement('th');
+            positionHeader.textContent = 'POSITION S';
+            headerRow.appendChild(positionHeader);
+            
+            // Actions header
             const actionsHeader = document.createElement('th');
             actionsHeader.textContent = 'ACTIONS';
             headerRow.appendChild(actionsHeader);
@@ -632,63 +1211,34 @@
                 nameCell.appendChild(nameInput);
                 row.appendChild(nameCell);
                 
-                // CAT1 cell
-                const cat1Cell = document.createElement('td');
-                cat1Cell.className = 'numeric';
-                const cat1Input = document.createElement('span');
-                cat1Input.className = 'editable';
-                cat1Input.textContent = student.cat1;
-                cat1Input.setAttribute('contenteditable', 'true');
-                cat1Input.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat1);
-                    updateStudentMark(tableData.id, index, 'cat1', convertedMark);
+                // CAT column cells
+                tableData.catColumns.forEach(catColumn => {
+                    const catCell = document.createElement('td');
+                    const catInput = document.createElement('span');
+                    catInput.className = 'editable';
+                    catInput.textContent = student.catMarks[catColumn.id] || 0;
+                    catInput.setAttribute('contenteditable', 'true');
+                    catInput.addEventListener('blur', (e) => {
+                        const convertedMark = parseMarkInput(e.target.textContent, catColumn.maxScore);
+                        updateStudentCatMark(tableData.id, index, catColumn.id, convertedMark);
+                    });
+                    catCell.appendChild(catInput);
+                    row.appendChild(catCell);
                 });
-                cat1Cell.appendChild(cat1Input);
-                row.appendChild(cat1Cell);
-                
-                // CAT2 cell
-                const cat2Cell = document.createElement('td');
-                cat2Cell.className = 'numeric';
-                const cat2Input = document.createElement('span');
-                cat2Input.className = 'editable';
-                cat2Input.textContent = student.cat2;
-                cat2Input.setAttribute('contenteditable', 'true');
-                cat2Input.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat2);
-                    updateStudentMark(tableData.id, index, 'cat2', convertedMark);
-                });
-                cat2Cell.appendChild(cat2Input);
-                row.appendChild(cat2Cell);
-                
-                // CAT3 cell
-                const cat3Cell = document.createElement('td');
-                cat3Cell.className = 'numeric';
-                const cat3Input = document.createElement('span');
-                cat3Input.className = 'editable';
-                cat3Input.textContent = student.cat3;
-                cat3Input.setAttribute('contenteditable', 'true');
-                cat3Input.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.cat3);
-                    updateStudentMark(tableData.id, index, 'cat3', convertedMark);
-                });
-                cat3Cell.appendChild(cat3Input);
-                row.appendChild(cat3Cell);
                 
                 // CAT Total cell (calculated)
                 const catTotalCell = document.createElement('td');
-                catTotalCell.className = 'numeric';
                 catTotalCell.textContent = student.catTotal;
                 row.appendChild(catTotalCell);
                 
                 // EXAM cell
                 const examCell = document.createElement('td');
-                examCell.className = 'numeric';
                 const examInput = document.createElement('span');
                 examInput.className = 'editable';
                 examInput.textContent = student.exam;
                 examInput.setAttribute('contenteditable', 'true');
                 examInput.addEventListener('blur', (e) => {
-                    const convertedMark = parseMarkInput(e.target.textContent, maxMarks.exam);
+                    const convertedMark = parseMarkInput(e.target.textContent, 50);
                     updateStudentMark(tableData.id, index, 'exam', convertedMark);
                 });
                 examCell.appendChild(examInput);
@@ -696,7 +1246,6 @@
                 
                 // TOTAL cell (calculated)
                 const totalCell = document.createElement('td');
-                totalCell.className = 'numeric';
                 totalCell.textContent = student.total;
                 row.appendChild(totalCell);
                 
@@ -726,6 +1275,7 @@
             const addStudentRow = document.createElement('div');
             addStudentRow.style.padding = '15px 20px';
             addStudentRow.style.borderTop = '1px solid var(--border)';
+            addStudentRow.style.textAlign = 'center';
             
             const addStudentBtn = document.createElement('button');
             addStudentBtn.className = 'btn-primary';
@@ -735,10 +1285,162 @@
             addStudentRow.appendChild(addStudentBtn);
             
             tableContainer.appendChild(tableHeader);
+            tableContainer.appendChild(catConfigSection);
             tableContainer.appendChild(table);
             tableContainer.appendChild(addStudentRow);
             
             return tableContainer;
+        }
+
+        // Show add CAT form
+        function showAddCatForm(tableId) {
+            const form = document.getElementById(`add-cat-form-${tableId}`);
+            if (form) {
+                form.style.display = 'flex';
+                // Focus the name input
+                const nameInput = form.querySelector('.cat-name-input');
+                if (nameInput) nameInput.focus();
+            }
+        }
+
+        // Hide add CAT form
+        function hideAddCatForm(tableId) {
+            const form = document.getElementById(`add-cat-form-${tableId}`);
+            if (form) {
+                form.style.display = 'none';
+                const nameInput = form.querySelector('.cat-name-input');
+                const maxInput = form.querySelector('.cat-max-input');
+                if (nameInput) nameInput.value = '';
+                if (maxInput) maxInput.value = '10';
+            }
+        }
+
+        // Add a new CAT column
+        function addCatColumn(tableId, name, maxScore) {
+            if (!name || !maxScore || maxScore <= 0) {
+                alert('Please enter a valid name and maximum score (greater than 0)');
+                return;
+            }
+            
+            const table = tables.find(t => t.id === tableId);
+            if (!table) return;
+            
+            // Check if a CAT column with this name already exists
+            if (table.catColumns.some(cat => cat.name === name)) {
+                alert('A CAT column with this name already exists');
+                return;
+            }
+            
+            // Generate a unique ID for the CAT column
+            const id = `cat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Add the new CAT column
+            table.catColumns.push({
+                id: id,
+                name: name,
+                maxScore: maxScore
+            });
+            
+            // Add the new CAT column to all students
+            table.students.forEach(student => {
+                student.catMarks[id] = 0;
+            });
+            
+            // Recalculate totals and positions
+            table.students.forEach((student) => {
+                recalculateStudentTotals(table, student);
+            });
+            updatePositions(tableId);
+            
+            // Re-render the table
+            renderTables();
+            saveToLocalStorage();
+        }
+
+        // Edit CAT column
+        function editCatColumn(tableId, catIndex) {
+            const table = tables.find(t => t.id === tableId);
+            if (!table || !table.catColumns[catIndex]) return;
+            
+            const catColumn = table.catColumns[catIndex];
+            
+            const newName = prompt('Enter new name for CAT column:', catColumn.name);
+            if (newName === null) return;
+            
+            const newMaxScore = parseInt(prompt('Enter new maximum score:', catColumn.maxScore));
+            if (isNaN(newMaxScore) || newMaxScore <= 0) {
+                alert('Please enter a valid maximum score (greater than 0)');
+                return;
+            }
+            
+            // Update CAT column
+            const oldMaxScore = catColumn.maxScore;
+            catColumn.name = newName;
+            catColumn.maxScore = newMaxScore;
+            
+            // Recalculate marks if max score changed
+            if (newMaxScore !== oldMaxScore) {
+                table.students.forEach(student => {
+                    const currentMark = student.catMarks[catColumn.id];
+                    if (currentMark > newMaxScore) {
+                        student.catMarks[catColumn.id] = newMaxScore;
+                    }
+                });
+            }
+            
+            // Recalculate totals and positions
+            table.students.forEach((student) => {
+                recalculateStudentTotals(table, student);
+            });
+            updatePositions(tableId);
+            
+            // Re-render the table
+            renderTables();
+            saveToLocalStorage();
+        }
+
+        // Delete CAT column
+        function deleteCatColumn(tableId, catIndex) {
+            const table = tables.find(t => t.id === tableId);
+            if (!table || !table.catColumns[catIndex]) return;
+            
+            const catColumn = table.catColumns[catIndex];
+            
+            if (!confirm(`Are you sure you want to delete the "${catColumn.name}" CAT column? This action cannot be undone.`)) {
+                return;
+            }
+            
+            // Remove the CAT column
+            table.catColumns.splice(catIndex, 1);
+            
+            // Remove the CAT column from all students
+            table.students.forEach(student => {
+                delete student.catMarks[catColumn.id];
+            });
+            
+            // Recalculate totals and positions
+            table.students.forEach((student) => {
+                recalculateStudentTotals(table, student);
+            });
+            updatePositions(tableId);
+            
+            // Re-render the table
+            renderTables();
+            saveToLocalStorage();
+        }
+
+        // Recalculate totals for a student
+        function recalculateStudentTotals(table, student) {
+            // Calculate CAT total (sum of all CAT marks)
+            student.catTotal = table.catColumns.reduce((sum, cat) => {
+                return sum + (student.catMarks[cat.id] || 0);
+            }, 0);
+            
+            // Ensure CAT total doesn't exceed 50
+            student.catTotal = Math.min(student.catTotal, 50);
+            
+            // Calculate overall total
+            student.total = student.catTotal + student.exam;
         }
 
         // Update table name
@@ -760,6 +1462,20 @@
             }
         }
 
+        // Update student CAT mark
+        function updateStudentCatMark(tableId, studentIndex, catId, value) {
+            const table = tables.find(t => t.id === tableId);
+            if (table && table.students[studentIndex]) {
+                table.students[studentIndex].catMarks[catId] = value;
+                
+                // Recalculate totals
+                recalculateStudentTotals(table, table.students[studentIndex]);
+                updatePositions(tableId);
+                renderTables();
+                saveToLocalStorage();
+            }
+        }
+
         // Update student mark
         function updateStudentMark(tableId, studentIndex, markType, value) {
             const table = tables.find(t => t.id === tableId);
@@ -767,24 +1483,14 @@
                 table.students[studentIndex][markType] = value;
                 
                 // Recalculate totals
-                recalculateTotals(tableId, studentIndex);
+                recalculateStudentTotals(table, table.students[studentIndex]);
                 updatePositions(tableId);
                 renderTables();
                 saveToLocalStorage();
             }
         }
-
-        // Recalculate totals for a student
-        function recalculateTotals(tableId, studentIndex) {
-            const table = tables.find(t => t.id === tableId);
-            if (table && table.students[studentIndex]) {
-                const student = table.students[studentIndex];
-                student.catTotal = student.cat1 + student.cat2 + student.cat3;
-                student.total = student.catTotal + student.exam;
-            }
-        }
-
-        // Update positions based on total marks
+        
+        //update positions new formula
         function updatePositions(tableId) {
             const table = tables.find(t => t.id === tableId);
             if (table) {
@@ -810,20 +1516,53 @@
             }
         }
 
+        // Update positions based on total marks old
+        /*function updatePositions(tableId) {
+            const table = tables.find(t => t.id === tableId);
+            if (table) {
+                // Sort students by total marks in descending order
+                const sortedStudents = [...table.students].sort((a, b) => b.total - a.total);
+                
+                // Assign positions
+                let currentPosition = 1;
+                let previousTotal = null;
+                let skipPosition = 0;
+                
+                sortedStudents.forEach((student, index) => {
+                    // If this student has the same total as the previous, they share the position
+                    if (previousTotal !== null && student.total === previousTotal) {
+                        // Same position as previous student
+                        student.position = currentPosition;
+                        skipPosition++;
+                    } else {
+                        currentPosition = index + 1 - skipPosition;
+                        student.position = currentPosition;
+                    }
+                    
+                    previousTotal = student.total;
+                });
+            }
+        }*/
+
         // Add a new student to a table
         function addStudent(tableId) {
             const table = tables.find(t => t.id === tableId);
             if (table) {
-                table.students.push({
+                const newStudent = {
                     name: 'New Student',
-                    cat1: 0,
-                    cat2: 0,
-                    cat3: 0,
                     exam: 0,
                     catTotal: 0,
                     total: 0,
-                    position: 0
+                    position: 0,
+                    catMarks: {}
+                };
+                
+                // Initialize marks for each CAT column
+                table.catColumns.forEach(cat => {
+                    newStudent.catMarks[cat.id] = 0;
                 });
+                
+                table.students.push(newStudent);
                 
                 updatePositions(tableId);
                 renderTables();
@@ -856,6 +1595,8 @@
                 }
                 saveToLocalStorage();
             }
+
+            
         }
 
         // Clear all data
@@ -868,6 +1609,596 @@
                 saveStatus.textContent = 'All data cleared';
                 saveStatus.className = '';
             }
+
+            location.reload(true);
+        }
+
+        // Show statistics modal
+        function showStatistics() {
+            if (tables.length === 0) {
+                alert('No tables available. Please create tables first.');
+                return;
+            }
+            
+            renderStatisticsTable();
+            statisticsModal.style.display = 'flex';
+        }
+
+        // Render statistics table
+        function renderStatisticsTable() {
+            // Get all unique student names across all tables
+            const allStudentNames = [...new Set(
+                tables.flatMap(table => table.students.map(student => student.name))
+            )].sort();
+            
+            // Create statistics data structure
+            const statisticsData = allStudentNames.map(name => {
+                const studentData = { name, totals: [] };
+                
+                // For each table, find the student's total score
+                tables.forEach(table => {
+                    const student = table.students.find(s => s.name === name);
+                    studentData.totals.push(student ? student.total : 0);
+                });
+                
+                // Calculate overall total
+                studentData.overallTotal = studentData.totals.reduce((sum, total) => sum + total, 0);
+                
+                return studentData;
+            });
+            
+            // Sort by overall total (descending) for positioning
+            statisticsData.sort((a, b) => b.overallTotal - a.overallTotal);
+            
+            // Assign positions
+            let currentPosition = 1;
+            let previousTotal = null;
+            let skipPosition = 0;
+            
+            statisticsData.forEach((student, index) => {
+                if (previousTotal !== null && student.overallTotal === previousTotal) {
+                    student.position = currentPosition;
+                    skipPosition++;
+                } else {
+                    currentPosition = index + 1 - skipPosition;
+                    student.position = currentPosition;
+                }
+                previousTotal = student.overallTotal;
+            });
+            
+            // Create the statistics table
+            statisticsContainer.innerHTML = '';
+            
+            if (allStudentNames.length === 0) {
+                statisticsContainer.innerHTML = '<p style="text-align: center;">No student data available.</p>';
+                return;
+            }
+            
+            const statsTable = document.createElement('table');
+            statsTable.style.width = '100%';
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            const nameHeader = document.createElement('th');
+            nameHeader.textContent = 'NAMES';
+            headerRow.appendChild(nameHeader);
+            
+            // Add table name headers
+            tables.forEach(table => {
+                const tableHeader = document.createElement('th');
+                tableHeader.textContent = table.name;
+                headerRow.appendChild(tableHeader);
+            });
+            
+            // Add totals and position headers
+            const totalsHeader = document.createElement('th');
+            totalsHeader.textContent = 'TOTALS';
+            headerRow.appendChild(totalsHeader);
+            
+            const positionHeader = document.createElement('th');
+            positionHeader.textContent = 'POSITION';
+            headerRow.appendChild(positionHeader);
+            
+            statsTable.appendChild(headerRow);
+            
+            // Create data rows
+            statisticsData.forEach(student => {
+                const row = document.createElement('tr');
+                
+                // Name cell (clickable)
+                const nameCell = document.createElement('td');
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = student.name;
+                nameSpan.className = 'clickable-name';
+                nameSpan.addEventListener('click', () => showTerminalReport(student.name));
+                nameCell.appendChild(nameSpan);
+                row.appendChild(nameCell);
+                
+                // Table score cells
+                student.totals.forEach(total => {
+                    const scoreCell = document.createElement('td');
+                    scoreCell.textContent = total;
+                    row.appendChild(scoreCell);
+                });
+                
+                // Overall total cell
+                const totalCell = document.createElement('td');
+                totalCell.textContent = student.overallTotal;
+                row.appendChild(totalCell);
+                
+                // Position cell
+                const positionCell = document.createElement('td');
+                positionCell.textContent = student.position;
+                row.appendChild(positionCell);
+                
+                statsTable.appendChild(row);
+            });
+            
+            statisticsContainer.appendChild(statsTable);
+        }
+
+        // Show terminal report for a student
+        function showTerminalReport(studentName) {
+            // Close statistics modal first
+            statisticsModal.style.display = 'none';
+            
+            // Generate terminal report
+            renderTerminalReport(studentName);
+            terminalReportModal.style.display = 'flex';
+        }
+
+        // Render terminal report for a student
+        function renderTerminalReport(studentName) {
+            terminalReportContainer.innerHTML = '';
+            
+            // Create terminal report container
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'terminal-report';
+            
+            // Create report header
+            const headerDiv = document.createElement('div');
+            headerDiv.style.textAlign = 'center';
+            headerDiv.style.marginBottom = '20px';
+            headerDiv.style.paddingBottom = '15px';
+            headerDiv.style.borderBottom = '2px solid var(--primary)';
+            
+            const studentNameHeading = document.createElement('h2');
+            studentNameHeading.textContent = `Terminal Report: ${studentName}`;
+            studentNameHeading.style.color = 'var(--primary)';
+            headerDiv.appendChild(studentNameHeading);
+            
+            const reportDate = document.createElement('p');
+            reportDate.textContent = `Generated on: ${new Date().toLocaleDateString()}`;
+            reportDate.style.color = 'var(--gray)';
+            headerDiv.appendChild(reportDate);
+            
+            reportDiv.appendChild(headerDiv);
+            
+            // Create results table
+            const resultsTable = document.createElement('table');
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            const headers = ['SUBJECT', 'CAT TOTAL', 'EXAM', 'SUBJECT TOTAL', 'REMARKS'];
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            resultsTable.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            let grandTotal = 0;
+            let totalPossible = 0;
+            
+            // Add rows for each table (subject)
+            tables.forEach(table => {
+                const student = table.students.find(s => s.name === studentName);
+                if (student) {
+                    const row = document.createElement('tr');
+                    
+                    // Subject name
+                    const subjectCell = document.createElement('td');
+                    subjectCell.textContent = table.name;
+                    row.appendChild(subjectCell);
+                    
+                    // CAT Total
+                    const catTotalCell = document.createElement('td');
+                    catTotalCell.textContent = student.catTotal;
+                    row.appendChild(catTotalCell);
+                    
+                    // Exam
+                    const examCell = document.createElement('td');
+                    examCell.textContent = student.exam;
+                    row.appendChild(examCell);
+                    
+                    // Subject Total
+                    const subjectTotalCell = document.createElement('td');
+                    subjectTotalCell.textContent = student.total;
+                    row.appendChild(subjectTotalCell);
+                    
+                    // Remarks for subject
+                    const remarksCell = document.createElement('td');
+                    const subjectRemarks = getRemarks(student.total, 100);
+                    remarksCell.textContent = subjectRemarks.text;
+                    remarksCell.className = `remarks-cell ${subjectRemarks.class}`;
+                    row.appendChild(remarksCell);
+                    
+                    tbody.appendChild(row);
+                    
+                    // Update grand total
+                    grandTotal += student.total;
+                    totalPossible += 100; // Each subject is out of 100
+                }
+            });
+            
+            // Add grand total row
+            const grandTotalRow = document.createElement('tr');
+            grandTotalRow.style.fontWeight = 'bold';
+            grandTotalRow.style.backgroundColor = '#f1f5fd';
+            
+            const grandTotalLabelCell = document.createElement('td');
+            grandTotalLabelCell.textContent = 'GRAND TOTAL';
+            grandTotalLabelCell.colSpan = 3;
+            grandTotalRow.appendChild(grandTotalLabelCell);
+            
+            const grandTotalCell = document.createElement('td');
+            grandTotalCell.textContent = grandTotal;
+            grandTotalRow.appendChild(grandTotalCell);
+            
+            const overallRemarksCell = document.createElement('td');
+            const overallPercentage = totalPossible > 0 ? (grandTotal / totalPossible) * 100 : 0;
+            const overallRemarks = getRemarks(overallPercentage, 100);
+            overallRemarksCell.textContent = overallRemarks.text;
+            overallRemarksCell.className = `remarks-cell ${overallRemarks.class}`;
+            grandTotalRow.appendChild(overallRemarksCell);
+            
+            tbody.appendChild(grandTotalRow);
+            
+            resultsTable.appendChild(tbody);
+            reportDiv.appendChild(resultsTable);
+            
+            // Add comments section
+            const commentsSection = document.createElement('div');
+            commentsSection.className = 'comments-section';
+            
+            const commentsHeading = document.createElement('h3');
+            commentsHeading.textContent = 'Teacher Comments:';
+            commentsHeading.style.textAlign = 'center';
+            commentsSection.appendChild(commentsHeading);
+            
+            const commentsTextarea = document.createElement('textarea');
+            commentsTextarea.className = 'comments-textarea';
+            commentsTextarea.placeholder = 'Enter teacher comments here...';
+            commentsSection.appendChild(commentsTextarea);
+            
+            reportDiv.appendChild(commentsSection);
+            
+            // Add action buttons
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'terminal-report-actions';
+            
+            const printReportBtn = document.createElement('button');
+            printReportBtn.className = 'btn-info';
+            printReportBtn.innerHTML = '🖨️ Print Report';
+            printReportBtn.addEventListener('click', () => printTerminalReport(studentName, commentsTextarea.value));
+            
+            const closeReportBtn = document.createElement('button');
+            closeReportBtn.className = 'btn-secondary';
+            closeReportBtn.innerHTML = '❌ Close';
+            closeReportBtn.addEventListener('click', () => {
+                terminalReportModal.style.display = 'none';
+            });
+            
+            actionsDiv.appendChild(printReportBtn);
+            actionsDiv.appendChild(closeReportBtn);
+            
+            reportDiv.appendChild(actionsDiv);
+            
+            terminalReportContainer.appendChild(reportDiv);
+        }
+
+        // Get remarks based on score
+        function getRemarks(score, maxScore) {
+            const percentage = (score / maxScore) * 100;
+            
+            if (percentage >= 90) {
+                return { text: 'Distinction', class: 'remarks-excellent' };
+            } else if (percentage >= 80) {
+                return { text: 'Excellent', class: 'remarks-excellent' };
+            } else if (percentage >= 70) {
+                return { text: 'Very Good', class: 'remarks-very-good' };
+            } else if (percentage >= 60) {
+                return { text: 'Good', class: 'remarks-good' };
+            } else if (percentage >= 50) {
+                return { text: 'Pass', class: 'remarks-pass' };
+            } else {
+                return { text: 'Fail', class: 'remarks-fail' };
+            }
+        }
+
+        // Print terminal report
+        function printTerminalReport(studentName, comments) {
+            // Create a print-friendly version of the terminal report
+            const printWindow = window.open('', '_blank');
+            
+            // Get the student data
+            let grandTotal = 0;
+            let totalPossible = 0;
+            let subjectRows = '';
+            
+            tables.forEach(table => {
+                const student = table.students.find(s => s.name === studentName);
+                if (student) {
+                    const subjectRemarks = getRemarks(student.total, 100);
+                    subjectRows += `
+                        <tr>
+                            <td>${table.name}</td>
+                            <td>${student.catTotal}</td>
+                            <td>${student.exam}</td>
+                            <td>${student.total}</td>
+                            <td class="remarks-cell ${subjectRemarks.class}">${subjectRemarks.text}</td>
+                        </tr>
+                    `;
+                    
+                    grandTotal += student.total;
+                    totalPossible += 100;
+                }
+            });
+            
+            const overallPercentage = totalPossible > 0 ? (grandTotal / totalPossible) * 100 : 0;
+            const overallRemarks = getRemarks(overallPercentage, 100);
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Terminal Report - ${studentName}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .print-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #333;
+                            padding-bottom: 10px;
+                        }
+                        .print-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 14px;
+                            margin-bottom: 20px;
+                        }
+                        .print-table th, .print-table td {
+                            border: 1px solid #ddd;
+                            padding: 8px 10px;
+                            text-align: center;
+                        }
+                        .print-table th {
+                            background-color: #f5f5f5;
+                            font-weight: bold;
+                        }
+                        .print-table .remarks-cell {
+                            font-weight: bold;
+                        }
+                        .remarks-excellent {
+                            color: #28a745;
+                        }
+                        .remarks-very-good {
+                            color: #20c997;
+                        }
+                        .remarks-good {
+                            color: #17a2b8;
+                        }
+                        .remarks-pass {
+                            color: #ffc107;
+                        }
+                        .remarks-fail {
+                            color: #dc3545;
+                        }
+                        .comments-section {
+                            margin-top: 20px;
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                        }
+                        @page {
+                            size: A4 portrait;
+                            margin: 0.5cm;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <h1>Terminal Report</h1>
+                        <h2>${studentName}</h2>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th>SUBJECT</th>
+                                <th>CAT TOTAL</th>
+                                <th>EXAM</th>
+                                <th>SUBJECT TOTAL</th>
+                                <th>REMARKS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${subjectRows}
+                            <tr style="font-weight: bold; background-color: #f1f5fd;">
+                                <td colspan="3">GRAND TOTAL</td>
+                                <td>${grandTotal}</td>
+                                <td class="remarks-cell ${overallRemarks.class}">${overallRemarks.text}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="comments-section">
+                        <h3>Teacher Comments:</h3>
+                        <p>${comments || 'No comments provided.'}</p>
+                    </div>
+                    <div style="margin-top: 20px; font-size: 12px; text-align: center;">
+                        School Stamp & Signature: _________________________
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            
+            // Wait for content to load before printing
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+        }
+
+        // Show help modal
+        function showHelp() {
+            renderHelpContent();
+            helpModal.style.display = 'flex';
+        }
+
+        // Render help content
+        function renderHelpContent() {
+            helpContainer.innerHTML = `
+                <div class="help-section">
+                    <h3>📋 Getting Started</h3>
+                    <p>Welcome to the Student Results Manager! This application helps teachers and school administrators manage student grades efficiently.</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>➕ Add New Table</h4>
+                            <p>Create a new class or subject table with default student names.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📝 Clone Names</h4>
+                            <p>Create a new table with student names from an existing table (marks reset to 0).</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✏️ Edit Content</h4>
+                            <p>Click on any cell to edit student names or marks. Changes save automatically.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>➕ Add Student</h4>
+                            <p>Add new students to any table using the button at the bottom of each table.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>🔢 Flexible Mark Input</h3>
+                    <p>You can enter marks in several formats and they will be automatically converted:</p>
+                    <ul>
+                        <li><strong>Fractions:</strong> e.g., "45/50" will be converted to the equivalent mark out of the category maximum</li>
+                        <li><strong>Percentages:</strong> e.g., "90%" will be converted to 90% of the category maximum</li>
+                        <li><strong>Direct numbers:</strong> e.g., "14" will be used directly (if within the allowed maximum)</li>
+                    </ul>
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li>For CAT1 (max 15): "12/15" → 12, "80%" → 12, "14" → 14</li>
+                        <li>For EXAM (max 50): "45/50" → 45, "90%" → 45, "48" → 48</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>⚙️ Dynamic CAT Columns</h3>
+                    <p>You can now customize the CAT columns for each table:</p>
+                    <ul>
+                        <li><strong>Add CAT Columns:</strong> Use the "Add CAT Column" button to create new assessment columns</li>
+                        <li><strong>Set Maximum Scores:</strong> Define the maximum score for each CAT column</li>
+                        <li><strong>Edit CAT Columns:</strong> Click the edit button to change a CAT column's name or maximum score</li>
+                        <li><strong>Delete CAT Columns:</strong> Remove CAT columns you no longer need</li>
+                    </ul>
+                    <p><strong>Note:</strong> When you delete a CAT column, all marks for that column will be permanently removed.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>📊 Data Management</h3>
+                    <ul>
+                        <li><strong>Automatic Saving:</strong> All changes are automatically saved to your browser's storage.</li>
+                        <li><strong>Export Data:</strong> Download all your data as a JSON file for backup or transfer.</li>
+                        <li><strong>Import Data:</strong> Merge data from JSON files with your existing data:
+                            <ul>
+                                <li>Tables with the same name will be merged (students updated/added)</li>
+                                <li>New tables will be added to your existing data</li>
+                                <li>Student records with the same name will be updated</li>
+                            </ul>
+                        </li>
+                        <li><strong>Clear Data:</strong> Remove all tables and start fresh (use with caution!).</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>📈 Statistics & Reports</h3>
+                    <ul>
+                        <li><strong>Statistics View:</strong> See an overview of all students across all tables with their total scores and positions.</li>
+                        <li><strong>Terminal Reports:</strong> Click on any student name in the statistics view to generate a detailed report card.</li>
+                        <li><strong>Print Reports:</strong> Generate professional A4-sized reports for parent meetings or student records.</li>
+                        <li><strong>Automatic Calculations:</strong> CAT totals, overall scores, and positions are calculated automatically.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🖨️ Printing</h3>
+                    <ul>
+                        <li><strong>Table Printing:</strong> Print individual class tables using the print button on each table.</li>
+                        <li><strong>Report Printing:</strong> Generate and print professional terminal reports for students.</li>
+                        <li><strong>A4 Optimization:</strong> All print outputs are optimized for standard A4 paper size.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🎯 Grading System</h3>
+                    <ul>
+                        <li><strong>CAT Marks:</strong> Each CAT column has its own maximum score that you define</li>
+                        <li><strong>Exam Marks:</strong> Maximum of 50 marks per subject</li>
+                        <li><strong>Total Calculation:</strong> CAT Total + Exam = Subject Total (out of 100)</li>
+                        <li><strong>Automatic Remarks:</strong>
+                            <ul>
+                                <li>Distinction: 90% and above</li>
+                                <li>Excellent: 80% - 89%</li>
+                                <li>Very Good: 70% - 79%</li>
+                                <li>Good: 60% - 69%</li>
+                                <li>Pass: 50% - 59%</li>
+                                <li>Fail: Below 50%</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 Tips & Best Practices</h3>
+                    <ul>
+                        <li>Use descriptive table names (e.g., "Mathematics Grade 7" instead of "Class 1")</li>
+                        <li>Regularly export your data as backup</li>
+                        <li>Use the statistics view to identify students who need extra help</li>
+                        <li>Add personalized comments in terminal reports for better parent communication</li>
+                        <li>Use the clone feature to create similar classes with the same student roster</li>
+                        <li>Take advantage of flexible mark input to enter marks in your preferred format</li>
+                        <li>Customize CAT columns to match your school's assessment structure</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🛠️ Technical Information</h3>
+                    <ul>
+                        <li>This app works entirely in your browser - no server required</li>
+                        <li>Data is stored locally in your browser's storage</li>
+                        <li>Works offline once loaded</li>
+                        <li>Compatible with modern browsers (Chrome, Firefox, Safari, Edge)</li>
+                        <li>Responsive design works on desktop, tablet, and mobile devices</li>
+                    </ul>
+                </div>
+            `;
         }
 
         // Print a specific table
@@ -877,6 +2208,13 @@
             
             // Create a print-friendly version of the table
             const printWindow = window.open('', '_blank');
+            
+            // Create CAT column headers
+            let catHeaders = '';
+            table.catColumns.forEach(catColumn => {
+                catHeaders += `<th>${catColumn.name} Marks ${catColumn.maxScore}</th>`;
+            });
+            
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
@@ -902,17 +2240,13 @@
                         .print-table th, .print-table td {
                             border: 1px solid #ddd;
                             padding: 8px 10px;
-                            text-align: left;
+                            text-align: center;
                         }
                         .print-table th {
                             background-color: #f5f5f5;
                             font-weight: bold;
                         }
-                        .print-table .numeric {
-                            text-align: right;
-                        }
                         .print-table .position-cell {
-                            text-align: center;
                             font-weight: bold;
                         }
                         @page {
@@ -930,9 +2264,7 @@
                         <thead>
                             <tr>
                                 <th>NAMES</th>
-                                <th>CAT1 Marks 15</th>
-                                <th>CAT2 Marks 20</th>
-                                <th>CAT3 Marks 15</th>
+                                ${catHeaders}
                                 <th>CAT Totals 50</th>
                                 <th>EXAM Marks 50</th>
                                 <th>TOTAL CAT+ EXAM Marks 100</th>
@@ -940,18 +2272,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${table.students.map(student => `
+                            ${table.students.map(student => {
+                                let catMarks = '';
+                                table.catColumns.forEach(catColumn => {
+                                    catMarks += `<td>${student.catMarks[catColumn.id] || 0}</td>`;
+                                });
+                                
+                                return `
                                 <tr>
                                     <td>${student.name}</td>
-                                    <td class="numeric">${student.cat1}</td>
-                                    <td class="numeric">${student.cat2}</td>
-                                    <td class="numeric">${student.cat3}</td>
-                                    <td class="numeric">${student.catTotal}</td>
-                                    <td class="numeric">${student.exam}</td>
-                                    <td class="numeric">${student.total}</td>
+                                    ${catMarks}
+                                    <td>${student.catTotal}</td>
+                                    <td>${student.exam}</td>
+                                    <td>${student.total}</td>
                                     <td class="position-cell">${student.position}</td>
                                 </tr>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                     <div style="margin-top: 20px; font-size: 12px; text-align: center;">
@@ -966,8 +2303,6 @@
             // Wait for content to load before printing
             printWindow.onload = function() {
                 printWindow.print();
-                // Optional: close the window after printing
-                // printWindow.close();
             };
         }
 
@@ -1006,7 +2341,7 @@
             URL.revokeObjectURL(url);
         }
 
-        // Handle file import
+        // Handle file import with merging
         function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1020,12 +2355,13 @@
                     if (Array.isArray(importedData.tables) && importedData.tables.every(item => 
                         item.id && item.name && Array.isArray(item.students))) {
                         
-                        tables = importedData.tables;
-                        tableCounter = importedData.tableCounter || tables.length + 1;
+                        const importSummary = mergeImportedData(importedData);
                         renderTables();
                         hideEmptyState();
                         saveToLocalStorage();
-                        alert('Data imported successfully!');
+                        
+                        // Show import summary
+                        showImportSummary(importSummary);
                     } else {
                         throw new Error('Invalid data format');
                     }
@@ -1038,6 +2374,96 @@
             reader.readAsText(file);
             // Reset file input
             event.target.value = '';
+        }
+
+        // Merge imported data with existing data
+        function mergeImportedData(importedData) {
+            const summary = {
+                tablesAdded: 0,
+                tablesUpdated: 0,
+                studentsAdded: 0,
+                studentsUpdated: 0
+            };
+            
+            // Update table counter to avoid ID conflicts
+            const maxExistingId = tables.reduce((max, table) => {
+                const idNum = parseInt(table.id.replace('table-', ''));
+                return idNum > max ? idNum : max;
+            }, 0);
+            
+            tableCounter = Math.max(tableCounter, maxExistingId + 1);
+            
+            // Process each imported table
+            importedData.tables.forEach(importedTable => {
+                // Check if table with same name exists
+                const existingTable = tables.find(t => t.name === importedTable.name);
+                
+                if (existingTable) {
+                    // Merge students into existing table
+                    summary.tablesUpdated++;
+                    
+                    importedTable.students.forEach(importedStudent => {
+                        const existingStudent = existingTable.students.find(s => s.name === importedStudent.name);
+                        
+                        if (existingStudent) {
+                            // Update existing student
+                            Object.assign(existingStudent, importedStudent);
+                            summary.studentsUpdated++;
+                        } else {
+                            // Add new student
+                            existingTable.students.push(importedStudent);
+                            summary.studentsAdded++;
+                        }
+                    });
+                    
+                    // Update positions for the merged table
+                    updatePositions(existingTable.id);
+                } else {
+                    // Add new table
+                    // Generate new ID to avoid conflicts
+                    const newTableId = `table-${tableCounter++}`;
+                    importedTable.id = newTableId;
+                    tables.push(importedTable);
+                    summary.tablesAdded++;
+                    summary.studentsAdded += importedTable.students.length;
+                }
+            });
+            
+            return summary;
+        }
+
+        // Show import summary
+        function showImportSummary(summary) {
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'import-summary';
+            
+            summaryDiv.innerHTML = `
+                <h4>✅ Data Import Successful</h4>
+                <ul>
+                    <li>Tables added: ${summary.tablesAdded}</li>
+                    <li>Tables updated: ${summary.tablesUpdated}</li>
+                    <li>Students added: ${summary.studentsAdded}</li>
+                    <li>Students updated: ${summary.studentsUpdated}</li>
+                </ul>
+                <p>Your data has been merged successfully. All changes have been saved automatically.</p>
+            `;
+            
+            // Insert at the top of the tables container
+            tablesContainer.insertBefore(summaryDiv, tablesContainer.firstChild);
+            
+            // Remove the summary after 5 seconds
+            setTimeout(() => {
+                if (summaryDiv.parentNode) {
+                    summaryDiv.parentNode.removeChild(summaryDiv);
+                }
+            }, 5000);
+        }
+
+        // Reload function with confirmation
+        function reloadPage() {
+            if (confirm('Reload the page? All unsaved changes will be lost.')) {
+                location.reload(true);
+            }
         }
 
         // Initialize the app when the page loads
