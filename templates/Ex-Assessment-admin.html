@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Results Manager - Admin</title>
+    <title>Student Results Manager</title>
     <style>
         /* Your existing CSS remains the same */
         :root {
@@ -548,6 +548,68 @@
             margin-bottom: 5px;
         }
 
+        /* Bulk operations styles */
+        .bulk-list-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bulk-list-item:hover {
+            background-color: #f1f5fd;
+            border-color: var(--primary-light);
+        }
+
+        .bulk-list-item.active {
+            background-color: #e8f4ff;
+            border-color: var(--primary);
+        }
+
+        .bulk-list-item-info {
+            flex: 1;
+        }
+
+        .bulk-list-item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .bulk-list-item-details {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .bulk-list-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .bulk-list-item-actions button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Current dataset indicator */
+        .current-dataset {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         /* Print-specific styles */
         @media print {
             body * {
@@ -592,68 +654,6 @@
             }
         }
 
-        /* Bulk list styles */
-        .bulk-list-container {
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .results-data-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .results-data-item:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
-        }
-
-        .results-data-item.active {
-            background-color: #e3f2fd;
-            border-left-color: var(--success);
-        }
-
-        .results-data-info h3 {
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-
-        .results-data-stats {
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-
-        .results-data-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .bulk-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .current-data-indicator {
-            background-color: var(--primary);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 0 10px;
@@ -689,14 +689,14 @@
             .add-cat-form input {
                 width: 100%;
             }
-
-            .results-data-item {
+            
+            .bulk-list-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-
-            .results-data-actions {
+            
+            .bulk-list-item-actions {
                 width: 100%;
                 justify-content: flex-end;
             }
@@ -706,18 +706,22 @@
 <body>
     <div class="container">
         <header>
-            <h1>📊 Student Results Manager - Admin <span id="currentDatasetName" style="font-size: 1rem; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; color: white;"></span></h1>
+            <h1>📊 Student Results Manager 
+                <span id="currentDatasetIndicator" class="current-dataset" style="display: none;">
+                    <span id="currentDatasetName">Default</span>
+                </span>
+            </h1>
             <div>
                 <div class="controls">
-                    <button id="bulkImportBtn" class="btn-success">📦 Bulk Import</button>
-                    <button id="bulkExportBtn" class="btn-warning">📤 Bulk Export</button>
-                    <button id="bulkListBtn" class="btn-info">📋 Bulk List</button>
                     <button id="addTableBtn" class="btn-primary">📋 Add New Table</button>
                     <button id="importBtn" class="btn-success">📁 Import Data</button>
                     <button id="exportBtn" class="btn-warning">💾 Export Data</button>
                     <button id="statisticsBtn" class="btn-info">📈 Statistics</button>
                     <button id="helpBtn" class="btn-help">❓ Help</button>
-                    <button id="clearDataBtn" class="btn-danger">🗑️ Clear Current Data</button>
+                    <button id="bulkImportBtn" class="btn-success">📚 Bulk Import</button>
+                    <button id="bulkExportBtn" class="btn-warning">📦 Bulk Export</button>
+                    <button id="bulkListBtn" class="btn-info">📋 Bulk List</button>
+                    <button id="clearDataBtn" class="btn-danger">🗑️ Clear All Data</button>
                     <button id="reloadBtn" class="btn-secondary">🔄 Reload Page</button>
                 </div>
                 <div class="status-indicator" id="statusIndicator">
@@ -796,12 +800,11 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="bulk-list-container" id="bulkListContainer">
-                    <!-- Results datasets will be listed here -->
+                <div id="bulkListContainer">
+                    <!-- Bulk list will be rendered here -->
                 </div>
-                <div class="bulk-actions">
+                <div style="text-align: center; margin-top: 20px;">
                     <button id="createNewDatasetBtn" class="btn-primary">➕ Create New Dataset</button>
-                    <button id="closeBulkListBtn" class="btn-secondary">❌ Close</button>
                 </div>
             </div>
         </div>
@@ -809,12 +812,11 @@
 
     <script>
         // Global state
-        let resultsDatasets = {};
-        let currentDatasetId = 'default';
-        let tables = [];
+        let resultDatasets = [];
+        let currentDatasetId = null;
         let tableCounter = 1;
         let saveTimeout = null;
-        const STORAGE_KEY = 'studentResultsData';
+        const STORAGE_KEY = 'studentResultsDataV2';
 
         // DOM elements
         const reloadBtn = document.getElementById('reloadBtn');
@@ -826,12 +828,10 @@
         const exportBtn = document.getElementById('exportBtn');
         const statisticsBtn = document.getElementById('statisticsBtn');
         const helpBtn = document.getElementById('helpBtn');
-        const clearDataBtn = document.getElementById('clearDataBtn');
         const bulkImportBtn = document.getElementById('bulkImportBtn');
         const bulkExportBtn = document.getElementById('bulkExportBtn');
         const bulkListBtn = document.getElementById('bulkListBtn');
-        const createNewDatasetBtn = document.getElementById('createNewDatasetBtn');
-        const closeBulkListBtn = document.getElementById('closeBulkListBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
         const fileInput = document.getElementById('fileInput');
         const bulkFileInput = document.getElementById('bulkFileInput');
         const saveStatus = document.getElementById('saveStatus');
@@ -844,6 +844,8 @@
         const terminalReportContainer = document.getElementById('terminalReportContainer');
         const helpContainer = document.getElementById('helpContainer');
         const bulkListContainer = document.getElementById('bulkListContainer');
+        const createNewDatasetBtn = document.getElementById('createNewDatasetBtn');
+        const currentDatasetIndicator = document.getElementById('currentDatasetIndicator');
         const currentDatasetName = document.getElementById('currentDatasetName');
 
         // Sample data for initial table
@@ -867,13 +869,11 @@
         exportBtn.addEventListener('click', exportData);
         statisticsBtn.addEventListener('click', showStatistics);
         helpBtn.addEventListener('click', showHelp);
-        clearDataBtn.addEventListener('click', clearCurrentData);
         bulkImportBtn.addEventListener('click', () => bulkFileInput.click());
-        bulkExportBtn.addEventListener('click', exportBulkData);
+        bulkExportBtn.addEventListener('click', bulkExportData);
         bulkListBtn.addEventListener('click', showBulkList);
         createNewDatasetBtn.addEventListener('click', createNewDataset);
-        closeBulkListBtn.addEventListener('click', () => bulkListModal.style.display = 'none');
-        
+        clearDataBtn.addEventListener('click', clearAllData);
         fileInput.addEventListener('change', handleFileImport);
         bulkFileInput.addEventListener('change', handleBulkFileImport);
         
@@ -897,21 +897,56 @@
             loadFromLocalStorage();
             
             // If no datasets exist, create a default one
-            if (Object.keys(resultsDatasets).length === 0) {
-                createNewDataset('Default Dataset');
+            if (resultDatasets.length === 0) {
+                createDefaultDataset();
             }
             
-            // Load the current dataset
-            loadCurrentDataset();
+            // Set current dataset if not set
+            if (!currentDatasetId && resultDatasets.length > 0) {
+                currentDatasetId = resultDatasets[0].id;
+            }
             
-            if (tables.length === 0) {
-                showEmptyState();
+            updateCurrentDatasetIndicator();
+            renderCurrentDataset();
+        }
+
+        // Get the current dataset
+        function getCurrentDataset() {
+            return resultDatasets.find(dataset => dataset.id === currentDatasetId);
+        }
+
+        // Get the current tables
+        function getCurrentTables() {
+            const dataset = getCurrentDataset();
+            return dataset ? dataset.tables : [];
+        }
+
+        // Update current dataset indicator
+        function updateCurrentDatasetIndicator() {
+            const dataset = getCurrentDataset();
+            if (dataset) {
+                currentDatasetName.textContent = dataset.name;
+                currentDatasetIndicator.style.display = 'inline-flex';
             } else {
-                hideEmptyState();
-                renderTables();
+                currentDatasetIndicator.style.display = 'none';
             }
-            
-            updateCurrentDatasetDisplay();
+        }
+
+        // Create default dataset
+        function createDefaultDataset() {
+            const datasetId = generateId();
+            resultDatasets.push({
+                id: datasetId,
+                name: 'Default Dataset',
+                tables: [],
+                tableCounter: 1
+            });
+            currentDatasetId = datasetId;
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
         }
 
         // Load data from localStorage
@@ -921,30 +956,54 @@
                 if (savedData) {
                     const parsedData = JSON.parse(savedData);
                     
-                    // Check if it's the new format with datasets
-                    if (parsedData.resultsDatasets && parsedData.currentDatasetId) {
-                        resultsDatasets = parsedData.resultsDatasets;
-                        currentDatasetId = parsedData.currentDatasetId;
+                    // Handle migration from v1 to v2
+                    if (parsedData.tables !== undefined) {
+                        // This is v1 data, migrate to v2 format
+                        const datasetId = generateId();
+                        resultDatasets = [{
+                            id: datasetId,
+                            name: 'Migrated Dataset',
+                            tables: parsedData.tables || [],
+                            tableCounter: parsedData.tableCounter || 1
+                        }];
+                        currentDatasetId = datasetId;
+                        
+                        console.log('Migrated data from v1 to v2 format');
                     } else {
-                        // Migrate from old format to new format
-                        resultsDatasets = {
-                            'default': {
-                                id: 'default',
-                                name: 'Default Dataset',
-                                tables: parsedData.tables || [],
-                                tableCounter: parsedData.tableCounter || 1
-                            }
-                        };
-                        currentDatasetId = 'default';
-                        saveToLocalStorage(); // Save in new format
+                        // This is v2 data
+                        resultDatasets = parsedData.resultDatasets || [];
+                        currentDatasetId = parsedData.currentDatasetId || null;
                     }
                     
                     console.log('Data loaded from localStorage');
+                    
+                    // Ensure all datasets and tables have proper structure
+                    resultDatasets.forEach(dataset => {
+                        if (!dataset.tables) dataset.tables = [];
+                        if (!dataset.tableCounter) dataset.tableCounter = 1;
+                        
+                        dataset.tables.forEach(table => {
+                            if (!table.catColumns) {
+                                table.catColumns = [...defaultCatColumns];
+                            }
+                            table.students.forEach(student => {
+                                if (!student.catMarks) {
+                                    student.catMarks = {};
+                                    table.catColumns.forEach(cat => {
+                                        student.catMarks[cat.id] = student[cat.id] || 0;
+                                    });
+                                }
+                                // Ensure catTotal and total are calculated
+                                recalculateStudentTotals(table, student);
+                            });
+                            updatePositions(table.id);
+                        });
+                    });
                 }
             } catch (error) {
                 console.error('Error loading data from localStorage:', error);
-                resultsDatasets = {};
-                currentDatasetId = 'default';
+                resultDatasets = [];
+                currentDatasetId = null;
             }
         }
 
@@ -959,11 +1018,8 @@
             
             saveTimeout = setTimeout(() => {
                 try {
-                    // Update current dataset before saving
-                    updateCurrentDataset();
-                    
                     const dataToSave = {
-                        resultsDatasets: resultsDatasets,
+                        resultDatasets: resultDatasets,
                         currentDatasetId: currentDatasetId,
                         lastSaved: new Date().toISOString()
                     };
@@ -981,327 +1037,6 @@
                 }
             }, 500);
         }
-
-        // Load the current dataset into the working state
-        function loadCurrentDataset() {
-            const currentDataset = resultsDatasets[currentDatasetId];
-            if (currentDataset) {
-                tables = currentDataset.tables || [];
-                tableCounter = currentDataset.tableCounter || 1;
-                
-                // Ensure all tables have catColumns and students have catMarks
-                tables.forEach(table => {
-                    if (!table.catColumns) {
-                        table.catColumns = [...defaultCatColumns];
-                    }
-                    table.students.forEach(student => {
-                        if (!student.catMarks) {
-                            student.catMarks = {};
-                            table.catColumns.forEach(cat => {
-                                student.catMarks[cat.id] = student[cat.id] || 0;
-                            });
-                        }
-                        // Ensure catTotal and total are calculated
-                        recalculateStudentTotals(table, student);
-                    });
-                    updatePositions(table.id);
-                });
-            } else {
-                tables = [];
-                tableCounter = 1;
-            }
-        }
-
-        // Update the current dataset with the current working state
-        function updateCurrentDataset() {
-            if (resultsDatasets[currentDatasetId]) {
-                resultsDatasets[currentDatasetId].tables = tables;
-                resultsDatasets[currentDatasetId].tableCounter = tableCounter;
-                resultsDatasets[currentDatasetId].lastModified = new Date().toISOString();
-            }
-        }
-
-        // Update the current dataset display
-        function updateCurrentDatasetDisplay() {
-            const currentDataset = resultsDatasets[currentDatasetId];
-            if (currentDataset) {
-                currentDatasetName.textContent = currentDataset.name;
-            }
-        }
-
-        // Create a new dataset
-        function createNewDataset(name = null) {
-            const datasetName = name || prompt('Enter a name for the new dataset:');
-            if (!datasetName) return;
-            
-            const datasetId = `dataset-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            
-            resultsDatasets[datasetId] = {
-                id: datasetId,
-                name: datasetName,
-                tables: [],
-                tableCounter: 1,
-                created: new Date().toISOString(),
-                lastModified: new Date().toISOString()
-            };
-            
-            // Switch to the new dataset
-            switchDataset(datasetId);
-            saveToLocalStorage();
-            
-            // Refresh the bulk list if it's open
-            if (bulkListModal.style.display === 'flex') {
-                renderBulkList();
-            }
-        }
-
-        // Switch to a different dataset
-        function switchDataset(datasetId) {
-            if (!resultsDatasets[datasetId]) {
-                alert('Dataset not found');
-                return;
-            }
-            
-            // Save current dataset before switching
-            updateCurrentDataset();
-            
-            // Switch to new dataset
-            currentDatasetId = datasetId;
-            loadCurrentDataset();
-            
-            // Update UI
-            updateCurrentDatasetDisplay();
-            
-            if (tables.length === 0) {
-                showEmptyState();
-            } else {
-                hideEmptyState();
-                renderTables();
-            }
-            
-            // Close bulk list modal
-            bulkListModal.style.display = 'none';
-            
-            saveToLocalStorage();
-        }
-
-        // Delete a dataset
-        function deleteDataset(datasetId) {
-            if (Object.keys(resultsDatasets).length <= 1) {
-                alert('You cannot delete the last dataset. Create a new one first.');
-                return;
-            }
-            
-            if (!confirm(`Are you sure you want to delete the dataset "${resultsDatasets[datasetId].name}"? This action cannot be undone.`)) {
-                return;
-            }
-            
-            // If we're deleting the current dataset, switch to another one first
-            if (datasetId === currentDatasetId) {
-                const otherDatasetId = Object.keys(resultsDatasets).find(id => id !== datasetId);
-                if (otherDatasetId) {
-                    switchDataset(otherDatasetId);
-                }
-            }
-            
-            // Delete the dataset
-            delete resultsDatasets[datasetId];
-            saveToLocalStorage();
-            
-            // Refresh the bulk list
-            renderBulkList();
-        }
-
-        // Rename a dataset
-        function renameDataset(datasetId) {
-            const currentName = resultsDatasets[datasetId].name;
-            const newName = prompt('Enter a new name for the dataset:', currentName);
-            
-            if (newName && newName.trim() !== '') {
-                resultsDatasets[datasetId].name = newName.trim();
-                resultsDatasets[datasetId].lastModified = new Date().toISOString();
-                
-                // Update display if this is the current dataset
-                if (datasetId === currentDatasetId) {
-                    updateCurrentDatasetDisplay();
-                }
-                
-                saveToLocalStorage();
-                renderBulkList();
-            }
-        }
-
-        // Show bulk list modal
-        function showBulkList() {
-            renderBulkList();
-            bulkListModal.style.display = 'flex';
-        }
-
-        // Render the bulk list
-        function renderBulkList() {
-            bulkListContainer.innerHTML = '';
-            
-            if (Object.keys(resultsDatasets).length === 0) {
-                bulkListContainer.innerHTML = '<p style="text-align: center; padding: 20px;">No datasets available. Create one to get started.</p>';
-                return;
-            }
-            
-            Object.values(resultsDatasets).forEach(dataset => {
-                const datasetItem = document.createElement('div');
-                datasetItem.className = `results-data-item ${dataset.id === currentDatasetId ? 'active' : ''}`;
-                
-                const tableCount = dataset.tables ? dataset.tables.length : 0;
-                const studentCount = dataset.tables ? dataset.tables.reduce((count, table) => count + table.students.length, 0) : 0;
-                
-                datasetItem.innerHTML = `
-                    <div class="results-data-info">
-                        <h3>${dataset.name} ${dataset.id === currentDatasetId ? '<span class="current-data-indicator">Current</span>' : ''}</h3>
-                        <div class="results-data-stats">
-                            ${tableCount} table(s), ${studentCount} student(s)<br>
-                            Last modified: ${new Date(dataset.lastModified).toLocaleString()}
-                        </div>
-                    </div>
-                    <div class="results-data-actions">
-                        <button class="btn-primary switch-dataset" data-id="${dataset.id}">📁 Switch To</button>
-                        <button class="btn-secondary rename-dataset" data-id="${dataset.id}">✏️ Rename</button>
-                        <button class="btn-danger delete-dataset" data-id="${dataset.id}">🗑️ Delete</button>
-                    </div>
-                `;
-                
-                bulkListContainer.appendChild(datasetItem);
-            });
-            
-            // Add event listeners for the buttons
-            document.querySelectorAll('.switch-dataset').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const datasetId = e.target.getAttribute('data-id');
-                    switchDataset(datasetId);
-                });
-            });
-            
-            document.querySelectorAll('.rename-dataset').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const datasetId = e.target.getAttribute('data-id');
-                    renameDataset(datasetId);
-                });
-            });
-            
-            document.querySelectorAll('.delete-dataset').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const datasetId = e.target.getAttribute('data-id');
-                    deleteDataset(datasetId);
-                });
-            });
-        }
-
-        // Handle bulk file import
-        function handleBulkFileImport(event) {
-            const files = event.target.files;
-            if (!files || files.length === 0) return;
-            
-            let filesProcessed = 0;
-            let datasetsAdded = 0;
-            
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const importedData = JSON.parse(e.target.result);
-                        processBulkImportData(importedData);
-                        filesProcessed++;
-                        
-                        if (filesProcessed === files.length) {
-                            // All files processed
-                            saveToLocalStorage();
-                            renderBulkList();
-                            
-                            if (datasetsAdded > 0) {
-                                alert(`Bulk import completed! ${datasetsAdded} new dataset(s) added.`);
-                            } else {
-                                alert('Bulk import completed. No new datasets were added (they may already exist).');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error processing file:', file.name, error);
-                        filesProcessed++;
-                        
-                        if (filesProcessed === files.length) {
-                            alert(`Bulk import completed with errors. ${datasetsAdded} new dataset(s) added.`);
-                        }
-                    }
-                };
-                reader.readAsText(file);
-            });
-            
-            // Reset file input
-            event.target.value = '';
-        }
-
-        // Process data from bulk import
-        function processBulkImportData(importedData) {
-            // Check if it's a single dataset or an array of datasets
-            if (Array.isArray(importedData)) {
-                // It's an array of datasets
-                importedData.forEach(dataset => {
-                    addDatasetFromImport(dataset);
-                });
-            } else if (importedData.resultsDatasets) {
-                // It's the new format with multiple datasets
-                Object.values(importedData.resultsDatasets).forEach(dataset => {
-                    addDatasetFromImport(dataset);
-                });
-            } else {
-                // It's a single dataset in the old format
-                addDatasetFromImport(importedData);
-            }
-        }
-
-        // Add a dataset from imported data
-        function addDatasetFromImport(importedDataset) {
-            // Generate a unique ID for the dataset
-            const datasetId = `dataset-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            
-            // Create the dataset
-            resultsDatasets[datasetId] = {
-                id: datasetId,
-                name: importedDataset.name || `Imported Dataset ${Object.keys(resultsDatasets).length + 1}`,
-                tables: importedDataset.tables || [],
-                tableCounter: importedDataset.tableCounter || 1,
-                created: new Date().toISOString(),
-                lastModified: new Date().toISOString()
-            };
-            
-            datasetsAdded++;
-        }
-
-        // Export all datasets as bulk data
-        function exportBulkData() {
-            if (Object.keys(resultsDatasets).length === 0) {
-                alert('No datasets to export.');
-                return;
-            }
-            
-            const dataToExport = {
-                resultsDatasets: resultsDatasets,
-                exportedAt: new Date().toISOString(),
-                version: '2.0'
-            };
-            
-            const dataStr = JSON.stringify(dataToExport, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'student-results-bulk-data.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
-        // The rest of your existing functions remain the same (addNewTable, createTableFromNames, renderTables, etc.)
-        // I'm including a few key ones to show they're unchanged, but in practice, all your existing functions would be here
 
         // Parse mark input and convert to appropriate scale
         function parseMarkInput(input, maxMark) {
@@ -1349,7 +1084,10 @@
 
         // Create a new table
         function addNewTable() {
-            const tableId = `table-${tableCounter++}`;
+            const dataset = getCurrentDataset();
+            if (!dataset) return;
+            
+            const tableId = `table-${dataset.tableCounter++}`;
             
             const students = initialStudents.map(name => {
                 const student = {
@@ -1370,183 +1108,535 @@
             
             const tableData = {
                 id: tableId,
-                name: `Class ${tableCounter - 1}`,
+                name: `Class ${dataset.tableCounter - 1}`,
                 catColumns: JSON.parse(JSON.stringify(defaultCatColumns)),
                 students: students
             };
             
-            tables.push(tableData);
-            renderTables();
+            dataset.tables.push(tableData);
+            renderCurrentDataset();
             hideEmptyState();
             saveToLocalStorage();
         }
 
-        // Render all tables
-        function renderTables() {
+        // Create a new table with names from an existing table
+        function createTableFromNames(sourceTableId) {
+            const dataset = getCurrentDataset();
+            if (!dataset) return;
+            
+            const sourceTable = dataset.tables.find(t => t.id === sourceTableId);
+            if (!sourceTable) return;
+            
+            const tableId = `table-${dataset.tableCounter++}`;
+            
+            const students = sourceTable.students.map(student => {
+                const newStudent = {
+                    name: student.name,
+                    exam: 0,
+                    catTotal: 0,
+                    total: 0,
+                    position: 0,
+                    catMarks: {}
+                };
+                
+                sourceTable.catColumns.forEach(cat => {
+                    newStudent.catMarks[cat.id] = 0;
+                });
+                
+                return newStudent;
+            });
+            
+            const tableData = {
+                id: tableId,
+                name: `${sourceTable.name} (Copy)`,
+                catColumns: JSON.parse(JSON.stringify(sourceTable.catColumns)),
+                students: students
+            };
+            
+            dataset.tables.push(tableData);
+            renderCurrentDataset();
+            hideEmptyState();
+            saveToLocalStorage();
+        }
+
+        // Render the current dataset
+        function renderCurrentDataset() {
             tablesContainer.innerHTML = '';
             
-            tables.forEach(tableData => {
+            const dataset = getCurrentDataset();
+            if (!dataset) {
+                showEmptyState();
+                return;
+            }
+            
+            if (dataset.tables.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            hideEmptyState();
+            
+            dataset.tables.forEach(tableData => {
                 const tableElement = createTableElement(tableData);
                 tablesContainer.appendChild(tableElement);
             });
             
-            tables.forEach(table => updatePositions(table.id));
+            dataset.tables.forEach(table => updatePositions(table.id));
         }
-
-        // Create table HTML element
-        function createTableElement(tableData) {
-            // Your existing createTableElement function remains exactly the same
-            // This is a simplified version for brevity
-            const tableContainer = document.createElement('div');
-            tableContainer.className = 'table-container';
-            tableContainer.id = tableData.id;
             
-            // Table header with title and actions
-            const tableHeader = document.createElement('div');
-            tableHeader.className = 'table-header';
-            
-            const tableTitle = document.createElement('div');
-            tableTitle.className = 'table-title';
-            tableTitle.setAttribute('contenteditable', 'true');
-            tableTitle.textContent = tableData.name;
-            tableTitle.addEventListener('blur', (e) => {
-                updateTableName(tableData.id, e.target.textContent);
-            });
-            tableTitle.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    tableTitle.blur();
-                }
-            });
-            
-            const tableActions = document.createElement('div');
-            tableActions.className = 'table-actions';
-            
-            const printBtn = document.createElement('button');
-            printBtn.className = 'btn-info';
-            printBtn.innerHTML = '🖨️ Print';
-            printBtn.addEventListener('click', () => printTable(tableData.id));
-            
-            const cloneBtn = document.createElement('button');
-            cloneBtn.className = 'btn-secondary';
-            cloneBtn.innerHTML = '📝 Clone Names';
-            cloneBtn.title = 'Create new table with these names';
-            cloneBtn.addEventListener('click', () => createTableFromNames(tableData.id));
-            
-            const renameBtn = document.createElement('button');
-            renameBtn.className = 'btn-success';
-            renameBtn.innerHTML = '✏️ Edit Name';
-            renameBtn.addEventListener('click', () => {
-                tableTitle.focus();
-                const range = document.createRange();
-                range.selectNodeContents(tableTitle);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-            });
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn-danger';
-            deleteBtn.innerHTML = '🗑️ Delete';
-            deleteBtn.addEventListener('click', () => deleteTable(tableData.id));
-            
-            tableActions.appendChild(printBtn);
-            tableActions.appendChild(cloneBtn);
-            tableActions.appendChild(renameBtn);
-            tableActions.appendChild(deleteBtn);
-            
-            tableHeader.appendChild(tableTitle);
-            tableHeader.appendChild(tableActions);
-            
-            // ... rest of your existing createTableElement function
-            
-            return tableContainer;
-        }
-
-        // Clear current data (not all data)
-        function clearCurrentData() {
-            if (confirm('Are you sure you want to clear ALL data in the current dataset? This action cannot be undone.')) {
-                tables = [];
-                tableCounter = 1;
-                updateCurrentDataset();
-                showEmptyState();
-                saveStatus.textContent = 'Current data cleared';
-                saveStatus.className = '';
-                saveToLocalStorage();
-            }
-        }
-
-        // Handle file import (for single dataset)
-        function handleFileImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    // Validate imported data structure
-                    if (Array.isArray(importedData.tables) && importedData.tables.every(item => 
-                        item.id && item.name && Array.isArray(item.students))) {
-                        
-                        const importSummary = mergeImportedData(importedData);
-                        renderTables();
-                        hideEmptyState();
-                        saveToLocalStorage();
-                        
-                        // Show import summary
-                        showImportSummary(importSummary);
-                    } else {
-                        throw new Error('Invalid data format');
-                    }
-                } catch (error) {
-                    alert('Error importing data: Invalid file format');
-                    console.error('Import error:', error);
-                }
-            };
-            
-            reader.readAsText(file);
-            // Reset file input
-            event.target.value = '';
-        }
-
-        // The rest of your existing functions (showStatistics, showHelp, etc.) remain exactly the same
-        
-        // Create a new table with names from an existing table
-function createTableFromNames(sourceTableId) {
-    const sourceTable = tables.find(t => t.id === sourceTableId);
-    if (!sourceTable) return;
+            // Create table HTML element
+function createTableElement(tableData) {
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+    tableContainer.id = tableData.id;
     
-    const tableId = `table-${tableCounter++}`;
+    // Table header with title and actions
+    const tableHeader = document.createElement('div');
+    tableHeader.className = 'table-header';
     
-    const students = sourceTable.students.map(student => {
-        const newStudent = {
-            name: student.name,
-            exam: 0,
-            catTotal: 0,
-            total: 0,
-            position: 0,
-            catMarks: {}
-        };
-        
-        sourceTable.catColumns.forEach(cat => {
-            newStudent.catMarks[cat.id] = 0;
-        });
-        
-        return newStudent;
+    const tableTitle = document.createElement('div');
+    tableTitle.className = 'table-title';
+    tableTitle.setAttribute('contenteditable', 'true');
+    tableTitle.textContent = tableData.name;
+    tableTitle.addEventListener('blur', (e) => {
+        updateTableName(tableData.id, e.target.textContent);
+    });
+    tableTitle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            tableTitle.blur();
+        }
     });
     
-    const tableData = {
-        id: tableId,
-        name: `${sourceTable.name} (Copy)`,
-        catColumns: JSON.parse(JSON.stringify(sourceTable.catColumns)),
-        students: students
-    };
+    const tableActions = document.createElement('div');
+    tableActions.className = 'table-actions';
     
-    tables.push(tableData);
-    renderTables();
-    hideEmptyState();
+    const printBtn = document.createElement('button');
+    printBtn.className = 'btn-info';
+    printBtn.innerHTML = '🖨️ Print';
+    printBtn.addEventListener('click', () => printTable(tableData.id));
+    
+    const cloneBtn = document.createElement('button');
+    cloneBtn.className = 'btn-secondary';
+    cloneBtn.innerHTML = '📝 Clone Names';
+    cloneBtn.title = 'Create new table with these names';
+    cloneBtn.addEventListener('click', () => createTableFromNames(tableData.id));
+    
+    const renameBtn = document.createElement('button');
+    renameBtn.className = 'btn-success';
+    renameBtn.innerHTML = '✏️ Edit Name';
+    renameBtn.addEventListener('click', () => {
+        tableTitle.focus();
+        const range = document.createRange();
+        range.selectNodeContents(tableTitle);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    });
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-danger';
+    deleteBtn.innerHTML = '🗑️ Delete';
+    deleteBtn.addEventListener('click', () => deleteTable(tableData.id));
+    
+    tableActions.appendChild(printBtn);
+    tableActions.appendChild(cloneBtn);
+    tableActions.appendChild(renameBtn);
+    tableActions.appendChild(deleteBtn);
+    
+    tableHeader.appendChild(tableTitle);
+    tableHeader.appendChild(tableActions);
+    
+    // CAT Configuration section
+    const catConfigSection = document.createElement('div');
+    catConfigSection.className = 'cat-config';
+    
+    const catConfigHeader = document.createElement('div');
+    catConfigHeader.className = 'cat-config-header';
+    
+    const catConfigTitle = document.createElement('div');
+    catConfigTitle.className = 'cat-config-title';
+    catConfigTitle.textContent = 'CAT Columns Configuration';
+    catConfigHeader.appendChild(catConfigTitle);
+    
+    const addCatBtn = document.createElement('button');
+    addCatBtn.className = 'btn-primary';
+    addCatBtn.innerHTML = '➕ Add CAT Column';
+    addCatBtn.addEventListener('click', () => showAddCatForm(tableData.id));
+    catConfigHeader.appendChild(addCatBtn);
+    
+    catConfigSection.appendChild(catConfigHeader);
+    
+    // CAT columns list
+    const catColumnsList = document.createElement('div');
+    catColumnsList.className = 'cat-columns-list';
+    
+    tableData.catColumns.forEach((catColumn, index) => {
+        const catColumnItem = document.createElement('div');
+        catColumnItem.className = 'cat-column-item';
+        
+        const catColumnName = document.createElement('span');
+        catColumnName.className = 'cat-column-name';
+        catColumnName.textContent = catColumn.name;
+        
+        const catColumnMax = document.createElement('span');
+        catColumnMax.className = 'cat-column-max';
+        catColumnMax.textContent = `Max: ${catColumn.maxScore}`;
+        
+        const catColumnActions = document.createElement('div');
+        catColumnActions.className = 'cat-column-actions';
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-secondary';
+        editBtn.innerHTML = '✏️';
+        editBtn.title = 'Edit CAT Column';
+        editBtn.addEventListener('click', () => editCatColumn(tableData.id, index));
+        
+        const deleteCatBtn = document.createElement('button');
+        deleteCatBtn.className = 'btn-danger';
+        deleteCatBtn.innerHTML = '🗑️';
+        deleteCatBtn.title = 'Delete CAT Column';
+        deleteCatBtn.addEventListener('click', () => deleteCatColumn(tableData.id, index));
+        
+        catColumnActions.appendChild(editBtn);
+        catColumnActions.appendChild(deleteCatBtn);
+        
+        catColumnItem.appendChild(catColumnName);
+        catColumnItem.appendChild(catColumnMax);
+        catColumnItem.appendChild(catColumnActions);
+        
+        catColumnsList.appendChild(catColumnItem);
+    });
+    
+    catConfigSection.appendChild(catColumnsList);
+    
+    // Add CAT form (initially hidden)
+    const addCatForm = document.createElement('div');
+    addCatForm.className = 'add-cat-form';
+    addCatForm.id = `add-cat-form-${tableData.id}`;
+    addCatForm.style.display = 'none';
+    
+    const catNameInput = document.createElement('input');
+    catNameInput.type = 'text';
+    catNameInput.className = 'cat-name-input';
+    catNameInput.placeholder = 'CAT Name';
+    
+    const catMaxInput = document.createElement('input');
+    catMaxInput.type = 'number';
+    catMaxInput.className = 'cat-max-input';
+    catMaxInput.placeholder = 'Max Score';
+    catMaxInput.min = '1';
+    catMaxInput.value = '10';
+    
+    const saveCatBtn = document.createElement('button');
+    saveCatBtn.className = 'btn-success';
+    saveCatBtn.innerHTML = '💾 Save';
+    saveCatBtn.addEventListener('click', () => {
+        addCatColumn(tableData.id, catNameInput.value, parseInt(catMaxInput.value));
+        hideAddCatForm(tableData.id);
+    });
+    
+    const cancelCatBtn = document.createElement('button');
+    cancelCatBtn.className = 'btn-secondary';
+    cancelCatBtn.innerHTML = '❌ Cancel';
+    cancelCatBtn.addEventListener('click', () => hideAddCatForm(tableData.id));
+    
+    addCatForm.appendChild(catNameInput);
+    addCatForm.appendChild(catMaxInput);
+    addCatForm.appendChild(saveCatBtn);
+    addCatForm.appendChild(cancelCatBtn);
+    
+    catConfigSection.appendChild(addCatForm);
+    
+    // Create the table
+    const table = document.createElement('table');
+    
+    // Table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    // Name header
+    const nameHeader = document.createElement('th');
+    nameHeader.textContent = 'NAMES';
+    headerRow.appendChild(nameHeader);
+    
+    // CAT column headers
+    tableData.catColumns.forEach(catColumn => {
+        const catHeader = document.createElement('th');
+        catHeader.textContent = `${catColumn.name} Marks ${catColumn.maxScore}`;
+        headerRow.appendChild(catHeader);
+    });
+    
+    // CAT Total header
+    const catTotalHeader = document.createElement('th');
+    catTotalHeader.textContent = 'CAT Totals 50';
+    headerRow.appendChild(catTotalHeader);
+    
+    // Exam header
+    const examHeader = document.createElement('th');
+    examHeader.textContent = 'EXAM Marks 50';
+    headerRow.appendChild(examHeader);
+    
+    // Total header
+    const totalHeader = document.createElement('th');
+    totalHeader.textContent = 'TOTAL CAT+ EXAM Marks 100';
+    headerRow.appendChild(totalHeader);
+    
+    // Position header
+    const positionHeader = document.createElement('th');
+    positionHeader.textContent = 'POSITION S';
+    headerRow.appendChild(positionHeader);
+    
+    // Actions header
+    const actionsHeader = document.createElement('th');
+    actionsHeader.textContent = 'ACTIONS';
+    headerRow.appendChild(actionsHeader);
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Table body
+    const tbody = document.createElement('tbody');
+    
+    tableData.students.forEach((student, index) => {
+        const row = document.createElement('tr');
+        
+        // Name cell
+        const nameCell = document.createElement('td');
+        const nameInput = document.createElement('span');
+        nameInput.className = 'editable';
+        nameInput.textContent = student.name;
+        nameInput.setAttribute('contenteditable', 'true');
+        nameInput.addEventListener('blur', (e) => {
+            updateStudentName(tableData.id, index, e.target.textContent);
+        });
+        nameCell.appendChild(nameInput);
+        row.appendChild(nameCell);
+        
+        // CAT column cells
+        tableData.catColumns.forEach(catColumn => {
+            const catCell = document.createElement('td');
+            const catInput = document.createElement('span');
+            catInput.className = 'editable';
+            catInput.textContent = student.catMarks[catColumn.id] || 0;
+            catInput.setAttribute('contenteditable', 'true');
+            catInput.addEventListener('blur', (e) => {
+                const convertedMark = parseMarkInput(e.target.textContent, catColumn.maxScore);
+                updateStudentCatMark(tableData.id, index, catColumn.id, convertedMark);
+            });
+            catCell.appendChild(catInput);
+            row.appendChild(catCell);
+        });
+        
+        // CAT Total cell (calculated)
+        const catTotalCell = document.createElement('td');
+        catTotalCell.textContent = student.catTotal;
+        row.appendChild(catTotalCell);
+        
+        // EXAM cell
+        const examCell = document.createElement('td');
+        const examInput = document.createElement('span');
+        examInput.className = 'editable';
+        examInput.textContent = student.exam;
+        examInput.setAttribute('contenteditable', 'true');
+        examInput.addEventListener('blur', (e) => {
+            const convertedMark = parseMarkInput(e.target.textContent, 50);
+            updateStudentMark(tableData.id, index, 'exam', convertedMark);
+        });
+        examCell.appendChild(examInput);
+        row.appendChild(examCell);
+        
+        // TOTAL cell (calculated)
+        const totalCell = document.createElement('td');
+        totalCell.textContent = student.total;
+        row.appendChild(totalCell);
+        
+        // POSITION cell (calculated)
+        const positionCell = document.createElement('td');
+        positionCell.className = 'position-cell';
+        positionCell.textContent = student.position;
+        row.appendChild(positionCell);
+        
+        // Add row actions
+        const actionsCell = document.createElement('td');
+        const deleteStudentBtn = document.createElement('button');
+        deleteStudentBtn.className = 'btn-danger';
+        deleteStudentBtn.innerHTML = '🗑️';
+        deleteStudentBtn.title = 'Delete Student';
+        deleteStudentBtn.addEventListener('click', () => deleteStudent(tableData.id, index));
+        
+        actionsCell.appendChild(deleteStudentBtn);
+        row.appendChild(actionsCell);
+        
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    
+    // Add student button
+    const addStudentRow = document.createElement('div');
+    addStudentRow.style.padding = '15px 20px';
+    addStudentRow.style.borderTop = '1px solid var(--border)';
+    addStudentRow.style.textAlign = 'center';
+    
+    const addStudentBtn = document.createElement('button');
+    addStudentBtn.className = 'btn-primary';
+    addStudentBtn.innerHTML = '➕ Add Student';
+    addStudentBtn.addEventListener('click', () => addStudent(tableData.id));
+    
+    addStudentRow.appendChild(addStudentBtn);
+    
+    tableContainer.appendChild(tableHeader);
+    tableContainer.appendChild(catConfigSection);
+    tableContainer.appendChild(table);
+    tableContainer.appendChild(addStudentRow);
+    
+    return tableContainer;
+}
+
+// Show add CAT form
+function showAddCatForm(tableId) {
+    const form = document.getElementById(`add-cat-form-${tableId}`);
+    if (form) {
+        form.style.display = 'flex';
+        // Focus the name input
+        const nameInput = form.querySelector('.cat-name-input');
+        if (nameInput) nameInput.focus();
+    }
+}
+
+// Hide add CAT form
+function hideAddCatForm(tableId) {
+    const form = document.getElementById(`add-cat-form-${tableId}`);
+    if (form) {
+        form.style.display = 'none';
+        const nameInput = form.querySelector('.cat-name-input');
+        const maxInput = form.querySelector('.cat-max-input');
+        if (nameInput) nameInput.value = '';
+        if (maxInput) maxInput.value = '10';
+    }
+}
+
+// Add a new CAT column
+function addCatColumn(tableId, name, maxScore) {
+    if (!name || !maxScore || maxScore <= 0) {
+        alert('Please enter a valid name and maximum score (greater than 0)');
+        return;
+    }
+    
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
+    if (!table) return;
+    
+    // Check if a CAT column with this name already exists
+    if (table.catColumns.some(cat => cat.name === name)) {
+        alert('A CAT column with this name already exists');
+        return;
+    }
+    
+    // Generate a unique ID for the CAT column
+    const id = `cat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Add the new CAT column
+    table.catColumns.push({
+        id: id,
+        name: name,
+        maxScore: maxScore
+    });
+    
+    // Add the new CAT column to all students
+    table.students.forEach(student => {
+        student.catMarks[id] = 0;
+    });
+    
+    // Recalculate totals and positions
+    table.students.forEach((student) => {
+        recalculateStudentTotals(table, student);
+    });
+    updatePositions(tableId);
+    
+    // Re-render the table
+    renderCurrentDataset();
+    saveToLocalStorage();
+}
+
+// Edit CAT column
+function editCatColumn(tableId, catIndex) {
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
+    if (!table || !table.catColumns[catIndex]) return;
+    
+    const catColumn = table.catColumns[catIndex];
+    
+    const newName = prompt('Enter new name for CAT column:', catColumn.name);
+    if (newName === null) return;
+    
+    const newMaxScore = parseInt(prompt('Enter new maximum score:', catColumn.maxScore));
+    if (isNaN(newMaxScore) || newMaxScore <= 0) {
+        alert('Please enter a valid maximum score (greater than 0)');
+        return;
+    }
+    
+    // Update CAT column
+    const oldMaxScore = catColumn.maxScore;
+    catColumn.name = newName;
+    catColumn.maxScore = newMaxScore;
+    
+    // Recalculate marks if max score changed
+    if (newMaxScore !== oldMaxScore) {
+        table.students.forEach(student => {
+            const currentMark = student.catMarks[catColumn.id];
+            if (currentMark > newMaxScore) {
+                student.catMarks[catColumn.id] = newMaxScore;
+            }
+        });
+    }
+    
+    // Recalculate totals and positions
+    table.students.forEach((student) => {
+        recalculateStudentTotals(table, student);
+    });
+    updatePositions(tableId);
+    
+    // Re-render the table
+    renderCurrentDataset();
+    saveToLocalStorage();
+}
+
+// Delete CAT column
+function deleteCatColumn(tableId, catIndex) {
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
+    if (!table || !table.catColumns[catIndex]) return;
+    
+    const catColumn = table.catColumns[catIndex];
+    
+    if (!confirm(`Are you sure you want to delete the "${catColumn.name}" CAT column? This action cannot be undone.`)) {
+        return;
+    }
+    
+    // Remove the CAT column
+    table.catColumns.splice(catIndex, 1);
+    
+    // Remove the CAT column from all students
+    table.students.forEach(student => {
+        delete student.catMarks[catColumn.id];
+    });
+    
+    // Recalculate totals and positions
+    table.students.forEach((student) => {
+        recalculateStudentTotals(table, student);
+    });
+    updatePositions(tableId);
+    
+    // Re-render the table
+    renderCurrentDataset();
     saveToLocalStorage();
 }
 
@@ -1566,54 +1656,69 @@ function recalculateStudentTotals(table, student) {
 
 // Update table name
 function updateTableName(tableId, newName) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table) {
-        table.name = newName || `Class ${tableCounter}`;
+        table.name = newName || `Class ${dataset.tableCounter}`;
         saveToLocalStorage();
     }
 }
 
 // Update student name
 function updateStudentName(tableId, studentIndex, newName) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table && table.students[studentIndex]) {
         table.students[studentIndex].name = newName || 'Unnamed Student';
-        renderTables();
+        renderCurrentDataset();
         saveToLocalStorage();
     }
 }
 
 // Update student CAT mark
 function updateStudentCatMark(tableId, studentIndex, catId, value) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table && table.students[studentIndex]) {
         table.students[studentIndex].catMarks[catId] = value;
         
         // Recalculate totals
         recalculateStudentTotals(table, table.students[studentIndex]);
         updatePositions(tableId);
-        renderTables();
+        renderCurrentDataset();
         saveToLocalStorage();
     }
 }
 
 // Update student mark
 function updateStudentMark(tableId, studentIndex, markType, value) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table && table.students[studentIndex]) {
         table.students[studentIndex][markType] = value;
         
         // Recalculate totals
         recalculateStudentTotals(table, table.students[studentIndex]);
         updatePositions(tableId);
-        renderTables();
+        renderCurrentDataset();
         saveToLocalStorage();
     }
 }
 
-// Update positions
+// Update positions based on total marks
 function updatePositions(tableId) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table) {
         // Sort students by total marks in descending order
         const sortedStudents = [...table.students].sort((a, b) => b.total - a.total);
@@ -1639,7 +1744,10 @@ function updatePositions(tableId) {
 
 // Add a new student to a table
 function addStudent(tableId) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table) {
         const newStudent = {
             name: 'New Student',
@@ -1658,19 +1766,22 @@ function addStudent(tableId) {
         table.students.push(newStudent);
         
         updatePositions(tableId);
-        renderTables();
+        renderCurrentDataset();
         saveToLocalStorage();
     }
 }
 
 // Delete a student from a table
 function deleteStudent(tableId, studentIndex) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (table && table.students[studentIndex]) {
         if (confirm('Are you sure you want to delete this student?')) {
             table.students.splice(studentIndex, 1);
             updatePositions(tableId);
-            renderTables();
+            renderCurrentDataset();
             saveToLocalStorage();
         }
     }
@@ -1678,21 +1789,319 @@ function deleteStudent(tableId, studentIndex) {
 
 // Delete a table
 function deleteTable(tableId) {
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
     if (confirm('Are you sure you want to delete this table? This action cannot be undone.')) {
-        tables = tables.filter(t => t.id !== tableId);
+        dataset.tables = dataset.tables.filter(t => t.id !== tableId);
         
-        if (tables.length === 0) {
+        if (dataset.tables.length === 0) {
             showEmptyState();
         } else {
-            renderTables();
+            renderCurrentDataset();
         }
         saveToLocalStorage();
     }
 }
 
+// Create new dataset
+function createNewDataset() {
+    const datasetName = prompt('Enter a name for the new dataset:', `Dataset ${resultDatasets.length + 1}`);
+    if (!datasetName) return;
+    
+    const datasetId = generateId();
+    const newDataset = {
+        id: datasetId,
+        name: datasetName,
+        tables: [],
+        tableCounter: 1
+    };
+    
+    resultDatasets.push(newDataset);
+    currentDatasetId = datasetId;
+    
+    updateCurrentDatasetIndicator();
+    renderCurrentDataset();
+    saveToLocalStorage();
+    
+    // Close the bulk list modal
+    bulkListModal.style.display = 'none';
+}
+
+// Switch to a different dataset
+function switchDataset(datasetId) {
+    currentDatasetId = datasetId;
+    updateCurrentDatasetIndicator();
+    renderCurrentDataset();
+    saveToLocalStorage();
+    
+    // Close the bulk list modal
+    bulkListModal.style.display = 'none';
+}
+
+// Delete a dataset
+function deleteDataset(datasetId) {
+    if (resultDatasets.length <= 1) {
+        alert('You cannot delete the last dataset. At least one dataset is required.');
+        return;
+    }
+    
+    const dataset = resultDatasets.find(d => d.id === datasetId);
+    if (!dataset) return;
+    
+    if (!confirm(`Are you sure you want to delete the dataset "${dataset.name}"? This action cannot be undone and will delete all tables in this dataset.`)) {
+        return;
+    }
+    
+    // Remove the dataset
+    resultDatasets = resultDatasets.filter(d => d.id !== datasetId);
+    
+    // If we deleted the current dataset, switch to the first available one
+    if (currentDatasetId === datasetId) {
+        if (resultDatasets.length > 0) {
+            currentDatasetId = resultDatasets[0].id;
+        } else {
+            currentDatasetId = null;
+        }
+    }
+    
+    updateCurrentDatasetIndicator();
+    renderCurrentDataset();
+    saveToLocalStorage();
+    
+    // Update the bulk list if it's open
+    if (bulkListModal.style.display === 'flex') {
+        renderBulkList();
+    }
+}
+
+// Show bulk list modal
+function showBulkList() {
+    renderBulkList();
+    bulkListModal.style.display = 'flex';
+}
+
+// Render bulk list
+function renderBulkList() {
+    bulkListContainer.innerHTML = '';
+    
+    if (resultDatasets.length === 0) {
+        bulkListContainer.innerHTML = '<p style="text-align: center;">No datasets available.</p>';
+        return;
+    }
+    
+    resultDatasets.forEach(dataset => {
+        const listItem = document.createElement('div');
+        listItem.className = `bulk-list-item ${dataset.id === currentDatasetId ? 'active' : ''}`;
+        
+        const itemInfo = document.createElement('div');
+        itemInfo.className = 'bulk-list-item-info';
+        
+        const itemName = document.createElement('div');
+        itemName.className = 'bulk-list-item-name';
+        itemName.textContent = dataset.name;
+        
+        const itemDetails = document.createElement('div');
+        itemDetails.className = 'bulk-list-item-details';
+        itemDetails.textContent = `${dataset.tables.length} table(s), ${dataset.tables.reduce((total, table) => total + table.students.length, 0)} student(s)`;
+        
+        itemInfo.appendChild(itemName);
+        itemInfo.appendChild(itemDetails);
+        
+        const itemActions = document.createElement('div');
+        itemActions.className = 'bulk-list-item-actions';
+        
+        const switchBtn = document.createElement('button');
+        switchBtn.className = 'btn-primary';
+        switchBtn.innerHTML = '📋 Switch';
+        switchBtn.title = 'Switch to this dataset';
+        switchBtn.addEventListener('click', () => switchDataset(dataset.id));
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-danger';
+        deleteBtn.innerHTML = '🗑️ Delete';
+        deleteBtn.title = 'Delete this dataset';
+        deleteBtn.addEventListener('click', () => deleteDataset(dataset.id));
+        
+        itemActions.appendChild(switchBtn);
+        itemActions.appendChild(deleteBtn);
+        
+        listItem.appendChild(itemInfo);
+        listItem.appendChild(itemActions);
+        
+        bulkListContainer.appendChild(listItem);
+    });
+}
+
+// Handle bulk file import
+function handleBulkFileImport(event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    let filesProcessed = 0;
+    let datasetsImported = 0;
+    let datasetsUpdated = 0;
+    
+    // Process each file
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                
+                // Check if this is a single dataset or a list of datasets
+                if (Array.isArray(importedData)) {
+                    // This is a list of datasets
+                    importedData.forEach(data => {
+                        if (isValidDataset(data)) {
+                            importDataset(data);
+                            datasetsImported++;
+                        }
+                    });
+                } else if (isValidDataset(importedData)) {
+                    // This is a single dataset
+                    importDataset(importedData);
+                    datasetsImported++;
+                } else if (importedData.resultDatasets && Array.isArray(importedData.resultDatasets)) {
+                    // This is a bulk export file
+                    importedData.resultDatasets.forEach(dataset => {
+                        if (isValidDataset(dataset)) {
+                            importDataset(dataset);
+                            datasetsImported++;
+                        }
+                    });
+                } else {
+                    throw new Error('Invalid data format');
+                }
+                
+                filesProcessed++;
+                
+                // When all files are processed, show summary
+                if (filesProcessed === files.length) {
+                    showBulkImportSummary(datasetsImported, datasetsUpdated);
+                    renderBulkList();
+                    saveToLocalStorage();
+                }
+            } catch (error) {
+                console.error('Error importing file:', file.name, error);
+                filesProcessed++;
+                
+                // If this was the last file, show summary
+                if (filesProcessed === files.length) {
+                    showBulkImportSummary(datasetsImported, datasetsUpdated, true);
+                }
+            }
+        };
+        
+        reader.readAsText(file);
+    });
+    
+    // Reset file input
+    event.target.value = '';
+}
+
+// Check if data is a valid dataset
+function isValidDataset(data) {
+    return data && 
+           typeof data === 'object' && 
+           data.id && 
+           data.name && 
+           Array.isArray(data.tables) &&
+           typeof data.tableCounter === 'number';
+}
+
+// Import a dataset
+function importDataset(importedDataset) {
+    // Check if dataset with same ID already exists
+    const existingDataset = resultDatasets.find(d => d.id === importedDataset.id);
+    
+    if (existingDataset) {
+        // Update existing dataset
+        existingDataset.name = importedDataset.name;
+        existingDataset.tables = importedDataset.tables;
+        existingDataset.tableCounter = importedDataset.tableCounter;
+        return 'updated';
+    } else {
+        // Add new dataset
+        resultDatasets.push({
+            id: importedDataset.id,
+            name: importedDataset.name,
+            tables: importedDataset.tables,
+            tableCounter: importedDataset.tableCounter
+        });
+        return 'imported';
+    }
+}
+
+// Show bulk import summary
+function showBulkImportSummary(datasetsImported, datasetsUpdated, hasErrors = false) {
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'import-summary';
+    
+    if (hasErrors) {
+        summaryDiv.style.backgroundColor = '#f8d7da';
+        summaryDiv.style.borderLeftColor = '#dc3545';
+        
+        summaryDiv.innerHTML = `
+            <h4>⚠️ Bulk Import Completed with Errors</h4>
+            <p>Some files could not be imported due to invalid format.</p>
+            <ul>
+                <li>Datasets imported: ${datasetsImported}</li>
+                <li>Datasets updated: ${datasetsUpdated}</li>
+            </ul>
+        `;
+    } else {
+        summaryDiv.innerHTML = `
+            <h4>✅ Bulk Import Successful</h4>
+            <ul>
+                <li>Datasets imported: ${datasetsImported}</li>
+                <li>Datasets updated: ${datasetsUpdated}</li>
+            </ul>
+            <p>Your datasets have been imported successfully. All changes have been saved automatically.</p>
+        `;
+    }
+    
+    // Insert at the top of the tables container
+    tablesContainer.insertBefore(summaryDiv, tablesContainer.firstChild);
+    
+    // Remove the summary after 5 seconds
+    setTimeout(() => {
+        if (summaryDiv.parentNode) {
+            summaryDiv.parentNode.removeChild(summaryDiv);
+        }
+    }, 5000);
+}
+
+// Bulk export data
+function bulkExportData() {
+    if (resultDatasets.length === 0) {
+        alert('No datasets to export. Please create datasets first.');
+        return;
+    }
+    
+    const dataStr = JSON.stringify({
+        resultDatasets: resultDatasets,
+        currentDatasetId: currentDatasetId,
+        exportedAt: new Date().toISOString()
+    }, null, 2);
+    
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'student-results-bulk-data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+
 // Show statistics modal
 function showStatistics() {
-    if (tables.length === 0) {
+    const dataset = getCurrentDataset();
+    if (!dataset || dataset.tables.length === 0) {
         alert('No tables available. Please create tables first.');
         return;
     }
@@ -1703,9 +2112,12 @@ function showStatistics() {
 
 // Render statistics table
 function renderStatisticsTable() {
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
     // Get all unique student names across all tables
     const allStudentNames = [...new Set(
-        tables.flatMap(table => table.students.map(student => student.name))
+        dataset.tables.flatMap(table => table.students.map(student => student.name))
     )].sort();
     
     // Create statistics data structure
@@ -1713,7 +2125,7 @@ function renderStatisticsTable() {
         const studentData = { name, totals: [] };
         
         // For each table, find the student's total score
-        tables.forEach(table => {
+        dataset.tables.forEach(table => {
             const student = table.students.find(s => s.name === name);
             studentData.totals.push(student ? student.total : 0);
         });
@@ -1761,7 +2173,7 @@ function renderStatisticsTable() {
     headerRow.appendChild(nameHeader);
     
     // Add table name headers
-    tables.forEach(table => {
+    dataset.tables.forEach(table => {
         const tableHeader = document.createElement('th');
         tableHeader.textContent = table.name;
         headerRow.appendChild(tableHeader);
@@ -1828,6 +2240,9 @@ function showTerminalReport(studentName) {
 function renderTerminalReport(studentName) {
     terminalReportContainer.innerHTML = '';
     
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
     // Create terminal report container
     const reportDiv = document.createElement('div');
     reportDiv.className = 'terminal-report';
@@ -1875,7 +2290,7 @@ function renderTerminalReport(studentName) {
     let totalPossible = 0;
     
     // Add rows for each table (subject)
-    tables.forEach(table => {
+    dataset.tables.forEach(table => {
         const student = table.students.find(s => s.name === studentName);
         if (student) {
             const row = document.createElement('tr');
@@ -2002,6 +2417,9 @@ function getRemarks(score, maxScore) {
 
 // Print terminal report
 function printTerminalReport(studentName, comments) {
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
     // Create a print-friendly version of the terminal report
     const printWindow = window.open('', '_blank');
     
@@ -2010,7 +2428,7 @@ function printTerminalReport(studentName, comments) {
     let totalPossible = 0;
     let subjectRows = '';
     
-    tables.forEach(table => {
+    dataset.tables.forEach(table => {
         const student = table.students.find(s => s.name === studentName);
         if (student) {
             const subjectRemarks = getRemarks(student.total, 100);
@@ -2172,6 +2590,18 @@ function renderHelpContent() {
         </div>
 
         <div class="help-section">
+            <h3>📚 Multiple Datasets</h3>
+            <p>You can now work with multiple result datasets:</p>
+            <ul>
+                <li><strong>Bulk Import:</strong> Import multiple datasets from JSON files</li>
+                <li><strong>Bulk Export:</strong> Export all your datasets as a single JSON file</li>
+                <li><strong>Bulk List:</strong> View and switch between all your datasets</li>
+                <li><strong>Dataset Management:</strong> Create new datasets or delete existing ones</li>
+            </ul>
+            <p>Each dataset acts as a separate workspace with its own tables and students.</p>
+        </div>
+
+        <div class="help-section">
             <h3>🔢 Flexible Mark Input</h3>
             <p>You can enter marks in several formats and they will be automatically converted:</p>
             <ul>
@@ -2210,7 +2640,8 @@ function renderHelpContent() {
                         <li>Student records with the same name will be updated</li>
                     </ul>
                 </li>
-                <li><strong>Clear Data:</strong> Remove all tables and start fresh (use with caution!).</li>
+                <li><strong>Bulk Operations:</strong> Import/export multiple datasets at once</li>
+                <li><strong>Clear Data:</strong> Remove all datasets and start fresh (use with caution!).</li>
             </ul>
         </div>
 
@@ -2256,6 +2687,7 @@ function renderHelpContent() {
             <h3>💡 Tips & Best Practices</h3>
             <ul>
                 <li>Use descriptive table names (e.g., "Mathematics Grade 7" instead of "Class 1")</li>
+                <li>Use descriptive dataset names to organize your work (e.g., "Term 1 2024", "Grade 7 Results")</li>
                 <li>Regularly export your data as backup</li>
                 <li>Use the statistics view to identify students who need extra help</li>
                 <li>Add personalized comments in terminal reports for better parent communication</li>
@@ -2280,7 +2712,10 @@ function renderHelpContent() {
 
 // Print a specific table
 function printTable(tableId) {
-    const table = tables.find(t => t.id === tableId);
+    const dataset = getCurrentDataset();
+    if (!dataset) return;
+    
+    const table = dataset.tables.find(t => t.id === tableId);
     if (!table) return;
     
     // Create a print-friendly version of the table
@@ -2393,16 +2828,16 @@ function showEmptyState() {
     emptyState.style.display = 'block';
 }
 
-// Export data as JSON
+// Export data as JSON (single dataset)
 function exportData() {
-    if (tables.length === 0) {
+    const dataset = getCurrentDataset();
+    if (!dataset || dataset.tables.length === 0) {
         alert('No data to export. Please add tables first.');
         return;
     }
     
     const dataStr = JSON.stringify({
-        tables: tables,
-        tableCounter: tableCounter,
+        ...dataset,
         exportedAt: new Date().toISOString()
     }, null, 2);
     
@@ -2411,14 +2846,14 @@ function exportData() {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'student-results-data.json';
+    link.download = `student-results-${dataset.name.replace(/\s+/g, '-').toLowerCase()}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
 
-// Handle file import with merging
+// Handle file import with merging (single dataset)
 function handleFileImport(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -2427,13 +2862,16 @@ function handleFileImport(event) {
     reader.onload = function(e) {
         try {
             const importedData = JSON.parse(e.target.result);
+            const dataset = getCurrentDataset();
+            
+            if (!dataset) return;
             
             // Validate imported data structure
             if (Array.isArray(importedData.tables) && importedData.tables.every(item => 
                 item.id && item.name && Array.isArray(item.students))) {
                 
                 const importSummary = mergeImportedData(importedData);
-                renderTables();
+                renderCurrentDataset();
                 hideEmptyState();
                 saveToLocalStorage();
                 
@@ -2453,8 +2891,11 @@ function handleFileImport(event) {
     event.target.value = '';
 }
 
-// Merge imported data with existing data
+// Merge imported data with existing data (single dataset)
 function mergeImportedData(importedData) {
+    const dataset = getCurrentDataset();
+    if (!dataset) return { tablesAdded: 0, tablesUpdated: 0, studentsAdded: 0, studentsUpdated: 0 };
+    
     const summary = {
         tablesAdded: 0,
         tablesUpdated: 0,
@@ -2463,17 +2904,17 @@ function mergeImportedData(importedData) {
     };
     
     // Update table counter to avoid ID conflicts
-    const maxExistingId = tables.reduce((max, table) => {
+    const maxExistingId = dataset.tables.reduce((max, table) => {
         const idNum = parseInt(table.id.replace('table-', ''));
         return idNum > max ? idNum : max;
     }, 0);
     
-    tableCounter = Math.max(tableCounter, maxExistingId + 1);
+    dataset.tableCounter = Math.max(dataset.tableCounter, maxExistingId + 1);
     
     // Process each imported table
     importedData.tables.forEach(importedTable => {
         // Check if table with same name exists
-        const existingTable = tables.find(t => t.name === importedTable.name);
+        const existingTable = dataset.tables.find(t => t.name === importedTable.name);
         
         if (existingTable) {
             // Merge students into existing table
@@ -2498,9 +2939,9 @@ function mergeImportedData(importedData) {
         } else {
             // Add new table
             // Generate new ID to avoid conflicts
-            const newTableId = `table-${tableCounter++}`;
+            const newTableId = `table-${dataset.tableCounter++}`;
             importedTable.id = newTableId;
-            tables.push(importedTable);
+            dataset.tables.push(importedTable);
             summary.tablesAdded++;
             summary.studentsAdded += importedTable.students.length;
         }
@@ -2533,19 +2974,490 @@ function showImportSummary(summary) {
         if (summaryDiv.parentNode) {
             summaryDiv.parentNode.removeChild(summaryDiv);
         }
-    }, 5000);
+    }, 3000);
 }
 
-// Reload function with confirmation
-function reloadPage() {
-    if (confirm('Reload the page? All unsaved changes will be lost.')) {
-        location.reload(true);
-    }
-}
-        
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear ALL data? This action cannot be undone and will delete all datasets and tables.')) {
+                resultDatasets = [];
+                currentDatasetId = null;
+                tableCounter = 1;
+                localStorage.removeItem(STORAGE_KEY);
+                showEmptyState();
+                updateCurrentDatasetIndicator();
+                saveStatus.textContent = 'All data cleared';
+                saveStatus.className = '';
+            }
+        }
+
+        // Reload function with confirmation
+        function reloadPage() {
+            if (confirm('Reload the page? All unsaved changes will be lost.')) {
+                location.reload(true);
+            }
+        }
+
+        // Handle edge cases for dataset operations
+        function handleDatasetEdgeCases() {
+            // Ensure we always have at least one dataset
+            if (resultDatasets.length === 0) {
+                createDefaultDataset();
+            }
+            
+            // Ensure currentDatasetId is valid
+            if (currentDatasetId && !resultDatasets.find(d => d.id === currentDatasetId)) {
+                currentDatasetId = resultDatasets.length > 0 ? resultDatasets[0].id : null;
+            }
+            
+            // If no current dataset but datasets exist, set to first one
+            if (!currentDatasetId && resultDatasets.length > 0) {
+                currentDatasetId = resultDatasets[0].id;
+            }
+        }
+
+        // Validate and repair dataset structure
+        function validateAndRepairDataset(dataset) {
+            if (!dataset.tables) dataset.tables = [];
+            if (!dataset.tableCounter) dataset.tableCounter = 1;
+            
+            // Ensure all tables have required structure
+            dataset.tables.forEach(table => {
+                if (!table.id) table.id = `table-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                if (!table.name) table.name = 'Unnamed Table';
+                if (!table.catColumns) table.catColumns = [...defaultCatColumns];
+                if (!table.students) table.students = [];
+                
+                // Ensure all students have required structure
+                table.students.forEach(student => {
+                    if (!student.name) student.name = 'Unnamed Student';
+                    if (!student.catMarks) student.catMarks = {};
+                    if (typeof student.exam !== 'number') student.exam = 0;
+                    if (typeof student.catTotal !== 'number') student.catTotal = 0;
+                    if (typeof student.total !== 'number') student.total = 0;
+                    if (typeof student.position !== 'number') student.position = 0;
+                    
+                    // Ensure all CAT columns have marks
+                    table.catColumns.forEach(cat => {
+                        if (typeof student.catMarks[cat.id] !== 'number') {
+                            student.catMarks[cat.id] = 0;
+                        }
+                    });
+                    
+                    // Recalculate totals
+                    recalculateStudentTotals(table, student);
+                });
+                
+                // Update positions
+                updatePositions(table.id);
+            });
+            
+            return dataset;
+        }
+
+        // Enhanced save with validation
+        function saveToLocalStorageWithValidation() {
+            // Validate and repair all datasets before saving
+            resultDatasets.forEach(dataset => {
+                validateAndRepairDataset(dataset);
+            });
+            
+            // Handle edge cases
+            handleDatasetEdgeCases();
+            
+            // Proceed with saving
+            saveToLocalStorage();
+        }
+
+        // Override the original save function with enhanced version
+        const originalSaveToLocalStorage = saveToLocalStorage;
+        saveToLocalStorage = saveToLocalStorageWithValidation;
+
+        // Enhanced error handling for file operations
+        function handleFileOperationError(error, operation) {
+            console.error(`Error during ${operation}:`, error);
+            
+            let errorMessage = 'An error occurred during the operation.';
+            
+            if (error instanceof SyntaxError) {
+                errorMessage = 'Invalid file format. Please ensure you are importing a valid JSON file.';
+            } else if (error instanceof TypeError) {
+                errorMessage = 'File format not supported.';
+            } else if (error.message.includes('QuotaExceededError')) {
+                errorMessage = 'Storage limit exceeded. Please clear some data or export existing data.';
+            }
+            
+            // Show error to user
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'import-summary';
+            errorDiv.style.backgroundColor = '#f8d7da';
+            errorDiv.style.borderLeftColor = '#dc3545';
+            
+            errorDiv.innerHTML = `
+                <h4>❌ Operation Failed</h4>
+                <p>${errorMessage}</p>
+                <p style="font-size: 0.8rem; margin-top: 5px;">Technical details: ${error.message}</p>
+            `;
+            
+            // Insert at the top of the tables container
+            tablesContainer.insertBefore(errorDiv, tablesContainer.firstChild);
+            
+            // Remove the error after 7 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 3000);
+        }
+
+        // Enhanced file import with better error handling
+        const originalHandleFileImport = handleFileImport;
+        handleFileImport = function(event) {
+            try {
+                originalHandleFileImport(event);
+            } catch (error) {
+                handleFileOperationError(error, 'file import');
+            }
+        };
+
+        // Enhanced bulk import with better error handling
+        const originalHandleBulkFileImport = handleBulkFileImport;
+        handleBulkFileImport = function(event) {
+            try {
+                originalHandleBulkFileImport(event);
+            } catch (error) {
+                handleFileOperationError(error, 'bulk import');
+            }
+        };
+
+        // Auto-save on beforeunload
+        window.addEventListener('beforeunload', function() {
+            saveToLocalStorage();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S or Cmd+S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveToLocalStorage();
+                // Show temporary feedback
+                const originalText = saveStatus.textContent;
+                saveStatus.textContent = 'Manually saved!';
+                setTimeout(() => {
+                    saveStatus.textContent = originalText;
+                }, 2000);
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                const openModals = document.querySelectorAll('.modal-overlay[style*="display: flex"]');
+                openModals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+        });
+
+        // Enhanced initialization with error recovery
+        function enhancedInit() {
+            try {
+                loadFromLocalStorage();
+                
+                // Handle edge cases
+                handleDatasetEdgeCases();
+                
+                // Validate and repair all datasets
+                resultDatasets.forEach(dataset => {
+                    validateAndRepairDataset(dataset);
+                });
+                
+                // If no datasets exist, create a default one
+                if (resultDatasets.length === 0) {
+                    createDefaultDataset();
+                }
+                
+                // Set current dataset if not set
+                if (!currentDatasetId && resultDatasets.length > 0) {
+                    currentDatasetId = resultDatasets[0].id;
+                }
+                
+                updateCurrentDatasetIndicator();
+                renderCurrentDataset();
+                
+                console.log('Application initialized successfully');
+            } catch (error) {
+                console.error('Error during initialization:', error);
+                
+                // Show error to user but don't prevent app from loading
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'import-summary';
+                errorDiv.style.backgroundColor = '#fff3cd';
+                errorDiv.style.borderLeftColor = '#ffc107';
+                
+                errorDiv.innerHTML = `
+                    <h4>⚠️ Data Load Issue</h4>
+                    <p>There was a problem loading your saved data. Some features may not work correctly.</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">You can continue working, but consider exporting your data and refreshing the page.</p>
+                `;
+                
+                // Insert at the top of the container
+                const container = document.querySelector('.container');
+                container.insertBefore(errorDiv, container.firstChild);
+                
+                // Create default dataset to ensure app is usable
+                createDefaultDataset();
+                updateCurrentDatasetIndicator();
+                renderCurrentDataset();
+            }
+        }
+
+        // Export dataset as template
+        function exportDatasetTemplate() {
+            const template = {
+                id: generateId(),
+                name: 'Template Dataset',
+                tables: [
+                    {
+                        id: 'table-1',
+                        name: 'Mathematics',
+                        catColumns: [...defaultCatColumns],
+                        students: initialStudents.map(name => ({
+                            name,
+                            exam: 0,
+                            catTotal: 0,
+                            total: 0,
+                            position: 0,
+                            catMarks: defaultCatColumns.reduce((acc, cat) => {
+                                acc[cat.id] = 0;
+                                return acc;
+                            }, {})
+                        }))
+                    }
+                ],
+                tableCounter: 2
+            };
+            
+            const dataStr = JSON.stringify(template, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'student-results-template.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Add template export button to help section
+        function enhanceHelpContent() {
+            const originalRenderHelpContent = renderHelpContent;
+            renderHelpContent = function() {
+                originalRenderHelpContent();
+                
+                const templateSection = document.createElement('div');
+                templateSection.className = 'help-section';
+                templateSection.style.textAlign = 'center';
+                templateSection.style.marginTop = '30px';
+                templateSection.style.paddingTop = '20px';
+                templateSection.style.borderTop = '2px solid var(--primary)';
+                
+                templateSection.innerHTML = `
+                    <h3>🚀 Quick Start</h3>
+                    <p>Need a starting point? Download our template to see how the data should be structured.</p>
+                    <button id="exportTemplateBtn" class="btn-primary" style="margin-top: 15px;">
+                        📥 Download Template
+                    </button>
+                `;
+                
+                helpContainer.appendChild(templateSection);
+                
+                // Add event listener for the template button
+                document.getElementById('exportTemplateBtn').addEventListener('click', exportDatasetTemplate);
+            };
+        }
+
+        // Data integrity check
+        function performDataIntegrityCheck() {
+            const issues = [];
+            
+            resultDatasets.forEach((dataset, datasetIndex) => {
+                if (!dataset.id || !dataset.name) {
+                    issues.push(`Dataset ${datasetIndex + 1} is missing ID or name`);
+                }
+                
+                dataset.tables.forEach((table, tableIndex) => {
+                    if (!table.id || !table.name) {
+                        issues.push(`Table ${tableIndex + 1} in dataset "${dataset.name}" is missing ID or name`);
+                    }
+                    
+                    // Check for duplicate student names
+                    const studentNames = table.students.map(s => s.name);
+                    const duplicateNames = studentNames.filter((name, index) => studentNames.indexOf(name) !== index);
+                    if (duplicateNames.length > 0) {
+                        issues.push(`Table "${table.name}" has duplicate student names: ${duplicateNames.join(', ')}`);
+                    }
+                    
+                    // Check for invalid marks
+                    table.students.forEach(student => {
+                        table.catColumns.forEach(cat => {
+                            const mark = student.catMarks[cat.id];
+                            if (mark < 0 || mark > cat.maxScore) {
+                                issues.push(`Invalid mark ${mark} for ${student.name} in ${cat.name} (should be 0-${cat.maxScore})`);
+                            }
+                        });
+                        
+                        if (student.exam < 0 || student.exam > 50) {
+                            issues.push(`Invalid exam mark ${student.exam} for ${student.name} (should be 0-50)`);
+                        }
+                    });
+                });
+            });
+            
+            return issues;
+        }
+
+        // Show data integrity report
+        function showDataIntegrityReport() {
+            const issues = performDataIntegrityCheck();
+            
+            if (issues.length === 0) {
+                alert('✅ No data integrity issues found! Your data is in good shape.');
+                return;
+            }
+            
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Data Integrity Report</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            line-height: 1.6;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            padding-bottom: 15px;
+                            border-bottom: 2px solid #333;
+                        }
+                        .issue {
+                            background-color: #f8f9fa;
+                            padding: 10px 15px;
+                            margin-bottom: 10px;
+                            border-left: 4px solid #dc3545;
+                            border-radius: 4px;
+                        }
+                        .summary {
+                            background-color: #e8f5e8;
+                            padding: 15px;
+                            margin-top: 20px;
+                            border-radius: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>📊 Data Integrity Report</h1>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    
+                    <h2>Issues Found (${issues.length})</h2>
+                    ${issues.map(issue => `<div class="issue">${issue}</div>`).join('')}
+                    
+                    <div class="summary">
+                        <h3>Recommendations</h3>
+                        <ul>
+                            <li>Review and fix the issues listed above</li>
+                            <li>Export your data regularly as backup</li>
+                            <li>Use the template for creating new datasets</li>
+                            <li>Consider clearing and re-importing data if issues persist</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Print Report
+                        </button>
+                        <button onclick="window.close()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                            Close
+                        </button>
+                    </div>
+                </body>
+                </html>
+            `);
+            reportWindow.document.close();
+        }
+
+        // Add data integrity check to help section
+        function addDataIntegrityToHelp() {
+            const originalEnhanceHelpContent = enhanceHelpContent;
+            enhanceHelpContent = function() {
+                originalEnhanceHelpContent();
+                
+                const integritySection = document.createElement('div');
+                integritySection.className = 'help-section';
+                integritySection.style.textAlign = 'center';
+                integritySection.style.marginTop = '20px';
+                
+                integritySection.innerHTML = `
+                    <h3>🔍 Data Health Check</h3>
+                    <p>Run a comprehensive check to identify any data integrity issues in your datasets.</p>
+                    <button id="dataIntegrityBtn" class="btn-warning" style="margin-top: 15px;">
+                        🔍 Run Data Integrity Check
+                    </button>
+                `;
+                
+                helpContainer.appendChild(integritySection);
+                
+                // Add event listener for the integrity button
+                document.getElementById('dataIntegrityBtn').addEventListener('click', showDataIntegrityReport);
+            };
+        }
+
+        // Final initialization with all enhancements
+        function finalInit() {
+            // Apply all enhancements
+            enhanceHelpContent();
+            addDataIntegrityToHelp();
+            
+            // Initialize the application
+            enhancedInit();
+            
+            // Add data integrity check button to controls (optional)
+            const integrityBtn = document.createElement('button');
+            integrityBtn.className = 'btn-warning';
+            integrityBtn.innerHTML = '🔍 Data Check';
+            integrityBtn.title = 'Run data integrity check';
+            integrityBtn.addEventListener('click', showDataIntegrityReport);
+            
+            // Insert before the clear data button
+            const controls = document.querySelector('.controls');
+            controls.insertBefore(integrityBtn, clearDataBtn);
+            
+            console.log('Student Results Manager fully initialized with bulk operations support');
+        }
 
         // Initialize the app when the page loads
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', finalInit);
+
+        // Export functions for debugging (development only)
+        if (typeof window !== 'undefined') {
+            window.debugApp = {
+                getCurrentDataset,
+                getCurrentTables,
+                resultDatasets,
+                currentDatasetId,
+                performDataIntegrityCheck,
+                validateAndRepairDataset,
+                exportDatasetTemplate
+            };
+        }
     </script>
 </body>
 </html>
