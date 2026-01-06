@@ -232,56 +232,47 @@
     </main>
 
     <script>
-        // Data structure
+        // New data structure as requested
         const wordTables = [
             {
-                topic: "Word Patterns Group 1",
-                "column-label": ["-ank", "-ink", "-onk", "-unk"],
-                "column-data": [
-                    ["thank", "sink", "wonk", "dunk"],
-                    ["sank", "blink", "clonk", "drunk"],
-                    ["drank", "drink", "monk", "sunk"],
-                    ["tank", "pink", "honk", "chunk"],
-                    ["bank", "link", "bonk", "bunk"]
-                ]
+                "Vowel-Consonant Digraphs (-nk patterns)": {
+                    "ank": ["thank", "sank", "drank", "tank", "bank"],
+                    "ink": ["sink", "blink", "drink", "pink", "link"],
+                    "onk": ["wonk", "clonk", "monk", "honk", "bonk"],
+                    "unk": ["dunk", "drunk", "sunk", "chunk", "bunk"]
+                }
             },
             {
-                topic: "Word Patterns Group 2",
-                "column-label": ["-ang", "-ing", "-ong", "-ung"],
-                "column-data": [
-                    ["gang", "wing", "gong", "lung"],
-                    ["hang", "bring", "tong", "rung"],
-                    ["pang", "thing", "wrong", "dung"],
-                    ["sang", "sing", "long", "hung"],
-                    ["bang", "ring", "song", "sung"]
-                ]
-            },
-
-            {
-                topic: "Word Patterns Group 2",
-                "column-label": ["-ang", "-ing", "-ong"],
-                "column-data": [
-                    ["gang", "wing", "gong", "lung"],
-                    ["hang", "bring", "tong", "rung"],
-                    ["pang", "thing", "wrong", "dung"],
-
-                ]
+                "Vowel-Consonant Digraphs (-ng patterns)": {
+                    "ang": ["gang", "hang", "pang", "sang", "bang"],
+                    "ing": ["wing", "bring", "thing", "sing", "ring"],
+                    "ong": ["gong", "tong", "wrong", "long", "song"],
+                    "ung": ["lung", "rung", "dung", "hung", "sung"]
+                }
             },
             {
-                topic: "Word Patterns Group 2",
-                "column-label": ["-ang", "-ing", "-ong", "-ung", "-jng"],
-                "column-data": [
-                    ["gang", "wing", "gong", "lung"],
-                    ["hang", "bring", "tong", "rung"],
-                    ["pang", "thing", "wrong", "dung"],
-                    ["sang", "sing", "long", "hung"],
-                    ["bang", "ring", "song", "sung"],
-                    ["bang", "ring", "song", "sung"],
-                    ["bang", "ring", "song", "sung"]
-
-
-
-                ]
+                "Vowel Digraphs (ai, ay) - Long A": {
+                    "ai (middle)": ["rain", "train", "brain", "grain", "strain"],
+                    "ay (end)": ["day", "play", "may", "way", "stay"],
+                    "ai words": ["bail", "wail", "mail", "gain", "wait"],
+                    "ay words": ["lay", "pay", "say", "stray", "ray"]
+                }
+            },
+            {
+                "Vowel Digraphs (ee, ey) - Long E": {
+                    "ee pattern": ["see", "fee", "tree", "sleep", "week"],
+                    "ey (key)": ["key", "money", "honey", "hockey", "valley"],
+                    "ey (they)": ["they", "obey", "prey", "grey", "survey"],
+                    "Mixed": ["tree", "sleep", "sweet", "free", "sheep"]
+                }
+            },
+            {
+                "Vowel Digraphs (oa, oe) - Long O": {
+                    "oa pattern": ["boat", "coat", "soak", "toad", "loaf"],
+                    "oe pattern": ["toe", "doe", "hoe", "woe", "Joe"],
+                    "oa words": ["coat", "soak", "toad", "loaf", "road"],
+                    "oe words": ["foe", "hoe", "woe", "Joe", "goes"]
+                }
             }
         ];
 
@@ -297,10 +288,11 @@
 
         // Function to populate topic list in drawer
         function populateTopicList() {
-            wordTables.forEach((tableData, index) => {
+            wordTables.forEach((tableObj, index) => {
+                const topicName = Object.keys(tableObj)[0];
                 const listItem = document.createElement('li');
                 listItem.className = `topic-item ${index === activeTopicIndex ? 'active' : ''}`;
-                listItem.textContent = tableData.topic;
+                listItem.textContent = topicName;
                 listItem.dataset.index = index;
                 
                 listItem.addEventListener('click', () => {
@@ -314,7 +306,7 @@
                     listItem.classList.add('active');
                     
                     // Generate table for selected topic
-                    generateTable(tableData);
+                    generateTable(tableObj);
                     
                     // Close drawer on mobile
                     if (window.innerWidth <= 768) {
@@ -328,8 +320,12 @@
         }
 
         // Function to generate table for a topic
-        function generateTable(tableData) {
+        function generateTable(tableObj) {
             contentContainer.innerHTML = '';
+            
+            // Get the topic name (first key in the object)
+            const topicName = Object.keys(tableObj)[0];
+            const tableData = tableObj[topicName];
             
             // Create table container
             const tableContainer = document.createElement('div');
@@ -338,7 +334,7 @@
             // Add topic title
             const topicTitle = document.createElement('h2');
             topicTitle.className = 'topic-title';
-            topicTitle.textContent = tableData.topic;
+            topicTitle.textContent = topicName;
             tableContainer.appendChild(topicTitle);
             
             // Create table
@@ -348,7 +344,10 @@
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
             
-            tableData['column-label'].forEach(label => {
+            // Get column labels (keys of the tableData object)
+            const columnLabels = Object.keys(tableData);
+            
+            columnLabels.forEach(label => {
                 const th = document.createElement('th');
                 th.className = 'phonogram-header';
                 th.textContent = label;
@@ -361,17 +360,23 @@
             // Create table body
             const tbody = document.createElement('tbody');
             
-            tableData['column-data'].forEach(rowData => {
+            // Get the number of rows (all columns should have same number of items)
+            const firstColumnKey = columnLabels[0];
+            const numRows = tableData[firstColumnKey].length;
+            
+            // Create each row
+            for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
                 const row = document.createElement('tr');
                 
-                rowData.forEach(cellData => {
+                // For each column, get the item at current row index
+                columnLabels.forEach(columnKey => {
                     const td = document.createElement('td');
-                    td.textContent = cellData;
+                    td.textContent = tableData[columnKey][rowIndex] || ''; // Handle missing data
                     row.appendChild(td);
                 });
                 
                 tbody.appendChild(row);
-            });
+            }
             
             table.appendChild(tbody);
             tableContainer.appendChild(table);
