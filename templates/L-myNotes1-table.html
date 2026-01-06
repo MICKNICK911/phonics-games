@@ -90,13 +90,23 @@
             font-size: 1.8rem;
         }
         
+        /* Topic Container */
+        .topic-container {
+            margin-bottom: 40px;
+        }
+        
         /* Table Styles */
         .table-container {
             background-color: white;
             padding: 30px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            break-inside: avoid;
+        }
+        
+        .table-container:last-child {
+            margin-bottom: 0;
         }
         
         .topic-title {
@@ -108,10 +118,19 @@
             border-bottom: 1px solid #eee;
         }
         
+        .table-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 0 auto;
+            table-layout: fixed;
         }
         
         th, td {
@@ -119,16 +138,20 @@
             padding: 12px;
             text-align: center;
             font-size: 16px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         th {
             background-color: #f2f2f2;
             font-weight: bold;
             color: #2c3e50;
+            min-width: 80px;
         }
         
         td {
             background-color: white;
+            min-height: 50px;
         }
         
         .phonogram-header {
@@ -141,6 +164,12 @@
             margin-top: 30px;
             font-style: italic;
             color: #666;
+        }
+        
+        .table-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
         
         /* Responsive Design */
@@ -201,6 +230,17 @@
                 padding: 6px;
                 font-size: 13px;
             }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        /* Helper classes */
+        .empty-cell {
+            color: #999;
+            font-style: italic;
         }
     </style>
 </head>
@@ -232,7 +272,7 @@
     </main>
 
     <script>
-        // New data structure as requested
+        // Data structure with varying column counts for testing
         const wordTables = [
             {
                 "Vowel-Consonant Digraphs (-nk patterns)": {
@@ -272,6 +312,40 @@
                     "oe pattern": ["toe", "doe", "hoe", "woe", "Joe"],
                     "oa words": ["coat", "soak", "toad", "loaf", "road"],
                     "oe words": ["foe", "hoe", "woe", "Joe", "goes"]
+                }
+            },
+            {
+                "Test Table with 8 Columns": {
+                    "Column 1": ["A1", "A2", "A3", "A4", "A5"],
+                    "Column 2": ["B1", "B2", "B3", "B4", "B5"],
+                    "Column 3": ["C1", "C2", "C3", "C4", "C5"],
+                    "Column 4": ["D1", "D2", "D3", "D4", "D5"],
+                    "Column 5": ["E1", "E2", "E3", "E4", "E5"],
+                    "Column 6": ["F1", "F2", "F3", "F4", "F5"],
+                    "Column 7": ["G1", "G2", "G3", "G4", "G5"],
+                    "Column 8": ["H1", "H2", "H3", "H4", "H5"]
+                }
+            },
+            {
+                "Test Table with 6 Columns": {
+                    "Col A": ["A1", "A2", "A3"],
+                    "Col B": ["B1", "B2", "B3"],
+                    "Col C": ["C1", "C2", "C3"],
+                    "Col D": ["D1", "D2", "D3"],
+                    "Col E": ["E1", "E2", "E3"],
+                    "Col F": ["F1", "F2", "F3"]
+                }
+            },
+            {
+                "Test Table with 3 Columns": {
+                    "Red": ["apple", "cherry", "rose", "fire"],
+                    "Blue": ["sky", "ocean", "berry", "jeans"],
+                    "Green": ["grass", "leaf", "emerald", "lime"]
+                }
+            },
+            {
+                "Test Table with 1 Column": {
+                    "Single Column": ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"]
                 }
             }
         ];
@@ -319,23 +393,27 @@
             });
         }
 
-        // Function to generate table for a topic
-        function generateTable(tableObj) {
-            contentContainer.innerHTML = '';
-            
-            // Get the topic name (first key in the object)
-            const topicName = Object.keys(tableObj)[0];
-            const tableData = tableObj[topicName];
-            
-            // Create table container
+        // Helper function to chunk array into groups
+        function chunkArray(array, chunkSize) {
+            const chunks = [];
+            for (let i = 0; i < array.length; i += chunkSize) {
+                chunks.push(array.slice(i, i + chunkSize));
+            }
+            return chunks;
+        }
+
+        // Helper function to create a single table with given columns
+        function createSingleTable(topicName, columnData, columnKeys, tableIndex = 0, totalTables = 1) {
             const tableContainer = document.createElement('div');
             tableContainer.className = 'table-container';
             
-            // Add topic title
-            const topicTitle = document.createElement('h2');
-            topicTitle.className = 'topic-title';
-            topicTitle.textContent = topicName;
-            tableContainer.appendChild(topicTitle);
+            // Add table title if multiple tables
+            if (totalTables > 1) {
+                const tableTitle = document.createElement('div');
+                tableTitle.className = 'table-title';
+                tableTitle.textContent = `Part ${tableIndex + 1} of ${totalTables}`;
+                tableContainer.appendChild(tableTitle);
+            }
             
             // Create table
             const table = document.createElement('table');
@@ -344,10 +422,7 @@
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
             
-            // Get column labels (keys of the tableData object)
-            const columnLabels = Object.keys(tableData);
-            
-            columnLabels.forEach(label => {
+            columnKeys.forEach(label => {
                 const th = document.createElement('th');
                 th.className = 'phonogram-header';
                 th.textContent = label;
@@ -360,18 +435,25 @@
             // Create table body
             const tbody = document.createElement('tbody');
             
-            // Get the number of rows (all columns should have same number of items)
-            const firstColumnKey = columnLabels[0];
-            const numRows = tableData[firstColumnKey].length;
+            // Find maximum number of rows needed
+            const maxRows = Math.max(...columnKeys.map(key => columnData[key].length));
             
             // Create each row
-            for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
+            for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
                 const row = document.createElement('tr');
                 
                 // For each column, get the item at current row index
-                columnLabels.forEach(columnKey => {
+                columnKeys.forEach(columnKey => {
                     const td = document.createElement('td');
-                    td.textContent = tableData[columnKey][rowIndex] || ''; // Handle missing data
+                    const value = columnData[columnKey][rowIndex];
+                    
+                    if (value !== undefined && value !== null && value !== '') {
+                        td.textContent = value;
+                    } else {
+                        td.textContent = '-';
+                        td.classList.add('empty-cell');
+                    }
+                    
                     row.appendChild(td);
                 });
                 
@@ -380,7 +462,65 @@
             
             table.appendChild(tbody);
             tableContainer.appendChild(table);
-            contentContainer.appendChild(tableContainer);
+            
+            return tableContainer;
+        }
+
+        // Function to generate tables for a topic (handles multiple tables if needed)
+        function generateTable(tableObj) {
+            contentContainer.innerHTML = '';
+            
+            // Get the topic name and data
+            const topicName = Object.keys(tableObj)[0];
+            const tableData = tableObj[topicName];
+            const allColumnKeys = Object.keys(tableData);
+            
+            // Create main topic container
+            const topicContainer = document.createElement('div');
+            topicContainer.className = 'topic-container';
+            
+            // Add topic title
+            const topicTitle = document.createElement('h2');
+            topicTitle.className = 'topic-title';
+            topicTitle.textContent = topicName;
+            topicContainer.appendChild(topicTitle);
+            
+            // Split columns into groups of maximum 4 columns per table
+            const MAX_COLUMNS_PER_TABLE = 4;
+            const columnGroups = chunkArray(allColumnKeys, MAX_COLUMNS_PER_TABLE);
+            
+            // Create table for each group of columns
+            columnGroups.forEach((columnGroup, groupIndex) => {
+                // Get data only for columns in this group
+                const groupData = {};
+                columnGroup.forEach(key => {
+                    groupData[key] = tableData[key];
+                });
+                
+                // Create table for this group
+                const tableContainer = createSingleTable(
+                    topicName, 
+                    groupData, 
+                    columnGroup,
+                    groupIndex,
+                    columnGroups.length
+                );
+                
+                topicContainer.appendChild(tableContainer);
+            });
+            
+            // If there are multiple tables, add spacing
+            if (columnGroups.length > 1) {
+                topicContainer.classList.add('table-group');
+            }
+            
+            contentContainer.appendChild(topicContainer);
+            
+            // Update main title with column count info
+            const mainTitle = document.querySelector('.header h1');
+            if (mainTitle) {
+                mainTitle.textContent = `${topicName} (${allColumnKeys.length} columns)`;
+            }
         }
 
         // Function to toggle drawer on mobile
