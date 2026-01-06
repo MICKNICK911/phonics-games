@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P-vcd Words</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 40px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .page-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .word-lines {
+            font-size: 18px;
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+        
+        .line {
+            margin-bottom: 10px;
+            white-space: pre;
+        }
+        
+        .page-label {
+            text-align: center;
+            margin-top: 30px;
+            font-style: italic;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        /* Table version (alternative layout) */
+        .table-version {
+            display: none; /* Hidden by default, showing text version */
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .toggle-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                margin: 20px;
+            }
+            
+            .page-container {
+                padding: 20px;
+            }
+            
+            .word-lines {
+                font-size: 16px;
+            }
+            
+            .line {
+                white-space: normal;
+                word-spacing: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="toggle-container">
+            <button id="toggleView">Switch to Table View</button>
+        </div>
+        
+        <!-- Text Version (Default) -->
+        <div class="word-lines" id="textVersion">
+            <div class="line">thank sink wonk dunk gang wing gong lung</div>
+            <div class="line">sank blink clonk drunk hang bring tong rung</div>
+            <div class="line">drank drink monk sunk pang thing wrong dung</div>
+        </div>
+        
+        <!-- Table Version (Hidden by Default) -->
+        <div class="table-version" id="tableVersion">
+            <table>
+                <tbody id="tableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="page-label">===== Page 1 =====</div>
+    </div>
+
+    <script>
+        // Word data organized by lines
+        const wordLines = [
+            ["thank", "sink", "wonk", "dunk", "gang", "wing", "gong", "lung"],
+            ["sank", "blink", "clonk", "drunk", "hang", "bring", "tong", "rung"],
+            ["drank", "drink", "monk", "sunk", "pang", "thing", "wrong", "dung"]
+        ];
+        
+        // Function to create table version
+        function createTable() {
+            const tableBody = document.getElementById('tableBody');
+            
+            wordLines.forEach(lineWords => {
+                const row = document.createElement('tr');
+                
+                lineWords.forEach(word => {
+                    const cell = document.createElement('td');
+                    cell.textContent = word;
+                    row.appendChild(cell);
+                });
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Toggle between text and table views
+        const toggleButton = document.getElementById('toggleView');
+        const textVersion = document.getElementById('textVersion');
+        const tableVersion = document.getElementById('tableVersion');
+        
+        let isTableView = false;
+        
+        toggleButton.addEventListener('click', () => {
+            if (isTableView) {
+                // Switch to text view
+                textVersion.style.display = 'block';
+                tableVersion.style.display = 'none';
+                toggleButton.textContent = 'Switch to Table View';
+                isTableView = false;
+            } else {
+                // Switch to table view
+                textVersion.style.display = 'none';
+                tableVersion.style.display = 'block';
+                toggleButton.textContent = 'Switch to Text View';
+                isTableView = true;
+            }
+        });
+        
+        // Initialize table when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            createTable();
+        });
+    </script>
+</body>
+</html>
