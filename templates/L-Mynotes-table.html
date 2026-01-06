@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonograms with Long Vowels</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Drawer Styles */
+        .drawer {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .drawer h2 {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .topic-list {
+            list-style: none;
+        }
+        
+        .topic-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-left: 4px solid transparent;
+        }
+        
+        .topic-item:hover {
+            background-color: #34495e;
+        }
+        
+        .topic-item.active {
+            background-color: #3498db;
+            border-left-color: #1abc9c;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .topic-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        td {
+            background-color: white;
+        }
+        
+        .phonogram-header {
+            font-weight: bold;
+            background-color: #e8e8e8;
+        }
+        
+        .page-label {
+            text-align: center;
+            margin-top: 30px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .drawer {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            
+            .drawer.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .table-container {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .topic-title {
+                font-size: 1.2rem;
+            }
+            
+            th, td {
+                padding: 6px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Drawer Menu -->
+    <nav class="drawer" id="drawer">
+        <h2>Word Patterns</h2>
+        <ul class="topic-list" id="topic-list">
+            <!-- Topic items will be populated by JavaScript -->
+        </ul>
+    </nav>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <button class="menu-toggle" id="menu-toggle">☰</button>
+            <h1>Vowel-Consonant Digraphs</h1>
+            <div style="width: 40px;"></div> <!-- Spacer for alignment -->
+        </header>
+        
+        <div id="content-container">
+            <!-- Tables will be dynamically generated here -->
+        </div>
+        
+        <div class="page-label">===== Page 1 =====</div>
+    </main>
+
+    <script>
+        // Data structure
+        const wordTables = [
+            {
+                topic: "Word Patterns Group 1",
+                "column-label": ["-ank", "-ink", "-onk", "-unk"],
+                "column-data": [
+                    ["thank", "sink", "wonk", "dunk"],
+                    ["sank", "blink", "clonk", "drunk"],
+                    ["drank", "drink", "monk", "sunk"],
+                    ["tank", "pink", "honk", "chunk"],
+                    ["bank", "link", "bonk", "bunk"]
+                ]
+            },
+            {
+                topic: "Word Patterns Group 2",
+                "column-label": ["-ang", "-ing", "-ong", "-ung"],
+                "column-data": [
+                    ["gang", "wing", "gong", "lung"],
+                    ["hang", "bring", "tong", "rung"],
+                    ["pang", "thing", "wrong", "dung"],
+                    ["sang", "sing", "long", "hung"],
+                    ["bang", "ring", "song", "sung"]
+                ]
+            }
+        ];
+
+        // DOM Elements
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menu-toggle');
+        const topicList = document.getElementById('topic-list');
+        const contentContainer = document.getElementById('content-container');
+
+        // Initialize active topic
+        let activeTopicIndex = 0;
+
+        // Function to populate topic list in drawer
+        function populateTopicList() {
+            wordTables.forEach((tableData, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = `topic-item ${index === activeTopicIndex ? 'active' : ''}`;
+                listItem.textContent = tableData.topic;
+                listItem.dataset.index = index;
+                
+                listItem.addEventListener('click', () => {
+                    // Update active topic
+                    activeTopicIndex = index;
+                    
+                    // Update active class in drawer
+                    document.querySelectorAll('.topic-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    listItem.classList.add('active');
+                    
+                    // Generate table for selected topic
+                    generateTable(tableData);
+                    
+                    // Close drawer on mobile
+                    if (window.innerWidth <= 768) {
+                        drawer.classList.remove('open');
+                        overlay.classList.remove('active');
+                    }
+                });
+                
+                topicList.appendChild(listItem);
+            });
+        }
+
+        // Function to generate table for a topic
+        function generateTable(tableData) {
+            contentContainer.innerHTML = '';
+            
+            // Create table container
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'table-container';
+            
+            // Add topic title
+            const topicTitle = document.createElement('h2');
+            topicTitle.className = 'topic-title';
+            topicTitle.textContent = tableData.topic;
+            tableContainer.appendChild(topicTitle);
+            
+            // Create table
+            const table = document.createElement('table');
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            tableData['column-label'].forEach(label => {
+                const th = document.createElement('th');
+                th.className = 'phonogram-header';
+                th.textContent = label;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            tableData['column-data'].forEach(rowData => {
+                const row = document.createElement('tr');
+                
+                rowData.forEach(cellData => {
+                    const td = document.createElement('td');
+                    td.textContent = cellData;
+                    row.appendChild(td);
+                });
+                
+                tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+            contentContainer.appendChild(tableContainer);
+        }
+
+        // Function to toggle drawer on mobile
+        function toggleDrawer() {
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        // Event listeners
+        menuToggle.addEventListener('click', toggleDrawer);
+        overlay.addEventListener('click', toggleDrawer);
+
+        // Initialize the app
+        function initApp() {
+            populateTopicList();
+            
+            // Generate table for first topic
+            if (wordTables.length > 0) {
+                generateTable(wordTables[0]);
+            }
+            
+            // Close drawer by default on mobile
+            if (window.innerWidth <= 768) {
+                drawer.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                drawer.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        });
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
