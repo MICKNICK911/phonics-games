@@ -268,7 +268,7 @@
             <!-- Tables will be dynamically generated here -->
         </div>
         
-        <div class="page-label">===== Page 1 =====</div>
+        <!--<div class="page-label">===== Page 1 =====</div>-->
     </main>
 
     <script>
@@ -396,6 +396,16 @@
         // Helper function to chunk array into groups
         function chunkArray(array, chunkSize) {
             const chunks = [];
+            
+            if (window.innerWidth <= 768) {
+                for (let i = 0; i < array.length; i += chunkSize) {
+                chunks.push(array.slice(i, i + chunkSize));
+            }
+            return chunks;        
+             }
+             
+            chunkSize = array.length; 
+            
             for (let i = 0; i < array.length; i += chunkSize) {
                 chunks.push(array.slice(i, i + chunkSize));
             }
@@ -408,12 +418,12 @@
             tableContainer.className = 'table-container';
             
             // Add table title if multiple tables
-            if (totalTables > 1) {
+            /*if (totalTables > 1) {
                 const tableTitle = document.createElement('div');
                 tableTitle.className = 'table-title';
                 tableTitle.textContent = `Part ${tableIndex + 1} of ${totalTables}`;
                 tableContainer.appendChild(tableTitle);
-            }
+            }*/
             
             // Create table
             const table = document.createElement('table');
