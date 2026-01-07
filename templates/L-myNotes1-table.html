@@ -274,115 +274,193 @@
     <script>
         // Data structure with varying column counts for testing
         const wordTables = [
-            {
-"Short Vowel CVC Words": {
-"Short a": ["bag", "cat", "mat", "hat", "rat", "bat", "sat", "pat", "fat", "man"],
-"Short e": ["get", "wet", "net", "let", "pen", "ten", "hen", "men", "bed", "red"],
-"Short i": ["sit", "fix", "hit", "win", "pin", "big", "pig", "dig", "lid", "kid"],
-"Short o": ["pot", "hot", "not", "lot", "got", "dog", "log", "fog", "hop", "mop"],
-"Short u": ["sum", "fun", "gun", "mud", "but", "sun", "run", "cup", "bug", "rug"]
-},
-"Special Consonants": {
-"x (ks)": ["box", "fox", "mix", "six", "ax", "ox", "fix", "wax", "tax", "next"],
-"qu": ["quit", "queen", "quiz", "quick", "quack", "quill", "quilt", "quest", "quench", "quote"],
-"y (as i)": ["gym", "cry", "fly", "try", "sky", "my", "by", "why", "spy", "dry"],
-"y (as e)": ["happy", "baby", "city", "lady", "party", "puppy", "sunny", "funny", "silly", "jelly"]
-},
-"c/k Rule": {
-"c (before a, o, u)": ["cat", "cot", "cup", "can", "cap", "cop", "cub", "cut", "cab", "cod"],
-"k (before e, i)": ["ken", "kit", "key", "keg", "kid", "kiss", "king", "kick", "kept", "kite"]
-},
-"Rainbow s / j (Soft c and g)": {
-"Soft c (ce, ci, cy)": ["cent", "city", "cyst", "ice", "race", "face", "lace", "circle", "circus", "cycle"],
-"Soft g (ge, gi, gy)": ["page", "ginger", "gym", "age", "cage", "gem", "giant", "giraffe", "magic", "engine"]
-},
-"Beginning Blends": {
-"bl, cl, fl, gl, pl, sl": ["blast", "class", "flip", "glass", "plus", "slip", "black", "clip", "flat", "glow"],
-"br, cr, dr, fr, gr, pr, tr": ["brown", "crab", "drop", "from", "grape", "pray", "tree", "brush", "crash", "drink"],
-"sc, sk, sm, sn, sp, st, sw, tw": ["scale", "skin", "small", "snake", "spine", "start", "swim", "twin", "scan", "smart"],
-"squ, dw": ["squat", "squeeze", "square", "squid", "squint", "squash", "dwell", "dwarf", "dwindle", "dweller"]
-},
-"Ending Blends": {
-"nd, nt, nk, mp, st, sk, sp": ["hand", "plant", "sink", "jump", "list", "flask", "rasp", "land", "went", "blink"],
-"ld, lp, pt, ft, ct, lk, lt, xt, ts, rd": ["wild", "help", "kept", "left", "fact", "milk", "salt", "text", "pets", "hard"]
-},
-"Digraphs": {
-"sh": ["ship", "shot", "trash", "crash", "shop", "wish", "fish", "dish", "rush", "shell"],
-"ch": ["chat", "chop", "branch", "much", "chip", "chin", "chest", "chick", "chase", "chill"],
-"tch": ["match", "fetch", "switch", "scratch", "catch", "patch", "watch", "hatch", "stitch", "clutch"],
-"th (voiced)": ["that", "the", "them", "this", "then", "than", "there", "those", "they", "though"],
-"th (unvoiced)": ["thin", "thank", "both", "with", "three", "thumb", "thick", "thing", "think", "bath"],
-"ng": ["song", "long", "wing", "string", "ring", "king", "sing", "bang", "hang", "strong"],
-"nk": ["pink", "link", "sink", "drink", "bank", "thank", "sank", "blink", "drunk", "stink"],
-"wh": ["which", "what", "white", "when", "why", "where", "whale", "wheel", "whisper", "whistle"],
-"ph": ["phone", "photo", "graph", "Rapha", "alphabet", "dolphin", "elephant", "phrase", "sphere", "phonics"],
-"ck": ["track", "back", "black", "sack", "pack", "pick", "sick", "duck", "neck", "clock"],
-"wr": ["write", "wrote", "wrap", "wrath", "wrist", "wrong", "wreck", "wrench", "wrinkle", "wrestle"],
-"kn": ["know", "knap", "knot", "knob", "knee", "knife", "knight", "knock", "knit", "knoll"],
-"gn": ["gnash", "gnome", "gnat", "gnaw", "sign", "design", "campaign", "foreign", "gnarl", "gnostic"],
-"gh": ["ghost", "Ghana", "ghetto", "ghastly", "ghoul", "gharry", "gherkin", "Ghanaian", "ghostly", "ghazal"]
-},
-"Stubborn Digraphs (Multiple Sounds of ch)": {
-"ch (tch sound)": ["church", "child", "chair", "cheese", "champion", "chocolate", "chest", "chase", "chill", "chop"],
-"ch (k sound)": ["chorus", "chrome", "chasm", "chemist", "chord", "chlorine", "chaos", "character", "chronic", "choir"],
-"ch (sh sound)": ["chef", "champagne", "chateau", "chauffeur", "chic", "moustache", "parachute", "chalet", "chandelier", "brochure"]
-},
-"Digraph-Blends": {
-"phr, phl": ["phrase", "phrenic", "phratry", "phlegm", "phlox", "Phleum", "phloem", "phlegmatic", "phrasing", "phrenology"],
-"shr, thr": ["shred", "shrimp", "shrink", "throw", "throat", "through", "shrub", "shrug", "three", "thread"],
-"sch, chl, chr": ["school", "schedule", "scheme", "chloride", "chlorine", "chlamydia", "chrome", "Christ", "chronic", "scholar"]
-},
-"Vowel-Consonant Digraphs": {
-"ank, ink, onk, unk": ["bank", "link", "honk", "bunk", "tank", "pink", "bonk", "chunk", "thank", "sink"],
-"ang, ing, ong, ung": ["bang", "sing", "song", "sung", "sang", "ring", "long", "hung", "gang", "wing"]
-},
-"Long Vowel Sounds (Silent e Rule)": {
-"a_e": ["cake", "came", "mate", "gate", "date", "name", "lane", "pace", "safe", "tape"],
-"e_e": ["Pete", "mete", "eve", "these", "here", "scene", "complete", "delete", "extreme", "athlete"],
-"i_e": ["bike", "hive", "like", "bite", "line", "kite", "time", "nine", "prize", "slide"],
-"o_e": ["cone", "bone", "home", "note", "stone", "hope", "rope", "vote", "joke", "dose"],
-"u_e (yoo sound)": ["cube", "mute", "tune", "cute", "flute", "fuse", "mule", "huge", "use", "fume"],
-"u_e (oo sound)": ["rude", "rule", "June", "brute", "crude", "prune", "flute", "include", "exclude", "conclude"]
-},
-"Short Words With Long Vowel Sounds": {
-"Long a": ["me", "she", "we", "be", "he", "the", "see", "bee", "flea", "tea"],
-"Long e": ["so", "lo", "co", "go", "no", "hi", "flu", "spa", "my", "by"],
-"Long i": ["hi", "my", "by", "fly", "cry", "sky", "why", "try", "dry", "shy"],
-"Long o": ["go", "no", "so", "lo", "co", "yo", "bo", "po", "to", "do"],
-"Long u": ["flu", "you", "moo", "boo", "coo", "zoo", "too", "new", "due", "few"]
-},
-"Phonograms with Long Vowels": {
-"old, olt, alt": ["cold", "bold", "sold", "hold", "gold", "bolt", "volt", "holt", "jolt", "molt"],
-"ild, ind": ["mild", "wild", "child", "bind", "find", "kind", "mind", "blind", "grind", "rind"],
-"oth, ost": ["both", "loth", "quoth", "zeroth", "betroth", "most", "post", "host", "ghost", "almost"]
-},
-"2-Consonant Division (Compound) Words": {
-"Compound Words": ["myself", "keyboard", "knapsack", "clockwise", "cupcake", "footprint", "popcorn", "napkin", "rainbow", "chopstick"]
-}
-},
-            {
-"Silent e words": {
-"a_e (long a)": ["cake", "name", "lane", "gate", "pace", "mate", "safe", "tape", "vase", "wave"],
-"e_e (long e)": ["eve", "scene", "these", "concrete", "complete", "delete", "extreme", "supreme", "athlete", "scheme"],
-"i_e (long i)": ["kite", "bike", "time", "nine", "prize", "slide", "dive", "ripe", "wife", "spine"],
-"o_e (long o)": ["hope", "bone", "rope", "vote", "joke", "cone", "note", "dose", "robe", "choke"],
-"u_e (long u /yoo/)": ["cute", "cube", "fuse", "mule", "tune", "huge", "use", "fume", "cube", "pure"],
-"u_e (long u /oo/)": ["flute", "rude", "rule", "June", "brute", "crude", "prune", "include", "exclude", "conclude"]
-}
-},
-            {
-                "Vowel-Consonant Digraphs (-nk patterns)": {
-                    "ank": ["thank", "sank", "drank", "tank", "bank"],
-                    "ink": ["sink", "blink", "drink", "pink", "link"],
-                    "onk": ["wonk", "clonk", "monk", "honk", "bonk"],
-                    "unk": ["dunk", "drunk", "sunk", "chunk", "bunk"],
-                    "ang": ["gang", "hang", "pang", "sang", "bang"],
-                    "ing": ["wing", "bring", "thing", "sing", "ring"],
-                    "ong": ["gong", "tong", "wrong", "long", "song"],
-                    "ung": ["lung", "rung", "dung", "hung", "sung"]
-                }
-            },
-            {
+    {
+        "Short Vowel CVC Words": {
+            "Short a": ["bag", "cat", "mat", "hat", "rat", "bat", "sat", "pat", "fat", "man"],
+            "Short e": ["get", "wet", "net", "let", "pen", "ten", "hen", "men", "bed", "red"],
+            "Short i": ["sit", "fix", "hit", "win", "pin", "big", "pig", "dig", "lid", "kid"],
+            "Short o": ["pot", "hot", "not", "lot", "got", "dog", "log", "fog", "hop", "mop"],
+            "Short u": ["sum", "fun", "gun", "mud", "but", "sun", "run", "cup", "bug", "rug"]
+        }
+    },
+    {
+        "Special Consonants": {
+            "x (ks)": ["box", "fox", "mix", "six", "ax", "ox", "fix", "wax", "tax", "next"],
+            "qu": ["quit", "queen", "quiz", "quick", "quack", "quill", "quilt", "quest", "quench", "quote"],
+            "y (as i)": ["gym", "cry", "fly", "try", "sky", "my", "by", "why", "spy", "dry"],
+            "y (as e)": ["happy", "baby", "city", "lady", "party", "puppy", "sunny", "funny", "silly", "jelly"]
+        }
+    },
+    {
+        "c/k Rule": {
+            "c (before a, o, u)": ["cat", "cot", "cup", "can", "cap", "cop", "cub", "cut", "cab", "cod"],
+            "k (before e, i)": ["ken", "kit", "key", "keg", "kid", "kiss", "king", "kick", "kept", "kite"]
+        }
+    },
+    {
+        "Rainbow s / j (Soft c and g)": {
+            "Soft c (ce, ci, cy)": ["cent", "city", "cyst", "ice", "race", "face", "lace", "circle", "circus", "cycle"],
+            "Soft g (ge, gi, gy)": ["page", "ginger", "gym", "age", "cage", "gem", "giant", "giraffe", "magic", "engine"]
+        }
+    },
+    {
+        "Beginning Blends - bl, cl, fl, gl, pl, sl": {
+            "bl": ["blast", "black", "blue", "blow", "blend", "blob", "blink", "blank", "bliss", "bloom"],
+            "cl": ["class", "clip", "click", "clap", "club", "clog", "cluck", "cliff", "clock", "clown"],
+            "fl": ["flip", "flat", "flask", "flag", "flock", "flip", "flame", "flood", "flute", "flash"],
+            "gl": ["glass", "glow", "glue", "glad", "glide", "globe", "gloss", "glum", "gloom", "glaze"],
+            "pl": ["plus", "play", "plant", "plum", "plop", "pluck", "plank", "plot", "plow", "plaid"],
+            "sl": ["slip", "slow", "slide", "slap", "slim", "slop", "slack", "sled", "slid", "slosh"]
+        }
+    },
+    {
+        "Beginning Blends - br, cr, dr, fr, gr, pr, tr": {
+            "br": ["brown", "brush", "bring", "brick", "bread", "brother", "brave", "branch", "break", "bright"],
+            "cr": ["crab", "crash", "crop", "crack", "crawl", "cream", "crisp", "crown", "cradle", "crumb"],
+            "dr": ["drop", "drink", "draw", "drum", "dress", "dream", "drive", "drip", "dragon", "drill"],
+            "fr": ["from", "fresh", "frame", "frog", "frost", "fruit", "free", "front", "fry", "frown"],
+            "gr": ["grape", "grip", "grow", "grass", "grand", "green", "ground", "grain", "gravel", "grin"],
+            "pr": ["prune", "pray", "pride", "price", "press", "prank", "print", "proud", "proof", "prime"],
+            "tr": ["tree", "try", "trust", "trap", "truck", "train", "trip", "track", "trick", "troop"]
+        }
+    },
+    {
+        "Beginning Blends - sc, sk, sm, sn, sp, st, sw, tw": {
+            "sc": ["scale", "scan", "scalp", "scare", "score", "scout", "scold", "scrap", "scuff", "scalp"],
+            "sk": ["skin", "skill", "skull", "skip", "skate", "skid", "skirt", "sketch", "skull", "skimp"],
+            "sm": ["small", "smart", "smile", "smoke", "smash", "smell", "smock", "smooth", "smirk", "smug"],
+            "sn": ["snake", "snap", "sneeze", "snip", "snail", "snore", "snug", "snack", "snout", "snow"],
+            "sp": ["spine", "space", "spend", "spoon", "spell", "spot", "spark", "spin", "spy", "spill"],
+            "st": ["start", "stop", "stone", "step", "stamp", "star", "stir", "stem", "sting", "stun"],
+            "sw": ["sweet", "swim", "swing", "swan", "swell", "swap", "swear", "sweep", "sword", "swamp"],
+            "squ": ["squat", "squeeze", "square", "squid", "squint", "squash", "squirm", "squeak", "squeal", "squawk"],
+        }
+    },
+    {
+        "Beginning Blends - squ, dw": {
+            "tw": ["twist", "twin", "twine", "twice", "twig", "tweak", "tweet", "twirl", "twang", "twice"],
+            "dw": ["dwell", "dwarf", "dwindle", "dweller", "dweeb", "dwindle", "dwarf", "dwell", "dwindle", "dweller"]
+        }
+    },
+    {
+        "Ending Blends - nd, nt, nk, mp, st, sk, sp": {
+            "nd": ["hand", "land", "blend", "send", "find", "wind", "stand", "round", "sound", "ground"],
+            "nt": ["plant", "went", "rent", "sent", "bent", "tent", "hunt", "pant", "vent", "lint"],
+            "nk": ["sink", "blink", "bank", "drink", "thank", "sank", "drunk", "stink", "think", "shrink"],
+            "mp": ["jump", "camp", "pump", "lamp", "stamp", "lump", "clump", "plump", "stomp", "tramp"],
+            "st": ["list", "fast", "best", "last", "cast", "past", "nest", "rest", "test", "west"],
+            "sk": ["flask", "husk", "desk", "task", "mask", "brisk", "risk", "disk", "whisk", "tusk"],
+            "sp": ["rasp", "gasp", "grasp", "clasp", "wisp", "crisp", "lisp", "wasp", "hasp", "gasp"]
+        }
+    },
+    {
+        "Ending Blends - ld, lp, pt, ft, ct, lk, lt, xt, ts, rd": {
+            "ld": ["wild", "hold", "child", "cold", "fold", "gold", "mold", "scold", "told", "bold"],
+            "lp": ["help", "gulp", "scalp", "yelp", "pulp", "kelp", "alp", "scalp", "help", "gulp"],
+            "pt": ["kept", "wept", "slept", "crept", "leapt", "swept", "adept", "crept", "slept", "wept"],
+            "ft": ["left", "soft", "swift", "craft", "loft", "sift", "drift", "gift", "lift", "shift"],
+            "ct": ["fact", "erect", "sect", "act", "react", "impact", "contract", "exact", "attract", "predict"],
+            "lk": ["milk", "walk", "talk", "chalk", "stalk", "folk", "yolk", "silk", "bulk", "skulk"],
+            "lt": ["salt", "felt", "malt", "bolt", "kilt", "melt", "belt", "colt", "wilt", "guilt"],
+            "xt": ["text", "next", "context", "pretext", "ext", "sext", "fixt", "mixt", "next", "text"],
+            "ts": ["pets", "pots", "cats", "hats", "rats", "bats", "mats", "sits", "bits", "hits"],
+            "rd": ["hard", "word", "herd", "card", "bird", "cord", "ford", "lord", "ward", "yard"]
+        }
+    },
+    {
+        "Digraphs": {
+            "sh": ["ship", "shot", "trash", "crash", "shop", "wish", "fish", "dish", "rush", "shell"],
+            "ch": ["chat", "chop", "branch", "much", "chip", "chin", "chest", "chick", "chase", "chill"],
+            "tch": ["match", "fetch", "switch", "scratch", "catch", "patch", "watch", "hatch", "stitch", "clutch"],
+            "th (voiced)": ["that", "the", "them", "this", "then", "than", "there", "those", "they", "though"],
+            "th (unvoiced)": ["thin", "thank", "both", "with", "three", "thumb", "thick", "thing", "think", "bath"],
+            "ng": ["song", "long", "wing", "string", "ring", "king", "sing", "bang", "hang", "strong"],
+            "nk": ["pink", "link", "sink", "drink", "bank", "thank", "sank", "blink", "drunk", "stink"],
+            "wh": ["which", "what", "white", "when", "why", "where", "whale", "wheel", "whisper", "whistle"],
+            "ph": ["phone", "photo", "graph", "Rapha", "alphabet", "dolphin", "elephant", "phrase", "sphere", "phonics"],
+            "ck": ["track", "back", "black", "sack", "pack", "pick", "sick", "duck", "neck", "clock"],
+            "wr": ["write", "wrote", "wrap", "wrath", "wrist", "wrong", "wreck", "wrench", "wrinkle", "wrestle"],
+            "kn": ["know", "knap", "knot", "knob", "knee", "knife", "knight", "knock", "knit", "knoll"],
+            "gn": ["gnash", "gnome", "gnat", "gnaw", "sign", "design", "campaign", "foreign", "gnarl", "gnostic"],
+            "gh": ["ghost", "Ghana", "ghetto", "ghastly", "ghoul", "gharry", "gherkin", "Ghanaian", "ghostly", "ghazal"]
+        }
+    },
+    {
+        "Stubborn Digraphs (Multiple Sounds of ch)": {
+            "ch (tch sound)": ["church", "child", "chair", "cheese", "champion", "chocolate", "chest", "chase", "chill", "chop"],
+            "ch (k sound)": ["chorus", "chrome", "chasm", "chemist", "chord", "chlorine", "chaos", "character", "chronic", "choir"],
+            "ch (sh sound)": ["chef", "champagne", "chateau", "chauffeur", "chic", "moustache", "parachute", "chalet", "chandelier", "brochure"]
+        }
+    },
+    {
+        "Digraph-Blends": {
+            "phr": ["phrase", "phrenic", "phratry", "phrasing", "phrenology", "phrase", "phrenic", "phratry", "phrasing", "phrenology"],
+            "phl": ["phlegm", "phlox", "Phleum", "phloem", "phlegmatic", "phlegm", "phlox", "Phleum", "phloem", "phlegmatic"],
+            "shr": ["shred", "shrimp", "shrink", "shrub", "shrug", "shred", "shrimp", "shrink", "shrub", "shrug"],
+            "thr": ["throw", "throat", "through", "three", "thread", "throw", "throat", "through", "three", "thread"],
+            "sch": ["school", "schedule", "scheme", "scholar", "schedule", "school", "schedule", "scheme", "scholar", "schedule"],
+            "chl": ["chloride", "chlorine", "chlamydia", "chloride", "chlorine", "chlamydia", "chloride", "chlorine", "chlamydia", "chloride"],
+            "chr": ["chrome", "Christ", "chronic", "chrome", "Christ", "chronic", "chrome", "Christ", "chronic", "chrome"]
+        }
+    },
+    {
+        "Vowel-Consonant Digraphs": {
+            "ank": ["bank", "tank", "thank", "sank", "drank", "rank", "blank", "flank", "plank", "prank"],
+            "ink": ["link", "pink", "sink", "blink", "drink", "think", "wink", "stink", "shrink", "mink"],
+            "onk": ["honk", "bonk", "clonk", "monk", "wonk", "honk", "bonk", "clonk", "monk", "wonk"],
+            "unk": ["bunk", "chunk", "dunk", "drunk", "sunk", "junk", "skunk", "trunk", "flunk", "spunk"],
+            "ang": ["bang", "sang", "gang", "hang", "pang", "fang", "rang", "clang", "slang", "twang"],
+            "ing": ["sing", "ring", "wing", "bring", "thing", "king", "swing", "spring", "string", "cling"],
+            "ong": ["song", "long", "gong", "tong", "wrong", "strong", "belong", "along", "thong", "prong"],
+            "ung": ["sung", "hung", "lung", "rung", "dung", "clung", "flung", "stung", "swung", "wrung"]
+        }
+    },
+    {
+        "Long Vowel Sounds (Silent e Rule)": {
+            "a_e": ["cake", "came", "mate", "gate", "date", "name", "lane", "pace", "safe", "tape"],
+            "e_e": ["Pete", "mete", "eve", "these", "here", "scene", "complete", "delete", "extreme", "athlete"],
+            "i_e": ["bike", "hive", "like", "bite", "line", "kite", "time", "nine", "prize", "slide"],
+            "o_e": ["cone", "bone", "home", "note", "stone", "hope", "rope", "vote", "joke", "dose"],
+            "u_e (yoo sound)": ["cube", "mute", "tune", "cute", "flute", "fuse", "mule", "huge", "use", "fume"],
+            "u_e (oo sound)": ["rude", "rule", "June", "brute", "crude", "prune", "flute", "include", "exclude", "conclude"]
+        }
+    },
+    {
+        "Short Words With Long Vowel Sounds": {
+            "Long a": ["me", "she", "we", "be", "he", "the", "see", "bee", "flea", "tea"],
+            "Long e": ["so", "lo", "co", "go", "no", "hi", "flu", "spa", "my", "by"],
+            "Long i": ["hi", "my", "by", "fly", "cry", "sky", "why", "try", "dry", "shy"],
+            "Long o": ["go", "no", "so", "lo", "co", "yo", "bo", "po", "to", "do"],
+            "Long u": ["flu", "you", "moo", "boo", "coo", "zoo", "too", "new", "due", "few"]
+        }
+    },
+    {
+        "Phonograms with Long Vowels": {
+            "old": ["cold", "bold", "sold", "hold", "gold", "fold", "scold", "told", "mold", "behold"],
+            "olt": ["bolt", "volt", "holt", "jolt", "molt", "colt", "dolt", "holt", "jolt", "molt"],
+            "alt": ["halt", "salt", "malt", "asphalt", "basalt", "halt", "salt", "malt", "asphalt", "basalt"],
+            "ild": ["mild", "wild", "child", "build", "gild", "mild", "wild", "child", "build", "gild"],
+            "ind": ["bind", "find", "kind", "mind", "blind", "grind", "rind", "wind", "hind", "remind"],
+            "oth": ["both", "loth", "quoth", "zeroth", "betroth", "both", "loth", "quoth", "zeroth", "betroth"],
+            "ost": ["most", "post", "host", "ghost", "almost", "coast", "toast", "roast", "boast", "post"]
+        }
+    },
+    {
+        "2-Consonant Division (Compound) Words": {
+            "Compound Words": ["myself", "keyboard", "knapsack", "clockwise", "cupcake", "footprint", "popcorn", "napkin", "rainbow", "chopstick"]
+        }
+    },
+    {
+        "Silent e words": {
+            "a_e (long a)": ["cake", "name", "lane", "gate", "pace", "mate", "safe", "tape", "vase", "wave"],
+            "e_e (long e)": ["eve", "scene", "these", "concrete", "complete", "delete", "extreme", "supreme", "athlete", "scheme"],
+            "i_e (long i)": ["kite", "bike", "time", "nine", "prize", "slide", "dive", "ripe", "wife", "spine"],
+            "o_e (long o)": ["hope", "bone", "rope", "vote", "joke", "cone", "note", "dose", "robe", "choke"],
+            "u_e (long u /yoo/)": ["cute", "cube", "fuse", "mule", "tune", "huge", "use", "fume", "cube", "pure"],
+            "u_e (long u /oo/)": ["flute", "rude", "rule", "June", "brute", "crude", "prune", "include", "exclude", "conclude"]
+        }
+    },
+    {
         "R-Controlled Vowels": {
             "ar": ["bar", "dark", "mark", "park", "hard", "star", "farm", "charm", "smart", "chart"],
             "or": ["born", "fork", "torn", "cord", "fort", "scorn", "corn", "storm", "for", "worn"],
@@ -391,16 +469,14 @@
             "ur": ["hurt", "burn", "turn", "curb", "curve", "burst", "curl", "surf", "lurk", "churn"]
         }
     },
-    
     {
-    "R-Controlled Vowels(ar(or), or(er))": {
-        "ar": ["bar", "dark", "mark", "park", "hard", "star", "farm", "charm", "smart", "chart"],
-        "ar(or)": ["war", "warm", "ward", "award", "reward", "toward", "forward", "dwarf", "warn"],
-        "or": ["born", "fork", "torn", "cord", "fort", "scorn", "corn", "storm", "for", "worn"],
-        "or(er)": ["worm", "word", "work", "world", "worse", "worst", "worth", "worship", "worsen"]
-    }
-},
-    
+        "R-Controlled Vowels(ar(or), or(er))": {
+            "ar": ["bar", "dark", "mark", "park", "hard", "star", "farm", "charm", "smart", "chart"],
+            "ar(or)": ["war", "warm", "ward", "award", "reward", "toward", "forward", "dwarf", "warn", "warp"],
+            "or": ["born", "fork", "torn", "cord", "fort", "scorn", "corn", "storm", "for", "worn"],
+            "or(er)": ["worm", "word", "work", "world", "worse", "worst", "worth", "worship", "worsen", "works"]
+        }
+    },
     {
         "R-Controlled Vowels(-or,-er)": {
             "or(a)": ["actor", "doctor", "visitor", "sector", "vector", "creator", "tailor", "vendor", "educator", "orator"],
@@ -411,21 +487,6 @@
         "Phonograms with Short Vowels": {
             "all": ["ball", "tall", "wall", "call", "hall", "mall", "fall", "install", "pall", "small"],
             "al": ["walk", "chalk", "malt", "halt", "false", "wait", "bald", "already", "also", "talk"]
-        }
-    },
-    {
-        "Phonograms with Long Vowels": {
-            "old": ["cold", "bold", "sold", "hold", "gold"],
-            "oll": ["poll", "toll", "roll", "scroll", "stroll"],
-            "olt": ["bolt", "volt", "holt", "jolt", "molt"],
-            "oth": ["both", "loth", "quoth", "zeroth", "betroth"],
-            "ost": ["most", "post", "host", "ghost", "almost"],
-            "ind": ["bind", "find", "kind", "mind", "blind"],
-            "ild": ["mild", "wild", "child"],
-            "ull": ["full", "bull", "pull", "fullback"],
-            "ush": ["push", "bush", "cushion"],
-            "ul": ["careful", "fulfill"],
-            "ut": ["put", "brut"]
         }
     },
     {
@@ -508,9 +569,9 @@
     },
     {
         "Rainbow C & J": {
-            "c = s": ["cent", "center", "nice", "mice", "cycle"],
-            "g = j": ["age", "page", "gym", "stage", "change"],
-            "dge = j": ["bridge", "garage", "judge", "pledge", "hinge"]
+            "c = s": ["cent", "center", "nice", "mice", "cycle", "city", "circle", "circus", "celery", "cinder"],
+            "g = j": ["age", "page", "gym", "stage", "change", "gem", "giant", "giraffe", "magic", "engine"],
+            "dge = j": ["bridge", "garage", "judge", "pledge", "hinge", "badge", "edge", "fridge", "lodge", "knowledge"]
         }
     },
     {
@@ -520,15 +581,13 @@
             "gh(f)": ["laugh", "tough", "trough", "cough", "rough", "enough", "gopher", "slough", "sought", "draught"]
         }
     },
-    
     {
         "Sounds of ch": {
-        "ch(k)": ["chaos", "chorus", "chrome", "chasm", "chemist", "chord", "chlorine", "chameleon", "character", "chronic"],
-        "ch(tch)": ["church", "child", "chair", "cheese", "champion", "chocolate", "chest", "chase", "chill", "chop"],
-        "ch(sh)": ["chef", "champagne", "chateau", "chauffeur", "chic", "moustache", "parachute", "chalet", "chandelier", "brochure"]
+            "ch(k)": ["chaos", "chorus", "chrome", "chasm", "chemist", "chord", "chlorine", "chameleon", "character", "chronic"],
+            "ch(tch)": ["church", "child", "chair", "cheese", "champion", "chocolate", "chest", "chase", "chill", "chop"],
+            "ch(sh)": ["chef", "champagne", "chateau", "chauffeur", "chic", "moustache", "parachute", "chalet", "chandelier", "brochure"]
         }
-      },
-    
+    },
     {
         "Silent Letters": {
             "k": ["knot", "knee", "knife", "know", "knock", "knapsack", "knight", "knob", "knit", "knuckle"],
@@ -539,21 +598,21 @@
         }
     },
     {
-        "Spelling Patterns": {
+        "Spelling Patterns (se, as, is)": {
             "se(z)": ["choose", "cheese", "tease", "pose", "chose", "loose", "use", "noise", "rose", "wise"],
             "as(z)": ["as", "has", "visas", "divas", "alias", "villas", "fellas", "atlas", "Texas", "bias"],
             "is(z)": ["is", "his", "bris", "Iris", "axis", "arsis", "pubis", "lexis", "basis", "lysis"]
         }
     },
     {
-        "Spelling Patterns": {
+        "Spelling Patterns (le, tion, sion)": {
             "le": ["puzzle", "bundle", "struggle", "battle", "apple", "tackle", "humble", "hustle", "muscle", "muffle"],
             "tion": ["station", "nation", "portion", "mention", "education", "addition", "subtraction", "attraction", "section", "affection"],
             "sion": ["mission", "pension", "erosion", "impression", "session", "profession", "confession", "version", "aggression", "comprehension"]
         }
     },
     {
-        "Spelling Patterns": {
+        "Spelling Patterns (ed)": {
             "ed(ed)": ["added", "ended", "wasted", "acted", "folded", "landed", "rested", "counted", "rested", "printed"],
             "ed(d)": ["aimed", "changed", "saved", "stayed", "burned", "filled", "rained", "turned", "called", "baked"]
         }
@@ -563,7 +622,7 @@
             "Open Syllables": ["baker", "giant", "paper", "final", "racer", "lady", "hero", "zero", "open", "legal"]
         }
     }
-        ];
+];
 
         // DOM Elements
         const drawer = document.getElementById('drawer');
