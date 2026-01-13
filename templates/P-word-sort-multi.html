@@ -332,9 +332,12 @@ document.getElementById('start-game').addEventListener('click', () => {
   const gameContainer = document.createElement('div');
   document.body.appendChild(gameContainer);
   const radioContainer = document.createElement('div');
-    radioContainer.style.display = 'flex';
+    radioContainer.style.display = 'grid';
+    radioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+    radioContainer.style.gap = '10px';
     radioContainer.style.justifyContent = 'center';
     radioContainer.style.marginBottom = '20px';
+    radioContainer.style.padding = '0 15px';
   gameContainer.appendChild(radioContainer);
   const gameDisplay = document.createElement('div');
   gameContainer.appendChild(gameDisplay);
@@ -357,8 +360,46 @@ document.getElementById('start-game').addEventListener('click', () => {
   // const radioLabel = document.createElement('label');
   // radioLabel.textContent = gameName;
   // radioLabel.style.marginRight = '20px';
-  radioContainer.appendChild(radioInput);
-  radioContainer.appendChild(document.createTextNode(`QUIZ ${index + 1}`));
+  
+  // Create a wrapper for each radio button and label
+  const radioWrapper = document.createElement('div');
+  radioWrapper.style.display = 'flex';
+  radioWrapper.style.alignItems = 'center';
+  radioWrapper.style.justifyContent = 'center';
+  radioWrapper.style.gap = '8px';
+  radioWrapper.style.padding = '10px';
+  radioWrapper.style.backgroundColor = '#f0f0f0';
+  radioWrapper.style.borderRadius = '8px';
+  radioWrapper.style.cursor = 'pointer';
+  radioWrapper.style.transition = 'all 0.2s ease';
+  radioWrapper.style.minHeight = '50px';
+  
+  // Add hover effect
+  radioWrapper.addEventListener('mouseenter', () => {
+    radioWrapper.style.backgroundColor = '#e0e0e0';
+    radioWrapper.style.transform = 'translateY(-2px)';
+  });
+  radioWrapper.addEventListener('mouseleave', () => {
+    radioWrapper.style.backgroundColor = '#f0f0f0';
+    radioWrapper.style.transform = 'translateY(0)';
+  });
+  
+  // Click the radio when wrapper is clicked
+  radioWrapper.addEventListener('click', () => {
+    radioInput.click();
+  });
+  
+  // Style the radio input
+  radioInput.style.cursor = 'pointer';
+  radioInput.style.width = '18px';
+  radioInput.style.height = '18px';
+  
+  // Create the label text
+  const labelText = document.createTextNode(`QUIZ ${index + 1}`);
+  
+  radioWrapper.appendChild(radioInput);
+  radioWrapper.appendChild(labelText);
+  radioContainer.appendChild(radioWrapper);
 });
   displayGame(currentGameName, gameDisplay);
 
