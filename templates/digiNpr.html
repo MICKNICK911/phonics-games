@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Lesson Builder</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --secondary: #34a853;
+            --danger: #ea4335;
+            --warning: #fbbc05;
+            --light: #f8f9fa;
+            --dark: #202124;
+            --gray: #5f6368;
+            --code-bg: #f1f3f4;
+            --markdown-blue: #1a73e8;
+            --markdown-green: #0b8043;
+            --markdown-red: #d93025;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+        
+        .input-section, .preview-section {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            margin: 8px 8px 8px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2d9249;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e6a800;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d33426;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: rgba(66, 133, 244, 0.1);
+        }
+        
+        .btn-icon {
+            margin-right: 8px;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .dictionary-preview {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: white;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .dictionary-preview h2 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 20px;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        
+        .entry-count {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+        }
+        
+        .entries-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .entry-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .entry-item:hover {
+            background-color: rgba(66, 133, 244, 0.05);
+        }
+        
+        .entry-info {
+            flex: 1;
+        }
+        
+        .entry-topic {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .entry-desc {
+            font-size: 14px;
+            color: var(--gray);
+            margin: 5px 0;
+        }
+        
+        .entry-examples {
+            font-size: 13px;
+            color: var(--dark);
+            font-style: italic;
+        }
+        
+        .entry-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--dark);
+            font-size: 1.3rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .filename-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .filename-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+        }
+        
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .preview-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .tab-button {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .markdown-preview {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .markdown-preview .topic {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .markdown-preview .desc {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .markdown-preview .examples {
+            margin-left: 20px;
+        }
+        
+        .markdown-preview .example-item {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .markdown-preview .example-item:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .markdown-bold {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .markdown-italic {
+            font-style: italic;
+            color: var(--gray);
+        }
+        
+        .markdown-underline {
+            text-decoration: underline;
+            color: var(--markdown-blue);
+        }
+        
+        .markdown-colored {
+            color: var(--markdown-green);
+            font-weight: 500;
+        }
+        
+        .markdown-bullet {
+            display: block;
+            padding-left: 20px;
+            text-indent: -15px;
+            margin: 5px 0;
+        }
+        
+        .markdown-bullet:before {
+            content: "• ";
+            color: var(--markdown-red);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enhanced Lesson Builder</h1>
+        
+        <div class="input-section">
+            <h2>Manage Entries</h2>
+            
+            <div class="input-group">
+                <label for="editId">Select Entry to Edit:</label>
+                <select id="editId">
+                    <option value="">-- Create New Entry --</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="topic">Topic:</label>
+                <input type="text" id="topic">
+            </div>
+            
+            <div class="input-group">
+                <label for="desc">Description:</label>
+                <textarea id="desc" rows="3"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="ex">Examples (comma separated):</label>
+                <input type="text" id="ex">
+            </div>
+            
+            <div class="button-group">
+                <button id="addBtn" class="btn btn-primary">
+                    <span class="btn-icon">+</span> Add Entry
+                </button>
+                <button id="updateBtn" class="btn btn-secondary" disabled>
+                    <span class="btn-icon">↻</span> Update Entry
+                </button>
+                <button id="cancelBtn" class="btn btn-outline" disabled>
+                    Cancel Edit
+                </button>
+            </div>
+            
+            <div class="button-group">
+                <div class="file-input-container">
+                    <button class="btn btn-primary">
+                        <span class="btn-icon">↑</span> Import JSON
+                    </button>
+                    <input type="file" id="importFile" class="file-input" accept=".json">
+                </div>
+                <button id="exportBtn" class="btn btn-secondary">
+                    <span class="btn-icon">↓</span> Export as JSON
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <span class="btn-icon">×</span> Clear All
+                </button>
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h2>Dictionary Preview</h2>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search entries...">
+            </div>
+            
+            <div class="entries-list" id="entriesList">
+                <div class="empty-state">No entries yet. Add your first entry!</div>
+            </div>
+            
+            <div class="entry-count" id="entryCount">0 entries</div>
+            
+            <div class="dictionary-preview">
+                <div class="preview-tabs">
+                    <button class="tab-button active" data-tab="markdown">Markdown Preview</button>
+                    <button class="tab-button" data-tab="raw">Raw JSON</button>
+                </div>
+                
+                <div id="markdown-preview" class="tab-content active markdown-preview">
+                    No entries yet
+                </div>
+                
+                <div id="raw-preview" class="tab-content">
+                    <pre id="preview">No entries yet</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Filename Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Save Dictionary</h3>
+            <div class="input-group">
+                <label for="filename">File name:</label>
+                <input type="text" id="filename" class="filename-input" value="dictionary.json" placeholder="Enter filename">
+            </div>
+            <div class="modal-actions">
+                <button id="cancelExport" class="btn btn-danger">Cancel</button>
+                <button id="confirmExport" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Confirm Deletion</h3>
+            <p>Are you sure you want to delete the entry "<span id="deleteTopic"></span>"?</p>
+            <div class="modal-actions">
+                <button id="cancelDelete" class="btn btn-secondary">Cancel</button>
+                <button id="confirmDelete" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Options Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Import Options</h3>
+            <p>How would you like to import the data?</p>
+            <div class="modal-actions">
+                <button id="replaceData" class="btn btn-danger">Replace Current Data</button>
+                <button id="mergeData" class="btn btn-primary">Merge with Current Data</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">Operation completed successfully!</div>
+
+    <script>
+        // Initialize dictionary
+        let dictionary = {};
+        let currentEditId = null;
+        let importData = null;
+        
+        // DOM elements
+        const editIdSelect = document.getElementById('editId');
+        const topicInput = document.getElementById('topic');
+        const descInput = document.getElementById('desc');
+        const exInput = document.getElementById('ex');
+        const addBtn = document.getElementById('addBtn');
+        const updateBtn = document.getElementById('updateBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const importFile = document.getElementById('importFile');
+        const preview = document.getElementById('preview');
+        const markdownPreview = document.getElementById('markdown-preview');
+        const entryCount = document.getElementById('entryCount');
+        const entriesList = document.getElementById('entriesList');
+        const searchInput = document.getElementById('searchInput');
+        const exportModal = document.getElementById('exportModal');
+        const filenameInput = document.getElementById('filename');
+        const cancelExport = document.getElementById('cancelExport');
+        const confirmExport = document.getElementById('confirmExport');
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteTopicSpan = document.getElementById('deleteTopic');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const importModal = document.getElementById('importModal');
+        const replaceData = document.getElementById('replaceData');
+        const mergeData = document.getElementById('mergeData');
+        const notification = document.getElementById('notification');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        
+        // Initialize the application
+        function init() {
+            updatePreview();
+            loadFromLocalStorage();
+            attachEventListeners();
+        }
+        
+        // Load data from localStorage if available
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('dictionaryBuilderData');
+            if (savedData) {
+                dictionary = JSON.parse(savedData);
+                updatePreview();
+                updateEntriesList();
+                updateEditDropdown();
+            }
+        }
+        
+        // Save data to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('dictionaryBuilderData', JSON.stringify(dictionary));
+        }
+        
+        // Attach event listeners
+        function attachEventListeners() {
+            addBtn.addEventListener('click', addEntry);
+            updateBtn.addEventListener('click', updateEntry);
+            cancelBtn.addEventListener('click', cancelEdit);
+            exportBtn.addEventListener('click', showExportModal);
+            clearBtn.addEventListener('click', clearAll);
+            importFile.addEventListener('change', handleFileImport);
+            searchInput.addEventListener('input', updateEntriesList);
+            editIdSelect.addEventListener('change', loadEntryForEdit);
+            
+            // Tab buttons
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tab = button.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+            
+            // Export modal events
+            confirmExport.addEventListener('click', confirmExportAction);
+            cancelExport.addEventListener('click', hideExportModal);
+            exportModal.addEventListener('click', (e) => {
+                if (e.target === exportModal) hideExportModal();
+            });
+            
+            // Delete modal events
+            confirmDelete.addEventListener('click', confirmDeleteAction);
+            cancelDelete.addEventListener('click', hideDeleteModal);
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) hideDeleteModal();
+            });
+            
+            // Import modal events
+            replaceData.addEventListener('click', () => confirmImport('replace'));
+            mergeData.addEventListener('click', () => confirmImport('merge'));
+            importModal.addEventListener('click', (e) => {
+                if (e.target === importModal) hideImportModal();
+            });
+            
+            // Allow pressing Enter in inputs (but not in description)
+            topicInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (updateBtn.disabled) addBtn.click();
+                    else updateBtn.click();
+                }
+            });
+            
+            exInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (updateBtn.disabled) addBtn.click();
+                    else updateBtn.click();
+                }
+            });
+            
+            // For description, allow Enter to create new lines
+            // No special handling needed - the textarea already supports this
+            
+            filenameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') confirmExport.click();
+            });
+        }
+        
+        // Switch between tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            tabButtons.forEach(button => {
+                if (button.dataset.tab === tabName) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-preview`).classList.add('active');
+        }
+        
+        // Add entry to dictionary
+        function addEntry() {
+            const topic = topicInput.value.trim();
+            const desc = descInput.value.trim();
+            const ex = exInput.value.trim();
+            
+            if (!topic || !desc || !ex) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (dictionary[topic]) {
+                showNotification('Topic already exists. Use a different name or edit the existing one.', 'error');
+                return;
+            }
+            
+            // Create entry
+            dictionary[topic] = {
+                desc: desc,
+                ex: ex.split(',').map(item => item.trim())
+            };
+            
+            // Update UI
+            updatePreview();
+            updateEntriesList();
+            updateEditDropdown();
+            saveToLocalStorage();
+            showNotification('Entry added successfully');
+            
+            // Clear inputs
+            clearForm();
+        }
+        
+        // Update existing entry
+        function updateEntry() {
+            if (!currentEditId) return;
+            
+            const topic = topicInput.value.trim();
+            const desc = descInput.value.trim();
+            const ex = exInput.value.trim();
+            
+            if (!topic || !desc || !ex) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            // If topic changed, remove old entry and create new one
+            if (currentEditId !== topic) {
+                delete dictionary[currentEditId];
+            }
+            
+            // Create/update entry
+            dictionary[topic] = {
+                desc: desc,
+                ex: ex.split(',').map(item => item.trim())
+            };
+            
+            // Update UI
+            updatePreview();
+            updateEntriesList();
+            updateEditDropdown();
+            saveToLocalStorage();
+            showNotification('Entry updated successfully');
+            
+            // Exit edit mode
+            cancelEdit();
+        }
+        
+        // Load entry for editing
+        function loadEntryForEdit() {
+            const selectedTopic = editIdSelect.value;
+            
+            if (!selectedTopic) {
+                cancelEdit();
+                return;
+            }
+            
+            const entry = dictionary[selectedTopic];
+            if (!entry) return;
+            
+            // Populate form
+            topicInput.value = selectedTopic;
+            descInput.value = entry.desc;
+            exInput.value = entry.ex.join(', ');
+            
+            // Set edit mode
+            currentEditId = selectedTopic;
+            addBtn.disabled = true;
+            updateBtn.disabled = false;
+            cancelBtn.disabled = false;
+            topicInput.focus();
+        }
+        
+        // Cancel edit mode
+        function cancelEdit() {
+            clearForm();
+            editIdSelect.value = "";
+            currentEditId = null;
+            addBtn.disabled = false;
+            updateBtn.disabled = true;
+            cancelBtn.disabled = true;
+        }
+        
+        // Clear form inputs
+        function clearForm() {
+            topicInput.value = '';
+            descInput.value = '';
+            exInput.value = '';
+            topicInput.focus();
+        }
+        
+        // Delete entry
+        function deleteEntry(topic) {
+            deleteTopicSpan.textContent = topic;
+            showDeleteModal();
+            
+            // Store topic for deletion confirmation
+            deleteModal.dataset.topic = topic;
+        }
+        
+        // Confirm deletion
+        function confirmDeleteAction() {
+            const topic = deleteModal.dataset.topic;
+            if (dictionary[topic]) {
+                delete dictionary[topic];
+                updatePreview();
+                updateEntriesList();
+                updateEditDropdown();
+                saveToLocalStorage();
+                showNotification('Entry deleted successfully');
+                
+                // If we were editing this entry, cancel edit mode
+                if (currentEditId === topic) {
+                    cancelEdit();
+                }
+            }
+            hideDeleteModal();
+        }
+        
+        // Handle file import
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const jsonData = JSON.parse(event.target.result);
+                    importData = jsonData;
+                    showImportModal();
+                } catch (error) {
+                    showNotification('Invalid JSON file', 'error');
+                    console.error('Error parsing JSON:', error);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset the file input
+            e.target.value = '';
+        }
+        
+        // Show import modal
+        function showImportModal() {
+            importModal.style.display = 'flex';
+        }
+        
+        // Hide import modal
+        function hideImportModal() {
+            importModal.style.display = 'none';
+            importData = null;
+        }
+        
+        // Confirm import with selected option
+        function confirmImport(method) {
+            if (!importData) return;
+            
+            if (method === 'replace') {
+                dictionary = importData;
+                showNotification('Data replaced successfully');
+            } else if (method === 'merge') {
+                // Merge the imported data with existing data
+                dictionary = {...dictionary, ...importData};
+                showNotification('Data merged successfully');
+            }
+            
+            // Update UI
+            updatePreview();
+            updateEntriesList();
+            updateEditDropdown();
+            saveToLocalStorage();
+            
+            hideImportModal();
+        }
+        
+        // Update the entries list
+        function updateEntriesList() {
+            const searchTerm = searchInput.value.toLowerCase();
+            entriesList.innerHTML = '';
+            
+            const filteredEntries = Object.entries(dictionary).filter(([topic, data]) => {
+                return topic.toLowerCase().includes(searchTerm) || 
+                       data.desc.toLowerCase().includes(searchTerm) ||
+                       data.ex.join(' ').toLowerCase().includes(searchTerm);
+            });
+            
+            if (filteredEntries.length === 0) {
+                entriesList.innerHTML = '<div class="empty-state">No entries found</div>';
+                return;
+            }
+            
+            filteredEntries.forEach(([topic, data]) => {
+                const entryEl = document.createElement('div');
+                entryEl.className = 'entry-item';
+                entryEl.innerHTML = `
+                    <div class="entry-info">
+                        <div class="entry-topic">${topic}</div>
+                        <div class="entry-desc">${data.desc}</div>
+                        <div class="entry-examples">Examples: ${data.ex.join(', ')}</div>
+                    </div>
+                    <div class="entry-actions">
+                        <button class="btn btn-warning edit-btn" data-topic="${topic}">Edit</button>
+                        <button class="btn btn-danger delete-btn" data-topic="${topic}">Delete</button>
+                    </div>
+                `;
+                entriesList.appendChild(entryEl);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const topic = btn.dataset.topic;
+                    editIdSelect.value = topic;
+                    loadEntryForEdit();
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const topic = btn.dataset.topic;
+                    deleteEntry(topic);
+                });
+            });
+        }
+        
+        // Update the edit dropdown
+        function updateEditDropdown() {
+            editIdSelect.innerHTML = '<option value="">-- Create New Entry --</option>';
+            
+            Object.keys(dictionary).sort().forEach(topic => {
+                const option = document.createElement('option');
+                option.value = topic;
+                option.textContent = topic;
+                editIdSelect.appendChild(option);
+            });
+        }
+        
+        // Process markdown formatting in text
+        function processMarkdown(text) {
+            // Replace *text* with bold (must come first to avoid conflicts)
+            text = text.replace(/\*(.*?)\*/g, '<span class="markdown-bold">$1</span>');
+            
+            // Replace _text_ with italic
+            text = text.replace(/_(.*?)_/g, '<span class="markdown-italic">$1</span>');
+            
+            // Replace -text- with underline
+            text = text.replace(/-(.*?)-/g, '<span class="markdown-underline">$1</span>');
+            
+            // Replace [text] with colored text
+            text = text.replace(/\[(.*?)\]/g, '<span class="markdown-colored">$1</span>');
+            
+            // Replace + at start of line with bullet point
+            text = text.replace(/^\+ (.*)$/gm, '<div class="markdown-bullet">$1</div>');
+            
+            return text;
+        }
+        
+        // Update the preview panels
+        function updatePreview() {
+            // Update raw JSON preview
+            if (Object.keys(dictionary).length === 0) {
+                preview.textContent = 'No entries yet';
+                markdownPreview.innerHTML = 'No entries yet';
+            } else {
+                preview.textContent = JSON.stringify(dictionary, null, 2);
+                
+                // Generate markdown preview
+                let markdownHTML = '';
+                for (const [topic, data] of Object.entries(dictionary)) {
+                    markdownHTML += `
+                        <div class="topic">${processMarkdown(topic)}</div>
+                        <div class="desc">${processMarkdown(data.desc)}</div>
+                        <div class="examples">
+                    `;
+                    
+                    data.ex.forEach(example => {
+                        markdownHTML += `<div class="example-item">${processMarkdown(example)}</div>`;
+                    });
+                    
+                    markdownHTML += `</div><hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">`;
+                }
+                markdownPreview.innerHTML = markdownHTML;
+            }
+            entryCount.textContent = `${Object.keys(dictionary).length} entries`;
+        }
+        
+        // Show export modal
+        function showExportModal() {
+            if (Object.keys(dictionary).length === 0) {
+                showNotification('No entries to export', 'error');
+                return;
+            }
+            
+            // Set default filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            filenameInput.value = `dictionary_${dateStr}.json`;
+            
+            exportModal.style.display = 'flex';
+            filenameInput.focus();
+        }
+        
+        // Hide export modal
+        function hideExportModal() {
+            exportModal.style.display = 'none';
+        }
+        
+        // Confirm export action
+        function confirmExportAction() {
+            const filename = filenameInput.value.trim();
+            
+            if (!filename) {
+                showNotification('Please enter a filename', 'error');
+                return;
+            }
+            
+            // Ensure .json extension
+            const finalFilename = filename.endsWith('.json') ? filename : `${filename}.json`;
+            
+            exportDictionary(finalFilename);
+            hideExportModal();
+        }
+        
+        // Show delete modal
+        function showDeleteModal() {
+            deleteModal.style.display = 'flex';
+        }
+        
+        // Hide delete modal
+        function hideDeleteModal() {
+            deleteModal.style.display = 'none';
+        }
+        
+        // Export as JSON file
+        function exportDictionary(filename) {
+            const jsonStr = JSON.stringify(dictionary, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Dictionary exported successfully');
+        }
+        
+        // Clear all entries
+        function clearAll() {
+            if (Object.keys(dictionary).length === 0) {
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all entries? This cannot be undone.')) {
+                dictionary = {};
+                updatePreview();
+                updateEntriesList();
+                updateEditDropdown();
+                saveToLocalStorage();
+                cancelEdit();
+                showNotification('All entries cleared');
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.style.backgroundColor = type === 'success' ? 'var(--secondary)' : 'var(--danger)';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
