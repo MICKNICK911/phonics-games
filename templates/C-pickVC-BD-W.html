@@ -33,7 +33,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1.2rem;
             flex-wrap: wrap;
             padding: 1rem;
             transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -41,11 +41,12 @@
             left: 0;
         }
 
+        /* pill-shaped word tiles */
         .letter {
             cursor: pointer;
-            width: 7rem;
-            height: 7rem;
-            border-radius: 50%;
+            width: 9rem;
+            height: 5rem;
+            border-radius: 3rem;        /* pill shape */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -62,7 +63,8 @@
             word-break: break-word;
             white-space: normal;
             line-height: 1.2;
-            padding: 0.4rem;
+            padding: 0 0.8rem;
+            font-size: 2rem;             /* base, adjusted later via js */
         }
 
         @keyframes fadeIn {
@@ -70,7 +72,7 @@
         }
 
         .letter:hover, .letter:active {
-            transform: scale(1.05);
+            transform: scale(1.03);
         }
 
         .correct {
@@ -111,7 +113,7 @@
 
         #gameOver h2, #levelComplete h2, #winScreen h2 {
             margin-bottom: 1rem;
-            font-size: 3rem;
+            font-size: 2.5rem;
         }
 
         #gameOver p, #levelComplete p, #winScreen p {
@@ -147,38 +149,40 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 1rem;
+            padding: 0.8rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             z-index: 10;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             flex-wrap: wrap;
             gap: 0.5rem;
+            backdrop-filter: blur(4px);
         }
 
         .score-display, .time-display, .high-score-display {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 1rem;
             border-radius: 50px;
             background-color: #e3f2fd;
+            white-space: nowrap;
         }
 
         #targetLimitContainer {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             background-color: #e3f2fd;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 1rem;
             border-radius: 50px;
         }
 
         #targetLimit {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             text-align: center;
             font-weight: bold;
             background-color: transparent;
@@ -205,12 +209,12 @@
         }
 
         #soundToggle {
-            padding: 0.8rem;
-            font-size: 1.2rem;
+            padding: 0.6rem 1rem;
+            font-size: 1.3rem;
             background-color: #66bb6a;
             color: white;
             border: none;
-            border-radius: 50%;
+            border-radius: 50px;
             cursor: pointer;
         }
 
@@ -228,41 +232,49 @@
             z-index: 10;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             pointer-events: none;
+            font-size: 1.2rem;
+            white-space: nowrap;
         }
 
-        @media (max-width: 768px) {
+        /* mobile first adjustments */
+        @media (max-width: 600px) {
             .letter {
-                width: 6rem;
-                height: 6rem;
+                width: 8rem;
+                height: 4.5rem;
                 font-size: 1.8rem;
+                border-radius: 2.5rem;
             }
             .page {
                 gap: 1rem;
             }
             #header {
+                padding: 0.5rem;
                 justify-content: center;
             }
             .score-display, .time-display, .high-score-display, #targetLimitContainer {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
                 padding: 0.3rem 0.8rem;
+            }
+            #soundToggle {
+                font-size: 1.1rem;
+                padding: 0.5rem 0.8rem;
+            }
+            #levelIndicator {
+                font-size: 1rem;
+                padding: 0.6rem 1rem;
+                bottom: 0.8rem;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 380px) {
             .letter {
-                width: 5rem;
-                height: 5rem;
-                font-size: 1.5rem;
+                width: 7rem;
+                height: 4rem;
+                font-size: 1.6rem;
+                border-radius: 2rem;
             }
             .page {
                 gap: 0.8rem;
-            }
-            #header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            #gameOver h2, #levelComplete h2, #winScreen h2 {
-                font-size: 2rem;
             }
         }
     </style>
@@ -271,12 +283,11 @@
     <div id="gameContainer"></div>
     
     <div id="header">
-        <div class="score-display">🏆 Score: <span id="scoreValue">0</span></div>
-        <div class="time-display">⏱️ Time: <span id="timeValue">0</span>s</div>
-        <div class="high-score-display">🏅 Best: <span id="highScoreValue">0</span></div>
+        <div class="score-display">🏆 <span id="scoreValue">0</span></div>
+        <div class="time-display">⏱️ <span id="timeValue">0</span>s</div>
+        <div class="high-score-display">🏅 <span id="highScoreValue">0</span></div>
         <div id="targetLimitContainer">
-            🎯 Target: 
-            <span id="targetLimit">1</span>
+            🎯 <span id="targetLimit">30</span>
             <div id="targetProgress">
                 <div id="targetProgressFill"></div>
             </div>
@@ -289,8 +300,8 @@
     <div id="gameOver">
         <h2>Game Over!</h2>
         <p>Your score: <span id="finalScore">0</span></p>
-        <p>Time played: <span id="finalTime">0</span>s</p>
-        <p>Best score: <span id="finalHighScore">0</span></p>
+        <p>Time: <span id="finalTime">0</span>s</p>
+        <p>Best: <span id="finalHighScore">0</span></p>
         <p id="motivationalMessage"></p>
         <button class="btn btn-primary" onclick="restartCurrentLevel()">Try Again</button>
     </div>
@@ -299,7 +310,7 @@
         <h2>Level Complete! 🎉</h2>
         <p>You mastered the blends!</p>
         <p>Get ready for digraphs!</p>
-        <p>Your score: <span id="levelScore">0</span></p>
+        <p>Score: <span id="levelScore">0</span></p>
         <p>Time: <span id="levelTime">0</span>s</p>
         <button class="btn btn-primary" onclick="startNextLevel()">Start Digraphs</button>
     </div>
@@ -307,9 +318,9 @@
     <div id="winScreen">
         <h2>Congratulations! 🎉</h2>
         <p>You completed both levels!</p>
-        <p>Your score: <span id="winScore">0</span></p>
+        <p>Score: <span id="winScore">0</span></p>
         <p>Time: <span id="winTime">0</span>s</p>
-        <p>Best score: <span id="winHighScore">0</span></p>
+        <p>Best: <span id="winHighScore">0</span></p>
         <p id="winMessage"></p>
         <button class="btn btn-primary" onclick="restartGame()">Play Again</button>
     </div>
@@ -318,75 +329,33 @@
         (function() {
             // ---------- WORD LISTS (60 blends, 60 digraphs, no cross contamination) ----------
             const blendWords = [
-                // each blend appears at least once, 60 total
-                "blot", "blue",           // bl
-                "clap", "clog",           // cl
-                "flag", "flip",           // fl
-                "glass", "glue",          // gl
-                "plant", "play",          // pl
-                "and", "hand",             // nd
-                "ant", "tent",             // nt
-                "slip", "slow",            // sl
-                "brim", "bran",            // br
-                "crab", "crib",            // cr
-                "drag", "drop",            // dr
-                "frog", "from",            // fr
-                "jump", "lamp",            // mp
-                "card", "hard",            // rd
-                "old", "cold",             // ld
-                "help", "pulp",            // lp
-                "grab", "grass",           // gr
-                "pray", "press",           // pr
-                "trap", "trip",            // tr
-                "scab", "scan",            // sc
-                "skip", "skin",            // sk
-                "park", "bark",            // rk
-                "golf", "elf",              // lf
-                "kept", "wept",             // pt
-                "left", "lift",             // ft
-                "act", "fact",              // ct
-                "squid", "squad",           // squ
-                "stop", "step",             // st
-                "smile", "smog",            // sm
-                "snap", "snip",             // sn
-                "spin", "spot",             // sp
-                "milk", "silk",             // lk
-                "salt", "belt",             // lt
-                "text", "next",             // xt
-                "cats", "hats",              // ts
-                "swim", "swan",              // sw
-                "twin", "twig",              // tw
-                "dwell", "dwarf"             // dw
-            ]; // exactly 60 (38 first + 22 from second list, carefully checked for digraphs)
+                "blot", "blue", "clap", "clog", "flag", "flip", "glass", "glue",
+                "plant", "play", "and", "hand", "ant", "tent", "slip", "slow",
+                "brim", "bran", "crab", "crib", "drag", "drop", "frog", "from",
+                "jump", "lamp", "card", "hard", "old", "cold", "help", "pulp",
+                "grab", "grass", "pray", "press", "trap", "trip", "scab", "scan",
+                "skip", "skin", "park", "bark", "golf", "elf", "kept", "wept",
+                "left", "lift", "act", "fact", "squid", "squad", "stop", "step",
+                "smile", "smog", "snap", "snip", "spin", "spot", "milk", "silk",
+                "salt", "belt", "text", "next", "cats", "hats", "swim", "swan",
+                "twin", "twig", "dwell", "dwarf"
+            ]; // exactly 60
 
             const digraphWords = [
-                // ch (5)
                 "chip", "chop", "chin", "chat", "chill",
-                // tch (5)
                 "catch", "hatch", "patch", "match", "fetch",
-                // th (5)
                 "this", "that", "thin", "thick", "thud",
-                // ng (5)
                 "king", "ring", "sing", "long", "thing",
-                // nk (5)
                 "ink", "sink", "link", "pink", "rink",
-                // sh (5)
                 "ship", "shop", "shut", "shed", "fish",
-                // ck (5)
                 "back", "duck", "pick", "sock", "luck",
-                // wr (5)
                 "wrap", "wren", "wreck", "wrist", "write",
-                // ph (4)
                 "phone", "photo", "dolphin", "phonics",
-                // wh (4)
                 "when", "whip", "whiz", "whale",
-                // gn (4)
                 "gnat", "gnaw", "sign", "gnome",
-                // kn (4)
                 "knot", "knit", "knock", "knife",
-                // gh (4)
                 "ghost", "ghoul", "aghast", "cough"
-            ]; // total 60
+            ]; // 60
 
             // ---------- GAME CONFIG ----------
             const bgColors = [
@@ -394,7 +363,7 @@
                 '#FCE4EC', '#E0F7FA', '#E8EAF6', '#F1F8E9', '#FFFDE7',
                 '#EFEBE9', '#E0F2F1', '#F3E5F5', '#FBE9E7', '#EEEEEE'
             ];
-            let colorIndex = 1;
+            let colorIndex = 0;
             
             // Game state
             let score = 0;
@@ -452,18 +421,15 @@
                 oscillator.stop(audioCtx.currentTime + duration);
             }
 
-            // Helper: random item
             function getRandomItem(array) {
                 return array[Math.floor(Math.random() * array.length)];
             }
 
-            // Get N distinct random items from array (simple, for small N)
             function getDistinctRandomItems(arr, count, excludeItem = null) {
                 let copy = [...arr];
                 if (excludeItem !== null) {
                     copy = copy.filter(item => item !== excludeItem);
                 }
-                // shuffle and take first 'count'
                 for (let i = copy.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [copy[i], copy[j]] = [copy[j], copy[i]];
@@ -471,13 +437,11 @@
                 return copy.slice(0, count);
             }
 
-            // Update target progress bar
             function updateTargetProgress() {
                 const progress = (score / targetLimit) * 100;
                 targetProgressFill.style.width = `${Math.min(progress, 100)}%`;
             }
 
-            // Update level indicator
             function updateLevelIndicator() {
                 if (currentLevel === 1) {
                     levelIndicator.textContent = "Level 1: Blends";
@@ -488,18 +452,15 @@
                 }
             }
 
-            // Adjust font size based on word length
             function applyWordFontSize(element, word) {
                 const len = word.length;
-                if (len <= 4) element.style.fontSize = '2.5rem';
-                else if (len === 5) element.style.fontSize = '2.2rem';
-                else if (len === 6) element.style.fontSize = '2rem';
-                else if (len === 7) element.style.fontSize = '1.8rem';
-                else element.style.fontSize = '1.6rem';
-                // responsive override handled by media queries, but this fine-tunes
+                if (len <= 4) element.style.fontSize = '2.2rem';
+                else if (len === 5) element.style.fontSize = '2rem';
+                else if (len === 6) element.style.fontSize = '1.8rem';
+                else if (len === 7) element.style.fontSize = '1.6rem';
+                else element.style.fontSize = '1.5rem';
             }
 
-            // Create a new page with three words
             function createNewPage() {
                 const page = document.createElement('div');
                 page.className = 'page';
@@ -509,13 +470,9 @@
                 const correctList = (currentLevel === 1) ? blendWords : digraphWords;
                 const wrongList = (currentLevel === 1) ? digraphWords : blendWords;
 
-                // pick one correct word
                 const correctWord = getRandomItem(correctList);
-                // pick two distinct wrong words (and not equal to correctWord, though lists are disjoint, but for safety)
                 let wrongWords = getDistinctRandomItems(wrongList, 2, correctWord); 
-                // in extremely rare case wrongList might not have 2 distinct? it does, size >=60.
 
-                // combine and shuffle
                 const words = [correctWord, ...wrongWords];
                 shuffleArray(words);
 
@@ -539,7 +496,6 @@
                 return page;
             }
 
-            // Shuffle array
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -547,7 +503,6 @@
                 }
             }
 
-            // Check if word belongs to current level (correct category)
             function isCorrectWord(word) {
                 if (currentLevel === 1) {
                     return blendWords.includes(word);
@@ -556,7 +511,6 @@
                 }
             }
 
-            // Handle word click
             function handleWordClick(word, currentPage, wordElement) {
                 if (!gameActive) return;
 
@@ -564,12 +518,11 @@
 
                 if (correct) {
                     score++;
-                    playSound(440); // correct
+                    playSound(440);
                     wordElement.classList.add('correct');
                     updateScore();
                     updateTargetProgress();
 
-                    // check if reached target limit
                     if (score >= targetLimit) {
                         if (currentLevel === 1) {
                             completeLevel();
@@ -579,7 +532,6 @@
                         return;
                     }
 
-                    // transition to next page
                     const newPage = createNewPage();
                     newPage.style.transform = 'translateY(100%)';
 
@@ -588,13 +540,12 @@
                         newPage.style.transform = 'translateY(0)';
                     }, 10);
                 } else {
-                    playSound(220, 'square', 0.2); // incorrect
+                    playSound(220, 'square', 0.2);
                     wordElement.classList.add('incorrect');
                     endGame();
                 }
             }
 
-            // Update score and high score
             function updateScore() {
                 scoreValue.textContent = score;
                 if (score > highScore) {
@@ -610,7 +561,6 @@
                 winHighScore.textContent = highScore;
             }
 
-            // Timer
             function startTimer() {
                 clearInterval(timer);
                 timeValue.textContent = timePlayed;
@@ -620,7 +570,6 @@
                 }, 1000);
             }
 
-            // Level complete (blend level finished)
             function completeLevel() {
                 gameActive = false;
                 clearInterval(timer);
@@ -629,7 +578,6 @@
                 levelComplete.style.display = 'flex';
             }
 
-            // Start next level (digraphs)
             function startNextLevel() {
                 currentLevel = 2;
                 score = 0;
@@ -645,7 +593,6 @@
                 createNewPage();
             }
 
-            // Game over (wrong tap)
             function endGame() {
                 gameActive = false;
                 clearInterval(timer);
@@ -656,7 +603,6 @@
                 gameOver.style.display = 'flex';
             }
 
-            // Win both levels
             function winGame() {
                 gameActive = false;
                 clearInterval(timer);
@@ -679,7 +625,6 @@
                 return "Fantastic! You've mastered blends and digraphs!";
             }
 
-            // Restart current level (after game over)
             function restartCurrentLevel() {
                 score = 0;
                 timePlayed = 0;
@@ -693,7 +638,6 @@
                 createNewPage();
             }
 
-            // Restart entire game
             function restartGame() {
                 winScreen.style.display = 'none';
                 currentLevel = 1;
@@ -709,13 +653,11 @@
                 createNewPage();
             }
 
-            // Toggle sound
             function toggleSound() {
                 soundEnabled = !soundEnabled;
                 soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
             }
 
-            // Initialize
             function initGame() {
                 score = 0;
                 timePlayed = 0;
@@ -731,12 +673,10 @@
                 createNewPage();
             }
 
-            // Expose functions to global for button onclick
             window.restartCurrentLevel = restartCurrentLevel;
             window.startNextLevel = startNextLevel;
             window.restartGame = restartGame;
 
-            // Event listeners
             soundToggle.addEventListener('click', toggleSound);
             window.addEventListener('load', () => {
                 updateHighScore();
