@@ -20,6 +20,19 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* particle canvas */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2000;
         }
 
         .game-container {
@@ -172,6 +185,15 @@
             box-shadow: 0 25px 40px black;
             border: 2px solid #f7cd7c;
         }
+        /* correct popup (no button) */
+        .correct-popup {
+            background: #2e7d32;
+            color: white;
+            text-shadow: 0 2px 4px black;
+        }
+        .correct-popup .message {
+            font-size: 2rem;
+        }
         .choices-row {
             display: flex;
             justify-content: center;
@@ -258,10 +280,9 @@
 </div>
 
 <div id="correctModal" class="modal">
-    <div class="modal-content">
-        <div class="message">✨ CORRECT! ✨</div>
-        <div>🎉 you solved the pattern</div>
-        <button class="next-btn" id="nextLevelBtn">➡ NEXT LEVEL ⬅</button>
+    <div class="modal-content correct-popup">
+        <div class="message">✅ CORRECT! ✅</div>
+        <div style="font-size: 3rem;">🎉</div>
     </div>
 </div>
 
@@ -281,6 +302,8 @@
     </div>
 </div>
 
+<canvas id="particleCanvas"></canvas>
+
 <script>
     // ========== CONFIGURABLE MAX LEVEL ==========
     const MAX_LEVEL = 5;   // ← change this number to set how many levels to win
@@ -292,6 +315,7 @@
     let step = 0;             // = lastValue / 10 (integer)
     let targetValue = 0;      // integer: step * targetIndex
     let gameActive = true;
+    let nextLevelTimeout = null;
 
     const circlesRow = document.getElementById('circlesRow');
     const levelDisplaySpan = document.getElementById('levelDisplay');
@@ -300,11 +324,77 @@
     const victoryModal = document.getElementById('victoryModal');
     const gameOverModal = document.getElementById('gameOverModal');
     const choicesContainer = document.getElementById('choicesContainer');
-    const nextLevelBtn = document.getElementById('nextLevelBtn');
     const restartGameBtn = document.getElementById('restartGameBtn');
     const victoryRestartBtn = document.getElementById('victoryRestartBtn');
 
-    // random multiple of 10 between 10 and 300 inclusive
+    // ---------- PARTICLE EFFECT ----------
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationId = null;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createParticles(centerX, centerY) {
+        const particleCount = 60;
+        for (let i = 0; i < particleCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 2;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            particles.push({
+                x: centerX,
+                y: centerY,
+                vx: vx,
+                vy: vy,
+                life: 1,
+                size: Math.random() * 6 + 2,
+                color: `hsl(${Math.random() * 60 + 30}, 100%, 60%)`
+            });
+        }
+        if (animationId) cancelAnimationFrame(animationId);
+        function animate() {
+            if (particles.length === 0) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                p.vy += 0.2; // gravity
+                if (p.life <= 0 || p.x > canvas.width + 100 || p.x < -100 || p.y > canvas.height + 100) {
+                    particles.splice(i,1);
+                    i--;
+                    continue;
+                }
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+            }
+            animationId = requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    function triggerParticles() {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        createParticles(centerX, centerY);
+    }
+
+    // ---------- GAME LOGIC ----------
     function getRandomLastValue() {
         const multiples = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
                            160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300];
@@ -373,20 +463,29 @@
         correctModal.classList.remove('active');
         gameOverModal.classList.remove('active');
         victoryModal.classList.remove('active');
+        if (nextLevelTimeout) {
+            clearTimeout(nextLevelTimeout);
+            nextLevelTimeout = null;
+        }
     }
 
     function handleAnswer(selectedNum) {
         if (!gameActive) return;
         const isCorrect = (selectedNum === targetValue);
-        closeAllModals();
+        closeAllModals(); // close choices modal
         if (isCorrect) {
+            gameActive = false;
+            triggerParticles(); // ✨ particle effect
             if (currentLevel === MAX_LEVEL) {
-                // Victory! (completed last level)
+                // Victory – show final screen
                 victoryModal.classList.add('active');
-                gameActive = false;
             } else {
+                // Show correct popup, auto‑hide, then next level
                 correctModal.classList.add('active');
-                gameActive = false;
+                nextLevelTimeout = setTimeout(() => {
+                    correctModal.classList.remove('active');
+                    nextLevel();
+                }, 2000);
             }
         } else {
             gameActive = false;
@@ -395,10 +494,7 @@
     }
 
     function nextLevel() {
-        if (currentLevel >= MAX_LEVEL) {
-            // Should never happen because nextLevel button only appears before reaching max
-            return;
-        }
+        if (currentLevel >= MAX_LEVEL) return;
         currentLevel++;
         lastValue = getRandomLastValue();
         targetIndex = Math.floor(Math.random() * 9) + 1; // 1..9
@@ -410,6 +506,7 @@
     }
 
     function restartGame() {
+        if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
         currentLevel = 1;
         lastValue = getRandomLastValue();
         targetIndex = Math.floor(Math.random() * 9) + 1;
@@ -473,7 +570,6 @@
         closeAllModals();
     }
 
-    nextLevelBtn.addEventListener('click', () => nextLevel());
     restartGameBtn.addEventListener('click', () => restartGame());
     victoryRestartBtn.addEventListener('click', () => restartGame());
     
