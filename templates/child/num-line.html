@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Number Line Quest – Arrow & Sound</title>
+    <title>Number Line Quest – Score & Timer</title>
     <style>
         * {
             box-sizing: border-box;
@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* particle canvas */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -61,6 +60,17 @@
             font-weight: bold;
             font-size: 1.2rem;
             letter-spacing: 1px;
+            box-shadow: inset 0 -2px 0 #5f4c2b, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .timer-score {
+            background: #2c2b28;
+            padding: 8px 20px;
+            border-radius: 60px;
+            color: #f9e7c2;
+            font-weight: bold;
+            font-size: 1rem;
+            display: flex;
+            gap: 20px;
             box-shadow: inset 0 -2px 0 #5f4c2b, 0 5px 10px rgba(0,0,0,0.2);
         }
         .instruction {
@@ -110,7 +120,6 @@
             color: white;
             text-shadow: 0 2px 3px rgba(0,0,0,0.3);
             box-shadow: 0 8px 12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,200,0.7);
-            transition: all 0.1s;
         }
         .circle.green {
             background: radial-gradient(circle at 30% 30%, #6bc46d, #2c7a2a);
@@ -121,18 +130,15 @@
             margin-top: 12px;
             font-weight: 700;
             font-size: 1rem;
-            background: #2d2b26aa;
-            backdrop-filter: blur(4px);
-            padding: 4px 8px;
-            border-radius: 36px;
             color: #fef0db;
             min-width: 48px;
             text-align: center;
             font-family: monospace;
             letter-spacing: 0.5px;
+            background: transparent;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        /* Arrow button */
         .arrow-btn {
             font-size: 2.2rem;
             font-weight: bold;
@@ -260,6 +266,7 @@
         @media (max-width: 550px) {
             .choice-circle { width: 70px; height: 70px; font-size: 1.4rem; }
             .arrow-btn { font-size: 1.8rem; width: 40px; height: 40px; }
+            .timer-score { font-size: 0.8rem; padding: 6px 12px; gap: 12px; }
         }
     </style>
 </head>
@@ -267,11 +274,15 @@
 <div class="game-container" id="gameContainer">
     <div class="game-header">
         <div class="level-badge" id="levelDisplay">LEVEL 1</div>
-        <div class="instruction">🔽 tap the ARROW below the GREEN circle</div>
+        <div class="timer-score">
+            <span>⏱️ <span id="timerDisplay">00</span>s</span>
+            <span>⭐ <span id="scoreDisplay">0</span></span>
+        </div>
     </div>
+    <div class="instruction">🔽 tap the ARROW below the GREEN circle & guess its value</div>
 
     <div id="circlesRow" class="number-line"></div>
-    <footer>⚡ first = 0 &nbsp;&nbsp;|&nbsp;&nbsp; last = multiple of 10 &nbsp;&nbsp;|&nbsp;&nbsp; find the hidden value</footer>
+    <footer>⚡ first = 0 &nbsp;&nbsp;|&nbsp;&nbsp; last = multiple of 10 (10‑120) &nbsp;&nbsp;|&nbsp;&nbsp; find the hidden value</footer>
 </div>
 
 <!-- MODALS -->
@@ -294,7 +305,7 @@
     <div class="modal-content">
         <div class="prominent-image">🏆</div>
         <div class="message">VICTORY!</div>
-        <div>You completed all levels!</div>
+        <div id="victoryScoreMsg">Score: 0</div>
         <button class="restart-btn" id="victoryRestartBtn">🔄 PLAY AGAIN</button>
     </div>
 </div>
@@ -303,7 +314,7 @@
     <div class="modal-content">
         <div class="prominent-image">💀</div>
         <div class="message">GAME OVER</div>
-        <div>wrong guess... restart and try again</div>
+        <div id="gameOverScoreMsg">Score: 0</div>
         <button class="restart-btn" id="restartGameBtn">🔄 RESTART</button>
     </div>
 </div>
@@ -314,12 +325,12 @@
         <div class="prominent-image">🎮</div>
         <h2>How to Play</h2>
         <p style="margin: 12px 0; text-align: left; display: inline-block; font-size: 0.9rem;">
-            • Guess the <strong>correct number</strong>, the green circle holds. <br>
-            • The leftmost circle is <strong>0</strong>, the rightmost is a <strong>random number</strong>.<br>
+            • The leftmost circle is <strong>0</strong>, the rightmost is a <strong>multiple of 10 (10–120)</strong>.<br>
             • The <strong style="color:#2c7a2a;">GREEN circle</strong> is your target.<br>
-            • Tap the <strong style="color:#ffdd99;">▼ arrow</strong> below it.<br>
-            • Choose the correct number from the three options.<br>
-            • Correct → next level | Wrong → game over.
+            • Tap the <strong style="color:#ffdd99;">▼ arrow</strong> below it and <strong>guess the correct number the green circle holds</strong>.<br>
+            • Choose from three options.<br>
+            • Correct → next level | Wrong → game over.<br>
+            • You have <strong id="timerDefaultMsg">60</strong> seconds per level.
         </p>
         <button class="gotit-btn" id="closeInstructionBtn">Got it!</button>
     </div>
@@ -328,8 +339,9 @@
 <canvas id="particleCanvas"></canvas>
 
 <script>
-    // ========== CONFIGURABLE MAX LEVEL ==========
-    const MAX_LEVEL = 5;   // change this to set total levels
+    // ========== CONFIGURATION ==========
+    const MAX_LEVEL = 5;           // total levels to win
+    const TIME_PER_LEVEL = 60;     // seconds per level (adjustable)
 
     // ---------- GAME STATE ----------
     let currentLevel = 1;
@@ -339,10 +351,15 @@
     let targetValue = 0;
     let gameActive = true;
     let nextLevelTimeout = null;
+    let timerInterval = null;
+    let timeLeft = TIME_PER_LEVEL;
+    let score = 0;                 // number of correctly solved levels
 
     // DOM elements
     const circlesRow = document.getElementById('circlesRow');
     const levelDisplaySpan = document.getElementById('levelDisplay');
+    const timerDisplaySpan = document.getElementById('timerDisplay');
+    const scoreDisplaySpan = document.getElementById('scoreDisplay');
     const choicesModal = document.getElementById('choicesModal');
     const correctModal = document.getElementById('correctModal');
     const victoryModal = document.getElementById('victoryModal');
@@ -352,8 +369,12 @@
     const choicesContainer = document.getElementById('choicesContainer');
     const restartGameBtn = document.getElementById('restartGameBtn');
     const victoryRestartBtn = document.getElementById('victoryRestartBtn');
+    const victoryScoreMsg = document.getElementById('victoryScoreMsg');
+    const gameOverScoreMsg = document.getElementById('gameOverScoreMsg');
+    const timerDefaultMsg = document.getElementById('timerDefaultMsg');
+    if (timerDefaultMsg) timerDefaultMsg.textContent = TIME_PER_LEVEL;
 
-    // ---------- SOUND EFFECTS (Web Audio) ----------
+    // ---------- SOUND EFFECTS ----------
     let audioCtx = null;
     let soundEnabled = false;
 
@@ -376,7 +397,6 @@
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
         osc.start(now);
         osc.stop(now + 0.4);
-        // second beep
         const osc2 = audioCtx.createOscillator();
         const gain2 = audioCtx.createGain();
         osc2.connect(gain2);
@@ -404,14 +424,10 @@
         osc.stop(now + 0.5);
     }
 
-    // Enable audio on first user interaction (any tap)
     function enableAudioOnFirstTap() {
         if (soundEnabled) return;
         initAudio();
-        // resume context if suspended (autoplay policy)
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         document.body.removeEventListener('click', enableAudioOnFirstTap);
         document.body.removeEventListener('touchstart', enableAudioOnFirstTap);
     }
@@ -484,9 +500,10 @@
 
     // ---------- GAME FUNCTIONS ----------
     function getRandomLastValue() {
-        const multiples = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,
-                           160,170,180,190,200,210,220,230,240,250,260,270,280,290,300];
-        return multiples[Math.floor(Math.random() * multiples.length)];
+        // multiples of 10 from 10 to 120 inclusive
+        const max = 12; // 12 * 10 = 120
+        const val = (Math.floor(Math.random() * max) + 1) * 10;
+        return val;
     }
 
     function updateDerivedValues() {
@@ -554,6 +571,39 @@
         if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
     }
 
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function startTimer() {
+        stopTimer();
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            if (timeLeft <= 0) {
+                // time's up → game over
+                stopTimer();
+                if (gameActive) {
+                    gameActive = false;
+                    playWrongSound();
+                    gameOverScoreMsg.innerText = `Score: ${score}`;
+                    gameOverModal.classList.add('active');
+                }
+            } else {
+                timeLeft--;
+                timerDisplaySpan.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        timeLeft = TIME_PER_LEVEL;
+        timerDisplaySpan.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+        startTimer();
+    }
+
     function handleAnswer(selectedNum) {
         if (!gameActive) return;
         const isCorrect = (selectedNum === targetValue);
@@ -561,8 +611,14 @@
         if (isCorrect) {
             playCorrectSound();
             gameActive = false;
+            stopTimer();   // stop countdown for this level
             triggerParticles();
+            // increase score (one point per correct level)
+            score++;
+            scoreDisplaySpan.textContent = score;
             if (currentLevel === MAX_LEVEL) {
+                // VICTORY!
+                victoryScoreMsg.innerText = `Score: ${score}`;
                 victoryModal.classList.add('active');
             } else {
                 correctModal.classList.add('active');
@@ -574,6 +630,8 @@
         } else {
             playWrongSound();
             gameActive = false;
+            stopTimer();
+            gameOverScoreMsg.innerText = `Score: ${score}`;
             gameOverModal.classList.add('active');
         }
     }
@@ -582,23 +640,28 @@
         if (currentLevel >= MAX_LEVEL) return;
         currentLevel++;
         lastValue = getRandomLastValue();
-        targetIndex = Math.floor(Math.random() * 9) + 1;
+        targetIndex = Math.floor(Math.random() * 9) + 1; // 1..9
         updateDerivedValues();
         renderNumberLine();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
         gameActive = true;
+        resetTimer();        // fresh timer for new level
         closeAllModals();
     }
 
     function restartGame() {
+        stopTimer();
         if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
         currentLevel = 1;
+        score = 0;
+        scoreDisplaySpan.textContent = '0';
         lastValue = getRandomLastValue();
         targetIndex = Math.floor(Math.random() * 9) + 1;
         updateDerivedValues();
         renderNumberLine();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
         gameActive = true;
+        resetTimer();
         closeAllModals();
     }
 
@@ -637,12 +700,15 @@
 
     function initGame() {
         currentLevel = 1;
+        score = 0;
+        scoreDisplaySpan.textContent = '0';
         lastValue = getRandomLastValue();
         targetIndex = Math.floor(Math.random() * 9) + 1;
         updateDerivedValues();
         renderNumberLine();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
         gameActive = true;
+        resetTimer();
         closeAllModals();
     }
 
@@ -652,13 +718,12 @@
     }
     closeInstructionBtn.addEventListener('click', () => {
         instructionModal.classList.remove('active');
-        initGame(); // start game after instructions
+        initGame();
     });
 
     restartGameBtn.addEventListener('click', () => restartGame());
     victoryRestartBtn.addEventListener('click', () => restartGame());
 
-    // Show instructions first, game starts after dismissal
     showInstruction();
 </script>
 </body>
