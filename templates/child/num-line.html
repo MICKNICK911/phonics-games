@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Number Line Quest – Multiples of 10</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a3c2c 0%, #0e2a1d 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255,248,225,0.9);
+            border-radius: 72px;
+            padding: 24px 16px 32px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.4), inset 0 1px 4px rgba(255,255,200,0.6);
+            width: 100%;
+            max-width: 1100px;
+            transition: all 0.2s ease;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin: 0 12px 20px 12px;
+            gap: 12px;
+        }
+        .level-badge {
+            background: #2c2b28;
+            padding: 8px 20px;
+            border-radius: 60px;
+            color: #f9e7c2;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            box-shadow: inset 0 -2px 0 #5f4c2b, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .instruction {
+            background: #ecd9b4;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2e241f;
+            box-shadow: inset 0 1px 3px #fff9e8, 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .number-line {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 15px 0 10px;
+            padding: 12px 4px;
+        }
+
+        .circle-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 70px;
+            transition: transform 0.1s ease;
+        }
+        @media (max-width: 780px) {
+            .circle-item { width: 58px; }
+        }
+        @media (max-width: 640px) {
+            .circle-item { width: 48px; }
+        }
+
+        .circle {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: radial-gradient(circle at 30% 30%, #e05a3a, #a13012);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: white;
+            text-shadow: 0 2px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,200,0.7);
+            transition: all 0.1s;
+        }
+        .circle.green {
+            background: radial-gradient(circle at 30% 30%, #6bc46d, #2c7a2a);
+            box-shadow: 0 0 0 3px #ffdd88, 0 8px 14px black;
+        }
+
+        .circle-label {
+            margin-top: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            background: #2d2b26aa;
+            backdrop-filter: blur(4px);
+            padding: 4px 8px;
+            border-radius: 36px;
+            color: #fef0db;
+            min-width: 48px;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .square-btn {
+            background: #ffcf7a;
+            width: 42px;
+            height: 42px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #4a2a1a;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b97f2e;
+            transition: 0.05s linear;
+            user-select: none;
+            font-family: monospace;
+        }
+        .square-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #b97f2e;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #fff7e8;
+            max-width: 340px;
+            width: 85%;
+            border-radius: 64px;
+            padding: 28px 20px 32px;
+            text-align: center;
+            box-shadow: 0 25px 40px black;
+            border: 2px solid #f7cd7c;
+        }
+        .choices-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 24px 0 20px;
+        }
+        .choice-circle {
+            background: radial-gradient(circle at 30% 30%, #4d7eb3, #1f4970);
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.07s linear;
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+            border: 2px solid #ffcd7e;
+        }
+        .choice-circle:active {
+            transform: scale(0.96);
+        }
+        .modal h2 {
+            margin-top: 0;
+            color: #34200c;
+        }
+        .restart-btn, .next-btn {
+            background: #daa742;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #2b241c;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #7c541e;
+            transition: 0.05s linear;
+        }
+        .restart-btn:active, .next-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #7c541e;
+        }
+        .message {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #2f2a24;
+            opacity: 0.8;
+        }
+        @media (max-width: 550px) {
+            .choice-circle { width: 70px; height: 70px; font-size: 1.4rem; }
+            .square-btn { width: 36px; height: 36px; font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+    <div class="game-header">
+        <div class="level-badge" id="levelDisplay">LEVEL 1</div>
+        <div class="instruction">🔍 tap the GOLDEN SQUARE below the GREEN circle</div>
+    </div>
+
+    <div id="circlesRow" class="number-line"></div>
+    <footer>⚡ first = 0 &nbsp;&nbsp;|&nbsp;&nbsp; last = multiple of 10 &nbsp;&nbsp;|&nbsp;&nbsp; find the hidden value</footer>
+</div>
+
+<!-- MODALS -->
+<div id="choicesModal" class="modal">
+    <div class="modal-content">
+        <h2>🎯 WHAT IS THE VALUE ?</h2>
+        <div id="choicesContainer" class="choices-row"></div>
+        <div style="font-size: 0.85rem; margin-top: 10px;">tap the correct number</div>
+    </div>
+</div>
+
+<div id="correctModal" class="modal">
+    <div class="modal-content">
+        <div class="message">✨ CORRECT! ✨</div>
+        <div>🎉 you solved the pattern</div>
+        <button class="next-btn" id="nextLevelBtn">➡ NEXT LEVEL ⬅</button>
+    </div>
+</div>
+
+<div id="victoryModal" class="modal">
+    <div class="modal-content">
+        <div class="message">🏆 VICTORY! 🏆</div>
+        <div>You completed all levels!</div>
+        <button class="restart-btn" id="victoryRestartBtn">🔄 PLAY AGAIN</button>
+    </div>
+</div>
+
+<div id="gameOverModal" class="modal">
+    <div class="modal-content">
+        <div class="message">💀 GAME OVER 💀</div>
+        <div>wrong guess... restart and try again</div>
+        <button class="restart-btn" id="restartGameBtn">🔄 RESTART</button>
+    </div>
+</div>
+
+<script>
+    // ========== CONFIGURABLE MAX LEVEL ==========
+    const MAX_LEVEL = 5;   // ← change this number to set how many levels to win
+
+    // ---------- GAME STATE ----------
+    let currentLevel = 1;
+    let lastValue = 100;      // integer multiple of 10
+    let targetIndex = 5;      // index of green circle (1..9)
+    let step = 0;             // = lastValue / 10 (integer)
+    let targetValue = 0;      // integer: step * targetIndex
+    let gameActive = true;
+
+    const circlesRow = document.getElementById('circlesRow');
+    const levelDisplaySpan = document.getElementById('levelDisplay');
+    const choicesModal = document.getElementById('choicesModal');
+    const correctModal = document.getElementById('correctModal');
+    const victoryModal = document.getElementById('victoryModal');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const choicesContainer = document.getElementById('choicesContainer');
+    const nextLevelBtn = document.getElementById('nextLevelBtn');
+    const restartGameBtn = document.getElementById('restartGameBtn');
+    const victoryRestartBtn = document.getElementById('victoryRestartBtn');
+
+    // random multiple of 10 between 10 and 300 inclusive
+    function getRandomLastValue() {
+        const multiples = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+                           160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300];
+        return multiples[Math.floor(Math.random() * multiples.length)];
+    }
+
+    function updateDerivedValues() {
+        step = lastValue / 10;
+        targetValue = targetIndex * step;
+    }
+
+    function generateChoices() {
+        const correct = targetValue;
+        const minVal = 0;
+        const maxVal = lastValue;
+        let candidates = new Set();
+        candidates.add(correct);
+
+        let d1 = correct + step;
+        if (d1 >= minVal && d1 <= maxVal && !candidates.has(d1)) candidates.add(d1);
+        let d2 = correct - step;
+        if (d2 >= minVal && d2 <= maxVal && !candidates.has(d2)) candidates.add(d2);
+        
+        if (candidates.size < 3) {
+            let d3 = correct + (2 * step);
+            if (d3 >= minVal && d3 <= maxVal && !candidates.has(d3)) candidates.add(d3);
+        }
+        if (candidates.size < 3) {
+            let d4 = correct - (2 * step);
+            if (d4 >= minVal && d4 <= maxVal && !candidates.has(d4)) candidates.add(d4);
+        }
+        
+        while (candidates.size < 3) {
+            let randIndex = Math.floor(Math.random() * 11);
+            let randVal = randIndex * step;
+            if (!candidates.has(randVal)) candidates.add(randVal);
+        }
+        
+        let choicesArray = Array.from(candidates);
+        for (let i = choicesArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [choicesArray[i], choicesArray[j]] = [choicesArray[j], choicesArray[i]];
+        }
+        return choicesArray.slice(0,3);
+    }
+
+    function showChoicesModal() {
+        if (!gameActive) return;
+        const choices = generateChoices();
+        choicesContainer.innerHTML = '';
+        choices.forEach(value => {
+            const circleDiv = document.createElement('div');
+            circleDiv.className = 'choice-circle';
+            circleDiv.textContent = value;
+            circleDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleAnswer(value);
+            });
+            choicesContainer.appendChild(circleDiv);
+        });
+        choicesModal.classList.add('active');
+    }
+
+    function closeAllModals() {
+        choicesModal.classList.remove('active');
+        correctModal.classList.remove('active');
+        gameOverModal.classList.remove('active');
+        victoryModal.classList.remove('active');
+    }
+
+    function handleAnswer(selectedNum) {
+        if (!gameActive) return;
+        const isCorrect = (selectedNum === targetValue);
+        closeAllModals();
+        if (isCorrect) {
+            if (currentLevel === MAX_LEVEL) {
+                // Victory! (completed last level)
+                victoryModal.classList.add('active');
+                gameActive = false;
+            } else {
+                correctModal.classList.add('active');
+                gameActive = false;
+            }
+        } else {
+            gameActive = false;
+            gameOverModal.classList.add('active');
+        }
+    }
+
+    function nextLevel() {
+        if (currentLevel >= MAX_LEVEL) {
+            // Should never happen because nextLevel button only appears before reaching max
+            return;
+        }
+        currentLevel++;
+        lastValue = getRandomLastValue();
+        targetIndex = Math.floor(Math.random() * 9) + 1; // 1..9
+        updateDerivedValues();
+        renderNumberLine();
+        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        gameActive = true;
+        closeAllModals();
+    }
+
+    function restartGame() {
+        currentLevel = 1;
+        lastValue = getRandomLastValue();
+        targetIndex = Math.floor(Math.random() * 9) + 1;
+        updateDerivedValues();
+        renderNumberLine();
+        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        gameActive = true;
+        closeAllModals();
+    }
+
+    function renderNumberLine() {
+        circlesRow.innerHTML = '';
+        const totalCircles = 11;
+        for (let i = 0; i < totalCircles; i++) {
+            const circleItem = document.createElement('div');
+            circleItem.className = 'circle-item';
+            
+            const circleDiv = document.createElement('div');
+            circleDiv.className = 'circle';
+            if (i === targetIndex) {
+                circleDiv.classList.add('green');
+            } else {
+                circleDiv.classList.add('red');
+            }
+            circleItem.appendChild(circleDiv);
+            
+            const labelSpan = document.createElement('div');
+            labelSpan.className = 'circle-label';
+            
+            if (i === 0) {
+                labelSpan.textContent = '0';
+            } else if (i === 10) {
+                labelSpan.textContent = lastValue;
+            } else if (i === targetIndex) {
+                const squareBox = document.createElement('div');
+                squareBox.className = 'square-btn';
+                squareBox.textContent = '□';
+                squareBox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (gameActive) {
+                        showChoicesModal();
+                    }
+                });
+                labelSpan.appendChild(squareBox);
+            } else {
+                labelSpan.textContent = '';
+            }
+            circleItem.appendChild(labelSpan);
+            circlesRow.appendChild(circleItem);
+        }
+    }
+
+    function initGame() {
+        currentLevel = 1;
+        lastValue = getRandomLastValue();
+        targetIndex = Math.floor(Math.random() * 9) + 1;
+        updateDerivedValues();
+        renderNumberLine();
+        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        gameActive = true;
+        closeAllModals();
+    }
+
+    nextLevelBtn.addEventListener('click', () => nextLevel());
+    restartGameBtn.addEventListener('click', () => restartGame());
+    victoryRestartBtn.addEventListener('click', () => restartGame());
+    
+    initGame();
+</script>
+</body>
+</html>
