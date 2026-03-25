@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Number Line Quest – Multiples of 10</title>
+    <title>Number Line Quest – Arrow Edition</title>
     <style>
         * {
             box-sizing: border-box;
@@ -132,27 +132,26 @@
             letter-spacing: 0.5px;
         }
 
-        .square-btn {
-            background: #ffcf7a;
-            width: 42px;
-            height: 42px;
-            margin: 0 auto;
+        /* Arrow button */
+        .arrow-btn {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ffdd99;
+            text-shadow: 0 2px 3px #6b4c1c;
+            cursor: pointer;
+            background: rgba(0,0,0,0.2);
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #4a2a1a;
-            border-radius: 18px;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #b97f2e;
+            border-radius: 30px;
             transition: 0.05s linear;
-            user-select: none;
-            font-family: monospace;
+            margin: 0 auto;
         }
-        .square-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #b97f2e;
+        .arrow-btn:active {
+            transform: scale(0.92);
+            text-shadow: 0 1px 2px #6b4c1c;
         }
 
         .modal {
@@ -161,8 +160,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(6px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -177,7 +176,7 @@
         }
         .modal-content {
             background: #fff7e8;
-            max-width: 340px;
+            max-width: 360px;
             width: 85%;
             border-radius: 64px;
             padding: 28px 20px 32px;
@@ -185,7 +184,6 @@
             box-shadow: 0 25px 40px black;
             border: 2px solid #f7cd7c;
         }
-        /* correct popup (no button) */
         .correct-popup {
             background: #2e7d32;
             color: white;
@@ -224,7 +222,7 @@
             margin-top: 0;
             color: #34200c;
         }
-        .restart-btn, .next-btn {
+        .restart-btn {
             background: #daa742;
             border: none;
             padding: 12px 28px;
@@ -237,7 +235,7 @@
             box-shadow: 0 5px 0 #7c541e;
             transition: 0.05s linear;
         }
-        .restart-btn:active, .next-btn:active {
+        .restart-btn:active {
             transform: translateY(3px);
             box-shadow: 0 2px 0 #7c541e;
         }
@@ -245,6 +243,12 @@
             font-size: 1.2rem;
             margin-bottom: 16px;
             font-weight: bold;
+        }
+        .prominent-image {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
         }
         footer {
             font-size: 0.7rem;
@@ -255,7 +259,7 @@
         }
         @media (max-width: 550px) {
             .choice-circle { width: 70px; height: 70px; font-size: 1.4rem; }
-            .square-btn { width: 36px; height: 36px; font-size: 24px; }
+            .arrow-btn { font-size: 1.8rem; width: 40px; height: 40px; }
         }
     </style>
 </head>
@@ -263,7 +267,7 @@
 <div class="game-container" id="gameContainer">
     <div class="game-header">
         <div class="level-badge" id="levelDisplay">LEVEL 1</div>
-        <div class="instruction">🔍 tap the GOLDEN SQUARE below the GREEN circle</div>
+        <div class="instruction">🔽 tap the ARROW below the GREEN circle</div>
     </div>
 
     <div id="circlesRow" class="number-line"></div>
@@ -281,14 +285,15 @@
 
 <div id="correctModal" class="modal">
     <div class="modal-content correct-popup">
-        <div class="message">✅ CORRECT! ✅</div>
-        <div style="font-size: 3rem;">🎉</div>
+        <div class="prominent-image">✅</div>
+        <div class="message">CORRECT!</div>
     </div>
 </div>
 
 <div id="victoryModal" class="modal">
     <div class="modal-content">
-        <div class="message">🏆 VICTORY! 🏆</div>
+        <div class="prominent-image">🏆</div>
+        <div class="message">VICTORY!</div>
         <div>You completed all levels!</div>
         <button class="restart-btn" id="victoryRestartBtn">🔄 PLAY AGAIN</button>
     </div>
@@ -296,7 +301,8 @@
 
 <div id="gameOverModal" class="modal">
     <div class="modal-content">
-        <div class="message">💀 GAME OVER 💀</div>
+        <div class="prominent-image">💀</div>
+        <div class="message">GAME OVER</div>
         <div>wrong guess... restart and try again</div>
         <button class="restart-btn" id="restartGameBtn">🔄 RESTART</button>
     </div>
@@ -310,10 +316,10 @@
 
     // ---------- GAME STATE ----------
     let currentLevel = 1;
-    let lastValue = 100;      // integer multiple of 10
-    let targetIndex = 5;      // index of green circle (1..9)
-    let step = 0;             // = lastValue / 10 (integer)
-    let targetValue = 0;      // integer: step * targetIndex
+    let lastValue = 100;
+    let targetIndex = 5;
+    let step = 0;
+    let targetValue = 0;
     let gameActive = true;
     let nextLevelTimeout = null;
 
@@ -327,11 +333,11 @@
     const restartGameBtn = document.getElementById('restartGameBtn');
     const victoryRestartBtn = document.getElementById('victoryRestartBtn');
 
-    // ---------- PARTICLE EFFECT ----------
+    // ---------- PARTICLE EFFECT (lightweight) ----------
     const canvas = document.getElementById('particleCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
-    let animationId = null;
+    let animFrame = null;
 
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -341,27 +347,24 @@
     resizeCanvas();
 
     function createParticles(centerX, centerY) {
-        const particleCount = 60;
-        for (let i = 0; i < particleCount; i++) {
+        const count = 45;
+        for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 5 + 2;
-            const vx = Math.cos(angle) * speed;
-            const vy = Math.sin(angle) * speed;
             particles.push({
-                x: centerX,
-                y: centerY,
-                vx: vx,
-                vy: vy,
+                x: centerX, y: centerY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
                 life: 1,
-                size: Math.random() * 6 + 2,
+                size: Math.random() * 5 + 2,
                 color: `hsl(${Math.random() * 60 + 30}, 100%, 60%)`
             });
         }
-        if (animationId) cancelAnimationFrame(animationId);
+        if (animFrame) cancelAnimationFrame(animFrame);
         function animate() {
             if (particles.length === 0) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 return;
             }
@@ -371,7 +374,7 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life -= 0.02;
-                p.vy += 0.2; // gravity
+                p.vy += 0.2;
                 if (p.life <= 0 || p.x > canvas.width + 100 || p.x < -100 || p.y > canvas.height + 100) {
                     particles.splice(i,1);
                     i--;
@@ -383,21 +386,21 @@
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
                 ctx.fill();
             }
-            animationId = requestAnimationFrame(animate);
+            animFrame = requestAnimationFrame(animate);
         }
         animate();
     }
 
     function triggerParticles() {
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        createParticles(centerX, centerY);
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        createParticles(cx, cy);
     }
 
-    // ---------- GAME LOGIC ----------
+    // ---------- GAME FUNCTIONS ----------
     function getRandomLastValue() {
-        const multiples = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
-                           160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300];
+        const multiples = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,
+                           160,170,180,190,200,210,220,230,240,250,260,270,280,290,300];
         return multiples[Math.floor(Math.random() * multiples.length)];
     }
 
@@ -433,12 +436,12 @@
             if (!candidates.has(randVal)) candidates.add(randVal);
         }
         
-        let choicesArray = Array.from(candidates);
-        for (let i = choicesArray.length - 1; i > 0; i--) {
+        let choices = Array.from(candidates);
+        for (let i = choices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [choicesArray[i], choicesArray[j]] = [choicesArray[j], choicesArray[i]];
+            [choices[i], choices[j]] = [choices[j], choices[i]];
         }
-        return choicesArray.slice(0,3);
+        return choices.slice(0,3);
     }
 
     function showChoicesModal() {
@@ -446,14 +449,14 @@
         const choices = generateChoices();
         choicesContainer.innerHTML = '';
         choices.forEach(value => {
-            const circleDiv = document.createElement('div');
-            circleDiv.className = 'choice-circle';
-            circleDiv.textContent = value;
-            circleDiv.addEventListener('click', (e) => {
+            const div = document.createElement('div');
+            div.className = 'choice-circle';
+            div.textContent = value;
+            div.addEventListener('click', (e) => {
                 e.stopPropagation();
                 handleAnswer(value);
             });
-            choicesContainer.appendChild(circleDiv);
+            choicesContainer.appendChild(div);
         });
         choicesModal.classList.add('active');
     }
@@ -463,24 +466,19 @@
         correctModal.classList.remove('active');
         gameOverModal.classList.remove('active');
         victoryModal.classList.remove('active');
-        if (nextLevelTimeout) {
-            clearTimeout(nextLevelTimeout);
-            nextLevelTimeout = null;
-        }
+        if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
     }
 
     function handleAnswer(selectedNum) {
         if (!gameActive) return;
         const isCorrect = (selectedNum === targetValue);
-        closeAllModals(); // close choices modal
+        closeAllModals();
         if (isCorrect) {
             gameActive = false;
-            triggerParticles(); // ✨ particle effect
+            triggerParticles();
             if (currentLevel === MAX_LEVEL) {
-                // Victory – show final screen
                 victoryModal.classList.add('active');
             } else {
-                // Show correct popup, auto‑hide, then next level
                 correctModal.classList.add('active');
                 nextLevelTimeout = setTimeout(() => {
                     correctModal.classList.remove('active');
@@ -497,7 +495,7 @@
         if (currentLevel >= MAX_LEVEL) return;
         currentLevel++;
         lastValue = getRandomLastValue();
-        targetIndex = Math.floor(Math.random() * 9) + 1; // 1..9
+        targetIndex = Math.floor(Math.random() * 9) + 1;
         updateDerivedValues();
         renderNumberLine();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
@@ -519,43 +517,34 @@
 
     function renderNumberLine() {
         circlesRow.innerHTML = '';
-        const totalCircles = 11;
-        for (let i = 0; i < totalCircles; i++) {
-            const circleItem = document.createElement('div');
-            circleItem.className = 'circle-item';
+        const total = 11;
+        for (let i = 0; i < total; i++) {
+            const item = document.createElement('div');
+            item.className = 'circle-item';
             
-            const circleDiv = document.createElement('div');
-            circleDiv.className = 'circle';
-            if (i === targetIndex) {
-                circleDiv.classList.add('green');
-            } else {
-                circleDiv.classList.add('red');
-            }
-            circleItem.appendChild(circleDiv);
+            const circle = document.createElement('div');
+            circle.className = 'circle';
+            if (i === targetIndex) circle.classList.add('green');
+            item.appendChild(circle);
             
-            const labelSpan = document.createElement('div');
-            labelSpan.className = 'circle-label';
-            
+            const label = document.createElement('div');
+            label.className = 'circle-label';
             if (i === 0) {
-                labelSpan.textContent = '0';
+                label.textContent = '0';
             } else if (i === 10) {
-                labelSpan.textContent = lastValue;
+                label.textContent = lastValue;
             } else if (i === targetIndex) {
-                const squareBox = document.createElement('div');
-                squareBox.className = 'square-btn';
-                squareBox.textContent = '□';
-                squareBox.addEventListener('click', (e) => {
+                const arrow = document.createElement('div');
+                arrow.className = 'arrow-btn';
+                arrow.textContent = '▼';
+                arrow.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (gameActive) {
-                        showChoicesModal();
-                    }
+                    if (gameActive) showChoicesModal();
                 });
-                labelSpan.appendChild(squareBox);
-            } else {
-                labelSpan.textContent = '';
+                label.appendChild(arrow);
             }
-            circleItem.appendChild(labelSpan);
-            circlesRow.appendChild(circleItem);
+            item.appendChild(label);
+            circlesRow.appendChild(item);
         }
     }
 
