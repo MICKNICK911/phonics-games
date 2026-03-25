@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Number Line Quest – Arrow Edition</title>
+    <title>Number Line Quest – Arrow & Sound</title>
     <style>
         * {
             box-sizing: border-box;
@@ -222,7 +222,7 @@
             margin-top: 0;
             color: #34200c;
         }
-        .restart-btn {
+        .restart-btn, .gotit-btn {
             background: #daa742;
             border: none;
             padding: 12px 28px;
@@ -235,7 +235,7 @@
             box-shadow: 0 5px 0 #7c541e;
             transition: 0.05s linear;
         }
-        .restart-btn:active {
+        .restart-btn:active, .gotit-btn:active {
             transform: translateY(3px);
             box-shadow: 0 2px 0 #7c541e;
         }
@@ -308,11 +308,27 @@
     </div>
 </div>
 
+<!-- Instruction Modal (appears at start) -->
+<div id="instructionModal" class="modal">
+    <div class="modal-content">
+        <div class="prominent-image">🎮</div>
+        <h2>How to Play</h2>
+        <p style="margin: 12px 0; text-align: left; display: inline-block; font-size: 0.9rem;">
+            • The leftmost circle is <strong>0</strong>, the rightmost is a <strong>multiple of 10</strong>.<br>
+            • The <strong style="color:#2c7a2a;">GREEN circle</strong> is your target.<br>
+            • Tap the <strong style="color:#ffdd99;">▼ arrow</strong> below it.<br>
+            • Choose the correct number from the three options.<br>
+            • Correct → next level | Wrong → game over.
+        </p>
+        <button class="gotit-btn" id="closeInstructionBtn">Got it!</button>
+    </div>
+</div>
+
 <canvas id="particleCanvas"></canvas>
 
 <script>
     // ========== CONFIGURABLE MAX LEVEL ==========
-    const MAX_LEVEL = 5;   // ← change this number to set how many levels to win
+    const MAX_LEVEL = 5;   // change this to set total levels
 
     // ---------- GAME STATE ----------
     let currentLevel = 1;
@@ -323,17 +339,85 @@
     let gameActive = true;
     let nextLevelTimeout = null;
 
+    // DOM elements
     const circlesRow = document.getElementById('circlesRow');
     const levelDisplaySpan = document.getElementById('levelDisplay');
     const choicesModal = document.getElementById('choicesModal');
     const correctModal = document.getElementById('correctModal');
     const victoryModal = document.getElementById('victoryModal');
     const gameOverModal = document.getElementById('gameOverModal');
+    const instructionModal = document.getElementById('instructionModal');
+    const closeInstructionBtn = document.getElementById('closeInstructionBtn');
     const choicesContainer = document.getElementById('choicesContainer');
     const restartGameBtn = document.getElementById('restartGameBtn');
     const victoryRestartBtn = document.getElementById('victoryRestartBtn');
 
-    // ---------- PARTICLE EFFECT (lightweight) ----------
+    // ---------- SOUND EFFECTS (Web Audio) ----------
+    let audioCtx = null;
+    let soundEnabled = false;
+
+    function initAudio() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        soundEnabled = true;
+    }
+
+    function playCorrectSound() {
+        if (!soundEnabled || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        // second beep
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.value = 660;
+        gain2.gain.setValueAtTime(0.3, now + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+        osc2.start(now + 0.15);
+        osc2.stop(now + 0.55);
+    }
+
+    function playWrongSound() {
+        if (!soundEnabled || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.value = 220;
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+    }
+
+    // Enable audio on first user interaction (any tap)
+    function enableAudioOnFirstTap() {
+        if (soundEnabled) return;
+        initAudio();
+        // resume context if suspended (autoplay policy)
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        document.body.removeEventListener('click', enableAudioOnFirstTap);
+        document.body.removeEventListener('touchstart', enableAudioOnFirstTap);
+    }
+    document.body.addEventListener('click', enableAudioOnFirstTap);
+    document.body.addEventListener('touchstart', enableAudioOnFirstTap);
+
+    // ---------- PARTICLE EFFECT ----------
     const canvas = document.getElementById('particleCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -474,6 +558,7 @@
         const isCorrect = (selectedNum === targetValue);
         closeAllModals();
         if (isCorrect) {
+            playCorrectSound();
             gameActive = false;
             triggerParticles();
             if (currentLevel === MAX_LEVEL) {
@@ -486,6 +571,7 @@
                 }, 2000);
             }
         } else {
+            playWrongSound();
             gameActive = false;
             gameOverModal.classList.add('active');
         }
@@ -559,10 +645,20 @@
         closeAllModals();
     }
 
+    // Show instruction modal on load
+    function showInstruction() {
+        instructionModal.classList.add('active');
+    }
+    closeInstructionBtn.addEventListener('click', () => {
+        instructionModal.classList.remove('active');
+        initGame(); // start game after instructions
+    });
+
     restartGameBtn.addEventListener('click', () => restartGame());
     victoryRestartBtn.addEventListener('click', () => restartGame());
-    
-    initGame();
+
+    // Show instructions first, game starts after dismissal
+    showInstruction();
 </script>
 </body>
 </html>
