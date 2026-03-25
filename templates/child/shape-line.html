@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Shape Pattern Quest – Guess the Missing Shape</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a3c2c 0%, #0e2a1d 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .game-container {
+            background: rgba(255,248,225,0.9);
+            border-radius: 72px;
+            padding: 24px 16px 32px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.4), inset 0 1px 4px rgba(255,255,200,0.6);
+            width: 100%;
+            max-width: 1100px;
+            transition: all 0.2s ease;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin: 0 12px 20px 12px;
+            gap: 12px;
+        }
+        .level-badge {
+            background: #2c2b28;
+            padding: 8px 20px;
+            border-radius: 60px;
+            color: #f9e7c2;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            box-shadow: inset 0 -2px 0 #5f4c2b, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .timer-score {
+            background: #2c2b28;
+            padding: 8px 20px;
+            border-radius: 60px;
+            color: #f9e7c2;
+            font-weight: bold;
+            font-size: 1rem;
+            display: flex;
+            gap: 20px;
+            box-shadow: inset 0 -2px 0 #5f4c2b, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .instruction {
+            background: #ecd9b4;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2e241f;
+            box-shadow: inset 0 1px 3px #fff9e8, 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            margin: 0 12px 15px 12px;
+        }
+
+        .shape-row {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0 10px;
+            padding: 12px 4px;
+        }
+
+        .shape-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 85px;
+            transition: transform 0.1s ease;
+        }
+        @media (max-width: 780px) {
+            .shape-item { width: 70px; }
+        }
+        @media (max-width: 640px) {
+            .shape-item { width: 60px; }
+        }
+
+        .shape {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            transition: all 0.1s;
+            margin-bottom: 12px;
+        }
+        /* shape specific styles */
+        .shape-square {
+            background-color: var(--square-color);
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+        }
+        .shape-circle {
+            background-color: var(--circle-color);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+        }
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 28px solid transparent;
+            border-right: 28px solid transparent;
+            border-bottom: 55px solid var(--triangle-color);
+            background: transparent !important;
+        }
+        .shape-star {
+            width: 0;
+            height: 0;
+            background: transparent;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            background-color: var(--star-color);
+            width: 55px;
+            height: 55px;
+        }
+        .shape-transparent {
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            border: 2px dashed rgba(255,255,200,0.6);
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+        }
+
+        .shape-label {
+            margin-top: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fef0db;
+            text-align: center;
+            font-family: monospace;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            background: transparent;
+        }
+
+        .finger-btn {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffdd99;
+            text-shadow: 0 2px 3px #6b4c1c;
+            cursor: pointer;
+            background: rgba(0,0,0,0.2);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            transition: 0.05s linear;
+            margin: 0 auto;
+        }
+        .finger-btn:active {
+            transform: scale(0.92);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #fff7e8;
+            max-width: 360px;
+            width: 85%;
+            border-radius: 64px;
+            padding: 28px 20px 32px;
+            text-align: center;
+            box-shadow: 0 25px 40px black;
+            border: 2px solid #f7cd7c;
+        }
+        .correct-popup {
+            background: #2e7d32;
+            color: white;
+            text-shadow: 0 2px 4px black;
+        }
+        .choices-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 24px 0 20px;
+        }
+        .choice-shape {
+            width: 85px;
+            height: 85px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.07s linear;
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+            border: 2px solid #ffcd7e;
+        }
+        .choice-shape:active {
+            transform: scale(0.96);
+        }
+        .restart-btn, .gotit-btn {
+            background: #daa742;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #2b241c;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #7c541e;
+            transition: 0.05s linear;
+        }
+        .restart-btn:active, .gotit-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #7c541e;
+        }
+        .message {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        .prominent-image {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #2f2a24;
+            opacity: 0.8;
+        }
+        @media (max-width: 550px) {
+            .shape { width: 55px; height: 55px; }
+            .shape-square, .shape-circle, .shape-star { width: 45px; height: 45px; }
+            .shape-triangle { border-left: 22px solid transparent; border-right: 22px solid transparent; border-bottom: 45px solid; }
+            .choice-shape { width: 70px; height: 70px; }
+            .finger-btn { font-size: 1.6rem; width: 40px; height: 40px; }
+            .timer-score { font-size: 0.8rem; padding: 6px 12px; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-header">
+        <div class="level-badge" id="levelDisplay">LEVEL 1</div>
+        <div class="timer-score">
+            <span>⏱️ <span id="timerDisplay">00</span>s</span>
+            <span>⭐ <span id="scoreDisplay">0</span></span>
+        </div>
+    </div>
+    <div class="instruction">🔍 Find the pattern – tap the 👆 finger below the hidden shape</div>
+
+    <div id="shapeRow" class="shape-row"></div>
+    <footer>🔷 pattern repeats: square → circle → triangle → star → ...</footer>
+</div>
+
+<!-- MODALS -->
+<div id="choicesModal" class="modal">
+    <div class="modal-content">
+        <h2>❓ WHICH SHAPE IS MISSING?</h2>
+        <div id="choicesContainer" class="choices-row"></div>
+        <div style="font-size: 0.85rem; margin-top: 10px;">tap the correct shape</div>
+    </div>
+</div>
+
+<div id="correctModal" class="modal">
+    <div class="modal-content correct-popup">
+        <div class="prominent-image">✅</div>
+        <div class="message">CORRECT!</div>
+    </div>
+</div>
+
+<div id="victoryModal" class="modal">
+    <div class="modal-content">
+        <div class="prominent-image">🏆</div>
+        <div class="message">VICTORY!</div>
+        <div id="victoryScoreMsg">Score: 0</div>
+        <button class="restart-btn" id="victoryRestartBtn">🔄 PLAY AGAIN</button>
+    </div>
+</div>
+
+<div id="gameOverModal" class="modal">
+    <div class="modal-content">
+        <div class="prominent-image">💀</div>
+        <div class="message">GAME OVER</div>
+        <div id="gameOverScoreMsg">Score: 0</div>
+        <button class="restart-btn" id="restartGameBtn">🔄 RESTART</button>
+    </div>
+</div>
+
+<div id="instructionModal" class="modal">
+    <div class="modal-content">
+        <div class="prominent-image">🎮</div>
+        <h2>How to Play</h2>
+        <p style="margin: 12px 0; text-align: left; font-size: 0.9rem;">
+            • A row of shapes follows a repeating pattern.<br>
+            • One shape is <strong>hidden (transparent)</strong> – tap the <strong>👇 finger</strong> below it.<br>
+            • Choose the correct shape from three options.<br>
+            • Correct → next level | Wrong → game over.<br>
+            • Each level gives you <span id="timerDefaultMsg"></span> seconds.<br>
+            • First shape is always visible – find the logic!
+        </p>
+        <button class="gotit-btn" id="closeInstructionBtn">Got it!</button>
+    </div>
+</div>
+
+<canvas id="particleCanvas"></canvas>
+
+<script>
+    // ========== CONFIGURATION ==========
+    const MAX_LEVEL = 5;           // total levels to win
+    const TIME_PER_LEVEL = 60;     // seconds per level (adjustable)
+    const SHAPE_TYPES = ['square', 'circle', 'triangle', 'star'];
+    const BASE_PATTERN = ['square', 'circle', 'triangle', 'star']; // repeats every 4
+
+    // ---------- GLOBAL STATE ----------
+    let currentLevel = 1;
+    let shapes = [];          // array of shape objects: { type, color }
+    let hiddenIndex = -1;
+    let correctShapeType = '';
+    let gameActive = true;
+    let nextLevelTimeout = null;
+    let timerInterval = null;
+    let timeLeft = TIME_PER_LEVEL;
+    let score = 0;
+
+    // DOM elements
+    const shapeRow = document.getElementById('shapeRow');
+    const levelDisplaySpan = document.getElementById('levelDisplay');
+    const timerDisplaySpan = document.getElementById('timerDisplay');
+    const scoreDisplaySpan = document.getElementById('scoreDisplay');
+    const choicesModal = document.getElementById('choicesModal');
+    const correctModal = document.getElementById('correctModal');
+    const victoryModal = document.getElementById('victoryModal');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const instructionModal = document.getElementById('instructionModal');
+    const closeInstructionBtn = document.getElementById('closeInstructionBtn');
+    const choicesContainer = document.getElementById('choicesContainer');
+    const restartGameBtn = document.getElementById('restartGameBtn');
+    const victoryRestartBtn = document.getElementById('victoryRestartBtn');
+    const victoryScoreMsg = document.getElementById('victoryScoreMsg');
+    const gameOverScoreMsg = document.getElementById('gameOverScoreMsg');
+    const timerDefaultMsg = document.getElementById('timerDefaultMsg');
+    if (timerDefaultMsg) timerDefaultMsg.textContent = TIME_PER_LEVEL;
+
+    // ---------- SOUND EFFECTS ----------
+    let audioCtx = null;
+    let soundEnabled = false;
+
+    function initAudio() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        soundEnabled = true;
+    }
+
+    function playCorrectSound() {
+        if (!soundEnabled || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.value = 660;
+        gain2.gain.setValueAtTime(0.3, now + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+        osc2.start(now + 0.15);
+        osc2.stop(now + 0.55);
+    }
+
+    function playWrongSound() {
+        if (!soundEnabled || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.value = 220;
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+    }
+
+    function enableAudioOnFirstTap() {
+        if (soundEnabled) return;
+        initAudio();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        document.body.removeEventListener('click', enableAudioOnFirstTap);
+        document.body.removeEventListener('touchstart', enableAudioOnFirstTap);
+    }
+    document.body.addEventListener('click', enableAudioOnFirstTap);
+    document.body.addEventListener('touchstart', enableAudioOnFirstTap);
+
+    // ---------- PARTICLE EFFECT ----------
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animFrame = null;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createParticles(centerX, centerY) {
+        const count = 45;
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 2;
+            particles.push({
+                x: centerX, y: centerY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 1,
+                size: Math.random() * 5 + 2,
+                color: `hsl(${Math.random() * 60 + 30}, 100%, 60%)`
+            });
+        }
+        if (animFrame) cancelAnimationFrame(animFrame);
+        function animate() {
+            if (particles.length === 0) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                p.vy += 0.2;
+                if (p.life <= 0 || p.x > canvas.width + 100 || p.x < -100 || p.y > canvas.height + 100) {
+                    particles.splice(i,1);
+                    i--;
+                    continue;
+                }
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+            }
+            animFrame = requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    function triggerParticles() {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        createParticles(cx, cy);
+    }
+
+    // ---------- SHAPE GENERATION & COLOR ----------
+    // random color for each shape type (bright, consistent per level)
+    function generateColorsForLevel() {
+        const colors = {};
+        SHAPE_TYPES.forEach(type => {
+            // random bright hue (0-360), saturation 70%, lightness 65%
+            const hue = Math.floor(Math.random() * 360);
+            colors[type] = `hsl(${hue}, 70%, 65%)`;
+        });
+        return colors;
+    }
+
+    let currentColors = generateColorsForLevel();
+
+    function createShapeDiv(shapeType, color, isHidden = false) {
+        const container = document.createElement('div');
+        container.className = 'shape';
+        const shapeDiv = document.createElement('div');
+        if (isHidden) {
+            shapeDiv.className = 'shape-transparent';
+        } else {
+            shapeDiv.className = `shape-${shapeType}`;
+            shapeDiv.style.setProperty(`--${shapeType}-color`, color);
+        }
+        container.appendChild(shapeDiv);
+        return container;
+    }
+
+    function getShapeAtPosition(index) {
+        // pattern repeats every 4
+        const patternIdx = index % BASE_PATTERN.length;
+        return BASE_PATTERN[patternIdx];
+    }
+
+    function generateLevel() {
+        // choose hidden index (1..7, but not first)
+        const rowLength = 8; // 8 shapes total
+        hiddenIndex = Math.floor(Math.random() * (rowLength - 1)) + 1; // 1..7
+        correctShapeType = getShapeAtPosition(hiddenIndex);
+        // build shapes array
+        shapes = [];
+        for (let i = 0; i < rowLength; i++) {
+            const type = getShapeAtPosition(i);
+            shapes.push({ type: type, isHidden: (i === hiddenIndex) });
+        }
+    }
+
+    // render shapes into DOM
+    function renderShapes() {
+        shapeRow.innerHTML = '';
+        for (let i = 0; i < shapes.length; i++) {
+            const item = document.createElement('div');
+            item.className = 'shape-item';
+            const shape = shapes[i];
+            const isHidden = shape.isHidden;
+            const shapeType = shape.type;
+            const color = currentColors[shapeType];
+            const shapeContainer = createShapeDiv(shapeType, color, isHidden);
+            item.appendChild(shapeContainer);
+
+            const label = document.createElement('div');
+            label.className = 'shape-label';
+            if (isHidden) {
+                const finger = document.createElement('div');
+                finger.className = 'finger-btn';
+                finger.textContent = '👇';
+                finger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (gameActive) showChoicesModal();
+                });
+                label.appendChild(finger);
+            } else {
+                // no label for visible shapes
+                label.innerHTML = '&nbsp;';
+            }
+            item.appendChild(label);
+            shapeRow.appendChild(item);
+        }
+    }
+
+    // ---------- CHOICE GENERATION ----------
+    function generateShapeChoices() {
+        const correct = correctShapeType;
+        let others = SHAPE_TYPES.filter(t => t !== correct);
+        // shuffle others
+        for (let i = others.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [others[i], others[j]] = [others[j], others[i]];
+        }
+        const distractors = others.slice(0, 2);
+        const choices = [correct, ...distractors];
+        // shuffle final order
+        for (let i = choices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+        return choices;
+    }
+
+    function showChoicesModal() {
+        if (!gameActive) return;
+        const choices = generateShapeChoices();
+        choicesContainer.innerHTML = '';
+        choices.forEach(shapeType => {
+            const color = currentColors[shapeType];
+            const container = document.createElement('div');
+            container.className = 'choice-shape';
+            const shapeDiv = createShapeDiv(shapeType, color, false);
+            // adjust size for modal
+            shapeDiv.style.width = '60px';
+            shapeDiv.style.height = '60px';
+            const inner = shapeDiv.firstChild;
+            if (inner) {
+                if (inner.classList.contains('shape-square')) inner.style.width = '50px'; inner.style.height = '50px';
+                if (inner.classList.contains('shape-circle')) inner.style.width = '50px'; inner.style.height = '50px';
+                if (inner.classList.contains('shape-star')) inner.style.width = '50px'; inner.style.height = '50px';
+                if (inner.classList.contains('shape-triangle')) {
+                    inner.style.borderLeft = '25px solid transparent';
+                    inner.style.borderRight = '25px solid transparent';
+                    inner.style.borderBottom = '50px solid ' + color;
+                }
+            }
+            container.appendChild(shapeDiv);
+            container.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleAnswer(shapeType);
+            });
+            choicesContainer.appendChild(container);
+        });
+        choicesModal.classList.add('active');
+    }
+
+    // ---------- TIMER & GAME FLOW ----------
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function startTimer() {
+        stopTimer();
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            if (timeLeft <= 0) {
+                stopTimer();
+                if (gameActive) {
+                    gameActive = false;
+                    playWrongSound();
+                    gameOverScoreMsg.innerText = `Score: ${score}`;
+                    gameOverModal.classList.add('active');
+                }
+            } else {
+                timeLeft--;
+                timerDisplaySpan.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        timeLeft = TIME_PER_LEVEL;
+        timerDisplaySpan.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+        startTimer();
+    }
+
+    function closeAllModals() {
+        choicesModal.classList.remove('active');
+        correctModal.classList.remove('active');
+        gameOverModal.classList.remove('active');
+        victoryModal.classList.remove('active');
+        if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
+    }
+
+    function handleAnswer(selectedShape) {
+        if (!gameActive) return;
+        const isCorrect = (selectedShape === correctShapeType);
+        closeAllModals();
+        if (isCorrect) {
+            playCorrectSound();
+            gameActive = false;
+            stopTimer();
+            triggerParticles();
+            score++;
+            scoreDisplaySpan.textContent = score;
+            if (currentLevel === MAX_LEVEL) {
+                victoryScoreMsg.innerText = `Score: ${score}`;
+                victoryModal.classList.add('active');
+            } else {
+                correctModal.classList.add('active');
+                nextLevelTimeout = setTimeout(() => {
+                    correctModal.classList.remove('active');
+                    nextLevel();
+                }, 2000);
+            }
+        } else {
+            playWrongSound();
+            gameActive = false;
+            stopTimer();
+            gameOverScoreMsg.innerText = `Score: ${score}`;
+            gameOverModal.classList.add('active');
+        }
+    }
+
+    function nextLevel() {
+        if (currentLevel >= MAX_LEVEL) return;
+        currentLevel++;
+        // regenerate colors for new level
+        currentColors = generateColorsForLevel();
+        generateLevel();
+        renderShapes();
+        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        gameActive = true;
+        resetTimer();
+        closeAllModals();
+    }
+
+    function restartGame() {
+        stopTimer();
+        if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
+        currentLevel = 1;
+        score = 0;
+        scoreDisplaySpan.textContent = '0';
+        currentColors = generateColorsForLevel();
+        generateLevel();
+        renderShapes();
+        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        gameActive = true;
+        resetTimer();
+        closeAllModals();
+    }
+
+    function initGame() {
+        currentLevel = 1;
+        score = 0;
+        scoreDisplaySpan.textContent = '0';
+        currentColors = generateColorsForLevel();
+        generateLevel();
+        renderShapes();
+        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        gameActive = true;
+        resetTimer();
+        closeAllModals();
+    }
+
+    // Instruction modal
+    function showInstruction() {
+        instructionModal.classList.add('active');
+    }
+    closeInstructionBtn.addEventListener('click', () => {
+        instructionModal.classList.remove('active');
+        initGame();
+    });
+
+    restartGameBtn.addEventListener('click', () => restartGame());
+    victoryRestartBtn.addEventListener('click', () => restartGame());
+
+    showInstruction();
+</script>
+</body>
+</html>
