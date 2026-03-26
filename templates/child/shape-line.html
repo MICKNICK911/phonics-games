@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Shape Odyssey – Growing Patterns</title>
+    <title>Shape Odyssey – High Contrast</title>
     <style>
         * {
             box-sizing: border-box;
@@ -360,10 +360,17 @@
     const MIN_SHAPES = 20;
     const MAX_SHAPES = 40;
 
+    // High-contrast, bright color palette for each shape type (consistent across level)
+    // These colors stand out against dark background
+    const COLOR_PALETTE = {
+        square: '#FFB347',   // vibrant orange
+        circle: '#5D9BEC',   // bright blue
+        triangle: '#FF6B6B', // coral red
+        star: '#6FCF97'      // fresh green
+    };
+
     // ---------- PATTERN GENERATION (creative & variable length) ----------
-    // Returns an array of shape types for a given level and length
     function getPatternForLevel(level, length) {
-        // Define base sequences (each is a repeating pattern fragment)
         // Level 1: simple 4‑cycle
         if (level === 1) {
             const base = ['square', 'circle', 'triangle', 'star'];
@@ -404,12 +411,12 @@
             const base = ['square', 'circle', 'star', 'triangle'];
             return repeatPattern(base, length);
         }
-        // Level 9: alternating pairs: square, circle, star, triangle, but with repeats
+        // Level 9: alternating pairs
         if (level === 9) {
             const base = ['square', 'square', 'circle', 'star', 'triangle', 'triangle', 'circle', 'star'];
             return repeatPattern(base, length);
         }
-        // Level 10: Fibonacci-like (0,1,2,3,0,2,1,3,2,0,3,1,...)
+        // Level 10: Fibonacci-like sequence
         if (level === 10) {
             const seq = [0,1,2,3,0,2,1,3,2,0,3,1,0,3,2,1,3,0,1,2];
             let pattern = [];
@@ -418,7 +425,7 @@
             }
             return pattern;
         }
-        // Level 11: pattern based on index multiplication
+        // Level 11: index multiplication
         if (level === 11) {
             let pattern = [];
             for (let i = 0; i < length; i++) {
@@ -431,7 +438,7 @@
             let base = ['star', 'triangle', 'circle', 'square'];
             return repeatPattern(base, length);
         }
-        // Level 13: group of 3 squares, then 3 circles, etc.
+        // Level 13: groups of 3 identical
         if (level === 13) {
             let pattern = [];
             const groups = ['square', 'circle', 'triangle', 'star'];
@@ -441,7 +448,7 @@
             }
             return pattern;
         }
-        // Level 14: pattern with increasing run lengths
+        // Level 14: increasing run lengths
         if (level === 14) {
             let pattern = [];
             let run = 1;
@@ -456,17 +463,17 @@
             }
             return pattern;
         }
-        // Level 15: primes
+        // Level 15: prime‑inspired
         if (level === 15) {
             let pattern = [];
+            const primes = [2,3,5,7,11,13,17,19];
             for (let i = 0; i < length; i++) {
-                const primeLike = [2,3,5,7,11,13,17,19];
-                let val = primeLike[i % primeLike.length];
+                let val = primes[i % primes.length];
                 pattern.push(SHAPE_TYPES[val % 4]);
             }
             return pattern;
         }
-        // Level 16: complex alternating
+        // Level 16: ternary pattern
         if (level === 16) {
             let pattern = [];
             for (let i = 0; i < length; i++) {
@@ -485,7 +492,7 @@
             }
             return pattern;
         }
-        // Level 18: symmetric
+        // Level 18: sinusoidal
         if (level === 18) {
             let pattern = [];
             for (let i = 0; i < length; i++) {
@@ -493,7 +500,7 @@
             }
             return pattern;
         }
-        // Level 19: count up pattern
+        // Level 19: increasing step
         if (level === 19) {
             let pattern = [];
             for (let i = 0; i < length; i++) {
@@ -501,17 +508,16 @@
             }
             return pattern;
         }
-        // Level 20: final challenge – repeating pattern of 6 (square, circle, triangle, star, star, circle)
+        // Level 20: final complex pattern
         if (level === 20) {
             const base = ['square', 'circle', 'triangle', 'star', 'star', 'circle'];
             return repeatPattern(base, length);
         }
-        // fallback (should never happen)
+        // fallback
         const base = ['square', 'circle', 'triangle', 'star'];
         return repeatPattern(base, length);
     }
 
-    // Helper: repeat a base pattern to fill exact length
     function repeatPattern(base, length) {
         let result = [];
         for (let i = 0; i < length; i++) {
@@ -522,7 +528,7 @@
 
     // ---------- GLOBAL STATE ----------
     let currentLevel = 1;
-    let shapes = [];            // { type, isHidden }
+    let shapes = [];
     let hiddenIndex = -1;
     let correctShapeType = '';
     let gameActive = true;
@@ -531,9 +537,6 @@
     let timeLeft = TIME_PER_LEVEL;
     let score = 0;
     let rowLength = MIN_SHAPES;
-
-    // Color map per shape type (fresh each level)
-    let currentColors = {};
 
     // DOM elements
     const shapeRow = document.getElementById('shapeRow');
@@ -554,12 +557,10 @@
     const timerDefaultMsg = document.getElementById('timerDefaultMsg');
     if (timerDefaultMsg) timerDefaultMsg.textContent = TIME_PER_LEVEL;
 
-    // Calculate row length based on level (20 at level 1, 40 at level 20)
     function getRowLength(level) {
         return MIN_SHAPES + Math.floor((level - 1) * (MAX_SHAPES - MIN_SHAPES) / (MAX_LEVEL - 1));
     }
 
-    // generate level shapes using pattern
     function generateLevel() {
         rowLength = getRowLength(currentLevel);
         const pattern = getPatternForLevel(currentLevel, rowLength);
@@ -571,18 +572,12 @@
         }
     }
 
-    // generate fresh color palette per level
-    function generateColorsForLevel() {
-        const colors = {};
-        SHAPE_TYPES.forEach(type => {
-            const hue = Math.floor(Math.random() * 360);
-            colors[type] = `hsl(${hue}, 75%, 65%)`;
-        });
-        return colors;
+    // Use fixed high-contrast colors (no randomness)
+    function getShapeColor(shapeType) {
+        return COLOR_PALETTE[shapeType];
     }
 
-    // DOM shape builder
-    function createShapeDiv(shapeType, color, isHidden = false) {
+    function createShapeDiv(shapeType, isHidden = false) {
         const outer = document.createElement('div');
         outer.className = 'shape';
         const inner = document.createElement('div');
@@ -590,6 +585,7 @@
             inner.className = 'shape-transparent';
         } else {
             inner.className = `shape-${shapeType}`;
+            const color = getShapeColor(shapeType);
             inner.style.setProperty('--shape-color', color);
         }
         outer.appendChild(inner);
@@ -602,7 +598,7 @@
             const item = document.createElement('div');
             item.className = 'shape-item';
             const shape = shapes[i];
-            const shapeDiv = createShapeDiv(shape.type, currentColors[shape.type], shape.isHidden);
+            const shapeDiv = createShapeDiv(shape.type, shape.isHidden);
             item.appendChild(shapeDiv);
             const labelDiv = document.createElement('div');
             labelDiv.className = 'shape-label';
@@ -623,18 +619,15 @@
         }
     }
 
-    // generate 3 shape choices (correct + two distractors)
     function generateShapeChoices() {
         const correct = correctShapeType;
         const others = SHAPE_TYPES.filter(t => t !== correct);
-        // shuffle others
         for (let i = others.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [others[i], others[j]] = [others[j], others[i]];
         }
         const distractors = others.slice(0, 2);
         let choices = [correct, ...distractors];
-        // shuffle final order
         for (let i = choices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [choices[i], choices[j]] = [choices[j], choices[i]];
@@ -647,10 +640,9 @@
         const choices = generateShapeChoices();
         choicesContainer.innerHTML = '';
         choices.forEach(shapeType => {
-            const color = currentColors[shapeType];
             const container = document.createElement('div');
             container.className = 'choice-shape';
-            const shapeDiv = createShapeDiv(shapeType, color, false);
+            const shapeDiv = createShapeDiv(shapeType, false);
             // scale down for modal
             const inner = shapeDiv.firstChild;
             if (inner) {
@@ -658,6 +650,7 @@
                 if (inner.classList.contains('shape-circle')) inner.style.width = '45px'; inner.style.height = '45px';
                 if (inner.classList.contains('shape-star')) inner.style.width = '45px'; inner.style.height = '45px';
                 if (inner.classList.contains('shape-triangle')) {
+                    const color = getShapeColor(shapeType);
                     inner.style.borderLeft = '22px solid transparent';
                     inner.style.borderRight = '22px solid transparent';
                     inner.style.borderBottom = '45px solid ' + color;
@@ -673,7 +666,7 @@
         choicesModal.classList.add('active');
     }
 
-    // ---------- AUDIO (optional, lightweight) ----------
+    // Audio (optional)
     let audioCtx = null;
     let soundEnabled = false;
     function initAudio() {
@@ -729,7 +722,7 @@
     document.body.addEventListener('click', enableAudioOnFirstTap);
     document.body.addEventListener('touchstart', enableAudioOnFirstTap);
 
-    // ---------- TIMER & GAME FLOW ----------
+    // Timer & game flow
     function stopTimer() {
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = null;
@@ -798,7 +791,6 @@
     function nextLevel() {
         if (currentLevel >= MAX_LEVEL) return;
         currentLevel++;
-        currentColors = generateColorsForLevel();
         generateLevel();
         renderShapes();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
@@ -813,7 +805,6 @@
         currentLevel = 1;
         score = 0;
         scoreDisplaySpan.textContent = '0';
-        currentColors = generateColorsForLevel();
         generateLevel();
         renderShapes();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
@@ -826,7 +817,6 @@
         currentLevel = 1;
         score = 0;
         scoreDisplaySpan.textContent = '0';
-        currentColors = generateColorsForLevel();
         generateLevel();
         renderShapes();
         levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
