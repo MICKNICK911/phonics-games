@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Shape Pattern Odyssey – Purple & Green</title>
+    <title>Shape Odyssey – Growing Patterns</title>
     <style>
         * {
             box-sizing: border-box;
@@ -20,7 +20,6 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            position: relative;
             overflow-x: auto;
         }
 
@@ -31,7 +30,7 @@
             padding: 24px 16px 32px;
             box-shadow: 0 25px 40px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,200,0.2);
             width: 100%;
-            max-width: 1400px;
+            max-width: 1600px;
             transition: all 0.2s ease;
             border: 1px solid #9b4dff;
         }
@@ -81,10 +80,9 @@
 
         .shape-row {
             display: flex;
-            justify-content: space-evenly;
-            align-items: flex-start;
+            justify-content: center;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
             margin: 15px 0 10px;
             padding: 12px 4px;
         }
@@ -205,7 +203,7 @@
         }
         .modal-content {
             background: #2f2a2f;
-            max-width: 400px;
+            max-width: 380px;
             width: 85%;
             border-radius: 64px;
             padding: 28px 20px 32px;
@@ -226,8 +224,8 @@
             margin: 24px 0 20px;
         }
         .choice-shape {
-            width: 85px;
-            height: 85px;
+            width: 70px;
+            height: 70px;
             background: rgba(0,0,0,0.2);
             border-radius: 50%;
             display: flex;
@@ -235,11 +233,15 @@
             justify-content: center;
             cursor: pointer;
             transition: 0.07s linear;
-            box-shadow: 0 8px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.4);
             border: 2px solid #ffdb8e;
         }
         .choice-shape:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
+        }
+        .choice-shape .shape {
+            margin-bottom: 0;
+            transform: scale(0.85);
         }
         .restart-btn, .gotit-btn {
             background: #b273ff;
@@ -280,7 +282,7 @@
             .shape-square, .shape-circle, .shape-star, .shape-transparent { width: 40px; height: 40px; }
             .shape-triangle { border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid; }
             .finger-btn { width: 38px; height: 38px; font-size: 1.6rem; }
-            .choice-shape { width: 70px; height: 70px; }
+            .choice-shape { width: 60px; height: 60px; }
         }
     </style>
 </head>
@@ -293,10 +295,10 @@
             <span>⭐ <span id="scoreDisplay">0</span></span>
         </div>
     </div>
-    <div class="instruction">🔍 20 shapes follow a hidden pattern – tap the ☝️ finger below the missing shape</div>
+    <div class="instruction">🔍 Shapes grow each level (20 → 40). Tap the ☝️ finger below the missing shape.</div>
 
     <div id="shapeRow" class="shape-row"></div>
-    <footer>⚡ Patterns become trickier each level | Correct guess → next level | Wrong or time out → game over</footer>
+    <footer>⚡ Patterns become trickier each level | Correct → next level | Wrong or time out → game over</footer>
 </div>
 
 <!-- MODALS -->
@@ -338,7 +340,7 @@
         <div class="prominent-image">🎮</div>
         <h2>How to Play</h2>
         <p style="margin: 12px 0; text-align: left; font-size: 0.9rem;">
-            • A row of <strong>20 shapes</strong> follows a pattern (level‑dependent).<br>
+            • A row of <strong>20 → 40 shapes</strong> follows a pattern (level‑dependent).<br>
             • One shape is <strong>hidden (transparent)</strong> – tap the <strong>☝️ finger</strong> below it.<br>
             • Choose the correct shape from three options.<br>
             • Correct → next level | Wrong → game over.<br>
@@ -352,75 +354,170 @@
 
 <script>
     // ========== CONFIGURATION ==========
-    const MAX_LEVEL = 8;                // total levels to win (adjustable)
+    const MAX_LEVEL = 20;               // total levels to win
     const TIME_PER_LEVEL = 60;          // seconds per level
     const SHAPE_TYPES = ['square', 'circle', 'triangle', 'star'];
-    const ROW_LENGTH = 20;              // 20 shapes per row
+    const MIN_SHAPES = 20;
+    const MAX_SHAPES = 40;
 
-    // ---------- CREATIVE PATTERN GENERATION (with repeats) ----------
-    // Returns an array of 20 shape names for the given level
-    function getPatternForLevel(level) {
-        // Predefined patterns – each is 20 elements, contains repeats for interesting logic
-        const patterns = {
-            1: [
-                'square', 'circle', 'triangle', 'star',
-                'square', 'circle', 'triangle', 'star',
-                'square', 'circle', 'triangle', 'star',
-                'square', 'circle', 'triangle', 'star',
-                'square', 'circle', 'triangle', 'star'
-            ],
-            2: [
-                'circle', 'circle', 'square', 'star',
-                'circle', 'circle', 'square', 'star',
-                'circle', 'circle', 'square', 'star',
-                'circle', 'circle', 'square', 'star',
-                'circle', 'circle', 'square', 'star'
-            ],
-            3: [
-                'triangle', 'square', 'triangle', 'circle',
-                'triangle', 'square', 'triangle', 'circle',
-                'triangle', 'square', 'triangle', 'circle',
-                'triangle', 'square', 'triangle', 'circle',
-                'triangle', 'square', 'triangle', 'circle'
-            ],
-            4: [
-                'star', 'star', 'circle', 'square',
-                'star', 'star', 'circle', 'square',
-                'star', 'star', 'circle', 'square',
-                'star', 'star', 'circle', 'square',
-                'star', 'star', 'circle', 'square'
-            ],
-            5: [
-                'square', 'square', 'circle', 'circle', 'triangle', 'triangle', 'star', 'star',
-                'square', 'square', 'circle', 'circle', 'triangle', 'triangle', 'star', 'star',
-                'square', 'square', 'circle', 'circle'
-            ],
-            6: [
-                'circle', 'square', 'square', 'star', 'circle', 'square', 'square', 'star',
-                'circle', 'square', 'square', 'star', 'circle', 'square', 'square', 'star',
-                'circle', 'square', 'square', 'star'
-            ],
-            7: [
-                'triangle', 'circle', 'triangle', 'star', 'square', 'circle', 'triangle', 'star',
-                'square', 'circle', 'triangle', 'star', 'square', 'circle', 'triangle', 'star',
-                'square', 'circle', 'triangle', 'star'
-            ],
-            8: [
-                'square', 'circle', 'star', 'triangle', 'square', 'circle', 'star', 'triangle',
-                'square', 'circle', 'star', 'triangle', 'square', 'circle', 'star', 'triangle',
-                'square', 'circle', 'star', 'triangle'
-            ]
-        };
-        // fallback for levels beyond 8 – generate a more complex repeating pattern with repeats
-        if (!patterns[level]) {
-            let arr = [];
-            let seq = ['square', 'circle', 'square', 'triangle', 'star', 'circle', 'star'];
-            for (let i = 0; i < ROW_LENGTH; i++) {
-                arr.push(seq[i % seq.length]);
-            }
-            return arr;
+    // ---------- PATTERN GENERATION (creative & variable length) ----------
+    // Returns an array of shape types for a given level and length
+    function getPatternForLevel(level, length) {
+        // Define base sequences (each is a repeating pattern fragment)
+        // Level 1: simple 4‑cycle
+        if (level === 1) {
+            const base = ['square', 'circle', 'triangle', 'star'];
+            return repeatPattern(base, length);
         }
-        return patterns[level];
+        // Level 2: two circles, then square, star
+        if (level === 2) {
+            const base = ['circle', 'circle', 'square', 'star'];
+            return repeatPattern(base, length);
+        }
+        // Level 3: triangle, square, triangle, circle
+        if (level === 3) {
+            const base = ['triangle', 'square', 'triangle', 'circle'];
+            return repeatPattern(base, length);
+        }
+        // Level 4: star, star, circle, square
+        if (level === 4) {
+            const base = ['star', 'star', 'circle', 'square'];
+            return repeatPattern(base, length);
+        }
+        // Level 5: square, square, circle, circle, triangle, triangle, star, star
+        if (level === 5) {
+            const base = ['square', 'square', 'circle', 'circle', 'triangle', 'triangle', 'star', 'star'];
+            return repeatPattern(base, length);
+        }
+        // Level 6: circle, square, square, star
+        if (level === 6) {
+            const base = ['circle', 'square', 'square', 'star'];
+            return repeatPattern(base, length);
+        }
+        // Level 7: triangle, circle, triangle, star, square, circle, triangle, star
+        if (level === 7) {
+            const base = ['triangle', 'circle', 'triangle', 'star', 'square', 'circle', 'triangle', 'star'];
+            return repeatPattern(base, length);
+        }
+        // Level 8: square, circle, star, triangle (repeating)
+        if (level === 8) {
+            const base = ['square', 'circle', 'star', 'triangle'];
+            return repeatPattern(base, length);
+        }
+        // Level 9: alternating pairs: square, circle, star, triangle, but with repeats
+        if (level === 9) {
+            const base = ['square', 'square', 'circle', 'star', 'triangle', 'triangle', 'circle', 'star'];
+            return repeatPattern(base, length);
+        }
+        // Level 10: Fibonacci-like (0,1,2,3,0,2,1,3,2,0,3,1,...)
+        if (level === 10) {
+            const seq = [0,1,2,3,0,2,1,3,2,0,3,1,0,3,2,1,3,0,1,2];
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                pattern.push(SHAPE_TYPES[seq[i % seq.length]]);
+            }
+            return pattern;
+        }
+        // Level 11: pattern based on index multiplication
+        if (level === 11) {
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                pattern.push(SHAPE_TYPES[(i * 3) % 4]);
+            }
+            return pattern;
+        }
+        // Level 12: reverse of level 1
+        if (level === 12) {
+            let base = ['star', 'triangle', 'circle', 'square'];
+            return repeatPattern(base, length);
+        }
+        // Level 13: group of 3 squares, then 3 circles, etc.
+        if (level === 13) {
+            let pattern = [];
+            const groups = ['square', 'circle', 'triangle', 'star'];
+            for (let i = 0; i < length; i++) {
+                const groupIdx = Math.floor(i / 3) % 4;
+                pattern.push(groups[groupIdx]);
+            }
+            return pattern;
+        }
+        // Level 14: pattern with increasing run lengths
+        if (level === 14) {
+            let pattern = [];
+            let run = 1;
+            let typeIdx = 0;
+            while (pattern.length < length) {
+                for (let j = 0; j < run && pattern.length < length; j++) {
+                    pattern.push(SHAPE_TYPES[typeIdx % 4]);
+                }
+                typeIdx++;
+                if (run < 4) run++;
+                else run = 1;
+            }
+            return pattern;
+        }
+        // Level 15: primes
+        if (level === 15) {
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                const primeLike = [2,3,5,7,11,13,17,19];
+                let val = primeLike[i % primeLike.length];
+                pattern.push(SHAPE_TYPES[val % 4]);
+            }
+            return pattern;
+        }
+        // Level 16: complex alternating
+        if (level === 16) {
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                if (i % 3 === 0) pattern.push('square');
+                else if (i % 3 === 1) pattern.push('circle');
+                else pattern.push('triangle');
+            }
+            return pattern;
+        }
+        // Level 17: star heavy
+        if (level === 17) {
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                if (i % 5 === 0) pattern.push('star');
+                else pattern.push(SHAPE_TYPES[i % 4]);
+            }
+            return pattern;
+        }
+        // Level 18: symmetric
+        if (level === 18) {
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                pattern.push(SHAPE_TYPES[Math.floor(Math.sin(i) * 4 + 4) % 4]);
+            }
+            return pattern;
+        }
+        // Level 19: count up pattern
+        if (level === 19) {
+            let pattern = [];
+            for (let i = 0; i < length; i++) {
+                pattern.push(SHAPE_TYPES[Math.floor(i / 2) % 4]);
+            }
+            return pattern;
+        }
+        // Level 20: final challenge – repeating pattern of 6 (square, circle, triangle, star, star, circle)
+        if (level === 20) {
+            const base = ['square', 'circle', 'triangle', 'star', 'star', 'circle'];
+            return repeatPattern(base, length);
+        }
+        // fallback (should never happen)
+        const base = ['square', 'circle', 'triangle', 'star'];
+        return repeatPattern(base, length);
+    }
+
+    // Helper: repeat a base pattern to fill exact length
+    function repeatPattern(base, length) {
+        let result = [];
+        for (let i = 0; i < length; i++) {
+            result.push(base[i % base.length]);
+        }
+        return result;
     }
 
     // ---------- GLOBAL STATE ----------
@@ -433,6 +530,7 @@
     let timerInterval = null;
     let timeLeft = TIME_PER_LEVEL;
     let score = 0;
+    let rowLength = MIN_SHAPES;
 
     // Color map per shape type (fresh each level)
     let currentColors = {};
@@ -456,13 +554,19 @@
     const timerDefaultMsg = document.getElementById('timerDefaultMsg');
     if (timerDefaultMsg) timerDefaultMsg.textContent = TIME_PER_LEVEL;
 
-    // generate level shapes using pattern, hiddenIndex not first or last
+    // Calculate row length based on level (20 at level 1, 40 at level 20)
+    function getRowLength(level) {
+        return MIN_SHAPES + Math.floor((level - 1) * (MAX_SHAPES - MIN_SHAPES) / (MAX_LEVEL - 1));
+    }
+
+    // generate level shapes using pattern
     function generateLevel() {
-        const pattern = getPatternForLevel(currentLevel);
-        hiddenIndex = Math.floor(Math.random() * (ROW_LENGTH - 2)) + 1; // 1..18
+        rowLength = getRowLength(currentLevel);
+        const pattern = getPatternForLevel(currentLevel, rowLength);
+        hiddenIndex = Math.floor(Math.random() * (rowLength - 2)) + 1; // 1..length-2
         correctShapeType = pattern[hiddenIndex];
         shapes = [];
-        for (let i = 0; i < ROW_LENGTH; i++) {
+        for (let i = 0; i < rowLength; i++) {
             shapes.push({ type: pattern[i], isHidden: (i === hiddenIndex) });
         }
     }
@@ -547,16 +651,16 @@
             const container = document.createElement('div');
             container.className = 'choice-shape';
             const shapeDiv = createShapeDiv(shapeType, color, false);
-            // adjust size for modal
+            // scale down for modal
             const inner = shapeDiv.firstChild;
             if (inner) {
-                if (inner.classList.contains('shape-square')) inner.style.width = '60px'; inner.style.height = '60px';
-                if (inner.classList.contains('shape-circle')) inner.style.width = '60px'; inner.style.height = '60px';
-                if (inner.classList.contains('shape-star')) inner.style.width = '60px'; inner.style.height = '60px';
+                if (inner.classList.contains('shape-square')) inner.style.width = '45px'; inner.style.height = '45px';
+                if (inner.classList.contains('shape-circle')) inner.style.width = '45px'; inner.style.height = '45px';
+                if (inner.classList.contains('shape-star')) inner.style.width = '45px'; inner.style.height = '45px';
                 if (inner.classList.contains('shape-triangle')) {
-                    inner.style.borderLeft = '30px solid transparent';
-                    inner.style.borderRight = '30px solid transparent';
-                    inner.style.borderBottom = '60px solid ' + color;
+                    inner.style.borderLeft = '22px solid transparent';
+                    inner.style.borderRight = '22px solid transparent';
+                    inner.style.borderBottom = '45px solid ' + color;
                 }
             }
             container.appendChild(shapeDiv);
@@ -569,7 +673,7 @@
         choicesModal.classList.add('active');
     }
 
-    // ---------- AUDIO (lightweight, optional) ----------
+    // ---------- AUDIO (optional, lightweight) ----------
     let audioCtx = null;
     let soundEnabled = false;
     function initAudio() {
