@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Shape Odyssey – High Contrast</title>
+    <title>Shape Odyssey – Fast & Robust</title>
     <style>
         * {
             box-sizing: border-box;
@@ -24,14 +24,12 @@
         }
 
         .game-container {
-            background: rgba(46, 26, 71, 0.85);
-            backdrop-filter: blur(2px);
+            background: rgba(46, 26, 71, 0.9);
             border-radius: 56px;
             padding: 24px 16px 32px;
-            box-shadow: 0 25px 40px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,200,0.2);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.4);
             width: 100%;
             max-width: 1600px;
-            transition: all 0.2s ease;
             border: 1px solid #9b4dff;
         }
 
@@ -43,28 +41,20 @@
             margin: 0 12px 20px 12px;
             gap: 12px;
         }
-        .level-badge {
+        .level-badge, .timer-score {
             background: #5a2e8a;
             padding: 8px 20px;
             border-radius: 60px;
             color: #e2ffcf;
             font-weight: bold;
             font-size: 1.2rem;
-            letter-spacing: 1px;
-            box-shadow: inset 0 -2px 0 #3a1c5a, 0 5px 10px rgba(0,0,0,0.3);
+            box-shadow: inset 0 -2px 0 #3a1c5a;
             border: 1px solid #a66eff;
         }
         .timer-score {
-            background: #5a2e8a;
-            padding: 8px 20px;
-            border-radius: 60px;
-            color: #e2ffcf;
-            font-weight: bold;
             font-size: 1rem;
             display: flex;
             gap: 20px;
-            box-shadow: inset 0 -2px 0 #3a1c5a, 0 5px 10px rgba(0,0,0,0.3);
-            border: 1px solid #a66eff;
         }
         .instruction {
             background: #2c4d35;
@@ -73,7 +63,6 @@
             font-size: 0.9rem;
             font-weight: 600;
             color: #ffe5b4;
-            box-shadow: inset 0 1px 3px #79b37a, 0 2px 5px rgba(0,0,0,0.2);
             text-align: center;
             margin: 0 12px 20px 12px;
         }
@@ -92,17 +81,10 @@
             flex-direction: column;
             align-items: center;
             width: 70px;
-            transition: transform 0.1s ease;
         }
-        @media (max-width: 1200px) {
-            .shape-item { width: 60px; }
-        }
-        @media (max-width: 900px) {
-            .shape-item { width: 52px; }
-        }
-        @media (max-width: 700px) {
-            .shape-item { width: 48px; }
-        }
+        @media (max-width: 1200px) { .shape-item { width: 60px; } }
+        @media (max-width: 900px) { .shape-item { width: 52px; } }
+        @media (max-width: 700px) { .shape-item { width: 48px; } }
 
         .shape {
             width: 100%;
@@ -117,7 +99,7 @@
             background-color: var(--shape-color);
             width: 50px;
             height: 50px;
-            border-radius: 12px;
+            border-radius: 8px;
         }
         .shape-circle {
             background-color: var(--shape-color);
@@ -140,10 +122,9 @@
             clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
         }
         .shape-transparent {
-            background: rgba(255,255,200,0.15);
-            backdrop-filter: blur(4px);
+            background: rgba(255,255,200,0.2);
             border: 2px dashed #c4a7ff;
-            border-radius: 16px;
+            border-radius: 12px;
             width: 50px;
             height: 50px;
         }
@@ -156,7 +137,6 @@
             text-align: center;
             font-family: monospace;
             text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-            background: transparent;
             min-height: 40px;
         }
 
@@ -173,13 +153,11 @@
             align-items: center;
             justify-content: center;
             border-radius: 40px;
-            transition: 0.05s linear;
+            transition: transform 0.05s linear;
             margin: 0 auto;
-            backdrop-filter: blur(2px);
+            will-change: transform;
         }
-        .finger-btn:active {
-            transform: scale(0.9);
-        }
+        .finger-btn:active { transform: scale(0.92); }
 
         .modal {
             position: fixed;
@@ -188,7 +166,6 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -208,14 +185,10 @@
             border-radius: 64px;
             padding: 28px 20px 32px;
             text-align: center;
-            box-shadow: 0 25px 40px black;
             border: 2px solid #b77eff;
             color: #ffe3b5;
         }
-        .correct-popup {
-            background: #2a5a3a;
-            border-color: #a7ff8e;
-        }
+        .correct-popup { background: #2a5a3a; border-color: #a7ff8e; }
         .choices-row {
             display: flex;
             justify-content: center;
@@ -232,17 +205,12 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: 0.07s linear;
-            box-shadow: 0 6px 10px rgba(0,0,0,0.4);
+            transition: transform 0.05s linear;
             border: 2px solid #ffdb8e;
+            will-change: transform;
         }
-        .choice-shape:active {
-            transform: scale(0.95);
-        }
-        .choice-shape .shape {
-            margin-bottom: 0;
-            transform: scale(0.85);
-        }
+        .choice-shape:active { transform: scale(0.96); }
+        .choice-shape .shape { margin-bottom: 0; transform: scale(0.85); }
         .restart-btn, .gotit-btn {
             background: #b273ff;
             border: none;
@@ -254,30 +222,12 @@
             margin-top: 20px;
             cursor: pointer;
             box-shadow: 0 5px 0 #4a2780;
-            transition: 0.05s linear;
+            transition: transform 0.05s linear;
         }
-        .restart-btn:active, .gotit-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #4a2780;
-        }
-        .message {
-            font-size: 1.2rem;
-            margin-bottom: 16px;
-            font-weight: bold;
-        }
-        .prominent-image {
-            font-size: 5rem;
-            margin-bottom: 10px;
-            display: block;
-            text-align: center;
-        }
-        footer {
-            font-size: 0.7rem;
-            text-align: center;
-            margin-top: 24px;
-            color: #e0cf9e;
-            opacity: 0.8;
-        }
+        .restart-btn:active, .gotit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #4a2780; }
+        .message { font-size: 1.2rem; margin-bottom: 16px; font-weight: bold; }
+        .prominent-image { font-size: 5rem; margin-bottom: 10px; text-align: center; }
+        footer { font-size: 0.7rem; text-align: center; margin-top: 24px; color: #e0cf9e; opacity: 0.8; }
         @media (max-width: 700px) {
             .shape-square, .shape-circle, .shape-star, .shape-transparent { width: 40px; height: 40px; }
             .shape-triangle { border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid; }
@@ -296,297 +246,133 @@
         </div>
     </div>
     <div class="instruction">🔍 Shapes grow each level (20 → 40). Tap the ☝️ finger below the missing shape.</div>
-
     <div id="shapeRow" class="shape-row"></div>
     <footer>⚡ Patterns become trickier each level | Correct → next level | Wrong or time out → game over</footer>
 </div>
 
 <!-- MODALS -->
-<div id="choicesModal" class="modal">
-    <div class="modal-content">
-        <h2>❓ WHICH SHAPE IS MISSING?</h2>
-        <div id="choicesContainer" class="choices-row"></div>
-        <div style="font-size: 0.85rem; margin-top: 10px;">tap the correct shape</div>
-    </div>
-</div>
-
-<div id="correctModal" class="modal">
-    <div class="modal-content correct-popup">
-        <div class="prominent-image">✅</div>
-        <div class="message">CORRECT!</div>
-    </div>
-</div>
-
-<div id="victoryModal" class="modal">
-    <div class="modal-content">
-        <div class="prominent-image">🏆</div>
-        <div class="message">VICTORY!</div>
-        <div id="victoryScoreMsg">Score: 0</div>
-        <button class="restart-btn" id="victoryRestartBtn">🔄 PLAY AGAIN</button>
-    </div>
-</div>
-
-<div id="gameOverModal" class="modal">
-    <div class="modal-content">
-        <div class="prominent-image">💀</div>
-        <div class="message">GAME OVER</div>
-        <div id="gameOverScoreMsg">Score: 0</div>
-        <button class="restart-btn" id="restartGameBtn">🔄 RESTART</button>
-    </div>
-</div>
-
-<div id="instructionModal" class="modal">
-    <div class="modal-content">
-        <div class="prominent-image">🎮</div>
-        <h2>How to Play</h2>
-        <p style="margin: 12px 0; text-align: left; font-size: 0.9rem;">
-            • A row of <strong>20 → 40 shapes</strong> follows a pattern (level‑dependent).<br>
-            • One shape is <strong>hidden (transparent)</strong> – tap the <strong>☝️ finger</strong> below it.<br>
-            • Choose the correct shape from three options.<br>
-            • Correct → next level | Wrong → game over.<br>
-            • Each level gives you <span id="timerDefaultMsg"></span> seconds.<br>
-            • First shape is always visible – find the logic!<br>
-            • Patterns become more complex as you advance.
-        </p>
-        <button class="gotit-btn" id="closeInstructionBtn">Got it!</button>
-    </div>
-</div>
+<div id="choicesModal" class="modal"><div class="modal-content"><h2>❓ WHICH SHAPE IS MISSING?</h2><div id="choicesContainer" class="choices-row"></div><div style="font-size: 0.85rem;">tap the correct shape</div></div></div>
+<div id="correctModal" class="modal"><div class="modal-content correct-popup"><div class="prominent-image">✅</div><div class="message">CORRECT!</div></div></div>
+<div id="victoryModal" class="modal"><div class="modal-content"><div class="prominent-image">🏆</div><div class="message">VICTORY!</div><div id="victoryScoreMsg">Score: 0</div><button class="restart-btn" id="victoryRestartBtn">🔄 PLAY AGAIN</button></div></div>
+<div id="gameOverModal" class="modal"><div class="modal-content"><div class="prominent-image">💀</div><div class="message">GAME OVER</div><div id="gameOverScoreMsg">Score: 0</div><button class="restart-btn" id="restartGameBtn">🔄 RESTART</button></div></div>
+<div id="instructionModal" class="modal"><div class="modal-content"><div class="prominent-image">🎮</div><h2>How to Play</h2><p style="margin: 12px 0; text-align: left;">• 20 → 40 shapes follow a pattern.<br>• One shape is <strong>hidden</strong> – tap the ☝️ finger.<br>• Choose the correct shape.<br>• Correct → next level | Wrong → game over.<br>• Each level: <span id="timerDefaultMsg"></span> seconds.</p><button class="gotit-btn" id="closeInstructionBtn">Got it!</button></div></div>
 
 <script>
-    // ========== CONFIGURATION ==========
-    const MAX_LEVEL = 20;               // total levels to win
-    const TIME_PER_LEVEL = 60;          // seconds per level
+    // ========== CONFIG ==========
+    const MAX_LEVEL = 20;
+    const TIME_PER_LEVEL = 60;
     const SHAPE_TYPES = ['square', 'circle', 'triangle', 'star'];
     const MIN_SHAPES = 20;
     const MAX_SHAPES = 40;
+    const COLORS = { square: '#FFB347', circle: '#5D9BEC', triangle: '#FF6B6B', star: '#6FCF97' };
 
-    // High-contrast, bright color palette for each shape type (consistent across level)
-    // These colors stand out against dark background
-    const COLOR_PALETTE = {
-        square: '#FFB347',   // vibrant orange
-        circle: '#5D9BEC',   // bright blue
-        triangle: '#FF6B6B', // coral red
-        star: '#6FCF97'      // fresh green
-    };
-
-    // ---------- PATTERN GENERATION (creative & variable length) ----------
-    function getPatternForLevel(level, length) {
-        // Level 1: simple 4‑cycle
-        if (level === 1) {
-            const base = ['square', 'circle', 'triangle', 'star'];
-            return repeatPattern(base, length);
-        }
-        // Level 2: two circles, then square, star
-        if (level === 2) {
-            const base = ['circle', 'circle', 'square', 'star'];
-            return repeatPattern(base, length);
-        }
-        // Level 3: triangle, square, triangle, circle
-        if (level === 3) {
-            const base = ['triangle', 'square', 'triangle', 'circle'];
-            return repeatPattern(base, length);
-        }
-        // Level 4: star, star, circle, square
-        if (level === 4) {
-            const base = ['star', 'star', 'circle', 'square'];
-            return repeatPattern(base, length);
-        }
-        // Level 5: square, square, circle, circle, triangle, triangle, star, star
-        if (level === 5) {
-            const base = ['square', 'square', 'circle', 'circle', 'triangle', 'triangle', 'star', 'star'];
-            return repeatPattern(base, length);
-        }
-        // Level 6: circle, square, square, star
-        if (level === 6) {
-            const base = ['circle', 'square', 'square', 'star'];
-            return repeatPattern(base, length);
-        }
-        // Level 7: triangle, circle, triangle, star, square, circle, triangle, star
-        if (level === 7) {
-            const base = ['triangle', 'circle', 'triangle', 'star', 'square', 'circle', 'triangle', 'star'];
-            return repeatPattern(base, length);
-        }
-        // Level 8: square, circle, star, triangle (repeating)
-        if (level === 8) {
-            const base = ['square', 'circle', 'star', 'triangle'];
-            return repeatPattern(base, length);
-        }
-        // Level 9: alternating pairs
-        if (level === 9) {
-            const base = ['square', 'square', 'circle', 'star', 'triangle', 'triangle', 'circle', 'star'];
-            return repeatPattern(base, length);
-        }
-        // Level 10: Fibonacci-like sequence
-        if (level === 10) {
+    // ========== PATTERN GENERATION (precomputed for speed) ==========
+    const patternCache = new Map();
+    function getPattern(level, length) {
+        const key = `${level}:${length}`;
+        if (patternCache.has(key)) return patternCache.get(key);
+        let pattern;
+        if (level === 1) pattern = repeat(['square', 'circle', 'triangle', 'star'], length);
+        else if (level === 2) pattern = repeat(['circle', 'circle', 'square', 'star'], length);
+        else if (level === 3) pattern = repeat(['triangle', 'square', 'triangle', 'circle'], length);
+        else if (level === 4) pattern = repeat(['star', 'star', 'circle', 'square'], length);
+        else if (level === 5) pattern = repeat(['square','square','circle','circle','triangle','triangle','star','star'], length);
+        else if (level === 6) pattern = repeat(['circle', 'square', 'square', 'star'], length);
+        else if (level === 7) pattern = repeat(['triangle','circle','triangle','star','square','circle','triangle','star'], length);
+        else if (level === 8) pattern = repeat(['square', 'circle', 'star', 'triangle'], length);
+        else if (level === 9) pattern = repeat(['square','square','circle','star','triangle','triangle','circle','star'], length);
+        else if (level === 10) {
             const seq = [0,1,2,3,0,2,1,3,2,0,3,1,0,3,2,1,3,0,1,2];
-            let pattern = [];
-            for (let i = 0; i < length; i++) {
-                pattern.push(SHAPE_TYPES[seq[i % seq.length]]);
+            pattern = Array.from({length}, (_,i) => SHAPE_TYPES[seq[i % seq.length]]);
+        }
+        else if (level === 11) pattern = Array.from({length}, (_,i) => SHAPE_TYPES[(i*3)%4]);
+        else if (level === 12) pattern = repeat(['star','triangle','circle','square'], length);
+        else if (level === 13) {
+            pattern = Array.from({length}, (_,i) => SHAPE_TYPES[Math.floor(i/3)%4]);
+        }
+        else if (level === 14) {
+            let arr = [], run=1, idx=0;
+            while(arr.length < length) {
+                for(let j=0; j<run && arr.length<length; j++) arr.push(SHAPE_TYPES[idx%4]);
+                idx++;
+                if(run<4) run++; else run=1;
             }
-            return pattern;
+            pattern = arr;
         }
-        // Level 11: index multiplication
-        if (level === 11) {
-            let pattern = [];
-            for (let i = 0; i < length; i++) {
-                pattern.push(SHAPE_TYPES[(i * 3) % 4]);
-            }
-            return pattern;
-        }
-        // Level 12: reverse of level 1
-        if (level === 12) {
-            let base = ['star', 'triangle', 'circle', 'square'];
-            return repeatPattern(base, length);
-        }
-        // Level 13: groups of 3 identical
-        if (level === 13) {
-            let pattern = [];
-            const groups = ['square', 'circle', 'triangle', 'star'];
-            for (let i = 0; i < length; i++) {
-                const groupIdx = Math.floor(i / 3) % 4;
-                pattern.push(groups[groupIdx]);
-            }
-            return pattern;
-        }
-        // Level 14: increasing run lengths
-        if (level === 14) {
-            let pattern = [];
-            let run = 1;
-            let typeIdx = 0;
-            while (pattern.length < length) {
-                for (let j = 0; j < run && pattern.length < length; j++) {
-                    pattern.push(SHAPE_TYPES[typeIdx % 4]);
-                }
-                typeIdx++;
-                if (run < 4) run++;
-                else run = 1;
-            }
-            return pattern;
-        }
-        // Level 15: prime‑inspired
-        if (level === 15) {
-            let pattern = [];
+        else if (level === 15) {
             const primes = [2,3,5,7,11,13,17,19];
-            for (let i = 0; i < length; i++) {
-                let val = primes[i % primes.length];
-                pattern.push(SHAPE_TYPES[val % 4]);
-            }
-            return pattern;
+            pattern = Array.from({length}, (_,i) => SHAPE_TYPES[primes[i%primes.length]%4]);
         }
-        // Level 16: ternary pattern
-        if (level === 16) {
-            let pattern = [];
-            for (let i = 0; i < length; i++) {
-                if (i % 3 === 0) pattern.push('square');
-                else if (i % 3 === 1) pattern.push('circle');
-                else pattern.push('triangle');
-            }
-            return pattern;
+        else if (level === 16) {
+            pattern = Array.from({length}, (_,i) => {
+                if(i%3===0) return 'square';
+                if(i%3===1) return 'circle';
+                return 'triangle';
+            });
         }
-        // Level 17: star heavy
-        if (level === 17) {
-            let pattern = [];
-            for (let i = 0; i < length; i++) {
-                if (i % 5 === 0) pattern.push('star');
-                else pattern.push(SHAPE_TYPES[i % 4]);
-            }
-            return pattern;
+        else if (level === 17) {
+            pattern = Array.from({length}, (_,i) => i%5===0 ? 'star' : SHAPE_TYPES[i%4]);
         }
-        // Level 18: sinusoidal
-        if (level === 18) {
-            let pattern = [];
-            for (let i = 0; i < length; i++) {
-                pattern.push(SHAPE_TYPES[Math.floor(Math.sin(i) * 4 + 4) % 4]);
-            }
-            return pattern;
+        else if (level === 18) {
+            pattern = Array.from({length}, (_,i) => SHAPE_TYPES[Math.floor(Math.sin(i)*4+4)%4]);
         }
-        // Level 19: increasing step
-        if (level === 19) {
-            let pattern = [];
-            for (let i = 0; i < length; i++) {
-                pattern.push(SHAPE_TYPES[Math.floor(i / 2) % 4]);
-            }
-            return pattern;
+        else if (level === 19) {
+            pattern = Array.from({length}, (_,i) => SHAPE_TYPES[Math.floor(i/2)%4]);
         }
-        // Level 20: final complex pattern
-        if (level === 20) {
-            const base = ['square', 'circle', 'triangle', 'star', 'star', 'circle'];
-            return repeatPattern(base, length);
+        else if (level === 20) {
+            pattern = repeat(['square','circle','triangle','star','star','circle'], length);
         }
-        // fallback
-        const base = ['square', 'circle', 'triangle', 'star'];
-        return repeatPattern(base, length);
+        else pattern = repeat(['square','circle','triangle','star'], length);
+        patternCache.set(key, pattern);
+        return pattern;
+    }
+    function repeat(base, len) {
+        let arr = [];
+        for(let i=0; i<len; i++) arr.push(base[i%base.length]);
+        return arr;
     }
 
-    function repeatPattern(base, length) {
-        let result = [];
-        for (let i = 0; i < length; i++) {
-            result.push(base[i % base.length]);
-        }
-        return result;
-    }
+    // ========== GAME STATE ==========
+    let currentLevel = 1, shapes = [], hiddenIndex = -1, correctShape = '', gameActive = true;
+    let nextLevelTimeout = null, timerInterval = null, timeLeft = TIME_PER_LEVEL, score = 0, rowLength = MIN_SHAPES;
 
-    // ---------- GLOBAL STATE ----------
-    let currentLevel = 1;
-    let shapes = [];
-    let hiddenIndex = -1;
-    let correctShapeType = '';
-    let gameActive = true;
-    let nextLevelTimeout = null;
-    let timerInterval = null;
-    let timeLeft = TIME_PER_LEVEL;
-    let score = 0;
-    let rowLength = MIN_SHAPES;
-
-    // DOM elements
+    // DOM refs
     const shapeRow = document.getElementById('shapeRow');
-    const levelDisplaySpan = document.getElementById('levelDisplay');
-    const timerDisplaySpan = document.getElementById('timerDisplay');
-    const scoreDisplaySpan = document.getElementById('scoreDisplay');
+    const levelSpan = document.getElementById('levelDisplay');
+    const timerSpan = document.getElementById('timerDisplay');
+    const scoreSpan = document.getElementById('scoreDisplay');
     const choicesModal = document.getElementById('choicesModal');
     const correctModal = document.getElementById('correctModal');
     const victoryModal = document.getElementById('victoryModal');
     const gameOverModal = document.getElementById('gameOverModal');
-    const instructionModal = document.getElementById('instructionModal');
-    const closeInstructionBtn = document.getElementById('closeInstructionBtn');
+    const instrModal = document.getElementById('instructionModal');
+    const closeInstr = document.getElementById('closeInstructionBtn');
     const choicesContainer = document.getElementById('choicesContainer');
-    const restartGameBtn = document.getElementById('restartGameBtn');
-    const victoryRestartBtn = document.getElementById('victoryRestartBtn');
+    const restartBtn = document.getElementById('restartGameBtn');
+    const victoryRestart = document.getElementById('victoryRestartBtn');
     const victoryScoreMsg = document.getElementById('victoryScoreMsg');
     const gameOverScoreMsg = document.getElementById('gameOverScoreMsg');
     const timerDefaultMsg = document.getElementById('timerDefaultMsg');
-    if (timerDefaultMsg) timerDefaultMsg.textContent = TIME_PER_LEVEL;
+    if(timerDefaultMsg) timerDefaultMsg.textContent = TIME_PER_LEVEL;
 
-    function getRowLength(level) {
-        return MIN_SHAPES + Math.floor((level - 1) * (MAX_SHAPES - MIN_SHAPES) / (MAX_LEVEL - 1));
-    }
+    function getRowLength(lvl) { return MIN_SHAPES + Math.floor((lvl-1)*(MAX_SHAPES-MIN_SHAPES)/(MAX_LEVEL-1)); }
 
     function generateLevel() {
         rowLength = getRowLength(currentLevel);
-        const pattern = getPatternForLevel(currentLevel, rowLength);
-        hiddenIndex = Math.floor(Math.random() * (rowLength - 2)) + 1; // 1..length-2
-        correctShapeType = pattern[hiddenIndex];
-        shapes = [];
-        for (let i = 0; i < rowLength; i++) {
-            shapes.push({ type: pattern[i], isHidden: (i === hiddenIndex) });
-        }
+        const pattern = getPattern(currentLevel, rowLength);
+        hiddenIndex = Math.floor(Math.random() * (rowLength - 2)) + 1;
+        correctShape = pattern[hiddenIndex];
+        shapes = pattern.map((type, idx) => ({ type, isHidden: idx === hiddenIndex }));
     }
 
-    // Use fixed high-contrast colors (no randomness)
-    function getShapeColor(shapeType) {
-        return COLOR_PALETTE[shapeType];
-    }
-
-    function createShapeDiv(shapeType, isHidden = false) {
+    function createShapeDiv(type, isHidden = false) {
         const outer = document.createElement('div');
         outer.className = 'shape';
         const inner = document.createElement('div');
-        if (isHidden) {
-            inner.className = 'shape-transparent';
-        } else {
-            inner.className = `shape-${shapeType}`;
-            const color = getShapeColor(shapeType);
-            inner.style.setProperty('--shape-color', color);
+        if(isHidden) inner.className = 'shape-transparent';
+        else {
+            inner.className = `shape-${type}`;
+            inner.style.setProperty('--shape-color', COLORS[type]);
         }
         outer.appendChild(inner);
         return outer;
@@ -594,249 +380,156 @@
 
     function renderShapes() {
         shapeRow.innerHTML = '';
-        for (let i = 0; i < shapes.length; i++) {
+        for(let i=0; i<shapes.length; i++) {
             const item = document.createElement('div');
             item.className = 'shape-item';
-            const shape = shapes[i];
-            const shapeDiv = createShapeDiv(shape.type, shape.isHidden);
-            item.appendChild(shapeDiv);
-            const labelDiv = document.createElement('div');
-            labelDiv.className = 'shape-label';
-            if (shape.isHidden) {
+            const s = shapes[i];
+            item.appendChild(createShapeDiv(s.type, s.isHidden));
+            const label = document.createElement('div');
+            label.className = 'shape-label';
+            if(s.isHidden) {
                 const finger = document.createElement('div');
                 finger.className = 'finger-btn';
                 finger.textContent = '☝️';
-                finger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (gameActive) showChoicesModal();
-                });
-                labelDiv.appendChild(finger);
-            } else {
-                labelDiv.innerHTML = '&nbsp;';
-            }
-            item.appendChild(labelDiv);
+                finger.addEventListener('click', (e) => { e.stopPropagation(); if(gameActive) showChoices(); });
+                label.appendChild(finger);
+            } else label.innerHTML = '&nbsp;';
+            item.appendChild(label);
             shapeRow.appendChild(item);
         }
     }
 
-    function generateShapeChoices() {
-        const correct = correctShapeType;
-        const others = SHAPE_TYPES.filter(t => t !== correct);
-        for (let i = others.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [others[i], others[j]] = [others[j], others[i]];
-        }
-        const distractors = others.slice(0, 2);
-        let choices = [correct, ...distractors];
-        for (let i = choices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [choices[i], choices[j]] = [choices[j], choices[i]];
-        }
-        return choices;
-    }
-
-    function showChoicesModal() {
-        if (!gameActive) return;
-        const choices = generateShapeChoices();
+    function showChoices() {
+        if(!gameActive) return;
+        const correct = correctShape;
+        let others = SHAPE_TYPES.filter(t => t !== correct);
+        for(let i=others.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [others[i], others[j]] = [others[j], others[i]]; }
+        const choices = [correct, ...others.slice(0,2)];
+        for(let i=choices.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
         choicesContainer.innerHTML = '';
-        choices.forEach(shapeType => {
+        choices.forEach(type => {
             const container = document.createElement('div');
             container.className = 'choice-shape';
-            const shapeDiv = createShapeDiv(shapeType, false);
-            // scale down for modal
+            const shapeDiv = createShapeDiv(type, false);
             const inner = shapeDiv.firstChild;
-            if (inner) {
-                if (inner.classList.contains('shape-square')) inner.style.width = '45px'; inner.style.height = '45px';
-                if (inner.classList.contains('shape-circle')) inner.style.width = '45px'; inner.style.height = '45px';
-                if (inner.classList.contains('shape-star')) inner.style.width = '45px'; inner.style.height = '45px';
-                if (inner.classList.contains('shape-triangle')) {
-                    const color = getShapeColor(shapeType);
+            if(inner) {
+                if(inner.classList.contains('shape-square')) inner.style.width = '45px'; inner.style.height = '45px';
+                if(inner.classList.contains('shape-circle')) inner.style.width = '45px'; inner.style.height = '45px';
+                if(inner.classList.contains('shape-star')) inner.style.width = '45px'; inner.style.height = '45px';
+                if(inner.classList.contains('shape-triangle')) {
                     inner.style.borderLeft = '22px solid transparent';
                     inner.style.borderRight = '22px solid transparent';
-                    inner.style.borderBottom = '45px solid ' + color;
+                    inner.style.borderBottom = '45px solid ' + COLORS[type];
                 }
             }
             container.appendChild(shapeDiv);
-            container.addEventListener('click', (e) => {
-                e.stopPropagation();
-                handleAnswer(shapeType);
-            });
+            container.addEventListener('click', (e) => { e.stopPropagation(); handleAnswer(type); });
             choicesContainer.appendChild(container);
         });
         choicesModal.classList.add('active');
     }
 
-    // Audio (optional)
-    let audioCtx = null;
-    let soundEnabled = false;
-    function initAudio() {
-        if (audioCtx) return;
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        soundEnabled = true;
-    }
-    function playCorrectSound() {
-        if (!soundEnabled || !audioCtx) return;
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
-        osc.start(now);
-        osc.stop(now + 0.4);
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.type = 'sine';
-        osc2.frequency.value = 660;
-        gain2.gain.setValueAtTime(0.3, now + 0.15);
-        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-        osc2.start(now + 0.15);
-        osc2.stop(now + 0.55);
-    }
-    function playWrongSound() {
-        if (!soundEnabled || !audioCtx) return;
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sawtooth';
-        osc.frequency.value = 220;
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-        osc.start(now);
-        osc.stop(now + 0.5);
-    }
-    function enableAudioOnFirstTap() {
-        if (soundEnabled) return;
-        initAudio();
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        document.body.removeEventListener('click', enableAudioOnFirstTap);
-        document.body.removeEventListener('touchstart', enableAudioOnFirstTap);
-    }
-    document.body.addEventListener('click', enableAudioOnFirstTap);
-    document.body.addEventListener('touchstart', enableAudioOnFirstTap);
+    // Audio (light)
+    let audioCtx = null, soundOn = false;
+    function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); soundOn=true; }
+    function playCorrect() { if(!soundOn||!audioCtx) return; const now=audioCtx.currentTime, osc=audioCtx.createOscillator(), gain=audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type='sine'; osc.frequency.value=880; gain.gain.setValueAtTime(0.3,now); gain.gain.exponentialRampToValueAtTime(0.0001,now+0.4); osc.start(now); osc.stop(now+0.4); const osc2=audioCtx.createOscillator(), gain2=audioCtx.createGain(); osc2.connect(gain2); gain2.connect(audioCtx.destination); osc2.type='sine'; osc2.frequency.value=660; gain2.gain.setValueAtTime(0.3,now+0.15); gain2.gain.exponentialRampToValueAtTime(0.0001,now+0.55); osc2.start(now+0.15); osc2.stop(now+0.55); }
+    function playWrong() { if(!soundOn||!audioCtx) return; const now=audioCtx.currentTime, osc=audioCtx.createOscillator(), gain=audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type='sawtooth'; osc.frequency.value=220; gain.gain.setValueAtTime(0.4,now); gain.gain.exponentialRampToValueAtTime(0.0001,now+0.5); osc.start(now); osc.stop(now+0.5); }
+    function enableAudio() { if(soundOn) return; initAudio(); if(audioCtx.state==='suspended') audioCtx.resume(); document.body.removeEventListener('click',enableAudio); document.body.removeEventListener('touchstart',enableAudio); }
+    document.body.addEventListener('click',enableAudio); document.body.addEventListener('touchstart',enableAudio);
 
-    // Timer & game flow
-    function stopTimer() {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = null;
-    }
+    // Timer (requestAnimationFrame for smooth display)
+    let rafId = null;
+    function updateTimerDisplay() { timerSpan.textContent = timeLeft < 10 ? '0'+timeLeft : timeLeft; }
     function startTimer() {
-        stopTimer();
+        if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            if (!gameActive) return;
-            if (timeLeft <= 0) {
-                stopTimer();
-                if (gameActive) {
-                    gameActive = false;
-                    playWrongSound();
-                    gameOverScoreMsg.innerText = `Score: ${score}`;
-                    gameOverModal.classList.add('active');
-                }
+            if(!gameActive) return;
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval); timerInterval = null;
+                if(gameActive) { gameActive=false; playWrong(); gameOverScoreMsg.innerText=`Score: ${score}`; gameOverModal.classList.add('active'); }
             } else {
                 timeLeft--;
-                timerDisplaySpan.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+                updateTimerDisplay();
             }
         }, 1000);
     }
-    function resetTimer() {
-        timeLeft = TIME_PER_LEVEL;
-        timerDisplaySpan.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
-        startTimer();
-    }
+    function resetTimer() { timeLeft = TIME_PER_LEVEL; updateTimerDisplay(); startTimer(); }
 
-    function closeAllModals() {
+    function closeModals() {
         choicesModal.classList.remove('active');
         correctModal.classList.remove('active');
         gameOverModal.classList.remove('active');
         victoryModal.classList.remove('active');
-        if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
+        if(nextLevelTimeout) clearTimeout(nextLevelTimeout);
     }
 
-    function handleAnswer(selectedShape) {
-        if (!gameActive) return;
-        const isCorrect = (selectedShape === correctShapeType);
-        closeAllModals();
-        if (isCorrect) {
-            playCorrectSound();
+    function handleAnswer(selected) {
+        if(!gameActive) return;
+        const correct = (selected === correctShape);
+        closeModals();
+        if(correct) {
+            playCorrect();
             gameActive = false;
-            stopTimer();
+            clearInterval(timerInterval);
             score++;
-            scoreDisplaySpan.textContent = score;
-            if (currentLevel === MAX_LEVEL) {
+            scoreSpan.textContent = score;
+            if(currentLevel === MAX_LEVEL) {
                 victoryScoreMsg.innerText = `Score: ${score}`;
                 victoryModal.classList.add('active');
             } else {
                 correctModal.classList.add('active');
-                nextLevelTimeout = setTimeout(() => {
-                    correctModal.classList.remove('active');
-                    nextLevel();
-                }, 2000);
+                nextLevelTimeout = setTimeout(() => { correctModal.classList.remove('active'); nextLevel(); }, 2000);
             }
         } else {
-            playWrongSound();
+            playWrong();
             gameActive = false;
-            stopTimer();
+            clearInterval(timerInterval);
             gameOverScoreMsg.innerText = `Score: ${score}`;
             gameOverModal.classList.add('active');
         }
     }
 
     function nextLevel() {
-        if (currentLevel >= MAX_LEVEL) return;
+        if(currentLevel >= MAX_LEVEL) return;
         currentLevel++;
         generateLevel();
         renderShapes();
-        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        levelSpan.innerText = `LEVEL ${currentLevel}`;
         gameActive = true;
         resetTimer();
-        closeAllModals();
+        closeModals();
     }
 
-    function restartGame() {
-        stopTimer();
-        if (nextLevelTimeout) clearTimeout(nextLevelTimeout);
+    function restart() {
+        clearInterval(timerInterval);
+        if(nextLevelTimeout) clearTimeout(nextLevelTimeout);
         currentLevel = 1;
         score = 0;
-        scoreDisplaySpan.textContent = '0';
+        scoreSpan.textContent = '0';
         generateLevel();
         renderShapes();
-        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        levelSpan.innerText = `LEVEL ${currentLevel}`;
         gameActive = true;
         resetTimer();
-        closeAllModals();
+        closeModals();
     }
 
     function initGame() {
         currentLevel = 1;
         score = 0;
-        scoreDisplaySpan.textContent = '0';
+        scoreSpan.textContent = '0';
         generateLevel();
         renderShapes();
-        levelDisplaySpan.innerText = `LEVEL ${currentLevel}`;
+        levelSpan.innerText = `LEVEL ${currentLevel}`;
         gameActive = true;
         resetTimer();
-        closeAllModals();
+        closeModals();
     }
 
-    // Instruction modal
-    function showInstruction() {
-        instructionModal.classList.add('active');
-    }
-    closeInstructionBtn.addEventListener('click', () => {
-        instructionModal.classList.remove('active');
-        initGame();
-    });
-    restartGameBtn.addEventListener('click', () => restartGame());
-    victoryRestartBtn.addEventListener('click', () => restartGame());
-
-    showInstruction();
+    closeInstr.addEventListener('click', () => { instrModal.classList.remove('active'); initGame(); });
+    restartBtn.addEventListener('click', () => restart());
+    victoryRestart.addEventListener('click', () => restart());
+    instrModal.classList.add('active');
 </script>
 </body>
 </html>
