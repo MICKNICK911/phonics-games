@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phonics Decoding Tool | Dark Theme + Underline</title>
+    <style>
+        /* ----- DARK THEME (global) ----- */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #0a0f1e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ----- WORD DISPLAY (EXACTLY ORIGINAL STYLE FROM FIRST CODE) ----- */
+        #wordDisplay {
+            font-size: 64px;
+            letter-spacing: 15px;
+            margin: 80px 0;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 3px solid #ff9966;
+        }
+
+        /* ----- CONTROLS PANEL (DARK) ----- */
+        .controls-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e2f;
+            padding: 20px;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        .controls {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 14px 20px;
+            border: 2px solid #3a3a4a;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #2a2a3a;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
+            background: #1e1e2e;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            background-color: #11111a;
+            border-radius: 12px;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #2d2d3a;
+            color: #e0e0e0;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: #3d3d50;
+            transform: translateY(-1px);
+        }
+
+        button.active-tool {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 6px rgba(33,150,243,0.4);
+        }
+
+        button.clear-btn {
+            background: #c62828;
+            color: white;
+        }
+
+        button.clear-btn:hover {
+            background: #b71c1c;
+        }
+
+        /* ----- LETTER CONTAINERS (unchanged) ----- */
+        .letter-container {
+            display: inline-flex;
+            justify-content: center;
+            position: relative;
+            width: 70px;
+            margin: 0 15px;
+            vertical-align: top;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .letter-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .letter {
+            font-weight: bold;
+            font-size: 70px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* ----- ANNOTATIONS (original + new underline) ----- */
+        .annotation {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .vowel-arc {
+            border-top: 3px solid red;
+            border-radius: 0 0 50% 50%;
+            width: 40px;
+            height: 20px;
+            top: -15px;
+            left: 37%;
+            transform: translateX(-50%);
+        }
+
+        .consonant-cross::after {
+            content: "+";
+            position: absolute;
+            top: 60px;
+            left: calc(100% - 2px);
+            transform: translateX(-50%) rotate(45deg);
+            color: #FF5722;
+            font-size: 60px;
+            font-weight: 1px;
+            width: 2em;
+            text-align: center;
+        }
+
+        .syllable-divider {
+            border-right: 5px solid #2196F3;
+            height: 120px;
+            top: -10px;
+            right: -10px;
+        }
+
+        .vertical-strike {
+            border-left: 4px solid rgb(109, 14, 1);
+            height: 150px;
+            top: -100;
+            left: 37.5%;
+            transform: translateX(-50%);
+        }
+
+        .asterisk::before {
+            content: "*";
+            position: absolute;
+            top: -40px;
+            left: 80%;
+            transform: translateX(-50%);
+            color: #FF5722;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+
+        .asterisk2::before {
+            content: "+";
+            position: absolute;
+            top: 60px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%) rotate(45deg);
+            color: #FF5722;
+            font-size: 60px;
+            font-weight: 1px;
+            width: 2em;
+            text-align: center;
+        }
+        
+        .k::before {
+            content: "/k/";
+            position: absolute;
+            top: -75px;
+            left: calc(50% - 28px);
+            transform: translateX(-50%);
+            color: #e74c3c;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+        
+        .g::before {
+            content: "/g/";
+            position: absolute;
+            top: -75px;
+            left: calc(50% - 28px);
+            transform: translateX(-50%);
+            color: #e74c3c;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+        
+        .s::before {
+            content: "s";
+            position: absolute;
+            top: -82px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%);
+            color: #5a3601;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+            z-index: 9999;
+        }
+        
+        .j::before {
+            content: "j";
+            position: absolute;
+            top: -82px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%);
+            color: #5a3601;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+            z-index: 9999;
+        }
+
+        .semicircle {
+            border-top: 4px solid #0c5e02;
+            border-radius: 50% 50% 0 0;
+            width: 40px;
+            height: 20px;
+            top: -25px;
+            left: 37.5%;
+            transform: translateX(-50%) rotate(180deg);
+        }
+
+        .group-semicircle {
+            position: absolute;
+            height: 50px;
+            border: 5px solid #77014a;
+            border-top: none;
+            border-radius: 0 0 150px 150px;
+            top: calc(50% + 45px);
+            z-index: 0;
+        }
+        
+        .group-semicircle2 {
+            position: absolute;
+            height: 50px;
+            border: 5px solid #e7b40c;
+            border-bottom: none;
+            border-radius: 50% 50% 0 0;
+            top: calc(50% + -90px);
+            z-index: 0;
+        }
+
+        /* NEW: underline group */
+        .group-underline {
+            position: absolute;
+            height: 6px;
+            background: linear-gradient(90deg, #1e88e5, #00bcd4);
+            border-radius: 3px;
+            z-index: 15;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* result screens (dark theme adjusted) */
+        .result-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            color: white;
+        }
+
+        .result-screen h1, .result-screen h2 {
+            margin: 0 0 20px 0;
+            color: yellow;
+        }
+
+        .result-screen button {
+            background: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        #winScreen { background-color: #2e7d32; }
+        #UnknownOverScreen { background-color: #1565c0; }
+        #gameOverScreen { background-color: #c62828; }
+        
+        /* word bank modal (dark) */
+        .word-bank-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .word-bank-content {
+            background-color: #2a2a3a;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            color: white;
+        }
+        
+        .word-bank-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #ffcc80;
+            text-align: center;
+        }
+        
+        .word-bank-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .word-bank-item {
+            background-color: #3a3a4a;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #eee;
+        }
+        
+        .word-bank-item:hover {
+            background-color: #2196F3;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .close-word-bank {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* export screen dark */
+        #codeExportScreen pre {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 80vw;
+            max-height: 60vh;
+            overflow: auto;
+            background: #1e1e2e;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* desktop sidebar */
+        @media only screen and (min-width: 981px) {
+            .controls-container {
+                position: fixed;
+                bottom: 0;
+                width: 280px;
+                height: 100%;
+                overflow: auto;
+                right: 0;
+                background: #1e1e2f;
+                padding: 20px;
+                border-radius: 16px 0 0 16px;
+            }
+            
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            #wordDisplay {
+                margin-left: 20px;
+                margin-right: 300px;
+                width: calc(100% - 340px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="wordDisplay"></div>
+    
+    <!-- Word Bank Modal -->
+    <div class="word-bank-modal" id="wordBankModal">
+        <div class="word-bank-content">
+            <div class="word-bank-title">📚 Word Bank</div>
+            <div class="word-bank-list" id="wordBankList"></div>
+        </div>
+        <div class="close-word-bank" onclick="closeWordBank()">✕</div>
+    </div>
+
+    <!-- Export Code Screen -->
+    <div id="codeExportScreen" class="result-screen">
+        <h2>📄 Code Export</h2>
+        <pre id="codeSnippet" style="background: #1e1e2e; padding: 20px; border-radius: 8px; color: #0f0;"></pre>
+        <button onclick="copyCode()" style="background: #2196F3; margin-top: 15px;">Copy Code</button>
+        <button onclick="closeExportScreen()" style="background: #666; margin-top: 10px;">Close</button>
+    </div>
+
+    <div class="controls-container">
+        <div style="margin: 20px 0;">
+            <h3 style="color: #ffffff; text-align: center;">🔤 Phonics Decoder</h3>
+        </div>
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="wordInput" placeholder="Enter a word..." value="spray">
+                <button onclick="displayWord()" style="background: #2e7d32; color: white;">Show Word</button>
+            </div>
+
+            <div class="tools-grid">
+                <button onclick="showWordBank()" style="background: #6a1b9a; color: white;">📖 Word Bank</button>
+                <button data-tool="vowel" onclick="selectTool('vowel')">🔴 Long Vowel</button>
+                <button data-tool="semicircle" onclick="selectTool('semicircle')">🟢 Short Vowel</button>
+                <button data-tool="group-semi" onclick="selectTool('group-semi')">📉 Group Curve Down</button>
+                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">🌈 Rainbow Curve</button>
+                <!-- NEW UNDERLINE BUTTON -->
+                <button data-tool="group-underline" onclick="selectTool('group-underline')">📏 Underline Group</button>
+                <button data-tool="consonant" onclick="selectTool('consonant')">✚ Down Cross</button>
+                <button data-tool="divider" onclick="selectTool('divider')">❘ Split Bar</button>
+                <button data-tool="strike" onclick="selectTool('strike')">⚡ Vertical Strike</button>
+                <button data-tool="asterisk" onclick="selectTool('asterisk')">⭐ Guardian-Star</button>
+                <button data-tool="asterisk2" onclick="selectTool('asterisk2')">† Mid-Cross</button>
+                <button data-tool="s" onclick="selectTool('s')">🔤 s</button>
+                <button data-tool="j" onclick="selectTool('j')">🔤 j</button>
+                <button data-tool="k" onclick="selectTool('k')">🔊 /k/</button>
+                <button data-tool="g" onclick="selectTool('g')">🔊 /g/</button>
+                <button onclick="clearAll()" class="clear-btn">🗑️ Clear All</button>
+                <button onclick="saveCurrentWord()" style="background: #4CAF50; color: white;">💾 Save Word</button>
+                <button onclick="checkAnswer()" style="background: #2196F3; color: white;">✅ Check Answer</button>
+                <button onclick="showCodeExport()" style="background: #9C27B0; color: white;">📤 Export Code</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="winScreen" class="result-screen"><h2>🎉 Correct! Well Done!</h2><button onclick="resetGame()">Play Again</button></div>
+    <div id="gameOverScreen" class="result-screen"><h2>❌ Game Over! Try Again</h2><button onclick="resetGame()">Try Again</button></div>
+    <div id="UnknownOverScreen" class="result-screen"><h1>🤔 I DON'T KNOW!<br>Try Another Word</h1><button onclick="resetGame()">Try Again</button></div>
+
+    <script>
+        let currentTool = null;
+        let firstLetterIndex = -1;
+        let correctWords = [
+            { word: "spray", annotations: [{ type: "asterisk", position: 1 }] },
+            { word: "take", annotations: [{ type: "vowel-arc", position: 1 }, { type: "asterisk", position: 3 }] },
+            { word: "fish", annotations: [{ type: "group-semicircle", positions: [0,1] }, { type: "consonant-cross", position: 3 }] },
+            { word: "fetch", annotations: [{ type: "group-semicircle", positions: [0,1] }, { type: "consonant-cross", position: 3 }] }
+        ];
+
+        function displayWord() {
+            const word = document.getElementById('wordInput').value.toLowerCase().replace(/[^a-z]/g, '');
+            const display = document.getElementById('wordDisplay');
+            display.innerHTML = '';
+            word.split('').forEach((letter, index) => {
+                const container = document.createElement('div');
+                container.className = 'letter-container';
+                container.dataset.index = index;
+                container.innerHTML = `<div class="letter">${letter.toLowerCase()}</div>`;
+                container.onclick = handleAnnotation;
+                display.appendChild(container);
+            });
+        }
+
+        function selectTool(tool) {
+            currentTool = tool;
+            firstLetterIndex = -1;
+            document.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.classList.toggle('active-tool', btn.dataset.tool === tool);
+            });
+        }
+
+        // create group annotations (curve down, curve up, underline)
+        function createGroupAnnotation(index1, index2, toolType) {
+            const firstLetter = document.querySelector(`[data-index="${index1}"]`);
+            const lastLetter = document.querySelector(`[data-index="${index2}"]`);
+            if (!firstLetter || !lastLetter) return;
+
+            const display = document.getElementById('wordDisplay');
+            const firstRect = firstLetter.getBoundingClientRect();
+            const lastRect = lastLetter.getBoundingClientRect();
+            const displayRect = display.getBoundingClientRect();
+
+            let startX = firstRect.left - displayRect.left;
+            let endX = lastRect.right - displayRect.left - 37;
+            let width = endX - startX;
+
+            let groupDiv = null;
+            if (toolType === 'group-semi') {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else if (toolType === 'group-semi2') {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle2';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else if (toolType === 'group-underline') {
+                // underline positioned just below letters
+                const letterBottom = firstRect.bottom - displayRect.top;
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-underline';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+                groupDiv.style.top = `${letterBottom + 6}px`; // small gap
+            }
+
+            if (groupDiv) {
+                groupDiv.dataset.positions = `${index1},${index2}`;
+                display.appendChild(groupDiv);
+            }
+        }
+
+        function handleAnnotation(e) {
+            if (!currentTool) return;
+            const container = e.target.closest('.letter-container');
+            if (!container) return;
+            const currentIndex = parseInt(container.dataset.index);
+
+            // group tools (curve down, curve up, underline)
+            if (currentTool === 'group-semi' || currentTool === 'group-semi2' || currentTool === 'group-underline') {
+                if (firstLetterIndex === -1) {
+                    firstLetterIndex = currentIndex;
+                    container.style.backgroundColor = '#fff3e0';
+                } else {
+                    document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
+                    createGroupAnnotation(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex),
+                        currentTool
+                    );
+                    firstLetterIndex = -1;
+                }
+                return;
+            }
+
+            // syllable divider
+            if (currentTool === 'divider') {
+                const existing = container.querySelector('.syllable-divider');
+                if (existing) existing.remove();
+                else {
+                    const divider = document.createElement('div');
+                    divider.className = 'annotation syllable-divider';
+                    container.appendChild(divider);
+                }
+                return;
+            }
+
+            // vowel restriction for short vowel
+            if (currentTool === 'semicircle') {
+                const letter = container.textContent.trim();
+                if (!['a','e','i','o','u'].includes(letter)) return;
+            }
+
+            const annotationType = {
+                vowel: 'vowel-arc',
+                consonant: 'consonant-cross',
+                strike: 'vertical-strike',
+                asterisk: 'asterisk',
+                asterisk2: 'asterisk2',
+                semicircle: 'semicircle',
+                s: 's',
+                j: 'j',
+                g: 'g',
+                k: 'k'
+            }[currentTool];
+
+            if (!annotationType) return;
+
+            const existing = container.querySelector(`.${annotationType}`);
+            existing ? existing.remove() : container.appendChild(createAnnotation(annotationType));
+        }
+
+        function createAnnotation(type) {
+            const annotation = document.createElement('div');
+            annotation.className = `annotation ${type}`;
+            return annotation;
+        }
+
+        // collect all annotations including underline
+        function collectAnnotations() {
+            const annotations = [];
+            document.querySelectorAll('.annotation').forEach(ann => {
+                const container = ann.closest('.letter-container');
+                if (ann.classList.contains('group-semicircle') && ann.dataset.positions) {
+                    annotations.push({ type: 'group-semicircle', positions: ann.dataset.positions.split(',').map(Number) });
+                } else if (ann.classList.contains('group-semicircle2') && ann.dataset.positions) {
+                    annotations.push({ type: 'group-semicircle2', positions: ann.dataset.positions.split(',').map(Number) });
+                } else if (ann.classList.contains('group-underline') && ann.dataset.positions) {
+                    annotations.push({ type: 'group-underline', positions: ann.dataset.positions.split(',').map(Number) });
+                } else if (container) {
+                    const type = Array.from(ann.classList).find(c => c !== 'annotation');
+                    if (type) annotations.push({ type, position: parseInt(container.dataset.index) });
+                }
+            });
+            return annotations;
+        }
+
+        function checkAnswer() {
+            const userAnnotations = collectAnnotations();
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            
+            const patternsForCurrentWord = correctWords.filter(item => item.word === currentWord);
+            if (patternsForCurrentWord.length === 0) {
+                document.getElementById('UnknownOverScreen').style.display = 'block';
+                return;
+            }
+
+            const isCorrect = patternsForCurrentWord.some(pattern => {
+                const patternMap = new Map();
+                pattern.annotations.forEach(ann => {
+                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+                    patternMap.set(key, (patternMap.get(key) || 0) + 1);
+                });
+                const userMap = new Map();
+                userAnnotations.forEach(ann => {
+                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+                    userMap.set(key, (userMap.get(key) || 0) + 1);
+                });
+                if (patternMap.size !== userMap.size) return false;
+                for (const [key, count] of patternMap) {
+                    if (userMap.get(key) !== count) return false;
+                }
+                return true;
+            });
+
+            if (isCorrect) document.getElementById('winScreen').style.display = 'block';
+            else document.getElementById('gameOverScreen').style.display = 'block';
+        }
+
+        function resetGame() {
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('UnknownOverScreen').style.display = 'none';
+            clearAll();
+        }
+
+        function clearAll() {
+            currentTool = null;
+            firstLetterIndex = -1;
+            document.querySelectorAll('.active-tool').forEach(btn => btn.classList.remove('active-tool'));
+            document.getElementById('wordDisplay').innerHTML = '';
+            displayWord();
+        }
+
+        function saveCurrentWord() {
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            const annotations = collectAnnotations();
+            correctWords.push({ word: currentWord, annotations: annotations });
+            alert('✅ Word saved to word bank!');
+            displayWord();
+        }
+
+        // Export functions
+        function showCodeExport() {
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            const annotations = collectAnnotations();
+            const code = `{
+    word: "${currentWord}",
+    annotations: ${JSON.stringify(annotations, null, 4).replace(/"/g, "'")}
+}`;
+            document.getElementById('codeSnippet').textContent = code;
+            document.getElementById('codeExportScreen').style.display = 'block';
+        }
+
+        function copyCode() {
+            const textarea = document.createElement('textarea');
+            textarea.value = document.getElementById('codeSnippet').textContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Code copied to clipboard!');
+        }
+
+        function closeExportScreen() {
+            document.getElementById('codeExportScreen').style.display = 'none';
+        }
+
+        function showWordBank() {
+            const modal = document.getElementById('wordBankModal');
+            const wordList = document.getElementById('wordBankList');
+            wordList.innerHTML = '';
+            correctWords.forEach(wordData => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-bank-item';
+                wordItem.textContent = wordData.word;
+                wordItem.onclick = () => {
+                    document.getElementById('wordInput').value = wordData.word;
+                    displayWord();
+                    closeWordBank();
+                };
+                wordList.appendChild(wordItem);
+            });
+            modal.style.display = 'flex';
+        }
+
+        function closeWordBank() {
+            document.getElementById('wordBankModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('wordBankModal');
+            if (event.target === modal) closeWordBank();
+            const exportModal = document.getElementById('codeExportScreen');
+            if (event.target === exportModal) closeExportScreen();
+        };
+
+        displayWord();
+    </script>
+</body>
+</html>
