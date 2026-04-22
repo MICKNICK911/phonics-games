@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phonics Decoding Tool</title>
+    <style>
+        /* ----- ORIGINAL STYLES (preserved exactly) ----- */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e5c01, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #wordDisplay {
+            font-size: 64px;
+            letter-spacing: 15px;
+            margin: 80px 0;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 3px solid #ff9966;
+        }
+
+        .controls-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        .controls {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            flex-grow: 1;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33,150,243,0.1);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            background-color: black;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f2f5;
+            color: #1d1d1f;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: #e4e6e9;
+            transform: translateY(-1px);
+        }
+
+        button.active-tool {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 6px rgba(33,150,243,0.2);
+        }
+
+        button.clear-btn {
+            background: #ff3b30;
+            color: white;
+        }
+
+        button.clear-btn:hover {
+            background: #ff2d55;
+        }
+
+        .letter-container {
+            display: inline-flex;
+            justify-content: center;
+            position: relative;
+            width: 70px;
+            margin: 0 15px;
+            vertical-align: top;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .letter-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .letter {
+            font-weight: bold;
+            font-size: 70px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .annotation {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .vowel-arc {
+            border-top: 3px solid red;
+            border-radius: 0 0 50% 50%;
+            width: 40px;
+            height: 20px;
+            top: -15px;
+            left: 37%;
+            transform: translateX(-50%);
+        }
+
+        .consonant-cross::after {
+            content: "+";
+            position: absolute;
+            top: 60px;
+            left: calc(100% - 2px);
+            transform: translateX(-50%) rotate(45deg);
+            color: #FF5722;
+            font-size: 60px;
+            font-weight: 1px;
+            width: 2em;
+            text-align: center;
+        }
+
+        .syllable-divider {
+            border-right: 5px solid #2196F3;
+            height: 120px;
+            top: -10px;
+            right: -10px;
+        }
+
+        .vertical-strike {
+            border-left: 4px solid rgb(109, 14, 1);
+            height: 150px;
+            top: -100;
+            left: 37.5%;
+            transform: translateX(-50%);
+        }
+
+        .asterisk::before {
+            content: "*";
+            position: absolute;
+            top: -40px;
+            left: 80%;
+            transform: translateX(-50%);
+            color: #FF5722;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+
+        .asterisk2::before {
+            content: "+";
+            position: absolute;
+            top: 60px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%) rotate(45deg);
+            color: #FF5722;
+            font-size: 60px;
+            font-weight: 1px;
+            width: 2em;
+            text-align: center;
+        }
+        
+        .k::before {
+            content: "/k/";
+            position: absolute;
+            top: -75px;
+            left: calc(50% - 28px);
+            transform: translateX(-50%);
+            color: #e74c3c;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+        
+        .g::before {
+            content: "/g/";
+            position: absolute;
+            top: -75px;
+            left: calc(50% - 28px);
+            transform: translateX(-50%);
+            color: #e74c3c;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+        }
+        
+        .s::before {
+            content: "s";
+            position: absolute;
+            top: -82px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%);
+            color: #5a3601;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+            z-index: 9999;
+        }
+        
+        .j::before {
+            content: "j";
+            position: absolute;
+            top: -82px;
+            left: calc(50% + 45px);
+            transform: translateX(-50%);
+            color: #5a3601;
+            font-size: 50px;
+            font-weight: bold;
+            width: 1em;
+            text-align: center;
+            z-index: 9999;
+        }
+
+        .semicircle {
+            border-top: 4px solid #0c5e02;
+            border-radius: 50% 50% 0 0;
+            width: 40px;
+            height: 20px;
+            top: -25px;
+            left: 37.5%;
+            transform: translateX(-50%) rotate(180deg);
+        }
+
+        .group-semicircle {
+            position: absolute;
+            height: 50px;
+            border: 5px solid #77014a;
+            border-top: none;
+            border-radius: 0 0 150px 150px;
+            top: calc(50% + 45px);
+            z-index: 0;
+        }
+        
+        .group-semicircle2 {
+            position: absolute;
+            height: 50px;
+            border: 5px solid #e7b40c;
+            border-bottom: none;
+            border-radius: 50% 50% 0 0;
+            top: calc(50% + -90px);
+            z-index: 0;
+        }
+
+        /* NEW: underline group (tight under letters) */
+        .group-underline {
+            position: absolute;
+            height: 6px;
+            background: linear-gradient(90deg, #1e88e5, #00bcd4);
+            border-radius: 3px;
+            z-index: 15;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .result-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .result-screen h1 {
+            font-size: 50px;
+            margin: 0 0 20px 0;
+            color: yellow;
+        }
+
+        .result-screen button {
+            background: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        #winScreen { background-color: green; }
+        #UnknownOverScreen { background-color: blue; }
+        #gameOverScreen { background-color: red; }
+        
+        .word-bank-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .word-bank-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .word-bank-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .word-bank-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .word-bank-item {
+            background-color: #f0f2f5;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .word-bank-item:hover {
+            background-color: #2196F3;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .close-word-bank {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        @media only screen and (min-width: 981px) {
+            .controls-container {
+                position: fixed;
+                bottom: 0;
+                width: 15%;
+                height: 100%;
+                overflow: auto;
+                right: 0;
+                background: white;
+                padding: 20px;
+                box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
+            }
+            
+            .tools-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+                padding: 10px;
+                background-color: black;
+            }
+            
+            #wordDisplay {
+                margin-left: 10%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="wordDisplay"></div>
+    
+    <div class="word-bank-modal" id="wordBankModal">
+        <div class="word-bank-content">
+            <div class="word-bank-title">Word Bank</div>
+            <div class="word-bank-list" id="wordBankList"></div>
+        </div>
+        <div class="close-word-bank" onclick="closeWordBank()">✕</div>
+    </div>
+
+    <div class="controls-container">
+        <div style="margin: 30px">
+            <h3 style="color: #1d1d1f; text-align: center;">Phonics Decoder</h3>
+        </div>
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="wordInput" placeholder="Enter a word..." value="spray">
+                <button onclick="displayWord()" style="background: #34c759; color: white;">Show Word</button>
+            </div>
+
+            <div class="tools-grid">
+                <button onclick="showWordBank()" style="background: #9C27B0; color: white;">Word Bank</button>
+                <button data-tool="vowel" onclick="selectTool('vowel')">Long Vowel</button>
+                <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
+                <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
+                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve Up</button>
+                <!-- NEW underline button -->
+                <button data-tool="group-underline" onclick="selectTool('group-underline')">Underline Group</button>
+                <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
+                <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
+                <button data-tool="strike" onclick="selectTool('strike')">Vertical Strike</button>
+                <button data-tool="asterisk" onclick="selectTool('asterisk')">Guardian-Star</button>
+                <button data-tool="asterisk2" onclick="selectTool('asterisk2')">Mid-Cross</button>
+                <button data-tool="s" onclick="selectTool('s')">s</button>
+                <button data-tool="j" onclick="selectTool('j')">j</button>
+                <button data-tool="k" onclick="selectTool('k')">/k/</button>
+                <button data-tool="g" onclick="selectTool('g')">/g/</button>
+                <button onclick="clearAll()" class="clear-btn">Clear All</button>
+                <button onclick="saveCurrentWord()" style="background: #4CAF50; color: white;">Save Word</button>
+                <button onclick="checkAnswer()" style="background: #2196F3; color: white;">Check Answer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="winScreen" class="result-screen"><h1>CORRECT!<br>Well Done!</h1><button onclick="resetGame()">Play Again</button></div>
+    <div id="gameOverScreen" class="result-screen"><h1>WRONG!<br>Try Again</h1><button onclick="resetGame()">Try Again</button></div>
+    <div id="UnknownOverScreen" class="result-screen"><h1>I DON'T KNOW!<br>Try Another Word</h1><button onclick="resetGame()">Try Again</button></div>
+
+    <script>
+        let currentTool = null;
+        let firstLetterIndex = -1;
+        let correctWords = [
+            { word: "spray", annotations: [{ type: "asterisk", position: 1 }] },
+            { word: "take", annotations: [{ type: "vowel-arc", position: 1 }, { type: "asterisk", position: 3 }] },
+            { word: "fish", annotations: [{ type: "group-semicircle", positions: [0,1] }, { type: "consonant-cross", position: 3 }] },
+            { word: "fetch", annotations: [{ type: "group-semicircle", positions: [0,1] }, { type: "consonant-cross", position: 3 }] }
+        ];
+
+        function displayWord() {
+            const word = document.getElementById('wordInput').value.toLowerCase().replace(/[^a-z]/g, '');
+            const display = document.getElementById('wordDisplay');
+            display.innerHTML = '';
+            word.split('').forEach((letter, index) => {
+                const container = document.createElement('div');
+                container.className = 'letter-container';
+                container.dataset.index = index;
+                container.innerHTML = `<div class="letter">${letter.toLowerCase()}</div>`;
+                container.onclick = handleAnnotation;
+                display.appendChild(container);
+            });
+        }
+
+        function selectTool(tool) {
+            currentTool = tool;
+            firstLetterIndex = -1;
+            document.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.classList.toggle('active-tool', btn.dataset.tool === tool);
+            });
+        }
+
+        // create group annotations (curve down, curve up, underline)
+        function createGroupAnnotation(index1, index2, toolType) {
+            const firstLetter = document.querySelector(`[data-index="${index1}"]`);
+            const lastLetter = document.querySelector(`[data-index="${index2}"]`);
+            if (!firstLetter || !lastLetter) return;
+
+            const display = document.getElementById('wordDisplay');
+            const firstRect = firstLetter.getBoundingClientRect();
+            const lastRect = lastLetter.getBoundingClientRect();
+            const displayRect = display.getBoundingClientRect();
+            
+            let startX = firstRect.left - displayRect.left;
+            let endX = lastRect.right - displayRect.left - 37;
+            let width = endX - startX;
+            
+            let groupDiv = null;
+            if (toolType === 'group-semi') {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else if (toolType === 'group-semi2') {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle2';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else if (toolType === 'group-underline') {
+                // position underline directly below letters (tight)
+                const letterBottom = firstRect.bottom - displayRect.top;
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-underline';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+                groupDiv.style.top = `${letterBottom + 6}px`; // small gap
+            }
+            
+            if (groupDiv) {
+                groupDiv.dataset.positions = `${index1},${index2}`;
+                display.appendChild(groupDiv);
+            }
+        }
+
+        function handleAnnotation(e) {
+            if (!currentTool) return;
+            const container = e.target.closest('.letter-container');
+            if (!container) return;
+            const currentIndex = parseInt(container.dataset.index);
+
+            // group tools (curve down, curve up, underline)
+            if (currentTool === 'group-semi' || currentTool === 'group-semi2' || currentTool === 'group-underline') {
+                if (firstLetterIndex === -1) {
+                    firstLetterIndex = currentIndex;
+                    container.style.backgroundColor = '#fff3e0';
+                } else {
+                    document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
+                    createGroupAnnotation(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex),
+                        currentTool
+                    );
+                    firstLetterIndex = -1;
+                }
+                return;
+            }
+
+            // syllable divider
+            if (currentTool === 'divider') {
+                const existing = container.querySelector('.syllable-divider');
+                if (existing) existing.remove();
+                else {
+                    const divider = document.createElement('div');
+                    divider.className = 'annotation syllable-divider';
+                    container.appendChild(divider);
+                }
+                return;
+            }
+
+            const annotationType = {
+                vowel: 'vowel-arc',
+                consonant: 'consonant-cross',
+                strike: 'vertical-strike',
+                asterisk: 'asterisk',
+                asterisk2: 'asterisk2',
+                semicircle: 'semicircle',
+                s: 's',
+                j: 'j',
+                g: 'g',
+                k: 'k'
+            }[currentTool];
+
+            if (!annotationType) return;
+
+            const existing = container.querySelector(`.${annotationType}`);
+            existing ? existing.remove() : container.appendChild(createAnnotation(annotationType));
+        }
+
+        function createAnnotation(type) {
+            const annotation = document.createElement('div');
+            annotation.className = `annotation ${type}`;
+            return annotation;
+        }
+
+        function collectAnnotations() {
+            const annotations = [];
+            document.querySelectorAll('.annotation').forEach(ann => {
+                const container = ann.closest('.letter-container');
+                if (ann.classList.contains('group-semicircle')) {
+                    annotations.push({ type: 'group-semicircle', positions: ann.dataset.positions.split(',').map(Number) });
+                } else if (ann.classList.contains('group-semicircle2')) {
+                    annotations.push({ type: 'group-semicircle2', positions: ann.dataset.positions.split(',').map(Number) });
+                } else if (ann.classList.contains('group-underline')) {
+                    annotations.push({ type: 'group-underline', positions: ann.dataset.positions.split(',').map(Number) });
+                } else if (container) {
+                    const type = Array.from(ann.classList).find(c => c !== 'annotation');
+                    if (type) annotations.push({ type, position: parseInt(container.dataset.index) });
+                }
+            });
+            return annotations;
+        }
+
+        function checkAnswer() {
+            const userAnnotations = collectAnnotations();
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            
+            const patternsForCurrentWord = correctWords.filter(item => item.word === currentWord);
+            if (patternsForCurrentWord.length === 0) {
+                document.getElementById('UnknownOverScreen').style.display = 'block';
+                return;
+            }
+
+            const isCorrect = patternsForCurrentWord.some(pattern => {
+                const patternMap = new Map();
+                pattern.annotations.forEach(ann => {
+                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+                    patternMap.set(key, (patternMap.get(key) || 0) + 1);
+                });
+                const userMap = new Map();
+                userAnnotations.forEach(ann => {
+                    const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
+                    userMap.set(key, (userMap.get(key) || 0) + 1);
+                });
+                if (patternMap.size !== userMap.size) return false;
+                for (const [key, count] of patternMap) {
+                    if (userMap.get(key) !== count) return false;
+                }
+                return true;
+            });
+
+            if (isCorrect) document.getElementById('winScreen').style.display = 'block';
+            else document.getElementById('gameOverScreen').style.display = 'block';
+        }
+
+        function resetGame() {
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('UnknownOverScreen').style.display = 'none';
+            clearAll();
+        }
+
+        function clearAll() {
+            currentTool = null;
+            firstLetterIndex = -1;
+            document.querySelectorAll('.active-tool').forEach(btn => btn.classList.remove('active-tool'));
+            document.getElementById('wordDisplay').innerHTML = '';
+            displayWord();
+        }
+
+        function saveCurrentWord() {
+            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            const annotations = collectAnnotations();
+            correctWords.push({ word: currentWord, annotations: annotations });
+            alert('Word saved to correct words list!');
+            displayWord();
+        }
+
+        function showWordBank() {
+            const modal = document.getElementById('wordBankModal');
+            const wordList = document.getElementById('wordBankList');
+            wordList.innerHTML = '';
+            correctWords.forEach(wordData => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-bank-item';
+                wordItem.textContent = wordData.word;
+                wordItem.onclick = () => {
+                    document.getElementById('wordInput').value = wordData.word;
+                    displayWord();
+                    closeWordBank();
+                };
+                wordList.appendChild(wordItem);
+            });
+            modal.style.display = 'flex';
+        }
+
+        function closeWordBank() {
+            document.getElementById('wordBankModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('wordBankModal');
+            if (event.target === modal) closeWordBank();
+        };
+
+        displayWord();
+    </script>
+</body>
+</html>
