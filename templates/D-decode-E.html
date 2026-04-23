@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Phonics Decoding Tool | Dark Theme + Underline</title>
+    <title>Phonics Decoding Tool | RA + Dark Theme + Underline + Export</title>
     <style>
-        /* ----- DARK THEME (global) ----- */
+        /* ----- DARK THEME (applied to original RA structure) ----- */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
@@ -16,7 +16,7 @@
             justify-content: center;
         }
 
-        /* ----- WORD DISPLAY (EXACTLY ORIGINAL STYLE FROM FIRST CODE) ----- */
+        /* ----- WORD DISPLAY (exactly as RA) ----- */
         #wordDisplay {
             font-size: 64px;
             letter-spacing: 15px;
@@ -34,7 +34,7 @@
             border: 3px solid #ff9966;
         }
 
-        /* ----- CONTROLS PANEL (DARK) ----- */
+        /* ----- CONTROLS PANEL (dark, but same fixed bottom / right sidebar) ----- */
         .controls-container {
             position: fixed;
             bottom: 0;
@@ -45,6 +45,7 @@
             box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
+            z-index: 100;
         }
 
         .controls {
@@ -72,7 +73,7 @@
         input:focus {
             outline: none;
             border-color: #2196F3;
-            box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
+            box-shadow: 0 0 0 3px rgba(33,150,243,0.1);
             background: #1e1e2e;
         }
 
@@ -108,7 +109,7 @@
         button.active-tool {
             background: #2196F3;
             color: white;
-            box-shadow: 0 2px 6px rgba(33,150,243,0.4);
+            box-shadow: 0 2px 6px rgba(33,150,243,0.2);
         }
 
         button.clear-btn {
@@ -120,7 +121,7 @@
             background: #b71c1c;
         }
 
-        /* ----- LETTER CONTAINERS (unchanged) ----- */
+        /* ----- LETTER CONTAINERS (exactly RA) ----- */
         .letter-container {
             display: inline-flex;
             justify-content: center;
@@ -144,7 +145,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* ----- ANNOTATIONS (original + new underline) ----- */
+        /* ----- ANNOTATIONS (RA plus underline) ----- */
         .annotation {
             position: absolute;
             pointer-events: none;
@@ -298,17 +299,16 @@
             z-index: 0;
         }
 
-        /* NEW: underline group */
         .group-underline {
             position: absolute;
             height: 6px;
             background: linear-gradient(90deg, #1e88e5, #00bcd4);
             border-radius: 3px;
             z-index: 15;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* result screens (dark theme adjusted) */
+        /* result screens (dark) */
         .result-screen {
             position: fixed;
             top: 50%;
@@ -403,42 +403,101 @@
             cursor: pointer;
         }
 
-        /* export screen dark */
-        #codeExportScreen pre {
+        /* export screen (dark) */
+        .export-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 2100;
+            justify-content: center;
+            align-items: center;
+        }
+        .export-content {
+            background: #1e1e2e;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: #eee;
+        }
+        .export-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3a3a4a;
+            padding-bottom: 10px;
+        }
+        .export-header h2 {
+            margin: 0;
+            color: #ffcc80;
+        }
+        .close-export {
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #ccc;
+            padding: 0 8px;
+        }
+        .close-export:hover {
+            color: white;
+        }
+        .code-preview {
+            background: #11111a;
+            border-radius: 16px;
+            padding: 12px;
             font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #0f0;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-width: 80vw;
-            max-height: 60vh;
+            max-height: 50vh;
             overflow: auto;
-            background: #1e1e2e;
-            color: #0f0;
-            padding: 15px;
-            border-radius: 8px;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .export-buttons button {
+            padding: 10px 20px;
         }
 
-        /* desktop sidebar */
+        /* desktop sidebar (exactly RA) */
         @media only screen and (min-width: 981px) {
             .controls-container {
                 position: fixed;
                 bottom: 0;
-                width: 280px;
+                width: 15%;
                 height: 100%;
                 overflow: auto;
                 right: 0;
                 background: #1e1e2f;
                 padding: 20px;
-                border-radius: 16px 0 0 16px;
+                box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
             }
             
             .tools-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+                padding: 10px;
+                background-color: #11111a;
             }
             
             #wordDisplay {
-                margin-left: 20px;
-                margin-right: 300px;
-                width: calc(100% - 340px);
+                margin-left: 10%;
             }
         }
     </style>
@@ -449,23 +508,30 @@
     <!-- Word Bank Modal -->
     <div class="word-bank-modal" id="wordBankModal">
         <div class="word-bank-content">
-            <div class="word-bank-title">📚 Word Bank</div>
+            <div class="word-bank-title">Word Bank</div>
             <div class="word-bank-list" id="wordBankList"></div>
         </div>
         <div class="close-word-bank" onclick="closeWordBank()">✕</div>
     </div>
 
-    <!-- Export Code Screen -->
-    <div id="codeExportScreen" class="result-screen">
-        <h2>📄 Code Export</h2>
-        <pre id="codeSnippet" style="background: #1e1e2e; padding: 20px; border-radius: 8px; color: #0f0;"></pre>
-        <button onclick="copyCode()" style="background: #2196F3; margin-top: 15px;">Copy Code</button>
-        <button onclick="closeExportScreen()" style="background: #666; margin-top: 10px;">Close</button>
+    <!-- Export Modal -->
+    <div id="exportModal" class="export-modal">
+        <div class="export-content">
+            <div class="export-header">
+                <h2>📄 Export Word Code</h2>
+                <button class="close-export" onclick="closeExport()">✕</button>
+            </div>
+            <div class="code-preview" id="codeSnippet"></div>
+            <div class="export-buttons">
+                <button onclick="copyCode()" style="background: #2196F3;">Copy Code</button>
+                <button onclick="closeExport()" style="background: #666;">Close</button>
+            </div>
+        </div>
     </div>
 
     <div class="controls-container">
-        <div style="margin: 20px 0;">
-            <h3 style="color: #ffffff; text-align: center;">🔤 Phonics Decoder</h3>
+        <div style="margin: 30px">
+            <h3 style="color: #ffffff; text-align: center;">Phonics Decoder</h3>
         </div>
         <div class="controls">
             <div class="input-group">
@@ -474,35 +540,36 @@
             </div>
 
             <div class="tools-grid">
-                <button onclick="showWordBank()" style="background: #6a1b9a; color: white;">📖 Word Bank</button>
-                <button data-tool="vowel" onclick="selectTool('vowel')">🔴 Long Vowel</button>
-                <button data-tool="semicircle" onclick="selectTool('semicircle')">🟢 Short Vowel</button>
-                <button data-tool="group-semi" onclick="selectTool('group-semi')">📉 Group Curve Down</button>
-                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">🌈 Rainbow Curve</button>
-                <!-- NEW UNDERLINE BUTTON -->
-                <button data-tool="group-underline" onclick="selectTool('group-underline')">📏 Underline Group</button>
-                <button data-tool="consonant" onclick="selectTool('consonant')">✚ Down Cross</button>
-                <button data-tool="divider" onclick="selectTool('divider')">❘ Split Bar</button>
-                <button data-tool="strike" onclick="selectTool('strike')">⚡ Vertical Strike</button>
-                <button data-tool="asterisk" onclick="selectTool('asterisk')">⭐ Guardian-Star</button>
-                <button data-tool="asterisk2" onclick="selectTool('asterisk2')">† Mid-Cross</button>
-                <button data-tool="s" onclick="selectTool('s')">🔤 s</button>
-                <button data-tool="j" onclick="selectTool('j')">🔤 j</button>
-                <button data-tool="k" onclick="selectTool('k')">🔊 /k/</button>
-                <button data-tool="g" onclick="selectTool('g')">🔊 /g/</button>
-                <button onclick="clearAll()" class="clear-btn">🗑️ Clear All</button>
-                <button onclick="saveCurrentWord()" style="background: #4CAF50; color: white;">💾 Save Word</button>
-                <button onclick="checkAnswer()" style="background: #2196F3; color: white;">✅ Check Answer</button>
-                <button onclick="showCodeExport()" style="background: #9C27B0; color: white;">📤 Export Code</button>
+                <button onclick="showWordBank()" style="background: #6a1b9a; color: white;">Word Bank</button>
+                <button data-tool="vowel" onclick="selectTool('vowel')">Long Vowel</button>
+                <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
+                <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
+                <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve Up</button>
+                <!-- NEW underline button -->
+                <button data-tool="group-underline" onclick="selectTool('group-underline')">Underline Group</button>
+                <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
+                <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
+                <button data-tool="strike" onclick="selectTool('strike')">Vertical Strike</button>
+                <button data-tool="asterisk" onclick="selectTool('asterisk')">Guardian-Star</button>
+                <button data-tool="asterisk2" onclick="selectTool('asterisk2')">Mid-Cross</button>
+                <button data-tool="s" onclick="selectTool('s')">s</button>
+                <button data-tool="j" onclick="selectTool('j')">j</button>
+                <button data-tool="k" onclick="selectTool('k')">/k/</button>
+                <button data-tool="g" onclick="selectTool('g')">/g/</button>
+                <button onclick="clearAll()" class="clear-btn">Clear All</button>
+                <button onclick="saveCurrentWord()" style="background: #4CAF50; color: white;">Save Word</button>
+                <button onclick="checkAnswer()" style="background: #2196F3; color: white;">Check Answer</button>
+                <button onclick="showExport()" style="background: #9C27B0; color: white;">Export Code</button>
             </div>
         </div>
     </div>
 
-    <div id="winScreen" class="result-screen"><h2>🎉 Correct! Well Done!</h2><button onclick="resetGame()">Play Again</button></div>
-    <div id="gameOverScreen" class="result-screen"><h2>❌ Game Over! Try Again</h2><button onclick="resetGame()">Try Again</button></div>
-    <div id="UnknownOverScreen" class="result-screen"><h1>🤔 I DON'T KNOW!<br>Try Another Word</h1><button onclick="resetGame()">Try Again</button></div>
+    <div id="winScreen" class="result-screen"><h1>CORRECT!<br>Well Done!</h1><button onclick="resetGame()">Play Again</button></div>
+    <div id="gameOverScreen" class="result-screen"><h1>WRONG!<br>Try Again</h1><button onclick="resetGame()">Try Again</button></div>
+    <div id="UnknownOverScreen" class="result-screen"><h1>I DON'T KNOW!<br>Try Another Word</h1><button onclick="resetGame()">Try Again</button></div>
 
     <script>
+        // ----- RA ORIGINAL LOGIC, extended with underline and export -----
         let currentTool = null;
         let firstLetterIndex = -1;
         let correctWords = [
@@ -512,6 +579,7 @@
             { word: "fetch", annotations: [{ type: "group-semicircle", positions: [0,1] }, { type: "consonant-cross", position: 3 }] }
         ];
 
+        // RA displayWord
         function displayWord() {
             const word = document.getElementById('wordInput').value.toLowerCase().replace(/[^a-z]/g, '');
             const display = document.getElementById('wordDisplay');
@@ -534,8 +602,8 @@
             });
         }
 
-        // create group annotations (curve down, curve up, underline)
-        function createGroupAnnotation(index1, index2, toolType) {
+        // RA group curve creation (extended for underline)
+        function createGroupSemicircle(index1, index2, isRainbow = false, isUnderline = false) {
             const firstLetter = document.querySelector(`[data-index="${index1}"]`);
             const lastLetter = document.querySelector(`[data-index="${index2}"]`);
             if (!firstLetter || !lastLetter) return;
@@ -544,32 +612,31 @@
             const firstRect = firstLetter.getBoundingClientRect();
             const lastRect = lastLetter.getBoundingClientRect();
             const displayRect = display.getBoundingClientRect();
-
+            
             let startX = firstRect.left - displayRect.left;
             let endX = lastRect.right - displayRect.left - 37;
             let width = endX - startX;
-
+            
             let groupDiv = null;
-            if (toolType === 'group-semi') {
-                groupDiv = document.createElement('div');
-                groupDiv.className = 'annotation group-semicircle';
-                groupDiv.style.left = `${startX}px`;
-                groupDiv.style.width = `${width}px`;
-            } else if (toolType === 'group-semi2') {
-                groupDiv = document.createElement('div');
-                groupDiv.className = 'annotation group-semicircle2';
-                groupDiv.style.left = `${startX}px`;
-                groupDiv.style.width = `${width}px`;
-            } else if (toolType === 'group-underline') {
-                // underline positioned just below letters
+            if (isUnderline) {
                 const letterBottom = firstRect.bottom - displayRect.top;
                 groupDiv = document.createElement('div');
                 groupDiv.className = 'annotation group-underline';
                 groupDiv.style.left = `${startX}px`;
                 groupDiv.style.width = `${width}px`;
-                groupDiv.style.top = `${letterBottom + 6}px`; // small gap
+                groupDiv.style.top = `${letterBottom + 6}px`;
+            } else if (isRainbow) {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle2';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
             }
-
+            
             if (groupDiv) {
                 groupDiv.dataset.positions = `${index1},${index2}`;
                 display.appendChild(groupDiv);
@@ -582,24 +649,52 @@
             if (!container) return;
             const currentIndex = parseInt(container.dataset.index);
 
-            // group tools (curve down, curve up, underline)
-            if (currentTool === 'group-semi' || currentTool === 'group-semi2' || currentTool === 'group-underline') {
+            if (currentTool === 'group-semi') {
                 if (firstLetterIndex === -1) {
                     firstLetterIndex = currentIndex;
                     container.style.backgroundColor = '#fff3e0';
                 } else {
                     document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
-                    createGroupAnnotation(
+                    createGroupSemicircle(
                         Math.min(firstLetterIndex, currentIndex),
                         Math.max(firstLetterIndex, currentIndex),
-                        currentTool
+                        false, false
+                    );
+                    firstLetterIndex = -1;
+                }
+                return;
+            }
+            if (currentTool === 'group-semi2') {
+                if (firstLetterIndex === -1) {
+                    firstLetterIndex = currentIndex;
+                    container.style.backgroundColor = '#fff3e0';
+                } else {
+                    document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
+                    createGroupSemicircle(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex),
+                        true, false
+                    );
+                    firstLetterIndex = -1;
+                }
+                return;
+            }
+            if (currentTool === 'group-underline') {
+                if (firstLetterIndex === -1) {
+                    firstLetterIndex = currentIndex;
+                    container.style.backgroundColor = '#fff3e0';
+                } else {
+                    document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
+                    createGroupSemicircle(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex),
+                        false, true
                     );
                     firstLetterIndex = -1;
                 }
                 return;
             }
 
-            // syllable divider
             if (currentTool === 'divider') {
                 const existing = container.querySelector('.syllable-divider');
                 if (existing) existing.remove();
@@ -631,27 +726,26 @@
             }[currentTool];
 
             if (!annotationType) return;
-
             const existing = container.querySelector(`.${annotationType}`);
             existing ? existing.remove() : container.appendChild(createAnnotation(annotationType));
         }
 
         function createAnnotation(type) {
-            const annotation = document.createElement('div');
-            annotation.className = `annotation ${type}`;
-            return annotation;
+            const ann = document.createElement('div');
+            ann.className = `annotation ${type}`;
+            return ann;
         }
 
-        // collect all annotations including underline
+        // collect all annotations (including underline)
         function collectAnnotations() {
             const annotations = [];
             document.querySelectorAll('.annotation').forEach(ann => {
                 const container = ann.closest('.letter-container');
-                if (ann.classList.contains('group-semicircle') && ann.dataset.positions) {
+                if (ann.classList.contains('group-semicircle')) {
                     annotations.push({ type: 'group-semicircle', positions: ann.dataset.positions.split(',').map(Number) });
-                } else if (ann.classList.contains('group-semicircle2') && ann.dataset.positions) {
+                } else if (ann.classList.contains('group-semicircle2')) {
                     annotations.push({ type: 'group-semicircle2', positions: ann.dataset.positions.split(',').map(Number) });
-                } else if (ann.classList.contains('group-underline') && ann.dataset.positions) {
+                } else if (ann.classList.contains('group-underline')) {
                     annotations.push({ type: 'group-underline', positions: ann.dataset.positions.split(',').map(Number) });
                 } else if (container) {
                     const type = Array.from(ann.classList).find(c => c !== 'annotation');
@@ -661,17 +755,16 @@
             return annotations;
         }
 
+        // RA checkAnswer (extended)
         function checkAnswer() {
             const userAnnotations = collectAnnotations();
             const currentWord = document.getElementById('wordInput').value.toLowerCase();
-            
-            const patternsForCurrentWord = correctWords.filter(item => item.word === currentWord);
-            if (patternsForCurrentWord.length === 0) {
+            const patterns = correctWords.filter(item => item.word === currentWord);
+            if (patterns.length === 0) {
                 document.getElementById('UnknownOverScreen').style.display = 'block';
                 return;
             }
-
-            const isCorrect = patternsForCurrentWord.some(pattern => {
+            const isCorrect = patterns.some(pattern => {
                 const patternMap = new Map();
                 pattern.annotations.forEach(ann => {
                     const key = ann.type + (ann.positions ? ann.positions.join(',') : ann.position);
@@ -688,7 +781,6 @@
                 }
                 return true;
             });
-
             if (isCorrect) document.getElementById('winScreen').style.display = 'block';
             else document.getElementById('gameOverScreen').style.display = 'block';
         }
@@ -709,66 +801,51 @@
         }
 
         function saveCurrentWord() {
-            const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            const word = document.getElementById('wordInput').value.toLowerCase().replace(/[^a-z]/g, '');
+            if (!word) return;
             const annotations = collectAnnotations();
-            correctWords.push({ word: currentWord, annotations: annotations });
+            correctWords.push({ word, annotations });
             alert('✅ Word saved to word bank!');
             displayWord();
         }
 
-        // Export functions
-        function showCodeExport() {
-            const currentWord = document.getElementById('wordInput').value.toLowerCase();
-            const annotations = collectAnnotations();
-            const code = `{
-    word: "${currentWord}",
-    annotations: ${JSON.stringify(annotations, null, 4).replace(/"/g, "'")}
-}`;
-            document.getElementById('codeSnippet').textContent = code;
-            document.getElementById('codeExportScreen').style.display = 'block';
-        }
-
-        function copyCode() {
-            const textarea = document.createElement('textarea');
-            textarea.value = document.getElementById('codeSnippet').textContent;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert('Code copied to clipboard!');
-        }
-
-        function closeExportScreen() {
-            document.getElementById('codeExportScreen').style.display = 'none';
-        }
-
+        // Word Bank
         function showWordBank() {
             const modal = document.getElementById('wordBankModal');
-            const wordList = document.getElementById('wordBankList');
-            wordList.innerHTML = '';
-            correctWords.forEach(wordData => {
-                const wordItem = document.createElement('div');
-                wordItem.className = 'word-bank-item';
-                wordItem.textContent = wordData.word;
-                wordItem.onclick = () => {
-                    document.getElementById('wordInput').value = wordData.word;
+            const list = document.getElementById('wordBankList');
+            list.innerHTML = '';
+            correctWords.forEach(wd => {
+                const item = document.createElement('div');
+                item.className = 'word-bank-item';
+                item.textContent = wd.word;
+                item.onclick = () => {
+                    document.getElementById('wordInput').value = wd.word;
                     displayWord();
                     closeWordBank();
                 };
-                wordList.appendChild(wordItem);
+                list.appendChild(item);
             });
             modal.style.display = 'flex';
         }
+        function closeWordBank() { document.getElementById('wordBankModal').style.display = 'none'; }
 
-        function closeWordBank() {
-            document.getElementById('wordBankModal').style.display = 'none';
+        // Export functions
+        function showExport() {
+            const word = document.getElementById('wordInput').value.toLowerCase();
+            const annotations = collectAnnotations();
+            const code = `{\n    word: "${word}",\n    annotations: ${JSON.stringify(annotations, null, 4).replace(/"/g, "'")}\n}`;
+            document.getElementById('codeSnippet').innerText = code;
+            document.getElementById('exportModal').style.display = 'flex';
+        }
+        function closeExport() { document.getElementById('exportModal').style.display = 'none'; }
+        function copyCode() {
+            const code = document.getElementById('codeSnippet').innerText;
+            navigator.clipboard.writeText(code).then(() => alert('Code copied to clipboard!')).catch(() => alert('Failed to copy'));
         }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('wordBankModal');
-            if (event.target === modal) closeWordBank();
-            const exportModal = document.getElementById('codeExportScreen');
-            if (event.target === exportModal) closeExportScreen();
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('wordBankModal')) closeWordBank();
+            if (e.target === document.getElementById('exportModal')) closeExport();
         };
 
         displayWord();

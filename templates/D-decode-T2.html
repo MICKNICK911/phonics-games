@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Phonics Decoding Tool | RA + Dark Theme + Underline + Word Manager</title>
+    <title>Phonics Decoding Tool | Dark Theme + Underline + Word Manager</title>
     <style>
         /* ----- DARK THEME (applied to RA structure, no layout changes) ----- */
         body {
@@ -33,15 +33,17 @@
             border: 3px solid #ff9966;
         }
 
-        /* controls container - NOT fixed, flows naturally (exactly as RA) */
         .controls-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: #1e1e2f;  /* dark panel */
             padding: 20px;
-            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
-            border-radius: 16px;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 1200px;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            z-index: 100;
         }
 
         .controls {
@@ -70,6 +72,7 @@
             outline: none;
             border-color: #2196F3;
             box-shadow: 0 0 0 3px rgba(33,150,243,0.1);
+            background: #1e1e2e;
         }
 
         .tools-grid {
@@ -181,6 +184,7 @@
             left: 37.5%;
             transform: translateX(-50%);
         }
+
         .asterisk::before {
             content: "*";
             position: absolute;
@@ -291,7 +295,6 @@
             z-index: 0;
         }
 
-        /* NEW underline group */
         .group-underline {
             position: absolute;
             height: 6px;
@@ -394,7 +397,7 @@
             cursor: pointer;
         }
 
-        /* Word Manager Modal (no JSON, only delete) */
+        /* Word Manager Modal */
         .manager-modal {
             display: none;
             position: fixed;
@@ -498,10 +501,29 @@
 
         @media only screen and (min-width: 981px) {
             .controls-container {
-                width: 100%;
+                position: fixed;
+                bottom: 0;
+                width: 15%;
+                height: 100%;
+                overflow: auto;
+                right: 0;
+                background: #1e1e2f;
+                padding: 20px;
+                box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
             }
+            
             .tools-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+                padding: 10px;
+                background-color: #11111a;
+            }
+            
+            #wordDisplay {
+                margin-left: 10%;
             }
         }
     </style>
@@ -548,7 +570,6 @@
                 <button data-tool="semicircle" onclick="selectTool('semicircle')">Short Vowel</button>
                 <button data-tool="group-semi" onclick="selectTool('group-semi')">Group Curve Down</button>
                 <button data-tool="group-semi2" onclick="selectTool('group-semi2')">Rainbow Curve Up</button>
-                <!-- NEW underline button -->
                 <button data-tool="group-underline" onclick="selectTool('group-underline')">Underline Group</button>
                 <button data-tool="consonant" onclick="selectTool('consonant')">Down Cross</button>
                 <button data-tool="divider" onclick="selectTool('divider')">Split Bar</button>
@@ -593,7 +614,6 @@
                 container.onclick = handleAnnotation;
                 display.appendChild(container);
             });
-            setTimeout(() => repositionAllAnnotations(), 10);
         }
 
         function selectTool(tool) {
@@ -604,7 +624,7 @@
             });
         }
 
-        function createGroupSemicircle(index1, index2, isRainbow = false) {
+        function createGroupAnnotation(index1, index2, toolType) {
             const firstLetter = document.querySelector(`[data-index="${index1}"]`);
             const lastLetter = document.querySelector(`[data-index="${index2}"]`);
             if (!firstLetter || !lastLetter) return;
@@ -614,67 +634,34 @@
             const lastRect = lastLetter.getBoundingClientRect();
             const displayRect = display.getBoundingClientRect();
             
-            const startX = firstRect.left - displayRect.left;
-            const endX = lastRect.right - displayRect.left - 37;
-            const width = endX - startX;
+            let startX = firstRect.left - displayRect.left;
+            let endX = lastRect.right - displayRect.left - 37;
+            let width = endX - startX;
             
-            const semicircle = document.createElement('div');
-            if (isRainbow) {
-                semicircle.className = 'annotation group-semicircle2';
-            } else {
-                semicircle.className = 'annotation group-semicircle';
+            let groupDiv = null;
+            if (toolType === 'group-semi') {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else if (toolType === 'group-semi2') {
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-semicircle2';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+            } else if (toolType === 'group-underline') {
+                const letterBottom = firstRect.bottom - displayRect.top;
+                groupDiv = document.createElement('div');
+                groupDiv.className = 'annotation group-underline';
+                groupDiv.style.left = `${startX}px`;
+                groupDiv.style.width = `${width}px`;
+                groupDiv.style.top = `${letterBottom + 6}px`;
             }
-            semicircle.dataset.positions = `${index1},${index2}`;
-            semicircle.style.left = `${startX}px`;
-            semicircle.style.width = `${width}px`;
-            display.appendChild(semicircle);
-        }
-
-        function createGroupUnderline(index1, index2) {
-            const firstLetter = document.querySelector(`[data-index="${index1}"]`);
-            const lastLetter = document.querySelector(`[data-index="${index2}"]`);
-            if (!firstLetter || !lastLetter) return;
-
-            const display = document.getElementById('wordDisplay');
-            const firstRect = firstLetter.getBoundingClientRect();
-            const lastRect = lastLetter.getBoundingClientRect();
-            const displayRect = display.getBoundingClientRect();
             
-            const startX = firstRect.left - displayRect.left;
-            const endX = lastRect.right - displayRect.left - 37;
-            const width = endX - startX;
-            const letterBottom = firstRect.bottom - displayRect.top;
-            
-            const underline = document.createElement('div');
-            underline.className = 'annotation group-underline';
-            underline.dataset.positions = `${index1},${index2}`;
-            underline.style.left = `${startX}px`;
-            underline.style.width = `${width}px`;
-            underline.style.top = `${letterBottom + 6}px`;
-            display.appendChild(underline);
-        }
-
-        function repositionAllAnnotations() {
-            document.querySelectorAll('.group-semicircle, .group-semicircle2, .group-underline').forEach(ann => {
-                const positions = ann.dataset.positions.split(',').map(Number);
-                const [idx1, idx2] = positions;
-                const firstLetter = document.querySelector(`[data-index="${idx1}"]`);
-                const lastLetter = document.querySelector(`[data-index="${idx2}"]`);
-                if (!firstLetter || !lastLetter) return;
-                const display = document.getElementById('wordDisplay');
-                const displayRect = display.getBoundingClientRect();
-                const firstRect = firstLetter.getBoundingClientRect();
-                const lastRect = lastLetter.getBoundingClientRect();
-                const startX = firstRect.left - displayRect.left;
-                const endX = lastRect.right - displayRect.left - 37;
-                const width = endX - startX;
-                ann.style.left = `${startX}px`;
-                ann.style.width = `${width}px`;
-                if (ann.classList.contains('group-underline')) {
-                    const letterBottom = firstRect.bottom - displayRect.top;
-                    ann.style.top = `${letterBottom + 6}px`;
-                }
-            });
+            if (groupDiv) {
+                groupDiv.dataset.positions = `${index1},${index2}`;
+                display.appendChild(groupDiv);
+            }
         }
 
         function handleAnnotation(e) {
@@ -689,13 +676,11 @@
                     container.style.backgroundColor = '#fff3e0';
                 } else {
                     document.querySelectorAll('.letter-container').forEach(c => c.style.backgroundColor = '');
-                    if (currentTool === 'group-semi') {
-                        createGroupSemicircle(Math.min(firstLetterIndex, currentIndex), Math.max(firstLetterIndex, currentIndex), false);
-                    } else if (currentTool === 'group-semi2') {
-                        createGroupSemicircle(Math.min(firstLetterIndex, currentIndex), Math.max(firstLetterIndex, currentIndex), true);
-                    } else if (currentTool === 'group-underline') {
-                        createGroupUnderline(Math.min(firstLetterIndex, currentIndex), Math.max(firstLetterIndex, currentIndex));
-                    }
+                    createGroupAnnotation(
+                        Math.min(firstLetterIndex, currentIndex),
+                        Math.max(firstLetterIndex, currentIndex),
+                        currentTool
+                    );
                     firstLetterIndex = -1;
                 }
                 return;
@@ -726,6 +711,7 @@
             }[currentTool];
 
             if (!annotationType) return;
+
             const existing = container.querySelector(`.${annotationType}`);
             existing ? existing.remove() : container.appendChild(createAnnotation(annotationType));
         }
@@ -757,11 +743,13 @@
         function checkAnswer() {
             const userAnnotations = collectAnnotations();
             const currentWord = document.getElementById('wordInput').value.toLowerCase();
+            
             const patternsForCurrentWord = correctWords.filter(item => item.word === currentWord);
             if (patternsForCurrentWord.length === 0) {
                 document.getElementById('UnknownOverScreen').style.display = 'block';
                 return;
             }
+
             const isCorrect = patternsForCurrentWord.some(pattern => {
                 const patternMap = new Map();
                 pattern.annotations.forEach(ann => {
@@ -779,6 +767,7 @@
                 }
                 return true;
             });
+
             if (isCorrect) document.getElementById('winScreen').style.display = 'block';
             else document.getElementById('gameOverScreen').style.display = 'block';
         }
@@ -803,7 +792,7 @@
             if (!currentWord) return;
             const annotations = collectAnnotations();
             correctWords.push({ word: currentWord, annotations: annotations });
-            alert('Word saved to correct words list!');
+            alert('Word saved to word bank!');
             displayWord();
         }
 
@@ -825,14 +814,18 @@
             modal.style.display = 'flex';
         }
 
-        function closeWordBank() { document.getElementById('wordBankModal').style.display = 'none'; }
+        function closeWordBank() {
+            document.getElementById('wordBankModal').style.display = 'none';
+        }
 
         // Word Manager functions
         function openWordManager() {
             renderManagerList();
             document.getElementById('wordManagerModal').style.display = 'flex';
         }
-        function closeWordManager() { document.getElementById('wordManagerModal').style.display = 'none'; }
+        function closeWordManager() {
+            document.getElementById('wordManagerModal').style.display = 'none';
+        }
         function renderManagerList() {
             const container = document.getElementById('managerWordsList');
             container.innerHTML = '';
@@ -865,11 +858,11 @@
                     if (ann.positions) {
                         const [start, end] = ann.positions;
                         if (ann.type === 'group-semicircle') {
-                            createGroupSemicircle(start, end, false);
+                            createGroupAnnotation(start, end, 'group-semi');
                         } else if (ann.type === 'group-semicircle2') {
-                            createGroupSemicircle(start, end, true);
+                            createGroupAnnotation(start, end, 'group-semi2');
                         } else if (ann.type === 'group-underline') {
-                            createGroupUnderline(start, end);
+                            createGroupAnnotation(start, end, 'group-underline');
                         }
                     } else {
                         const container = document.querySelector(`.letter-container[data-index='${ann.position}']`);
@@ -883,7 +876,6 @@
             }, 20);
         }
 
-        window.addEventListener('resize', () => repositionAllAnnotations());
         window.onclick = function(event) {
             const modal = document.getElementById('wordBankModal');
             if (event.target === modal) closeWordBank();
