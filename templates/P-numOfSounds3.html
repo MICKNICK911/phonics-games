@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Segmenter - Phoneme Identification Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 25px 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            margin: auto 0;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 6px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.85;
+            font-weight: 300;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 10px 0;
+        }
+
+        /* Info tabs at top */
+        .info-tabs {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(5px);
+            padding: 12px 18px;
+            border-radius: 16px;
+            gap: 8px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .info-tabs > div {
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timer-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 18px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            margin: 2px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 12px;
+        }
+
+        /* Prominent word display */
+        .word-display {
+            font-size: 4.4rem;
+            font-weight: 800;
+            text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+            margin: 10px 0;
+            min-height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            padding: 18px 20px;
+            width: 100%;
+            letter-spacing: 2px;
+        }
+
+        .letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            margin: 4px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.22);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+            min-width: 62px;
+            min-height: 62px;
+            font-size: inherit;
+            border: 2px solid transparent;
+            outline: none;
+        }
+
+        .letter:hover:not(.marked):not([class*="sound-"]) {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .letter:active:not(.marked) {
+            transform: scale(0.92);
+            transition: transform 0.1s ease;
+        }
+
+        .letter.selected {
+            background-color: #4CAF50 !important;
+            transform: scale(1.08);
+            box-shadow: 0 0 22px rgba(76, 175, 80, 0.7);
+            border-color: #81C784;
+            animation: pulse-selected 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-selected {
+            0%, 100% { box-shadow: 0 0 22px rgba(76, 175, 80, 0.7); }
+            50% { box-shadow: 0 0 35px rgba(76, 175, 80, 0.9); }
+        }
+
+        .letter.marked {
+            cursor: default;
+            pointer-events: none;
+            border-color: rgba(255, 255, 255, 0.65);
+            animation: mark-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes mark-pop {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.2); }
+            100% { transform: scale(1.04); }
+        }
+
+        /* 12 sound colors */
+        .letter.sound-0 { background-color: #FF5252 !important; box-shadow: 0 0 16px rgba(255,82,82,0.55); }
+        .letter.sound-1 { background-color: #FF9800 !important; box-shadow: 0 0 16px rgba(255,152,0,0.55); }
+        .letter.sound-2 { background-color: #FFEB3B !important; color: #333; box-shadow: 0 0 16px rgba(255,235,59,0.55); }
+        .letter.sound-3 { background-color: #4CAF50 !important; box-shadow: 0 0 16px rgba(76,175,80,0.55); }
+        .letter.sound-4 { background-color: #2196F3 !important; box-shadow: 0 0 16px rgba(33,150,243,0.55); }
+        .letter.sound-5 { background-color: #9C27B0 !important; box-shadow: 0 0 16px rgba(156,39,176,0.55); }
+        .letter.sound-6 { background-color: #00BCD4 !important; box-shadow: 0 0 16px rgba(0,188,212,0.55); }
+        .letter.sound-7 { background-color: #E91E63 !important; box-shadow: 0 0 16px rgba(233,30,99,0.55); }
+        .letter.sound-8 { background-color: #8BC34A !important; box-shadow: 0 0 16px rgba(139,195,74,0.55); }
+        .letter.sound-9 { background-color: #FFC107 !important; box-shadow: 0 0 16px rgba(255,193,7,0.55); }
+        .letter.sound-10 { background-color: #795548 !important; box-shadow: 0 0 16px rgba(121,85,72,0.55); }
+        .letter.sound-11 { background-color: #607D8B !important; box-shadow: 0 0 16px rgba(96,125,139,0.55); }
+
+        .sound-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 8px 0 12px;
+            max-width: 100%;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        /* Controls below */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 8px 0 12px;
+        }
+
+        button {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            outline: none;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        button:active:not(:disabled) { transform: translateY(1px); }
+
+        button:disabled {
+            background: linear-gradient(to right, #a0a0a0, #777);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+
+        #foundBtn { background: linear-gradient(to right, #4CAF50, #2E7D32); }
+        #foundBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #checkBtn { background: linear-gradient(to right, #2196F3, #0D47A1); }
+        #checkBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #resetBtn { background: linear-gradient(to right, #FF7043, #BF360C); }
+        #resetBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #hintBtn { background: linear-gradient(to right, #FFA726, #E65100); }
+        #hintBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #instructionsToggleBtn { background: linear-gradient(to right, #7C4DFF, #311B92); border: 2px solid rgba(255,255,255,0.25); }
+
+        .feedback { display: none; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1e3a5f, #1a2a4a);
+            padding: 30px 25px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+
+        #wellDoneModal .modal-content { background: linear-gradient(145deg, #1b5e20, #2e7d32); }
+        #tryAgainModal .modal-content { background: linear-gradient(145deg, #b71c1c, #c62828); }
+        #gameOverModal .modal-content { background: linear-gradient(145deg, #1a2a6c, #b21f1f); }
+
+        .modal-icon {
+            font-size: 3.8rem;
+            margin-bottom: 12px;
+            animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bounce-in {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.3); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 { font-size: 2rem; margin-bottom: 12px; }
+        .modal-content p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 15px; }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 18px;
+            border-radius: 15px;
+            min-width: 85px;
+        }
+        .stat-value { font-size: 2.2rem; font-weight: bold; }
+        .stat-label { font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; }
+
+        #instructionsModal .modal-content {
+            text-align: left;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        #instructionsModal h2 { text-align: center; }
+        #instructionsModal ol { padding-left: 22px; }
+        #instructionsModal li { margin-bottom: 10px; line-height: 1.5; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .container { padding: 15px 12px; }
+            h1 { font-size: 2rem; }
+            .word-display { font-size: 2.8rem; min-height: 90px; padding: 12px; gap: 4px; }
+            .letter { padding: 8px 12px; min-width: 48px; min-height: 48px; border-radius: 10px; }
+            .info-tabs { font-size: 0.9rem; padding: 8px 10px; gap: 4px; }
+            .controls { flex-direction: column; align-items: center; }
+            button { width: 100%; max-width: 260px; padding: 10px 20px; }
+            .stats-row { gap: 10px; }
+            .stat-item { padding: 12px 14px; min-width: 75px; }
+            .stat-value { font-size: 1.8rem; }
+            .sound-legend { gap: 4px; }
+            .legend-item { font-size: 0.7rem; padding: 3px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="gameContainer">
+        <h1>🔊 Sound Segmenter</h1>
+        <p class="subtitle">Tap letters to build sounds • press "Found Sound" to confirm</p>
+
+        <div class="game-area">
+            <!-- Info tabs -->
+            <div class="info-tabs">
+                <div>⭐ <span id="score">0</span></div>
+                <div>📝 <span id="wordCount">0</span>/10</div>
+                <div>❤️ <span id="lives">3</span></div>
+                <div class="timer-box">⏱ <span id="timer">00:00</span></div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+
+            <div class="word-display" id="wordDisplay"></div>
+
+            <div class="sound-legend" id="soundLegend"></div>
+
+            <div class="controls">
+                <button id="foundBtn" disabled>✅ Found Sound</button>
+                <button id="checkBtn">🔍 Check Sounds</button>
+                <button id="resetBtn" disabled>↺ Reset Selection</button>
+                <button id="hintBtn">💡 Show Hint</button>
+                <button id="instructionsToggleBtn">📖 How to Play</button>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="instructionsModal">
+        <div class="modal-content">
+            <h2>📖 How to Play</h2>
+            <ol>
+                <li>Tap adjacent letters that form a <strong>single sound</strong> (e.g., "sh", "ee", "p").</li>
+                <li>Click <strong>"Found Sound"</strong> to lock them – they get a unique colour.</li>
+                <li>Cover <strong>every letter</strong> in the word with a sound group.</li>
+                <li>Click <strong>"Check Sounds"</strong> to verify your answer.</li>
+                <li>✅ Correct → a "Well Done" popup appears for 2 seconds, then next word.</li>
+                <li>❌ Wrong → a "Try Again" popup shows for 2 seconds. You lose one ❤️.</li>
+                <li>After 3 wrong attempts → game over. Finish all 10 words to win!</li>
+            </ul>
+            <p style="text-align:center;margin-top:12px;opacity:0.8;">Press Esc or tap outside to close</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="wellDoneModal">
+        <div class="modal-content">
+            <div class="modal-icon">🎉</div>
+            <h2>Well Done!</h2>
+            <p id="wellDoneMessage">Correct segmentation!</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="tryAgainModal">
+        <div class="modal-content">
+            <div class="modal-icon">😕</div>
+            <h2>Try Again</h2>
+            <p id="tryAgainMessage">That wasn't quite right.</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">Game Over</h2>
+            <p id="gameOverMessage">Better luck next time!</p>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-value" id="finalScore">0</div>
+                    <div class="stat-label">Total Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalTime">00:00</div>
+                    <div class="stat-label">Time Spent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalWords">0/10</div>
+                    <div class="stat-label">Words Done</div>
+                </div>
+            </div>
+            <button id="restartBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const wordList = [
+                { word: "start", sounds: ["st", "ar", "t"] },
+                { word: "sheep", sounds: ["sh", "ee", "p"] },
+                { word: "bright", sounds: ["br", "igh", "t"] },
+                { word: "chair", sounds: ["ch", "air"] },
+                { word: "phone", sounds: ["ph", "o", "n", "e"] },
+                { word: "splash", sounds: ["s", "p", "l", "a", "sh"] },
+                { word: "through", sounds: ["th", "r", "ough"] },
+                { word: "choice", sounds: ["ch", "oi", "ce"] },
+                { word: "knight", sounds: ["kn", "igh", "t"] },
+                { word: "eight", sounds: ["eigh", "t"] }
+            ];
+            const TOTAL_WORDS = wordList.length;
+            const SOUND_COLORS = 12; // now 12 colors
+
+            // DOM elements
+            const wordDisplay = document.getElementById('wordDisplay');
+            const soundLegend = document.getElementById('soundLegend');
+            const foundBtn = document.getElementById('foundBtn');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const hintBtn = document.getElementById('hintBtn');
+            const instructionsToggleBtn = document.getElementById('instructionsToggleBtn');
+            const scoreDisplay = document.getElementById('score');
+            const wordCountDisplay = document.getElementById('wordCount');
+            const livesDisplay = document.getElementById('lives');
+            const timerDisplay = document.getElementById('timer');
+            const progressBar = document.getElementById('progressBar');
+
+            const instructionsModal = document.getElementById('instructionsModal');
+            const wellDoneModal = document.getElementById('wellDoneModal');
+            const wellDoneMessage = document.getElementById('wellDoneMessage');
+            const tryAgainModal = document.getElementById('tryAgainModal');
+            const tryAgainMessage = document.getElementById('tryAgainMessage');
+            const gameOverModal = document.getElementById('gameOverModal');
+            const gameOverTitle = document.getElementById('gameOverTitle');
+            const gameOverMessage = document.getElementById('gameOverMessage');
+            const finalScoreDisplay = document.getElementById('finalScore');
+            const finalTimeDisplay = document.getElementById('finalTime');
+            const finalWordsDisplay = document.getElementById('finalWords');
+            const restartBtn = document.getElementById('restartBtn');
+
+            let currentWordIndex = 0;
+            let score = 0;
+            let lives = 3;
+            let gameWords = [];
+            let currentSelection = [];
+            let markedSounds = [];
+            let gameStartTime = null;
+            let timerInterval = null;
+            let isProcessing = false;
+            let gameEnded = false;
+
+            function shuffleArray(arr) {
+                const a = [...arr];
+                for (let i = a.length-1; i>0; i--) {
+                    const j = Math.floor(Math.random()*(i+1));
+                    [a[i],a[j]] = [a[j],a[i]];
+                }
+                return a;
+            }
+            function formatTime(sec) {
+                const m = Math.floor(sec/60), s = Math.floor(sec%60);
+                return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+            }
+            function getElapsed() { return gameStartTime ? (Date.now()-gameStartTime)/1000 : 0; }
+
+            function startTimer() {
+                stopTimer();
+                gameStartTime = Date.now();
+                timerDisplay.textContent = '00:00';
+                timerInterval = setInterval(() => { timerDisplay.textContent = formatTime(getElapsed()); }, 200);
+            }
+            function stopTimer() {
+                if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                timerDisplay.textContent = formatTime(getElapsed());
+            }
+
+            function showModal(modal) { modal.classList.add('active'); }
+            function hideModal(modal) { modal.classList.remove('active'); }
+            function hideAllModals() {
+                [instructionsModal, wellDoneModal, tryAgainModal, gameOverModal].forEach(m => hideModal(m));
+            }
+
+            function updateScore() { scoreDisplay.textContent = score; }
+            function updateLives() { livesDisplay.textContent = lives; }
+            function updateProgress() {
+                progressBar.style.width = `${(currentWordIndex/TOTAL_WORDS)*100}%`;
+                wordCountDisplay.textContent = `${currentWordIndex+1}/${TOTAL_WORDS}`;
+            }
+
+            function areAllLettersCovered() {
+                const total = gameWords[currentWordIndex].word.length;
+                const covered = new Set();
+                markedSounds.forEach(s => s.indices.forEach(i => covered.add(i)));
+                currentSelection.forEach(i => covered.add(i));
+                return covered.size === total;
+            }
+
+            function updateButtons() {
+                const hasSel = currentSelection.length > 0;
+                const allCovered = areAllLettersCovered();
+                foundBtn.disabled = !hasSel || isProcessing || gameEnded;
+                resetBtn.disabled = (!hasSel && markedSounds.length === 0) || isProcessing || gameEnded;
+                checkBtn.disabled = !allCovered || isProcessing || gameEnded;
+                hintBtn.disabled = isProcessing || gameEnded;
+                instructionsToggleBtn.disabled = isProcessing || gameEnded;
+            }
+
+            function getLetterEl(idx) { return wordDisplay.querySelector(`[data-index="${idx}"]`); }
+
+            function loadWord() {
+                if (gameEnded || currentWordIndex >= TOTAL_WORDS) return;
+                const word = gameWords[currentWordIndex];
+                wordDisplay.innerHTML = '';
+                currentSelection = [];
+                markedSounds = [];
+                isProcessing = false;
+
+                for (let i = 0; i < word.word.length; i++) {
+                    const span = document.createElement('span');
+                    span.className = 'letter';
+                    span.textContent = word.word[i];
+                    span.dataset.index = i;
+                    span.addEventListener('click', handleLetterClick);
+                    span.addEventListener('touchend', (e) => { e.preventDefault(); handleLetterClick.call(span, e); });
+                    wordDisplay.appendChild(span);
+                }
+
+                updateProgress();
+                updateButtons();
+                createLegend();
+            }
+
+            function createLegend() {
+                soundLegend.innerHTML = '';
+                const colors = [
+                    { name:'Sound 1', bg:'#FF5252' }, { name:'Sound 2', bg:'#FF9800' },
+                    { name:'Sound 3', bg:'#FFEB3B' }, { name:'Sound 4', bg:'#4CAF50' },
+                    { name:'Sound 5', bg:'#2196F3' }, { name:'Sound 6', bg:'#9C27B0' },
+                    { name:'Sound 7', bg:'#00BCD4' }, { name:'Sound 8', bg:'#E91E63' },
+                    { name:'Sound 9', bg:'#8BC34A' }, { name:'Sound 10', bg:'#FFC107' },
+                    { name:'Sound 11', bg:'#795548' }, { name:'Sound 12', bg:'#607D8B' }
+                ];
+                colors.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    const box = document.createElement('div');
+                    box.className = 'legend-color';
+                    box.style.backgroundColor = c.bg;
+                    const lbl = document.createElement('span');
+                    lbl.textContent = c.name;
+                    item.appendChild(box);
+                    item.appendChild(lbl);
+                    soundLegend.appendChild(item);
+                });
+            }
+
+            function handleLetterClick(e) {
+                if (isProcessing || gameEnded) return;
+                const el = e.target;
+                const idx = parseInt(el.dataset.index);
+                if (el.classList.contains('marked')) {
+                    el.style.animation = 'none';
+                    void el.offsetWidth;
+                    el.style.animation = 'shake 0.4s ease';
+                    return;
+                }
+                if (el.classList.contains('selected')) {
+                    const pos = currentSelection.indexOf(idx);
+                    if (pos !== -1 && (idx === currentSelection[currentSelection.length-1] || currentSelection.length===1)) {
+                        currentSelection.splice(pos,1);
+                        el.classList.remove('selected');
+                    }
+                    updateButtons();
+                    return;
+                }
+                if (currentSelection.length === 0) {
+                    currentSelection.push(idx);
+                    el.classList.add('selected');
+                    updateButtons();
+                    return;
+                }
+                const last = currentSelection[currentSelection.length-1];
+                const first = currentSelection[0];
+                if (idx === last+1 || idx === first-1) {
+                    const target = getLetterEl(idx);
+                    if (target && target.classList.contains('marked')) return;
+                    if (idx === last+1) currentSelection.push(idx);
+                    else currentSelection.unshift(idx);
+                    el.classList.add('selected');
+                    updateButtons();
+                    return;
+                }
+                clearCurrentSelection();
+                currentSelection = [idx];
+                el.classList.add('selected');
+                updateButtons();
+            }
+
+            function clearCurrentSelection() {
+                currentSelection.forEach(i => {
+                    const el = getLetterEl(i);
+                    if(el && !el.classList.contains('marked')) el.classList.remove('selected');
+                });
+                currentSelection = [];
+            }
+
+            function markFoundSound() {
+                if (isProcessing || gameEnded || currentSelection.length===0) return;
+                const colorIdx = markedSounds.length;
+                const newSound = {
+                    indices: [...currentSelection].sort((a,b)=>a-b),
+                    soundColorIndex: colorIdx
+                };
+                newSound.indices.forEach(i => {
+                    const el = getLetterEl(i);
+                    if(el) {
+                        el.classList.remove('selected');
+                        el.classList.add('marked', `sound-${colorIdx % SOUND_COLORS}`);
+                    }
+                });
+                markedSounds.push(newSound);
+                currentSelection = [];
+                updateButtons();
+            }
+
+            function resetSelection() {
+                if (isProcessing || gameEnded) return;
+                if (currentSelection.length > 0) {
+                    clearCurrentSelection();
+                    updateButtons();
+                } else if (markedSounds.length > 0) {
+                    markedSounds = [];
+                    document.querySelectorAll('.letter').forEach(l => { l.className = 'letter'; });
+                    updateButtons();
+                }
+            }
+
+            function getPlayerSegmentation() {
+                const sorted = [...markedSounds].sort((a,b)=>a.indices[0]-b.indices[0]);
+                return sorted.map(s => s.indices.map(i => getLetterEl(i)?.textContent).join(''));
+            }
+
+            function checkSegmentation() {
+                if (isProcessing || gameEnded) return;
+                if (currentSelection.length > 0) return;
+                if (!areAllLettersCovered()) return;
+
+                const currentWord = gameWords[currentWordIndex];
+                const playerSeg = getPlayerSegmentation();
+                const correct = JSON.stringify(playerSeg) === JSON.stringify(currentWord.sounds);
+
+                if (correct) {
+                    score += 10; updateScore();
+                    isProcessing = true;
+                    disableAllButtons();
+                    wellDoneMessage.textContent = `"${currentWord.word}" = ${currentWord.sounds.join(' - ')}`;
+                    showModal(wellDoneModal);
+                    setTimeout(() => {
+                        hideModal(wellDoneModal);
+                        currentWordIndex++;
+                        if (currentWordIndex >= TOTAL_WORDS) {
+                            isProcessing = false;
+                            endGame(true);
+                        } else {
+                            isProcessing = false;
+                            loadWord();
+                        }
+                    }, 2000);
+                } else {
+                    lives--; updateLives();
+                    isProcessing = true;
+                    disableAllButtons();
+                    tryAgainMessage.textContent = `Correct: "${currentWord.sounds.join(' - ')}". You have ${lives} ❤️ left.`;
+                    showModal(tryAgainModal);
+                    setTimeout(() => {
+                        hideModal(tryAgainModal);
+                        if (lives <= 0) {
+                            isProcessing = false;
+                            endGame(false);
+                        } else {
+                            resetGameForCurrentWord();
+                            isProcessing = false;
+                            updateButtons();
+                        }
+                    }, 2000);
+                }
+            }
+
+            function resetGameForCurrentWord() {
+                markedSounds = [];
+                currentSelection = [];
+                document.querySelectorAll('.letter').forEach(l => { l.className = 'letter'; });
+            }
+
+            function showHint() {
+                if (isProcessing || gameEnded) return;
+                const word = gameWords[currentWordIndex];
+                alert(`💡 This word has ${word.sounds.length} sound(s).`);
+                hintBtn.disabled = true;
+                if (score >= 2) score -= 2; else score = 0;
+                updateScore();
+                setTimeout(() => { if(!isProcessing && !gameEnded) hintBtn.disabled = false; }, 3000);
+            }
+
+            function disableAllButtons() {
+                foundBtn.disabled = checkBtn.disabled = resetBtn.disabled = hintBtn.disabled = instructionsToggleBtn.disabled = true;
+            }
+
+            function endGame(isWin) {
+                gameEnded = true;
+                isProcessing = false;
+                stopTimer();
+                disableAllButtons();
+                hideAllModals();
+                const elapsed = formatTime(getElapsed());
+                finalScoreDisplay.textContent = score;
+                finalTimeDisplay.textContent = elapsed;
+                finalWordsDisplay.textContent = `${currentWordIndex}/${TOTAL_WORDS}`;
+                if (isWin) {
+                    gameOverTitle.textContent = '🏆 Victory!';
+                    gameOverMessage.textContent = 'You mastered all the phonemes!';
+                } else {
+                    gameOverTitle.textContent = '💔 Game Over';
+                    gameOverMessage.textContent = `You completed ${currentWordIndex} of ${TOTAL_WORDS} words.`;
+                }
+                showModal(gameOverModal);
+            }
+
+            function restartGame() {
+                hideAllModals();
+                stopTimer();
+                gameEnded = false;
+                isProcessing = false;
+                currentWordIndex = 0;
+                score = 0;
+                lives = 3;
+                gameWords = shuffleArray(wordList);
+                updateScore(); updateLives();
+                hintBtn.disabled = false;
+                loadWord();
+                startTimer();
+            }
+
+            foundBtn.addEventListener('click', markFoundSound);
+            checkBtn.addEventListener('click', checkSegmentation);
+            resetBtn.addEventListener('click', resetSelection);
+            hintBtn.addEventListener('click', showHint);
+            restartBtn.addEventListener('click', restartGame);
+
+            instructionsToggleBtn.addEventListener('click', () => {
+                if(!isProcessing && !gameEnded) showModal(instructionsModal);
+            });
+            instructionsModal.addEventListener('click', (e) => {
+                if(e.target === instructionsModal) hideModal(instructionsModal);
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && instructionsModal.classList.contains('active'))
+                    hideModal(instructionsModal);
+                if (isProcessing || gameEnded) return;
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                switch(e.key.toLowerCase()) {
+                    case 'f': if(!foundBtn.disabled) markFoundSound(); break;
+                    case 'c': if(!checkBtn.disabled) checkSegmentation(); break;
+                    case 'r': if(!resetBtn.disabled) resetSelection(); break;
+                    case 'h': if(!hintBtn.disabled) showHint(); break;
+                    case 'i': if(!instructionsToggleBtn.disabled) showModal(instructionsModal); break;
+                }
+            });
+
+            [wellDoneModal, tryAgainModal].forEach(m => m.addEventListener('click', (e) => e.stopPropagation()));
+
+            window.addEventListener('DOMContentLoaded', () => {
+                hideAllModals();
+                gameWords = shuffleArray(wordList);
+                updateScore(); updateLives();
+                loadWord();
+                startTimer();
+            });
+        })();
+    </script>
+</body>
+</html>
