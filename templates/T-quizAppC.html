@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Quiz</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #333;
+            --text-color: #2c3e50;
+            --white: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .description {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .quiz-container {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .progress-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--medium-gray);
+            border-radius: 4px;
+            flex-grow: 1;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .timer-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .timer {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-left: 8px;
+        }
+        
+        .timer-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .timer-warning {
+            color: var(--warning-color);
+        }
+        
+        .timer-danger {
+            color: var(--error-color);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .question.active {
+            display: block;
+        }
+        
+        .review-question {
+            display: block !important;
+            margin-bottom: 30px;
+            animation: none;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .question-type-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-left: 10px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-multiple-choice {
+            background-color: rgba(52, 152, 219, 0.15);
+            color: #2471a3;
+        }
+        
+        .badge-text-input {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: #1e8449;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .option {
+            position: relative;
+            padding: 15px;
+            padding-left: 50px;
+            background-color: var(--white);
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: block;
+            user-select: none;
+        }
+        
+        .option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .option .option-indicator {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .option input[type="radio"]:focus-visible + .option-indicator {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        .option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .option.selected .option-indicator {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+        }
+        
+        .option.selected .option-indicator::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: var(--white);
+            border-radius: 50%;
+        }
+        
+        .option.correct {
+            border-color: var(--success-color);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        .option.correct .option-indicator {
+            border-color: var(--success-color);
+            background-color: var(--success-color);
+        }
+        
+        .option.incorrect {
+            border-color: var(--error-color);
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .option.incorrect .option-indicator {
+            border-color: var(--error-color);
+            background-color: var(--error-color);
+        }
+        
+        .text-input-container {
+            position: relative;
+        }
+        
+        .text-input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background-color: var(--white);
+            color: var(--text-color);
+        }
+        
+        .text-input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .text-input-field:disabled {
+            background-color: var(--light-gray);
+            cursor: not-allowed;
+        }
+        
+        .text-input-field.correct-input {
+            border-color: var(--success-color);
+            background-color: rgba(46, 204, 113, 0.05);
+        }
+        
+        .text-input-field.incorrect-input {
+            border-color: var(--error-color);
+            background-color: rgba(231, 76, 60, 0.05);
+        }
+        
+        .text-input-hint {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        .instant-feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .feedback-correct {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: #27ae60;
+        }
+        
+        .feedback-incorrect {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--error-color);
+            color: #c0392b;
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.05);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .explanation-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 30px;
+            display: none;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-top: 20px;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        
+        .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .score-text {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+        
+        .review-wrapper {
+            margin-top: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .user-text-answer {
+            background-color: rgba(52, 152, 219, 0.05);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .user-text-answer .answer-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .quiz-container { padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            .question { padding: 15px; }
+            button { padding: 10px 15px; font-size: 0.9rem; }
+            .stats { flex-direction: column; gap: 10px; align-items: center; }
+            .stat-item { width: 100%; max-width: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Machine Learning Quiz</h1>
+            <p class="description">Test your knowledge of machine learning concepts with this interactive quiz</p>
+        </header>
+        
+        <div class="quiz-container" id="quiz-container">
+            <div class="progress-container">
+                <span class="progress-text">Question <span id="current-question">1</span> of <span id="total-questions">10</span></span>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-bar"></div>
+                </div>
+            </div>
+            
+            <div class="timer-container">
+                <svg class="timer-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="timer" id="timer">30s</span>
+            </div>
+            
+            <div id="question-container"></div>
+            
+            <div class="instant-feedback" id="instant-feedback"></div>
+            
+            <div class="navigation">
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="next-btn">Next</button>
+                <button id="submit-btn" style="display: none;">Submit Quiz</button>
+            </div>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <h2 class="result-title">Quiz Completed!</h2>
+            <div class="score">Your Score: <span id="score">0</span>/<span id="max-score">10</span></div>
+            <p class="score-text" id="score-text">Great job! You have a solid understanding of machine learning fundamentals.</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="correct-answers">0</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="incorrect-answers">0</div>
+                    <div class="stat-label">Incorrect</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="average-time">0s</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            <button id="restart-btn" style="margin-top: 20px;">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const masterQuizData = [
+                {
+                    type: 'multiple-choice',
+                    question: "What is Machine Learning?",
+                    options: [
+                        "A subset of AI that enables systems to learn and improve from experience without being explicitly programmed",
+                        "A programming language for robots",
+                        "A database technology for storing large datasets",
+                        "A type of computer hardware optimized for calculations"
+                    ],
+                    correctAnswer: 0,
+                    explanation: "Machine Learning is a subset of artificial intelligence (AI) that focuses on building systems that can learn from data, identify patterns, and make decisions with minimal human intervention."
+                },
+                {
+                    type: 'text-input',
+                    question: "What does the acronym 'AI' stand for?",
+                    correctAnswer: "artificial intelligence",
+                    acceptableAnswers: ["artificial intelligence", "ai"],
+                    caseSensitive: false,
+                    explanation: "AI stands for Artificial Intelligence, the broad field of creating machines that can perform tasks requiring human intelligence."
+                },
+                {
+                    type: 'multiple-choice',
+                    question: "Which of these is NOT a type of Machine Learning?",
+                    options: [
+                        "Supervised Learning",
+                        "Unsupervised Learning",
+                        "Database Learning",
+                        "Reinforcement Learning"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "The main types of Machine Learning are Supervised Learning, Unsupervised Learning, and Reinforcement Learning. 'Database Learning' is not a recognized type of ML."
+                },
+                {
+                    type: 'text-input',
+                    question: "What is the name of the function that introduces non-linearity in neural networks?",
+                    correctAnswer: "activation function",
+                    acceptableAnswers: ["activation function", "activation", "activation functions", "activation func"],
+                    caseSensitive: false,
+                    explanation: "Activation functions like ReLU, sigmoid, and tanh introduce non-linearity, allowing neural networks to learn complex patterns."
+                },
+                {
+                    type: 'multiple-choice',
+                    question: "What does 'overfitting' mean in Machine Learning?",
+                    options: [
+                        "The model is too simple to capture patterns in the data",
+                        "The model learns the training data too well, including noise and outliers",
+                        "The model takes too long to train",
+                        "The model uses too many features"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Overfitting occurs when a model learns the training data too well, including its noise and outliers, resulting in poor performance on new, unseen data."
+                },
+                {
+                    type: 'multiple-choice',
+                    question: "Which technique can help prevent overfitting?",
+                    options: [
+                        "Using more features",
+                        "Training for more epochs",
+                        "Regularization",
+                        "Decreasing the training set size"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "Regularization techniques like L1 (Lasso) and L2 (Ridge) help prevent overfitting by adding a penalty for larger coefficients in the model."
+                },
+                {
+                    type: 'text-input',
+                    question: "What is the most commonly used programming language for machine learning?",
+                    correctAnswer: "python",
+                    acceptableAnswers: ["python"],
+                    caseSensitive: false,
+                    explanation: "Python is the most popular programming language for machine learning due to its extensive libraries like TensorFlow, PyTorch, and scikit-learn."
+                },
+                {
+                    type: 'multiple-choice',
+                    question: "Which evaluation metric would you use for an imbalanced classification problem?",
+                    options: [
+                        "Accuracy",
+                        "Mean Squared Error",
+                        "F1 Score",
+                        "R-squared"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "For imbalanced datasets, accuracy can be misleading. The F1 score (harmonic mean of precision and recall) provides a better measure."
+                },
+                {
+                    type: 'multiple-choice',
+                    question: "What is 'feature engineering' in Machine Learning?",
+                    options: [
+                        "Designing the user interface for ML applications",
+                        "Creating new input features from raw data to improve model performance",
+                        "Building the hardware for ML systems",
+                        "Writing the code for ML algorithms"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Feature engineering involves creating new features or transforming existing ones from raw data to help machine learning algorithms better understand the underlying problem."
+                },
+                {
+                    type: 'multiple-choice',
+                    question: "Which of these is an example of unsupervised learning?",
+                    options: [
+                        "Predicting house prices based on historical data",
+                        "Classifying emails as spam or not spam",
+                        "Grouping customers based on purchasing behavior",
+                        "Recognizing handwritten digits"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "Grouping customers based on purchasing behavior is an example of clustering, an unsupervised learning technique that doesn't require labeled training data."
+                }
+            ];
+
+            let quizData = [];
+            const TIME_PER_QUESTION = 30;
+            const WARNING_TIME = 10;
+            const DANGER_TIME = 5;
+
+            function shuffleArray(arr) {
+                const shuffled = [...arr];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            function shuffleQuizData() {
+                quizData = shuffleArray(masterQuizData);
+            }
+
+            const questionContainer = document.getElementById('question-container');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const currentQuestionEl = document.getElementById('current-question');
+            const totalQuestionsEl = document.getElementById('total-questions');
+            const progressBar = document.getElementById('progress-bar');
+            const resultContainer = document.getElementById('result-container');
+            const quizContainer = document.getElementById('quiz-container');
+            const scoreEl = document.getElementById('score');
+            const maxScoreEl = document.getElementById('max-score');
+            const scoreTextEl = document.getElementById('score-text');
+            const feedbackEl = document.getElementById('feedback');
+            const timerEl = document.getElementById('timer');
+            const instantFeedbackEl = document.getElementById('instant-feedback');
+            const correctAnswersEl = document.getElementById('correct-answers');
+            const incorrectAnswersEl = document.getElementById('incorrect-answers');
+            const averageTimeEl = document.getElementById('average-time');
+
+            let currentQuestionIndex = 0;
+            let userAnswers = [];
+            let quizSubmitted = false;
+            let timer = null;
+            let timeLeft = TIME_PER_QUESTION;
+            let timeSpentPerQuestion = [];
+            let feedbackTimeout = null;
+            let isNavigating = false; // Flag to prevent blur handler during navigation
+
+            function clearFeedback() {
+                if (feedbackTimeout) {
+                    clearTimeout(feedbackTimeout);
+                    feedbackTimeout = null;
+                }
+                instantFeedbackEl.style.display = 'none';
+            }
+
+            function stopTimer() {
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+            }
+
+            function updateTimerDisplay() {
+                timerEl.textContent = `${timeLeft}s`;
+                timerEl.classList.remove('timer-warning', 'timer-danger');
+                if (timeLeft <= WARNING_TIME) timerEl.classList.add('timer-warning');
+                if (timeLeft <= DANGER_TIME) timerEl.classList.add('timer-danger');
+            }
+
+            function isQuestionAnswered(index) {
+                if (index === undefined) index = currentQuestionIndex;
+                const answer = userAnswers[index];
+                if (answer === null || answer === undefined) return false;
+                if (typeof answer === 'string') return answer.trim().length > 0;
+                return true; // number (multiple-choice index)
+            }
+
+            function startTimer() {
+                stopTimer();
+                if (isQuestionAnswered()) {
+                    timeLeft = 0;
+                    updateTimerDisplay();
+                    return;
+                }
+                timeLeft = TIME_PER_QUESTION;
+                updateTimerDisplay();
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    if (timeLeft <= 0) {
+                        stopTimer();
+                        handleTimeExpired();
+                    }
+                }, 1000);
+            }
+
+            function handleTimeExpired() {
+                // Save any pending text input before handling expiration
+                savePendingTextInput();
+                
+                if (!isQuestionAnswered()) {
+                    timeSpentPerQuestion[currentQuestionIndex] = TIME_PER_QUESTION;
+                    const isLast = currentQuestionIndex === quizData.length - 1;
+                    clearFeedback();
+                    instantFeedbackEl.textContent = isLast 
+                        ? "⏰ Time's up! You can still submit an answer." 
+                        : "⏰ Time's up! Moving to next question...";
+                    instantFeedbackEl.className = "instant-feedback feedback-incorrect";
+                    instantFeedbackEl.style.display = 'block';
+                    
+                    if (!isLast) {
+                        feedbackTimeout = setTimeout(() => {
+                            instantFeedbackEl.style.display = 'none';
+                            feedbackTimeout = null;
+                            goToNextQuestion();
+                        }, 2000);
+                    } else {
+                        feedbackTimeout = setTimeout(() => {
+                            instantFeedbackEl.style.display = 'none';
+                            feedbackTimeout = null;
+                        }, 2000);
+                        updateNavigation();
+                    }
+                }
+            }
+
+            function getQuestionTypeBadge(question) {
+                if (question.type === 'text-input') {
+                    return '<span class="question-type-badge badge-text-input">Fill in the blank</span>';
+                }
+                return '<span class="question-type-badge badge-multiple-choice">Multiple Choice</span>';
+            }
+
+            // Save text input value to userAnswers without finalizing (no feedback, timer continues)
+            function savePendingTextInput() {
+                if (quizSubmitted) return;
+                const question = quizData[currentQuestionIndex];
+                if (question.type !== 'text-input') return;
+                
+                const textInput = document.getElementById('text-answer');
+                if (textInput) {
+                    const value = textInput.value;
+                    userAnswers[currentQuestionIndex] = value; // may be empty string
+                }
+            }
+
+            // Finalize text input: save, stop timer, show feedback
+            function finalizeTextInput() {
+                if (quizSubmitted) return;
+                const question = quizData[currentQuestionIndex];
+                if (question.type !== 'text-input') return;
+                
+                const textInput = document.getElementById('text-answer');
+                if (!textInput) return;
+                
+                const answer = textInput.value.trim();
+                if (answer.length === 0) return; // Don't finalize empty input
+                
+                userAnswers[currentQuestionIndex] = answer;
+                timeSpentPerQuestion[currentQuestionIndex] = TIME_PER_QUESTION - timeLeft;
+                stopTimer();
+                
+                const isCorrect = checkTextAnswer(answer, question);
+                clearFeedback();
+                instantFeedbackEl.textContent = isCorrect 
+                    ? "✅ Correct! Well done!" 
+                    : `❌ Incorrect. The correct answer is: ${question.correctAnswer}`;
+                instantFeedbackEl.className = `instant-feedback ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`;
+                instantFeedbackEl.style.display = 'block';
+                feedbackTimeout = setTimeout(() => {
+                    instantFeedbackEl.style.display = 'none';
+                    feedbackTimeout = null;
+                }, 3000);
+                
+                // Re-render to show input styling
+                renderQuestion();
+            }
+
+            function renderQuestion() {
+                clearFeedback();
+                const question = quizData[currentQuestionIndex];
+                currentQuestionEl.textContent = currentQuestionIndex + 1;
+                progressBar.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+
+                let html = `<div class="question active" role="group" aria-labelledby="question-text">`;
+                html += `<div class="question-text" id="question-text">${question.question}${getQuestionTypeBadge(question)}</div>`;
+                
+                if (question.type === 'text-input') {
+                    const userAnswer = userAnswers[currentQuestionIndex] || '';
+                    const hasSubmitted = isQuestionAnswered();
+                    let inputClass = '';
+                    if (quizSubmitted || hasSubmitted) {
+                        const answer = typeof userAnswer === 'string' ? userAnswer : '';
+                        const isCorrect = checkTextAnswer(answer, question);
+                        inputClass = isCorrect ? 'correct-input' : 'incorrect-input';
+                    }
+                    
+                    html += `<div class="text-input-container">`;
+                    html += `<input type="text" class="text-input-field ${inputClass}" 
+                                id="text-answer" 
+                                placeholder="Type your answer here..." 
+                                value="${escapeHtml(typeof userAnswer === 'string' ? userAnswer : '')}"
+                                ${quizSubmitted || hasSubmitted ? 'disabled' : ''}>`;
+                    
+                    if (!quizSubmitted && !hasSubmitted) {
+                        html += `<div class="text-input-hint">Press Enter to submit your answer</div>`;
+                    }
+                    html += `</div>`;
+                } else {
+                    html += `<div class="options">`;
+                    const groupName = `question-${currentQuestionIndex}`;
+                    question.options.forEach((option, index) => {
+                        const isSelected = userAnswers[currentQuestionIndex] === index;
+                        let optionClass = '';
+                        if (quizSubmitted) {
+                            if (index === question.correctAnswer) optionClass = 'correct';
+                            else if (isSelected) optionClass = 'incorrect';
+                        } else if (isSelected) {
+                            optionClass = 'selected';
+                        }
+                        
+                        html += `
+                            <label class="option ${optionClass}">
+                                <input type="radio" name="${groupName}" value="${index}" 
+                                    ${isSelected ? 'checked' : ''} 
+                                    ${quizSubmitted ? 'disabled' : ''}>
+                                <span class="option-indicator"></span>
+                                ${option}
+                            </label>`;
+                    });
+                    html += `</div>`;
+                }
+                
+                const explanationDisplay = quizSubmitted ? 'display: block;' : 'display: none;';
+                html += `
+                    <div class="explanation" style="${explanationDisplay}">
+                        <div class="explanation-title">Explanation:</div>
+                        ${question.explanation}
+                    </div>`;
+                html += `</div>`;
+                
+                questionContainer.innerHTML = html;
+
+                if (!quizSubmitted) {
+                    if (question.type === 'text-input') {
+                        const textInput = document.getElementById('text-answer');
+                        if (textInput) {
+                            const hasSubmitted = isQuestionAnswered();
+                            if (!hasSubmitted) {
+                                textInput.addEventListener('input', handleTextInputChange);
+                                textInput.addEventListener('keypress', handleTextInputKeypress);
+                            }
+                            // Focus the input for better UX
+                            setTimeout(() => textInput.focus(), 100);
+                        }
+                    } else {
+                        const radios = questionContainer.querySelectorAll('input[type="radio"]');
+                        radios.forEach(radio => {
+                            radio.addEventListener('change', handleOptionChange);
+                        });
+                    }
+                }
+                
+                updateNavigation();
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function checkTextAnswer(userAnswer, question) {
+                if (!userAnswer || typeof userAnswer !== 'string') return false;
+                const normalized = userAnswer.trim();
+                if (normalized.length === 0) return false;
+                
+                const compare = question.caseSensitive === false 
+                    ? (a, b) => a.toLowerCase() === b.toLowerCase()
+                    : (a, b) => a === b;
+                
+                return question.acceptableAnswers.some(accepted => compare(normalized, accepted));
+            }
+
+            function handleTextInputChange(e) {
+                if (quizSubmitted) return;
+                // Save value in real-time but don't finalize
+                userAnswers[currentQuestionIndex] = e.target.value;
+                updateNavigation();
+            }
+
+            function handleTextInputKeypress(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    finalizeTextInput();
+                }
+            }
+
+            function handleOptionChange(e) {
+                if (quizSubmitted) return;
+                const selectedIndex = parseInt(e.target.value, 10);
+                userAnswers[currentQuestionIndex] = selectedIndex;
+                timeSpentPerQuestion[currentQuestionIndex] = TIME_PER_QUESTION - timeLeft;
+                stopTimer();
+                
+                const isCorrect = selectedIndex === quizData[currentQuestionIndex].correctAnswer;
+                clearFeedback();
+                instantFeedbackEl.textContent = isCorrect ? "✅ Correct! Well done!" : "❌ Incorrect. Try the next question!";
+                instantFeedbackEl.className = `instant-feedback ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`;
+                instantFeedbackEl.style.display = 'block';
+                feedbackTimeout = setTimeout(() => {
+                    instantFeedbackEl.style.display = 'none';
+                    feedbackTimeout = null;
+                }, 3000);
+                
+                renderQuestion();
+            }
+
+            function updateNavigation() {
+                prevBtn.disabled = currentQuestionIndex === 0;
+                const isLast = currentQuestionIndex === quizData.length - 1;
+                
+                if (isLast) {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'block';
+                    submitBtn.disabled = !isQuestionAnswered();
+                } else {
+                    nextBtn.style.display = 'block';
+                    submitBtn.style.display = 'none';
+                    nextBtn.disabled = !isQuestionAnswered() && !quizSubmitted;
+                }
+            }
+
+            function goToPreviousQuestion() {
+                if (currentQuestionIndex > 0) {
+                    isNavigating = true;
+                    savePendingTextInput(); // Save any partial text
+                    currentQuestionIndex--;
+                    renderQuestion();
+                    startTimer();
+                    isNavigating = false;
+                }
+            }
+
+            function goToNextQuestion() {
+                if (currentQuestionIndex < quizData.length - 1) {
+                    isNavigating = true;
+                    savePendingTextInput(); // Save any partial text
+                    currentQuestionIndex++;
+                    renderQuestion();
+                    startTimer();
+                    isNavigating = false;
+                }
+            }
+
+            function submitQuiz() {
+                // Finalize any pending text input
+                savePendingTextInput();
+                
+                quizSubmitted = true;
+                stopTimer();
+                clearFeedback();
+                
+                let correctCount = 0;
+                let incorrectCount = 0;
+                quizData.forEach((q, i) => {
+                    const userAnswer = userAnswers[i];
+                    if (userAnswer === null || userAnswer === undefined) {
+                        incorrectCount++;
+                        return;
+                    }
+                    
+                    let isCorrect = false;
+                    if (q.type === 'text-input') {
+                        isCorrect = checkTextAnswer(String(userAnswer), q);
+                    } else {
+                        isCorrect = userAnswer === q.correctAnswer;
+                    }
+                    
+                    if (isCorrect) correctCount++;
+                    else incorrectCount++;
+                });
+                
+                const answeredCount = userAnswers.filter(a => a !== null && a !== undefined && 
+                    (typeof a === 'number' || (typeof a === 'string' && a.trim().length > 0))).length;
+                const totalTime = timeSpentPerQuestion.reduce((sum, t) => sum + t, 0);
+                const avgTime = answeredCount > 0 ? Math.round(totalTime / answeredCount) : 0;
+                
+                quizContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                scoreEl.textContent = correctCount;
+                correctAnswersEl.textContent = correctCount;
+                incorrectAnswersEl.textContent = incorrectCount;
+                averageTimeEl.textContent = `${avgTime}s`;
+                
+                const percentage = (correctCount / quizData.length) * 100;
+                let message, feedbackText;
+                if (percentage >= 80) {
+                    message = 'Excellent! You have a strong understanding of machine learning concepts.';
+                    feedbackText = 'You demonstrated comprehensive knowledge across all major areas.';
+                } else if (percentage >= 60) {
+                    message = 'Good job! You have a solid foundation in machine learning.';
+                    feedbackText = 'You understand the core concepts well. Review some areas to strengthen further.';
+                } else if (percentage >= 40) {
+                    message = 'Not bad! You have some understanding of machine learning.';
+                    feedbackText = 'Build on your basics by reviewing the explanations below.';
+                } else {
+                    message = 'Keep learning! Machine learning is a journey.';
+                    feedbackText = 'Review the fundamentals and try again. You\'ll improve!';
+                }
+                scoreTextEl.textContent = message;
+                feedbackEl.innerHTML = feedbackText;
+                
+                renderReview();
+            }
+
+            function renderReview() {
+                let reviewHTML = '<div class="review-wrapper">';
+                quizData.forEach((q, idx) => {
+                    const userAnswer = userAnswers[idx];
+                    let isCorrect = false;
+                    
+                    if (q.type === 'text-input') {
+                        isCorrect = userAnswer ? checkTextAnswer(String(userAnswer), q) : false;
+                    } else {
+                        isCorrect = userAnswer === q.correctAnswer;
+                    }
+                    
+                    reviewHTML += `<div class="question review-question">`;
+                    reviewHTML += `<div class="question-text">${idx+1}. ${q.question}${getQuestionTypeBadge(q)}</div>`;
+                    
+                    if (q.type === 'text-input') {
+                        const displayAnswer = (userAnswer && typeof userAnswer === 'string' && userAnswer.trim().length > 0) 
+                            ? userAnswer : 'No answer';
+                        reviewHTML += `<div class="text-input-container">`;
+                        reviewHTML += `<input type="text" class="text-input-field ${isCorrect ? 'correct-input' : 'incorrect-input'}" 
+                                        value="${escapeHtml(displayAnswer)}" disabled>`;
+                        reviewHTML += `</div>`;
+                        if (!isCorrect) {
+                            reviewHTML += `<div class="user-text-answer">`;
+                            reviewHTML += `<span class="answer-label">Correct answer:</span> ${q.correctAnswer}`;
+                            reviewHTML += `</div>`;
+                        }
+                    } else {
+                        reviewHTML += `<div class="options">`;
+                        q.options.forEach((opt, optIdx) => {
+                            let cls = '';
+                            if (optIdx === q.correctAnswer) cls = 'correct';
+                            else if (userAnswer === optIdx) cls = 'incorrect';
+                            reviewHTML += `
+                                <div class="option ${cls}">
+                                    <span class="option-indicator"></span>
+                                    ${opt}
+                                </div>`;
+                        });
+                        reviewHTML += `</div>`;
+                    }
+                    
+                    reviewHTML += `
+                        <div class="explanation" style="display:block;">
+                            <div class="explanation-title">Explanation:</div>
+                            ${q.explanation}
+                        </div>`;
+                    reviewHTML += `
+                        <div style="margin-top:10px; font-size:0.9rem; color:var(--dark-gray);">
+                            Time spent: ${timeSpentPerQuestion[idx]}s | 
+                            ${isCorrect ? '✅ Correct' : '❌ Incorrect'}
+                        </div>`;
+                    reviewHTML += `</div>`;
+                });
+                reviewHTML += '</div>';
+                feedbackEl.insertAdjacentHTML('beforeend', reviewHTML);
+            }
+
+            function restartQuiz() {
+                stopTimer();
+                clearFeedback();
+                shuffleQuizData();
+                
+                currentQuestionIndex = 0;
+                userAnswers = new Array(quizData.length).fill(null);
+                timeSpentPerQuestion = new Array(quizData.length).fill(0);
+                quizSubmitted = false;
+                isNavigating = false;
+                
+                quizContainer.style.display = 'block';
+                resultContainer.style.display = 'none';
+                feedbackEl.innerHTML = '';
+                
+                totalQuestionsEl.textContent = quizData.length;
+                maxScoreEl.textContent = quizData.length;
+                
+                renderQuestion();
+                startTimer();
+            }
+
+            // Handle window blur - save text input if user clicks outside the window
+            window.addEventListener('blur', () => {
+                if (!isNavigating) {
+                    savePendingTextInput();
+                }
+            });
+
+            // Handle beforeunload - save state
+            window.addEventListener('beforeunload', () => {
+                savePendingTextInput();
+            });
+
+            prevBtn.addEventListener('click', goToPreviousQuestion);
+            nextBtn.addEventListener('click', goToNextQuestion);
+            submitBtn.addEventListener('click', submitQuiz);
+            restartBtn.addEventListener('click', restartQuiz);
+
+            // Initial setup
+            shuffleQuizData();
+            totalQuestionsEl.textContent = quizData.length;
+            maxScoreEl.textContent = quizData.length;
+            userAnswers = new Array(quizData.length).fill(null);
+            timeSpentPerQuestion = new Array(quizData.length).fill(0);
+            renderQuestion();
+            startTimer();
+        })();
+    </script>
+</body>
+</html>
