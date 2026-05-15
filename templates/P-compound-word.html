@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compound Word Match</title>
+    <title>Compound Word Match – Strict Order + Reset</title>
     <style>
         :root {
             --bg: #0f0f1a;
@@ -12,37 +12,20 @@
             --text: #e0e0e0;
             --text-muted: #a0a0b8;
             --gold: #f0b90b;
-            --gold-glow: #f5c842;
-            --green: #22c55e;
-            --green-glow: #4ade80;
-            --red: #ef4444;
-            --red-glow: #f87171;
-            --purple: #7c3aed;
-            --purple-light: #8b5cf6;
-            --indigo: #4f46e5;
-            --button-default: linear-gradient(135deg, #5b3cc4, #6d4ddb);
-            --button-hover: linear-gradient(135deg, #6d4ddb, #7e5ef0);
-            --button-active: linear-gradient(135deg, #4a2fa8, #5b3cc4);
             --radius-sm: 10px;
             --radius: 16px;
             --radius-lg: 20px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --shadow: 0 4px 20px rgba(0,0,0,0.35);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
             --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
             background: var(--bg);
             background-image:
-                radial-gradient(ellipse at 50% 0%, rgba(120, 60, 220, 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 80%, rgba(40, 80, 200, 0.08) 0%, transparent 50%);
+                radial-gradient(ellipse at 50% 0%, rgba(120,60,220,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(40,80,200,0.08) 0%, transparent 50%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -54,531 +37,139 @@
             overflow-x: hidden;
             padding: 16px;
         }
-
-        .game-wrapper {
-            width: 100%;
-            max-width: 650px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Header */
+        .game-wrapper { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 20px; }
         .game-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            padding: 16px 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            flex-wrap: wrap;
-            gap: 10px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface); border-radius: var(--radius-lg); padding: 16px 20px;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap; gap: 10px;
         }
-
-        .header-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            min-width: 70px;
-        }
-
-        .header-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+        .header-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .header-item { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; }
+        .header-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; }
+        .header-value { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: #fff; transition: all var(--transition); }
+        .header-value.score-pop { animation: scorePop 0.4s ease-out; }
+        @keyframes scorePop { 0% { transform: scale(1); color: #fff; } 40% { transform: scale(1.35); color: var(--gold); } 100% { transform: scale(1); color: #fff; } }
+        .stage-badge { background: #7c3aed; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+        .pairs-indicator { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        .pairs-indicator span { color: #fff; font-weight: 700; }
+        .header-value.timer-warning { color: #fbbf24; animation: timerPulse 0.7s ease-in-out infinite; }
+        @keyframes timerPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .btn-reset {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
             color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 25px;
+            font-size: 0.8rem;
             font-weight: 600;
-        }
-
-        .header-value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #fff;
-            transition: all var(--transition);
-        }
-
-        .header-value.score-pop {
-            animation: scorePop 0.4s ease-out;
-        }
-
-        @keyframes scorePop {
-            0% {
-                transform: scale(1);
-                color: #fff;
-            }
-            40% {
-                transform: scale(1.35);
-                color: var(--gold-glow);
-            }
-            100% {
-                transform: scale(1);
-                color: #fff;
-            }
-        }
-
-        .stage-badge {
-            background: var(--purple);
-            color: #fff;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-        }
-
-        .pairs-indicator {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .pairs-indicator span {
-            color: #fff;
-            font-weight: 700;
-        }
-
-        /* Timer pulse when low */
-        .header-value.timer-warning {
-            color: #fbbf24;
-            animation: timerPulse 0.7s ease-in-out infinite;
-        }
-        @keyframes timerPulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        /* Game Grid */
-        .game-grid-container {
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            min-height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .game-grid {
-            display: grid;
-            gap: 14px;
-            width: 100%;
-            justify-items: center;
-            align-items: center;
-            transition: opacity 0.3s ease;
-        }
-
-        .game-grid.fade-out {
-            opacity: 0;
-            transform: scale(0.96);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-        }
-        .game-grid.fade-in {
-            animation: gridFadeIn 0.35s ease-out;
-        }
-        @keyframes gridFadeIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.94);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        /* Word Buttons */
-        .word-btn {
-            padding: 16px 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            border: 2px solid transparent;
-            border-radius: var(--radius);
             cursor: pointer;
-            background: var(--button-default);
-            color: #fff;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
             transition: all var(--transition);
-            position: relative;
-            outline: none;
-            text-align: center;
-            word-break: break-word;
-            min-width: 100px;
-            min-height: 55px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
+            display: flex; align-items: center; gap: 5px;
+            white-space: nowrap;
             font-family: inherit;
         }
-
-        .word-btn:hover:not(.disabled):not(.selected):not(.matched) {
-            background: var(--button-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(100, 60, 220, 0.4);
-            border-color: rgba(255, 255, 255, 0.2);
+        .btn-reset:hover { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3); }
+        .btn-reset:active { transform: scale(0.96); }
+        .btn-reset:disabled { opacity: 0.3; pointer-events: none; }
+        .game-grid-container {
+            background: var(--surface); border-radius: var(--radius-lg); padding: 24px;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.06);
+            min-height: 180px; display: flex; align-items: center; justify-content: center;
         }
-
-        .word-btn:active:not(.disabled):not(.matched) {
-            background: var(--button-active);
-            transform: scale(0.96);
+        .game-grid {
+            display: grid; gap: 14px; width: 100%; justify-items: center; align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        .game-grid.fade-out { opacity:0; transform:scale(0.96); transition: opacity 0.25s ease, transform 0.25s ease; }
+        .game-grid.fade-in { animation: gridFadeIn 0.35s ease-out; }
+        @keyframes gridFadeIn { 0%{opacity:0;transform:scale(0.94)} 100%{opacity:1;transform:scale(1)} }
+        .word-btn {
+            padding: 16px 20px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em;
+            border: 2px solid transparent; border-radius: var(--radius); cursor: pointer;
+            background: linear-gradient(135deg, #5b3cc4, #6d4ddb); color: #fff;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.25); transition: all var(--transition);
+            outline: none; text-align: center; word-break: break-word;
+            min-width: 100px; min-height: 55px; display: flex; align-items: center;
+            justify-content: center; width: 100%; font-family: inherit;
+        }
+        .word-btn:hover:not(.disabled):not(.selected):not(.matched-pair) {
+            background: linear-gradient(135deg, #6d4ddb, #7e5ef0); transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100,60,220,0.4); border-color: rgba(255,255,255,0.2);
+        }
+        .word-btn:active:not(.disabled):not(.matched-pair) {
+            background: linear-gradient(135deg, #4a2fa8, #5b3cc4); transform: scale(0.96);
             transition: transform 0.1s ease;
         }
-
         .word-btn.selected {
-            background: linear-gradient(135deg, #eab308, #f59e0b);
-            border-color: #fde68a;
-            color: #1a1a00;
-            box-shadow: 0 0 30px rgba(234, 179, 8, 0.55), 0 0 60px rgba(234, 179, 8, 0.25);
-            transform: translateY(-3px);
-            animation: pulseGold 1.2s ease-in-out infinite;
-            font-weight: 700;
-            z-index: 2;
+            background: linear-gradient(135deg, #eab308, #f59e0b); border-color: #fde68a;
+            color: #1a1a00; box-shadow: 0 0 30px rgba(234,179,8,0.55), 0 0 60px rgba(234,179,8,0.25);
+            transform: translateY(-3px); animation: pulseGold 1.2s ease-in-out infinite;
+            font-weight: 700; z-index: 2;
         }
-
-        @keyframes pulseGold {
-            0%,
-            100% {
-                box-shadow: 0 0 25px rgba(234, 179, 8, 0.5), 0 0 50px rgba(234, 179, 8, 0.2);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(250, 204, 21, 0.7), 0 0 70px rgba(234, 179, 8, 0.35);
-            }
+        @keyframes pulseGold { 0%,100%{box-shadow:0 0 25px rgba(234,179,8,0.5),0 0 50px rgba(234,179,8,0.2)} 50%{box-shadow:0 0 40px rgba(250,204,21,0.7),0 0 70px rgba(234,179,8,0.35)} }
+        .word-btn.matched-pair {
+            pointer-events: none; cursor: not-allowed; opacity: 0.9; font-weight: 700;
         }
-
-        .word-btn.matched {
-            background: linear-gradient(135deg, #15803d, #16a34a);
-            border-color: #86efac;
-            color: #fff;
-            cursor: not-allowed;
-            opacity: 0.85;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-            animation: matchGlow 2s ease-in-out infinite;
-            font-weight: 700;
-            pointer-events: none;
-        }
-
-        @keyframes matchGlow {
-            0%,
-            100% {
-                box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
-            }
-        }
-
-        .word-btn.disabled {
-            pointer-events: none;
-            cursor: not-allowed;
-        }
-
+        .word-btn.disabled { pointer-events: none; cursor: not-allowed; }
         .word-btn.wrong-flash {
             animation: wrongShake 0.5s ease-out;
             background: linear-gradient(135deg, #dc2626, #ef4444) !important;
             border-color: #fca5a5 !important;
-            box-shadow: 0 0 35px rgba(239, 68, 68, 0.6) !important;
+            box-shadow: 0 0 35px rgba(239,68,68,0.6) !important;
             color: #fff !important;
         }
-
-        @keyframes wrongShake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            15% {
-                transform: translateX(-8px);
-            }
-            30% {
-                transform: translateX(8px);
-            }
-            45% {
-                transform: translateX(-5px);
-            }
-            60% {
-                transform: translateX(5px);
-            }
-            75% {
-                transform: translateX(-2px);
-            }
-            90% {
-                transform: translateX(2px);
-            }
-        }
-
-        /* Overlays */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            animation: overlayFadeIn 0.2s ease-out;
-            padding: 20px;
-        }
-
-        @keyframes overlayFadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .overlay-content {
-            background: var(--surface-light);
-            border-radius: var(--radius-lg);
-            padding: 32px 28px;
-            text-align: center;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 420px;
-            width: 100%;
-            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            0% {
-                transform: scale(0.7);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .overlay-icon {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
-            animation: bounceIcon 0.6s ease-out;
-        }
-        @keyframes bounceIcon {
-            0% {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            50% {
-                transform: translateY(-12px);
-            }
-            70% {
-                transform: translateY(4px);
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .overlay-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            margin-bottom: 6px;
-        }
-        .overlay-title.success {
-            color: var(--green-glow);
-        }
-        .overlay-title.failure {
-            color: var(--red-glow);
-        }
-        .overlay-title.victory {
-            color: var(--gold-glow);
-        }
-
-        .overlay-compound {
-            font-size: 2.4rem;
-            font-weight: 900;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #f0b90b, #fcd34d, #f0b90b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 8px 0 4px;
-        }
-
-        .overlay-subtitle {
-            font-size: 1rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
-        .overlay-stats {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 16px 0;
-            flex-wrap: wrap;
-        }
-        .overlay-stat {
-            text-align: center;
-        }
-        .overlay-stat-value {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #fff;
-        }
-        .overlay-stat-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-muted);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 14px 32px;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            outline: none;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-            color: #fff;
-            box-shadow: 0 4px 18px rgba(124, 58, 237, 0.4);
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(124, 58, 237, 0.55);
-        }
-        .btn-primary:active {
-            transform: scale(0.95);
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            color: #fff;
-            box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
-        }
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(239, 68, 68, 0.55);
-        }
-        .btn-gold {
-            background: linear-gradient(135deg, #eab308, #f59e0b);
-            color: #1a1a00;
-            box-shadow: 0 4px 18px rgba(234, 179, 8, 0.4);
-            font-weight: 800;
-        }
-        .btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(234, 179, 8, 0.55);
-        }
-
-        /* Confetti */
-        .confetti-piece {
-            position: fixed;
-            top: -40px;
-            z-index: 150;
-            pointer-events: none;
-            animation: confettiFall linear forwards;
-            border-radius: 3px;
-        }
-        @keyframes confettiFall {
-            0% {
-                transform: translateY(0) rotate(0deg) scale(1);
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(105vh) rotate(720deg) scale(0.3);
-                opacity: 0;
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .game-header {
-                padding: 12px 14px;
-                gap: 6px;
-            }
-            .header-value {
-                font-size: 1.1rem;
-            }
-            .header-label {
-                font-size: 0.65rem;
-            }
-            .game-grid-container {
-                padding: 14px;
-                border-radius: var(--radius);
-            }
-            .game-grid {
-                gap: 10px;
-            }
-            .word-btn {
-                padding: 14px 10px;
-                font-size: 0.95rem;
-                min-height: 48px;
-                border-radius: var(--radius-sm);
-            }
-            .overlay-content {
-                padding: 24px 16px;
-            }
-            .overlay-compound {
-                font-size: 1.8rem;
-            }
-            .overlay-title {
-                font-size: 1.4rem;
-            }
-            .btn {
-                padding: 12px 24px;
-                font-size: 0.9rem;
-            }
+        @keyframes wrongShake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 75%{transform:translateX(-2px)} 90%{transform:translateX(2px)} }
+        .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:100; animation:overlayFadeIn 0.2s ease-out; padding:20px; }
+        @keyframes overlayFadeIn { from{opacity:0} to{opacity:1} }
+        .overlay-content { background:var(--surface-light); border-radius:var(--radius-lg); padding:32px 28px; text-align:center; box-shadow:var(--shadow-lg); border:1px solid rgba(255,255,255,0.1); max-width:420px; width:100%; animation:popIn 0.35s cubic-bezier(0.175,0.885,0.32,1.275); }
+        @keyframes popIn { 0%{transform:scale(0.7);opacity:0} 100%{transform:scale(1);opacity:1} }
+        .overlay-icon { font-size:3.5rem; margin-bottom:10px; animation:bounceIcon 0.6s ease-out; }
+        @keyframes bounceIcon { 0%{transform:translateY(30px);opacity:0} 50%{transform:translateY(-12px)} 70%{transform:translateY(4px)} 100%{transform:translateY(0);opacity:1} }
+        .overlay-title { font-size:1.8rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:6px; }
+        .overlay-title.success { color:#4ade80; } .overlay-title.failure { color:#f87171; } .overlay-title.victory { color:#f5c842; }
+        .overlay-compound { font-size:2.4rem; font-weight:900; letter-spacing:-0.03em; background:linear-gradient(135deg,#f0b90b,#fcd34d,#f0b90b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:8px 0 4px; }
+        .overlay-subtitle { font-size:1rem; color:var(--text-muted); margin-bottom:6px; }
+        .overlay-stats { display:flex; gap:20px; justify-content:center; margin:16px 0; flex-wrap:wrap; }
+        .overlay-stat { text-align:center; } .overlay-stat-value { font-size:1.6rem; font-weight:700; color:#fff; }
+        .overlay-stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); }
+        .btn { display:inline-block; padding:14px 32px; font-size:1rem; font-weight:700; letter-spacing:0.03em; border:none; border-radius:30px; cursor:pointer; transition:all var(--transition); font-family:inherit; outline:none; }
+        .btn-primary { background:linear-gradient(135deg,#7c3aed,#8b5cf6); color:#fff; box-shadow:0 4px 18px rgba(124,58,237,0.4); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(124,58,237,0.55); }
+        .btn-danger { background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff; box-shadow:0 4px 18px rgba(239,68,68,0.4); }
+        .btn-danger:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(239,68,68,0.55); }
+        .btn-gold { background:linear-gradient(135deg,#eab308,#f59e0b); color:#1a1a00; box-shadow:0 4px 18px rgba(234,179,8,0.4); font-weight:800; }
+        .btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(234,179,8,0.55); }
+        .confetti-piece { position:fixed; top:-40px; z-index:150; pointer-events:none; animation:confettiFall linear forwards; border-radius:3px; }
+        @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1} 80%{opacity:1} 100%{transform:translateY(105vh) rotate(720deg) scale(0.3);opacity:0} }
+        @media (max-width:480px) {
+            .game-header { padding:12px 14px; gap:6px; } .header-left { gap:10px; }
+            .header-value { font-size:1.1rem; } .header-label { font-size:0.65rem; }
+            .btn-reset { padding:6px 10px; font-size:0.7rem; }
+            .game-grid-container { padding:14px; } .game-grid { gap:10px; }
+            .word-btn { padding:14px 10px; font-size:0.95rem; min-height:48px; border-radius:var(--radius-sm); }
+            .overlay-content { padding:24px 16px; } .overlay-compound { font-size:1.8rem; }
+            .overlay-title { font-size:1.4rem; } .btn { padding:12px 24px; font-size:0.9rem; }
         }
     </style>
 </head>
 <body>
-
     <div class="game-wrapper" id="gameWrapper">
-        <!-- Header -->
         <div class="game-header">
-            <div class="header-item">
-                <span class="header-label">Stage</span>
-                <span class="stage-badge" id="stageBadge">1 / 5</span>
+            <div class="header-left">
+                <div class="header-item"><span class="header-label">Stage</span><span class="stage-badge" id="stageBadge">1 / 5</span></div>
+                <div class="header-item"><span class="header-label">Score</span><span class="header-value" id="scoreDisplay">0</span></div>
+                <div class="header-item"><span class="header-label">Time</span><span class="header-value" id="timerDisplay">00:00</span></div>
+                <div class="header-item"><span class="header-label">Pairs</span><span class="pairs-indicator" id="pairsIndicator"><span>0</span> / 0</span></div>
             </div>
-            <div class="header-item">
-                <span class="header-label">Score</span>
-                <span class="header-value" id="scoreDisplay">0</span>
-            </div>
-            <div class="header-item">
-                <span class="header-label">Time</span>
-                <span class="header-value" id="timerDisplay">00:00</span>
-            </div>
-            <div class="header-item">
-                <span class="header-label">Pairs</span>
-                <span class="pairs-indicator" id="pairsIndicator"><span>0</span> / 0</span>
-            </div>
+            <button class="btn-reset" id="resetBtn" title="Deselect current word">↩️ Deselect</button>
         </div>
-
-        <!-- Game Grid -->
         <div class="game-grid-container">
-            <div class="game-grid" id="gameGrid"></div>
+            <div class="game-grid" id="gameGrid">
+                <div style="color: #a0a0b8; font-size: 1.2rem;">🎮 Loading game...</div>
+            </div>
         </div>
     </div>
-
-    <!-- Overlays Container -->
     <div id="overlayContainer"></div>
 
     <script>
@@ -586,45 +177,29 @@
             // ──────────────────────────────────────
             // STAGE DATA
             // ──────────────────────────────────────
-            const stagesData = [{
-                name: 'Stage 1',
-                pairs: [
-                    { word1: 'rain', word2: 'bow', compound: 'rainbow' },
-                    { word1: 'sun', word2: 'flower', compound: 'sunflower' },
-                ],
-            }, {
-                name: 'Stage 2',
-                pairs: [
-                    { word1: 'butter', word2: 'fly', compound: 'butterfly' },
-                    { word1: 'foot', word2: 'ball', compound: 'football' },
-                    { word1: 'star', word2: 'fish', compound: 'starfish' },
-                ],
-            }, {
-                name: 'Stage 3',
-                pairs: [
-                    { word1: 'snow', word2: 'man', compound: 'snowman' },
-                    { word1: 'book', word2: 'worm', compound: 'bookworm' },
-                    { word1: 'moon', word2: 'light', compound: 'moonlight' },
-                    { word1: 'fire', word2: 'works', compound: 'fireworks' },
-                ],
-            }, {
-                name: 'Stage 4',
-                pairs: [
-                    { word1: 'gold', word2: 'fish', compound: 'goldfish' },
-                    { word1: 'door', word2: 'bell', compound: 'doorbell' },
-                    { word1: 'honey', word2: 'moon', compound: 'honeymoon' },
-                    { word1: 'basket', word2: 'ball', compound: 'basketball' },
-                ],
-            }, {
-                name: 'Stage 5',
-                pairs: [
-                    { word1: 'water', word2: 'fall', compound: 'waterfall' },
-                    { word1: 'thunder', word2: 'storm', compound: 'thunderstorm' },
-                    { word1: 'news', word2: 'paper', compound: 'newspaper' },
-                    { word1: 'straw', word2: 'berry', compound: 'strawberry' },
-                    { word1: 'black', word2: 'board', compound: 'blackboard' },
-                ],
-            }, ];
+            const stagesData = [
+                { name: 'Stage 1', pairs: [{ word1: 'rain', word2: 'bow', compound: 'rainbow' }, { word1: 'sun', word2: 'flower', compound: 'sunflower' }] },
+                { name: 'Stage 2', pairs: [{ word1: 'butter', word2: 'fly', compound: 'butterfly' }, { word1: 'foot', word2: 'ball', compound: 'football' }, { word1: 'star', word2: 'fish', compound: 'starfish' }] },
+                { name: 'Stage 3', pairs: [{ word1: 'snow', word2: 'man', compound: 'snowman' }, { word1: 'book', word2: 'worm', compound: 'bookworm' }, { word1: 'moon', word2: 'light', compound: 'moonlight' }, { word1: 'fire', word2: 'works', compound: 'fireworks' }] },
+                { name: 'Stage 4', pairs: [{ word1: 'gold', word2: 'fish', compound: 'goldfish' }, { word1: 'door', word2: 'bell', compound: 'doorbell' }, { word1: 'honey', word2: 'moon', compound: 'honeymoon' }, { word1: 'basket', word2: 'ball', compound: 'basketball' }] },
+                { name: 'Stage 5', pairs: [{ word1: 'water', word2: 'fall', compound: 'waterfall' }, { word1: 'thunder', word2: 'storm', compound: 'thunderstorm' }, { word1: 'news', word2: 'paper', compound: 'newspaper' }, { word1: 'straw', word2: 'berry', compound: 'strawberry' }, { word1: 'black', word2: 'board', compound: 'blackboard' }] }
+            ];
+
+            // ──────────────────────────────────────
+            // UNIQUE PAIR COLOR PALETTE
+            // ──────────────────────────────────────
+            const pairColorPalette = [
+                { main: '#f97316', light: '#fb923c', border: '#fdba74', shadow: 'rgba(249,115,22,0.6)' },
+                { main: '#8b5cf6', light: '#a78bfa', border: '#c4b5fd', shadow: 'rgba(139,92,246,0.6)' },
+                { main: '#06b6d4', light: '#22d3ee', border: '#67e8f9', shadow: 'rgba(6,182,212,0.6)' },
+                { main: '#ec4899', light: '#f472b6', border: '#f9a8d4', shadow: 'rgba(236,72,153,0.6)' },
+                { main: '#22c55e', light: '#4ade80', border: '#86efac', shadow: 'rgba(34,197,94,0.6)' },
+                { main: '#eab308', light: '#facc15', border: '#fde047', shadow: 'rgba(234,179,8,0.6)' }
+            ];
+
+            function getPairColor(pairIndex) {
+                return pairColorPalette[pairIndex % pairColorPalette.length];
+            }
 
             // ──────────────────────────────────────
             // DOM ELEMENTS
@@ -635,6 +210,7 @@
             const stageBadge = document.getElementById('stageBadge');
             const pairsIndicator = document.getElementById('pairsIndicator');
             const overlayContainer = document.getElementById('overlayContainer');
+            const resetBtn = document.getElementById('resetBtn');
 
             // ──────────────────────────────────────
             // GAME STATE
@@ -649,10 +225,10 @@
             let timerSeconds = 0;
             let timerInterval = null;
             let timerPaused = false;
-            let currentStagePairs = [];
-            let pairLookup = new Map(); // word -> { partner, compound, pairIndex }
+            let pairLookup = new Map();
             let foundPairIndices = new Set();
             let allWordButtons = [];
+            let confettiPieces = [];
 
             // ──────────────────────────────────────
             // UTILITY FUNCTIONS
@@ -666,19 +242,19 @@
                 return shuffled;
             }
 
-            function formatTime(seconds) {
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            function formatTime(sec) {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
             }
 
-            function formatDuration(seconds) {
-                if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`;
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                let result = `${mins} minute${mins !== 1 ? 's' : ''}`;
-                if (secs > 0) result += ` ${secs} second${secs !== 1 ? 's' : ''}`;
-                return result;
+            function formatDuration(sec) {
+                if (sec < 60) return `${sec} second${sec !== 1 ? 's' : ''}`;
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                let r = `${m} minute${m !== 1 ? 's' : ''}`;
+                if (s > 0) r += ` ${s} second${s !== 1 ? 's' : ''}`;
+                return r;
             }
 
             // ──────────────────────────────────────
@@ -693,34 +269,23 @@
                     if (!timerPaused) {
                         timerSeconds++;
                         updateTimerDisplay();
+                        if (timerSeconds >= 45) timerDisplay.classList.add('timer-warning');
                     }
                 }, 1000);
             }
 
             function stopTimer() {
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                }
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             }
 
-            function pauseTimer() {
-                timerPaused = true;
-            }
-
-            function resumeTimer() {
-                timerPaused = false;
-            }
+            function pauseTimer() { timerPaused = true; }
+            function resumeTimer() { timerPaused = false; }
 
             function updateTimerDisplay() {
                 timerDisplay.textContent = formatTime(timerSeconds);
-                // Remove any animation classes
-                timerDisplay.classList.remove('timer-warning');
+                if (timerSeconds < 45) timerDisplay.classList.remove('timer-warning');
             }
 
-            // ──────────────────────────────────────
-            // UI UPDATE
-            // ──────────────────────────────────────
             function updateScoreDisplay(animate = false) {
                 scoreDisplay.textContent = score;
                 if (animate) {
@@ -731,26 +296,21 @@
             }
 
             function updatePairsIndicator() {
-                pairsIndicator.innerHTML =
-                    `<span>${pairsFoundInStage}</span> / ${totalPairsInStage}`;
+                pairsIndicator.innerHTML = `<span>${pairsFoundInStage}</span> / ${totalPairsInStage}`;
             }
 
             function updateStageBadge() {
                 stageBadge.textContent = `${currentStageIndex + 1} / ${stagesData.length}`;
             }
 
-            // ──────────────────────────────────────
-            // BUILD PAIR LOOKUP
-            // ──────────────────────────────────────
             function buildPairLookup(pairs) {
-                const lookup = new Map();
-                pairs.forEach((pair, index) => {
-                    lookup.set(pair.word1, { partner: pair.word2, compound: pair.compound,
-                        pairIndex: index });
-                    lookup.set(pair.word2, { partner: pair.word1, compound: pair.compound,
-                        pairIndex: index });
+                const map = new Map();
+                pairs.forEach((p, i) => {
+                    // Store both directions, but also mark which is the first word
+                    map.set(p.word1, { partner: p.word2, compound: p.compound, pairIndex: i, isFirstWord: true });
+                    map.set(p.word2, { partner: p.word1, compound: p.compound, pairIndex: i, isFirstWord: false });
                 });
-                return lookup;
+                return map;
             }
 
             // ──────────────────────────────────────
@@ -759,39 +319,28 @@
             function renderGrid(pairs) {
                 gameGrid.innerHTML = '';
                 allWordButtons = [];
-                foundPairIndices = new Set();
+                foundPairIndices.clear();
                 pairsFoundInStage = 0;
                 totalPairsInStage = pairs.length;
-                currentStagePairs = pairs;
                 pairLookup = buildPairLookup(pairs);
                 selectedWordEl = null;
                 selectedWordText = null;
 
-                // Collect all words
-                const allWords = [];
-                pairs.forEach((pair) => {
-                    allWords.push(pair.word1);
-                    allWords.push(pair.word2);
-                });
-                const shuffledWords = shuffleArray(allWords);
+                const words = [];
+                pairs.forEach(p => { words.push(p.word1); words.push(p.word2); });
+                const shuffled = shuffleArray(words);
 
-                // Determine grid columns
-                const wordCount = shuffledWords.length;
-                let gridCols;
-                if (wordCount <= 4) gridCols = 2;
-                else if (wordCount <= 6) gridCols = 3;
-                else if (wordCount <= 8) gridCols = 4;
-                else gridCols = 5;
+                let cols;
+                const wc = shuffled.length;
+                if (wc <= 4) cols = 2;
+                else if (wc <= 6) cols = 3;
+                else if (wc <= 8) cols = 4;
+                else cols = 5;
+                if (window.innerWidth < 480 && cols > 3) cols = 3;
+                if (window.innerWidth < 480 && wc === 4) cols = 2;
+                gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-                // On mobile, cap columns
-                const isMobile = window.innerWidth < 480;
-                if (isMobile && gridCols > 3) gridCols = 3;
-                if (isMobile && wordCount === 4) gridCols = 2;
-
-                gameGrid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
-
-                // Create buttons
-                shuffledWords.forEach((word) => {
+                shuffled.forEach(word => {
                     const btn = document.createElement('button');
                     btn.className = 'word-btn';
                     btn.textContent = word;
@@ -801,7 +350,6 @@
                     allWordButtons.push(btn);
                 });
 
-                // Animate grid in
                 gameGrid.classList.remove('fade-out');
                 gameGrid.classList.add('fade-in');
                 setTimeout(() => gameGrid.classList.remove('fade-in'), 400);
@@ -811,127 +359,142 @@
             }
 
             // ──────────────────────────────────────
-            // HANDLE WORD TAP
+            // RESET (DESELECT) BUTTON
             // ──────────────────────────────────────
-            function handleWordTap(word, btnElement) {
-                if (isLocked) return;
-                if (btnElement.classList.contains('matched')) return;
-                if (btnElement.classList.contains('disabled')) return;
-
-                // If tapping the already-selected word, deselect it
-                if (selectedWordEl === btnElement) {
-                    deselectWord();
-                    return;
-                }
-
-                // If no word is selected yet
-                if (!selectedWordEl) {
-                    selectWord(word, btnElement);
-                    return;
-                }
-
-                // A second word is tapped — check the pair
-                const firstWord = selectedWordText;
-                const secondWord = word;
-                const firstBtn = selectedWordEl;
-                const secondBtn = btnElement;
-
-                // Lock interactions
-                isLocked = true;
-                pauseTimer();
-
-                // Check if valid pair
-                const lookupEntry = pairLookup.get(firstWord);
-                const isValidPair = lookupEntry && lookupEntry.partner === secondWord;
-
-                if (isValidPair) {
-                    handleCorrectPair(firstWord, secondWord, lookupEntry.compound, lookupEntry.pairIndex,
-                        firstBtn, secondBtn);
+            function updateResetButtonState() {
+                if (!resetBtn) return;
+                if (isLocked || !selectedWordEl) {
+                    resetBtn.disabled = true;
                 } else {
-                    handleWrongPair(firstWord, secondWord, firstBtn, secondBtn);
+                    resetBtn.disabled = false;
                 }
             }
 
-            function selectWord(word, btnElement) {
-                // Deselect previous if any
+            resetBtn.addEventListener('click', () => {
+                if (isLocked) return;
                 if (selectedWordEl) {
-                    selectedWordEl.classList.remove('selected');
+                    deselectWord();
+                    updateResetButtonState();
                 }
-                selectedWordEl = btnElement;
+            });
+
+            // ──────────────────────────────────────
+            // WORD TAP HANDLER
+            // ──────────────────────────────────────
+            function handleWordTap(word, btn) {
+                if (isLocked || btn.classList.contains('matched-pair') || btn.classList.contains('disabled')) return;
+                if (selectedWordEl === btn) {
+                    deselectWord();
+                    updateResetButtonState();
+                    return;
+                }
+                if (!selectedWordEl) {
+                    selectWord(word, btn);
+                    updateResetButtonState();
+                } else {
+                    const firstWord = selectedWordText;
+                    const secondWord = word;
+                    const firstBtn = selectedWordEl;
+                    const secondBtn = btn;
+                    isLocked = true;
+                    pauseTimer();
+                    updateResetButtonState(); // disable reset during lock
+
+                    const entry = pairLookup.get(firstWord);
+                    if (entry && entry.partner === secondWord) {
+                        // Words belong to the same pair – now check order
+                        const pair = stagesData[currentStageIndex].pairs[entry.pairIndex];
+                        if (firstWord === pair.word1) {
+                            // Correct order: first word then second word
+                            handleCorrectPair(firstWord, secondWord, entry.compound, entry.pairIndex, firstBtn, secondBtn);
+                        } else {
+                            // Wrong order: tapped second word first, then first word
+                            handleWrongOrder(firstWord, secondWord, firstBtn, secondBtn);
+                        }
+                    } else {
+                        // Completely wrong pair
+                        handleWrongPair(firstWord, secondWord, firstBtn, secondBtn);
+                    }
+                }
+            }
+
+            function selectWord(word, btn) {
+                if (selectedWordEl) selectedWordEl.classList.remove('selected');
+                selectedWordEl = btn;
                 selectedWordText = word;
-                btnElement.classList.add('selected');
+                btn.classList.add('selected');
             }
 
             function deselectWord() {
-                if (selectedWordEl) {
-                    selectedWordEl.classList.remove('selected');
-                }
+                if (selectedWordEl) selectedWordEl.classList.remove('selected');
                 selectedWordEl = null;
                 selectedWordText = null;
             }
 
-            // ──────────────────────────────────────
-            // HANDLE CORRECT PAIR
-            // ──────────────────────────────────────
-            function handleCorrectPair(word1, word2, compoundWord, pairIndex, btn1, btn2) {
-                // Remove selection highlight
+            function handleCorrectPair(w1, w2, compound, pairIndex, btn1, btn2) {
                 btn1.classList.remove('selected');
-                if (btn2) btn2.classList.remove('selected');
+                btn2.classList.remove('selected');
                 selectedWordEl = null;
                 selectedWordText = null;
 
-                // Mark as matched
-                btn1.classList.add('matched', 'disabled');
-                btn2.classList.add('matched', 'disabled');
+                const color = getPairColor(pairIndex);
+                [btn1, btn2].forEach(btn => {
+                    btn.classList.add('matched-pair');
+                    btn.style.background = `linear-gradient(135deg, ${color.main}, ${color.light})`;
+                    btn.style.borderColor = color.border;
+                    btn.style.boxShadow = `0 0 28px ${color.shadow}`;
+                    btn.style.animation = 'none';
+                });
 
-                // Update state
                 foundPairIndices.add(pairIndex);
                 pairsFoundInStage = foundPairIndices.size;
                 score += 100;
                 updateScoreDisplay(true);
                 updatePairsIndicator();
 
-                // Show success popup
                 const allFound = pairsFoundInStage >= totalPairsInStage;
-                showSuccessPopup(compoundWord, allFound, () => {
+                showSuccessPopup(compound, allFound, () => {
                     resumeTimer();
                     isLocked = false;
-
-                    if (allFound) {
-                        // Stage complete
-                        handleStageComplete();
-                    }
+                    updateResetButtonState();
+                    if (allFound) handleStageComplete();
                 });
             }
 
-            // ──────────────────────────────────────
-            // HANDLE WRONG PAIR
-            // ──────────────────────────────────────
-            function handleWrongPair(word1, word2, btn1, btn2) {
-                // Flash both buttons red
+            function handleWrongOrder(w1, w2, btn1, btn2) {
+                // Reverse order: flash both and trigger game over with specific message
                 btn1.classList.remove('selected');
                 btn1.classList.add('wrong-flash');
                 btn2.classList.add('wrong-flash');
                 selectedWordEl = null;
                 selectedWordText = null;
-
-                // Short delay then game over
                 setTimeout(() => {
                     btn1.classList.remove('wrong-flash');
                     btn2.classList.remove('wrong-flash');
                     stopTimer();
-                    showGameOverScreen(word1, word2);
+                    showGameOverScreen(w1, w2, true); // true = wrong order
                 }, 500);
             }
 
-            // ──────────────────────────────────────
-            // HANDLE STAGE COMPLETE
-            // ──────────────────────────────────────
+            function handleWrongPair(w1, w2, btn1, btn2) {
+                btn1.classList.remove('selected');
+                btn1.classList.add('wrong-flash');
+                btn2.classList.add('wrong-flash');
+                selectedWordEl = null;
+                selectedWordText = null;
+                setTimeout(() => {
+                    btn1.classList.remove('wrong-flash');
+                    btn2.classList.remove('wrong-flash');
+                    stopTimer();
+                    showGameOverScreen(w1, w2, false);
+                }, 500);
+            }
+
             function handleStageComplete() {
                 if (currentStageIndex < stagesData.length - 1) {
-                    // More stages remain
                     isLocked = true;
                     pauseTimer();
+                    updateResetButtonState();
                     showStageTransitionPopup(() => {
                         currentStageIndex++;
                         pairsFoundInStage = 0;
@@ -942,158 +505,111 @@
                         resumeTimer();
                         isLocked = false;
                         deselectWord();
+                        updateResetButtonState();
                     });
                 } else {
-                    // All stages complete — VICTORY!
                     stopTimer();
                     showVictoryScreen();
                 }
             }
 
             // ──────────────────────────────────────
-            // POPUP: SUCCESS
+            // OVERLAYS
             // ──────────────────────────────────────
-            function showSuccessPopup(compoundWord, isLastInStage, callback) {
+            function dismissOverlay(overlay) {
+                if (overlay._timeout) clearTimeout(overlay._timeout);
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 250);
+            }
+
+            function showSuccessPopup(compound, last, cb) {
                 const overlay = document.createElement('div');
                 overlay.className = 'overlay';
                 overlay.innerHTML = `
                     <div class="overlay-content">
                         <div class="overlay-icon">✅</div>
                         <div class="overlay-title success">Well Done!</div>
-                        <div class="overlay-compound">${compoundWord}</div>
-                        <div class="overlay-subtitle">${isLastInStage ? 'All pairs found in this stage!' : 'Keep going!'}</div>
-                    </div>
-                `;
+                        <div class="overlay-compound">${compound}</div>
+                        <div class="overlay-subtitle">${last ? 'All pairs found!' : 'Keep going!'}</div>
+                    </div>`;
                 overlayContainer.appendChild(overlay);
-
-                // Auto-dismiss after 1.4 seconds
-                const dismissTimeout = setTimeout(() => {
-                    dismissOverlay(overlay);
-                    if (callback) callback();
-                }, 1400);
-
-                // Store timeout for cleanup
-                overlay._dismissTimeout = dismissTimeout;
+                overlay._timeout = setTimeout(() => { dismissOverlay(overlay); if (cb) cb(); }, 1400);
             }
 
-            // ──────────────────────────────────────
-            // POPUP: STAGE TRANSITION
-            // ──────────────────────────────────────
-            function showStageTransitionPopup(callback) {
-                const nextStageName = stagesData[currentStageIndex + 1].name;
+            function showStageTransitionPopup(cb) {
+                const next = stagesData[currentStageIndex + 1].name;
                 const overlay = document.createElement('div');
                 overlay.className = 'overlay';
                 overlay.innerHTML = `
                     <div class="overlay-content">
                         <div class="overlay-icon">🌟</div>
                         <div class="overlay-title success">Stage Complete!</div>
-                        <div class="overlay-subtitle" style="font-size:1.2rem;color:#fff;font-weight:700;">${nextStageName} incoming...</div>
-                    </div>
-                `;
+                        <div class="overlay-subtitle" style="font-size:1.2rem;color:#fff;font-weight:700;">${next} incoming...</div>
+                    </div>`;
                 overlayContainer.appendChild(overlay);
-
-                const dismissTimeout = setTimeout(() => {
-                    dismissOverlay(overlay);
-                    if (callback) callback();
-                }, 1100);
-
-                overlay._dismissTimeout = dismissTimeout;
+                overlay._timeout = setTimeout(() => { dismissOverlay(overlay); if (cb) cb(); }, 1100);
             }
 
-            // ──────────────────────────────────────
-            // SCREEN: GAME OVER
-            // ──────────────────────────────────────
-            function showGameOverScreen(wrongWord1, wrongWord2) {
+            function showGameOverScreen(w1, w2, isOrderMistake = false) {
                 isLocked = true;
+                const reason = isOrderMistake
+                    ? `Wrong order! "<strong>${w1}</strong>" should come after "<strong>${w2}</strong>" in the compound word.`
+                    : `"<strong>${w1}</strong>" + "<strong>${w2}</strong>" is not a valid compound word.`;
                 const overlay = document.createElement('div');
                 overlay.className = 'overlay';
-                overlay.id = 'gameOverOverlay';
                 overlay.innerHTML = `
                     <div class="overlay-content">
                         <div class="overlay-icon">😞</div>
                         <div class="overlay-title failure">Game Over</div>
-                        <div class="overlay-subtitle">
-                            "<strong>${wrongWord1}</strong>" + "<strong>${wrongWord2}</strong>" is not a valid compound word.
-                        </div>
+                        <div class="overlay-subtitle">${reason}</div>
                         <div class="overlay-stats">
-                            <div class="overlay-stat">
-                                <div class="overlay-stat-value">${score}</div>
-                                <div class="overlay-stat-label">Total Score</div>
-                            </div>
-                            <div class="overlay-stat">
-                                <div class="overlay-stat-value">${formatDuration(timerSeconds)}</div>
-                                <div class="overlay-stat-label">Duration</div>
-                            </div>
-                            <div class="overlay-stat">
-                                <div class="overlay-stat-value">Stage ${currentStageIndex + 1}</div>
-                                <div class="overlay-stat-label">Reached</div>
-                            </div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">${score}</div><div class="overlay-stat-label">Score</div></div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">${formatDuration(timerSeconds)}</div><div class="overlay-stat-label">Time</div></div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">Stage ${currentStageIndex+1}</div><div class="overlay-stat-label">Reached</div></div>
                         </div>
                         <button class="btn btn-danger" id="tryAgainBtn">🔄 Try Again</button>
-                    </div>
-                `;
+                    </div>`;
                 overlayContainer.appendChild(overlay);
-
                 document.getElementById('tryAgainBtn').addEventListener('click', () => {
                     dismissOverlay(overlay);
                     resetGame();
                 });
-
-                // Disable all word buttons
                 allWordButtons.forEach(b => b.classList.add('disabled'));
+                updateResetButtonState();
             }
 
-            // ──────────────────────────────────────
-            // SCREEN: VICTORY
-            // ──────────────────────────────────────
             function showVictoryScreen() {
                 isLocked = true;
                 spawnConfetti();
                 const overlay = document.createElement('div');
                 overlay.className = 'overlay';
-                overlay.id = 'victoryOverlay';
                 overlay.innerHTML = `
                     <div class="overlay-content">
                         <div class="overlay-icon">🏆</div>
                         <div class="overlay-title victory">Victory!</div>
                         <div class="overlay-subtitle">You mastered all compound words!</div>
                         <div class="overlay-stats">
-                            <div class="overlay-stat">
-                                <div class="overlay-stat-value">${score}</div>
-                                <div class="overlay-stat-label">Total Score</div>
-                            </div>
-                            <div class="overlay-stat">
-                                <div class="overlay-stat-value">${formatDuration(timerSeconds)}</div>
-                                <div class="overlay-stat-label">Total Time</div>
-                            </div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">${score}</div><div class="overlay-stat-label">Score</div></div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">${formatDuration(timerSeconds)}</div><div class="overlay-stat-label">Time</div></div>
                         </div>
                         <button class="btn btn-gold" id="playAgainBtn">🎮 Play Again</button>
-                    </div>
-                `;
+                    </div>`;
                 overlayContainer.appendChild(overlay);
-
                 document.getElementById('playAgainBtn').addEventListener('click', () => {
                     dismissOverlay(overlay);
                     cleanupConfetti();
                     resetGame();
                 });
-
-                // Disable all word buttons
                 allWordButtons.forEach(b => b.classList.add('disabled'));
+                updateResetButtonState();
             }
 
             // ──────────────────────────────────────
             // CONFETTI
             // ──────────────────────────────────────
-            let confettiPieces = [];
-
             function spawnConfetti() {
-                const colors = [
-                    '#f0b90b', '#fcd34d', '#22c55e', '#4ade80', '#ef4444',
-                    '#f87171', '#7c3aed', '#8b5cf6', '#3b82f6', '#60a5fa',
-                    '#ec4899', '#f472b6', '#14b8a6', '#f97316',
-                ];
-                const fragment = document.createDocumentFragment();
+                const colors = ['#f0b90b','#fcd34d','#22c55e','#4ade80','#ef4444','#f87171','#7c3aed','#8b5cf6','#3b82f6','#60a5fa','#ec4899','#f472b6','#14b8a6','#f97316'];
                 for (let i = 0; i < 70; i++) {
                     const piece = document.createElement('div');
                     piece.className = 'confetti-piece';
@@ -1104,33 +620,14 @@
                     piece.style.animationDuration = (Math.random() * 2.5 + 2) + 's';
                     piece.style.animationDelay = Math.random() * 1.5 + 's';
                     piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
-                    fragment.appendChild(piece);
+                    document.body.appendChild(piece);
                     confettiPieces.push(piece);
                 }
-                document.body.appendChild(fragment);
             }
 
             function cleanupConfetti() {
-                confettiPieces.forEach(piece => {
-                    if (piece.parentNode) piece.parentNode.removeChild(piece);
-                });
+                confettiPieces.forEach(p => { if (p.parentNode) p.parentNode.removeChild(p); });
                 confettiPieces = [];
-            }
-
-            // ──────────────────────────────────────
-            // OVERLAY DISMISS
-            // ──────────────────────────────────────
-            function dismissOverlay(overlay) {
-                if (overlay._dismissTimeout) {
-                    clearTimeout(overlay._dismissTimeout);
-                }
-                overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.2s ease';
-                setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }, 250);
             }
 
             // ──────────────────────────────────────
@@ -1139,9 +636,7 @@
             function resetGame() {
                 stopTimer();
                 cleanupConfetti();
-                // Clear all overlays
                 overlayContainer.innerHTML = '';
-                // Reset state
                 currentStageIndex = 0;
                 score = 0;
                 pairsFoundInStage = 0;
@@ -1150,19 +645,16 @@
                 isLocked = false;
                 timerSeconds = 0;
                 timerPaused = false;
-                foundPairIndices = new Set();
+                foundPairIndices.clear();
                 allWordButtons = [];
-                // Update UI
                 updateScoreDisplay();
                 updateTimerDisplay();
                 updateStageBadge();
                 timerDisplay.classList.remove('timer-warning');
-                // Render first stage
                 renderGrid(stagesData[0].pairs);
                 updatePairsIndicator();
-                // Start timer
                 startTimer();
-                // Ensure grid is visible
+                updateResetButtonState();
                 gameGrid.classList.remove('fade-out');
                 gameGrid.classList.add('fade-in');
                 setTimeout(() => gameGrid.classList.remove('fade-in'), 400);
@@ -1172,59 +664,57 @@
             // INIT
             // ──────────────────────────────────────
             function initGame() {
-                currentStageIndex = 0;
-                score = 0;
-                pairsFoundInStage = 0;
-                selectedWordEl = null;
-                selectedWordText = null;
-                isLocked = false;
-                timerSeconds = 0;
-                timerPaused = false;
-                foundPairIndices = new Set();
-                allWordButtons = [];
-                updateScoreDisplay();
-                updateTimerDisplay();
-                updateStageBadge();
-                timerDisplay.classList.remove('timer-warning');
-                overlayContainer.innerHTML = '';
-                cleanupConfetti();
-                renderGrid(stagesData[0].pairs);
-                updatePairsIndicator();
-                startTimer();
+                try {
+                    const loadingEl = gameGrid.querySelector('div');
+                    if (loadingEl) loadingEl.remove();
+                    currentStageIndex = 0;
+                    score = 0;
+                    pairsFoundInStage = 0;
+                    selectedWordEl = null;
+                    selectedWordText = null;
+                    isLocked = false;
+                    timerSeconds = 0;
+                    timerPaused = false;
+                    foundPairIndices.clear();
+                    allWordButtons = [];
+                    updateScoreDisplay();
+                    updateTimerDisplay();
+                    updateStageBadge();
+                    timerDisplay.classList.remove('timer-warning');
+                    renderGrid(stagesData[0].pairs);
+                    updatePairsIndicator();
+                    startTimer();
+                    updateResetButtonState();
+                } catch (e) {
+                    console.error('Init error:', e);
+                    gameGrid.innerHTML = '<div style="color:#ef4444; padding:20px;">⚠️ Could not start game. Check console (F12).</div>';
+                }
             }
 
-            // ──────────────────────────────────────
-            // HANDLE WINDOW RESIZE (recalculate grid)
-            // ──────────────────────────────────────
-            let resizeDebounce;
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initGame);
+            } else {
+                initGame();
+            }
+
+            // Responsive grid adjustment
+            let resizeTimer;
             window.addEventListener('resize', () => {
-                clearTimeout(resizeDebounce);
-                resizeDebounce = setTimeout(() => {
-                    if (!isLocked || (isLocked && allWordButtons.some(b => b.classList.contains(
-                            'matched')))) {
-                        // Refresh grid columns without losing state
-                        const wordCount = allWordButtons.length;
-                        let gridCols;
-                        if (wordCount <= 4) gridCols = 2;
-                        else if (wordCount <= 6) gridCols = 3;
-                        else if (wordCount <= 8) gridCols = 4;
-                        else gridCols = 5;
-                        const isMobile = window.innerWidth < 480;
-                        if (isMobile && gridCols > 3) gridCols = 3;
-                        if (isMobile && wordCount === 4) gridCols = 2;
-                        gameGrid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (allWordButtons.length > 0) {
+                        const wc = allWordButtons.length;
+                        let cols;
+                        if (wc <= 4) cols = 2;
+                        else if (wc <= 6) cols = 3;
+                        else if (wc <= 8) cols = 4;
+                        else cols = 5;
+                        if (window.innerWidth < 480 && cols > 3) cols = 3;
+                        if (window.innerWidth < 480 && wc === 4) cols = 2;
+                        gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
                     }
-                }, 250);
+                }, 200);
             });
-
-            // ──────────────────────────────────────
-            // START
-            // ──────────────────────────────────────
-            initGame();
-
-            console.log('🧩 Compound Word Match ready!');
-            console.log('   Find all compound word pairs across ' + stagesData.length + ' stages.');
-            console.log('   One wrong match = Game Over. Good luck!');
         })();
     </script>
 </body>
