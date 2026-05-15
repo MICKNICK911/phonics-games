@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compound Word Match – Strict Order + Reset</title>
+    <title>Compound Word Match – Strict Order + Centered Grid</title>
     <style>
         :root {
             --bg: #0f0f1a;
@@ -73,12 +73,17 @@
         .btn-reset:active { transform: scale(0.96); }
         .btn-reset:disabled { opacity: 0.3; pointer-events: none; }
         .game-grid-container {
-            background: var(--surface); border-radius: var(--radius-lg); padding: 24px;
+            background: var(--surface); border-radius: var(--radius-lg); padding: 24px 16px;
             box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.06);
             min-height: 180px; display: flex; align-items: center; justify-content: center;
         }
         .game-grid {
-            display: grid; gap: 14px; width: 100%; justify-items: center; align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
             transition: opacity 0.3s ease;
         }
         .game-grid.fade-out { opacity:0; transform:scale(0.96); transition: opacity 0.25s ease, transform 0.25s ease; }
@@ -91,7 +96,10 @@
             box-shadow: 0 3px 12px rgba(0,0,0,0.25); transition: all var(--transition);
             outline: none; text-align: center; word-break: break-word;
             min-width: 100px; min-height: 55px; display: flex; align-items: center;
-            justify-content: center; width: 100%; font-family: inherit;
+            justify-content: center; flex: 0 1 auto;
+            font-family: inherit;
+            /* Consistent width based on content, capped */
+            max-width: 180px;
         }
         .word-btn:hover:not(.disabled):not(.selected):not(.matched-pair) {
             background: linear-gradient(135deg, #6d4ddb, #7e5ef0); transform: translateY(-2px);
@@ -146,8 +154,9 @@
             .game-header { padding:12px 14px; gap:6px; } .header-left { gap:10px; }
             .header-value { font-size:1.1rem; } .header-label { font-size:0.65rem; }
             .btn-reset { padding:6px 10px; font-size:0.7rem; }
-            .game-grid-container { padding:14px; } .game-grid { gap:10px; }
-            .word-btn { padding:14px 10px; font-size:0.95rem; min-height:48px; border-radius:var(--radius-sm); }
+            .game-grid-container { padding:14px 8px; }
+            .game-grid { gap: 10px; }
+            .word-btn { padding:14px 10px; font-size:0.95rem; min-height:48px; min-width:80px; max-width:150px; }
             .overlay-content { padding:24px 16px; } .overlay-compound { font-size:1.8rem; }
             .overlay-title { font-size:1.4rem; } .btn { padding:12px 24px; font-size:0.9rem; }
         }
@@ -306,7 +315,6 @@
             function buildPairLookup(pairs) {
                 const map = new Map();
                 pairs.forEach((p, i) => {
-                    // Store both directions, but also mark which is the first word
                     map.set(p.word1, { partner: p.word2, compound: p.compound, pairIndex: i, isFirstWord: true });
                     map.set(p.word2, { partner: p.word1, compound: p.compound, pairIndex: i, isFirstWord: false });
                 });
@@ -329,16 +337,6 @@
                 const words = [];
                 pairs.forEach(p => { words.push(p.word1); words.push(p.word2); });
                 const shuffled = shuffleArray(words);
-
-                let cols;
-                const wc = shuffled.length;
-                if (wc <= 4) cols = 2;
-                else if (wc <= 6) cols = 3;
-                else if (wc <= 8) cols = 4;
-                else cols = 5;
-                if (window.innerWidth < 480 && cols > 3) cols = 3;
-                if (window.innerWidth < 480 && wc === 4) cols = 2;
-                gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
                 shuffled.forEach(word => {
                     const btn = document.createElement('button');
@@ -398,21 +396,17 @@
                     const secondBtn = btn;
                     isLocked = true;
                     pauseTimer();
-                    updateResetButtonState(); // disable reset during lock
+                    updateResetButtonState();
 
                     const entry = pairLookup.get(firstWord);
                     if (entry && entry.partner === secondWord) {
-                        // Words belong to the same pair – now check order
                         const pair = stagesData[currentStageIndex].pairs[entry.pairIndex];
                         if (firstWord === pair.word1) {
-                            // Correct order: first word then second word
                             handleCorrectPair(firstWord, secondWord, entry.compound, entry.pairIndex, firstBtn, secondBtn);
                         } else {
-                            // Wrong order: tapped second word first, then first word
                             handleWrongOrder(firstWord, secondWord, firstBtn, secondBtn);
                         }
                     } else {
-                        // Completely wrong pair
                         handleWrongPair(firstWord, secondWord, firstBtn, secondBtn);
                     }
                 }
@@ -462,7 +456,6 @@
             }
 
             function handleWrongOrder(w1, w2, btn1, btn2) {
-                // Reverse order: flash both and trigger game over with specific message
                 btn1.classList.remove('selected');
                 btn1.classList.add('wrong-flash');
                 btn2.classList.add('wrong-flash');
@@ -472,7 +465,7 @@
                     btn1.classList.remove('wrong-flash');
                     btn2.classList.remove('wrong-flash');
                     stopTimer();
-                    showGameOverScreen(w1, w2, true); // true = wrong order
+                    showGameOverScreen(w1, w2, true);
                 }, 500);
             }
 
@@ -696,25 +689,6 @@
             } else {
                 initGame();
             }
-
-            // Responsive grid adjustment
-            let resizeTimer;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    if (allWordButtons.length > 0) {
-                        const wc = allWordButtons.length;
-                        let cols;
-                        if (wc <= 4) cols = 2;
-                        else if (wc <= 6) cols = 3;
-                        else if (wc <= 8) cols = 4;
-                        else cols = 5;
-                        if (window.innerWidth < 480 && cols > 3) cols = 3;
-                        if (window.innerWidth < 480 && wc === 4) cols = 2;
-                        gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-                    }
-                }, 200);
-            });
         })();
     </script>
 </body>
