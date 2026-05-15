@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhyme Match – Ocean Theme</title>
+    <style>
+        :root {
+            --bg: #0b1a2a;
+            --surface: #102a3c;
+            --surface-light: #1a3447;
+            --text: #d4e6f1;
+            --text-muted: #7da3b6;
+            --gold: #f0a500;
+            --gold-glow: #f7b32b;
+            --accent: #14b8a6;        /* teal */
+            --accent-light: #2dd4bf;
+            --coral: #f87171;
+            --coral-light: #fca5a5;
+            --radius-sm: 10px;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(20,184,166,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(14,116,144,0.08) 0%, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+            padding: 16px;
+        }
+        .game-wrapper { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 20px; }
+        .game-header {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface); border-radius: var(--radius-lg); padding: 16px 20px;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap; gap: 10px;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .header-item { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; }
+        .header-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; }
+        .header-value { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: #fff; transition: all var(--transition); }
+        .header-value.score-pop { animation: scorePop 0.4s ease-out; }
+        @keyframes scorePop { 0% { transform: scale(1); color: #fff; } 40% { transform: scale(1.35); color: var(--gold-glow); } 100% { transform: scale(1); color: #fff; } }
+        .stage-badge { background: var(--accent); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+        .pairs-indicator { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        .pairs-indicator span { color: #fff; font-weight: 700; }
+        .header-value.timer-warning { color: #fbbf24; animation: timerPulse 0.7s ease-in-out infinite; }
+        @keyframes timerPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .btn-reset {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex; align-items: center; gap: 5px;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .btn-reset:hover { background: rgba(20,184,166,0.15); color: #fff; border-color: rgba(20,184,166,0.4); }
+        .btn-reset:active { transform: scale(0.96); }
+        .btn-reset:disabled { opacity: 0.3; pointer-events: none; }
+        .game-grid-container {
+            background: var(--surface); border-radius: var(--radius-lg); padding: 24px 16px;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.06);
+            min-height: 180px; display: flex; align-items: center; justify-content: center;
+        }
+        .game-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            transition: opacity 0.3s ease;
+        }
+        .game-grid.fade-out { opacity:0; transform:scale(0.96); transition: opacity 0.25s ease, transform 0.25s ease; }
+        .game-grid.fade-in { animation: gridFadeIn 0.35s ease-out; }
+        @keyframes gridFadeIn { 0%{opacity:0;transform:scale(0.94)} 100%{opacity:1;transform:scale(1)} }
+        .word-btn {
+            padding: 16px 20px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em;
+            border: 2px solid transparent; border-radius: var(--radius); cursor: pointer;
+            background: linear-gradient(135deg, #0e7490, #0c4a6e); color: #fff;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3); transition: all var(--transition);
+            outline: none; text-align: center; word-break: break-word;
+            min-width: 100px; min-height: 55px; display: flex; align-items: center;
+            justify-content: center; flex: 0 1 auto;
+            font-family: inherit;
+            max-width: 180px;
+        }
+        .word-btn:hover:not(.disabled):not(.selected):not(.matched-pair) {
+            background: linear-gradient(135deg, #0891b2, #0e7490); transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(8,145,178,0.4); border-color: rgba(255,255,255,0.2);
+        }
+        .word-btn:active:not(.disabled):not(.matched-pair) {
+            background: linear-gradient(135deg, #155e75, #0e7490); transform: scale(0.96);
+            transition: transform 0.1s ease;
+        }
+        .word-btn.selected {
+            background: linear-gradient(135deg, #f0a500, #eab308); border-color: #fde68a;
+            color: #1a1a00; box-shadow: 0 0 30px rgba(240,165,0,0.55), 0 0 60px rgba(240,165,0,0.25);
+            transform: translateY(-3px); animation: pulseGold 1.2s ease-in-out infinite;
+            font-weight: 700; z-index: 2;
+        }
+        @keyframes pulseGold { 0%,100%{box-shadow:0 0 25px rgba(240,165,0,0.5),0 0 50px rgba(240,165,0,0.2)} 50%{box-shadow:0 0 40px rgba(250,176,5,0.7),0 0 70px rgba(240,165,0,0.35)} }
+        .word-btn.matched-pair {
+            pointer-events: none; cursor: not-allowed; opacity: 0.9; font-weight: 700;
+        }
+        .word-btn.disabled { pointer-events: none; cursor: not-allowed; }
+        .word-btn.wrong-flash {
+            animation: wrongShake 0.5s ease-out;
+            background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+            border-color: #fca5a5 !important;
+            box-shadow: 0 0 35px rgba(239,68,68,0.6) !important;
+            color: #fff !important;
+        }
+        @keyframes wrongShake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 75%{transform:translateX(-2px)} 90%{transform:translateX(2px)} }
+        .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:100; animation:overlayFadeIn 0.2s ease-out; padding:20px; }
+        @keyframes overlayFadeIn { from{opacity:0} to{opacity:1} }
+        .overlay-content { background:var(--surface-light); border-radius:var(--radius-lg); padding:32px 28px; text-align:center; box-shadow:var(--shadow-lg); border:1px solid rgba(255,255,255,0.1); max-width:420px; width:100%; animation:popIn 0.35s cubic-bezier(0.175,0.885,0.32,1.275); }
+        @keyframes popIn { 0%{transform:scale(0.7);opacity:0} 100%{transform:scale(1);opacity:1} }
+        .overlay-icon { font-size:3.5rem; margin-bottom:10px; animation:bounceIcon 0.6s ease-out; }
+        @keyframes bounceIcon { 0%{transform:translateY(30px);opacity:0} 50%{transform:translateY(-12px)} 70%{transform:translateY(4px)} 100%{transform:translateY(0);opacity:1} }
+        .overlay-title { font-size:1.8rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:6px; }
+        .overlay-title.success { color:#2dd4bf; } .overlay-title.failure { color:var(--coral); } .overlay-title.victory { color:var(--gold-glow); }
+        .overlay-rhyme { font-size:2.4rem; font-weight:900; letter-spacing:-0.03em; background:linear-gradient(135deg,#14b8a6,#2dd4bf,#14b8a6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:8px 0 4px; }
+        .overlay-subtitle { font-size:1rem; color:var(--text-muted); margin-bottom:6px; }
+        .overlay-stats { display:flex; gap:20px; justify-content:center; margin:16px 0; flex-wrap:wrap; }
+        .overlay-stat { text-align:center; } .overlay-stat-value { font-size:1.6rem; font-weight:700; color:#fff; }
+        .overlay-stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); }
+        .btn { display:inline-block; padding:14px 32px; font-size:1rem; font-weight:700; letter-spacing:0.03em; border:none; border-radius:30px; cursor:pointer; transition:all var(--transition); font-family:inherit; outline:none; }
+        .btn-primary { background:linear-gradient(135deg,#0e7490,#0891b2); color:#fff; box-shadow:0 4px 18px rgba(14,116,144,0.4); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(14,116,144,0.55); }
+        .btn-danger { background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff; box-shadow:0 4px 18px rgba(239,68,68,0.4); }
+        .btn-danger:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(239,68,68,0.55); }
+        .btn-gold { background:linear-gradient(135deg,#f0a500,#eab308); color:#1a1a00; box-shadow:0 4px 18px rgba(240,165,0,0.4); font-weight:800; }
+        .btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(240,165,0,0.55); }
+        .confetti-piece { position:fixed; top:-40px; z-index:150; pointer-events:none; animation:confettiFall linear forwards; border-radius:3px; }
+        @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1} 80%{opacity:1} 100%{transform:translateY(105vh) rotate(720deg) scale(0.3);opacity:0} }
+        @media (max-width:480px) {
+            .game-header { padding:12px 14px; gap:6px; } .header-left { gap:10px; }
+            .header-value { font-size:1.1rem; } .header-label { font-size:0.65rem; }
+            .btn-reset { padding:6px 10px; font-size:0.7rem; }
+            .game-grid-container { padding:14px 8px; }
+            .game-grid { gap: 10px; }
+            .word-btn { padding:14px 10px; font-size:0.95rem; min-height:48px; min-width:80px; max-width:150px; }
+            .overlay-content { padding:24px 16px; } .overlay-rhyme { font-size:1.8rem; }
+            .overlay-title { font-size:1.4rem; } .btn { padding:12px 24px; font-size:0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper" id="gameWrapper">
+        <div class="game-header">
+            <div class="header-left">
+                <div class="header-item"><span class="header-label">Stage</span><span class="stage-badge" id="stageBadge">1 / 5</span></div>
+                <div class="header-item"><span class="header-label">Score</span><span class="header-value" id="scoreDisplay">0</span></div>
+                <div class="header-item"><span class="header-label">Time</span><span class="header-value" id="timerDisplay">00:00</span></div>
+                <div class="header-item"><span class="header-label">Rhymes</span><span class="pairs-indicator" id="pairsIndicator"><span>0</span> / 0</span></div>
+            </div>
+            <button class="btn-reset" id="resetBtn" title="Deselect current word">↩️ Deselect</button>
+        </div>
+        <div class="game-grid-container">
+            <div class="game-grid" id="gameGrid">
+                <div style="color: #7da3b6; font-size: 1.2rem;">🎮 Loading game...</div>
+            </div>
+        </div>
+    </div>
+    <div id="overlayContainer"></div>
+
+    <script>
+        (function() {
+            // ──────────────────────────────────────
+            // RHYMING STAGE DATA
+            // ──────────────────────────────────────
+            const stagesData = [
+                { name: 'Stage 1', pairs: [
+                    { word1: 'cat', word2: 'hat', rhyme: 'cat + hat' },
+                    { word1: 'sun', word2: 'fun', rhyme: 'sun + fun' }
+                ]},
+                { name: 'Stage 2', pairs: [
+                    { word1: 'dog', word2: 'log', rhyme: 'dog + log' },
+                    { word1: 'ball', word2: 'call', rhyme: 'ball + call' },
+                    { word1: 'star', word2: 'car', rhyme: 'star + car' }
+                ]},
+                { name: 'Stage 3', pairs: [
+                    { word1: 'moon', word2: 'soon', rhyme: 'moon + soon' },
+                    { word1: 'book', word2: 'look', rhyme: 'book + look' },
+                    { word1: 'night', word2: 'light', rhyme: 'night + light' },
+                    { word1: 'fire', word2: 'desire', rhyme: 'fire + desire' }
+                ]},
+                { name: 'Stage 4', pairs: [
+                    { word1: 'king', word2: 'sing', rhyme: 'king + sing' },
+                    { word1: 'door', word2: 'floor', rhyme: 'door + floor' },
+                    { word1: 'honey', word2: 'money', rhyme: 'honey + money' },
+                    { word1: 'basket', word2: 'casket', rhyme: 'basket + casket' }
+                ]},
+                { name: 'Stage 5', pairs: [
+                    { word1: 'water', word2: 'squatter', rhyme: 'water + squatter' },
+                    { word1: 'thunder', word2: 'blunder', rhyme: 'thunder + blunder' },
+                    { word1: 'news', word2: 'shoes', rhyme: 'news + shoes' },
+                    { word1: 'straw', word2: 'draw', rhyme: 'straw + draw' },
+                    { word1: 'black', word2: 'track', rhyme: 'black + track' }
+                ]}
+            ];
+
+            // ──────────────────────────────────────
+            // UNIQUE PAIR COLOR PALETTE (ocean-inspired)
+            // ──────────────────────────────────────
+            const pairColorPalette = [
+                { main: '#14b8a6', light: '#2dd4bf', border: '#5eead4', shadow: 'rgba(20,184,166,0.6)' },  // teal
+                { main: '#f97316', light: '#fb923c', border: '#fdba74', shadow: 'rgba(249,115,22,0.6)' },  // orange
+                { main: '#a78bfa', light: '#c4b5fd', border: '#ddd6fe', shadow: 'rgba(167,139,250,0.6)' }, // violet
+                { main: '#f0a500', light: '#f7b32b', border: '#fcd34d', shadow: 'rgba(240,165,0,0.6)' },    // gold
+                { main: '#ec4899', light: '#f472b6', border: '#f9a8d4', shadow: 'rgba(236,72,153,0.6)' }, // pink
+                { main: '#0ea5e9', light: '#38bdf8', border: '#7dd3fc', shadow: 'rgba(14,165,233,0.6)' }  // sky blue
+            ];
+
+            function getPairColor(pairIndex) {
+                return pairColorPalette[pairIndex % pairColorPalette.length];
+            }
+
+            // ──────────────────────────────────────
+            // DOM ELEMENTS
+            // ──────────────────────────────────────
+            const gameGrid = document.getElementById('gameGrid');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const stageBadge = document.getElementById('stageBadge');
+            const pairsIndicator = document.getElementById('pairsIndicator');
+            const overlayContainer = document.getElementById('overlayContainer');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // ──────────────────────────────────────
+            // GAME STATE
+            // ──────────────────────────────────────
+            let currentStageIndex = 0;
+            let score = 0;
+            let pairsFoundInStage = 0;
+            let totalPairsInStage = 0;
+            let selectedWordEl = null;
+            let selectedWordText = null;
+            let isLocked = false;
+            let timerSeconds = 0;
+            let timerInterval = null;
+            let timerPaused = false;
+            let pairLookup = new Map();
+            let foundPairIndices = new Set();
+            let allWordButtons = [];
+            let confettiPieces = [];
+
+            // ──────────────────────────────────────
+            // UTILITY FUNCTIONS
+            // ──────────────────────────────────────
+            function shuffleArray(arr) {
+                const shuffled = [...arr];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            function formatTime(sec) {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function formatDuration(sec) {
+                if (sec < 60) return `${sec} second${sec !== 1 ? 's' : ''}`;
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                let r = `${m} minute${m !== 1 ? 's' : ''}`;
+                if (s > 0) r += ` ${s} second${s !== 1 ? 's' : ''}`;
+                return r;
+            }
+
+            // ──────────────────────────────────────
+            // TIMER
+            // ──────────────────────────────────────
+            function startTimer() {
+                stopTimer();
+                timerSeconds = 0;
+                timerPaused = false;
+                updateTimerDisplay();
+                timerInterval = setInterval(() => {
+                    if (!timerPaused) {
+                        timerSeconds++;
+                        updateTimerDisplay();
+                        if (timerSeconds >= 45) timerDisplay.classList.add('timer-warning');
+                    }
+                }, 1000);
+            }
+
+            function stopTimer() {
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            }
+
+            function pauseTimer() { timerPaused = true; }
+            function resumeTimer() { timerPaused = false; }
+
+            function updateTimerDisplay() {
+                timerDisplay.textContent = formatTime(timerSeconds);
+                if (timerSeconds < 45) timerDisplay.classList.remove('timer-warning');
+            }
+
+            function updateScoreDisplay(animate = false) {
+                scoreDisplay.textContent = score;
+                if (animate) {
+                    scoreDisplay.classList.remove('score-pop');
+                    void scoreDisplay.offsetWidth;
+                    scoreDisplay.classList.add('score-pop');
+                }
+            }
+
+            function updatePairsIndicator() {
+                pairsIndicator.innerHTML = `<span>${pairsFoundInStage}</span> / ${totalPairsInStage}`;
+            }
+
+            function updateStageBadge() {
+                stageBadge.textContent = `${currentStageIndex + 1} / ${stagesData.length}`;
+            }
+
+            function buildPairLookup(pairs) {
+                const map = new Map();
+                pairs.forEach((p, i) => {
+                    map.set(p.word1, { partner: p.word2, rhyme: p.rhyme, pairIndex: i });
+                    map.set(p.word2, { partner: p.word1, rhyme: p.rhyme, pairIndex: i });
+                });
+                return map;
+            }
+
+            // ──────────────────────────────────────
+            // RENDER GRID
+            // ──────────────────────────────────────
+            function renderGrid(pairs) {
+                gameGrid.innerHTML = '';
+                allWordButtons = [];
+                foundPairIndices.clear();
+                pairsFoundInStage = 0;
+                totalPairsInStage = pairs.length;
+                pairLookup = buildPairLookup(pairs);
+                selectedWordEl = null;
+                selectedWordText = null;
+
+                const words = [];
+                pairs.forEach(p => { words.push(p.word1); words.push(p.word2); });
+                const shuffled = shuffleArray(words);
+
+                shuffled.forEach(word => {
+                    const btn = document.createElement('button');
+                    btn.className = 'word-btn';
+                    btn.textContent = word;
+                    btn.dataset.word = word;
+                    btn.addEventListener('click', () => handleWordTap(word, btn));
+                    gameGrid.appendChild(btn);
+                    allWordButtons.push(btn);
+                });
+
+                gameGrid.classList.remove('fade-out');
+                gameGrid.classList.add('fade-in');
+                setTimeout(() => gameGrid.classList.remove('fade-in'), 400);
+
+                updatePairsIndicator();
+                updateStageBadge();
+            }
+
+            // ──────────────────────────────────────
+            // RESET (DESELECT) BUTTON
+            // ──────────────────────────────────────
+            function updateResetButtonState() {
+                if (!resetBtn) return;
+                resetBtn.disabled = isLocked || !selectedWordEl;
+            }
+
+            resetBtn.addEventListener('click', () => {
+                if (isLocked) return;
+                if (selectedWordEl) {
+                    deselectWord();
+                    updateResetButtonState();
+                }
+            });
+
+            // ──────────────────────────────────────
+            // WORD TAP HANDLER
+            // ──────────────────────────────────────
+            function handleWordTap(word, btn) {
+                if (isLocked || btn.classList.contains('matched-pair') || btn.classList.contains('disabled')) return;
+                if (selectedWordEl === btn) {
+                    deselectWord();
+                    updateResetButtonState();
+                    return;
+                }
+                if (!selectedWordEl) {
+                    selectWord(word, btn);
+                    updateResetButtonState();
+                } else {
+                    const firstWord = selectedWordText;
+                    const secondWord = word;
+                    const firstBtn = selectedWordEl;
+                    const secondBtn = btn;
+                    isLocked = true;
+                    pauseTimer();
+                    updateResetButtonState();
+
+                    const entry = pairLookup.get(firstWord);
+                    if (entry && entry.partner === secondWord) {
+                        handleCorrectPair(firstWord, secondWord, entry.rhyme, entry.pairIndex, firstBtn, secondBtn);
+                    } else {
+                        handleWrongPair(firstWord, secondWord, firstBtn, secondBtn);
+                    }
+                }
+            }
+
+            function selectWord(word, btn) {
+                if (selectedWordEl) selectedWordEl.classList.remove('selected');
+                selectedWordEl = btn;
+                selectedWordText = word;
+                btn.classList.add('selected');
+            }
+
+            function deselectWord() {
+                if (selectedWordEl) selectedWordEl.classList.remove('selected');
+                selectedWordEl = null;
+                selectedWordText = null;
+            }
+
+            function handleCorrectPair(w1, w2, rhymeDisplay, pairIndex, btn1, btn2) {
+                btn1.classList.remove('selected');
+                btn2.classList.remove('selected');
+                selectedWordEl = null;
+                selectedWordText = null;
+
+                const color = getPairColor(pairIndex);
+                [btn1, btn2].forEach(btn => {
+                    btn.classList.add('matched-pair');
+                    btn.style.background = `linear-gradient(135deg, ${color.main}, ${color.light})`;
+                    btn.style.borderColor = color.border;
+                    btn.style.boxShadow = `0 0 28px ${color.shadow}`;
+                    btn.style.animation = 'none';
+                });
+
+                foundPairIndices.add(pairIndex);
+                pairsFoundInStage = foundPairIndices.size;
+                score += 100;
+                updateScoreDisplay(true);
+                updatePairsIndicator();
+
+                const allFound = pairsFoundInStage >= totalPairsInStage;
+                showSuccessPopup(rhymeDisplay, allFound, () => {
+                    resumeTimer();
+                    isLocked = false;
+                    updateResetButtonState();
+                    if (allFound) handleStageComplete();
+                });
+            }
+
+            function handleWrongPair(w1, w2, btn1, btn2) {
+                btn1.classList.remove('selected');
+                btn1.classList.add('wrong-flash');
+                btn2.classList.add('wrong-flash');
+                selectedWordEl = null;
+                selectedWordText = null;
+                setTimeout(() => {
+                    btn1.classList.remove('wrong-flash');
+                    btn2.classList.remove('wrong-flash');
+                    stopTimer();
+                    showGameOverScreen(w1, w2);
+                }, 500);
+            }
+
+            function handleStageComplete() {
+                if (currentStageIndex < stagesData.length - 1) {
+                    isLocked = true;
+                    pauseTimer();
+                    updateResetButtonState();
+                    showStageTransitionPopup(() => {
+                        currentStageIndex++;
+                        pairsFoundInStage = 0;
+                        updateStageBadge();
+                        updateScoreDisplay();
+                        renderGrid(stagesData[currentStageIndex].pairs);
+                        updatePairsIndicator();
+                        resumeTimer();
+                        isLocked = false;
+                        deselectWord();
+                        updateResetButtonState();
+                    });
+                } else {
+                    stopTimer();
+                    showVictoryScreen();
+                }
+            }
+
+            // ──────────────────────────────────────
+            // OVERLAYS
+            // ──────────────────────────────────────
+            function dismissOverlay(overlay) {
+                if (overlay._timeout) clearTimeout(overlay._timeout);
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 250);
+            }
+
+            function showSuccessPopup(rhyme, last, cb) {
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">✅</div>
+                        <div class="overlay-title success">Well Done!</div>
+                        <div class="overlay-rhyme">${rhyme}</div>
+                        <div class="overlay-subtitle">${last ? 'All rhymes found!' : 'Keep going!'}</div>
+                    </div>`;
+                overlayContainer.appendChild(overlay);
+                overlay._timeout = setTimeout(() => { dismissOverlay(overlay); if (cb) cb(); }, 1400);
+            }
+
+            function showStageTransitionPopup(cb) {
+                const next = stagesData[currentStageIndex + 1].name;
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">🌟</div>
+                        <div class="overlay-title success">Stage Complete!</div>
+                        <div class="overlay-subtitle" style="font-size:1.2rem;color:#fff;font-weight:700;">${next} incoming...</div>
+                    </div>`;
+                overlayContainer.appendChild(overlay);
+                overlay._timeout = setTimeout(() => { dismissOverlay(overlay); if (cb) cb(); }, 1100);
+            }
+
+            function showGameOverScreen(w1, w2) {
+                isLocked = true;
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">😞</div>
+                        <div class="overlay-title failure">Game Over</div>
+                        <div class="overlay-subtitle">"<strong>${w1}</strong>" and "<strong>${w2}</strong>" do not rhyme. Try again!</div>
+                        <div class="overlay-stats">
+                            <div class="overlay-stat"><div class="overlay-stat-value">${score}</div><div class="overlay-stat-label">Score</div></div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">${formatDuration(timerSeconds)}</div><div class="overlay-stat-label">Time</div></div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">Stage ${currentStageIndex+1}</div><div class="overlay-stat-label">Reached</div></div>
+                        </div>
+                        <button class="btn btn-danger" id="tryAgainBtn">🔄 Try Again</button>
+                    </div>`;
+                overlayContainer.appendChild(overlay);
+                document.getElementById('tryAgainBtn').addEventListener('click', () => {
+                    dismissOverlay(overlay);
+                    resetGame();
+                });
+                allWordButtons.forEach(b => b.classList.add('disabled'));
+                updateResetButtonState();
+            }
+
+            function showVictoryScreen() {
+                isLocked = true;
+                spawnConfetti();
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">🏆</div>
+                        <div class="overlay-title victory">Victory!</div>
+                        <div class="overlay-subtitle">You mastered all rhyming pairs!</div>
+                        <div class="overlay-stats">
+                            <div class="overlay-stat"><div class="overlay-stat-value">${score}</div><div class="overlay-stat-label">Score</div></div>
+                            <div class="overlay-stat"><div class="overlay-stat-value">${formatDuration(timerSeconds)}</div><div class="overlay-stat-label">Time</div></div>
+                        </div>
+                        <button class="btn btn-gold" id="playAgainBtn">🎮 Play Again</button>
+                    </div>`;
+                overlayContainer.appendChild(overlay);
+                document.getElementById('playAgainBtn').addEventListener('click', () => {
+                    dismissOverlay(overlay);
+                    cleanupConfetti();
+                    resetGame();
+                });
+                allWordButtons.forEach(b => b.classList.add('disabled'));
+                updateResetButtonState();
+            }
+
+            // ──────────────────────────────────────
+            // CONFETTI
+            // ──────────────────────────────────────
+            function spawnConfetti() {
+                const colors = ['#14b8a6','#2dd4bf','#f0a500','#f97316','#a78bfa','#ec4899','#0ea5e9','#38bdf8','#fbbf24','#fca5a5'];
+                for (let i = 0; i < 70; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.width = (Math.random() * 10 + 5) + 'px';
+                    piece.style.height = (Math.random() * 14 + 6) + 'px';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.animationDuration = (Math.random() * 2.5 + 2) + 's';
+                    piece.style.animationDelay = Math.random() * 1.5 + 's';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+                    document.body.appendChild(piece);
+                    confettiPieces.push(piece);
+                }
+            }
+
+            function cleanupConfetti() {
+                confettiPieces.forEach(p => { if (p.parentNode) p.parentNode.removeChild(p); });
+                confettiPieces = [];
+            }
+
+            // ──────────────────────────────────────
+            // RESET GAME
+            // ──────────────────────────────────────
+            function resetGame() {
+                stopTimer();
+                cleanupConfetti();
+                overlayContainer.innerHTML = '';
+                currentStageIndex = 0;
+                score = 0;
+                pairsFoundInStage = 0;
+                selectedWordEl = null;
+                selectedWordText = null;
+                isLocked = false;
+                timerSeconds = 0;
+                timerPaused = false;
+                foundPairIndices.clear();
+                allWordButtons = [];
+                updateScoreDisplay();
+                updateTimerDisplay();
+                updateStageBadge();
+                timerDisplay.classList.remove('timer-warning');
+                renderGrid(stagesData[0].pairs);
+                updatePairsIndicator();
+                startTimer();
+                updateResetButtonState();
+                gameGrid.classList.remove('fade-out');
+                gameGrid.classList.add('fade-in');
+                setTimeout(() => gameGrid.classList.remove('fade-in'), 400);
+            }
+
+            // ──────────────────────────────────────
+            // INIT
+            // ──────────────────────────────────────
+            function initGame() {
+                try {
+                    const loadingEl = gameGrid.querySelector('div');
+                    if (loadingEl) loadingEl.remove();
+                    currentStageIndex = 0;
+                    score = 0;
+                    pairsFoundInStage = 0;
+                    selectedWordEl = null;
+                    selectedWordText = null;
+                    isLocked = false;
+                    timerSeconds = 0;
+                    timerPaused = false;
+                    foundPairIndices.clear();
+                    allWordButtons = [];
+                    updateScoreDisplay();
+                    updateTimerDisplay();
+                    updateStageBadge();
+                    timerDisplay.classList.remove('timer-warning');
+                    renderGrid(stagesData[0].pairs);
+                    updatePairsIndicator();
+                    startTimer();
+                    updateResetButtonState();
+                } catch (e) {
+                    console.error('Init error:', e);
+                    gameGrid.innerHTML = '<div style="color:#f87171; padding:20px;">⚠️ Could not start game. Check console (F12).</div>';
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initGame);
+            } else {
+                initGame();
+            }
+        })();
+    </script>
+</body>
+</html>
