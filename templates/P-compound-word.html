@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compound Word Match</title>
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --surface: #1a1a2e;
+            --surface-light: #22223a;
+            --text: #e0e0e0;
+            --text-muted: #a0a0b8;
+            --gold: #f0b90b;
+            --gold-glow: #f5c842;
+            --green: #22c55e;
+            --green-glow: #4ade80;
+            --red: #ef4444;
+            --red-glow: #f87171;
+            --purple: #7c3aed;
+            --purple-light: #8b5cf6;
+            --indigo: #4f46e5;
+            --button-default: linear-gradient(135deg, #5b3cc4, #6d4ddb);
+            --button-hover: linear-gradient(135deg, #6d4ddb, #7e5ef0);
+            --button-active: linear-gradient(135deg, #4a2fa8, #5b3cc4);
+            --radius-sm: 10px;
+            --radius: 16px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(120, 60, 220, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(40, 80, 200, 0.08) 0%, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+            padding: 16px;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        .game-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 70px;
+        }
+
+        .header-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .header-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #fff;
+            transition: all var(--transition);
+        }
+
+        .header-value.score-pop {
+            animation: scorePop 0.4s ease-out;
+        }
+
+        @keyframes scorePop {
+            0% {
+                transform: scale(1);
+                color: #fff;
+            }
+            40% {
+                transform: scale(1.35);
+                color: var(--gold-glow);
+            }
+            100% {
+                transform: scale(1);
+                color: #fff;
+            }
+        }
+
+        .stage-badge {
+            background: var(--purple);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .pairs-indicator {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .pairs-indicator span {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* Timer pulse when low */
+        .header-value.timer-warning {
+            color: #fbbf24;
+            animation: timerPulse 0.7s ease-in-out infinite;
+        }
+        @keyframes timerPulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Game Grid */
+        .game-grid-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-grid {
+            display: grid;
+            gap: 14px;
+            width: 100%;
+            justify-items: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-grid.fade-out {
+            opacity: 0;
+            transform: scale(0.96);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .game-grid.fade-in {
+            animation: gridFadeIn 0.35s ease-out;
+        }
+        @keyframes gridFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.94);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Word Buttons */
+        .word-btn {
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 2px solid transparent;
+            border-radius: var(--radius);
+            cursor: pointer;
+            background: var(--button-default);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+            transition: all var(--transition);
+            position: relative;
+            outline: none;
+            text-align: center;
+            word-break: break-word;
+            min-width: 100px;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .word-btn:hover:not(.disabled):not(.selected):not(.matched) {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 60, 220, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .word-btn:active:not(.disabled):not(.matched) {
+            background: var(--button-active);
+            transform: scale(0.96);
+            transition: transform 0.1s ease;
+        }
+
+        .word-btn.selected {
+            background: linear-gradient(135deg, #eab308, #f59e0b);
+            border-color: #fde68a;
+            color: #1a1a00;
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.55), 0 0 60px rgba(234, 179, 8, 0.25);
+            transform: translateY(-3px);
+            animation: pulseGold 1.2s ease-in-out infinite;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        @keyframes pulseGold {
+            0%,
+            100% {
+                box-shadow: 0 0 25px rgba(234, 179, 8, 0.5), 0 0 50px rgba(234, 179, 8, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(250, 204, 21, 0.7), 0 0 70px rgba(234, 179, 8, 0.35);
+            }
+        }
+
+        .word-btn.matched {
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            border-color: #86efac;
+            color: #fff;
+            cursor: not-allowed;
+            opacity: 0.85;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            animation: matchGlow 2s ease-in-out infinite;
+            font-weight: 700;
+            pointer-events: none;
+        }
+
+        @keyframes matchGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
+            }
+        }
+
+        .word-btn.disabled {
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .word-btn.wrong-flash {
+            animation: wrongShake 0.5s ease-out;
+            background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+            border-color: #fca5a5 !important;
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.6) !important;
+            color: #fff !important;
+        }
+
+        @keyframes wrongShake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            15% {
+                transform: translateX(-8px);
+            }
+            30% {
+                transform: translateX(8px);
+            }
+            45% {
+                transform: translateX(-5px);
+            }
+            60% {
+                transform: translateX(5px);
+            }
+            75% {
+                transform: translateX(-2px);
+            }
+            90% {
+                transform: translateX(2px);
+            }
+        }
+
+        /* Overlays */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: overlayFadeIn 0.2s ease-out;
+            padding: 20px;
+        }
+
+        @keyframes overlayFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .overlay-content {
+            background: var(--surface-light);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 420px;
+            width: 100%;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .overlay-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            animation: bounceIcon 0.6s ease-out;
+        }
+        @keyframes bounceIcon {
+            0% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+            70% {
+                transform: translateY(4px);
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .overlay-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+        }
+        .overlay-title.success {
+            color: var(--green-glow);
+        }
+        .overlay-title.failure {
+            color: var(--red-glow);
+        }
+        .overlay-title.victory {
+            color: var(--gold-glow);
+        }
+
+        .overlay-compound {
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #f0b90b, #fcd34d, #f0b90b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 8px 0 4px;
+        }
+
+        .overlay-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .overlay-stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .overlay-stat {
+            text-align: center;
+        }
+        .overlay-stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .overlay-stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            outline: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(124, 58, 237, 0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(124, 58, 237, 0.55);
+        }
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(239, 68, 68, 0.55);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #eab308, #f59e0b);
+            color: #1a1a00;
+            box-shadow: 0 4px 18px rgba(234, 179, 8, 0.4);
+            font-weight: 800;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(234, 179, 8, 0.55);
+        }
+
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            top: -40px;
+            z-index: 150;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+            border-radius: 3px;
+        }
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(720deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .game-header {
+                padding: 12px 14px;
+                gap: 6px;
+            }
+            .header-value {
+                font-size: 1.1rem;
+            }
+            .header-label {
+                font-size: 0.65rem;
+            }
+            .game-grid-container {
+                padding: 14px;
+                border-radius: var(--radius);
+            }
+            .game-grid {
+                gap: 10px;
+            }
+            .word-btn {
+                padding: 14px 10px;
+                font-size: 0.95rem;
+                min-height: 48px;
+                border-radius: var(--radius-sm);
+            }
+            .overlay-content {
+                padding: 24px 16px;
+            }
+            .overlay-compound {
+                font-size: 1.8rem;
+            }
+            .overlay-title {
+                font-size: 1.4rem;
+            }
+            .btn {
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-wrapper" id="gameWrapper">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="header-item">
+                <span class="header-label">Stage</span>
+                <span class="stage-badge" id="stageBadge">1 / 5</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Score</span>
+                <span class="header-value" id="scoreDisplay">0</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Time</span>
+                <span class="header-value" id="timerDisplay">00:00</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Pairs</span>
+                <span class="pairs-indicator" id="pairsIndicator"><span>0</span> / 0</span>
+            </div>
+        </div>
+
+        <!-- Game Grid -->
+        <div class="game-grid-container">
+            <div class="game-grid" id="gameGrid"></div>
+        </div>
+    </div>
+
+    <!-- Overlays Container -->
+    <div id="overlayContainer"></div>
+
+    <script>
+        (function() {
+            // ──────────────────────────────────────
+            // STAGE DATA
+            // ──────────────────────────────────────
+            const stagesData = [{
+                name: 'Stage 1',
+                pairs: [
+                    { word1: 'rain', word2: 'bow', compound: 'rainbow' },
+                    { word1: 'sun', word2: 'flower', compound: 'sunflower' },
+                ],
+            }, {
+                name: 'Stage 2',
+                pairs: [
+                    { word1: 'butter', word2: 'fly', compound: 'butterfly' },
+                    { word1: 'foot', word2: 'ball', compound: 'football' },
+                    { word1: 'star', word2: 'fish', compound: 'starfish' },
+                ],
+            }, {
+                name: 'Stage 3',
+                pairs: [
+                    { word1: 'snow', word2: 'man', compound: 'snowman' },
+                    { word1: 'book', word2: 'worm', compound: 'bookworm' },
+                    { word1: 'moon', word2: 'light', compound: 'moonlight' },
+                    { word1: 'fire', word2: 'works', compound: 'fireworks' },
+                ],
+            }, {
+                name: 'Stage 4',
+                pairs: [
+                    { word1: 'gold', word2: 'fish', compound: 'goldfish' },
+                    { word1: 'door', word2: 'bell', compound: 'doorbell' },
+                    { word1: 'honey', word2: 'moon', compound: 'honeymoon' },
+                    { word1: 'basket', word2: 'ball', compound: 'basketball' },
+                ],
+            }, {
+                name: 'Stage 5',
+                pairs: [
+                    { word1: 'water', word2: 'fall', compound: 'waterfall' },
+                    { word1: 'thunder', word2: 'storm', compound: 'thunderstorm' },
+                    { word1: 'news', word2: 'paper', compound: 'newspaper' },
+                    { word1: 'straw', word2: 'berry', compound: 'strawberry' },
+                    { word1: 'black', word2: 'board', compound: 'blackboard' },
+                ],
+            }, ];
+
+            // ──────────────────────────────────────
+            // DOM ELEMENTS
+            // ──────────────────────────────────────
+            const gameGrid = document.getElementById('gameGrid');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const stageBadge = document.getElementById('stageBadge');
+            const pairsIndicator = document.getElementById('pairsIndicator');
+            const overlayContainer = document.getElementById('overlayContainer');
+
+            // ──────────────────────────────────────
+            // GAME STATE
+            // ──────────────────────────────────────
+            let currentStageIndex = 0;
+            let score = 0;
+            let pairsFoundInStage = 0;
+            let totalPairsInStage = 0;
+            let selectedWordEl = null;
+            let selectedWordText = null;
+            let isLocked = false;
+            let timerSeconds = 0;
+            let timerInterval = null;
+            let timerPaused = false;
+            let currentStagePairs = [];
+            let pairLookup = new Map(); // word -> { partner, compound, pairIndex }
+            let foundPairIndices = new Set();
+            let allWordButtons = [];
+
+            // ──────────────────────────────────────
+            // UTILITY FUNCTIONS
+            // ──────────────────────────────────────
+            function shuffleArray(arr) {
+                const shuffled = [...arr];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            }
+
+            function formatDuration(seconds) {
+                if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                let result = `${mins} minute${mins !== 1 ? 's' : ''}`;
+                if (secs > 0) result += ` ${secs} second${secs !== 1 ? 's' : ''}`;
+                return result;
+            }
+
+            // ──────────────────────────────────────
+            // TIMER
+            // ──────────────────────────────────────
+            function startTimer() {
+                stopTimer();
+                timerSeconds = 0;
+                timerPaused = false;
+                updateTimerDisplay();
+                timerInterval = setInterval(() => {
+                    if (!timerPaused) {
+                        timerSeconds++;
+                        updateTimerDisplay();
+                    }
+                }, 1000);
+            }
+
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+
+            function pauseTimer() {
+                timerPaused = true;
+            }
+
+            function resumeTimer() {
+                timerPaused = false;
+            }
+
+            function updateTimerDisplay() {
+                timerDisplay.textContent = formatTime(timerSeconds);
+                // Remove any animation classes
+                timerDisplay.classList.remove('timer-warning');
+            }
+
+            // ──────────────────────────────────────
+            // UI UPDATE
+            // ──────────────────────────────────────
+            function updateScoreDisplay(animate = false) {
+                scoreDisplay.textContent = score;
+                if (animate) {
+                    scoreDisplay.classList.remove('score-pop');
+                    void scoreDisplay.offsetWidth;
+                    scoreDisplay.classList.add('score-pop');
+                }
+            }
+
+            function updatePairsIndicator() {
+                pairsIndicator.innerHTML =
+                    `<span>${pairsFoundInStage}</span> / ${totalPairsInStage}`;
+            }
+
+            function updateStageBadge() {
+                stageBadge.textContent = `${currentStageIndex + 1} / ${stagesData.length}`;
+            }
+
+            // ──────────────────────────────────────
+            // BUILD PAIR LOOKUP
+            // ──────────────────────────────────────
+            function buildPairLookup(pairs) {
+                const lookup = new Map();
+                pairs.forEach((pair, index) => {
+                    lookup.set(pair.word1, { partner: pair.word2, compound: pair.compound,
+                        pairIndex: index });
+                    lookup.set(pair.word2, { partner: pair.word1, compound: pair.compound,
+                        pairIndex: index });
+                });
+                return lookup;
+            }
+
+            // ──────────────────────────────────────
+            // RENDER GRID
+            // ──────────────────────────────────────
+            function renderGrid(pairs) {
+                gameGrid.innerHTML = '';
+                allWordButtons = [];
+                foundPairIndices = new Set();
+                pairsFoundInStage = 0;
+                totalPairsInStage = pairs.length;
+                currentStagePairs = pairs;
+                pairLookup = buildPairLookup(pairs);
+                selectedWordEl = null;
+                selectedWordText = null;
+
+                // Collect all words
+                const allWords = [];
+                pairs.forEach((pair) => {
+                    allWords.push(pair.word1);
+                    allWords.push(pair.word2);
+                });
+                const shuffledWords = shuffleArray(allWords);
+
+                // Determine grid columns
+                const wordCount = shuffledWords.length;
+                let gridCols;
+                if (wordCount <= 4) gridCols = 2;
+                else if (wordCount <= 6) gridCols = 3;
+                else if (wordCount <= 8) gridCols = 4;
+                else gridCols = 5;
+
+                // On mobile, cap columns
+                const isMobile = window.innerWidth < 480;
+                if (isMobile && gridCols > 3) gridCols = 3;
+                if (isMobile && wordCount === 4) gridCols = 2;
+
+                gameGrid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+
+                // Create buttons
+                shuffledWords.forEach((word) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'word-btn';
+                    btn.textContent = word;
+                    btn.dataset.word = word;
+                    btn.addEventListener('click', () => handleWordTap(word, btn));
+                    gameGrid.appendChild(btn);
+                    allWordButtons.push(btn);
+                });
+
+                // Animate grid in
+                gameGrid.classList.remove('fade-out');
+                gameGrid.classList.add('fade-in');
+                setTimeout(() => gameGrid.classList.remove('fade-in'), 400);
+
+                updatePairsIndicator();
+                updateStageBadge();
+            }
+
+            // ──────────────────────────────────────
+            // HANDLE WORD TAP
+            // ──────────────────────────────────────
+            function handleWordTap(word, btnElement) {
+                if (isLocked) return;
+                if (btnElement.classList.contains('matched')) return;
+                if (btnElement.classList.contains('disabled')) return;
+
+                // If tapping the already-selected word, deselect it
+                if (selectedWordEl === btnElement) {
+                    deselectWord();
+                    return;
+                }
+
+                // If no word is selected yet
+                if (!selectedWordEl) {
+                    selectWord(word, btnElement);
+                    return;
+                }
+
+                // A second word is tapped — check the pair
+                const firstWord = selectedWordText;
+                const secondWord = word;
+                const firstBtn = selectedWordEl;
+                const secondBtn = btnElement;
+
+                // Lock interactions
+                isLocked = true;
+                pauseTimer();
+
+                // Check if valid pair
+                const lookupEntry = pairLookup.get(firstWord);
+                const isValidPair = lookupEntry && lookupEntry.partner === secondWord;
+
+                if (isValidPair) {
+                    handleCorrectPair(firstWord, secondWord, lookupEntry.compound, lookupEntry.pairIndex,
+                        firstBtn, secondBtn);
+                } else {
+                    handleWrongPair(firstWord, secondWord, firstBtn, secondBtn);
+                }
+            }
+
+            function selectWord(word, btnElement) {
+                // Deselect previous if any
+                if (selectedWordEl) {
+                    selectedWordEl.classList.remove('selected');
+                }
+                selectedWordEl = btnElement;
+                selectedWordText = word;
+                btnElement.classList.add('selected');
+            }
+
+            function deselectWord() {
+                if (selectedWordEl) {
+                    selectedWordEl.classList.remove('selected');
+                }
+                selectedWordEl = null;
+                selectedWordText = null;
+            }
+
+            // ──────────────────────────────────────
+            // HANDLE CORRECT PAIR
+            // ──────────────────────────────────────
+            function handleCorrectPair(word1, word2, compoundWord, pairIndex, btn1, btn2) {
+                // Remove selection highlight
+                btn1.classList.remove('selected');
+                if (btn2) btn2.classList.remove('selected');
+                selectedWordEl = null;
+                selectedWordText = null;
+
+                // Mark as matched
+                btn1.classList.add('matched', 'disabled');
+                btn2.classList.add('matched', 'disabled');
+
+                // Update state
+                foundPairIndices.add(pairIndex);
+                pairsFoundInStage = foundPairIndices.size;
+                score += 100;
+                updateScoreDisplay(true);
+                updatePairsIndicator();
+
+                // Show success popup
+                const allFound = pairsFoundInStage >= totalPairsInStage;
+                showSuccessPopup(compoundWord, allFound, () => {
+                    resumeTimer();
+                    isLocked = false;
+
+                    if (allFound) {
+                        // Stage complete
+                        handleStageComplete();
+                    }
+                });
+            }
+
+            // ──────────────────────────────────────
+            // HANDLE WRONG PAIR
+            // ──────────────────────────────────────
+            function handleWrongPair(word1, word2, btn1, btn2) {
+                // Flash both buttons red
+                btn1.classList.remove('selected');
+                btn1.classList.add('wrong-flash');
+                btn2.classList.add('wrong-flash');
+                selectedWordEl = null;
+                selectedWordText = null;
+
+                // Short delay then game over
+                setTimeout(() => {
+                    btn1.classList.remove('wrong-flash');
+                    btn2.classList.remove('wrong-flash');
+                    stopTimer();
+                    showGameOverScreen(word1, word2);
+                }, 500);
+            }
+
+            // ──────────────────────────────────────
+            // HANDLE STAGE COMPLETE
+            // ──────────────────────────────────────
+            function handleStageComplete() {
+                if (currentStageIndex < stagesData.length - 1) {
+                    // More stages remain
+                    isLocked = true;
+                    pauseTimer();
+                    showStageTransitionPopup(() => {
+                        currentStageIndex++;
+                        pairsFoundInStage = 0;
+                        updateStageBadge();
+                        updateScoreDisplay();
+                        renderGrid(stagesData[currentStageIndex].pairs);
+                        updatePairsIndicator();
+                        resumeTimer();
+                        isLocked = false;
+                        deselectWord();
+                    });
+                } else {
+                    // All stages complete — VICTORY!
+                    stopTimer();
+                    showVictoryScreen();
+                }
+            }
+
+            // ──────────────────────────────────────
+            // POPUP: SUCCESS
+            // ──────────────────────────────────────
+            function showSuccessPopup(compoundWord, isLastInStage, callback) {
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">✅</div>
+                        <div class="overlay-title success">Well Done!</div>
+                        <div class="overlay-compound">${compoundWord}</div>
+                        <div class="overlay-subtitle">${isLastInStage ? 'All pairs found in this stage!' : 'Keep going!'}</div>
+                    </div>
+                `;
+                overlayContainer.appendChild(overlay);
+
+                // Auto-dismiss after 1.4 seconds
+                const dismissTimeout = setTimeout(() => {
+                    dismissOverlay(overlay);
+                    if (callback) callback();
+                }, 1400);
+
+                // Store timeout for cleanup
+                overlay._dismissTimeout = dismissTimeout;
+            }
+
+            // ──────────────────────────────────────
+            // POPUP: STAGE TRANSITION
+            // ──────────────────────────────────────
+            function showStageTransitionPopup(callback) {
+                const nextStageName = stagesData[currentStageIndex + 1].name;
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">🌟</div>
+                        <div class="overlay-title success">Stage Complete!</div>
+                        <div class="overlay-subtitle" style="font-size:1.2rem;color:#fff;font-weight:700;">${nextStageName} incoming...</div>
+                    </div>
+                `;
+                overlayContainer.appendChild(overlay);
+
+                const dismissTimeout = setTimeout(() => {
+                    dismissOverlay(overlay);
+                    if (callback) callback();
+                }, 1100);
+
+                overlay._dismissTimeout = dismissTimeout;
+            }
+
+            // ──────────────────────────────────────
+            // SCREEN: GAME OVER
+            // ──────────────────────────────────────
+            function showGameOverScreen(wrongWord1, wrongWord2) {
+                isLocked = true;
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.id = 'gameOverOverlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">😞</div>
+                        <div class="overlay-title failure">Game Over</div>
+                        <div class="overlay-subtitle">
+                            "<strong>${wrongWord1}</strong>" + "<strong>${wrongWord2}</strong>" is not a valid compound word.
+                        </div>
+                        <div class="overlay-stats">
+                            <div class="overlay-stat">
+                                <div class="overlay-stat-value">${score}</div>
+                                <div class="overlay-stat-label">Total Score</div>
+                            </div>
+                            <div class="overlay-stat">
+                                <div class="overlay-stat-value">${formatDuration(timerSeconds)}</div>
+                                <div class="overlay-stat-label">Duration</div>
+                            </div>
+                            <div class="overlay-stat">
+                                <div class="overlay-stat-value">Stage ${currentStageIndex + 1}</div>
+                                <div class="overlay-stat-label">Reached</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger" id="tryAgainBtn">🔄 Try Again</button>
+                    </div>
+                `;
+                overlayContainer.appendChild(overlay);
+
+                document.getElementById('tryAgainBtn').addEventListener('click', () => {
+                    dismissOverlay(overlay);
+                    resetGame();
+                });
+
+                // Disable all word buttons
+                allWordButtons.forEach(b => b.classList.add('disabled'));
+            }
+
+            // ──────────────────────────────────────
+            // SCREEN: VICTORY
+            // ──────────────────────────────────────
+            function showVictoryScreen() {
+                isLocked = true;
+                spawnConfetti();
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                overlay.id = 'victoryOverlay';
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <div class="overlay-icon">🏆</div>
+                        <div class="overlay-title victory">Victory!</div>
+                        <div class="overlay-subtitle">You mastered all compound words!</div>
+                        <div class="overlay-stats">
+                            <div class="overlay-stat">
+                                <div class="overlay-stat-value">${score}</div>
+                                <div class="overlay-stat-label">Total Score</div>
+                            </div>
+                            <div class="overlay-stat">
+                                <div class="overlay-stat-value">${formatDuration(timerSeconds)}</div>
+                                <div class="overlay-stat-label">Total Time</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-gold" id="playAgainBtn">🎮 Play Again</button>
+                    </div>
+                `;
+                overlayContainer.appendChild(overlay);
+
+                document.getElementById('playAgainBtn').addEventListener('click', () => {
+                    dismissOverlay(overlay);
+                    cleanupConfetti();
+                    resetGame();
+                });
+
+                // Disable all word buttons
+                allWordButtons.forEach(b => b.classList.add('disabled'));
+            }
+
+            // ──────────────────────────────────────
+            // CONFETTI
+            // ──────────────────────────────────────
+            let confettiPieces = [];
+
+            function spawnConfetti() {
+                const colors = [
+                    '#f0b90b', '#fcd34d', '#22c55e', '#4ade80', '#ef4444',
+                    '#f87171', '#7c3aed', '#8b5cf6', '#3b82f6', '#60a5fa',
+                    '#ec4899', '#f472b6', '#14b8a6', '#f97316',
+                ];
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < 70; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.width = (Math.random() * 10 + 5) + 'px';
+                    piece.style.height = (Math.random() * 14 + 6) + 'px';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.animationDuration = (Math.random() * 2.5 + 2) + 's';
+                    piece.style.animationDelay = Math.random() * 1.5 + 's';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+                    fragment.appendChild(piece);
+                    confettiPieces.push(piece);
+                }
+                document.body.appendChild(fragment);
+            }
+
+            function cleanupConfetti() {
+                confettiPieces.forEach(piece => {
+                    if (piece.parentNode) piece.parentNode.removeChild(piece);
+                });
+                confettiPieces = [];
+            }
+
+            // ──────────────────────────────────────
+            // OVERLAY DISMISS
+            // ──────────────────────────────────────
+            function dismissOverlay(overlay) {
+                if (overlay._dismissTimeout) {
+                    clearTimeout(overlay._dismissTimeout);
+                }
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 250);
+            }
+
+            // ──────────────────────────────────────
+            // RESET GAME
+            // ──────────────────────────────────────
+            function resetGame() {
+                stopTimer();
+                cleanupConfetti();
+                // Clear all overlays
+                overlayContainer.innerHTML = '';
+                // Reset state
+                currentStageIndex = 0;
+                score = 0;
+                pairsFoundInStage = 0;
+                selectedWordEl = null;
+                selectedWordText = null;
+                isLocked = false;
+                timerSeconds = 0;
+                timerPaused = false;
+                foundPairIndices = new Set();
+                allWordButtons = [];
+                // Update UI
+                updateScoreDisplay();
+                updateTimerDisplay();
+                updateStageBadge();
+                timerDisplay.classList.remove('timer-warning');
+                // Render first stage
+                renderGrid(stagesData[0].pairs);
+                updatePairsIndicator();
+                // Start timer
+                startTimer();
+                // Ensure grid is visible
+                gameGrid.classList.remove('fade-out');
+                gameGrid.classList.add('fade-in');
+                setTimeout(() => gameGrid.classList.remove('fade-in'), 400);
+            }
+
+            // ──────────────────────────────────────
+            // INIT
+            // ──────────────────────────────────────
+            function initGame() {
+                currentStageIndex = 0;
+                score = 0;
+                pairsFoundInStage = 0;
+                selectedWordEl = null;
+                selectedWordText = null;
+                isLocked = false;
+                timerSeconds = 0;
+                timerPaused = false;
+                foundPairIndices = new Set();
+                allWordButtons = [];
+                updateScoreDisplay();
+                updateTimerDisplay();
+                updateStageBadge();
+                timerDisplay.classList.remove('timer-warning');
+                overlayContainer.innerHTML = '';
+                cleanupConfetti();
+                renderGrid(stagesData[0].pairs);
+                updatePairsIndicator();
+                startTimer();
+            }
+
+            // ──────────────────────────────────────
+            // HANDLE WINDOW RESIZE (recalculate grid)
+            // ──────────────────────────────────────
+            let resizeDebounce;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeDebounce);
+                resizeDebounce = setTimeout(() => {
+                    if (!isLocked || (isLocked && allWordButtons.some(b => b.classList.contains(
+                            'matched')))) {
+                        // Refresh grid columns without losing state
+                        const wordCount = allWordButtons.length;
+                        let gridCols;
+                        if (wordCount <= 4) gridCols = 2;
+                        else if (wordCount <= 6) gridCols = 3;
+                        else if (wordCount <= 8) gridCols = 4;
+                        else gridCols = 5;
+                        const isMobile = window.innerWidth < 480;
+                        if (isMobile && gridCols > 3) gridCols = 3;
+                        if (isMobile && wordCount === 4) gridCols = 2;
+                        gameGrid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+                    }
+                }, 250);
+            });
+
+            // ──────────────────────────────────────
+            // START
+            // ──────────────────────────────────────
+            initGame();
+
+            console.log('🧩 Compound Word Match ready!');
+            console.log('   Find all compound word pairs across ' + stagesData.length + ' stages.');
+            console.log('   One wrong match = Game Over. Good luck!');
+        })();
+    </script>
+</body>
+</html>
