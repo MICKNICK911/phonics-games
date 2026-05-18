@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Clock Lab: Move the Hands | Learn to Read Time</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Poppins', system-ui, -apple-system, 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #fef5e7;
+            border-radius: 64px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+            padding: 25px 20px 30px 20px;
+            transition: all 0.2s ease;
+        }
+
+        .clock-card {
+            background: #fff8f0;
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,200,0.8), 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 50%;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3), 0 0 0 8px #f3e1be, 0 0 0 12px #c9a87b;
+            background: #fffef7;
+            cursor: grab;
+            transition: transform 0.05s linear;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .time-panel {
+            background: #2e241f;
+            color: #fae67a;
+            padding: 20px 15px;
+            border-radius: 60px;
+            margin: 20px 10px 10px 10px;
+            text-align: center;
+            box-shadow: inset 0 2px 5px #1f1814, 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        .digital-clock {
+            font-family: 'Fira Mono', 'Courier New', monospace;
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: #000000aa;
+            background: #0a0a0a;
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 50px;
+            backdrop-filter: blur(2px);
+            text-shadow: 0 0 5px #ffd966;
+            box-shadow: inset 0 1px 4px #ffecb3, 0 2px 8px black;
+        }
+
+        .ampm {
+            font-size: 1.4rem;
+            background: #1f2a1b;
+            border-radius: 30px;
+            padding: 5px 14px;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+
+        .selected-hand {
+            background: #efcd90;
+            color: #2c1e12;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            background: #fff0d4;
+            padding: 8px 12px;
+            border-radius: 28px;
+            color: #443829;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #ffcd94;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 48px;
+            font-family: inherit;
+            color: #3d2b1a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 1px 3px black;
+        }
+
+        .challenge-area {
+            background: #f7e5cc;
+            margin: 18px 10px 5px 10px;
+            border-radius: 42px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .challenge-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: #2e2c2a;
+            padding: 5px 15px;
+            border-radius: 30px;
+            color: #ffe1a0;
+        }
+
+        .message {
+            font-weight: bold;
+            background: #d9c5a0;
+            border-radius: 30px;
+            padding: 5px 15px;
+            color: #2c471c;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 16px;
+            color: #4a3b2a;
+        }
+
+        @media (max-width: 500px) {
+            .digital-clock {
+                font-size: 1.8rem;
+                padding: 6px 12px;
+            }
+            .btn {
+                padding: 6px 14px;
+                font-size: 0.9rem;
+            }
+            canvas {
+                width: 280px;
+                height: 280px;
+            }
+            .game-container {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="clock-card">
+        <canvas id="clockCanvas" width="400" height="400" style="width:100%; height:auto; max-width:400px; aspect-ratio:1/1"></canvas>
+
+        <div class="time-panel">
+            <div>
+                <span class="digital-clock" id="digitalTime">--:--:--</span>
+                <span class="ampm" id="ampmLabel">--</span>
+            </div>
+            <div class="selected-hand" id="activeHandLabel">✨ Drag any hand → time updates</div>
+            <div class="info-text">🖱️ Click & drag on the HOUR, MINUTE or SECOND hand to move it!</div>
+        </div>
+
+        <div class="challenge-area">
+            <span class="challenge-text">🎯 CHALLENGE: <span id="challengeTarget">--:--:--</span></span>
+            <button class="btn" id="randomChallengeBtn">🎲 New Time</button>
+            <button class="btn" id="checkMatchBtn">✅ Check Match</button>
+        </div>
+        <div class="button-group">
+            <button class="btn" id="resetCurrentBtn">🕒 Set to Real Time</button>
+        </div>
+        <div id="feedbackMsg" class="message" style="text-align: center; margin-top: 12px;">👉 Move the hands or try a challenge!</div>
+        <footer>⚡ Drag hour/minute/second → digital display changes instantly</footer>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // --- DOM elements ---
+        const canvas = document.getElementById('clockCanvas');
+        const ctx = canvas.getContext('2d');
+        const digitalSpan = document.getElementById('digitalTime');
+        const ampmSpan = document.getElementById('ampmLabel');
+        const activeHandSpan = document.getElementById('activeHandLabel');
+        const challengeTargetSpan = document.getElementById('challengeTarget');
+        const feedbackDiv = document.getElementById('feedbackMsg');
+
+        // --- clock state (24-hour format for logic, but display 12h with AM/PM)
+        let hour24 = 14;    // default 2:00:00 PM
+        let minute = 0;
+        let second = 0;
+
+        // drag state
+        let dragging = false;
+        let selectedHand = null;   // 'hour', 'minute', 'second'
+        
+        // challenge target (store as 24h)
+        let targetHour24 = null;
+        let targetMinute = null;
+        let targetSecond = null;
+
+        // dimensions and helper
+        let centerX = 200, centerY = 200, radius = 180;
+
+        function updateCanvasSize() {
+            const rect = canvas.getBoundingClientRect();
+            const w = rect.width;
+            // keep internal drawing consistent: canvas is 400x400 native, we draw based on fixed 400
+            // but for mouse mapping we need scale factor
+        }
+
+        // --- convert angle (degrees from 12 o'clock clockwise) to time component
+        function angleToMinute(deg) {
+            let raw = Math.round(deg / 6);
+            raw = raw % 60;
+            if (raw < 0) raw += 60;
+            return raw;
+        }
+
+        function angleToSecond(deg) {
+            return angleToMinute(deg);
+        }
+
+        // hour from angle, preserving AM/PM period based on current hour24 (to keep day period consistent)
+        function angleToHourWithPeriod(deg, currentHour24) {
+            // hour hand positions: each hour = 30 degrees, but real hour hand has minute offset
+            // We calculate base hour (1-12) from angle ignoring minute offset for intuitive drag.
+            let rawHour = Math.round(deg / 30) % 12;
+            if (rawHour === 0) rawHour = 12;   // 12 o'clock
+            // Determine period (AM/PM) from currentHour24
+            let isPM = (currentHour24 >= 12);
+            let newHour12 = rawHour;
+            let newHour24 = newHour12 % 12;
+            if (isPM && newHour12 !== 12) newHour24 += 12;
+            if (!isPM && newHour12 === 12) newHour24 = 0;
+            if (isPM && newHour12 === 12) newHour24 = 12;
+            return newHour24;
+        }
+
+        // get angle from mouse/touch event relative to canvas center (degrees from 12 o'clock)
+        function getAngleFromEvent(e, canvasElem) {
+            const rect = canvasElem.getBoundingClientRect();
+            const scaleX = canvasElem.width / rect.width;   // canvas native 400 / displayed width
+            const scaleY = canvasElem.height / rect.height;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            let dx = canvasX - centerX;
+            let dy = canvasY - centerY;
+            let angleRad = Math.atan2(dy, dx);
+            let angleDeg = (angleRad * 180 / Math.PI) + 90; // 0 deg = upward (12 o'clock)
+            angleDeg = (angleDeg + 360) % 360;
+            return angleDeg;
+        }
+
+        // get current hand angles (in degrees)
+        function getCurrentHandAngles() {
+            // hour hand angle: 0.5 deg per minute + 30 deg per hour (12h base)
+            let hour12 = hour24 % 12;
+            let hourAngle = (hour12 * 30) + (minute * 0.5);
+            hourAngle = hourAngle % 360;
+            let minuteAngle = minute * 6;
+            let secondAngle = second * 6;
+            return { hourAngle, minuteAngle, secondAngle };
+        }
+
+        // detect which hand is near the given angle (threshold 25 degrees)
+        function detectHandNearAngle(angleDeg) {
+            const angles = getCurrentHandAngles();
+            let hourDelta = Math.abs(angleDiff(angleDeg, angles.hourAngle));
+            let minuteDelta = Math.abs(angleDiff(angleDeg, angles.minuteAngle));
+            let secondDelta = Math.abs(angleDiff(angleDeg, angles.secondAngle));
+            const THRESH = 28;
+            if (hourDelta < THRESH && hourDelta <= minuteDelta && hourDelta <= secondDelta) return 'hour';
+            if (minuteDelta < THRESH && minuteDelta <= hourDelta && minuteDelta <= secondDelta) return 'minute';
+            if (secondDelta < THRESH && secondDelta <= hourDelta && secondDelta <= minuteDelta) return 'second';
+            return null;
+        }
+
+        function angleDiff(a,b) {
+            let diff = Math.abs(a - b);
+            return Math.min(diff, 360 - diff);
+        }
+
+        // --- core time update functions maintaining consistency ---
+        function setNewTime(h, m, s) {
+            hour24 = ((h % 24) + 24) % 24;
+            minute = Math.min(59, Math.max(0, m));
+            second = Math.min(59, Math.max(0, s));
+            // ensure minute second proper
+            if (minute < 0) minute = 0;
+            if (second < 0) second = 0;
+            refreshDisplayAndRedraw();
+        }
+
+        // drag update: change selected hand based on new angle
+        function updateTimeFromDrag(angleDeg, hand) {
+            if (hand === 'minute') {
+                let newMinute = angleToMinute(angleDeg);
+                // maintain consistency: total minutes = hour*60 + minute, replace minute component
+                let totalMinutes = hour24 * 60 + minute;
+                let newTotalMinutes = hour24 * 60 + newMinute;
+                // if minute change crossing hour boundary -> adjust hour
+                let newHour = Math.floor(newTotalMinutes / 60) % 24;
+                let finalMinute = newTotalMinutes % 60;
+                setNewTime(newHour, finalMinute, second);
+            } 
+            else if (hand === 'second') {
+                let newSecond = angleToSecond(angleDeg);
+                setNewTime(hour24, minute, newSecond);
+            }
+            else if (hand === 'hour') {
+                // hour drag: keep minutes & seconds, but adjust hour respecting period
+                let newHour24 = angleToHourWithPeriod(angleDeg, hour24);
+                // preserve minutes and seconds
+                setNewTime(newHour24, minute, second);
+            }
+        }
+
+        // helper to update all UI & canvas
+        function refreshDisplayAndRedraw() {
+            updateDigitalDisplay();
+            drawClock();
+            updateActiveHandMessage();
+            checkChallengeMatchAuto();
+        }
+
+        function updateDigitalDisplay() {
+            let hour12 = hour24 % 12;
+            if (hour12 === 0) hour12 = 12;
+            let ampm = hour24 >= 12 ? 'PM' : 'AM';
+            let formattedHour = hour12.toString().padStart(2, ' ');
+            let formattedMin = minute.toString().padStart(2, '0');
+            let formattedSec = second.toString().padStart(2, '0');
+            digitalSpan.innerText = `${formattedHour}:${formattedMin}:${formattedSec}`;
+            ampmSpan.innerText = ampm;
+        }
+
+        function updateActiveHandMessage() {
+            if (dragging && selectedHand) {
+                activeHandSpan.innerHTML = `✋ Dragging: ${selectedHand.toUpperCase()} HAND  →  time changes`;
+            } else {
+                activeHandSpan.innerHTML = `🖱️ Grab & move HOUR / MINUTE / SECOND hand`;
+            }
+        }
+
+        // challenge matching (non-intrusive, auto feedback)
+        function checkChallengeMatchAuto() {
+            if (targetHour24 !== null && targetMinute !== null && targetSecond !== null) {
+                if (hour24 === targetHour24 && minute === targetMinute && second === targetSecond) {
+                    feedbackDiv.innerHTML = "🎉 PERFECT! 🎉 You matched the challenge! Great job! 🎯";
+                    feedbackDiv.style.background = "#b9f5a0";
+                    feedbackDiv.style.color = "#1e4a1a";
+                } else {
+                    feedbackDiv.innerHTML = `⏰ Keep moving! Target: ${formatTargetTime()}  |  Current: ${formatCurrentTime()}`;
+                    feedbackDiv.style.background = "#d9c5a0";
+                    feedbackDiv.style.color = "#2c471c";
+                }
+            } else {
+                feedbackDiv.innerHTML = "✨ Try a 'New Time' challenge & match the clock! Drag any hand.";
+                feedbackDiv.style.background = "#d9c5a0";
+            }
+        }
+
+        function formatTargetTime() {
+            if (targetHour24 === null) return "??:??:??";
+            let h12 = targetHour24 % 12; if (h12===0) h12=12;
+            let ampmTarget = targetHour24 >=12 ? "PM" : "AM";
+            return `${h12}:${targetMinute.toString().padStart(2,'0')}:${targetSecond.toString().padStart(2,'0')} ${ampmTarget}`;
+        }
+        function formatCurrentTime() {
+            let h12 = hour24 % 12; if (h12===0) h12=12;
+            let ampmCurr = hour24 >=12 ? "PM" : "AM";
+            return `${h12}:${minute.toString().padStart(2,'0')}:${second.toString().padStart(2,'0')} ${ampmCurr}`;
+        }
+
+        // generate random time challenge
+        function generateRandomChallenge() {
+            targetHour24 = Math.floor(Math.random() * 24);
+            targetMinute = Math.floor(Math.random() * 60);
+            targetSecond = Math.floor(Math.random() * 60);
+            let h12 = targetHour24 % 12; if (h12===0) h12=12;
+            let ampmTarget = targetHour24 >=12 ? "PM" : "AM";
+            challengeTargetSpan.innerText = `${h12}:${targetMinute.toString().padStart(2,'0')}:${targetSecond.toString().padStart(2,'0')} ${ampmTarget}`;
+            feedbackDiv.innerHTML = `🎯 Challenge set! Move hands to match ${challengeTargetSpan.innerText}`;
+            feedbackDiv.style.background = "#f7e5cc";
+            checkChallengeMatchAuto();
+        }
+
+        function checkExplicitMatch() {
+            if (targetHour24 === null) {
+                feedbackDiv.innerHTML = "❗ No active challenge. Press 'New Time' first!";
+                return;
+            }
+            if (hour24 === targetHour24 && minute === targetMinute && second === targetSecond) {
+                feedbackDiv.innerHTML = "✅ CORRECT! ✅ You nailed the time! Great reading! 🎓";
+                feedbackDiv.style.background = "#b9f5a0";
+            } else {
+                feedbackDiv.innerHTML = `❌ Not yet! Target: ${formatTargetTime()}  |  Your clock: ${formatCurrentTime()}. Try moving the hands!`;
+                feedbackDiv.style.background = "#ffcfb0";
+            }
+        }
+
+        function setToCurrentRealTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            setNewTime(hours, minutes, seconds);
+            feedbackDiv.innerHTML = "⏲️ Clock set to real time! Now try a challenge.";
+            if (targetHour24 !== null) checkChallengeMatchAuto();
+            else feedbackDiv.style.background = "#d9c5a0";
+        }
+
+        // ----- Drawing (analog clock) ------
+        function drawClock() {
+            ctx.clearRect(0, 0, 400, 400);
+            // outer dial
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = "#fffbf0";
+            ctx.fill();
+            ctx.strokeStyle = "#b57c48";
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            // minute ticks
+            for (let i = 0; i < 60; i++) {
+                let angle = (i * 6 - 90) * Math.PI / 180;
+                let startRad = radius - 12;
+                let endRad = radius - 4;
+                if (i % 5 === 0) {
+                    startRad = radius - 20;
+                    endRad = radius - 6;
+                    ctx.lineWidth = 3;
+                } else {
+                    ctx.lineWidth = 1.5;
+                }
+                let x1 = centerX + startRad * Math.cos(angle);
+                let y1 = centerY + startRad * Math.sin(angle);
+                let x2 = centerX + endRad * Math.cos(angle);
+                let y2 = centerY + endRad * Math.sin(angle);
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = "#6b4c2c";
+                ctx.stroke();
+            }
+            // numbers
+            ctx.font = "bold 22px 'Segoe UI', 'Quicksand'";
+            ctx.fillStyle = "#3e2a1f";
+            ctx.shadowBlur = 0;
+            for (let i = 1; i <= 12; i++) {
+                let angle = (i * 30 - 90) * Math.PI / 180;
+                let numRadius = radius - 32;
+                let x = centerX + numRadius * Math.cos(angle);
+                let y = centerY + numRadius * Math.sin(angle);
+                ctx.fillText(i.toString(), x-10, y+8);
+            }
+            // draw hands with angles
+            const angles = getCurrentHandAngles();
+            // hour hand
+            drawHand(angles.hourAngle, radius-55, 7, "#2C3E2B", "hour");
+            // minute hand
+            drawHand(angles.minuteAngle, radius-35, 5, "#2C5282", "minute");
+            // second hand
+            drawHand(angles.secondAngle, radius-25, 2.5, "#C44536", "second");
+            // center dot
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 8, 0, 2*Math.PI);
+            ctx.fillStyle = "#b87333";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 3, 0, 2*Math.PI);
+            ctx.fillStyle = "#f9e0a0";
+            ctx.fill();
+
+            if (dragging && selectedHand) {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius+8, 0, 2*Math.PI);
+                ctx.strokeStyle = "#f5bc70";
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 8]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        function drawHand(angleDeg, length, width, color, handType) {
+            let angleRad = (angleDeg - 90) * Math.PI / 180;
+            let x = centerX + length * Math.cos(angleRad);
+            let y = centerY + length * Math.sin(angleRad);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.lineWidth = width;
+            ctx.strokeStyle = color;
+            ctx.shadowBlur = 2;
+            ctx.stroke();
+            // hand cap
+            ctx.beginPath();
+            ctx.arc(centerX + (length-8)*Math.cos(angleRad)*0.3, centerY + (length-8)*Math.sin(angleRad)*0.3, width-1, 0, 2*Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        // ----- DRAG INTERACTION (mouse + touch) -----
+        function onPointerDown(e) {
+            e.preventDefault();
+            let angle = getAngleFromEvent(e, canvas);
+            let hand = detectHandNearAngle(angle);
+            if (hand) {
+                dragging = true;
+                selectedHand = hand;
+                updateActiveHandMessage();
+                drawClock();
+                canvas.style.cursor = 'grabbing';
+            } else {
+                dragging = false;
+                selectedHand = null;
+                updateActiveHandMessage();
+            }
+        }
+
+        function onPointerMove(e) {
+            if (!dragging || !selectedHand) return;
+            e.preventDefault();
+            let angle = getAngleFromEvent(e, canvas);
+            updateTimeFromDrag(angle, selectedHand);
+            drawClock();
+            updateActiveHandMessage();
+        }
+
+        function onPointerUp(e) {
+            if (dragging) {
+                dragging = false;
+                selectedHand = null;
+                canvas.style.cursor = 'grab';
+                updateActiveHandMessage();
+                drawClock();
+            }
+        }
+
+        // attach events
+        function attachEvents() {
+            canvas.addEventListener('mousedown', onPointerDown);
+            window.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('mouseup', onPointerUp);
+            
+            canvas.addEventListener('touchstart', onPointerDown, {passive: false});
+            window.addEventListener('touchmove', onPointerMove, {passive: false});
+            window.addEventListener('touchend', onPointerUp);
+            canvas.style.cursor = 'grab';
+        }
+
+        // initialize with current time
+        function init() {
+            const now = new Date();
+            hour24 = now.getHours();
+            minute = now.getMinutes();
+            second = now.getSeconds();
+            setNewTime(hour24, minute, second);
+            attachEvents();
+            drawClock();
+            updateDigitalDisplay();
+            updateActiveHandMessage();
+            // default challenge: none, but set random optionally
+            targetHour24 = null;
+            challengeTargetSpan.innerText = "Press 🎲 New Time";
+            document.getElementById('randomChallengeBtn').addEventListener('click', () => {
+                generateRandomChallenge();
+            });
+            document.getElementById('checkMatchBtn').addEventListener('click', () => {
+                checkExplicitMatch();
+            });
+            document.getElementById('resetCurrentBtn').addEventListener('click', () => {
+                setToCurrentRealTime();
+            });
+            feedbackDiv.innerHTML = "✨ Drag the HOUR, MINUTE or SECOND hand! ✨";
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
