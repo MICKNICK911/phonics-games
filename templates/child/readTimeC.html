@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>ClockMaster | Tap & Rotate Hands</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 30%, #0f2b22, #071a12);
+            font-family: 'Inter', 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 16px;
+        }
+
+        /* Modern glassmorphic container */
+        .game-wrapper {
+            background: rgba(255, 248, 235, 0.95);
+            backdrop-filter: blur(2px);
+            border-radius: 56px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 245, 205, 0.6);
+            width: 100%;
+            max-width: 560px;
+            transition: all 0.2s;
+        }
+
+        .screen {
+            background: rgba(255, 251, 240, 0.96);
+            border-radius: 48px;
+            padding: 20px 18px;
+            backdrop-filter: blur(2px);
+        }
+
+        /* --- Difficulty panel modern --- */
+        .difficulty-panel {
+            text-align: center;
+        }
+        .diff-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 28px 0 24px;
+            flex-wrap: wrap;
+        }
+        .diff-card {
+            background: linear-gradient(145deg, #f9efdf, #efe0cb);
+            border-radius: 48px;
+            padding: 18px 22px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            width: 160px;
+            box-shadow: 0 8px 14px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,200,0.8);
+            text-align: center;
+        }
+        .diff-card:active { transform: scale(0.97); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .diff-card.easy { background: linear-gradient(145deg, #cfeedd, #b7dfc7); color: #115c2e; }
+        .diff-card.hard { background: linear-gradient(145deg, #ffe0c4, #ffceaa); color: #b6420a; }
+        .diff-card h2 { margin: 0 0 6px; font-weight: 700; }
+        .diff-card p { font-size: 0.85rem; margin: 0; opacity: 0.8; }
+
+        /* Game header */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 25, 20, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 60px;
+            color: #ffefbf;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .badge {
+            background: rgba(0,0,0,0.5);
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+        }
+        .info-icon {
+            background: rgba(255,215,150,0.3);
+            width: 38px;
+            height: 38px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+            backdrop-filter: blur(4px);
+        }
+        .info-icon:active { transform: scale(0.94); background: rgba(255,200,100,0.6); }
+
+        /* Target area modern */
+        .target-box {
+            background: linear-gradient(135deg, #fff5e6, #ffefdb);
+            border-radius: 48px;
+            padding: 14px;
+            margin: 10px 0 16px;
+            text-align: center;
+            box-shadow: inset 0 1px 4px #ebd5b5, 0 6px 12px rgba(0,0,0,0.08);
+        }
+        .target-label {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: #aa6f3c;
+            font-weight: 600;
+        }
+        .target-time {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: #2c241ee6;
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: #ffe6b3;
+            font-family: 'Fira Mono', monospace;
+            margin-top: 6px;
+            word-break: break-word;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Canvas - exactly preserved */
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 50%;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3), 0 0 0 6px #f3e1be, 0 0 0 10px #c9a87b;
+            background: #fffef7;
+            width: 100%;
+            max-width: 290px;
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .selected-hand-message {
+            background: #eadbbc;
+            border-radius: 40px;
+            padding: 6px 14px;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #aa4e1c;
+        }
+
+        /* Control buttons - only symbols */
+        .control-group {
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            margin: 18px 0 12px;
+        }
+        .ctrl-btn {
+            background: #3a6b4e;
+            border: none;
+            font-size: 2.5rem;
+            width: 70px;
+            padding: 8px 0;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1f3b2b;
+            transition: 0.05s linear;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            color: white;
+        }
+        .ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1f3b2b; }
+        .ctrl-btn.reset-btn {
+            background: #b46f3a;
+            box-shadow: 0 5px 0 #73421f;
+            font-size: 1.1rem;
+            width: auto;
+            padding: 8px 24px;
+            gap: 8px;
+        }
+        .action-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 15px 0 10px;
+        }
+        .submit-btn {
+            background: linear-gradient(145deg, #f5bc6e, #eda542);
+            padding: 12px 32px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            border: none;
+            box-shadow: 0 4px 0 #b4621a;
+            cursor: pointer;
+            transition: 0.05s linear;
+            color: #2d1c0a;
+        }
+        .submit-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b4621a; }
+
+        .info-footer {
+            background: #e7d2b0;
+            border-radius: 30px;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 16px;
+            color: #4f3a24;
+        }
+
+        /* Popup modal */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.2s;
+        }
+        .popup-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .popup-card {
+            background: #fff8ec;
+            border-radius: 56px;
+            padding: 28px 36px;
+            text-align: center;
+            box-shadow: 0 20px 30px black;
+            font-size: 1.6rem;
+            font-weight: bold;
+            min-width: 240px;
+            border: 3px solid #ffcf8a;
+        }
+        .popup-card.success { border-color: #6fbf4c; background: #e9ffdb; color: #2b6e1a; }
+        .popup-card.error { border-color: #e6855a; background: #ffe3d4; color: #bc4a1c; }
+
+        /* How to play modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #fff8ef;
+            border-radius: 56px;
+            max-width: 85%;
+            width: 340px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 30px 40px black;
+            border: 1px solid #ffddb0;
+        }
+        .modal-content h3 {
+            font-size: 1.8rem;
+            margin: 0 0 12px;
+            color: #b15318;
+        }
+        .modal-content p {
+            font-size: 0.95rem;
+            margin: 12px 0;
+            line-height: 1.4;
+            color: #2e291f;
+        }
+        .close-modal {
+            background: #f0bc74;
+            border: none;
+            margin-top: 16px;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .hidden { display: none; }
+        .end-screen { text-align: center; padding: 20px; }
+        .big-emoji { font-size: 4rem; }
+        .final-score { font-size: 1.6rem; background: #2e2c2a; display: inline-block; padding: 10px 24px; border-radius: 40px; color: #ffd966; margin: 15px 0; }
+        footer { font-size: 0.7rem; text-align: center; margin-top: 20px; color: #a98653; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+<div class="game-wrapper" id="gameRoot">
+    <!-- DIFFICULTY SCREEN -->
+    <div id="difficultyScreen" class="screen">
+        <div class="difficulty-panel">
+            <h1 style="text-align:center; color:#2c6b40; font-weight: 700;">⏰ CLOCK MASTER</h1>
+            <p style="text-align:center;">Tap a hand → red highlight → use arrows</p>
+            <div class="diff-buttons">
+                <div class="diff-card easy" data-diff="easy">
+                    <h2>🌟 EASY</h2>
+                    <p>Hours & Minutes<br>No seconds · No AM/PM</p>
+                </div>
+                <div class="diff-card hard" data-diff="hard">
+                    <h2>🔥 HARD</h2>
+                    <p>Seconds + AM/PM<br>Full precision</p>
+                </div>
+            </div>
+            <div class="info-footer">🎯 Each level: random clock start (never matching target)</div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen hidden">
+        <div class="flex-between">
+            <span class="badge" id="levelDisplay">Level 1</span>
+            <div class="info-icon" id="infoButton">ℹ️</div>
+        </div>
+        <div class="game-header">
+            <span class="badge" id="scoreDisplay">Score: 0</span>
+            <span class="badge" id="timerDisplay">⏱️ 0s</span>
+        </div>
+        <div class="target-box">
+            <div class="target-label">🎯 MATCH THIS TIME</div>
+            <div class="target-time" id="targetTimeText">--:--</div>
+        </div>
+        <canvas id="clockCanvas" width="400" height="400"></canvas>
+        <div style="text-align: center; margin-top: 10px;">
+            <span class="selected-hand-message" id="selectedHandStatus">⚡ Tap a hand to select</span>
+        </div>
+        <div class="control-group">
+            <button class="ctrl-btn" id="anticlockBtn" aria-label="Anti-clockwise">⬅️</button>
+            <button class="ctrl-btn" id="clockBtn" aria-label="Clockwise">➡️</button>
+        </div>
+        <div class="control-group">
+            <button class="ctrl-btn reset-btn" id="resetTo12Btn">🔄 RESET TO 12:00</button>
+        </div>
+        <div class="action-group">
+            <button class="submit-btn" id="submitMatchBtn">✅ SUBMIT MATCH</button>
+        </div>
+        <div class="info-footer" id="liveTimeHint">⚡ Current: --:--</div>
+    </div>
+
+    <!-- GAME OVER & VICTORY screens same as before -->
+    <div id="gameOverScreen" class="screen hidden">
+        <div class="end-screen">
+            <div class="big-emoji">💀😭❌</div>
+            <h2>GAME OVER</h2>
+            <div class="final-score" id="gameOverScore">Score: 0</div>
+            <p id="gameOverDuration">Time: 0 seconds</p>
+            <button class="ctrl-btn reset-btn" id="playAgainFromOver">🔁 PLAY AGAIN</button>
+        </div>
+    </div>
+    <div id="victoryScreen" class="screen hidden">
+        <div class="end-screen">
+            <div class="big-emoji">🏆🎉🌟🏅</div>
+            <h2>VICTORY! PERFECT MASTER</h2>
+            <div class="final-score" id="victoryScore">Final Score: 0</div>
+            <p id="victoryDuration">Total time: 0 seconds</p>
+            <button class="ctrl-btn reset-btn" id="playAgainVictory">🔁 PLAY AGAIN</button>
+        </div>
+    </div>
+</div>
+
+<!-- Popup toast -->
+<div id="popupToast" class="popup-overlay">
+    <div class="popup-card" id="popupMsgCard">✨</div>
+</div>
+
+<!-- How to play modal -->
+<div id="howToModal" class="modal">
+    <div class="modal-content">
+        <h3>📖 HOW TO PLAY</h3>
+        <p>1️⃣ <strong>Tap any hand</strong> (hour / minute / second) on the clock → it turns <span style="color:#E34234;">RED</span> (selected).</p>
+        <p>2️⃣ Use <strong>⬅️ (anti-clockwise)</strong> and <strong>➡️ (clockwise)</strong> buttons to move the selected hand.</p>
+        <p>3️⃣ Tap the same hand again to <strong>deselect</strong>.</p>
+        <p>4️⃣ Match the clock to the <strong>target time</strong> and press ✅ SUBMIT.</p>
+        <p>5️⃣ <strong>Easy mode</strong>: hours + minutes (no seconds/AMPM). <strong>Hard mode</strong>: full seconds + AM/PM.</p>
+        <p>💡 Each level starts with a random clock position (never matching the target).</p>
+        <button class="close-modal" id="closeModalBtn">Got it!</button>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    //  LEVELS (hard coded, easily customizable)
+    // --------------------------------------------------------------
+    const BASE_LEVELS = [
+        { hour: 3, minute: 0, second: 0 },
+        { hour: 6, minute: 30, second: 0 },
+        { hour: 9, minute: 45, second: 0 },
+        { hour: 12, minute: 0, second: 0 },
+        { hour: 4, minute: 20, second: 0 },
+        { hour: 7, minute: 55, second: 0 },
+        { hour: 2, minute: 35, second: 15 },
+        { hour: 14, minute: 5, second: 45 },
+        { hour: 23, minute: 59, second: 30 }
+    ];
+    
+    // Game state
+    let currentDifficulty = null;
+    let gameActive = false;
+    let currentLevelIdx = 0;
+    let totalLevels = 0;
+    let score = 0;
+    let gameStartTimestamp = null;
+    let timerInterval = null;
+    let currentTarget = { hour: 0, minute: 0, second: 0 };
+    let currentTargetDisplay = "";
+    
+    // Clock state
+    let clockHour24 = 0;
+    let clockMinute = 0;
+    let clockSecond = 0;
+    let selectedHand = null;   // 'hour', 'minute', 'second'
+    
+    // DOM
+    const diffScreen = document.getElementById('difficultyScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const victoryScreen = document.getElementById('victoryScreen');
+    const canvas = document.getElementById('clockCanvas');
+    const ctx = canvas.getContext('2d');
+    const levelSpan = document.getElementById('levelDisplay');
+    const scoreSpan = document.getElementById('scoreDisplay');
+    const timerSpan = document.getElementById('timerDisplay');
+    const targetTimeDiv = document.getElementById('targetTimeText');
+    const liveHint = document.getElementById('liveTimeHint');
+    const selectedHandStatusSpan = document.getElementById('selectedHandStatus');
+    const infoBtn = document.getElementById('infoButton');
+    const modal = document.getElementById('howToModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    
+    // Popup
+    const popupOverlay = document.getElementById('popupToast');
+    const popupCard = document.getElementById('popupMsgCard');
+    
+    function showPopupMessage(text, isSuccess = true) {
+        popupCard.innerText = text;
+        popupCard.className = `popup-card ${isSuccess ? 'success' : 'error'}`;
+        popupOverlay.classList.add('show');
+        setTimeout(() => popupOverlay.classList.remove('show'), 1000);
+    }
+    
+    function to12Hour(h24) { let h = h24 % 12; return h === 0 ? 12 : h; }
+    function formatTwo(n) { return n.toString().padStart(2, '0'); }
+    
+    function formatDigitalTime(hour, minute, second, difficulty) {
+        if (difficulty === 'easy') return `${to12Hour(hour)}:${formatTwo(minute)}`;
+        let ampm = hour >= 12 ? 'PM' : 'AM';
+        let hour12 = to12Hour(hour);
+        return `${hour12}:${formatTwo(minute)}:${formatTwo(second)} ${ampm}`;
+    }
+    
+    function timeToWords(hour24, minute, second, difficulty) {
+        if (minute === 0 && second === 0 && (hour24 === 0 || hour24 === 12)) return hour24 === 0 ? "Midnight" : "Noon";
+        if (difficulty === 'hard' && second !== 0) return formatDigitalTime(hour24, minute, second, 'hard');
+        const hour12 = to12Hour(hour24);
+        let nextHour = (hour24 + 1) % 24;
+        let nextHour12 = to12Hour(nextHour);
+        if (minute === 0) return `${hour12} o'clock`;
+        if (minute === 15) return `quarter past ${hour12}`;
+        if (minute === 30) return `half past ${hour12}`;
+        if (minute === 45) return `quarter to ${nextHour12}`;
+        if (minute < 30) return `${minute} minute${minute !== 1 ? 's' : ''} past ${hour12}`;
+        let toMin = 60 - minute;
+        return `${toMin} minute${toMin !== 1 ? 's' : ''} to ${nextHour12}`;
+    }
+    
+    function getRandomRepresentation(hour, minute, second, difficulty) {
+        const useDigital = Math.random() < 0.5;
+        if (useDigital) return formatDigitalTime(hour, minute, second, difficulty);
+        else return timeToWords(hour, minute, second, difficulty);
+    }
+    
+    function updateLiveHint() {
+        if (currentDifficulty === 'easy') {
+            liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}`;
+        } else {
+            let ampm = clockHour24 >= 12 ? 'PM' : 'AM';
+            liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}:${formatTwo(clockSecond)} ${ampm}`;
+        }
+    }
+    
+    function updateSelectedStatus() {
+        if (!selectedHand) selectedHandStatusSpan.innerHTML = "⚡ Tap a hand to select";
+        else selectedHandStatusSpan.innerHTML = `🔴 SELECTED: ${selectedHand.toUpperCase()} hand (tap again to deselect)`;
+    }
+    
+    function isMatchingTarget() {
+        if (currentDifficulty === 'easy') {
+            let targetHour12 = currentTarget.hour % 12;
+            let clockHour12 = clockHour24 % 12;
+            return (targetHour12 === clockHour12) && (clockMinute === currentTarget.minute);
+        } else {
+            return (clockHour24 === currentTarget.hour) && (clockMinute === currentTarget.minute) && (clockSecond === currentTarget.second);
+        }
+    }
+    
+    function randomizeClockNotMatchingTarget(target, difficulty) {
+        for (let attempt = 0; attempt < 100; attempt++) {
+            let randHour = Math.floor(Math.random() * 24);
+            let randMin = Math.floor(Math.random() * 60);
+            let randSec = (difficulty === 'hard') ? Math.floor(Math.random() * 60) : 0;
+            let match = false;
+            if (difficulty === 'easy') {
+                if ((randHour % 12) === (target.hour % 12) && randMin === target.minute) match = true;
+            } else {
+                if (randHour === target.hour && randMin === target.minute && randSec === target.second) match = true;
+            }
+            if (!match) {
+                clockHour24 = randHour;
+                clockMinute = randMin;
+                clockSecond = randSec;
+                return;
+            }
+        }
+        // fallback
+        clockHour24 = (target.hour + 1) % 24;
+        clockMinute = (target.minute + 13) % 60;
+        clockSecond = (target.second + 29) % 60;
+        if (difficulty === 'easy') clockSecond = 0;
+    }
+    
+    // ----- DRAW CLOCK (exactly preserved style) -----
+    function drawClock() {
+        ctx.clearRect(0, 0, 400, 400);
+        const cx = 200, cy = 200, r = 180;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+        ctx.fillStyle = "#fffbf0";
+        ctx.fill();
+        ctx.strokeStyle = "#b57c48";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        for (let i = 0; i < 60; i++) {
+            let angle = (i * 6 - 90) * Math.PI / 180;
+            let start = r - (i % 5 === 0 ? 18 : 10);
+            let end = r - 4;
+            ctx.beginPath();
+            let x1 = cx + start * Math.cos(angle);
+            let y1 = cy + start * Math.sin(angle);
+            let x2 = cx + end * Math.cos(angle);
+            let y2 = cy + end * Math.sin(angle);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineWidth = i % 5 === 0 ? 2.5 : 1.2;
+            ctx.strokeStyle = "#6b4c2c";
+            ctx.stroke();
+        }
+        ctx.font = "bold 20px 'Segoe UI'";
+        ctx.fillStyle = "#3e2a1f";
+        for (let i = 1; i <= 12; i++) {
+            let angle = (i * 30 - 90) * Math.PI / 180;
+            let textR = r - 32;
+            let x = cx + textR * Math.cos(angle);
+            let y = cy + textR * Math.sin(angle);
+            ctx.fillText(i.toString(), x - 10, y + 8);
+        }
+        let hourAngle = ((clockHour24 % 12) * 30) + (clockMinute * 0.5);
+        let minuteAngle = clockMinute * 6;
+        let secondAngle = clockSecond * 6;
+        
+        function drawHand(angle, length, width, defaultColor, isSelected) {
+            let rad = (angle - 90) * Math.PI / 180;
+            let x = cx + length * Math.cos(rad);
+            let y = cy + length * Math.sin(rad);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.lineWidth = width;
+            ctx.strokeStyle = isSelected ? "#E34234" : defaultColor;
+            ctx.stroke();
+            if (isSelected) {
+                ctx.beginPath();
+                ctx.arc(cx + (length-10)*Math.cos(rad)*0.4, cy + (length-10)*Math.sin(rad)*0.4, width+2, 0, 2*Math.PI);
+                ctx.fillStyle = "#ff8866aa";
+                ctx.fill();
+            }
+        }
+        drawHand(hourAngle, r-55, 7, "#2C4A2E", selectedHand === 'hour');
+        drawHand(minuteAngle, r-40, 5, "#2C5282", selectedHand === 'minute');
+        if (currentDifficulty === 'hard') drawHand(secondAngle, r-28, 2.8, "#C44536", selectedHand === 'second');
+        ctx.beginPath();
+        ctx.arc(cx, cy, 7, 0, 2*Math.PI);
+        ctx.fillStyle = "#c97e3a";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 3, 0, 2*Math.PI);
+        ctx.fillStyle = "#ffeaae";
+        ctx.fill();
+        updateLiveHint();
+    }
+    
+    function detectHandFromTap(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scale = canvas.width / rect.width;
+        const canvasX = (clientX - rect.left) * scale;
+        const canvasY = (clientY - rect.top) * scale;
+        const dx = canvasX - 200, dy = canvasY - 200;
+        if (Math.hypot(dx, dy) < 20) return null;
+        let angle = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+        angle = (angle + 360) % 360;
+        const hourAng = ((clockHour24 % 12) * 30) + (clockMinute * 0.5);
+        const minAng = clockMinute * 6;
+        const secAng = clockSecond * 6;
+        const angleDiff = (a,b) => Math.min(Math.abs(a-b), 360 - Math.abs(a-b));
+        const thr = 28;
+        let hourDiff = angleDiff(angle, hourAng);
+        let minDiff = angleDiff(angle, minAng);
+        if (currentDifficulty === 'hard') {
+            let secDiff = angleDiff(angle, secAng);
+            if (secDiff < thr && secDiff <= hourDiff && secDiff <= minDiff) return 'second';
+            if (minDiff < thr && minDiff <= hourDiff) return 'minute';
+            if (hourDiff < thr) return 'hour';
+            return null;
+        } else {
+            if (minDiff < thr && minDiff <= hourDiff) return 'minute';
+            if (hourDiff < thr) return 'hour';
+            return null;
+        }
+    }
+    
+    function onCanvasTap(e) {
+        if (!gameActive) return;
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+        else { clientX = e.clientX; clientY = e.clientY; }
+        const tapped = detectHandFromTap(clientX, clientY);
+        if (tapped) {
+            if (selectedHand === tapped) { selectedHand = null; showPopupMessage(`🔘 ${tapped.toUpperCase()} deselected`, false); }
+            else { selectedHand = tapped; showPopupMessage(`✅ ${tapped.toUpperCase()} hand selected (RED)`, true); }
+        } else { if (selectedHand) { selectedHand = null; showPopupMessage(`Deselected`, false); } }
+        updateSelectedStatus();
+        drawClock();
+    }
+    
+    function adjustHand(delta) {
+        if (!gameActive) return;
+        if (!selectedHand) { showPopupMessage("👆 First tap a hand to select!", false); return; }
+        if (selectedHand === 'hour') { let newHour = (clockHour24 + delta) % 24; if (newHour < 0) newHour += 24; clockHour24 = newHour; }
+        else if (selectedHand === 'minute') { let newMin = (clockMinute + delta) % 60; if (newMin < 0) newMin += 60; clockMinute = newMin; }
+        else if (selectedHand === 'second' && currentDifficulty === 'hard') { let newSec = (clockSecond + delta) % 60; if (newSec < 0) newSec += 60; clockSecond = newSec; }
+        drawClock();
+    }
+    
+    function resetClockTo12() { clockHour24 = 0; clockMinute = 0; clockSecond = 0; drawClock(); }
+    
+    function loadLevel() {
+        if (!gameActive || currentLevelIdx >= totalLevels) return;
+        const raw = BASE_LEVELS[currentLevelIdx];
+        let targetHour = raw.hour, targetMin = raw.minute, targetSec = (currentDifficulty === 'hard') ? raw.second : 0;
+        if (currentDifficulty === 'easy') targetSec = 0;
+        currentTarget = { hour: targetHour, minute: targetMin, second: targetSec };
+        currentTargetDisplay = getRandomRepresentation(targetHour, targetMin, targetSec, currentDifficulty);
+        targetTimeDiv.innerText = currentTargetDisplay;
+        levelSpan.innerText = `Level ${currentLevelIdx+1}/${totalLevels}`;
+        scoreSpan.innerText = `Score: ${score}`;
+        randomizeClockNotMatchingTarget(currentTarget, currentDifficulty);
+        selectedHand = null;
+        updateSelectedStatus();
+        drawClock();
+    }
+    
+    function advanceLevel() {
+        score = currentLevelIdx + 1;
+        currentLevelIdx++;
+        if (currentLevelIdx >= totalLevels) endGameVictory();
+        else loadLevel();
+    }
+    
+    function onSubmitMatch() {
+        if (!gameActive) return;
+        if (isMatchingTarget()) { showPopupMessage("🎉 WELL DONE! 🎉", true); setTimeout(() => { if (gameActive) advanceLevel(); }, 600); }
+        else { showPopupMessage("❌ WRONG! GAME OVER ❌", false); setTimeout(() => { if (gameActive) gameLose(); }, 800); }
+    }
+    
+    function gameLose() {
+        if (!gameActive) return;
+        gameActive = false;
+        if (timerInterval) clearInterval(timerInterval);
+        const elapsed = Math.floor((Date.now() - gameStartTimestamp) / 1000);
+        document.getElementById('gameOverScore').innerText = `Score: ${score}`;
+        document.getElementById('gameOverDuration').innerText = `Time: ${elapsed} seconds`;
+        gameScreen.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+    }
+    
+    function endGameVictory() {
+        gameActive = false;
+        if (timerInterval) clearInterval(timerInterval);
+        const elapsed = Math.floor((Date.now() - gameStartTimestamp) / 1000);
+        document.getElementById('victoryScore').innerText = `🏆 ${score} / ${totalLevels}`;
+        document.getElementById('victoryDuration').innerText = `Total time: ${elapsed} seconds`;
+        gameScreen.classList.add('hidden');
+        victoryScreen.classList.remove('hidden');
+    }
+    
+    function startGame(difficulty) {
+        currentDifficulty = difficulty;
+        gameActive = true;
+        currentLevelIdx = 0;
+        score = 0;
+        totalLevels = BASE_LEVELS.length;
+        selectedHand = null;
+        clockHour24 = 0; clockMinute = 0; clockSecond = 0;
+        updateSelectedStatus();
+        if (timerInterval) clearInterval(timerInterval);
+        gameStartTimestamp = Date.now();
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            timerSpan.innerText = `⏱️ ${Math.floor((Date.now() - gameStartTimestamp) / 1000)}s`;
+        }, 200);
+        loadLevel();
+        diffScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        gameOverScreen.classList.add('hidden');
+        victoryScreen.classList.add('hidden');
+    }
+    
+    function resetToDifficultyMenu() {
+        if (timerInterval) clearInterval(timerInterval);
+        gameActive = false;
+        diffScreen.classList.remove('hidden');
+        gameScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        victoryScreen.classList.add('hidden');
+    }
+    
+    // Event listeners
+    document.querySelectorAll('.diff-card').forEach(card => {
+        card.addEventListener('click', () => startGame(card.getAttribute('data-diff')));
+    });
+    document.getElementById('clockBtn').addEventListener('click', () => adjustHand(1));
+    document.getElementById('anticlockBtn').addEventListener('click', () => adjustHand(-1));
+    document.getElementById('resetTo12Btn').addEventListener('click', () => { if(gameActive) resetClockTo12(); drawClock(); });
+    document.getElementById('submitMatchBtn').addEventListener('click', onSubmitMatch);
+    document.getElementById('playAgainFromOver').addEventListener('click', resetToDifficultyMenu);
+    document.getElementById('playAgainVictory').addEventListener('click', resetToDifficultyMenu);
+    canvas.addEventListener('click', onCanvasTap);
+    canvas.addEventListener('touchstart', onCanvasTap, { passive: false });
+    
+    // Info modal
+    infoBtn?.addEventListener('click', () => modal.classList.add('show'));
+    closeModalBtn?.addEventListener('click', () => modal.classList.remove('show'));
+    modal?.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
+    
+    drawClock();
+</script>
+</body>
+</html>
