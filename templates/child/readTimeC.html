@@ -39,33 +39,6 @@
             padding: 18px 16px;
         }
 
-        /* Difficulty panel */
-        .difficulty-panel {
-            text-align: center;
-        }
-        .diff-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin: 24px 0 20px;
-            flex-wrap: wrap;
-        }
-        .diff-card {
-            background: linear-gradient(145deg, #f9efdf, #efe0cb);
-            border-radius: 44px;
-            padding: 14px 18px;
-            cursor: pointer;
-            transition: 0.1s ease;
-            width: 150px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .diff-card:active { transform: scale(0.97); }
-        .diff-card.easy { background: linear-gradient(145deg, #cfeedd, #b7dfc7); color: #115c2e; }
-        .diff-card.hard { background: linear-gradient(145deg, #ffe0c4, #ffceaa); color: #b6420a; }
-        .diff-card h2 { margin: 0 0 4px; font-size: 1.4rem; }
-        .diff-card p { font-size: 0.8rem; margin: 0; }
-
         /* Game header row */
         .game-header-row {
             display: flex;
@@ -296,27 +269,8 @@
 </head>
 <body>
 <div class="game-wrapper" id="gameRoot">
-    <!-- DIFFICULTY SCREEN -->
-    <div id="difficultyScreen" class="screen">
-        <div class="difficulty-panel">
-            <h1 style="text-align:center; color:#2c6b40;">⏰ CLOCK MASTER</h1>
-            <p style="text-align:center; font-size:0.85rem;">Tap a hand → red highlight → use arrows</p>
-            <div class="diff-buttons">
-                <div class="diff-card easy" data-diff="easy">
-                    <h2>🌟 EASY</h2>
-                    <p>Hours & Minutes<br>No seconds</p>
-                </div>
-                <div class="diff-card hard" data-diff="hard">
-                    <h2>🔥 HARD</h2>
-                    <p>Seconds + AM/PM</p>
-                </div>
-            </div>
-            <div class="info-footer">🎯 Random start (never matches target)</div>
-        </div>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div id="gameScreen" class="screen hidden">
+    <!-- GAME SCREEN (always visible, no difficulty choice) -->
+    <div id="gameScreen" class="screen">
         <div class="flex-between">
             <span class="badge" id="levelDisplay">Level 1</span>
             <div class="info-icon" id="infoButton">ℹ️</div>
@@ -334,10 +288,10 @@
             <span class="selected-hand-message" id="selectedHandStatus">⚡ Tap a hand to select</span>
         </div>
         
-        <!-- One row for all controls: << (clockwise), >> (anticlockwise), Reset -->
+        <!-- One row for all controls: << (anticlockwise), >> (clockwise), Reset -->
         <div class="control-row">
-            <button class="ctrl-btn" id="clockWiseBtn" aria-label="Clockwise">«</button>
-            <button class="ctrl-btn" id="antiClockBtn" aria-label="Anticlockwise">»</button>
+            <button class="ctrl-btn" id="antiClockBtn" aria-label="Anticlockwise">«</button>
+            <button class="ctrl-btn" id="clockWiseBtn" aria-label="Clockwise">»</button>
             <button class="ctrl-btn reset-btn" id="resetTo12Btn">🔄 RESET</button>
         </div>
         
@@ -345,14 +299,14 @@
         <div class="info-footer" id="liveTimeHint">⚡ Current: --:--</div>
     </div>
 
-    <!-- GAME OVER & VICTORY -->
+    <!-- GAME OVER & VICTORY screens -->
     <div id="gameOverScreen" class="screen hidden">
         <div class="end-screen">
             <div class="big-emoji">💀❌</div>
             <h2>GAME OVER</h2>
             <div class="final-score" id="gameOverScore">Score: 0</div>
             <p id="gameOverDuration">Time: 0s</p>
-            <button class="ctrl-btn reset-btn" id="playAgainFromOver">🔁 PLAY AGAIN</button>
+            <button class="ctrl-btn reset-btn" id="playAgainBtn">🔁 PLAY AGAIN</button>
         </div>
     </div>
     <div id="victoryScreen" class="screen hidden">
@@ -361,12 +315,12 @@
             <h2>VICTORY!</h2>
             <div class="final-score" id="victoryScore">Final Score: 0</div>
             <p id="victoryDuration">Total time: 0s</p>
-            <button class="ctrl-btn reset-btn" id="playAgainVictory">🔁 PLAY AGAIN</button>
+            <button class="ctrl-btn reset-btn" id="victoryPlayAgainBtn">🔁 PLAY AGAIN</button>
         </div>
     </div>
 </div>
 
-<!-- Popup for success/error only (no selection popups) -->
+<!-- Popup for success/error -->
 <div id="popupToast" class="popup-overlay">
     <div class="popup-card" id="popupMsgCard">✨</div>
 </div>
@@ -375,8 +329,8 @@
 <div id="howToModal" class="modal">
     <div class="modal-content">
         <h3>📖 HOW TO PLAY</h3>
-        <p>1️⃣ <strong>Tap any hand</strong> on the clock → it turns <span style="color:#E34234;">RED</span> (selected).</p>
-        <p>2️⃣ Use <strong>« (clockwise)</strong> and <strong>» (anticlockwise)</strong> buttons to move the selected hand.</p>
+        <p>1️⃣ <strong>Tap any hand</strong> (hour or minute) on the clock → it turns <span style="color:#E34234;">RED</span> (selected).</p>
+        <p>2️⃣ Use <strong>« (anticlockwise)</strong> and <strong>» (clockwise)</strong> buttons to move the selected hand.</p>
         <p>3️⃣ Tap the same hand again to <strong>deselect</strong> (highlight disappears).</p>
         <p>4️⃣ Match the clock to the <strong>target time</strong> and press ✅ SUBMIT.</p>
         <p>🔊 Correct = beep ✓ | Wrong = buzz ✗</p>
@@ -386,18 +340,17 @@
 
 <script>
     // --------------------------------------------------------------
-    //  LEVELS (easily customizable)
+    //  LEVELS (hours & minutes only, easy mode)
     // --------------------------------------------------------------
-    const BASE_LEVELS = [
-        { hour: 3, minute: 0, second: 0 },
-        { hour: 6, minute: 30, second: 0 },
-        { hour: 9, minute: 45, second: 0 },
-        { hour: 12, minute: 0, second: 0 },
-        { hour: 4, minute: 20, second: 0 },
-        { hour: 7, minute: 55, second: 0 },
-        { hour: 2, minute: 35, second: 15 },
-        { hour: 14, minute: 5, second: 45 },
-        { hour: 23, minute: 59, second: 30 }
+    const LEVELS = [
+        { hour: 3, minute: 0 },      // 3:00
+        { hour: 6, minute: 30 },     // 6:30
+        { hour: 9, minute: 45 },     // 9:45
+        { hour: 12, minute: 0 },     // 12:00 (noon)
+        { hour: 4, minute: 20 },     // 4:20
+        { hour: 7, minute: 55 },     // 7:55
+        { hour: 2, minute: 35 },     // 2:35
+        { hour: 11, minute: 5 }      // 11:05
     ];
     
     // ---------- Sound API (simple beep using Web Audio) ----------
@@ -413,7 +366,6 @@
             initAudio();
             if (!audioCtx) return;
         }
-        // resume if suspended (user interaction already happened)
         if (audioCtx.state === 'suspended') {
             audioCtx.resume().then(() => playTone(success)).catch(()=>{});
         } else {
@@ -442,20 +394,18 @@
     }
     
     // Game state
-    let currentDifficulty = null;
-    let gameActive = false;
+    let gameActive = true;
     let currentLevelIdx = 0;
-    let totalLevels = 0;
+    const totalLevels = LEVELS.length;
     let score = 0;
     let gameStartTimestamp = null;
     let timerInterval = null;
-    let currentTarget = { hour: 0, minute: 0, second: 0 };
+    let currentTarget = { hour: 0, minute: 0 };
     let currentTargetDisplay = "";
-    let clockHour24 = 0, clockMinute = 0, clockSecond = 0;
-    let selectedHand = null;
+    let clockHour24 = 0, clockMinute = 0;
+    let selectedHand = null;   // 'hour' or 'minute'
     
     // DOM elements
-    const diffScreen = document.getElementById('difficultyScreen');
     const gameScreen = document.getElementById('gameScreen');
     const gameOverScreen = document.getElementById('gameOverScreen');
     const victoryScreen = document.getElementById('victoryScreen');
@@ -470,6 +420,8 @@
     const infoBtn = document.getElementById('infoButton');
     const modal = document.getElementById('howToModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const victoryPlayAgainBtn = document.getElementById('victoryPlayAgainBtn');
     
     // Popup
     const popupOverlay = document.getElementById('popupToast');
@@ -484,63 +436,64 @@
     // helpers
     function to12Hour(h24) { let h = h24 % 12; return h === 0 ? 12 : h; }
     function formatTwo(n) { return n.toString().padStart(2, '0'); }
-    function formatDigitalTime(hour, minute, second, difficulty) {
-        if (difficulty === 'easy') return `${to12Hour(hour)}:${formatTwo(minute)}`;
-        let ampm = hour >= 12 ? 'PM' : 'AM';
-        let hour12 = to12Hour(hour);
-        return `${hour12}:${formatTwo(minute)}:${formatTwo(second)} ${ampm}`;
+    function formatDigitalTime(hour, minute) {
+        return `${to12Hour(hour)}:${formatTwo(minute)}`;
     }
-    function timeToWords(hour24, minute, second, difficulty) {
-        if (minute === 0 && second === 0 && (hour24 === 0 || hour24 === 12)) return hour24 === 0 ? "Midnight" : "Noon";
-        if (difficulty === 'hard' && second !== 0) return formatDigitalTime(hour24, minute, second, 'hard');
+    function timeToWords(hour24, minute) {
         const hour12 = to12Hour(hour24);
-        let nextHour = (hour24 + 1) % 24;
-        let nextHour12 = to12Hour(nextHour);
-        if (minute === 0) return `${hour12} o'clock`;
+        if (minute === 0) {
+            if (hour24 === 0) return "Midnight";
+            if (hour24 === 12) return "Noon";
+            return `${hour12} o'clock`;
+        }
         if (minute === 15) return `quarter past ${hour12}`;
         if (minute === 30) return `half past ${hour12}`;
-        if (minute === 45) return `quarter to ${nextHour12}`;
-        if (minute < 30) return `${minute} minute${minute !== 1 ? 's' : ''} past ${hour12}`;
-        let toMin = 60 - minute;
-        return `${toMin} minute${toMin !== 1 ? 's' : ''} to ${nextHour12}`;
+        if (minute === 45) {
+            let nextHour = (hour24 + 1) % 24;
+            let nextHour12 = to12Hour(nextHour);
+            return `quarter to ${nextHour12}`;
+        }
+        if (minute < 30) {
+            return `${minute} minute${minute !== 1 ? 's' : ''} past ${hour12}`;
+        } else {
+            let toMin = 60 - minute;
+            let nextHour = (hour24 + 1) % 24;
+            let nextHour12 = to12Hour(nextHour);
+            return `${toMin} minute${toMin !== 1 ? 's' : ''} to ${nextHour12}`;
+        }
     }
-    function getRandomRepresentation(hour, minute, second, difficulty) {
-        return Math.random() < 0.5 ? formatDigitalTime(hour, minute, second, difficulty) : timeToWords(hour, minute, second, difficulty);
+    function getRandomRepresentation(hour, minute) {
+        return Math.random() < 0.5 ? formatDigitalTime(hour, minute) : timeToWords(hour, minute);
     }
     function updateLiveHint() {
-        if (currentDifficulty === 'easy') liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}`;
-        else liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}:${formatTwo(clockSecond)} ${clockHour24 >= 12 ? 'PM' : 'AM'}`;
+        liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}`;
     }
     function updateSelectedStatus() {
         selectedHandStatusSpan.innerHTML = selectedHand ? `🔴 SELECTED: ${selectedHand.toUpperCase()} hand` : "⚡ Tap a hand to select";
     }
     function isMatchingTarget() {
-        if (currentDifficulty === 'easy') {
-            return ((clockHour24 % 12) === (currentTarget.hour % 12)) && (clockMinute === currentTarget.minute);
-        } else {
-            return (clockHour24 === currentTarget.hour) && (clockMinute === currentTarget.minute) && (clockSecond === currentTarget.second);
-        }
+        return ((clockHour24 % 12) === (currentTarget.hour % 12)) && (clockMinute === currentTarget.minute);
     }
-    function randomizeClockNotMatchingTarget(target, difficulty) {
+    
+    // Randomize clock to a position that does NOT match target
+    function randomizeClockNotMatchingTarget(target) {
         for (let i = 0; i < 100; i++) {
-            let rh = Math.floor(Math.random() * 24);
-            let rm = Math.floor(Math.random() * 60);
-            let rs = difficulty === 'hard' ? Math.floor(Math.random() * 60) : 0;
-            let match = false;
-            if (difficulty === 'easy') match = ((rh % 12) === (target.hour % 12) && rm === target.minute);
-            else match = (rh === target.hour && rm === target.minute && rs === target.second);
+            let randHour = Math.floor(Math.random() * 12);     // 0-11 for hour display, but we store 0-23
+            let randMin = Math.floor(Math.random() * 60);
+            // convert randHour 0-11 to actual 24h preserving period? but matching logic uses %12 so it's fine
+            let match = ((randHour % 12) === (target.hour % 12) && randMin === target.minute);
             if (!match) {
-                clockHour24 = rh; clockMinute = rm; clockSecond = rs;
+                clockHour24 = randHour;
+                clockMinute = randMin;
                 return;
             }
         }
-        clockHour24 = (target.hour + 1) % 24;
+        // fallback
+        clockHour24 = (target.hour + 1) % 12;
         clockMinute = (target.minute + 13) % 60;
-        clockSecond = (target.second + 29) % 60;
-        if (difficulty === 'easy') clockSecond = 0;
     }
     
-    // Drawing (preserved)
+    // Drawing (only hour & minute hands)
     function drawClock() {
         ctx.clearRect(0, 0, 400, 400);
         const cx = 200, cy = 200, r = 180;
@@ -566,7 +519,7 @@
         }
         let hourAngle = ((clockHour24 % 12) * 30) + (clockMinute * 0.5);
         let minuteAngle = clockMinute * 6;
-        let secondAngle = clockSecond * 6;
+        
         function drawHand(angle, length, width, color, isSelected) {
             let rad = (angle-90)*Math.PI/180;
             let ex = cx + length*Math.cos(rad), ey = cy + length*Math.sin(rad);
@@ -581,13 +534,13 @@
         }
         drawHand(hourAngle, r-55, 7, "#2C4A2E", selectedHand === 'hour');
         drawHand(minuteAngle, r-40, 5, "#2C5282", selectedHand === 'minute');
-        if (currentDifficulty === 'hard') drawHand(secondAngle, r-28, 2.8, "#C44536", selectedHand === 'second');
+        
         ctx.beginPath(); ctx.arc(cx,cy,7,0,2*Math.PI); ctx.fillStyle = "#c97e3a"; ctx.fill();
         ctx.beginPath(); ctx.arc(cx,cy,3,0,2*Math.PI); ctx.fillStyle = "#ffeaae"; ctx.fill();
         updateLiveHint();
     }
     
-    // Tap detection
+    // Tap detection for hands
     function detectHandFromTap(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
         const scale = canvas.width / rect.width;
@@ -598,19 +551,11 @@
         angle = (angle + 360) % 360;
         const hourAng = ((clockHour24 % 12) * 30) + (clockMinute * 0.5);
         const minAng = clockMinute * 6;
-        const secAng = clockSecond * 6;
         const diff = (a,b) => Math.min(Math.abs(a-b), 360-Math.abs(a-b));
         const th = 28;
         let hd = diff(angle, hourAng), md = diff(angle, minAng);
-        if (currentDifficulty === 'hard') {
-            let sd = diff(angle, secAng);
-            if (sd < th && sd <= hd && sd <= md) return 'second';
-            if (md < th && md <= hd) return 'minute';
-            if (hd < th) return 'hour';
-        } else {
-            if (md < th && md <= hd) return 'minute';
-            if (hd < th) return 'hour';
-        }
+        if (md < th && md <= hd) return 'minute';
+        if (hd < th) return 'hour';
         return null;
     }
     
@@ -634,25 +579,29 @@
     function adjustHand(delta) {
         if (!gameActive) return;
         if (!selectedHand) return;
-        if (selectedHand === 'hour') { clockHour24 = (clockHour24 + delta + 24) % 24; }
-        else if (selectedHand === 'minute') { clockMinute = (clockMinute + delta + 60) % 60; }
-        else if (selectedHand === 'second' && currentDifficulty === 'hard') { clockSecond = (clockSecond + delta + 60) % 60; }
+        if (selectedHand === 'hour') {
+            let newHour = (clockHour24 + delta) % 12;
+            if (newHour < 0) newHour += 12;
+            clockHour24 = newHour;
+        } else if (selectedHand === 'minute') {
+            let newMin = (clockMinute + delta) % 60;
+            if (newMin < 0) newMin += 60;
+            clockMinute = newMin;
+        }
         drawClock();
     }
     
-    function resetClockTo12() { clockHour24 = 0; clockMinute = 0; clockSecond = 0; drawClock(); }
+    function resetClockTo12() { clockHour24 = 0; clockMinute = 0; drawClock(); }
     
     function loadLevel() {
         if (!gameActive || currentLevelIdx >= totalLevels) return;
-        const raw = BASE_LEVELS[currentLevelIdx];
-        let th = raw.hour, tm = raw.minute, ts = (currentDifficulty === 'hard') ? raw.second : 0;
-        if (currentDifficulty === 'easy') ts = 0;
-        currentTarget = { hour: th, minute: tm, second: ts };
-        currentTargetDisplay = getRandomRepresentation(th, tm, ts, currentDifficulty);
+        const level = LEVELS[currentLevelIdx];
+        currentTarget = { hour: level.hour, minute: level.minute };
+        currentTargetDisplay = getRandomRepresentation(level.hour, level.minute);
         targetTimeDiv.innerText = currentTargetDisplay;
         levelSpan.innerText = `Level ${currentLevelIdx+1}/${totalLevels}`;
         scoreSpan.innerText = `Score: ${score}`;
-        randomizeClockNotMatchingTarget(currentTarget, currentDifficulty);
+        randomizeClockNotMatchingTarget(currentTarget);
         selectedHand = null;
         updateSelectedStatus();
         drawClock();
@@ -661,8 +610,11 @@
     function advanceLevel() {
         score = currentLevelIdx + 1;
         currentLevelIdx++;
-        if (currentLevelIdx >= totalLevels) endGameVictory();
-        else loadLevel();
+        if (currentLevelIdx >= totalLevels) {
+            endGameVictory();
+        } else {
+            loadLevel();
+        }
     }
     
     function onSubmitMatch() {
@@ -699,47 +651,32 @@
         victoryScreen.classList.remove('hidden');
     }
     
-    function startGame(difficulty) {
-        initAudio(); // prepare audio context
-        currentDifficulty = difficulty;
+    function startNewGame() {
+        initAudio(); // prepare audio
         gameActive = true;
         currentLevelIdx = 0;
         score = 0;
-        totalLevels = BASE_LEVELS.length;
         selectedHand = null;
         updateSelectedStatus();
-        clockHour24 = 0; clockMinute = 0; clockSecond = 0;
+        clockHour24 = 0; clockMinute = 0;
         if (timerInterval) clearInterval(timerInterval);
         gameStartTimestamp = Date.now();
         timerInterval = setInterval(() => {
             if (gameActive) timerSpan.innerText = `⏱️ ${Math.floor((Date.now() - gameStartTimestamp) / 1000)}s`;
         }, 200);
         loadLevel();
-        diffScreen.classList.add('hidden');
         gameScreen.classList.remove('hidden');
         gameOverScreen.classList.add('hidden');
         victoryScreen.classList.add('hidden');
     }
     
-    function resetToDifficultyMenu() {
-        if (timerInterval) clearInterval(timerInterval);
-        gameActive = false;
-        diffScreen.classList.remove('hidden');
-        gameScreen.classList.add('hidden');
-        gameOverScreen.classList.add('hidden');
-        victoryScreen.classList.add('hidden');
-    }
-    
     // Event binding
-    document.querySelectorAll('.diff-card').forEach(card => {
-        card.addEventListener('click', () => startGame(card.getAttribute('data-diff')));
-    });
-    document.getElementById('clockWiseBtn').addEventListener('click', () => adjustHand(1));   // clockwise = increase angle = +1 step
+    document.getElementById('clockWiseBtn').addEventListener('click', () => adjustHand(1));   // clockwise = +1
     document.getElementById('antiClockBtn').addEventListener('click', () => adjustHand(-1)); // anticlockwise = -1
     document.getElementById('resetTo12Btn').addEventListener('click', () => { if(gameActive) resetClockTo12(); });
     document.getElementById('submitMatchBtn').addEventListener('click', onSubmitMatch);
-    document.getElementById('playAgainFromOver').addEventListener('click', resetToDifficultyMenu);
-    document.getElementById('playAgainVictory').addEventListener('click', resetToDifficultyMenu);
+    playAgainBtn.addEventListener('click', startNewGame);
+    victoryPlayAgainBtn.addEventListener('click', startNewGame);
     canvas.addEventListener('click', onCanvasTap);
     canvas.addEventListener('touchstart', onCanvasTap, { passive: false });
     
@@ -748,7 +685,8 @@
     closeModalBtn?.addEventListener('click', () => modal.classList.remove('show'));
     modal?.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
     
-    drawClock();
+    // Start the game
+    startNewGame();
 </script>
 </body>
 </html>
