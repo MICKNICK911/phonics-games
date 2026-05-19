@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>ClockMaster HARD | Tap & Rotate Hands with AM/PM & Seconds</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 30%, #1a2a2a, #0c1a1a);
+            font-family: 'Inter', 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 12px;
+        }
+
+        .game-wrapper {
+            background: rgba(255, 248, 235, 0.96);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .screen {
+            background: rgba(255, 251, 240, 0.96);
+            border-radius: 44px;
+            padding: 18px 16px;
+        }
+
+        /* Header */
+        .game-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .badge {
+            background: rgba(30, 25, 20, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #ffefbf;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .info-icon {
+            background: rgba(255,215,150,0.4);
+            width: 36px;
+            height: 36px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        .info-icon:active { transform: scale(0.94); }
+
+        /* Target area */
+        .target-box {
+            background: linear-gradient(135deg, #fff5e6, #ffefdb);
+            border-radius: 44px;
+            padding: 10px;
+            margin: 8px 0 14px;
+            text-align: center;
+            box-shadow: inset 0 1px 3px #ebd5b5, 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .target-label {
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            color: #aa6f3c;
+            font-weight: 600;
+        }
+        .target-time {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: #2c241ee6;
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 50px;
+            color: #ffe6b3;
+            font-family: 'Fira Mono', monospace;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        /* AM/PM indicator */
+        .ampm-indicator {
+            background: #2c241e;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            color: #ffd966;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        /* Canvas */
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 50%;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3), 0 0 0 5px #f3e1be, 0 0 0 8px #c9a87b;
+            background: #fffef7;
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .selected-hand-message {
+            background: #eadbbc;
+            border-radius: 30px;
+            padding: 4px 12px;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #aa4e1c;
+        }
+
+        /* Controls row */
+        .control-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 16px 0 12px;
+            flex-wrap: wrap;
+        }
+        .ctrl-btn {
+            background: #3a6b4e;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            width: 70px;
+            padding: 8px 0;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #1f3b2b;
+            transition: 0.05s linear;
+            color: white;
+            font-family: monospace;
+        }
+        .ctrl-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1f3b2b; }
+        .ctrl-btn.reset-btn {
+            background: #b46f3a;
+            box-shadow: 0 4px 0 #73421f;
+            font-size: 1rem;
+            width: auto;
+            padding: 8px 20px;
+        }
+        .submit-btn {
+            background: linear-gradient(145deg, #f5bc6e, #eda542);
+            width: 80%;
+            max-width: 220px;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 4px 0 #b4621a;
+            cursor: pointer;
+            margin: 0 auto 10px;
+            display: block;
+        }
+        .submit-btn:active { transform: translateY(2px); }
+
+        .info-footer {
+            background: #e7d2b0;
+            border-radius: 30px;
+            padding: 6px;
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 12px;
+        }
+
+        /* Popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .popup-overlay.show { visibility: visible; opacity: 1; }
+        .popup-card {
+            background: #fff8ec;
+            border-radius: 56px;
+            padding: 24px 32px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-width: 200px;
+            border: 3px solid #ffcf8a;
+        }
+        .popup-card.success { border-color: #6fbf4c; background: #e9ffdb; color: #2b6e1a; }
+        .popup-card.error { border-color: #e6855a; background: #ffe3d4; color: #bc4a1c; }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.show { visibility: visible; opacity: 1; }
+        .modal-content {
+            background: #fff8ef;
+            border-radius: 48px;
+            max-width: 85%;
+            width: 320px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .modal-content h3 { font-size: 1.5rem; margin: 0 0 8px; color: #b15318; }
+        .modal-content p { font-size: 0.85rem; margin: 8px 0; line-height: 1.4; }
+        .close-modal {
+            background: #f0bc74;
+            border: none;
+            margin-top: 12px;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .hidden { display: none; }
+        .end-screen { text-align: center; padding: 16px; }
+        .big-emoji { font-size: 3rem; }
+        .final-score { font-size: 1.4rem; background: #2e2c2a; display: inline-block; padding: 8px 20px; border-radius: 40px; color: #ffd966; margin: 12px 0; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <!-- MAIN GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <div class="flex-between">
+            <span class="badge" id="levelDisplay">Level 1</span>
+            <div class="info-icon" id="infoButton">ℹ️</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 6px 0 8px;">
+            <span class="badge" id="scoreDisplay">Score: 0</span>
+            <span class="badge" id="timerDisplay">⏱️ 0s</span>
+        </div>
+        <div class="target-box">
+            <div class="target-label">🎯 MATCH THIS TIME</div>
+            <div class="target-time" id="targetTimeText">--:-- --</div>
+        </div>
+        <canvas id="clockCanvas" width="400" height="400"></canvas>
+        <div style="text-align: center; margin-top: 8px;">
+            <span class="selected-hand-message" id="selectedHandStatus">⚡ Tap a hand to select</span>
+        </div>
+        <!-- Controls -->
+        <div class="control-row">
+            <button class="ctrl-btn" id="antiClockBtn" aria-label="Anticlockwise">«</button>
+            <button class="ctrl-btn" id="clockWiseBtn" aria-label="Clockwise">»</button>
+            <button class="ctrl-btn reset-btn" id="resetTo12Btn">🔄 RESET</button>
+        </div>
+        <button class="submit-btn" id="submitMatchBtn">✅ SUBMIT MATCH</button>
+        <div class="info-footer" id="liveTimeHint">⚡ Current: --:--:-- <span id="ampmLabel">AM</span></div>
+    </div>
+
+    <!-- GAME OVER & VICTORY -->
+    <div id="gameOverScreen" class="screen hidden">
+        <div class="end-screen">
+            <div class="big-emoji">💀❌</div>
+            <h2>GAME OVER</h2>
+            <div class="final-score" id="gameOverScore">Score: 0</div>
+            <p id="gameOverDuration">Time: 0s</p>
+            <button class="ctrl-btn reset-btn" id="playAgainBtn">🔁 PLAY AGAIN</button>
+        </div>
+    </div>
+    <div id="victoryScreen" class="screen hidden">
+        <div class="end-screen">
+            <div class="big-emoji">🏆🎉🌟</div>
+            <h2>VICTORY!</h2>
+            <div class="final-score" id="victoryScore">Final Score: 0</div>
+            <p id="victoryDuration">Total time: 0s</p>
+            <button class="ctrl-btn reset-btn" id="victoryPlayAgainBtn">🔁 PLAY AGAIN</button>
+        </div>
+    </div>
+</div>
+
+<!-- Popup toast -->
+<div id="popupToast" class="popup-overlay">
+    <div class="popup-card" id="popupMsgCard">✨</div>
+</div>
+
+<!-- How-to modal -->
+<div id="howToModal" class="modal">
+    <div class="modal-content">
+        <h3>📖 HARD MODE</h3>
+        <p>1️⃣ <strong>Tap a hand</strong> (hour / minute / second) → turns <span style="color:#E34234;">RED</span> (selected).</p>
+        <p>2️⃣ Use <strong>« (anticlockwise)</strong> and <strong>» (clockwise)</strong> to move the selected hand.</p>
+        <p>3️⃣ The <strong>AM/PM indicator</strong> updates live as you move the hour hand.</p>
+        <p>4️⃣ Match the clock exactly to the target time (including seconds & AM/PM) and press ✅ SUBMIT.</p>
+        <p>🔊 Correct = beep ✓ | Wrong = buzz ✗</p>
+        <button class="close-modal" id="closeModalBtn">Got it!</button>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    //  HARD MODE LEVELS (with seconds and explicit AM/PM)
+    // --------------------------------------------------------------
+    const LEVELS = [
+        { hour: 3, minute: 0, second: 0 },        // 3:00:00 AM
+        { hour: 9, minute: 45, second: 30 },      // 9:45:30 AM
+        { hour: 12, minute: 0, second: 0 },       // 12:00:00 PM (noon)
+        { hour: 15, minute: 20, second: 15 },     // 3:20:15 PM
+        { hour: 6, minute: 30, second: 45 },      // 6:30:45 AM
+        { hour: 22, minute: 5, second: 10 },      // 10:05:10 PM
+        { hour: 0, minute: 0, second: 0 },        // 12:00:00 AM (midnight)
+        { hour: 18, minute: 55, second: 20 }      // 6:55:20 PM
+    ];
+    
+    // ---------- Sound API ----------
+    let audioCtx = null;
+    function initAudio() {
+        if (audioCtx) return;
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    function playBeep(success) {
+        if (!audioCtx) { initAudio(); if(!audioCtx) return; }
+        if (audioCtx.state === 'suspended') audioCtx.resume().then(() => playTone(success)).catch(()=>{});
+        else playTone(success);
+    }
+    function playTone(success) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        if (success) {
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        } else {
+            osc.frequency.value = 220;
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        }
+        osc.start();
+        osc.stop(now + 0.3);
+    }
+    
+    // Game state
+    let gameActive = true;
+    let currentLevelIdx = 0;
+    const totalLevels = LEVELS.length;
+    let score = 0;
+    let gameStartTimestamp = null;
+    let timerInterval = null;
+    let currentTarget = { hour: 0, minute: 0, second: 0 };
+    let currentTargetDisplay = "";
+    let clockHour24 = 0, clockMinute = 0, clockSecond = 0;
+    let selectedHand = null;   // 'hour', 'minute', 'second'
+    
+    // DOM elements
+    const gameScreen = document.getElementById('gameScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const victoryScreen = document.getElementById('victoryScreen');
+    const canvas = document.getElementById('clockCanvas');
+    const ctx = canvas.getContext('2d');
+    const levelSpan = document.getElementById('levelDisplay');
+    const scoreSpan = document.getElementById('scoreDisplay');
+    const timerSpan = document.getElementById('timerDisplay');
+    const targetTimeDiv = document.getElementById('targetTimeText');
+    const liveHint = document.getElementById('liveTimeHint');
+    const ampmLabelSpan = document.getElementById('ampmLabel');
+    const selectedHandStatusSpan = document.getElementById('selectedHandStatus');
+    const infoBtn = document.getElementById('infoButton');
+    const modal = document.getElementById('howToModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const victoryPlayAgainBtn = document.getElementById('victoryPlayAgainBtn');
+    
+    // Popup
+    const popupOverlay = document.getElementById('popupToast');
+    const popupMsg = document.getElementById('popupMsgCard');
+    function showResultPopup(text, isSuccess) {
+        popupMsg.innerText = text;
+        popupMsg.className = `popup-card ${isSuccess ? 'success' : 'error'}`;
+        popupOverlay.classList.add('show');
+        setTimeout(() => popupOverlay.classList.remove('show'), 900);
+    }
+    
+    // Helpers
+    function to12Hour(h24) { let h = h24 % 12; return h === 0 ? 12 : h; }
+    function formatTwo(n) { return n.toString().padStart(2, '0'); }
+    function getAmPm(hour24) { return hour24 >= 12 ? 'PM' : 'AM'; }
+    
+    function formatDigitalTime(hour, minute, second) {
+        return `${to12Hour(hour)}:${formatTwo(minute)}:${formatTwo(second)} ${getAmPm(hour)}`;
+    }
+    
+    function timeToWords(hour24, minute, second) {
+        const hour12 = to12Hour(hour24);
+        const ampm = getAmPm(hour24);
+        if (second !== 0) return formatDigitalTime(hour24, minute, second);
+        if (minute === 0 && hour24 === 0) return `Midnight (12:00 AM)`;
+        if (minute === 0 && hour24 === 12) return `Noon (12:00 PM)`;
+        if (minute === 0) return `${hour12} o'clock ${ampm}`;
+        if (minute === 15) return `quarter past ${hour12} ${ampm}`;
+        if (minute === 30) return `half past ${hour12} ${ampm}`;
+        if (minute === 45) {
+            let nextHour = (hour24 + 1) % 24;
+            let nextHour12 = to12Hour(nextHour);
+            let nextAmpm = getAmPm(nextHour);
+            return `quarter to ${nextHour12} ${nextAmpm}`;
+        }
+        if (minute < 30) return `${minute} minute${minute!==1?'s':''} past ${hour12} ${ampm}`;
+        let toMin = 60 - minute;
+        let nextHour = (hour24 + 1) % 24;
+        let nextHour12 = to12Hour(nextHour);
+        let nextAmpm = getAmPm(nextHour);
+        return `${toMin} minute${toMin!==1?'s':''} to ${nextHour12} ${nextAmpm}`;
+    }
+    
+    function getRandomRepresentation(hour, minute, second) {
+        return Math.random() < 0.5 ? formatDigitalTime(hour, minute, second) : timeToWords(hour, minute, second);
+    }
+    
+    function updateLiveHint() {
+        const ampm = getAmPm(clockHour24);
+        ampmLabelSpan.innerText = ampm;
+        liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}:${formatTwo(clockSecond)} <span id="ampmLabel">${ampm}</span>`;
+        // reattach span reference after innerHTML replacement
+        document.getElementById('ampmLabel').innerText = ampm;
+    }
+    
+    function updateSelectedStatus() {
+        selectedHandStatusSpan.innerHTML = selectedHand ? `🔴 SELECTED: ${selectedHand.toUpperCase()} hand` : "⚡ Tap a hand to select";
+    }
+    
+    function isMatchingTarget() {
+        return (clockHour24 === currentTarget.hour && 
+                clockMinute === currentTarget.minute && 
+                clockSecond === currentTarget.second);
+    }
+    
+    // Randomize clock to a position that does NOT match target
+    function randomizeClockNotMatchingTarget(target) {
+        for (let i = 0; i < 150; i++) {
+            let randHour = Math.floor(Math.random() * 24);
+            let randMin = Math.floor(Math.random() * 60);
+            let randSec = Math.floor(Math.random() * 60);
+            if (!(randHour === target.hour && randMin === target.minute && randSec === target.second)) {
+                clockHour24 = randHour;
+                clockMinute = randMin;
+                clockSecond = randSec;
+                return;
+            }
+        }
+        // fallback
+        clockHour24 = (target.hour + 5) % 24;
+        clockMinute = (target.minute + 17) % 60;
+        clockSecond = (target.second + 23) % 60;
+    }
+    
+    // Drawing with three hands
+    function drawClock() {
+        ctx.clearRect(0, 0, 400, 400);
+        const cx = 200, cy = 200, r = 180;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+        ctx.fillStyle = "#fffbf0"; ctx.fill();
+        ctx.strokeStyle = "#b57c48"; ctx.lineWidth = 4; ctx.stroke();
+        for (let i = 0; i < 60; i++) {
+            let angle = (i * 6 - 90) * Math.PI/180;
+            let start = r - (i%5===0 ? 18 : 10);
+            let end = r - 4;
+            let x1 = cx + start*Math.cos(angle), y1 = cy + start*Math.sin(angle);
+            let x2 = cx + end*Math.cos(angle), y2 = cy + end*Math.sin(angle);
+            ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+            ctx.lineWidth = i%5===0 ? 2.5 : 1.2;
+            ctx.strokeStyle = "#6b4c2c"; ctx.stroke();
+        }
+        ctx.font = "bold 20px 'Segoe UI'";
+        ctx.fillStyle = "#3e2a1f";
+        for (let i=1;i<=12;i++) {
+            let angle = (i*30-90)*Math.PI/180;
+            let tx = cx + (r-32)*Math.cos(angle), ty = cy + (r-32)*Math.sin(angle);
+            ctx.fillText(i.toString(), tx-10, ty+8);
+        }
+        let hourAngle = ((clockHour24 % 12) * 30) + (clockMinute * 0.5);
+        let minuteAngle = clockMinute * 6;
+        let secondAngle = clockSecond * 6;
+        
+        function drawHand(angle, length, width, color, isSelected) {
+            let rad = (angle-90)*Math.PI/180;
+            let ex = cx + length*Math.cos(rad), ey = cy + length*Math.sin(rad);
+            ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey);
+            ctx.lineWidth = width; ctx.strokeStyle = isSelected ? "#E34234" : color;
+            ctx.stroke();
+            if (isSelected) {
+                ctx.beginPath();
+                ctx.arc(cx + (length-10)*Math.cos(rad)*0.4, cy + (length-10)*Math.sin(rad)*0.4, width+2, 0, 2*Math.PI);
+                ctx.fillStyle = "#ff8866aa"; ctx.fill();
+            }
+        }
+        drawHand(hourAngle, r-55, 7, "#2C4A2E", selectedHand === 'hour');
+        drawHand(minuteAngle, r-40, 5, "#2C5282", selectedHand === 'minute');
+        drawHand(secondAngle, r-28, 2.8, "#C44536", selectedHand === 'second');
+        
+        ctx.beginPath(); ctx.arc(cx,cy,7,0,2*Math.PI); ctx.fillStyle = "#c97e3a"; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx,cy,3,0,2*Math.PI); ctx.fillStyle = "#ffeaae"; ctx.fill();
+        updateLiveHint();
+    }
+    
+    // Tap detection for three hands
+    function detectHandFromTap(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scale = canvas.width / rect.width;
+        const cxv = (clientX - rect.left) * scale, cyv = (clientY - rect.top) * scale;
+        const dx = cxv - 200, dy = cyv - 200;
+        if (Math.hypot(dx, dy) < 20) return null;
+        let angle = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+        angle = (angle + 360) % 360;
+        const hourAng = ((clockHour24 % 12) * 30) + (clockMinute * 0.5);
+        const minAng = clockMinute * 6;
+        const secAng = clockSecond * 6;
+        const diff = (a,b) => Math.min(Math.abs(a-b), 360-Math.abs(a-b));
+        const th = 28;
+        let hd = diff(angle, hourAng), md = diff(angle, minAng), sd = diff(angle, secAng);
+        if (sd < th && sd <= hd && sd <= md) return 'second';
+        if (md < th && md <= hd) return 'minute';
+        if (hd < th) return 'hour';
+        return null;
+    }
+    
+    function onCanvasTap(e) {
+        if (!gameActive) return;
+        e.preventDefault();
+        let cx, cy;
+        if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+        else { cx = e.clientX; cy = e.clientY; }
+        const hand = detectHandFromTap(cx, cy);
+        if (hand) {
+            if (selectedHand === hand) selectedHand = null;
+            else selectedHand = hand;
+        } else {
+            selectedHand = null;
+        }
+        updateSelectedStatus();
+        drawClock();
+    }
+    
+    function adjustHand(delta) {
+        if (!gameActive) return;
+        if (!selectedHand) return;
+        if (selectedHand === 'hour') {
+            let newHour = (clockHour24 + delta) % 24;
+            if (newHour < 0) newHour += 24;
+            clockHour24 = newHour;
+        } else if (selectedHand === 'minute') {
+            let newMin = (clockMinute + delta) % 60;
+            if (newMin < 0) newMin += 60;
+            clockMinute = newMin;
+        } else if (selectedHand === 'second') {
+            let newSec = (clockSecond + delta) % 60;
+            if (newSec < 0) newSec += 60;
+            clockSecond = newSec;
+        }
+        drawClock();
+    }
+    
+    function resetClockTo12() { 
+        clockHour24 = 0; 
+        clockMinute = 0; 
+        clockSecond = 0; 
+        drawClock(); 
+    }
+    
+    function loadLevel() {
+        if (!gameActive || currentLevelIdx >= totalLevels) return;
+        const level = LEVELS[currentLevelIdx];
+        currentTarget = { hour: level.hour, minute: level.minute, second: level.second };
+        currentTargetDisplay = getRandomRepresentation(level.hour, level.minute, level.second);
+        targetTimeDiv.innerText = currentTargetDisplay;
+        levelSpan.innerText = `Level ${currentLevelIdx+1}/${totalLevels}`;
+        scoreSpan.innerText = `Score: ${score}`;
+        randomizeClockNotMatchingTarget(currentTarget);
+        selectedHand = null;
+        updateSelectedStatus();
+        drawClock();
+    }
+    
+    function advanceLevel() {
+        score = currentLevelIdx + 1;
+        currentLevelIdx++;
+        if (currentLevelIdx >= totalLevels) endGameVictory();
+        else loadLevel();
+    }
+    
+    function onSubmitMatch() {
+        if (!gameActive) return;
+        if (isMatchingTarget()) {
+            playBeep(true);
+            showResultPopup("🎉 WELL DONE! 🎉", true);
+            setTimeout(() => { if (gameActive) advanceLevel(); }, 600);
+        } else {
+            playBeep(false);
+            showResultPopup("❌ WRONG! GAME OVER ❌", false);
+            setTimeout(() => { if (gameActive) gameLose(); }, 800);
+        }
+    }
+    
+    function gameLose() {
+        if (!gameActive) return;
+        gameActive = false;
+        if (timerInterval) clearInterval(timerInterval);
+        const elapsed = Math.floor((Date.now() - gameStartTimestamp) / 1000);
+        document.getElementById('gameOverScore').innerText = `Score: ${score}`;
+        document.getElementById('gameOverDuration').innerText = `Time: ${elapsed}s`;
+        gameScreen.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+    }
+    
+    function endGameVictory() {
+        gameActive = false;
+        if (timerInterval) clearInterval(timerInterval);
+        const elapsed = Math.floor((Date.now() - gameStartTimestamp) / 1000);
+        document.getElementById('victoryScore').innerText = `🏆 ${score} / ${totalLevels}`;
+        document.getElementById('victoryDuration').innerText = `Total: ${elapsed}s`;
+        gameScreen.classList.add('hidden');
+        victoryScreen.classList.remove('hidden');
+    }
+    
+    function startNewGame() {
+        initAudio();
+        gameActive = true;
+        currentLevelIdx = 0;
+        score = 0;
+        selectedHand = null;
+        updateSelectedStatus();
+        clockHour24 = 0; clockMinute = 0; clockSecond = 0;
+        if (timerInterval) clearInterval(timerInterval);
+        gameStartTimestamp = Date.now();
+        timerInterval = setInterval(() => {
+            if (gameActive) timerSpan.innerText = `⏱️ ${Math.floor((Date.now() - gameStartTimestamp) / 1000)}s`;
+        }, 200);
+        loadLevel();
+        gameScreen.classList.remove('hidden');
+        gameOverScreen.classList.add('hidden');
+        victoryScreen.classList.add('hidden');
+    }
+    
+    // Event binding
+    document.getElementById('clockWiseBtn').addEventListener('click', () => adjustHand(1));
+    document.getElementById('antiClockBtn').addEventListener('click', () => adjustHand(-1));
+    document.getElementById('resetTo12Btn').addEventListener('click', () => { if(gameActive) resetClockTo12(); });
+    document.getElementById('submitMatchBtn').addEventListener('click', onSubmitMatch);
+    playAgainBtn.addEventListener('click', startNewGame);
+    victoryPlayAgainBtn.addEventListener('click', startNewGame);
+    canvas.addEventListener('click', onCanvasTap);
+    canvas.addEventListener('touchstart', onCanvasTap, { passive: false });
+    
+    infoBtn?.addEventListener('click', () => modal.classList.add('show'));
+    closeModalBtn?.addEventListener('click', () => modal.classList.remove('show'));
+    modal?.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
+    
+    startNewGame();
+</script>
+</body>
+</html>
