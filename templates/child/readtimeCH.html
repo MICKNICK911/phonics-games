@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ClockMaster HARD | Tap & Rotate Hands with AM/PM & Seconds</title>
+    <title>ClockMaster HARD | AM/PM & Seconds</title>
     <style>
         * {
             box-sizing: border-box;
@@ -94,17 +94,26 @@
             word-break: break-word;
         }
 
-        /* AM/PM indicator */
-        .ampm-indicator {
-            background: #2c241e;
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            color: #ffd966;
-            font-weight: bold;
-            font-size: 0.8rem;
-            margin-left: 8px;
+        /* Dedicated AM/PM Indicator */
+        .ampm-panel {
+            text-align: center;
+            margin: 12px 0 8px;
         }
+        .ampm-badge {
+            display: inline-block;
+            background: #1e2a2a;
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #ffd966;
+            box-shadow: inset 0 0 0 1px #ffefb0, 0 4px 10px rgba(0,0,0,0.2);
+            font-family: monospace;
+            transition: 0.1s;
+        }
+        .ampm-badge.am { background: #1e3a3a; color: #aaffdd; }
+        .ampm-badge.pm { background: #3a2a1e; color: #ffbb88; }
 
         /* Canvas */
         canvas {
@@ -184,6 +193,7 @@
             text-align: center;
             font-size: 0.7rem;
             margin-top: 12px;
+            color: #4f3a24;
         }
 
         /* Popup */
@@ -277,6 +287,12 @@
             <div class="target-label">🎯 MATCH THIS TIME</div>
             <div class="target-time" id="targetTimeText">--:-- --</div>
         </div>
+
+        <!-- DEDICATED AM/PM INDICATOR -->
+        <div class="ampm-panel">
+            <div class="ampm-badge" id="ampmIndicator">AM</div>
+        </div>
+
         <canvas id="clockCanvas" width="400" height="400"></canvas>
         <div style="text-align: center; margin-top: 8px;">
             <span class="selected-hand-message" id="selectedHandStatus">⚡ Tap a hand to select</span>
@@ -288,7 +304,7 @@
             <button class="ctrl-btn reset-btn" id="resetTo12Btn">🔄 RESET</button>
         </div>
         <button class="submit-btn" id="submitMatchBtn">✅ SUBMIT MATCH</button>
-        <div class="info-footer" id="liveTimeHint">⚡ Current: --:--:-- <span id="ampmLabel">AM</span></div>
+        <div class="info-footer" id="liveTimeHint">⚡ Current: --:--:--</div>
     </div>
 
     <!-- GAME OVER & VICTORY -->
@@ -323,7 +339,7 @@
         <h3>📖 HARD MODE</h3>
         <p>1️⃣ <strong>Tap a hand</strong> (hour / minute / second) → turns <span style="color:#E34234;">RED</span> (selected).</p>
         <p>2️⃣ Use <strong>« (anticlockwise)</strong> and <strong>» (clockwise)</strong> to move the selected hand.</p>
-        <p>3️⃣ The <strong>AM/PM indicator</strong> updates live as you move the hour hand.</p>
+        <p>3️⃣ The large <strong>AM/PM indicator</strong> changes live as you move the hour hand.</p>
         <p>4️⃣ Match the clock exactly to the target time (including seconds & AM/PM) and press ✅ SUBMIT.</p>
         <p>🔊 Correct = beep ✓ | Wrong = buzz ✗</p>
         <button class="close-modal" id="closeModalBtn">Got it!</button>
@@ -400,7 +416,7 @@
     const timerSpan = document.getElementById('timerDisplay');
     const targetTimeDiv = document.getElementById('targetTimeText');
     const liveHint = document.getElementById('liveTimeHint');
-    const ampmLabelSpan = document.getElementById('ampmLabel');
+    const ampmIndicator = document.getElementById('ampmIndicator');
     const selectedHandStatusSpan = document.getElementById('selectedHandStatus');
     const infoBtn = document.getElementById('infoButton');
     const modal = document.getElementById('howToModal');
@@ -422,6 +438,13 @@
     function to12Hour(h24) { let h = h24 % 12; return h === 0 ? 12 : h; }
     function formatTwo(n) { return n.toString().padStart(2, '0'); }
     function getAmPm(hour24) { return hour24 >= 12 ? 'PM' : 'AM'; }
+    
+    // Update the dedicated AM/PM indicator (no extra text)
+    function updateAmpmIndicator() {
+        const isPM = clockHour24 >= 12;
+        ampmIndicator.innerText = isPM ? 'PM' : 'AM';
+        ampmIndicator.className = `ampm-badge ${isPM ? 'pm' : 'am'}`;
+    }
     
     function formatDigitalTime(hour, minute, second) {
         return `${to12Hour(hour)}:${formatTwo(minute)}:${formatTwo(second)} ${getAmPm(hour)}`;
@@ -456,10 +479,7 @@
     
     function updateLiveHint() {
         const ampm = getAmPm(clockHour24);
-        ampmLabelSpan.innerText = ampm;
-        liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}:${formatTwo(clockSecond)} <span id="ampmLabel">${ampm}</span>`;
-        // reattach span reference after innerHTML replacement
-        document.getElementById('ampmLabel').innerText = ampm;
+        liveHint.innerHTML = `⚡ Current: ${to12Hour(clockHour24)}:${formatTwo(clockMinute)}:${formatTwo(clockSecond)} ${ampm}`;
     }
     
     function updateSelectedStatus() {
@@ -482,6 +502,7 @@
                 clockHour24 = randHour;
                 clockMinute = randMin;
                 clockSecond = randSec;
+                updateAmpmIndicator();
                 return;
             }
         }
@@ -489,6 +510,7 @@
         clockHour24 = (target.hour + 5) % 24;
         clockMinute = (target.minute + 17) % 60;
         clockSecond = (target.second + 23) % 60;
+        updateAmpmIndicator();
     }
     
     // Drawing with three hands
@@ -538,6 +560,7 @@
         ctx.beginPath(); ctx.arc(cx,cy,7,0,2*Math.PI); ctx.fillStyle = "#c97e3a"; ctx.fill();
         ctx.beginPath(); ctx.arc(cx,cy,3,0,2*Math.PI); ctx.fillStyle = "#ffeaae"; ctx.fill();
         updateLiveHint();
+        updateAmpmIndicator();
     }
     
     // Tap detection for three hands
@@ -585,6 +608,7 @@
             let newHour = (clockHour24 + delta) % 24;
             if (newHour < 0) newHour += 24;
             clockHour24 = newHour;
+            updateAmpmIndicator();
         } else if (selectedHand === 'minute') {
             let newMin = (clockMinute + delta) % 60;
             if (newMin < 0) newMin += 60;
@@ -601,6 +625,7 @@
         clockHour24 = 0; 
         clockMinute = 0; 
         clockSecond = 0; 
+        updateAmpmIndicator();
         drawClock(); 
     }
     
@@ -667,6 +692,7 @@
         selectedHand = null;
         updateSelectedStatus();
         clockHour24 = 0; clockMinute = 0; clockSecond = 0;
+        updateAmpmIndicator();
         if (timerInterval) clearInterval(timerInterval);
         gameStartTimestamp = Date.now();
         timerInterval = setInterval(() => {
