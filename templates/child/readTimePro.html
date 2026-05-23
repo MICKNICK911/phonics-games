@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Clock Lab Pro — Learn to Tell Time</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(145deg, #c8e8ff 0%, #b2dfdb 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 0 32px 0;
+    }
+
+    /* sky scene */
+    .sky {
+      width: 100%;
+      position: relative;
+      height: 88px;
+      overflow: hidden;
+    }
+
+    .sun {
+      position: absolute;
+      top: 12px;
+      left: 32px;
+      width: 64px;
+      height: 64px;
+      background: radial-gradient(circle, #FFE066, #FFB800);
+      border-radius: 50%;
+      box-shadow: 0 0 32px 8px rgba(255, 200, 0, 0.5);
+      animation: softGlow 3s infinite alternate;
+    }
+
+    @keyframes softGlow {
+      0% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 20px 4px #ffd966; }
+      100% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 40px 12px #ffcc33; }
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 80px;
+      backdrop-filter: blur(2px);
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .c1 { top: 24px; left: 15%; width: 90px; height: 32px; }
+    .c1::before { width: 42px; height: 42px; top: -22px; left: 12px; }
+    .c1::after { width: 32px; height: 32px; top: -14px; left: 42px; }
+    .c2 { top: 10px; right: 18%; width: 110px; height: 36px; }
+    .c2::before { width: 50px; height: 50px; top: -28px; left: 18px; }
+    .c2::after { width: 36px; height: 36px; top: -18px; left: 55px; }
+    .c3 { top: 32px; right: 8%; width: 70px; height: 28px; }
+    .c3::before { width: 34px; height: 34px; top: -18px; left: 10px; }
+
+    /* header */
+    .title-section {
+      text-align: center;
+      margin: 8px 16px 12px;
+    }
+    .title-section h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 7vw, 3.3rem);
+      color: #1e2a3a;
+      text-shadow: 0 4px 0 #ffb34755;
+      letter-spacing: -0.5px;
+    }
+    .title-section h1 span { color: #2c7a4d; }
+    .title-section p {
+      font-weight: 700;
+      color: #2c3e44;
+      background: #ffffffcc;
+      display: inline-block;
+      padding: 4px 18px;
+      border-radius: 60px;
+      backdrop-filter: blur(4px);
+      font-size: 0.9rem;
+    }
+
+    /* difficulty pills */
+    .diff-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 20px;
+      border-radius: 60px;
+      margin: 12px 16px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(4px);
+    }
+    .diff-btn {
+      font-weight: 800;
+      border: none;
+      background: transparent;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      transition: 0.2s;
+      cursor: pointer;
+      color: #2d3e50;
+    }
+    .diff-btn.active {
+      background: #ffb347;
+      color: #1e2a2f;
+      box-shadow: 0 4px 12px #ffb34780;
+      transform: translateY(-2px);
+    }
+
+    /* score board */
+    .score-board {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      background: #fff9ef;
+      border-radius: 60px;
+      padding: 8px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+    }
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      background: #fef3e2;
+      padding: 4px 16px;
+      border-radius: 40px;
+    }
+    .score-value {
+      background: #2d3e50;
+      color: white;
+      border-radius: 30px;
+      padding: 2px 12px;
+      min-width: 44px;
+      text-align: center;
+    }
+    .score-value.green { background: #2ecc71; }
+    .score-value.red { background: #e74c3c; }
+    .score-value.gold { background: #f39c12; color: #2d2a1e; }
+
+    /* main flex row */
+    .main-dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+      max-width: 1100px;
+      width: 100%;
+      padding: 0 20px;
+    }
+
+    /* clock card */
+    .clock-panel {
+      background: #fffdf7;
+      border-radius: 48px;
+      padding: 24px 24px 28px;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 auto;
+      width: min(380px, 90vw);
+    }
+    canvas {
+      display: block;
+      border-radius: 50%;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      background: #fffcf0;
+      box-shadow: 0 0 0 8px #f7e9c3, 0 0 0 14px #d4a373, 0 20px 30px rgba(0,0,0,0.2);
+      cursor: grab;
+      touch-action: none;
+    }
+    canvas.dragging {
+      cursor: grabbing;
+      box-shadow: 0 0 0 8px #ffe5a3, 0 0 0 18px #ffb347, 0 20px 35px black;
+    }
+    .digital-display {
+      width: 100%;
+      background: #1e2a32;
+      border-radius: 42px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 20px;
+      box-shadow: inset 0 1px 4px #00000055, 0 8px 18px rgba(0,0,0,0.1);
+    }
+    .digital-time {
+      font-family: 'Fredoka One', monospace;
+      font-size: clamp(1.8rem, 6vw, 2.5rem);
+      color: #ffe484;
+      letter-spacing: 3px;
+    }
+    .digital-ampm {
+      background: #2b3b44;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-weight: 800;
+      color: #ffde9c;
+    }
+    .drag-hint {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #6c7a7f;
+      margin-top: 8px;
+    }
+
+    /* side panel */
+    .side-station {
+      flex: 1;
+      min-width: 260px;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .card {
+      background: rgba(255, 255, 245, 0.96);
+      border-radius: 36px;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: #2c3e2f;
+    }
+    .challenge-time {
+      background: #f5efe3;
+      border-radius: 28px;
+      padding: 16px;
+      font-family: 'Fredoka One', monospace;
+      font-size: 2rem;
+      text-align: center;
+      letter-spacing: 2px;
+      color: #1f2f38;
+      margin-bottom: 10px;
+      word-break: break-word;
+    }
+    .challenge-words {
+      background: #e9e2d3;
+      border-radius: 32px;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-align: center;
+      color: #4a5b5e;
+    }
+    .feedback {
+      background: #eef2fa;
+      border-radius: 26px;
+      padding: 12px;
+      font-weight: 700;
+      text-align: center;
+      transition: 0.2s;
+      margin: 12px 0 8px;
+    }
+    .feedback.correct { background: #c8f0e0; color: #0f5c3a; }
+    .feedback.wrong { background: #ffe0db; color: #bc3f2e; }
+    .feedback.hint { background: #fff0cf; color: #b36b00; }
+    .progress-bar {
+      background: #e0daca;
+      border-radius: 30px;
+      height: 10px;
+      overflow: hidden;
+      margin: 12px 0 4px;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #3daa5c, #f7b32b);
+      width: 0%;
+      height: 100%;
+      border-radius: 30px;
+    }
+    .progress-stats {
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-align: right;
+      color: #5f6c64;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .btn {
+      flex: 1;
+      font-weight: 800;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.1s linear;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #f1efe7;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    .btn-primary { background: #ffb347; color: #2d2b20; }
+    .btn-success { background: #2ecc71; color: white; }
+    .btn-soft { background: #e6e2f0; color: #2c3e50; }
+    .btn:active { transform: scale(0.96); }
+
+    .hint-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hint-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hint-chip {
+      background: #d9e3f0;
+      border: none;
+      border-radius: 40px;
+      padding: 6px 18px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .streak-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f5b042;
+      color: #2c2b1f;
+      font-weight: 800;
+      padding: 8px 22px;
+      border-radius: 60px;
+      z-index: 200;
+      transition: 0.2s;
+      opacity: 0;
+      pointer-events: none;
+      font-family: 'Fredoka One';
+    }
+    .streak-toast.show {
+      opacity: 1;
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+      80% { transform: translateX(-50%) scale(1.1); }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+    footer.ground {
+      background: linear-gradient(180deg, #418b4b, #256f3a);
+      width: 100%;
+      height: 28px;
+      margin-top: 32px;
+      border-radius: 60px 60px 0 0;
+    }
+    @media (max-width: 700px) {
+      .diff-strip { margin: 8px 12px; }
+      .score-board { gap: 8px; padding: 6px 16px; }
+      .score-item { padding: 2px 12px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="sky">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+</div>
+<div class="title-section">
+  <h1>🕐 Clock Lab <span>Pro</span></h1>
+  <p>✨ Drag hands • Match challenge • Learn time ✨</p>
+</div>
+
+<div class="diff-strip" id="difficultyBar">
+  <button class="diff-btn active" data-level="hour">🌟 Hour Only</button>
+  <button class="diff-btn" data-level="half">🕠 Half Hour</button>
+  <button class="diff-btn" data-level="quarter">⏱ Quarter Hour</button>
+  <button class="diff-btn" data-level="five">🔢 5 Minutes</button>
+  <button class="diff-btn" data-level="exact">🎯 Any Minute</button>
+</div>
+
+<div class="score-board">
+  <div class="score-item">✅ Correct <span class="score-value green" id="correctVal">0</span></div>
+  <div class="score-item">❌ Wrong <span class="score-value red" id="wrongVal">0</span></div>
+  <div class="score-item">🔥 Streak <span class="score-value gold" id="streakVal">0</span></div>
+  <div class="score-item">🏆 Best <span class="score-value" id="bestVal">0</span></div>
+</div>
+
+<div class="main-dashboard">
+  <!-- CLOCK MODULE -->
+  <div class="clock-panel">
+    <canvas id="clockCanvas" width="400" height="400" style="width:100%; max-width:400px; height:auto; cursor:grab"></canvas>
+    <div class="digital-display">
+      <span class="digital-time" id="digitalTime">12:00</span>
+      <span class="digital-ampm" id="ampmLabel">AM</span>
+    </div>
+    <div class="drag-hint" id="dragHint">✋ Drag hour or minute hand (second hand on exact mode)</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="side-station">
+    <div class="card">
+      <h2>🎯 Current Challenge</h2>
+      <div class="challenge-time" id="challengeDisplay">⬅️ Press New Challenge</div>
+      <div class="challenge-words" id="challengeWords"></div>
+      <div class="feedback" id="feedbackMsg">Set the clock to match the target time</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-stats" id="progressStats">— no attempts —</div>
+    </div>
+
+    <div class="card">
+      <h2>🎮 Game controls</h2>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="newChallengeBtn">🎲 New Challenge</button>
+        <button class="btn btn-success" id="checkBtn">✅ Check!</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-soft" id="realTimeBtn">🕒 Real time clock</button>
+        <button class="btn btn-soft" id="toggleHintsBtn">💡 Show hints</button>
+      </div>
+    </div>
+
+    <div class="card" id="hintPanel" style="display: none;">
+      <h2>🧠 Hand guide</h2>
+      <div class="hint-section">
+        <div class="hint-buttons">
+          <button class="hint-chip" data-hand="hour">⬛ Hour hand</button>
+          <button class="hint-chip" data-hand="minute">🔵 Minute hand</button>
+          <button class="hint-chip" data-hand="second">🔴 Second hand</button>
+        </div>
+        <div id="handHintText" style="font-weight:600; font-size:0.8rem; background:#f0ede5; border-radius:28px; padding:8px;">Tap any hand to see its role</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ground"></div>
+<div id="streakToast" class="streak-toast">🔥 Streak!</div>
+
+<script>
+  (function(){
+    // ----- DOM elements -----
+    const canvas = document.getElementById('clockCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = 400, height = 400, cx = 200, cy = 200, radius = 180;
+    function updateCanvasSize(){
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.width;
+      canvas.width = width;
+      canvas.height = height;
+      cx = width/2;
+      cy = height/2;
+      radius = width * 0.44;
+      drawClock();
+    }
+    window.addEventListener('resize', updateCanvasSize);
+    
+    // ---- State ----
+    let hour24 = 10, minute = 0, second = 0;
+    let dragging = false;
+    let activeHand = null;   // 'hour', 'minute', 'second'
+    let targetHour = null, targetMinute = null, targetSecond = null;
+    let correctCount = 0, wrongCount = 0, streak = 0, bestStreak = 0;
+    let sessionTotal = 0;    // total checks (correct+wrong)
+    let difficulty = 'hour';  // hour, half, quarter, five, exact
+    let highlightHand = null;
+    let nextChallengeTimeout = null;
+    let checkingDisabled = false;   // prevent double check during cooldown
+    let hintPanelVisible = false;
+    
+    // ---- Difficulty config ----
+    const diffSettings = {
+      hour:   { minuteSnap: 0,  secondsEnabled: false, minuteFixed: true },
+      half:   { minuteSnap: 30, secondsEnabled: false, minuteFixed: false },
+      quarter:{ minuteSnap: 15, secondsEnabled: false, minuteFixed: false },
+      five:   { minuteSnap: 5,  secondsEnabled: false, minuteFixed: false },
+      exact:  { minuteSnap: 1,  secondsEnabled: true,  minuteFixed: false }
+    };
+    
+    function getCurrentSettings() {
+      return diffSettings[difficulty];
+    }
+    
+    // helper: round minute based on snap
+    function snapMinute(rawMinute) {
+      const snap = getCurrentSettings().minuteSnap;
+      if (snap === 0) return 0;
+      return Math.round(rawMinute / snap) * snap % 60;
+    }
+    
+    // update display & redraw
+    function updateDigitalAndDraw() {
+      const h12 = hour24 % 12 || 12;
+      const ampm = hour24 < 12 ? 'AM' : 'PM';
+      const mm = minute.toString().padStart(2,'0');
+      const ss = second.toString().padStart(2,'0');
+      const showSec = getCurrentSettings().secondsEnabled;
+      document.getElementById('digitalTime').innerText = showSec ? `${h12}:${mm}:${ss}` : `${h12}:${mm}`;
+      document.getElementById('ampmLabel').innerText = ampm;
+      drawClock();
+    }
+    
+    // drawing engine
+    function drawClock() {
+      if (!ctx) return;
+      ctx.clearRect(0,0,width,height);
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, 2*Math.PI);
+      ctx.fillStyle = '#FFFDF0';
+      ctx.fill();
+      // ticks
+      for(let i=0;i<60;i++){
+        const ang = (i*6 - 90) * Math.PI/180;
+        const isBig = i%5===0;
+        const inner = radius - (isBig ? 18 : 8);
+        const outer = radius - 4;
+        ctx.beginPath();
+        ctx.moveTo(cx+inner*Math.cos(ang), cy+inner*Math.sin(ang));
+        ctx.lineTo(cx+outer*Math.cos(ang), cy+outer*Math.sin(ang));
+        ctx.lineWidth = isBig ? 2.5 : 1.2;
+        ctx.strokeStyle = isBig ? '#a57248' : '#d4bb91';
+        ctx.stroke();
+      }
+      // numbers
+      ctx.font = `bold ${Math.floor(radius*0.12)}px "Fredoka One"`;
+      ctx.fillStyle = '#3a2c1c';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for(let i=1;i<=12;i++){
+        const ang = (i*30 -90)*Math.PI/180;
+        const r = radius - radius*0.22;
+        const x = cx + r*Math.cos(ang);
+        const y = cy + r*Math.sin(ang);
+        ctx.fillText(i.toString(), x, y);
+      }
+      // compute angles
+      const hourAngle = ((hour24%12)*30 + minute*0.5) % 360;
+      const minuteAngle = minute*6;
+      const secondAngle = second*6;
+      const settings = getCurrentSettings();
+      // draw hands
+      function drawHand(angle, lengthFactor, lineWidth, color, isHighlighted) {
+        const len = radius * lengthFactor;
+        const rad = (angle-90)*Math.PI/180;
+        const ex = cx + len*Math.cos(rad);
+        const ey = cy + len*Math.sin(rad);
+        if(isHighlighted){
+          ctx.beginPath();
+          ctx.moveTo(cx,cy);
+          ctx.lineTo(ex,ey);
+          ctx.lineWidth = lineWidth+6;
+          ctx.strokeStyle = '#ffb347aa';
+          ctx.shadowBlur = 8;
+          ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.lineTo(ex,ey);
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = color;
+        ctx.shadowBlur = 3;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+      drawHand(hourAngle, 0.48, 7, '#1E3A5F', highlightHand === 'hour');
+      drawHand(minuteAngle, 0.68, 4.5, '#2563EB', highlightHand === 'minute');
+      if(settings.secondsEnabled || highlightHand === 'second'){
+        drawHand(secondAngle, 0.78, 2.8, '#E03131', highlightHand === 'second');
+        const secRad = (secondAngle-90)*Math.PI/180;
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.lineTo(cx - 22*Math.cos(secRad), cy - 22*Math.sin(secRad));
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#E03131';
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(cx,cy, radius*0.055,0,2*Math.PI);
+      ctx.fillStyle = '#d4944a';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx,cy, radius*0.03,0,2*Math.PI);
+      ctx.fillStyle = '#fdebb3';
+      ctx.fill();
+    }
+    
+    // ----- time setting from drag (fixed hour crossing & minute snap)
+    function setTimeFromDrag(angleDeg, hand) {
+      const settings = getCurrentSettings();
+      if(hand === 'second'){
+        if(settings.secondsEnabled){
+          second = Math.round(angleDeg / 6) % 60;
+        }
+      } else if(hand === 'minute'){
+        let rawMin = Math.round(angleDeg / 6) % 60;
+        if(settings.minuteSnap === 0) rawMin = 0;
+        else if(settings.minuteSnap > 1) rawMin = Math.round(rawMin / settings.minuteSnap) * settings.minuteSnap % 60;
+        let delta = rawMin - minute;
+        if(Math.abs(delta) > 30) delta -= 60 * Math.sign(delta);
+        minute = rawMin;
+        // adjust hour proportionally when minute jumps across 60 boundary
+        let hourShift = 0;
+        if(delta >= 30) hourShift = 1;
+        else if(delta <= -30) hourShift = -1;
+        if(hourShift !== 0){
+          hour24 = (hour24 + hourShift + 24) % 24;
+        }
+        // enforce minute snap constraints again
+        if(settings.minuteSnap === 0) minute = 0;
+      } else if(hand === 'hour'){
+        // smooth hour adjustment based on angle difference, preserve minutes
+        let targetHourAngle = angleDeg % 360;
+        let currentHourAngle = ((hour24%12)*30 + minute*0.5) % 360;
+        let deltaAngle = targetHourAngle - currentHourAngle;
+        if(deltaAngle > 180) deltaAngle -= 360;
+        if(deltaAngle < -180) deltaAngle += 360;
+        let hourDelta = Math.round(deltaAngle / 30);
+        if(hourDelta !== 0){
+          let newHour = hour24 + hourDelta;
+          hour24 = ((newHour % 24) + 24) % 24;
+        }
+      }
+      // post conditions: if difficulty fixes minute to 0 (hour mode)
+      if(settings.minuteSnap === 0) minute = 0;
+      // second hand if not enabled -> force 0
+      if(!settings.secondsEnabled) second = 0;
+      updateDigitalAndDraw();
+    }
+    
+    // pointer events unified
+    let activePointerId = null;
+    function getAngleFromPointer(e){
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let clientX, clientY;
+      if(e.pointerId !== undefined){
+        clientX = e.clientX;
+        clientY = e.clientY;
+      } else if(e.touches){
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      const dx = (clientX - rect.left) * scaleX - cx;
+      const dy = (clientY - rect.top) * scaleY - cy;
+      let ang = (Math.atan2(dy, dx) * 180 / Math.PI + 90) % 360;
+      if(ang<0) ang+=360;
+      return ang;
+    }
+    function detectHandFromAngle(angle){
+      const hourAng = ((hour24%12)*30 + minute*0.5) % 360;
+      const minAng = minute*6;
+      const secAng = second*6;
+      const settings = getCurrentSettings();
+      let best = {hand:null, diff:999};
+      const diffH = Math.min(Math.abs(angle-hourAng), 360-Math.abs(angle-hourAng));
+      const diffM = Math.min(Math.abs(angle-minAng), 360-Math.abs(angle-minAng));
+      if(diffH < best.diff && diffH < 25) best = {hand:'hour', diff:diffH};
+      if(diffM < best.diff && diffM < 25) best = {hand:'minute', diff:diffM};
+      if(settings.secondsEnabled){
+        const diffS = Math.min(Math.abs(angle-secAng), 360-Math.abs(angle-secAng));
+        if(diffS < best.diff && diffS < 25) best = {hand:'second', diff:diffS};
+      }
+      return best.hand;
+    }
+    function onPointerDown(e){
+      e.preventDefault();
+      canvas.setPointerCapture(e.pointerId);
+      const ang = getAngleFromPointer(e);
+      const hand = detectHandFromAngle(ang);
+      if(hand){
+        dragging = true;
+        activeHand = hand;
+        activePointerId = e.pointerId;
+        canvas.classList.add('dragging');
+        document.getElementById('dragHint').innerHTML = `✋ Moving ${hand} hand`;
+      }
+    }
+    function onPointerMove(e){
+      if(!dragging || activePointerId !== e.pointerId) return;
+      e.preventDefault();
+      const ang = getAngleFromPointer(e);
+      setTimeFromDrag(ang, activeHand);
+    }
+    function onPointerUp(e){
+      if(dragging && activePointerId === e.pointerId){
+        dragging = false;
+        activeHand = null;
+        activePointerId = null;
+        canvas.classList.remove('dragging');
+        document.getElementById('dragHint').innerHTML = '✋ Drag any hand to set time';
+        updateDigitalAndDraw();
+      }
+    }
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    
+    // Scoreboard update & progress
+    function updateStatsUI(){
+      document.getElementById('correctVal').innerText = correctCount;
+      document.getElementById('wrongVal').innerText = wrongCount;
+      document.getElementById('streakVal').innerText = streak;
+      document.getElementById('bestVal').innerText = bestStreak;
+      let percent = sessionTotal === 0 ? 0 : Math.round((correctCount / sessionTotal) * 100);
+      document.getElementById('progressFill').style.width = percent+'%';
+      document.getElementById('progressStats').innerHTML = sessionTotal===0 ? '✨ No attempts yet' : `${correctCount} / ${sessionTotal} correct · ${percent}%`;
+    }
+    
+    function setFeedback(text, type){
+      const fb = document.getElementById('feedbackMsg');
+      fb.innerHTML = text;
+      fb.className = 'feedback '+(type||'');
+    }
+    
+    // challenge generator respecting difficulty
+    function generateChallenge(){
+      const settings = getCurrentSettings();
+      let hour = Math.floor(Math.random() * 12);
+      if(Math.random()>0.5) hour += 12;
+      let minuteVal = 0;
+      if(settings.minuteSnap === 0) minuteVal = 0;
+      else {
+        const steps = Math.floor(60 / settings.minuteSnap);
+        minuteVal = (Math.floor(Math.random() * steps) * settings.minuteSnap) % 60;
+      }
+      let secondVal = settings.secondsEnabled ? Math.floor(Math.random()*60) : 0;
+      targetHour = hour;
+      targetMinute = minuteVal;
+      targetSecond = secondVal;
+      const h12 = targetHour%12 || 12;
+      const ampm = targetHour<12 ? 'AM' : 'PM';
+      const mmPad = targetMinute.toString().padStart(2,'0');
+      const ssPad = targetSecond.toString().padStart(2,'0');
+      const challengeDiv = document.getElementById('challengeDisplay');
+      challengeDiv.innerText = settings.secondsEnabled ? `${h12}:${mmPad}:${ssPad} ${ampm}` : `${h12}:${mmPad} ${ampm}`;
+      document.getElementById('challengeWords').innerHTML = timeToWords(targetHour, targetMinute);
+      setFeedback('🎯 Set hands to match the target!', 'hint');
+    }
+    
+    function timeToWords(h24, m){
+      const h12 = h24%12 || 12;
+      const ampm = h24<12 ? 'AM' : 'PM';
+      const names = ['twelve','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+      if(m===0) return `${names[h12]} o'clock ${ampm}`;
+      if(m===15) return `quarter past ${names[h12]} ${ampm}`;
+      if(m===30) return `half past ${names[h12]} ${ampm}`;
+      if(m===45) return `quarter to ${names[(h12%12)+1] || names[1]} ${ampm}`;
+      return `${m} minutes past ${names[h12]} ${ampm}`;
+    }
+    
+    function checkMatch(){
+      if(checkingDisabled){
+        setFeedback('⏳ Wait, next challenge is loading...', 'hint');
+        return;
+      }
+      if(targetHour === null){
+        setFeedback('❗ Press "New Challenge" first!', 'wrong');
+        return;
+      }
+      const settings = getCurrentSettings();
+      let hourMatch = hour24 === targetHour;
+      let minMatch = minute === targetMinute;
+      let secMatch = (!settings.secondsEnabled) || (second === targetSecond);
+      if(hourMatch && minMatch && secMatch){
+        correctCount++;
+        streak++;
+        if(streak>bestStreak) bestStreak=streak;
+        sessionTotal++;
+        updateStatsUI();
+        setFeedback('🎉⭐ CORRECT! +1 point!', 'correct');
+        if(streak>=2 && streak%3===0){
+          const toast = document.getElementById('streakToast');
+          toast.innerText = `🔥 ${streak} in a row! Amazing!`;
+          toast.classList.add('show');
+          setTimeout(()=>toast.classList.remove('show'),1500);
+        }
+        checkingDisabled = true;
+        if(nextChallengeTimeout) clearTimeout(nextChallengeTimeout);
+        nextChallengeTimeout = setTimeout(()=>{
+          generateChallenge();
+          checkingDisabled = false;
+          nextChallengeTimeout = null;
+        }, 1400);
+      } else {
+        wrongCount++;
+        streak = 0;
+        sessionTotal++;
+        updateStatsUI();
+        let wrongParts = [];
+        if(!hourMatch) wrongParts.push('hour');
+        if(!minMatch) wrongParts.push('minute');
+        if(!secMatch) wrongParts.push('second');
+        setFeedback(`❌ Not yet — adjust ${wrongParts.join(' & ')} hand${wrongParts.length>1?'s':''}`, 'wrong');
+      }
+    }
+    
+    function newChallenge(){
+      if(nextChallengeTimeout){
+        clearTimeout(nextChallengeTimeout);
+        checkingDisabled = false;
+        nextChallengeTimeout = null;
+      }
+      generateChallenge();
+      setFeedback('✨ New challenge! Drag hands to match.', 'hint');
+    }
+    
+    function setRealTime(){
+      const now = new Date();
+      hour24 = now.getHours();
+      minute = now.getMinutes();
+      second = now.getSeconds();
+      const settings = getCurrentSettings();
+      if(settings.minuteSnap === 0) minute = 0;
+      else if(settings.minuteSnap > 1) minute = Math.round(minute / settings.minuteSnap) * settings.minuteSnap % 60;
+      if(!settings.secondsEnabled) second = 0;
+      updateDigitalAndDraw();
+      setFeedback('⏱ Clock set to current real time', 'hint');
+    }
+    
+    function changeDifficulty(level){
+      difficulty = level;
+      const settings = getCurrentSettings();
+      // reset clock to neutral 12:00 with proper constraints
+      hour24 = 12; minute = 0; second = 0;
+      if(settings.minuteSnap === 0) minute = 0;
+      if(!settings.secondsEnabled) second = 0;
+      targetHour = null;
+      document.getElementById('challengeDisplay').innerText = '⬅️ Press New Challenge';
+      document.getElementById('challengeWords').innerHTML = '';
+      setFeedback(`Difficulty: ${difficulty.toUpperCase()} — start new challenge`, 'hint');
+      updateDigitalAndDraw();
+      updateStatsUI();
+      if(nextChallengeTimeout) clearTimeout(nextChallengeTimeout);
+      checkingDisabled = false;
+    }
+    
+    // hints toggle and highlight
+    function toggleHints(){
+      hintPanelVisible = !hintPanelVisible;
+      document.getElementById('hintPanel').style.display = hintPanelVisible ? 'block' : 'none';
+      document.getElementById('toggleHintsBtn').innerText = hintPanelVisible ? '🙈 Hide hints' : '💡 Show hints';
+    }
+    function setHandHighlight(hand){
+      highlightHand = (highlightHand === hand) ? null : hand;
+      const texts = { hour:'⬛ Thick & short → points at hour numbers', minute:'🔵 Long hand → shows minutes (each number = 5 min)', second:'🔴 Thin hand → ticks every second (exact mode only)' };
+      document.getElementById('handHintText').innerText = texts[hand] || 'Tap a hand to highlight it on the clock';
+      drawClock();
+    }
+    
+    // event binding
+    document.querySelectorAll('.diff-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        changeDifficulty(btn.dataset.level);
+      });
+    });
+    document.getElementById('newChallengeBtn').addEventListener('click', newChallenge);
+    document.getElementById('checkBtn').addEventListener('click', checkMatch);
+    document.getElementById('realTimeBtn').addEventListener('click', setRealTime);
+    document.getElementById('toggleHintsBtn').addEventListener('click', toggleHints);
+    document.querySelectorAll('.hint-chip').forEach(chip=>{
+      chip.addEventListener('click',()=> setHandHighlight(chip.dataset.hand));
+    });
+    
+    // initialise
+    updateCanvasSize();
+    setRealTime();
+    updateStatsUI();
+    generateChallenge();
+  })();
+</script>
+</body>
+</html>
