@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Magnet Balls – Drag-to-Collect Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            background: #1e1e2f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, sans-serif;
+        }
+        .game-container {
+            background: #0a0a15;
+            border-radius: 2rem;
+            padding: 1rem;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.4);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 1rem;
+            cursor: grab;
+            box-shadow: 0 0 0 2px #3a3a55;
+        }
+        canvas:active { cursor: grabbing; }
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            color: white;
+            font-weight: bold;
+            background: #2a2a3a;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+        }
+        button {
+            background: #ff4757;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        button:hover { background: #ff6b81; }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div class="info">
+            <span>🎯 Score: <span id="scoreValue">0</span></span>
+            <span>🧲 Drag the ring → collect balls</span>
+            <button id="resetBtn">⟳ Reset</button>
+        </div>
+    </div>
+    <p style="color:#aaa; text-align:center; margin-top:1rem; font-size:0.8rem;">
+        ✔️ 50 balls • real‑time physics • smooth drag • no memory leaks
+    </p>
+</div>
+
+<script>
+    (function(){
+        // ----- CANVAS SETUP -----
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ----- GAME STATE -----
+        let balls = [];
+        const BALL_COUNT = 50;
+        let score = 0;
+        
+        // Magnet ring data
+        let magnet = { x: canvas.width/2, y: canvas.height/2, radius: 45 };
+        let isDragging = false;
+        
+        // Performance: store mouse/touch coords, update magnet once per frame
+        let dragX = magnet.x, dragY = magnet.y;
+        
+        // ----- HELPER FUNCTIONS -----
+        function random(min, max) {
+            return min + Math.random() * (max - min);
+        }
+        
+        function initBalls() {
+            balls = [];
+            for(let i = 0; i < BALL_COUNT; i++) {
+                balls.push({
+                    x: random(30, canvas.width - 30),
+                    y: random(30, canvas.height - 30),
+                    vx: random(-1.2, 1.2),
+                    vy: random(-1.2, 1.2),
+                    radius: random(8, 16),
+                    color: `hsl(${random(0, 360)}, 70%, 60%)`
+                });
+            }
+        }
+        
+        // Update physics & collision with walls and magnet
+        function updateGame() {
+            // Update magnet position from drag (applied once per frame)
+            if(isDragging) {
+                magnet.x = dragX;
+                magnet.y = dragY;
+                // Keep magnet inside canvas (with padding)
+                magnet.x = Math.min(Math.max(magnet.x, magnet.radius), canvas.width - magnet.radius);
+                magnet.y = Math.min(Math.max(magnet.y, magnet.radius), canvas.height - magnet.radius);
+            }
+            
+            // Move balls and check collection
+            for(let i = 0; i < balls.length; i++) {
+                const b = balls[i];
+                // Move
+                b.x += b.vx;
+                b.y += b.vy;
+                
+                // Wall bounce (with edge resistance to avoid sticking)
+                if(b.x - b.radius < 0) { b.x = b.radius; b.vx = -b.vx; }
+                if(b.x + b.radius > canvas.width) { b.x = canvas.width - b.radius; b.vx = -b.vx; }
+                if(b.y - b.radius < 0) { b.y = b.radius; b.vy = -b.vy; }
+                if(b.y + b.radius > canvas.height) { b.y = canvas.height - b.radius; b.vy = -b.vy; }
+                
+                // COLLECTION: if ball center inside magnet radius
+                const dx = b.x - magnet.x;
+                const dy = b.y - magnet.y;
+                const dist = Math.hypot(dx, dy);
+                if(dist < magnet.radius) {
+                    // Remove ball and increase score
+                    balls.splice(i,1);
+                    score++;
+                    i--; // adjust index after removal
+                    // Spawn a new ball to keep count challenging
+                    balls.push({
+                        x: random(30, canvas.width - 30),
+                        y: random(30, canvas.height - 30),
+                        vx: random(-1.5, 1.5),
+                        vy: random(-1.5, 1.5),
+                        radius: random(8, 16),
+                        color: `hsl(${random(0, 360)}, 70%, 60%)`
+                    });
+                }
+            }
+            
+            // Update score display
+            document.getElementById('scoreValue').innerText = score;
+        }
+        
+        // ----- DRAW EVERYTHING (canvas only, no DOM reflow)-----
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background grid (light, for aesthetics)
+            ctx.strokeStyle = "#2a2a3a";
+            ctx.lineWidth = 0.5;
+            for(let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Draw balls with glow effect (just for fun)
+            for(const b of balls) {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+                ctx.fillStyle = b.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = "rgba(0,0,0,0.5)";
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // inner highlight
+                ctx.beginPath();
+                ctx.arc(b.x-2, b.y-2, b.radius*0.2, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
+                ctx.fill();
+            }
+            
+            // Draw magnetic ring
+            ctx.beginPath();
+            ctx.arc(magnet.x, magnet.y, magnet.radius, 0, Math.PI*2);
+            ctx.strokeStyle = "#ffdd77";
+            ctx.lineWidth = 5;
+            ctx.setLineDash([8, 12]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.arc(magnet.x, magnet.y, magnet.radius-5, 0, Math.PI*2);
+            ctx.strokeStyle = "#ffaa33";
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            // center dot
+            ctx.beginPath();
+            ctx.arc(magnet.x, magnet.y, 5, 0, Math.PI*2);
+            ctx.fillStyle = "#ffaa33";
+            ctx.fill();
+            
+            // Draw instruction text if not dragging
+            if(!isDragging) {
+                ctx.font = "bold 16px system-ui";
+                ctx.fillStyle = "#ddd";
+                ctx.shadowBlur = 0;
+                ctx.fillText("⬅️ Drag this ring to collect balls", magnet.x+20, magnet.y-10);
+            }
+        }
+        
+        // ----- GAME LOOP (requestAnimationFrame) -----
+        let animationId;
+        function gameLoop() {
+            updateGame();
+            draw();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // ----- DRAG HANDLING (canvas‑based, memory safe) -----
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            if(e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            canvasX = Math.min(Math.max(canvasX, 0), canvas.width);
+            canvasY = Math.min(Math.max(canvasY, 0), canvas.height);
+            return { x: canvasX, y: canvasY };
+        }
+        
+        function onDragStart(e) {
+            e.preventDefault();
+            isDragging = true;
+            const { x, y } = getCanvasCoords(e);
+            dragX = x;
+            dragY = y;
+            magnet.x = x;
+            magnet.y = y;
+            canvas.style.cursor = 'grabbing';
+        }
+        
+        function onDragMove(e) {
+            if(!isDragging) return;
+            e.preventDefault();
+            const { x, y } = getCanvasCoords(e);
+            dragX = x;
+            dragY = y;
+        }
+        
+        function onDragEnd(e) {
+            if(!isDragging) return;
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        }
+        
+        // Register events (mouse + touch) – cleanup on page unload is automatic, but we'll store handlers for potential reset
+        function attachEvents() {
+            canvas.addEventListener('mousedown', onDragStart);
+            window.addEventListener('mousemove', onDragMove);
+            window.addEventListener('mouseup', onDragEnd);
+            
+            canvas.addEventListener('touchstart', onDragStart, { passive: false });
+            window.addEventListener('touchmove', onDragMove, { passive: false });
+            window.addEventListener('touchend', onDragEnd);
+        }
+        
+        function resetGame() {
+            score = 0;
+            initBalls();
+            document.getElementById('scoreValue').innerText = "0";
+            // Reset magnet to center, no drag active
+            isDragging = false;
+            magnet.x = canvas.width/2;
+            magnet.y = canvas.height/2;
+            dragX = magnet.x;
+            dragY = magnet.y;
+            canvas.style.cursor = 'grab';
+        }
+        
+        // ----- BOOTSTRAP -----
+        function init() {
+            initBalls();
+            attachEvents();
+            gameLoop();
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            canvas.style.cursor = 'grab';
+        }
+        
+        init();
+    })();
+</script>
+</body>
+</html>
