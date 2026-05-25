@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Slingshot Showdown - Angry Birds style</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: linear-gradient(145deg, #1a6d2f, #0e3a1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-wrapper {
+            background: #2b2b1f;
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 24px;
+            box-shadow: 0 0 0 4px #f3c26b, 0 0 0 8px #9b6a3c;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            background: #1e1b12;
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: #ffefc0;
+            font-weight: bold;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .score-box {
+            background: #00000066;
+            padding: 5px 18px;
+            border-radius: 40px;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+        }
+        button {
+            background: #e0a82b;
+            border: none;
+            color: #2a2412;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.1s linear;
+            font-family: inherit;
+        }
+        button:hover {
+            background: #ffc857;
+            transform: scale(0.97);
+        }
+        .status {
+            background: #00000066;
+            padding: 5px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 600px) {
+            .info-panel { font-size: 0.8rem; }
+            .score-box { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-wrapper">
+        <canvas id="gameCanvas" width="900" height="500"></canvas>
+        <div class="info-panel">
+            <div class="score-box">🎯 SCORE: <span id="scoreDisplay">0</span></div>
+            <div class="status" id="statusMsg">⚡ DRAG BACK TO AIM</div>
+            <button id="resetGameBtn">🔄 NEW FLING</button>
+        </div>
+    </div>
+    <p style="color:#d9ffc4; text-align:center; margin-top:12px; font-size:0.8rem;">
+        👆 Drag from the slingshot backward → release to fire! Destroy the wooden blocks.
+    </p>
+</div>
+
+<script>
+    (function(){
+        // ----- CANVAS -----
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ----- FIXED DIMENSIONS -----
+        const W = 900, H = 500;
+        canvas.width = W; canvas.height = H;
+        
+        // ----- SLINGSHOT POSITION (fixed anchor) -----
+        const slingX = 150, slingY = 420;
+        
+        // ----- GAME STATE -----
+        let blocks = [];
+        let bird = {
+            exists: false,      // true = flying / active
+            x: 0, y: 0,
+            vx: 0, vy: 0,
+            radius: 14
+        };
+        let score = 0;
+        let canShoot = true;    // true when no bird flying and ready to aim
+        let dragActive = false;
+        let dragEndX = slingX, dragEndY = slingY;   // current drag vector endpoint
+        let aimVector = { dx: 0, dy: 0 };           // from sling to drag point
+        
+        // ----- PHYSICS CONSTANTS -----
+        const GRAVITY = 0.35;
+        const GROUND_Y = H - 35;      // ground line
+        const BOUNCE_DAMP = 0.65;
+        const AIR_DRAG = 0.99;
+        
+        // ----- UTILITIES -----
+        function updateScoreUI() {
+            document.getElementById('scoreDisplay').innerText = score;
+        }
+        
+        // ----- BLOCKS (destructible targets) -----
+        function initBlocks() {
+            blocks = [];
+            // create a small castle of blocks
+            const startX = 650, startY = GROUND_Y - 30;
+            // row 1 (bottom)
+            for(let i = 0; i < 4; i++) {
+                blocks.push({ x: startX + i*42, y: startY, w: 38, h: 28, hp: 1 });
+            }
+            // row 2
+            for(let i = 0; i < 3; i++) {
+                blocks.push({ x: startX + 21 + i*42, y: startY - 28, w: 38, h: 28, hp: 1 });
+            }
+            // row 3 (top)
+            for(let i = 0; i < 2; i++) {
+                blocks.push({ x: startX + 42 + i*42, y: startY - 56, w: 38, h: 28, hp: 1 });
+            }
+            // center pillar
+            blocks.push({ x: startX + 63, y: startY - 84, w: 38, h: 28, hp: 1 });
+        }
+        
+        // collision: circle (bird) vs AABB blocks
+        function handleBirdBlockCollision() {
+            for(let i = 0; i < blocks.length; i++) {
+                const b = blocks[i];
+                // closest point on block to bird center
+                const closestX = Math.max(b.x, Math.min(bird.x, b.x + b.w));
+                const closestY = Math.max(b.y, Math.min(bird.y, b.y + b.h));
+                const dx = bird.x - closestX;
+                const dy = bird.y - closestY;
+                const dist = Math.hypot(dx, dy);
+                if(dist < bird.radius) {
+                    // collision! destroy block
+                    blocks.splice(i,1);
+                    score++;
+                    updateScoreUI();
+                    // add a little random bounce to bird (makes it juicy)
+                    bird.vx += (Math.random() - 0.5) * 2;
+                    bird.vy -= 2;
+                    // only one block per frame to avoid multiple deletions
+                    break;
+                }
+            }
+        }
+        
+        // update physics & collisions for bird
+        function updateBird() {
+            if(!bird.exists) return;
+            
+            // apply gravity & air drag
+            bird.vx *= AIR_DRAG;
+            bird.vy += GRAVITY;
+            bird.x += bird.vx;
+            bird.y += bird.vy;
+            
+            // ground collision
+            if(bird.y + bird.radius >= GROUND_Y) {
+                bird.y = GROUND_Y - bird.radius;
+                bird.vy = -bird.vy * BOUNCE_DAMP;
+                bird.vx *= 0.98;
+                // if very slow, stop bouncing
+                if(Math.abs(bird.vy) < 1 && bird.vy >= 0) {
+                    bird.vy = 0;
+                    bird.y = GROUND_Y - bird.radius;
+                }
+            }
+            
+            // left/right bounds (canvas edges)
+            if(bird.x - bird.radius <= 0) {
+                bird.x = bird.radius;
+                bird.vx = -bird.vx * 0.7;
+            }
+            if(bird.x + bird.radius >= W) {
+                bird.x = W - bird.radius;
+                bird.vx = -bird.vx * 0.7;
+            }
+            
+            // collision with blocks
+            handleBirdBlockCollision();
+            
+            // stop condition: if bird is nearly stationary on ground OR out of left side (behind sling)
+            const isStationaryOnGround = (bird.y + bird.radius >= GROUND_Y - 1) && Math.abs(bird.vy) < 0.5 && Math.abs(bird.vx) < 0.5;
+            const isOutLeft = bird.x + bird.radius < 30;
+            if(isStationaryOnGround || isOutLeft || bird.x > W + 100) {
+                bird.exists = false;
+                canShoot = true;
+                document.getElementById('statusMsg').innerText = '✨ DRAG BACK TO SHOOT AGAIN';
+            } else {
+                document.getElementById('statusMsg').innerText = '🐦 BIRD IN FLIGHT!';
+            }
+        }
+        
+        // ------ SLINGSHOT DRAG LOGIC (smooth & no memory leak) -----
+        function getMouseCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            if(e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            canvasX = Math.min(Math.max(canvasX, 0), W);
+            canvasY = Math.min(Math.max(canvasY, 0), H);
+            return { x: canvasX, y: canvasY };
+        }
+        
+        function onDragStart(e) {
+            e.preventDefault();
+            if(!canShoot) return;
+            dragActive = true;
+            const { x, y } = getMouseCoords(e);
+            dragEndX = x;
+            dragEndY = y;
+            canvas.style.cursor = 'grabbing';
+        }
+        
+        function onDragMove(e) {
+            if(!dragActive || !canShoot) return;
+            e.preventDefault();
+            const { x, y } = getMouseCoords(e);
+            // limit drag distance: max pull length 120px
+            let dx = x - slingX;
+            let dy = y - slingY;
+            const maxPull = 110;
+            let dist = Math.hypot(dx, dy);
+            if(dist > maxPull) {
+                dx = dx * (maxPull / dist);
+                dy = dy * (maxPull / dist);
+                dragEndX = slingX + dx;
+                dragEndY = slingY + dy;
+            } else {
+                dragEndX = x;
+                dragEndY = y;
+            }
+            // aim vector (from sling to drag point)
+            aimVector.dx = dragEndX - slingX;
+            aimVector.dy = dragEndY - slingY;
+        }
+        
+        function onDragEnd(e) {
+            if(!dragActive || !canShoot) {
+                dragActive = false;
+                return;
+            }
+            dragActive = false;
+            canvas.style.cursor = 'grab';
+            
+            // compute release velocity (reverse direction, scaled by pull length)
+            let pullX = slingX - dragEndX;
+            let pullY = slingY - dragEndY;
+            let power = Math.min(Math.hypot(pullX, pullY), 110) / 110; // 0..1
+            let strength = 12.5;   // base speed multiplier
+            let vx = pullX * strength * power;
+            let vy = pullY * strength * power;
+            
+            if(Math.hypot(vx, vy) > 2.0) {
+                // launch bird
+                bird.exists = true;
+                bird.x = slingX;
+                bird.y = slingY;
+                bird.vx = vx;
+                bird.vy = vy;
+                canShoot = false;
+                document.getElementById('statusMsg').innerText = '💥 FLING!';
+                // reset aim preview
+                aimVector.dx = 0; aimVector.dy = 0;
+            } else {
+                // too soft – do nothing
+                document.getElementById('statusMsg').innerText = '👎 PULL FURTHER!';
+                setTimeout(()=>{
+                    if(canShoot) document.getElementById('statusMsg').innerText = '⚡ DRAG BACK TO AIM';
+                }, 800);
+            }
+        }
+        
+        // ----- DRAW EVERYTHING (canvas) -----
+        function drawGround() {
+            ctx.fillStyle = '#7b3f1a';
+            ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+            ctx.fillStyle = '#c97e3a';
+            for(let i=0;i<W+20;i+=25){
+                ctx.fillRect(i, GROUND_Y-4, 12, 6);
+            }
+            // grass
+            ctx.fillStyle = '#5f8b3e';
+            ctx.fillRect(0, GROUND_Y-6, W, 6);
+        }
+        
+        function drawSlingshot() {
+            // wooden base
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#a55d2a';
+            ctx.beginPath();
+            ctx.rect(slingX-18, slingY-8, 36, 60);
+            ctx.fill();
+            ctx.fillStyle = '#d6893b';
+            ctx.beginPath();
+            ctx.ellipse(slingX, slingY-5, 12, 18, 0, 0, Math.PI*2);
+            ctx.fill();
+            // elastic band (Y shape)
+            ctx.beginPath();
+            ctx.moveTo(slingX-20, slingY-15);
+            ctx.lineTo(slingX, slingY);
+            ctx.lineTo(slingX+20, slingY-15);
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#5a3a1a';
+            ctx.stroke();
+            // leather pocket
+            ctx.beginPath();
+            ctx.arc(slingX, slingY, 10, 0, Math.PI*2);
+            ctx.fillStyle = '#8b5a2b';
+            ctx.fill();
+        }
+        
+        function drawBird() {
+            if(bird.exists) {
+                ctx.beginPath();
+                ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI*2);
+                ctx.fillStyle = '#e0512c';
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(bird.x-3, bird.y-3, 3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(bird.x-4, bird.y-4, 1.2, 0, Math.PI*2);
+                ctx.fill();
+            } else if(canShoot && dragActive) {
+                // show ghost bird while aiming
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.arc(dragEndX, dragEndY, 12, 0, Math.PI*2);
+                ctx.fillStyle = '#ff8c5a';
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            } else if(canShoot && !dragActive){
+                // bird resting on slingshot
+                ctx.beginPath();
+                ctx.arc(slingX, slingY, 14, 0, Math.PI*2);
+                ctx.fillStyle = '#e0512c';
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(slingX-4, slingY-4, 3, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+        
+        function drawBlocks() {
+            for(let b of blocks) {
+                ctx.fillStyle = '#bc9a6c';
+                ctx.shadowBlur = 3;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                ctx.fillStyle = '#9c7a4a';
+                ctx.fillRect(b.x+4, b.y+4, b.w-8, b.h-8);
+                ctx.fillStyle = '#6b4e2a';
+                ctx.fillRect(b.x+2, b.y+2, b.w-4, 6);
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawTrajectory() {
+            if(!canShoot || !dragActive) return;
+            // preview parabola
+            let pullX = slingX - dragEndX;
+            let pullY = slingY - dragEndY;
+            let power = Math.min(Math.hypot(pullX, pullY), 110) / 110;
+            let vx = pullX * 12.5 * power;
+            let vy = pullY * 12.5 * power;
+            let px = slingX, py = slingY;
+            let pvx = vx, pvy = vy;
+            ctx.beginPath();
+            ctx.moveTo(px, py);
+            ctx.setLineDash([6,8]);
+            ctx.strokeStyle = '#ffef99';
+            ctx.lineWidth = 2;
+            for(let step=0; step<35; step++) {
+                pvx *= AIR_DRAG;
+                pvy += GRAVITY;
+                px += pvx;
+                py += pvy;
+                if(py >= GROUND_Y) break;
+                ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        function drawUItext() {
+            ctx.font = "bold 18m 'Segoe UI'";
+            ctx.fillStyle = '#fff7cf';
+            ctx.shadowBlur = 0;
+            ctx.fillText("🎯 Drag BACK →", 30, 70);
+        }
+        
+        // ----- RENDER LOOP -----
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            // sky gradient
+            const grad = ctx.createLinearGradient(0,0,0,GROUND_Y);
+            grad.addColorStop(0, '#cbe4fe');
+            grad.addColorStop(1, '#e1f0c4');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,W,GROUND_Y);
+            
+            drawGround();
+            drawBlocks();
+            drawSlingshot();
+            drawBird();
+            drawTrajectory();
+            drawUItext();
+        }
+        
+        // ----- GAME LOOP (update & draw)-----
+        function update() {
+            updateBird();
+            draw();
+            requestAnimationFrame(update);
+        }
+        
+        // ----- RESET FUNCTION -----
+        function resetGame() {
+            score = 0;
+            updateScoreUI();
+            initBlocks();
+            bird.exists = false;
+            canShoot = true;
+            dragActive = false;
+            aimVector = { dx:0, dy:0 };
+            document.getElementById('statusMsg').innerText = '⚡ DRAG BACK TO AIM';
+            canvas.style.cursor = 'grab';
+        }
+        
+        // ----- EVENT LISTENERS (clean)-----
+        function attachEvents() {
+            canvas.addEventListener('mousedown', onDragStart);
+            window.addEventListener('mousemove', onDragMove);
+            window.addEventListener('mouseup', onDragEnd);
+            canvas.addEventListener('touchstart', onDragStart, { passive: false });
+            window.addEventListener('touchmove', onDragMove, { passive: false });
+            window.addEventListener('touchend', onDragEnd);
+        }
+        
+        // ----- BOOTSTRAP-----
+        function init() {
+            initBlocks();
+            attachEvents();
+            update();
+            document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+            canvas.style.cursor = 'grab';
+            canShoot = true;
+            bird.exists = false;
+        }
+        
+        init();
+    })();
+</script>
+</body>
+</html>
