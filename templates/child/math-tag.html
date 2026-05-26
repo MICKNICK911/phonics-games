@@ -402,7 +402,7 @@
 </head>
 <body>
 <div class="game-layout">
-    <!-- Player 1 -->
+    <!-- Player 1 (Blue) -->
     <div class="player-panel p1" id="p1Panel">
         <div class="player-name">🔵 PLAYER 1</div>
         <div class="round-badge" id="p1RoundBadge">Round 1 / 10</div>
@@ -420,7 +420,7 @@
         </div>
     </div>
 
-    <!-- Center column -->
+    <!-- Center column (Tug of War + Settings) -->
     <div class="center-column">
         <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
         <div class="settings-panel" id="settingsPanel">
@@ -451,7 +451,7 @@
         </div>
     </div>
 
-    <!-- Player 2 -->
+    <!-- Player 2 (Red) -->
     <div class="player-panel p2" id="p2Panel">
         <div class="player-name">🔴 PLAYER 2</div>
         <div class="round-badge" id="p2RoundBadge">Round 1 / 10</div>
@@ -470,6 +470,7 @@
     </div>
 </div>
 
+<!-- Result overlay -->
 <div class="overlay" id="overlay">
     <div class="result-card">
         <div class="result-icon" id="resultIcon">🏆</div>
@@ -532,7 +533,7 @@
         let TOTAL_ROUNDS = 10;
         let DIFFICULTY_MAX = 9;   // medium
         let gameActive = true;
-        let barPosition = 50;
+        let barPosition = 50;     // 50 = neutral
 
         function createPlayer() {
             return {
@@ -549,6 +550,7 @@
         let p1 = createPlayer();
         let p2 = createPlayer();
 
+        // ─────────── Helper functions ───────────
         function rand(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
@@ -605,25 +607,29 @@
             updateAllBarUI();
         }
 
-        function setControlsDisabled(player, disabled) {
-            const pad = player === p1 ? p1Pad : p2Pad;
-            const undo = player === p1 ? p1Undo : p2Undo;
-            const check = player === p1 ? p1Check : p2Check;
-            const answerEl = player === p1 ? p1Answer : p2Answer;
+        // Central button state manager – avoids inconsistent enables/disables
+        function refreshButtons(player) {
+            const isP1 = player === p1;
+            const pad = isP1 ? p1Pad : p2Pad;
+            const undo = isP1 ? p1Undo : p2Undo;
+            const check = isP1 ? p1Check : p2Check;
 
-            pad.querySelectorAll('button').forEach(b => b.disabled = disabled);
-            undo.disabled = disabled;
-            check.disabled = disabled || (player.answer === '' && !disabled);
+            const completelyDisabled = !gameActive || player.locked || player.round > TOTAL_ROUNDS;
+            const checkDisabled = completelyDisabled || player.answer === '';
+
+            pad.querySelectorAll('button').forEach(b => b.disabled = completelyDisabled);
+            undo.disabled = completelyDisabled;
+            check.disabled = checkDisabled;
         }
 
         function lockPlayer(player) {
             player.locked = true;
-            setControlsDisabled(player, true);
+            refreshButtons(player);
         }
 
         function unlockPlayer(player) {
             player.locked = false;
-            setControlsDisabled(player, false);
+            refreshButtons(player);
         }
 
         function clearAllAnimations() {
@@ -664,14 +670,11 @@
             }
 
             setTimeout(() => {
-                if (isCorrect) {
-                    ansBox.classList.remove('feedback-flash');
-                    panel.style.boxShadow = '';
-                } else {
-                    ansBox.classList.remove('wrong-flash');
-                }
+                // Clean up feedback classes
+                ansBox.classList.remove('feedback-flash', 'wrong-flash');
+                panel.style.boxShadow = '';
 
-                // Scoring and bar shift
+                // Update score & bar
                 if (isCorrect) {
                     player.score++;
                     if (playerId === 'p1') shiftBar(true);
@@ -682,15 +685,15 @@
                 }
                 updateAllBarUI();
 
-                // Progression logic
+                // Round progression
                 if (isCorrect) {
                     if (player.round === TOTAL_ROUNDS) {
-                        player.round = TOTAL_ROUNDS + 1;   // finished
+                        player.round = TOTAL_ROUNDS + 1;   // finished all rounds
                         player.answer = '';
                         updateAnswerDisplay(player, ansBox);
                         updateRoundBadge(player, badgeEl);
 
-                        // End game if any player completed all rounds
+                        // End game if any player has completed all rounds
                         if (p1.round > TOTAL_ROUNDS || p2.round > TOTAL_ROUNDS) {
                             endGame();
                         } else {
@@ -706,7 +709,7 @@
                         unlockPlayer(player);
                     }
                 } else {
-                    // Wrong answer: stay on same round, clear input
+                    // Wrong answer – stay on same round, clear answer
                     player.answer = '';
                     updateAnswerDisplay(player, ansBox);
                     unlockPlayer(player);
@@ -719,14 +722,14 @@
             if (player.answer.length >= 3) return;
             player.answer += digit;
             updateAnswerDisplay(player, answerEl);
-            const checkBtn = player === p1 ? p1Check : p2Check;
-            checkBtn.disabled = false;
+            refreshButtons(player);   // ensure Check button becomes enabled
         }
 
         function undoAnswer(player, answerEl) {
             if (!gameActive || player.locked || player.round > TOTAL_ROUNDS) return;
             player.answer = '';
             updateAnswerDisplay(player, answerEl);
+            refreshButtons(player);   // now Check becomes disabled
         }
 
         // ─────────── Game end & reset ───────────
@@ -740,7 +743,7 @@
             p1.locked = true;
             p2.locked = true;
 
-            // Show results
+            // Determine winner
             if (p1.score > p2.score) {
                 resultIcon.textContent = '🏆';
                 resultTitle.textContent = '🔵 Player 1 Wins!';
@@ -760,17 +763,14 @@
         }
 
         function fullReset() {
-            // Reset global state
             gameActive = true;
             barPosition = 50;
 
-            // Reset players
             p1 = createPlayer();
             p2 = createPlayer();
             generateQuestion(p1);
             generateQuestion(p2);
 
-            // Update UI
             renderQuestion(p1, p1Question);
             renderQuestion(p2, p2Question);
             updateAnswerDisplay(p1, p1Answer);
@@ -779,19 +779,17 @@
             updateRoundBadge(p2, p2RoundBadge);
             updateAllBarUI();
 
-            // Clear leftover animations
             clearAllAnimations();
+            // Ensure placeholder class is set
             p1Answer.classList.add('placeholder');
             p2Answer.classList.add('placeholder');
 
-            // Enable controls (players start unlocked)
             unlockPlayer(p1);
             unlockPlayer(p2);
 
-            // Hide overlay
             overlay.classList.remove('active');
 
-            // Sync settings inputs to current game values
+            // Sync settings UI to current values
             roundsInput.value = TOTAL_ROUNDS;
             if (DIFFICULTY_MAX === 5) difficultySelect.value = 'easy';
             else if (DIFFICULTY_MAX === 12) difficultySelect.value = 'hard';
@@ -799,18 +797,21 @@
         }
 
         function applySettingsAndReset() {
-            // Read and validate settings
+            // Read & validate rounds
             let newRounds = parseInt(roundsInput.value, 10);
             if (isNaN(newRounds) || newRounds < 1) newRounds = 1;
             if (newRounds > 20) newRounds = 20;
             TOTAL_ROUNDS = newRounds;
             roundsInput.value = TOTAL_ROUNDS;
 
+            // Set difficulty
             const diff = difficultySelect.value;
             if (diff === 'easy') DIFFICULTY_MAX = 5;
             else if (diff === 'hard') DIFFICULTY_MAX = 12;
             else DIFFICULTY_MAX = 9;
 
+            // Close settings panel after applying
+            settingsPanel.classList.remove('open');
             fullReset();
         }
 
@@ -857,4 +858,4 @@
     })();
 </script>
 </body>
-</html>
+</html>s
