@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Collect Stars – No Tunneling, Smooth Jump</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: linear-gradient(145deg, #0a2f3a, #05161f);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background: #1b3b4b;
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            box-shadow: 0 0 0 4px #f9d56e, 0 0 0 8px #3b2a1f;
+            cursor: none;
+        }
+        .info {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 18px;
+            background: #071e26;
+            padding: 12px 24px;
+            border-radius: 48px;
+            color: #f7ecc7;
+            font-weight: bold;
+            font-size: 1.4rem;
+            gap: 20px;
+        }
+        .score-board {
+            background: #00000077;
+            padding: 6px 20px;
+            border-radius: 40px;
+            letter-spacing: 2px;
+        }
+        button {
+            background: #f3b33d;
+            border: none;
+            color: #1e2a2f;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 6px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.08s linear;
+            font-family: monospace;
+        }
+        button:hover {
+            background: #ffcf6e;
+            transform: scale(0.96);
+        }
+        .controls-tip {
+            font-size: 0.75rem;
+            background: #00000066;
+            padding: 4px 14px;
+            border-radius: 26px;
+        }
+        @media (max-width: 700px) {
+            .info { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="900" height="500"></canvas>
+        <div class="info">
+            <div class="score-board">⭐ COLLECTED: <span id="starCount">0</span></div>
+            <div class="controls-tip">◀  ▶  |  ▲ JUMP (hold to jump repeatedly on ground)</div>
+            <button id="resetGameBtn">✨ RESTART</button>
+        </div>
+    </div>
+    <p style="color:#c7e9ff; text-align:center; margin-top:12px; font-size:0.8rem;">
+        🎮 Move with LEFT / RIGHT. Hold UP to keep jumping when on ground. No star tunneling!
+    </p>
+</div>
+
+<script>
+    (function(){
+        // ---------- CANVAS ----------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 900;
+        canvas.height = 500;
+        const W = 900, H = 500;
+        
+        // ---------- GAME STATE ----------
+        let stars = [];
+        let platforms = [];
+        let player = {
+            x: 100, y: 0,
+            vx: 0, vy: 0,
+            width: 28,
+            height: 28,
+            onGround: false,
+            jumpCooldown: 0   // to prevent micro-jitter, but not needed with new logic
+        };
+        let score = 0;
+        
+        // Keyboard input
+        const keys = {
+            ArrowLeft: false,
+            ArrowRight: false,
+            ArrowUp: false
+        };
+        
+        // Physics constants
+        const GRAVITY = 0.8;
+        const JUMP_POWER = -10.5;
+        const MOVE_ACC = 0.7;
+        const MAX_SPEED = 6.5;
+        const GROUND_FRICTION = 0.92;
+        const AIR_CONTROL = 0.96;
+        
+        // ---------- BUILD LEVEL ----------
+        function buildLevel() {
+            platforms = [];
+            // ground
+            platforms.push({ x: 0, y: H - 40, w: W, h: 40 });
+            // floating platforms
+            platforms.push({ x: 120, y: H - 110, w: 100, h: 20 });
+            platforms.push({ x: 380, y: H - 180, w: 100, h: 20 });
+            platforms.push({ x: 650, y: H - 130, w: 100, h: 20 });
+            platforms.push({ x: 780, y: H - 70, w: 70, h: 20 });
+            
+            stars = [];
+            function addStar(x, y) { stars.push({ x, y, radius: 10, collected: false }); }
+            addStar(200, H - 55);
+            addStar(400, H - 55);
+            addStar(700, H - 55);
+            addStar(820, H - 55);
+            addStar(150, H - 125);
+            addStar(190, H - 125);
+            addStar(410, H - 195);
+            addStar(450, H - 195);
+            addStar(690, H - 145);
+            addStar(730, H - 145);
+            addStar(430, H - 250);
+            addStar(280, H - 180);
+        }
+        
+        // ---------- COLLISION UTILITIES ----------
+        function aabbVsCircle(rect, circle) {
+            const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
+            const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
+            const dx = circle.x - closestX;
+            const dy = circle.y - closestY;
+            const dist2 = dx*dx + dy*dy;
+            return dist2 < circle.radius * circle.radius;
+        }
+        
+        // CCD: check collision between player's previous and new position for stars
+        function checkStarCollisionWithMovement(oldPlayer, newPlayer, star) {
+            // raycast from player's center previous to new
+            const oldCenter = { x: oldPlayer.x + oldPlayer.width/2, y: oldPlayer.y + oldPlayer.height/2 };
+            const newCenter = { x: newPlayer.x + newPlayer.width/2, y: newPlayer.y + newPlayer.height/2 };
+            const dx = newCenter.x - oldCenter.x;
+            const dy = newCenter.y - oldCenter.y;
+            const steps = Math.ceil(Math.hypot(dx, dy) / 4); // sample every 4px
+            if (steps === 0) return aabbVsCircle(newPlayer, star);
+            for (let t = 0; t <= steps; t++) {
+                const interp = t / steps;
+                const testCenter = {
+                    x: oldCenter.x + dx * interp,
+                    y: oldCenter.y + dy * interp
+                };
+                const testRect = {
+                    x: testCenter.x - newPlayer.width/2,
+                    y: testCenter.y - newPlayer.height/2,
+                    w: newPlayer.width,
+                    h: newPlayer.height
+                };
+                if (aabbVsCircle(testRect, star)) return true;
+            }
+            return false;
+        }
+        
+        // Platform collision (standard, but with CCD for fast fall? not necessary due to moderate speeds)
+        function collidesPlayerPlat(p, plat) {
+            return (p.x < plat.x + plat.w &&
+                    p.x + p.width > plat.x &&
+                    p.y < plat.y + plat.h &&
+                    p.y + p.height > plat.y);
+        }
+        
+        function handlePlatformCollisions() {
+            player.onGround = false;
+            // horizontal move
+            player.x += player.vx;
+            for (let plat of platforms) {
+                if (collidesPlayerPlat(player, plat)) {
+                    if (player.vx > 0) player.x = plat.x - player.width;
+                    else if (player.vx < 0) player.x = plat.x + plat.w;
+                }
+            }
+            // vertical move
+            player.y += player.vy;
+            for (let plat of platforms) {
+                if (collidesPlayerPlat(player, plat)) {
+                    if (player.vy >= 0) {
+                        player.y = plat.y - player.height;
+                        player.vy = 0;
+                        player.onGround = true;
+                    } else if (player.vy < 0) {
+                        player.y = plat.y + plat.h;
+                        player.vy = 0;
+                    }
+                }
+            }
+            // world boundaries
+            if (player.y + player.height > H) {
+                player.y = H - player.height;
+                player.vy = 0;
+                player.onGround = true;
+            }
+            if (player.y < 0) { player.y = 0; if (player.vy < 0) player.vy = 0; }
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > W) player.x = W - player.width;
+        }
+        
+        // ---------- UPDATE (with CCD for stars) ----------
+        let oldPlayerState = { x: 0, y: 0, vx: 0, vy: 0, width: 28, height: 28 };
+        
+        function updateGame() {
+            // store previous position for CCD
+            const oldPlayerCopy = { 
+                x: player.x, y: player.y, 
+                width: player.width, height: player.height 
+            };
+            
+            // input
+            if (keys.ArrowLeft) {
+                player.vx -= MOVE_ACC;
+                if (player.vx < -MAX_SPEED) player.vx = -MAX_SPEED;
+            }
+            if (keys.ArrowRight) {
+                player.vx += MOVE_ACC;
+                if (player.vx > MAX_SPEED) player.vx = MAX_SPEED;
+            }
+            if (player.onGround) player.vx *= GROUND_FRICTION;
+            else player.vx *= AIR_CONTROL;
+            if (Math.abs(player.vx) < 0.2) player.vx = 0;
+            
+            // jump handling: allow holding up to jump as soon as on ground (no need for cooldown)
+            if (keys.ArrowUp && player.onGround) {
+                player.vy = JUMP_POWER;
+                player.onGround = false;
+                // Note: we do NOT reset keys.ArrowUp here, so holding gives repeated jumps each frame while on ground? 
+                // But we set onGround false, so next frame it won't jump until touches ground again. That's fine.
+                // To prevent micro-jumps, we add a small flag: already jumped this air time.
+                // Actually, simpler: just set a tiny cooldown frame to avoid double jump in same ground touch.
+                // But if user holds up, they'll jump exactly once until landing. That's desired.
+            }
+            
+            // gravity
+            if (!player.onGround) {
+                player.vy += GRAVITY;
+            }
+            
+            // store previous for CCD
+            const prevPlayer = { ...oldPlayerCopy };
+            // apply movement and collisions
+            handlePlatformCollisions();
+            
+            // ----- CCD for stars (check between previous and new position) -----
+            for (let i = 0; i < stars.length; i++) {
+                const star = stars[i];
+                if (star.collected) continue;
+                let collided = false;
+                // Check new position collision first (fast)
+                const newRect = { x: player.x, y: player.y, w: player.width, h: player.height };
+                if (aabbVsCircle(newRect, star)) {
+                    collided = true;
+                } else {
+                    // Check movement between prevPlayer and current player
+                    collided = checkStarCollisionWithMovement(prevPlayer, player, star);
+                }
+                if (collided) {
+                    star.collected = true;
+                    score++;
+                    updateScoreUI();
+                    break; // only collect one star per frame for stability
+                }
+            }
+        }
+        
+        function updateScoreUI() {
+            document.getElementById('starCount').innerText = score;
+        }
+        
+        // ---------- DRAW ----------
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            const grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, '#1e476b');
+            grad.addColorStop(1, '#3c8da8');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+            
+            // platforms
+            for (let plat of platforms) {
+                ctx.fillStyle = '#8b5a2b';
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                ctx.fillStyle = '#c28a4e';
+                ctx.fillRect(plat.x+3, plat.y-4, plat.w-6, 6);
+                ctx.fillStyle = '#5a3316';
+                for(let i=0;i<plat.w;i+=15) ctx.fillRect(plat.x+i+2, plat.y+4, 6, plat.h-8);
+            }
+            
+            // stars
+            for (let s of stars) {
+                if (s.collected) continue;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+                ctx.fillStyle = '#FFD966';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius-3, 0, Math.PI*2);
+                ctx.fillStyle = '#FFBF00';
+                ctx.fill();
+                ctx.fillStyle = '#FFE484';
+                for(let a=0;a<5;a++){
+                    let angle = a * (Math.PI*2/5);
+                    let x2 = s.x + Math.cos(angle)* (s.radius-2);
+                    let y2 = s.y + Math.sin(angle)* (s.radius-2);
+                    ctx.beginPath();
+                    ctx.arc(x2, y2, 2, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+            
+            // player
+            ctx.fillStyle = '#2c7fb8';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.fillStyle = '#1f5882';
+            ctx.fillRect(player.x+4, player.y-6, player.width-8, 8);
+            ctx.fillStyle = '#f4c542';
+            ctx.fillRect(player.x+6, player.y+6, 5, 8);
+            ctx.fillRect(player.x+player.width-11, player.y+6, 5, 8);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(player.x+6, player.y+5, 5, 5);
+            ctx.fillRect(player.x+player.width-11, player.y+5, 5, 5);
+            ctx.fillStyle = '#001122';
+            ctx.fillRect(player.x+7, player.y+6, 2, 3);
+            ctx.fillRect(player.x+player.width-10, player.y+6, 2, 3);
+            
+            ctx.font = "bold 26m 'Courier New'";
+            ctx.fillStyle = '#FFE7A3';
+            ctx.fillText("⭐ "+score, W-100, 45);
+            
+            const remaining = stars.filter(s => !s.collected).length;
+            if (remaining === 0 && stars.length > 0) {
+                ctx.font = "bold 28px monospace";
+                ctx.fillStyle = "#FFEAA0";
+                ctx.fillText("★ YOU WIN! ★", W/2-110, H/2-30);
+                ctx.font = "18px monospace";
+                ctx.fillText("click RESTART to play again", W/2-140, H/2+20);
+            }
+        }
+        
+        // ---------- RESET ----------
+        function resetGame() {
+            buildLevel();
+            score = 0;
+            updateScoreUI();
+            player = {
+                x: 80, y: 0,
+                vx: 0, vy: 0,
+                width: 28,
+                height: 28,
+                onGround: false
+            };
+            handlePlatformCollisions(); // snap to ground
+        }
+        
+        // ---------- EVENT HANDLERS ----------
+        function handleKeyDown(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp') e.preventDefault();
+            if (e.key === 'ArrowLeft') keys.ArrowLeft = true;
+            if (e.key === 'ArrowRight') keys.ArrowRight = true;
+            if (e.key === 'ArrowUp') keys.ArrowUp = true;
+        }
+        
+        function handleKeyUp(e) {
+            if (e.key === 'ArrowLeft') keys.ArrowLeft = false;
+            if (e.key === 'ArrowRight') keys.ArrowRight = false;
+            if (e.key === 'ArrowUp') keys.ArrowUp = false;
+        }
+        
+        // ---------- GAME LOOP ----------
+        function gameLoop() {
+            updateGame();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function init() {
+            buildLevel();
+            resetGame();
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+            document.getElementById('resetGameBtn').addEventListener('click', () => resetGame());
+            gameLoop();
+        }
+        
+        init();
+    })();
+</script>
+</body>
+</html>
