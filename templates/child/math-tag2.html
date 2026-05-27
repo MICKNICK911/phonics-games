@@ -116,11 +116,14 @@
       flex-wrap: wrap; gap: 0.4rem;
     }
     .setting-row label { font-size: 0.85rem; font-weight: 500; color: #cbd5e1; }
-    .setting-row input, .setting-row select {
+    .setting-row input[type="text"],
+    .setting-row input[type="number"] {
       background: #0f172a; border: 1px solid #334155; color: white;
       padding: 0.4rem 0.5rem; border-radius: 0.5rem; font-weight: 600;
-      text-align: center; width: 60px;
+      text-align: center;
     }
+    .setting-row input[type="text"] { width: 90px; }
+    .setting-row input[type="number"] { width: 60px; }
     .radio-group {
       display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;
     }
@@ -190,7 +193,7 @@
 <body>
 <div class="game-layout">
   <div class="player-panel p1" id="p1Panel">
-    <div class="player-name">🔵 PLAYER 1</div>
+    <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
     <div class="round-badge" id="p1RoundBadge">Round 1 / 10</div>
     <div class="question" id="p1Question">3 + 4 = ?</div>
     <div class="answer-box placeholder" id="p1Answer">Your answer</div>
@@ -208,6 +211,14 @@
   <div class="center-column">
     <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
     <div class="settings-panel" id="settingsPanel">
+      <div class="setting-row">
+        <label>Player 1 Name</label>
+        <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+      </div>
+      <div class="setting-row">
+        <label>Player 2 Name</label>
+        <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+      </div>
       <div class="setting-row">
         <label>Number Range</label>
         <div style="display:flex; align-items:center; gap:4px;">
@@ -242,12 +253,12 @@
       </div>
     </div>
     <div class="score-summary">
-      <span style="color:var(--blue-light);">🔵 P1: <strong id="p1ScoreChip">0</strong></span>
-      <span style="color:var(--red-light);">🔴 P2: <strong id="p2ScoreChip">0</strong></span>
+      <span style="color:var(--blue-light);">🔵 <span id="p1SummaryName">Player 1</span>: <strong id="p1ScoreChip">0</strong></span>
+      <span style="color:var(--red-light);">🔴 <span id="p2SummaryName">Player 2</span>: <strong id="p2ScoreChip">0</strong></span>
     </div>
   </div>
   <div class="player-panel p2" id="p2Panel">
-    <div class="player-name">🔴 PLAYER 2</div>
+    <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
     <div class="round-badge" id="p2RoundBadge">Round 1 / 10</div>
     <div class="question" id="p2Question">5 + 2 = ?</div>
     <div class="answer-box placeholder" id="p2Answer">Your answer</div>
@@ -268,14 +279,17 @@
     <div class="result-icon" id="resultIcon">🏆</div>
     <div class="result-title" id="resultTitle"></div>
     <div class="result-scores">
-      <div><div style="color:var(--blue-light);">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
-      <div><div style="color:var(--red-light);">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
+      <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
+      <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
     </div>
     <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
   </div>
 </div>
 <script>
   (function() {
+    // DOM references
+    const p1NameDisplay = document.getElementById('p1NameDisplay');
+    const p2NameDisplay = document.getElementById('p2NameDisplay');
     const p1Question = document.getElementById('p1Question');
     const p1Answer = document.getElementById('p1Answer');
     const p1RoundBadge = document.getElementById('p1RoundBadge');
@@ -297,8 +311,12 @@
     const redScoreEl = document.getElementById('redScore');
     const p1ScoreChip = document.getElementById('p1ScoreChip');
     const p2ScoreChip = document.getElementById('p2ScoreChip');
+    const p1SummaryName = document.getElementById('p1SummaryName');
+    const p2SummaryName = document.getElementById('p2SummaryName');
     const settingsToggle = document.getElementById('settingsToggle');
     const settingsPanel = document.getElementById('settingsPanel');
+    const p1NameInput = document.getElementById('p1NameInput');
+    const p2NameInput = document.getElementById('p2NameInput');
     const minNumberInput = document.getElementById('minNumberInput');
     const maxNumberInput = document.getElementById('maxNumberInput');
     const roundsInput = document.getElementById('roundsInput');
@@ -307,14 +325,19 @@
     const overlay = document.getElementById('overlay');
     const resultIcon = document.getElementById('resultIcon');
     const resultTitle = document.getElementById('resultTitle');
+    const finalP1Label = document.getElementById('finalP1Label');
+    const finalP2Label = document.getElementById('finalP2Label');
     const finalP1 = document.getElementById('finalP1');
     const finalP2 = document.getElementById('finalP2');
     const playAgainBtn = document.getElementById('playAgainBtn');
 
+    // Game state
     let TOTAL_ROUNDS = 10;
     let MIN_NUMBER = 1;
     let MAX_NUMBER = 9;
     let OPERATION = 'add';
+    let PLAYER1_NAME = 'Player 1';
+    let PLAYER2_NAME = 'Player 2';
     let gameActive = true;
     let barPosition = 50;
 
@@ -360,7 +383,7 @@
             key = `${n1}÷${n2}`;
             break;
         }
-        if (attempts > maxAttempts) break;  // exit loop, accept repetition instead of wrong operation
+        if (attempts > maxAttempts) break;
       } while (key === player.lastKey);
 
       player.num1 = n1;
@@ -382,6 +405,7 @@
     function renderQuestion(player, element) {
       element.textContent = `${player.num1} ${getOperatorSymbol()} ${player.num2} = ?`;
     }
+
     function updateAnswerDisplay(player, element) {
       if (player.answer === '') {
         element.textContent = 'Your answer';
@@ -391,9 +415,11 @@
         element.classList.remove('placeholder');
       }
     }
+
     function updateRoundBadge(player, badge) {
       badge.textContent = `Round ${player.round} / ${TOTAL_ROUNDS}`;
     }
+
     function updateAllBarUI() {
       blueBar.style.width = barPosition + '%';
       redBar.style.width = (100 - barPosition) + '%';
@@ -403,10 +429,21 @@
       p1ScoreChip.textContent = p1.score;
       p2ScoreChip.textContent = p2.score;
     }
+
+    function updatePlayerNames() {
+      p1NameDisplay.textContent = `🔵 ${PLAYER1_NAME}`;
+      p2NameDisplay.textContent = `🔴 ${PLAYER2_NAME}`;
+      p1SummaryName.textContent = PLAYER1_NAME;
+      p2SummaryName.textContent = PLAYER2_NAME;
+      finalP1Label.textContent = `🔵 ${PLAYER1_NAME}`;
+      finalP2Label.textContent = `🔴 ${PLAYER2_NAME}`;
+    }
+
     function shiftBar(favorBlue) {
       barPosition = favorBlue ? Math.min(92, barPosition + 5) : Math.max(8, barPosition - 5);
       updateAllBarUI();
     }
+
     function setControlsDisabled(player, disabled) {
       const pad = player === p1 ? p1Pad : p2Pad;
       const undo = player === p1 ? p1Undo : p2Undo;
@@ -415,6 +452,7 @@
       undo.disabled = disabled;
       check.disabled = disabled || player.answer === '';
     }
+
     function lockPlayer(player) { player.locked = true; setControlsDisabled(player, true); }
     function unlockPlayer(player) { player.locked = false; setControlsDisabled(player, false); }
 
@@ -485,6 +523,7 @@
       const checkBtn = player === p1 ? p1Check : p2Check;
       checkBtn.disabled = false;
     }
+
     function undoAnswer(player, answerEl) {
       if (!gameActive || player.locked || player.round > TOTAL_ROUNDS) return;
       player.answer = '';
@@ -492,18 +531,20 @@
       const checkBtn = player === p1 ? p1Check : p2Check;
       checkBtn.disabled = true;
     }
+
     function endGame() {
       if (!gameActive) return;
       gameActive = false;
       setControlsDisabled(p1, true);
       setControlsDisabled(p2, true);
+
       if (p1.score > p2.score) {
         resultIcon.textContent = '🏆';
-        resultTitle.textContent = '🔵 Player 1 Wins!';
+        resultTitle.textContent = `🔵 ${PLAYER1_NAME} Wins!`;
         resultTitle.style.color = 'var(--blue-light)';
       } else if (p2.score > p1.score) {
         resultIcon.textContent = '🏆';
-        resultTitle.textContent = '🔴 Player 2 Wins!';
+        resultTitle.textContent = `🔴 ${PLAYER2_NAME} Wins!`;
         resultTitle.style.color = 'var(--red-light)';
       } else {
         resultIcon.textContent = '🤝';
@@ -514,6 +555,7 @@
       finalP2.textContent = p2.score;
       overlay.classList.add('active');
     }
+
     function fullReset() {
       gameActive = true;
       barPosition = 50;
@@ -528,11 +570,17 @@
       updateRoundBadge(p1, p1RoundBadge);
       updateRoundBadge(p2, p2RoundBadge);
       updateAllBarUI();
+      updatePlayerNames();  // re-apply current names (in case they changed)
       unlockPlayer(p1);
       unlockPlayer(p2);
       overlay.classList.remove('active');
     }
+
     function readSettingsFromUI() {
+      let p1name = p1NameInput.value.trim();
+      let p2name = p2NameInput.value.trim();
+      if (p1name === '') p1name = 'Player 1';
+      if (p2name === '') p2name = 'Player 2';
       let min = parseInt(minNumberInput.value, 10);
       let max = parseInt(maxNumberInput.value, 10);
       if (isNaN(min) || min < 1) min = 1;
@@ -550,18 +598,22 @@
       for (let radio of operationRadios) {
         if (radio.checked) { op = radio.value; break; }
       }
-      return { min, max, rounds, op };
+      return { p1name, p2name, min, max, rounds, op };
     }
+
     function applySettingsAndReset() {
-      const { min, max, rounds, op } = readSettingsFromUI();
-      MIN_NUMBER = min;
-      MAX_NUMBER = max;
-      TOTAL_ROUNDS = rounds;
-      OPERATION = op;
+      const s = readSettingsFromUI();
+      PLAYER1_NAME = s.p1name;
+      PLAYER2_NAME = s.p2name;
+      MIN_NUMBER = s.min;
+      MAX_NUMBER = s.max;
+      TOTAL_ROUNDS = s.rounds;
+      OPERATION = s.op;
       settingsPanel.classList.remove('open');
       fullReset();
     }
 
+    // Event wiring
     p1Pad.addEventListener('click', e => {
       const btn = e.target.closest('button');
       if (!btn || btn.disabled) return;
@@ -589,13 +641,17 @@
     p2Undo.addEventListener('click', () => undoAnswer(p2, p2Answer));
     p1Check.addEventListener('click', () => handleAnswer(p1, 'p1'));
     p2Check.addEventListener('click', () => handleAnswer(p2, 'p2'));
+
     settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
     applySettingsBtn.addEventListener('click', applySettingsAndReset);
     playAgainBtn.addEventListener('click', applySettingsAndReset);
+
     document.addEventListener('touchstart', e => {
       if (e.target.closest('button') && e.touches.length > 1) e.preventDefault();
     }, { passive: false });
 
+    // Initial setup
+    updatePlayerNames();
     generateQuestion(p1);
     generateQuestion(p2);
     renderQuestion(p1, p1Question);
