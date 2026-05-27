@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Collect Stars – Fixed Star Placement & Better Jump</title>
+    <title>Star Collector – Yellow vs Red (Top‑Down)</title>
     <style>
         * {
             user-select: none;
@@ -42,15 +42,14 @@
             border-radius: 48px;
             color: #f7ecc7;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             gap: 20px;
             flex-wrap: wrap;
         }
-        .score-board {
+        .score-board, .red-counter {
             background: #00000077;
             padding: 6px 20px;
             border-radius: 40px;
-            letter-spacing: 2px;
         }
         button {
             background: #f3b33d;
@@ -69,7 +68,7 @@
             transform: scale(0.96);
         }
         .controls-tip {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             background: #00000066;
             padding: 4px 14px;
             border-radius: 26px;
@@ -77,7 +76,7 @@
         .touch-controls {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
             flex-wrap: wrap;
         }
@@ -85,24 +84,24 @@
             background: #2c3e2f;
             border: none;
             color: #f9e0a0;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            padding: 12px 28px;
+            padding: 10px 20px;
             border-radius: 60px;
             box-shadow: 0 5px 0 #1a2a1a;
             cursor: pointer;
             transition: 0.05s linear;
             font-family: monospace;
             touch-action: manipulation;
-            min-width: 100px;
+            min-width: 80px;
         }
         .ctrl-btn:active {
             transform: translateY(3px);
             box-shadow: 0 2px 0 #1a2a1a;
         }
         @media (max-width: 700px) {
-            .ctrl-btn { font-size: 1.5rem; padding: 8px 20px; min-width: 70px; }
-            .info { font-size: 1rem; justify-content: center; }
+            .ctrl-btn { font-size: 1.2rem; padding: 8px 15px; min-width: 60px; }
+            .info { font-size: 0.9rem; justify-content: center; }
         }
     </style>
 </head>
@@ -111,18 +110,20 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="900" height="500"></canvas>
         <div class="info">
-            <div class="score-board">⭐ COLLECTED: <span id="starCount">0</span></div>
-            <div class="controls-tip">◀  ▶  |  ▲ JUMP (or use buttons)</div>
-            <button id="resetGameBtn">✨ RESTART</button>
+            <div class="score-board">⭐ YELLOW: <span id="yellowScore">0</span></div>
+            <div class="red-counter">💀 RED HITS: <span id="redHits">0</span> / 3</div>
+            <div class="controls-tip">🕹️ WASD / arrows + buttons below</div>
+            <button id="resetGameBtn">🔄 RESTART</button>
         </div>
         <div class="touch-controls">
+            <button class="ctrl-btn" id="btnUp">▲ UP</button>
             <button class="ctrl-btn" id="btnLeft">◀ LEFT</button>
+            <button class="ctrl-btn" id="btnDown">▼ DOWN</button>
             <button class="ctrl-btn" id="btnRight">RIGHT ▶</button>
-            <button class="ctrl-btn" id="btnJump">JUMP ▲</button>
         </div>
     </div>
     <p style="color:#c7e9ff; text-align:center; margin-top:12px; font-size:0.8rem;">
-        🎮 Stars are placed on platforms/ground — all reachable! Jump higher now.
+        🧭 Move freely. Collect YELLOW stars (+1). Avoid RED stars (-1, and 3 reds = GAME OVER). Navigate around grey platforms.
     </p>
 </div>
 
@@ -134,216 +135,204 @@
         canvas.height = 500;
         const W = 900, H = 500;
         
-        let stars = [];
-        let platforms = [];
+        // ---------- GAME STATE ----------
+        let yellowStars = [];    // each {x, y, radius, collected}
+        let redStars = [];
+        let obstacles = [];      // platforms (rectangles)
         let player = {
-            x: 100, y: 0,
-            vx: 0, vy: 0,
-            width: 28,
-            height: 28,
-            onGround: false
+            x: W/2, y: H/2,
+            radius: 14,
+            speed: 4
         };
-        let score = 0;
         
-        const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false };
+        let yellowScore = 0;
+        let redHits = 0;
+        let totalYellowCount = 0;
+        let gameOver = false;
+        let gameWin = false;
         
-        // Physics constants - increased jump power
-        const GRAVITY = 0.8;
-        const JUMP_POWER = -13;      // was -10.5, now much higher
-        const MOVE_ACC = 0.7;
-        const MAX_SPEED = 6.5;
-        const GROUND_FRICTION = 0.92;
-        const AIR_CONTROL = 0.96;
+        // Input handling (keyboard + buttons)
+        const input = { up: false, down: false, left: false, right: false };
         
-        // Build platforms first, then place stars ON TOP of them
+        // ---------- LEVEL DESIGN ----------
         function buildLevel() {
-            platforms = [];
-            // ground
-            platforms.push({ x: 0, y: H - 40, w: W, h: 40 });
-            // floating platforms
-            platforms.push({ x: 120, y: H - 110, w: 100, h: 20 });
-            platforms.push({ x: 380, y: H - 180, w: 100, h: 20 });
-            platforms.push({ x: 650, y: H - 130, w: 100, h: 20 });
-            platforms.push({ x: 780, y: H - 70, w: 70, h: 20 });
-        }
-        
-        // Place stars on top of each platform (and ground) at reasonable intervals
-        function placeStarsOnPlatforms() {
-            stars = [];
-            const starRadius = 10;
-            for (let plat of platforms) {
-                // place stars along the top edge of the platform, spaced 40-50px apart
-                const startX = plat.x + 20;
-                const endX = plat.x + plat.w - 20;
-                const yPos = plat.y - starRadius; // sit exactly on top
-                for (let x = startX; x <= endX; x += 45) {
-                    // avoid placing stars too close to edges
-                    stars.push({ x: x, y: yPos, radius: starRadius, collected: false });
-                }
-            }
-            // Also add a few extra stars on ground (already covered by ground platform, but add more variation)
-            // ground platform is the first one (y = H-40). Add extra stars on ground at specific spots.
-            const groundPlat = platforms[0];
-            const extraGroundSpots = [200, 400, 700, 820];
-            for (let x of extraGroundSpots) {
-                stars.push({ x: x, y: groundPlat.y - starRadius, radius: starRadius, collected: false });
-            }
-            // Remove duplicate stars that might be too close (optional: simple dedup by distance < 20)
-            const uniqueStars = [];
-            for (let s of stars) {
-                let duplicate = false;
-                for (let u of uniqueStars) {
-                    if (Math.hypot(s.x - u.x, s.y - u.y) < 25) {
-                        duplicate = true;
-                        break;
+            // Obstacles (platforms) – player cannot pass through
+            obstacles = [
+                { x: 200, y: 150, w: 80, h: 30 },
+                { x: 400, y: 300, w: 100, h: 30 },
+                { x: 600, y: 100, w: 70, h: 30 },
+                { x: 150, y: 400, w: 90, h: 30 },
+                { x: 700, y: 380, w: 80, h: 30 },
+                { x: 500, y: 450, w: 100, h: 30 },
+                { x: 50, y: 220, w: 60, h: 30 },
+                { x: 780, y: 250, w: 60, h: 30 },
+                { x: 320, y: 80, w: 70, h: 30 }
+            ];
+            
+            // Yellow stars (10-15 scattered, avoid obstacles)
+            yellowStars = [];
+            const yellowCount = 12;
+            for (let i = 0; i < yellowCount; i++) {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 100) {
+                    const x = 30 + Math.random() * (W - 60);
+                    const y = 30 + Math.random() * (H - 60);
+                    // check collision with obstacles
+                    let collides = false;
+                    for (let obs of obstacles) {
+                        if (x > obs.x - 20 && x < obs.x + obs.w + 20 &&
+                            y > obs.y - 20 && y < obs.y + obs.h + 20) {
+                            collides = true;
+                            break;
+                        }
                     }
+                    // also avoid spawning on player start
+                    if (!collides && Math.hypot(x - player.x, y - player.y) > 40) {
+                        yellowStars.push({ x, y, radius: 10, collected: false });
+                        placed = true;
+                    }
+                    attempts++;
                 }
-                if (!duplicate) uniqueStars.push(s);
+                if (!placed) yellowStars.push({ x: 100 + i*60, y: 100, radius: 10, collected: false });
             }
-            stars = uniqueStars;
+            
+            // Red stars (5-7 scattered)
+            redStars = [];
+            const redCount = 7;
+            for (let i = 0; i < redCount; i++) {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 100) {
+                    const x = 30 + Math.random() * (W - 60);
+                    const y = 30 + Math.random() * (H - 60);
+                    let collides = false;
+                    for (let obs of obstacles) {
+                        if (x > obs.x - 20 && x < obs.x + obs.w + 20 &&
+                            y > obs.y - 20 && y < obs.y + obs.h + 20) {
+                            collides = true;
+                            break;
+                        }
+                    }
+                    if (!collides && Math.hypot(x - player.x, y - player.y) > 40) {
+                        redStars.push({ x, y, radius: 10, collected: false });
+                        placed = true;
+                    }
+                    attempts++;
+                }
+                if (!placed) redStars.push({ x: 300 + i*50, y: 400, radius: 10, collected: false });
+            }
+            
+            totalYellowCount = yellowStars.length;
         }
         
-        // ---------- COLLISION UTILITIES (same robust CCD) ----------
-        function aabbVsCircle(rect, circle) {
-            const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
-            const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
-            const dx = circle.x - closestX;
-            const dy = circle.y - closestY;
-            return (dx*dx + dy*dy) < circle.radius * circle.radius;
-        }
-        
-        function checkStarCollisionWithMovement(oldPlayer, newPlayer, star) {
-            const oldCenter = { x: oldPlayer.x + oldPlayer.width/2, y: oldPlayer.y + oldPlayer.height/2 };
-            const newCenter = { x: newPlayer.x + newPlayer.width/2, y: newPlayer.y + newPlayer.height/2 };
-            const dx = newCenter.x - oldCenter.x;
-            const dy = newCenter.y - oldCenter.y;
-            const steps = Math.ceil(Math.hypot(dx, dy) / 4);
-            if (steps === 0) return aabbVsCircle(newPlayer, star);
-            for (let t = 0; t <= steps; t++) {
-                const interp = t / steps;
-                const testCenter = {
-                    x: oldCenter.x + dx * interp,
-                    y: oldCenter.y + dy * interp
-                };
-                const testRect = {
-                    x: testCenter.x - newPlayer.width/2,
-                    y: testCenter.y - newPlayer.height/2,
-                    w: newPlayer.width,
-                    h: newPlayer.height
-                };
-                if (aabbVsCircle(testRect, star)) return true;
+        // ---------- COLLISION & MOVEMENT ----------
+        function collidesWithObstacles(newX, newY, radius) {
+            const testRect = { x: newX - radius, y: newY - radius, w: radius*2, h: radius*2 };
+            for (let obs of obstacles) {
+                if (testRect.x < obs.x + obs.w &&
+                    testRect.x + testRect.w > obs.x &&
+                    testRect.y < obs.y + obs.h &&
+                    testRect.y + testRect.h > obs.y) {
+                    return true;
+                }
+            }
+            // also keep inside canvas
+            if (newX - radius < 0 || newX + radius > W || newY - radius < 0 || newY + radius > H) {
+                return true;
             }
             return false;
         }
         
-        function collidesPlayerPlat(p, plat) {
-            return (p.x < plat.x + plat.w &&
-                    p.x + p.width > plat.x &&
-                    p.y < plat.y + plat.h &&
-                    p.y + p.height > plat.y);
+        function movePlayer() {
+            if (gameOver || gameWin) return;
+            let moveX = 0, moveY = 0;
+            if (input.left) moveX = -player.speed;
+            if (input.right) moveX = player.speed;
+            if (input.up) moveY = -player.speed;
+            if (input.down) moveY = player.speed;
+            if (moveX === 0 && moveY === 0) return;
+            
+            // Normalize diagonal movement
+            if (moveX !== 0 && moveY !== 0) {
+                moveX *= 0.707;
+                moveY *= 0.707;
+            }
+            
+            let newX = player.x + moveX;
+            let newY = player.y + moveY;
+            
+            if (!collidesWithObstacles(newX, player.y, player.radius)) {
+                player.x = newX;
+            }
+            if (!collidesWithObstacles(player.x, newY, player.radius)) {
+                player.y = newY;
+            }
         }
         
-        function handlePlatformCollisions() {
-            player.onGround = false;
-            // horizontal
-            player.x += player.vx;
-            for (let plat of platforms) {
-                if (collidesPlayerPlat(player, plat)) {
-                    if (player.vx > 0) player.x = plat.x - player.width;
-                    else if (player.vx < 0) player.x = plat.x + plat.w;
+        function collectStars() {
+            // Yellow stars collection
+            for (let i = 0; i < yellowStars.length; i++) {
+                const s = yellowStars[i];
+                if (s.collected) continue;
+                const dx = player.x - s.x;
+                const dy = player.y - s.y;
+                if (Math.hypot(dx, dy) < player.radius + s.radius) {
+                    s.collected = true;
+                    yellowScore++;
+                    document.getElementById('yellowScore').innerText = yellowScore;
                 }
             }
-            // vertical
-            player.y += player.vy;
-            for (let plat of platforms) {
-                if (collidesPlayerPlat(player, plat)) {
-                    if (player.vy >= 0) {
-                        player.y = plat.y - player.height;
-                        player.vy = 0;
-                        player.onGround = true;
-                    } else if (player.vy < 0) {
-                        player.y = plat.y + plat.h;
-                        player.vy = 0;
+            
+            // Red stars collection (deduct score and count red hits)
+            for (let i = 0; i < redStars.length; i++) {
+                const s = redStars[i];
+                if (s.collected) continue;
+                const dx = player.x - s.x;
+                const dy = player.y - s.y;
+                if (Math.hypot(dx, dy) < player.radius + s.radius) {
+                    s.collected = true;
+                    redHits++;
+                    document.getElementById('redHits').innerText = redHits;
+                    // score deduction: yellowScore decreases by 1 (can't go below 0)
+                    yellowScore = Math.max(0, yellowScore - 1);
+                    document.getElementById('yellowScore').innerText = yellowScore;
+                    
+                    if (redHits >= 3) {
+                        gameOver = true;
                     }
                 }
             }
-            // world bounds
-            if (player.y + player.height > H) {
-                player.y = H - player.height;
-                player.vy = 0;
-                player.onGround = true;
-            }
-            if (player.y < 0) { player.y = 0; if (player.vy < 0) player.vy = 0; }
-            if (player.x < 0) player.x = 0;
-            if (player.x + player.width > W) player.x = W - player.width;
-        }
-        
-        function updateGame() {
-            const oldPlayerCopy = { 
-                x: player.x, y: player.y, 
-                width: player.width, height: player.height 
-            };
             
-            if (keys.ArrowLeft) {
-                player.vx -= MOVE_ACC;
-                if (player.vx < -MAX_SPEED) player.vx = -MAX_SPEED;
-            }
-            if (keys.ArrowRight) {
-                player.vx += MOVE_ACC;
-                if (player.vx > MAX_SPEED) player.vx = MAX_SPEED;
-            }
-            if (player.onGround) player.vx *= GROUND_FRICTION;
-            else player.vx *= AIR_CONTROL;
-            if (Math.abs(player.vx) < 0.2) player.vx = 0;
-            
-            if (keys.ArrowUp && player.onGround) {
-                player.vy = JUMP_POWER;
-                player.onGround = false;
-            }
-            
-            if (!player.onGround) player.vy += GRAVITY;
-            
-            const prevPlayer = { ...oldPlayerCopy };
-            handlePlatformCollisions();
-            
-            // Star collection with CCD
-            for (let i = 0; i < stars.length; i++) {
-                const star = stars[i];
-                if (star.collected) continue;
-                const newRect = { x: player.x, y: player.y, w: player.width, h: player.height };
-                if (aabbVsCircle(newRect, star) || checkStarCollisionWithMovement(prevPlayer, player, star)) {
-                    star.collected = true;
-                    score++;
-                    updateScoreUI();
-                    break;
-                }
+            // Check win condition: all yellow stars collected
+            const allYellowCollected = yellowStars.every(s => s.collected === true);
+            if (allYellowCollected && !gameOver && yellowStars.length > 0) {
+                gameWin = true;
             }
         }
         
-        function updateScoreUI() {
-            document.getElementById('starCount').innerText = score;
-        }
-        
+        // ---------- DRAW EVERYTHING ----------
         function draw() {
             ctx.clearRect(0, 0, W, H);
+            // Background
             const grad = ctx.createLinearGradient(0, 0, 0, H);
             grad.addColorStop(0, '#1e476b');
             grad.addColorStop(1, '#3c8da8');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, W, H);
             
-            // platforms
-            for (let plat of platforms) {
-                ctx.fillStyle = '#8b5a2b';
-                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-                ctx.fillStyle = '#c28a4e';
-                ctx.fillRect(plat.x+3, plat.y-4, plat.w-6, 6);
-                ctx.fillStyle = '#5a3316';
-                for(let i=0;i<plat.w;i+=15) ctx.fillRect(plat.x+i+2, plat.y+4, 6, plat.h-8);
+            // Draw obstacles (grey platforms)
+            ctx.fillStyle = '#6b6b6b';
+            ctx.shadowBlur = 4;
+            for (let obs of obstacles) {
+                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                ctx.fillStyle = '#8a8a8a';
+                ctx.fillRect(obs.x+3, obs.y-3, obs.w-6, 6);
+                ctx.fillStyle = '#6b6b6b';
             }
             
-            // stars
-            for (let s of stars) {
+            // Draw yellow stars
+            for (let s of yellowStars) {
                 if (s.collected) continue;
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
@@ -364,69 +353,125 @@
                 }
             }
             
-            // player
+            // Draw red stars
+            for (let s of redStars) {
+                if (s.collected) continue;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+                ctx.fillStyle = '#E34234';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius-3, 0, Math.PI*2);
+                ctx.fillStyle = '#B22222';
+                ctx.fill();
+                ctx.fillStyle = '#FFAAAA';
+                for(let a=0;a<5;a++){
+                    let angle = a * (Math.PI*2/5);
+                    let x2 = s.x + Math.cos(angle)* (s.radius-2);
+                    let y2 = s.y + Math.sin(angle)* (s.radius-2);
+                    ctx.beginPath();
+                    ctx.arc(x2, y2, 2, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+            
+            // Draw player (circle)
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
             ctx.fillStyle = '#2c7fb8';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            ctx.fillStyle = '#1f5882';
-            ctx.fillRect(player.x+4, player.y-6, player.width-8, 8);
-            ctx.fillStyle = '#f4c542';
-            ctx.fillRect(player.x+6, player.y+6, 5, 8);
-            ctx.fillRect(player.x+player.width-11, player.y+6, 5, 8);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(player.x-4, player.y-4, 3, 0, Math.PI*2);
             ctx.fillStyle = 'white';
-            ctx.fillRect(player.x+6, player.y+5, 5, 5);
-            ctx.fillRect(player.x+player.width-11, player.y+5, 5, 5);
+            ctx.fill();
             ctx.fillStyle = '#001122';
-            ctx.fillRect(player.x+7, player.y+6, 2, 3);
-            ctx.fillRect(player.x+player.width-10, player.y+6, 2, 3);
+            ctx.beginPath();
+            ctx.arc(player.x-5, player.y-5, 1.5, 0, Math.PI*2);
+            ctx.fill();
+            // smile
+            ctx.beginPath();
+            ctx.arc(player.x, player.y+3, 5, 0.05, Math.PI - 0.05);
+            ctx.strokeStyle = '#2b1e0e';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
             
-            ctx.font = "bold 26m 'Courier New'";
-            ctx.fillStyle = '#FFE7A3';
-            ctx.fillText("⭐ "+score, W-100, 45);
-            
-            const remaining = stars.filter(s => !s.collected).length;
-            if (remaining === 0 && stars.length > 0) {
-                ctx.font = "bold 28px monospace";
-                ctx.fillStyle = "#FFEAA0";
-                ctx.fillText("★ YOU WIN! ★", W/2-110, H/2-30);
+            // Game messages
+            if (gameOver) {
+                ctx.font = "bold 34px monospace";
+                ctx.fillStyle = "#FFAAAA";
+                ctx.shadowBlur = 3;
+                ctx.fillText("💀 GAME OVER 💀", W/2-160, H/2-30);
                 ctx.font = "18px monospace";
-                ctx.fillText("click RESTART to play again", W/2-140, H/2+20);
+                ctx.fillStyle = "#FFE8C0";
+                ctx.fillText("Press RESTART to try again", W/2-140, H/2+30);
+            } else if (gameWin) {
+                ctx.font = "bold 34px monospace";
+                ctx.fillStyle = "#FFEAA0";
+                ctx.fillText("★ YOU WIN! ★", W/2-120, H/2-30);
+                ctx.font = "18px monospace";
+                ctx.fillText("All yellow stars collected!", W/2-140, H/2+30);
+            }
+            
+            // remaining yellow count
+            const remainingYellow = yellowStars.filter(s => !s.collected).length;
+            ctx.font = "bold 18px monospace";
+            ctx.fillStyle = "#FFEFC0";
+            ctx.fillText(`⭐ Left: ${remainingYellow}`, W-100, 30);
+        }
+        
+        // ---------- RESET GAME ----------
+        function resetGame() {
+            buildLevel();
+            yellowScore = 0;
+            redHits = 0;
+            gameOver = false;
+            gameWin = false;
+            player.x = W/2;
+            player.y = H/2;
+            document.getElementById('yellowScore').innerText = "0";
+            document.getElementById('redHits').innerText = "0";
+            // ensure no input remains
+            input.up = false; input.down = false; input.left = false; input.right = false;
+        }
+        
+        // ---------- UPDATE LOOP ----------
+        function update() {
+            if (!gameOver && !gameWin) {
+                movePlayer();
+                collectStars();
             }
         }
         
-        function resetGame() {
-            buildLevel();
-            placeStarsOnPlatforms();  // stars now on top of platforms
-            score = 0;
-            updateScoreUI();
-            player = {
-                x: 80, y: 0,
-                vx: 0, vy: 0,
-                width: 28,
-                height: 28,
-                onGround: false
-            };
-            handlePlatformCollisions(); // snap to ground
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
         }
         
-        // Keyboard & button handlers
+        // ---------- INPUT HANDLING (Keyboard + Buttons) ----------
         function handleKeyDown(e) {
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp') e.preventDefault();
-            if (e.key === 'ArrowLeft') keys.ArrowLeft = true;
-            if (e.key === 'ArrowRight') keys.ArrowRight = true;
-            if (e.key === 'ArrowUp') keys.ArrowUp = true;
+            const key = e.key;
+            if (key === 'ArrowUp' || key === 'w' || key === 'W') { e.preventDefault(); input.up = true; }
+            if (key === 'ArrowDown' || key === 's' || key === 'S') { e.preventDefault(); input.down = true; }
+            if (key === 'ArrowLeft' || key === 'a' || key === 'A') { e.preventDefault(); input.left = true; }
+            if (key === 'ArrowRight' || key === 'd' || key === 'D') { e.preventDefault(); input.right = true; }
         }
         
         function handleKeyUp(e) {
-            if (e.key === 'ArrowLeft') keys.ArrowLeft = false;
-            if (e.key === 'ArrowRight') keys.ArrowRight = false;
-            if (e.key === 'ArrowUp') keys.ArrowUp = false;
+            const key = e.key;
+            if (key === 'ArrowUp' || key === 'w' || key === 'W') { input.up = false; }
+            if (key === 'ArrowDown' || key === 's' || key === 'S') { input.down = false; }
+            if (key === 'ArrowLeft' || key === 'a' || key === 'A') { input.left = false; }
+            if (key === 'ArrowRight' || key === 'd' || key === 'D') { input.right = false; }
         }
         
-        function attachButton(buttonId, keyName) {
-            const btn = document.getElementById(buttonId);
+        function attachButton(btnId, direction) {
+            const btn = document.getElementById(btnId);
             if (!btn) return;
-            const activate = (e) => { e.preventDefault(); keys[keyName] = true; };
-            const deactivate = (e) => { e.preventDefault(); keys[keyName] = false; };
+            const activate = (e) => { e.preventDefault(); input[direction] = true; };
+            const deactivate = (e) => { e.preventDefault(); input[direction] = false; };
             btn.addEventListener('mousedown', activate);
             btn.addEventListener('mouseup', deactivate);
             btn.addEventListener('mouseleave', deactivate);
@@ -435,22 +480,17 @@
             btn.addEventListener('touchcancel', deactivate);
         }
         
-        function gameLoop() {
-            updateGame();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        
+        // ---------- INIT ----------
         function init() {
             buildLevel();
-            placeStarsOnPlatforms();
-            resetGame(); // sets player and ensures stars
+            resetGame();
             window.addEventListener('keydown', handleKeyDown);
             window.addEventListener('keyup', handleKeyUp);
             document.getElementById('resetGameBtn').addEventListener('click', () => resetGame());
-            attachButton('btnLeft', 'ArrowLeft');
-            attachButton('btnRight', 'ArrowRight');
-            attachButton('btnJump', 'ArrowUp');
+            attachButton('btnUp', 'up');
+            attachButton('btnDown', 'down');
+            attachButton('btnLeft', 'left');
+            attachButton('btnRight', 'right');
             gameLoop();
         }
         
