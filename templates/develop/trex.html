@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>T-Rex Runner - Chrome Dino Game</title>
+    <title>T-Rex Runner - Fixed Jump Height</title>
     <style>
         * {
             user-select: none;
@@ -119,71 +119,61 @@
         </div>
     </div>
     <p style="color:#cdc99b; text-align:center; margin-top:12px; font-size:0.75rem;">
-        ⬆️ Press SPACE, UP arrow, or tap JUMP button to make the dino jump. Avoid cacti!
+        ⬆️ Press SPACE, UP arrow, or tap JUMP button to make the dino jump. Higher jump now!
     </p>
 </div>
 
 <script>
     (function(){
-        // ---------- CANVAS ----------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 800;
         canvas.height = 300;
         const W = 800, H = 300;
         
-        // ---------- GAME STATE ----------
         let gameRunning = true;
         let score = 0;
-        let frame = 0;          // for cactus spawn timing & score increment
-        let speed = 5;          // initial cactus scroll speed
+        let frame = 0;
+        let speed = 5;
         let baseSpeed = 5;
-        let speedIncreaseCounter = 0;
         
-        // Dino
+        // Dino - IMPROVED JUMP
         const dino = {
             x: 70,
-            y: H - 45,      // ground level (ground Y = H-10)
+            y: H - 45,
             width: 24,
             height: 28,
             vy: 0,
             gravity: 0.8,
-            jumpPower: -10,
+            jumpPower: -13,    // increased from -10 to -13 for higher jump
             grounded: true
         };
-        const groundY = H - 10;   // ground line
+        const groundY = H - 10;
         
-        // Cacti array
         let cacti = [];
         const CACTUS_WIDTH = 18;
         const CACTUS_HEIGHT = 28;
-        
-        // Frame counters for spawn cooldown
         let spawnCooldown = 0;
         
-        // ---------- UTILITIES ----------
         function updateScoreUI() {
             document.getElementById('scoreValue').innerText = Math.floor(score);
         }
         
-        // Spawn a new cactus at the right edge
         function spawnCactus() {
             cacti.push({
                 x: W,
-                y: groundY - CACTUS_HEIGHT + 5, // sits on ground
+                y: groundY - CACTUS_HEIGHT + 5,
                 width: CACTUS_WIDTH,
                 height: CACTUS_HEIGHT,
-                passed: false   // for scoring when it passes dino
+                passed: false
             });
         }
         
-        // Reset game completely
         function resetGame() {
             gameRunning = true;
             score = 0;
             frame = 0;
             speed = baseSpeed;
-            speedIncreaseCounter = 0;
             cacti = [];
             dino.y = groundY - dino.height;
             dino.vy = 0;
@@ -192,23 +182,20 @@
             updateScoreUI();
         }
         
-        // ---------- UPDATE (physics, collisions, spawning) ----------
         function updateGame() {
             if (!gameRunning) return;
             
-            // Increase score over time (each frame = ~0.1 point, but we'll add once per ~6 frames)
             frame++;
             if (frame % 6 === 0) {
                 score += 1;
                 updateScoreUI();
-                // Increase difficulty: every 200 points, speed increases (max 14)
                 if (Math.floor(score) > 0 && Math.floor(score) % 200 === 0 && speed < 14) {
                     speed += 0.5;
                     baseSpeed = speed;
                 }
             }
             
-            // ---- Dino jump physics ----
+            // Dino physics
             dino.vy += dino.gravity;
             dino.y += dino.vy;
             if (dino.y >= groundY - dino.height) {
@@ -223,18 +210,13 @@
                 if (dino.vy < 0) dino.vy = 0;
             }
             
-            // ---- Cactus movement & collision ----
+            // Cactus movement & collision
             for (let i = 0; i < cacti.length; i++) {
                 const c = cacti[i];
                 c.x -= speed;
-                
-                // Score when cactus passes dino (without collision)
                 if (!c.passed && c.x + c.width < dino.x) {
                     c.passed = true;
-                    // optional: extra scoring, but already handled by time, so not needed
                 }
-                
-                // Collision detection (AABB)
                 if (dino.x < c.x + c.width &&
                     dino.x + dino.width > c.x &&
                     dino.y < c.y + c.height &&
@@ -242,100 +224,79 @@
                     gameRunning = false;
                 }
             }
-            // Remove off-screen cacti
             cacti = cacti.filter(c => c.x + c.width > 0);
             
-            // ---- Cactus spawning (random interval) ----
             if (spawnCooldown <= 0) {
-                // random chance each frame, but with cooldown to avoid clusters
-                if (Math.random() < 0.018) {  // ~1.8% per frame after cooldown
+                if (Math.random() < 0.018) {
                     spawnCactus();
-                    spawnCooldown = 45 + Math.random() * 40;   // frames until next spawn
+                    spawnCooldown = 45 + Math.random() * 40;
                 }
             } else {
                 spawnCooldown--;
             }
         }
         
-        // ---------- DRAW EVERYTHING (pixel-style) ----------
         function draw() {
             ctx.clearRect(0, 0, W, H);
-            // Sky gradient
             const grad = ctx.createLinearGradient(0, 0, 0, H);
             grad.addColorStop(0, '#ece4c2');
             grad.addColorStop(1, '#e2d8b0');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, W, H);
             
-            // Ground
             ctx.fillStyle = '#8b6946';
             ctx.fillRect(0, groundY - 4, W, 6);
             ctx.fillStyle = '#c99e6f';
             ctx.fillRect(0, groundY, W, H - groundY);
-            // Ground line details
             ctx.fillStyle = '#aa7a4a';
             for(let i=0;i<W+20;i+=25){
                 ctx.fillRect(i, groundY-2, 12, 4);
             }
             
-            // Draw cacti (simple green shape)
             for (let c of cacti) {
                 ctx.fillStyle = '#2f6b2f';
-                ctx.shadowBlur = 2;
                 ctx.fillRect(c.x, c.y, c.width, c.height);
                 ctx.fillStyle = '#4cae4c';
                 ctx.fillRect(c.x+3, c.y-6, c.width-6, 8);
-                // spikes
                 ctx.fillStyle = '#1f471f';
                 for(let s=0; s<3; s++){
                     ctx.fillRect(c.x+4 + s*4, c.y+6, 3, 8);
                 }
             }
             
-            // Draw Dino (T-Rex style)
             ctx.fillStyle = '#3e5a2b';
             ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
             ctx.fillStyle = '#5e823b';
             ctx.fillRect(dino.x+4, dino.y-6, dino.width-8, 8);
-            // eye
             ctx.fillStyle = 'white';
             ctx.fillRect(dino.x+16, dino.y+5, 5, 5);
             ctx.fillStyle = '#0a0a0a';
             ctx.fillRect(dino.x+17, dino.y+6, 2, 3);
-            // legs (if grounded)
             if (dino.grounded) {
                 ctx.fillStyle = '#2f471f';
                 ctx.fillRect(dino.x+4, dino.y+dino.height-6, 5, 8);
                 ctx.fillRect(dino.x+14, dino.y+dino.height-6, 5, 8);
             } else {
-                // jumping: legs tucked
                 ctx.fillRect(dino.x+4, dino.y+dino.height-4, 5, 6);
                 ctx.fillRect(dino.x+14, dino.y+dino.height-4, 5, 6);
             }
-            // spikes on back
             ctx.fillStyle = '#2c4b1a';
             for (let i=0;i<3;i++) {
                 ctx.fillRect(dino.x+6+i*5, dino.y-4, 4, 8);
             }
             
-            // Score text on canvas
             ctx.font = "bold 20px 'Courier New'";
             ctx.fillStyle = '#3d2b1a';
             ctx.fillText(`⚡ ${Math.floor(score)}`, W-80, 40);
             
-            // Game over message
             if (!gameRunning) {
                 ctx.font = "bold 28px monospace";
                 ctx.fillStyle = '#5a2e1a';
-                ctx.shadowBlur = 0;
                 ctx.fillText("GAME OVER", W/2-85, H/2-25);
                 ctx.font = "16px monospace";
-                ctx.fillStyle = '#3a2a1a';
                 ctx.fillText("click RESTART", W/2-55, H/2+15);
             }
             
-            ctx.shadowBlur = 0;
-            // instruction hint
             if (gameRunning && dino.grounded && frame < 120) {
                 ctx.font = "12px monospace";
                 ctx.fillStyle = '#7a6a40';
@@ -343,7 +304,6 @@
             }
         }
         
-        // ---------- JUMP FUNCTION (called on key/button) ----------
         function jump() {
             if (!gameRunning) return;
             if (dino.grounded) {
@@ -352,21 +312,18 @@
             }
         }
         
-        // ---------- EVENT HANDLERS (Keyboard + Touch button) ----------
         function handleKeyDown(e) {
             const key = e.key;
             if (key === 'ArrowUp' || key === ' ' || key === 'Space') {
                 e.preventDefault();
                 jump();
             }
-            // optional: restart with R key
             if (key === 'r' || key === 'R') {
                 e.preventDefault();
                 resetGame();
             }
         }
         
-        // for touch button
         function attachJumpButton() {
             const btn = document.getElementById('jumpBtn');
             if (!btn) return;
@@ -378,14 +335,12 @@
             btn.addEventListener('touchstart', doJump, { passive: false });
         }
         
-        // ---------- GAME LOOP ----------
         function gameLoop() {
             updateGame();
             draw();
             requestAnimationFrame(gameLoop);
         }
         
-        // ---------- INIT ----------
         function init() {
             resetGame();
             window.addEventListener('keydown', handleKeyDown);
