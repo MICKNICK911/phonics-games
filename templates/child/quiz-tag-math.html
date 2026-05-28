@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Math Tug of War · Two‑Player</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#0b1120; --surface:#111b2e; --blue:#3b82f6; --blue-light:#60a5fa;
+      --red:#ef4444; --red-light:#f87171; --text:#f1f5f9; --text-dim:#94a3b8;
+      --border:#1e293b; --radius:16px;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      height: 100dvh; display: flex; align-items: center; justify-content: center;
+      padding: clamp(8px, 2vh, 20px); overflow: hidden;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .game-layout {
+      display: flex; width:100%; height:100%;
+      gap: clamp(12px, 2vw, 24px); max-width:1300px;
+    }
+    .player-panel {
+      flex:1; background: var(--surface); border-radius: var(--radius);
+      border:2px solid var(--border); padding: clamp(12px,2vw,24px);
+      display: flex; flex-direction: column; align-items: center;
+      gap: clamp(10px,2vh,18px); min-width:0;
+    }
+    .player-panel.p1 { border-top:4px solid var(--blue); }
+    .player-panel.p2 { border-top:4px solid var(--red); }
+    .player-name {
+      font-weight:700; font-size: clamp(1rem,2vw,1.4rem); letter-spacing:1px;
+      background: rgba(255,255,255,0.05); padding:0.4rem 1.2rem; border-radius:2rem;
+    }
+    .p1 .player-name { color: var(--blue-light); }
+    .p2 .player-name { color: var(--red-light); }
+    .round-badge {
+      font-size:0.9rem; font-weight:600; color: var(--text-dim);
+      background: rgba(255,255,255,0.05); padding:0.3rem 1rem; border-radius:1rem;
+    }
+    .question {
+      font-size: clamp(1.8rem,4vw,2.6rem); font-weight:700;
+      font-family: 'Fira Code', monospace; background: rgba(0,0,0,0.3);
+      padding:0.6rem 1.8rem; border-radius:2rem; margin:0.2rem 0; white-space:nowrap;
+    }
+    .answer-box {
+      background: #0f172a; border:2px solid #334155; border-radius:1rem;
+      padding:0.8rem 1.5rem; font-size: clamp(1.6rem,3.5vw,2.2rem);
+      font-family: 'Fira Code', monospace; font-weight:700; text-align:center;
+      min-width:160px; transition: border-color 0.2s, background 0.2s;
+    }
+    .answer-box.placeholder { color: #475569; font-weight:400; font-size:1rem; }
+    .options-grid {
+      display: grid; gap:10px; width:100%; max-width:300px;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    .option-btn {
+      font-size:1.5rem; font-weight:700; background:#1e293b;
+      border:2px solid #334155; border-radius:0.8rem; color:white;
+      cursor:pointer; transition: all 0.1s; padding:0.8rem 0.5rem;
+      min-height:64px; display:flex; align-items:center; justify-content:center;
+      word-break:break-word; touch-action:manipulation;
+    }
+    .option-btn:active { transform:scale(0.92); background:#0f172a; }
+    .option-btn:disabled { opacity:0.4; pointer-events:none; }
+    .option-btn.selected { border-color:#fbbf24; background:#1e3a2f; box-shadow:0 0 14px rgba(251,191,36,0.45); }
+    .action-row {
+      display:flex; gap:10px; width:100%; max-width:300px;
+    }
+    .action-btn {
+      flex:1; padding:0.8rem; font-weight:700; font-size:1rem;
+      border:none; border-radius:2rem; cursor:pointer; text-transform:uppercase;
+      letter-spacing:0.5px; transition:0.15s; display:flex;
+      align-items:center; justify-content:center; gap:0.3rem;
+    }
+    .undo-btn { background:#f59e0b; color:#0f172a; }
+    .undo-btn:active { background:#b45309; }
+    .check-btn { background:#22c55e; color:white; }
+    .check-btn:active { background:#15803d; }
+    .action-btn:disabled { opacity:0.5; pointer-events:none; }
+    .feedback-flash { animation: flashBorder 0.5s ease-out; }
+    @keyframes flashBorder {
+      0% { border-color:#22c55e; box-shadow:0 0 20px #22c55e; }
+      100% { border-color:#334155; box-shadow:none; }
+    }
+    .wrong-flash { animation: shake 0.4s ease; }
+    @keyframes shake {
+      0%,100%{ transform:translateX(0); }
+      20%{ transform:translateX(-6px); }
+      40%{ transform:translateX(6px); }
+      60%{ transform:translateX(-4px); }
+      80%{ transform:translateX(4px); }
+    }
+    .center-column {
+      flex:0 0 clamp(260px,30vw,340px);
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:center; gap:1rem;
+    }
+    .settings-toggle {
+      background:none; border:2px solid #334155; color:#cbd5e1;
+      border-radius:2rem; padding:0.4rem 1.2rem; font-weight:600;
+      font-size:0.85rem; cursor:pointer; transition:0.2s;
+      display:flex; align-items:center; gap:0.4rem;
+    }
+    .settings-toggle:hover { background:#1e293b; }
+    .settings-panel {
+      display:none; background:#1e293b; border-radius:1rem;
+      padding:1rem; width:100%; flex-direction:column; gap:0.8rem;
+      border:1px solid #334155; max-height:60vh; overflow-y:auto;
+    }
+    .settings-panel.open { display:flex; }
+    .setting-row {
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:0.4rem;
+    }
+    .setting-row label { font-size:0.85rem; font-weight:500; color:#cbd5e1; }
+    .setting-row input[type="text"],
+    .setting-row input[type="number"] {
+      background:#0f172a; border:1px solid #334155; color:white;
+      padding:0.4rem 0.5rem; border-radius:0.5rem; font-weight:600; text-align:center;
+    }
+    .setting-row input[type="text"] { width:90px; }
+    .setting-row input[type="number"] { width:60px; }
+    .radio-group {
+      display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
+    }
+    .radio-group label {
+      display:flex; align-items:center; gap:0.2rem; font-size:0.8rem;
+      cursor:pointer; color:#cbd5e1; background:#0f172a;
+      padding:0.35rem 0.7rem; border-radius:1.5rem; border:1px solid #334155;
+      transition:0.2s; white-space:nowrap;
+    }
+    .radio-group label:has(input:checked) {
+      border-color:#6366f1; background:#1a1f3a; color:#a5b4fc;
+    }
+    .radio-group input[type="radio"] { accent-color:#6366f1; width:auto; margin:0; }
+    .apply-settings-btn {
+      background:#6366f1; color:white; border:none; border-radius:2rem;
+      padding:0.6rem; font-weight:700; cursor:pointer; letter-spacing:0.5px;
+      margin-top:0.2rem;
+    }
+    .war-bar-container {
+      width:100%; position:relative; height:70px; background:white;
+      border-radius:40px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.6);
+    }
+    .war-bar-blue, .war-bar-red {
+      position:absolute; top:0; height:100%;
+      transition: width 0.6s cubic-bezier(0.2,0.9,0.4,1);
+    }
+    .war-bar-blue { left:0; background:linear-gradient(180deg,#3b82f6,#1e40af); border-radius:40px 0 0 40px; }
+    .war-bar-red { right:0; background:linear-gradient(180deg,#ef4444,#991b1b); border-radius:0 40px 40px 0; }
+    .bar-divider {
+      position:absolute; top:5%; height:90%; width:4px; background:white;
+      box-shadow:0 0 12px white; border-radius:4px;
+      transition: left 0.6s cubic-bezier(0.2,0.9,0.4,1); z-index:5;
+    }
+    .bar-scores {
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      pointer-events:none; z-index:10; display:flex;
+      justify-content:space-between; align-items:center; padding:0 20px;
+    }
+    .bar-score {
+      font-weight:900; font-size:1.8rem; color:white;
+      text-shadow:0 2px 8px black; line-height:1;
+    }
+    .score-summary {
+      display:flex; justify-content:space-between; width:100%; font-weight:700;
+    }
+    .overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.85);
+      backdrop-filter:blur(8px); display:flex; align-items:center;
+      justify-content:center; z-index:50; opacity:0; pointer-events:none;
+      transition:opacity 0.4s;
+    }
+    .overlay.active { opacity:1; pointer-events:auto; }
+    .result-card {
+      background:#1e293b; border-radius:2rem; padding:2rem;
+      text-align:center; box-shadow:0 20px 40px black;
+      max-width:400px; width:90%;
+    }
+    .result-icon { font-size:4rem; margin-bottom:0.5rem; }
+    .result-title { font-size:2rem; font-weight:900; }
+    .result-scores { display:flex; justify-content:center; gap:2rem; margin:1.5rem 0; }
+    .play-again-btn {
+      background:#6366f1; border:none; color:white; padding:0.8rem 2.5rem;
+      border-radius:3rem; font-weight:700; font-size:1.1rem; cursor:pointer;
+    }
+    @media (max-width:750px) {
+      .game-layout { flex-direction:column; gap:10px; }
+      .center-column { flex:0 0 auto; width:100%; order:-1; }
+      .war-bar-container { height:50px; }
+      .options-grid { max-width:260px; }
+      .option-btn { font-size:1.3rem; padding:0.6rem 0.4rem; min-height:56px; }
+      .question { font-size:1.5rem; padding:0.5rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="game-layout">
+  <div class="player-panel p1" id="p1Panel">
+    <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+    <div class="round-badge" id="p1RoundBadge">Round 1 / 10</div>
+    <div class="question" id="p1Question">3 + 4 = ?</div>
+    <div class="answer-box placeholder" id="p1Answer">Your answer</div>
+    <div class="options-grid" id="p1OptionsGrid"></div>
+    <div class="action-row">
+      <button class="action-btn undo-btn" id="p1Undo">↩ Undo</button>
+      <button class="action-btn check-btn" id="p1Check" disabled>✓ Check</button>
+    </div>
+  </div>
+  <div class="center-column">
+    <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
+    <div class="settings-panel" id="settingsPanel">
+      <div class="setting-row">
+        <label>Player 1 Name</label>
+        <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+      </div>
+      <div class="setting-row">
+        <label>Player 2 Name</label>
+        <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+      </div>
+      <div class="setting-row">
+        <label>Rounds</label>
+        <input type="number" id="roundsInput" value="10" min="1" max="20" step="1">
+      </div>
+      <div class="setting-row">
+        <label>Question Bank</label>
+        <div class="radio-group" id="bankGroup"></div>
+      </div>
+      <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
+    </div>
+    <div style="font-weight:700; color:#cbd5e1; letter-spacing:1px;">⚡ TUG OF WAR ⚡</div>
+    <div class="war-bar-container">
+      <div class="war-bar-blue" id="blueBar"></div>
+      <div class="war-bar-red" id="redBar"></div>
+      <div class="bar-divider" id="barDivider"></div>
+      <div class="bar-scores">
+        <span class="bar-score" id="blueScore">0</span>
+        <span class="bar-score" id="redScore">0</span>
+      </div>
+    </div>
+    <div class="score-summary">
+      <span style="color:var(--blue-light);">🔵 <span id="p1SummaryName">Player 1</span>: <strong id="p1ScoreChip">0</strong></span>
+      <span style="color:var(--red-light);">🔴 <span id="p2SummaryName">Player 2</span>: <strong id="p2ScoreChip">0</strong></span>
+    </div>
+  </div>
+  <div class="player-panel p2" id="p2Panel">
+    <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+    <div class="round-badge" id="p2RoundBadge">Round 1 / 10</div>
+    <div class="question" id="p2Question">5 + 2 = ?</div>
+    <div class="answer-box placeholder" id="p2Answer">Your answer</div>
+    <div class="options-grid" id="p2OptionsGrid"></div>
+    <div class="action-row">
+      <button class="action-btn undo-btn" id="p2Undo">↩ Undo</button>
+      <button class="action-btn check-btn" id="p2Check" disabled>✓ Check</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="result-card">
+    <div class="result-icon" id="resultIcon">🏆</div>
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-scores">
+      <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
+      <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
+    </div>
+    <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
+  </div>
+</div>
+<script>
+(function() {
+  // ──────────────────────── QUESTION BANKS ────────────────────────
+  const QUESTION_BANKS = [
+    { name: 'Easy +', questions: [
+      { question: '3 + 4', options: [6,7,8,5], answer: 7 },
+      { question: '5 + 2', options: [6,7,8,9], answer: 7 },
+      { question: '1 + 9', options: [8,9,10,11], answer: 10 },
+      { question: '6 + 3', options: [7,8,9,10], answer: 9 },
+      { question: '4 + 5', options: [7,8,9,10], answer: 9 },
+      { question: '2 + 8', options: [8,9,10,11], answer: 10 },
+      { question: '7 + 2', options: [7,8,9,10], answer: 9 },
+      { question: '3 + 6', options: [7,8,9,10], answer: 9 },
+      { question: '5 + 5', options: [8,9,10,11], answer: 10 },
+      { question: '4 + 7', options: [9,10,11,12], answer: 11 },
+    ]},
+    { name: 'Subtraction', questions: [
+      { question: '9 − 4', options: [3,4,5,6], answer: 5 },
+      { question: '12 − 5', options: [5,6,7,8], answer: 7 },
+      { question: '15 − 7', options: [6,7,8,9], answer: 8 },
+      { question: '10 − 3', options: [5,6,7,8], answer: 7 },
+    ]},
+    { name: 'Multiplication', questions: [
+      { question: '3 × 4', options: [10,11,12,13], answer: 12 },
+      { question: '5 × 2', options: [8,9,10,11], answer: 10 },
+    ]},
+    { name: 'Division', questions: [
+      { question: '12 ÷ 3', options: [3,4,5,6], answer: 4 },
+      { question: '20 ÷ 4', options: [4,5,6,7], answer: 5 },
+    ]},
+  ];
+
+  // ──────────────────────── DOM ELEMENTS ────────────────────────
+  const $ = id => document.getElementById(id);
+  const p1Panel = $('p1Panel'), p2Panel = $('p2Panel');
+  const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
+  const p1Question = $('p1Question'), p2Question = $('p2Question');
+  const p1Answer = $('p1Answer'), p2Answer = $('p2Answer');
+  const p1RoundBadge = $('p1RoundBadge'), p2RoundBadge = $('p2RoundBadge');
+  const p1OptionsGrid = $('p1OptionsGrid'), p2OptionsGrid = $('p2OptionsGrid');
+  const p1Undo = $('p1Undo'), p2Undo = $('p2Undo');
+  const p1Check = $('p1Check'), p2Check = $('p2Check');
+  const blueBar = $('blueBar'), redBar = $('redBar'), barDivider = $('barDivider');
+  const blueScoreEl = $('blueScore'), redScoreEl = $('redScore');
+  const p1ScoreChip = $('p1ScoreChip'), p2ScoreChip = $('p2ScoreChip');
+  const p1SummaryName = $('p1SummaryName'), p2SummaryName = $('p2SummaryName');
+  const settingsToggle = $('settingsToggle'), settingsPanel = $('settingsPanel');
+  const p1NameInput = $('p1NameInput'), p2NameInput = $('p2NameInput');
+  const roundsInput = $('roundsInput'), applySettingsBtn = $('applySettingsBtn');
+  const bankGroup = $('bankGroup');
+  const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
+  const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
+  const finalP1 = $('finalP1'), finalP2 = $('finalP2');
+  const playAgainBtn = $('playAgainBtn');
+
+  // ──────────────────────── GAME STATE ────────────────────────
+  let TOTAL_ROUNDS = 10;
+  let SELECTED_BANK = 0;
+  let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
+  let gameActive = true, barPosition = 50;
+
+  // Player objects are stored on the grid elements to avoid stale references
+  function createPlayer() {
+    return {
+      score: 0, round: 1, answer: '', correctAnswer: 0,
+      questionText: '', options: [], locked: false,
+      questionQueue: [], queueIndex: 0, lastIdx: -1
+    };
+  }
+
+  // Attach players to their respective grids
+  p1OptionsGrid.player = createPlayer();
+  p2OptionsGrid.player = createPlayer();
+
+  // ──────────────────────── UTILITIES ────────────────────────
+  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+  const currentBank = () => QUESTION_BANKS[SELECTED_BANK] || QUESTION_BANKS[0];
+
+  function buildQueue() {
+    const qs = currentBank().questions;
+    return shuffle(qs.map((_, i) => i));
+  }
+
+  function getQuestion(grid) {
+    const player = grid.player;
+    const bank = currentBank();
+    if (!bank.questions.length) {
+      player.questionText = 'No questions';
+      player.correctAnswer = 0;
+      player.options = [];
+      return;
+    }
+    if (!player.questionQueue.length || player.queueIndex >= player.questionQueue.length) {
+      player.questionQueue = buildQueue();
+      player.queueIndex = 0;
+      if (player.questionQueue.length > 1 && player.lastIdx >= 0 && player.questionQueue[0] === player.lastIdx) {
+        [player.questionQueue[0], player.questionQueue[1]] = [player.questionQueue[1], player.questionQueue[0]];
+      }
+    }
+    const idx = player.questionQueue[player.queueIndex++];
+    player.lastIdx = idx;
+    const q = bank.questions[idx];
+    player.questionText = q.question;
+    player.correctAnswer = Number(q.answer);
+    player.options = shuffle(q.options);
+  }
+
+  // ──────────────────────── UI RENDERING ────────────────────────
+  function renderButtons(grid) {
+    const player = grid.player;
+    grid.innerHTML = '';
+    if (!player.options.length) {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = '—';
+      btn.disabled = true;
+      grid.appendChild(btn);
+      return;
+    }
+    player.options.forEach(val => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = val;
+      btn.dataset.value = val;
+      btn.disabled = player.locked;
+      grid.appendChild(btn);
+    });
+    highlightSelected(grid, player.answer);
+  }
+
+  function highlightSelected(grid, answer) {
+    grid.querySelectorAll('.option-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.value === String(answer));
+    });
+  }
+
+  function updateAnswerBox(grid, answerBox) {
+    const player = grid.player;
+    if (player.answer === '') {
+      answerBox.textContent = 'Your answer';
+      answerBox.classList.add('placeholder');
+    } else {
+      answerBox.textContent = player.answer;
+      answerBox.classList.remove('placeholder');
+    }
+  }
+
+  function updateRoundBadge(grid, badge) {
+    badge.textContent = `Round ${grid.player.round} / ${TOTAL_ROUNDS}`;
+  }
+
+  function updateBar() {
+    blueBar.style.width = barPosition + '%';
+    redBar.style.width = (100 - barPosition) + '%';
+    barDivider.style.left = barPosition + '%';
+    blueScoreEl.textContent = p1OptionsGrid.player.score;
+    redScoreEl.textContent = p2OptionsGrid.player.score;
+    p1ScoreChip.textContent = p1OptionsGrid.player.score;
+    p2ScoreChip.textContent = p2OptionsGrid.player.score;
+  }
+
+  function updateNames() {
+    p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
+    p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
+    p1SummaryName.textContent = PLAYER1;
+    p2SummaryName.textContent = PLAYER2;
+    finalP1Label.textContent = `🔵 ${PLAYER1}`;
+    finalP2Label.textContent = `🔴 ${PLAYER2}`;
+  }
+
+  function shiftBar(favorBlue) {
+    barPosition = favorBlue ? Math.min(92, barPosition + 5) : Math.max(8, barPosition - 5);
+    updateBar();
+  }
+
+  function lockGrid(grid, lock) {
+    const player = grid.player;
+    player.locked = lock;
+    const undoBtn = grid === p1OptionsGrid ? p1Undo : p2Undo;
+    const checkBtn = grid === p1OptionsGrid ? p1Check : p2Check;
+    grid.querySelectorAll('.option-btn').forEach(btn => btn.disabled = lock);
+    undoBtn.disabled = lock;
+    checkBtn.disabled = lock || player.answer === '';
+  }
+
+  // ──────────────────────── ACTIONS ────────────────────────
+  function selectOption(grid, value, answerBox, checkBtn) {
+    const player = grid.player;
+    if (!gameActive || player.locked || player.round > TOTAL_ROUNDS) return;
+    player.answer = value;
+    updateAnswerBox(grid, answerBox);
+    checkBtn.disabled = false;
+    highlightSelected(grid, value);
+  }
+
+  function undo(grid, answerBox, checkBtn) {
+    const player = grid.player;
+    if (!gameActive || player.locked || player.round > TOTAL_ROUNDS) return;
+    player.answer = '';
+    updateAnswerBox(grid, answerBox);
+    checkBtn.disabled = true;
+    highlightSelected(grid, '');
+  }
+
+  function handleAnswer(grid, id) {
+    const player = grid.player;
+    if (!gameActive || player.locked || player.round > TOTAL_ROUNDS) return;
+    if (player.answer === '') {
+      const box = id === 'p1' ? p1Answer : p2Answer;
+      box.classList.add('wrong-flash');
+      setTimeout(() => box.classList.remove('wrong-flash'), 400);
+      return;
+    }
+    const isCorrect = Number(player.answer) === player.correctAnswer;
+    const panel = id === 'p1' ? p1Panel : p2Panel;
+    const answerBox = id === 'p1' ? p1Answer : p2Answer;
+    const questionEl = id === 'p1' ? p1Question : p2Question;
+    const badge = id === 'p1' ? p1RoundBadge : p2RoundBadge;
+    const checkBtn = id === 'p1' ? p1Check : p2Check;
+
+    lockGrid(grid, true);
+
+    if (isCorrect) {
+      answerBox.classList.add('feedback-flash');
+      panel.style.boxShadow = '0 0 30px #22c55e';
+      setTimeout(() => {
+        answerBox.classList.remove('feedback-flash');
+        panel.style.boxShadow = '';
+      }, 500);
+    } else {
+      answerBox.classList.add('wrong-flash');
+      setTimeout(() => answerBox.classList.remove('wrong-flash'), 400);
+    }
+
+    if (isCorrect) {
+      player.score++;
+      shiftBar(id === 'p1');
+    } else {
+      shiftBar(id !== 'p1');
+    }
+
+    setTimeout(() => {
+      if (!gameActive) return;
+      if (isCorrect) {
+        if (player.round === TOTAL_ROUNDS) {
+          player.round = TOTAL_ROUNDS + 1;
+          player.answer = '';
+          updateAnswerBox(grid, answerBox);
+          updateRoundBadge(grid, badge);
+          lockGrid(grid, false);
+          if (p1OptionsGrid.player.round > TOTAL_ROUNDS || p2OptionsGrid.player.round > TOTAL_ROUNDS) endGame();
+        } else {
+          player.round++;
+          player.answer = '';
+          getQuestion(grid);
+          questionEl.textContent = player.questionText + ' = ?';
+          renderButtons(grid);
+          updateAnswerBox(grid, answerBox);
+          updateRoundBadge(grid, badge);
+          checkBtn.disabled = true;
+          lockGrid(grid, false);
+        }
+      } else {
+        player.answer = '';
+        updateAnswerBox(grid, answerBox);
+        checkBtn.disabled = true;
+        highlightSelected(grid, '');
+        lockGrid(grid, false);
+      }
+    }, 500);
+  }
+
+  function endGame() {
+    if (!gameActive) return;
+    gameActive = false;
+    lockGrid(p1OptionsGrid, true);
+    lockGrid(p2OptionsGrid, true);
+    const p1 = p1OptionsGrid.player, p2 = p2OptionsGrid.player;
+    if (p1.score > p2.score) {
+      resultIcon.textContent = '🏆';
+      resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
+      resultTitle.style.color = 'var(--blue-light)';
+    } else if (p2.score > p1.score) {
+      resultIcon.textContent = '🏆';
+      resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
+      resultTitle.style.color = 'var(--red-light)';
+    } else {
+      resultIcon.textContent = '🤝';
+      resultTitle.textContent = "It's a Tie!";
+      resultTitle.style.color = '#fbbf24';
+    }
+    finalP1.textContent = p1.score;
+    finalP2.textContent = p2.score;
+    overlay.classList.add('active');
+  }
+
+  function fullReset() {
+    gameActive = true;
+    barPosition = 50;
+    // Replace player objects on grids
+    p1OptionsGrid.player = createPlayer();
+    p2OptionsGrid.player = createPlayer();
+    getQuestion(p1OptionsGrid);
+    getQuestion(p2OptionsGrid);
+    p1Question.textContent = p1OptionsGrid.player.questionText + ' = ?';
+    p2Question.textContent = p2OptionsGrid.player.questionText + ' = ?';
+    renderButtons(p1OptionsGrid);
+    renderButtons(p2OptionsGrid);
+    updateAnswerBox(p1OptionsGrid, p1Answer);
+    updateAnswerBox(p2OptionsGrid, p2Answer);
+    updateRoundBadge(p1OptionsGrid, p1RoundBadge);
+    updateRoundBadge(p2OptionsGrid, p2RoundBadge);
+    updateBar();
+    updateNames();
+    lockGrid(p1OptionsGrid, false);
+    lockGrid(p2OptionsGrid, false);
+    p1Check.disabled = p2Check.disabled = true;
+    overlay.classList.remove('active');
+    buildBankRadios();
+  }
+
+  // ──────────────────────── SETTINGS ────────────────────────
+  function buildBankRadios() {
+    bankGroup.innerHTML = '';
+    QUESTION_BANKS.forEach((bank, idx) => {
+      const label = document.createElement('label');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'bank';
+      radio.value = idx;
+      if (idx === SELECTED_BANK) radio.checked = true;
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(' ' + bank.name));
+      bankGroup.appendChild(label);
+    });
+  }
+
+  function readSettings() {
+    const p1name = p1NameInput.value.trim() || 'Player 1';
+    const p2name = p2NameInput.value.trim() || 'Player 2';
+    let rounds = parseInt(roundsInput.value, 10);
+    if (isNaN(rounds) || rounds < 1) rounds = 1;
+    if (rounds > 20) rounds = 20;
+    roundsInput.value = rounds;
+    let bank = 0;
+    document.getElementsByName('bank').forEach(r => { if (r.checked) bank = parseInt(r.value, 10); });
+    if (isNaN(bank) || bank < 0 || bank >= QUESTION_BANKS.length) bank = 0;
+    return { p1name, p2name, rounds, bank };
+  }
+
+  function applySettings() {
+    const s = readSettings();
+    PLAYER1 = s.p1name;
+    PLAYER2 = s.p2name;
+    TOTAL_ROUNDS = s.rounds;
+    SELECTED_BANK = s.bank;
+    settingsPanel.classList.remove('open');
+    fullReset();
+  }
+
+  // ──────────────────────── EVENT WIRING ────────────────────────
+  function setupGridEvents(grid, answerBox, checkBtn, undoBtn) {
+    grid.addEventListener('pointerdown', e => {
+      const btn = e.target.closest('.option-btn');
+      if (!btn || btn.disabled) return;
+      e.preventDefault();
+      selectOption(grid, btn.dataset.value, answerBox, checkBtn);
+    });
+    undoBtn.addEventListener('click', () => undo(grid, answerBox, checkBtn));
+    checkBtn.addEventListener('click', () => handleAnswer(grid, grid === p1OptionsGrid ? 'p1' : 'p2'));
+  }
+
+  setupGridEvents(p1OptionsGrid, p1Answer, p1Check, p1Undo);
+  setupGridEvents(p2OptionsGrid, p2Answer, p2Check, p2Undo);
+
+  settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+  applySettingsBtn.addEventListener('click', applySettings);
+  playAgainBtn.addEventListener('click', applySettings);
+
+  // ──────────────────────── INIT ────────────────────────
+  buildBankRadios();
+  updateNames();
+  fullReset();
+})();
+</script>
+</body>
+</html>
