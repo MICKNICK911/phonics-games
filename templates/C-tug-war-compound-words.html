@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Compound Word Tug of War · Two‑Player</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --surface: #111b2e;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --red: #ef4444;
+            --red-light: #f87171;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --radius: 16px;
+            --gold: #f0b90b;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 2vh, 20px);
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: clamp(8px, 1.5vw, 16px);
+            max-width: 1500px;
+        }
+        .player-panel {
+            flex: 1;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            padding: clamp(8px, 1.5vw, 16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(6px, 1.2vh, 12px);
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .player-panel.p1 {
+            border-top: 4px solid var(--blue);
+        }
+        .player-panel.p2 {
+            border-top: 4px solid var(--red);
+        }
+        .player-name {
+            font-weight: 700;
+            font-size: clamp(0.85rem, 1.6vw, 1.2rem);
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            white-space: nowrap;
+        }
+        .p1 .player-name {
+            color: var(--blue-light);
+        }
+        .p2 .player-name {
+            color: var(--red-light);
+        }
+        .stage-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+        }
+        .pairs-indicator {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+        .pairs-indicator span {
+            color: #fff;
+            font-weight: 700;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 450px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .words-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 4px;
+            transition: opacity 0.3s ease;
+        }
+        .word-btn {
+            padding: 10px 14px;
+            font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #5b3cc4, #6d4ddb);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+            transition: all 0.2s;
+            outline: none;
+            text-align: center;
+            word-break: break-word;
+            min-width: 65px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 1 auto;
+            font-family: inherit;
+            touch-action: manipulation;
+        }
+        .word-btn:active:not(.matched-pair) {
+            transform: scale(0.94);
+            transition: transform 0.08s;
+        }
+        .word-btn.selected {
+            background: linear-gradient(135deg, #eab308, #f59e0b) !important;
+            border-color: #fde68a !important;
+            color: #1a1a00 !important;
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.55) !important;
+            transform: translateY(-2px);
+            font-weight: 700;
+            z-index: 2;
+            animation: pulseGold 1.2s ease-in-out infinite;
+        }
+        @keyframes pulseGold {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(250, 204, 21, 0.7);
+            }
+        }
+        .word-btn.matched-pair {
+            pointer-events: none;
+            cursor: not-allowed;
+            opacity: 0.85;
+            font-weight: 700;
+        }
+        .word-btn.wrong-flash {
+            animation: wrongShake 0.5s ease-out;
+            background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+            border-color: #fca5a5 !important;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6) !important;
+            color: #fff !important;
+        }
+        @keyframes wrongShake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            15% {
+                transform: translateX(-6px);
+            }
+            30% {
+                transform: translateX(6px);
+            }
+            45% {
+                transform: translateX(-4px);
+            }
+            60% {
+                transform: translateX(4px);
+            }
+            75% {
+                transform: translateX(-2px);
+            }
+            90% {
+                transform: translateX(2px);
+            }
+        }
+        .action-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 0.6rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            font-family: inherit;
+            touch-action: manipulation;
+        }
+        .deselect-btn {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+        .deselect-btn:active {
+            background: #b45309;
+        }
+        .deselect-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .center-column {
+            flex: 0 0 clamp(240px, 28vw, 300px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+        .settings-toggle {
+            background: none;
+            border: 2px solid #334155;
+            color: #cbd5e1;
+            border-radius: 2rem;
+            padding: 0.35rem 1rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: inherit;
+        }
+        .settings-toggle:hover {
+            background: #1e293b;
+        }
+        .settings-panel {
+            display: none;
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            width: 100%;
+            flex-direction: column;
+            gap: 0.6rem;
+            border: 1px solid #334155;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .settings-panel.open {
+            display: flex;
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .setting-row label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        .setting-row input[type="text"],
+        .setting-row input[type="number"] {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .setting-row input[type="text"] {
+            width: 80px;
+        }
+        .setting-row input[type="number"] {
+            width: 55px;
+        }
+        .apply-settings-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .war-bar-container {
+            width: 100%;
+            position: relative;
+            height: 55px;
+            background: white;
+            border-radius: 35px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+        }
+        .war-bar-blue,
+        .war-bar-red {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+        }
+        .war-bar-blue {
+            left: 0;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+            border-radius: 35px 0 0 35px;
+        }
+        .war-bar-red {
+            right: 0;
+            background: linear-gradient(180deg, #ef4444, #991b1b);
+            border-radius: 0 35px 35px 0;
+        }
+        .bar-divider {
+            position: absolute;
+            top: 5%;
+            height: 90%;
+            width: 4px;
+            background: white;
+            box-shadow: 0 0 10px white;
+            border-radius: 4px;
+            transition: left 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+            z-index: 5;
+        }
+        .bar-scores {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+        }
+        .bar-score {
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: white;
+            text-shadow: 0 2px 6px black;
+            line-height: 1;
+        }
+        .score-summary {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .result-card {
+            background: #1e293b;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px black;
+            max-width: 400px;
+            width: 90%;
+        }
+        .result-icon {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .result-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+        }
+        .result-scores {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.2rem 0;
+        }
+        .play-again-btn {
+            background: #6366f1;
+            border: none;
+            color: white;
+            padding: 0.7rem 2rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        @media (max-width: 750px) {
+            .game-layout {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .center-column {
+                flex: 0 0 auto;
+                width: 100%;
+                order: -1;
+            }
+            .war-bar-container {
+                height: 40px;
+            }
+            .player-panel {
+                max-height: 42vh;
+            }
+            .words-grid {
+                gap: 5px;
+            }
+            .word-btn {
+                padding: 8px 10px;
+                font-size: 0.7rem;
+                min-width: 50px;
+                min-height: 36px;
+            }
+            .bar-score {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-layout">
+        <!-- Player 1 Panel -->
+        <div class="player-panel p1" id="p1Panel">
+            <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+            <div class="stage-badge" id="p1StageBadge">Stage 1 / 10</div>
+            <div class="pairs-indicator" id="p1PairsIndicator"><span>0</span> / 0</div>
+            <div class="game-container" id="p1GameContainer">
+                <div class="words-grid" id="p1WordsGrid"></div>
+            </div>
+            <div class="action-row">
+                <button class="action-btn deselect-btn" id="p1Deselect" disabled>↩ Deselect</button>
+            </div>
+        </div>
+
+        <!-- Center Column -->
+        <div class="center-column">
+            <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
+            <div class="settings-panel" id="settingsPanel">
+                <div class="setting-row">
+                    <label>Player 1 Name</label>
+                    <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+                </div>
+                <div class="setting-row">
+                    <label>Player 2 Name</label>
+                    <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+                </div>
+                <div class="setting-row">
+                    <label>Stages to Win</label>
+                    <input type="number" id="roundsInput" value="10" min="1" max="10" step="1">
+                </div>
+                <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
+            </div>
+            <div style="font-weight:700; color:#cbd5e1; letter-spacing:1px; font-size:0.9rem;">⚡ TUG OF WAR ⚡</div>
+            <div class="war-bar-container">
+                <div class="war-bar-blue" id="blueBar"></div>
+                <div class="war-bar-red" id="redBar"></div>
+                <div class="bar-divider" id="barDivider"></div>
+                <div class="bar-scores">
+                    <span class="bar-score" id="blueScore">0</span>
+                    <span class="bar-score" id="redScore">0</span>
+                </div>
+            </div>
+            <div class="score-summary">
+                <span style="color:var(--blue-light);">🔵 <span id="p1SummaryName">Player 1</span>: <strong id="p1ScoreChip">0</strong></span>
+                <span style="color:var(--red-light);">🔴 <span id="p2SummaryName">Player 2</span>: <strong id="p2ScoreChip">0</strong></span>
+            </div>
+        </div>
+
+        <!-- Player 2 Panel -->
+        <div class="player-panel p2" id="p2Panel">
+            <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+            <div class="stage-badge" id="p2StageBadge">Stage 1 / 10</div>
+            <div class="pairs-indicator" id="p2PairsIndicator"><span>0</span> / 0</div>
+            <div class="game-container" id="p2GameContainer">
+                <div class="words-grid" id="p2WordsGrid"></div>
+            </div>
+            <div class="action-row">
+                <button class="action-btn deselect-btn" id="p2Deselect" disabled>↩ Deselect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Overlay -->
+    <div class="overlay" id="overlay">
+        <div class="result-card">
+            <div class="result-icon" id="resultIcon">🏆</div>
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-scores">
+                <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2rem; font-weight:900;" id="finalP1">0</div></div>
+                <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2rem; font-weight:900;" id="finalP2">0</div></div>
+            </div>
+            <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ──────────────────────────────────────
+            // COMPOUND WORD STAGES DATA
+            // ──────────────────────────────────────
+            const stagesData = [
+                {
+                    name: 'Stage 1',
+                    pairs: [
+                        { word1: 'rain', word2: 'bow', compound: 'rainbow' },
+                        { word1: 'sun', word2: 'flower', compound: 'sunflower' }
+                    ]
+                }, {
+                    name: 'Stage 2',
+                    pairs: [
+                        { word1: 'butter', word2: 'fly', compound: 'butterfly' },
+                        { word1: 'foot', word2: 'ball', compound: 'football' },
+                        { word1: 'star', word2: 'fish', compound: 'starfish' }
+                    ]
+                }, {
+                    name: 'Stage 3',
+                    pairs: [
+                        { word1: 'snow', word2: 'man', compound: 'snowman' },
+                        { word1: 'book', word2: 'worm', compound: 'bookworm' },
+                        { word1: 'moon', word2: 'light', compound: 'moonlight' },
+                        { word1: 'fire', word2: 'works', compound: 'fireworks' }
+                    ]
+                }, {
+                    name: 'Stage 4',
+                    pairs: [
+                        { word1: 'gold', word2: 'fish', compound: 'goldfish' },
+                        { word1: 'door', word2: 'bell', compound: 'doorbell' },
+                        { word1: 'honey', word2: 'moon', compound: 'honeymoon' },
+                        { word1: 'basket', word2: 'ball', compound: 'basketball' }
+                    ]
+                }, {
+                    name: 'Stage 5',
+                    pairs: [
+                        { word1: 'water', word2: 'fall', compound: 'waterfall' },
+                        { word1: 'thunder', word2: 'storm', compound: 'thunderstorm' },
+                        { word1: 'news', word2: 'paper', compound: 'newspaper' },
+                        { word1: 'straw', word2: 'berry', compound: 'strawberry' },
+                        { word1: 'black', word2: 'board', compound: 'blackboard' }
+                    ]
+                }, {
+                    name: 'Stage 6',
+                    pairs: [
+                        { word1: 'hair', word2: 'cut', compound: 'haircut' },
+                        { word1: 'pan', word2: 'cake', compound: 'pancake' },
+                        { word1: 'pop', word2: 'corn', compound: 'popcorn' },
+                        { word1: 'blue', word2: 'berry', compound: 'blueberry' },
+                        { word1: 'earth', word2: 'quake', compound: 'earthquake' },
+                        { word1: 'lip', word2: 'stick', compound: 'lipstick' }
+                    ]
+                }, {
+                    name: 'Stage 7',
+                    pairs: [
+                        { word1: 'cup', word2: 'cake', compound: 'cupcake' },
+                        { word1: 'key', word2: 'board', compound: 'keyboard' },
+                        { word1: 'mail', word2: 'box', compound: 'mailbox' },
+                        { word1: 'rain', word2: 'coat', compound: 'raincoat' },
+                        { word1: 'sail', word2: 'boat', compound: 'sailboat' },
+                        { word1: 'fish', word2: 'bowl', compound: 'fishbowl' },
+                        { word1: 'bath', word2: 'tub', compound: 'bathtub' }
+                    ]
+                }, {
+                    name: 'Stage 8',
+                    pairs: [
+                        { word1: 'tooth', word2: 'brush', compound: 'toothbrush' },
+                        { word1: 'bed', word2: 'room', compound: 'bedroom' },
+                        { word1: 'lady', word2: 'bug', compound: 'ladybug' },
+                        { word1: 'pine', word2: 'apple', compound: 'pineapple' },
+                        { word1: 'cow', word2: 'boy', compound: 'cowboy' },
+                        { word1: 'dragon', word2: 'fly', compound: 'dragonfly' },
+                        { word1: 'sun', word2: 'light', compound: 'sunlight' },
+                        { word1: 'rail', word2: 'road', compound: 'railroad' }
+                    ]
+                }, {
+                    name: 'Stage 9',
+                    pairs: [
+                        { word1: 'eye', word2: 'lash', compound: 'eyelash' },
+                        { word1: 'ear', word2: 'ring', compound: 'earring' },
+                        { word1: 'shoe', word2: 'lace', compound: 'shoelace' },
+                        { word1: 'hand', word2: 'bag', compound: 'handbag' },
+                        { word1: 'rose', word2: 'bud', compound: 'rosebud' },
+                        { word1: 'snow', word2: 'flake', compound: 'snowflake' },
+                        { word1: 'moon', word2: 'beam', compound: 'moonbeam' },
+                        { word1: 'life', word2: 'boat', compound: 'lifeboat' },
+                        { word1: 'book', word2: 'case', compound: 'bookcase' }
+                    ]
+                }, {
+                    name: 'Stage 10',
+                    pairs: [
+                        { word1: 'door', word2: 'step', compound: 'doorstep' },
+                        { word1: 'fire', word2: 'fly', compound: 'firefly' },
+                        { word1: 'gold', word2: 'smith', compound: 'goldsmith' },
+                        { word1: 'head', word2: 'ache', compound: 'headache' },
+                        { word1: 'honey', word2: 'dew', compound: 'honeydew' },
+                        { word1: 'jelly', word2: 'fish', compound: 'jellyfish' },
+                        { word1: 'night', word2: 'fall', compound: 'nightfall' },
+                        { word1: 'pan', word2: 'try', compound: 'pantry' },
+                        { word1: 'silk', word2: 'worm', compound: 'silkworm' },
+                        { word1: 'wood', word2: 'pecker', compound: 'woodpecker' }
+                    ]
+                }
+            ];
+
+            // Pair color palette
+            const pairColorPalette = [
+                { main: '#f97316', light: '#fb923c', border: '#fdba74', shadow: 'rgba(249,115,22,0.6)' },
+                { main: '#8b5cf6', light: '#a78bfa', border: '#c4b5fd', shadow: 'rgba(139,92,246,0.6)' },
+                { main: '#06b6d4', light: '#22d3ee', border: '#67e8f9', shadow: 'rgba(6,182,212,0.6)' },
+                { main: '#ec4899', light: '#f472b6', border: '#f9a8d4', shadow: 'rgba(236,72,153,0.6)' },
+                { main: '#22c55e', light: '#4ade80', border: '#86efac', shadow: 'rgba(34,197,94,0.6)' },
+                { main: '#eab308', light: '#facc15', border: '#fde047', shadow: 'rgba(234,179,8,0.6)' }
+            ];
+
+            function getPairColor(pairIndex) {
+                return pairColorPalette[pairIndex % pairColorPalette.length];
+            }
+
+            // ──────────────────────────────────────
+            // DOM ELEMENTS
+            // ──────────────────────────────────────
+            const $ = id => document.getElementById(id);
+            const p1NameDisplay = $('p1NameDisplay'),
+                p2NameDisplay = $('p2NameDisplay');
+            const p1StageBadge = $('p1StageBadge'),
+                p2StageBadge = $('p2StageBadge');
+            const p1PairsIndicator = $('p1PairsIndicator'),
+                p2PairsIndicator = $('p2PairsIndicator');
+            const p1WordsGrid = $('p1WordsGrid'),
+                p2WordsGrid = $('p2WordsGrid');
+            const p1Deselect = $('p1Deselect'),
+                p2Deselect = $('p2Deselect');
+            const blueBar = $('blueBar'),
+                redBar = $('redBar'),
+                barDivider = $('barDivider');
+            const blueScoreEl = $('blueScore'),
+                redScoreEl = $('redScore');
+            const p1ScoreChip = $('p1ScoreChip'),
+                p2ScoreChip = $('p2ScoreChip');
+            const p1SummaryName = $('p1SummaryName'),
+                p2SummaryName = $('p2SummaryName');
+            const settingsToggle = $('settingsToggle'),
+                settingsPanel = $('settingsPanel');
+            const p1NameInput = $('p1NameInput'),
+                p2NameInput = $('p2NameInput');
+            const roundsInput = $('roundsInput'),
+                applySettingsBtn = $('applySettingsBtn');
+            const overlay = $('overlay'),
+                resultIcon = $('resultIcon'),
+                resultTitle = $('resultTitle');
+            const finalP1Label = $('finalP1Label'),
+                finalP2Label = $('finalP2Label');
+            const finalP1 = $('finalP1'),
+                finalP2 = $('finalP2');
+            const playAgainBtn = $('playAgainBtn');
+
+            // ──────────────────────────────────────
+            // GAME STATE
+            // ──────────────────────────────────────
+            let TOTAL_STAGES = 10;
+            let PLAYER1 = 'Player 1',
+                PLAYER2 = 'Player 2';
+            let gameActive = true,
+                barPosition = 50;
+
+            function createPlayerState() {
+                return {
+                    totalScore: 0,
+                    currentStage: 0,
+                    pairsFound: 0,
+                    totalPairs: 0,
+                    pairLookup: new Map(),
+                    foundPairIndices: new Set(),
+                    selectedWordEl: null,
+                    selectedWordText: null,
+                    isLocked: false,
+                    allButtons: [],
+                };
+            }
+
+            const players = {
+                p1: createPlayerState(),
+                p2: createPlayerState(),
+            };
+
+            // ──────────────────────────────────────
+            // UTILITIES
+            // ──────────────────────────────────────
+            const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+            function buildPairLookup(pairs) {
+                const map = new Map();
+                pairs.forEach((p, i) => {
+                    map.set(p.word1, { partner: p.word2, compound: p.compound, pairIndex: i,
+                        isFirstWord: true });
+                    map.set(p.word2, { partner: p.word1, compound: p.compound, pairIndex: i,
+                        isFirstWord: false });
+                });
+                return map;
+            }
+
+            function getStageData(stageIndex) {
+                return stagesData[Math.min(stageIndex, stagesData.length - 1)];
+            }
+
+            // ──────────────────────────────────────
+            // BAR & SCORE
+            // ──────────────────────────────────────
+            function updateBar() {
+                blueBar.style.width = barPosition + '%';
+                redBar.style.width = (100 - barPosition) + '%';
+                barDivider.style.left = barPosition + '%';
+                blueScoreEl.textContent = players.p1.totalScore;
+                redScoreEl.textContent = players.p2.totalScore;
+                p1ScoreChip.textContent = players.p1.totalScore;
+                p2ScoreChip.textContent = players.p2.totalScore;
+            }
+
+            function shiftBar(favorBlue) {
+                barPosition = favorBlue ? Math.min(92, barPosition + 5) : Math.max(8, barPosition - 5);
+                updateBar();
+            }
+
+            function updateNames() {
+                p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
+                p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
+                p1SummaryName.textContent = PLAYER1;
+                p2SummaryName.textContent = PLAYER2;
+                finalP1Label.textContent = `🔵 ${PLAYER1}`;
+                finalP2Label.textContent = `🔴 ${PLAYER2}`;
+            }
+
+            // ──────────────────────────────────────
+            // GAME OVER
+            // ──────────────────────────────────────
+            function endGame(winner) {
+                if (!gameActive) return;
+                gameActive = false;
+                players.p1.isLocked = true;
+                players.p2.isLocked = true;
+                disableAllButtons();
+
+                const p1 = players.p1,
+                    p2 = players.p2;
+                if (winner === 'p1') {
+                    resultIcon.textContent = '🏆';
+                    resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
+                    resultTitle.style.color = 'var(--blue-light)';
+                } else if (winner === 'p2') {
+                    resultIcon.textContent = '🏆';
+                    resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
+                    resultTitle.style.color = 'var(--red-light)';
+                } else {
+                    resultIcon.textContent = '🤝';
+                    resultTitle.textContent = "It's a Tie!";
+                    resultTitle.style.color = '#fbbf24';
+                }
+                finalP1.textContent = p1.totalScore;
+                finalP2.textContent = p2.totalScore;
+                overlay.classList.add('active');
+            }
+
+            function disableAllButtons() {
+                document.querySelectorAll('.word-btn').forEach(b => b.style.pointerEvents = 'none');
+            }
+
+            // ──────────────────────────────────────
+            // RENDER GRID FOR A PLAYER
+            // ──────────────────────────────────────
+            function renderStage(playerId) {
+                const p = players[playerId];
+                const grid = playerId === 'p1' ? p1WordsGrid : p2WordsGrid;
+                grid.innerHTML = '';
+
+                const stageData = getStageData(p.currentStage);
+                const pairs = stageData.pairs;
+                p.totalPairs = pairs.length;
+                p.pairsFound = 0;
+                p.foundPairIndices.clear();
+                p.pairLookup = buildPairLookup(pairs);
+                p.selectedWordEl = null;
+                p.selectedWordText = null;
+                p.isLocked = false;
+                p.allButtons = [];
+
+                const words = [];
+                pairs.forEach(pair => { words.push(pair.word1);
+                    words.push(pair.word2); });
+                const shuffled = shuffle(words);
+
+                shuffled.forEach(word => {
+                    const btn = document.createElement('button');
+                    btn.className = 'word-btn';
+                    btn.textContent = word;
+                    btn.dataset.word = word;
+                    btn.addEventListener('click', () => handleWordTap(playerId, word, btn));
+                    grid.appendChild(btn);
+                    p.allButtons.push(btn);
+                });
+
+                updatePairsIndicator(playerId);
+                updateStageBadge(playerId);
+                updateDeselectButton(playerId);
+            }
+
+            function updateStageBadge(playerId) {
+                const badge = playerId === 'p1' ? p1StageBadge : p2StageBadge;
+                const stage = players[playerId].currentStage + 1;
+                badge.textContent = `Stage ${stage} / ${TOTAL_STAGES}`;
+            }
+
+            function updatePairsIndicator(playerId) {
+                const indicator = playerId === 'p1' ? p1PairsIndicator : p2PairsIndicator;
+                const p = players[playerId];
+                indicator.innerHTML = `<span>${p.pairsFound}</span> / ${p.totalPairs}`;
+            }
+
+            function updateDeselectButton(playerId) {
+                const btn = playerId === 'p1' ? p1Deselect : p2Deselect;
+                const p = players[playerId];
+                btn.disabled = p.isLocked || !p.selectedWordEl;
+            }
+
+            // ──────────────────────────────────────
+            // WORD TAP HANDLER
+            // ──────────────────────────────────────
+            function handleWordTap(playerId, word, btn) {
+                const p = players[playerId];
+                if (!gameActive || p.isLocked) return;
+                if (btn.classList.contains('matched-pair')) return;
+
+                // Tapping the already-selected word deselects it
+                if (p.selectedWordEl === btn) {
+                    deselectWord(playerId);
+                    return;
+                }
+
+                if (!p.selectedWordEl) {
+                    // Select first word
+                    selectWord(playerId, word, btn);
+                } else {
+                    // Second word selected — attempt match
+                    const firstWord = p.selectedWordText;
+                    const secondWord = word;
+                    const firstBtn = p.selectedWordEl;
+                    const secondBtn = btn;
+                    p.isLocked = true;
+                    updateDeselectButton(playerId);
+
+                    const entry = p.pairLookup.get(firstWord);
+                    if (entry && entry.partner === secondWord) {
+                        // Check order: firstWord must be word1, secondWord must be word2
+                        const pair = getStageData(p.currentStage).pairs[entry.pairIndex];
+                        if (firstWord === pair.word1 && secondWord === pair.word2) {
+                            handleCorrectPair(playerId, firstWord, secondWord, entry.compound, entry.pairIndex,
+                                firstBtn, secondBtn);
+                        } else {
+                            handleWrongOrder(playerId, firstWord, secondWord, firstBtn, secondBtn);
+                        }
+                    } else {
+                        handleWrongPair(playerId, firstWord, secondWord, firstBtn, secondBtn);
+                    }
+                }
+            }
+
+            function selectWord(playerId, word, btn) {
+                const p = players[playerId];
+                if (p.selectedWordEl) p.selectedWordEl.classList.remove('selected');
+                p.selectedWordEl = btn;
+                p.selectedWordText = word;
+                btn.classList.add('selected');
+                updateDeselectButton(playerId);
+            }
+
+            function deselectWord(playerId) {
+                const p = players[playerId];
+                if (p.selectedWordEl) p.selectedWordEl.classList.remove('selected');
+                p.selectedWordEl = null;
+                p.selectedWordText = null;
+                updateDeselectButton(playerId);
+            }
+
+            function handleCorrectPair(playerId, w1, w2, compound, pairIndex, btn1, btn2) {
+                const p = players[playerId];
+                btn1.classList.remove('selected');
+                btn2.classList.remove('selected');
+                p.selectedWordEl = null;
+                p.selectedWordText = null;
+
+                const color = getPairColor(pairIndex);
+                [btn1, btn2].forEach(btn => {
+                    btn.classList.add('matched-pair');
+                    btn.style.background = `linear-gradient(135deg, ${color.main}, ${color.light})`;
+                    btn.style.borderColor = color.border;
+                    btn.style.boxShadow = `0 0 20px ${color.shadow}`;
+                });
+
+                p.foundPairIndices.add(pairIndex);
+                p.pairsFound = p.foundPairIndices.size;
+                p.totalScore += 10;
+                shiftBar(playerId === 'p1');
+                updatePairsIndicator(playerId);
+                updateBar();
+                updateDeselectButton(playerId);
+
+                // Brief flash on the player panel
+                const panel = playerId === 'p1' ? $('p1Panel') : $('p2Panel');
+                panel.style.boxShadow = '0 0 24px #22c55e';
+                setTimeout(() => panel.style.boxShadow = '', 400);
+
+                p.isLocked = false;
+                updateDeselectButton(playerId);
+
+                // Check if stage complete
+                if (p.pairsFound >= p.totalPairs) {
+                    p.isLocked = true;
+                    updateDeselectButton(playerId);
+                    setTimeout(() => advanceStage(playerId), 500);
+                }
+            }
+
+            function handleWrongOrder(playerId, w1, w2, btn1, btn2) {
+                const p = players[playerId];
+                btn1.classList.remove('selected');
+                btn1.classList.add('wrong-flash');
+                btn2.classList.add('wrong-flash');
+                p.selectedWordEl = null;
+                p.selectedWordText = null;
+                shiftBar(playerId !== 'p1');
+                if (p.totalScore > 0) p.totalScore--;
+                updateBar();
+                updateDeselectButton(playerId);
+
+                const panel = playerId === 'p1' ? $('p1Panel') : $('p2Panel');
+                panel.style.boxShadow = '0 0 24px #ef4444';
+                setTimeout(() => {
+                    btn1.classList.remove('wrong-flash');
+                    btn2.classList.remove('wrong-flash');
+                    panel.style.boxShadow = '';
+                    p.isLocked = false;
+                    updateDeselectButton(playerId);
+                }, 500);
+            }
+
+            function handleWrongPair(playerId, w1, w2, btn1, btn2) {
+                const p = players[playerId];
+                btn1.classList.remove('selected');
+                btn1.classList.add('wrong-flash');
+                btn2.classList.add('wrong-flash');
+                p.selectedWordEl = null;
+                p.selectedWordText = null;
+                shiftBar(playerId !== 'p1');
+                if (p.totalScore > 0) p.totalScore--;
+                updateBar();
+                updateDeselectButton(playerId);
+
+                const panel = playerId === 'p1' ? $('p1Panel') : $('p2Panel');
+                panel.style.boxShadow = '0 0 24px #ef4444';
+                setTimeout(() => {
+                    btn1.classList.remove('wrong-flash');
+                    btn2.classList.remove('wrong-flash');
+                    panel.style.boxShadow = '';
+                    p.isLocked = false;
+                    updateDeselectButton(playerId);
+                }, 500);
+            }
+
+            function advanceStage(playerId) {
+                const p = players[playerId];
+                if (p.currentStage + 1 >= TOTAL_STAGES) {
+                    p.isLocked = true;
+                    endGame(playerId);
+                } else {
+                    p.currentStage++;
+                    renderStage(playerId);
+                }
+            }
+
+            // ──────────────────────────────────────
+            // DESELECT BUTTON EVENTS
+            // ──────────────────────────────────────
+            p1Deselect.addEventListener('click', () => deselectWord('p1'));
+            p2Deselect.addEventListener('click', () => deselectWord('p2'));
+
+            // ──────────────────────────────────────
+            // FULL RESET
+            // ──────────────────────────────────────
+            function fullReset() {
+                gameActive = true;
+                barPosition = 50;
+                players.p1 = createPlayerState();
+                players.p2 = createPlayerState();
+                renderStage('p1');
+                renderStage('p2');
+                updateBar();
+                updateNames();
+                overlay.classList.remove('active');
+                roundsInput.max = stagesData.length;
+            }
+
+            // ──────────────────────────────────────
+            // SETTINGS
+            // ──────────────────────────────────────
+            function applySettings() {
+                const p1name = p1NameInput.value.trim() || 'Player 1';
+                const p2name = p2NameInput.value.trim() || 'Player 2';
+                let stages = parseInt(roundsInput.value, 10);
+                if (isNaN(stages) || stages < 1) stages = 1;
+                if (stages > stagesData.length) stages = stagesData.length;
+                roundsInput.value = stages;
+                PLAYER1 = p1name;
+                PLAYER2 = p2name;
+                TOTAL_STAGES = stages;
+                settingsPanel.classList.remove('open');
+                fullReset();
+            }
+
+            settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+            applySettingsBtn.addEventListener('click', applySettings);
+            playAgainBtn.addEventListener('click', applySettings);
+
+            // ──────────────────────────────────────
+            // INIT
+            // ──────────────────────────────────────
+            roundsInput.max = stagesData.length;
+            roundsInput.value = TOTAL_STAGES;
+            updateNames();
+            fullReset();
+        })();
+    </script>
+</body>
+</html>

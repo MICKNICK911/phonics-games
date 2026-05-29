@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Clock Tug of War · Two‑Player</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --surface: #111b2e;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --red: #ef4444;
+            --red-light: #f87171;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --radius: 16px;
+            --gold: #f0b90b;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 2vh, 20px);
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: clamp(8px, 1.5vw, 16px);
+            max-width: 1400px;
+        }
+        .player-panel {
+            flex: 1;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            padding: clamp(8px, 1.5vw, 16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(6px, 1vh, 10px);
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .player-panel.p1 {
+            border-top: 4px solid var(--blue);
+        }
+        .player-panel.p2 {
+            border-top: 4px solid var(--red);
+        }
+        .player-name {
+            font-weight: 700;
+            font-size: clamp(0.85rem, 1.6vw, 1.2rem);
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+        }
+        .p1 .player-name {
+            color: var(--blue-light);
+        }
+        .p2 .player-name {
+            color: var(--red-light);
+        }
+        .level-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+        }
+        .target-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        canvas.clock-canvas {
+            width: min(180px, 30vw);
+            height: min(180px, 30vw);
+            background: #fffef7;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 0 3px #f3e1be;
+            touch-action: manipulation;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+        .selected-hand-msg {
+            font-size: 0.7rem;
+            color: #fbbf24;
+            background: rgba(255,255,255,0.05);
+            padding: 0.2rem 0.8rem;
+            border-radius: 1rem;
+        }
+        .control-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .ctrl-btn {
+            background: #334155;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.5rem 0.8rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            color: white;
+            font-family: monospace;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        .ctrl-btn:active {
+            background: #475569;
+            transform: scale(0.95);
+        }
+        .submit-btn {
+            background: #f59e0b;
+            color: #0f172a;
+            font-weight: 700;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            margin-top: 0.3rem;
+        }
+        .submit-btn:active {
+            background: #b45309;
+        }
+        .center-column {
+            flex: 0 0 clamp(220px, 26vw, 280px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+        .settings-toggle {
+            background: none;
+            border: 2px solid #334155;
+            color: #cbd5e1;
+            border-radius: 2rem;
+            padding: 0.35rem 1rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: inherit;
+        }
+        .settings-toggle:hover {
+            background: #1e293b;
+        }
+        .settings-panel {
+            display: none;
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            width: 100%;
+            flex-direction: column;
+            gap: 0.6rem;
+            border: 1px solid #334155;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .settings-panel.open {
+            display: flex;
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .setting-row label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        .setting-row input[type="text"],
+        .setting-row input[type="number"] {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .setting-row input[type="text"] {
+            width: 80px;
+        }
+        .setting-row input[type="number"] {
+            width: 55px;
+        }
+        .apply-settings-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .war-bar-container {
+            width: 100%;
+            position: relative;
+            height: 50px;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+        }
+        .war-bar-blue,
+        .war-bar-red {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+        }
+        .war-bar-blue {
+            left: 0;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+            border-radius: 30px 0 0 30px;
+        }
+        .war-bar-red {
+            right: 0;
+            background: linear-gradient(180deg, #ef4444, #991b1b);
+            border-radius: 0 30px 30px 0;
+        }
+        .bar-divider {
+            position: absolute;
+            top: 5%;
+            height: 90%;
+            width: 4px;
+            background: white;
+            box-shadow: 0 0 10px white;
+            border-radius: 4px;
+            transition: left 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+            z-index: 5;
+        }
+        .bar-scores {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+        }
+        .bar-score {
+            font-weight: 900;
+            font-size: 1.1rem;
+            color: white;
+            text-shadow: 0 2px 6px black;
+            line-height: 1;
+        }
+        .score-summary {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .result-card {
+            background: #1e293b;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px black;
+            max-width: 400px;
+            width: 90%;
+        }
+        .result-icon {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .result-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+        }
+        .result-scores {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.2rem 0;
+        }
+        .play-again-btn {
+            background: #6366f1;
+            border: none;
+            color: white;
+            padding: 0.7rem 2rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        @media (max-width: 750px) {
+            .game-layout {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .center-column {
+                flex: 0 0 auto;
+                width: 100%;
+                order: -1;
+            }
+            .player-panel {
+                max-height: 40vh;
+            }
+            canvas.clock-canvas {
+                width: 130px;
+                height: 130px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-layout">
+    <!-- Player 1 Panel -->
+    <div class="player-panel p1" id="p1Panel">
+        <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+        <div class="level-badge" id="p1LevelBadge">Level 1 / 10</div>
+        <div class="target-box" id="p1Target">🎯 --:--</div>
+        <canvas class="clock-canvas" id="p1Canvas" width="300" height="300"></canvas>
+        <div class="selected-hand-msg" id="p1HandMsg">⚡ Tap hand to select</div>
+        <div class="control-row">
+            <button class="ctrl-btn" id="p1Anti">«</button>
+            <button class="ctrl-btn" id="p1ClockWise">»</button>
+            <button class="ctrl-btn" id="p1Reset">🔄</button>
+        </div>
+        <button class="submit-btn" id="p1Submit">✅ SUBMIT</button>
+    </div>
+
+    <!-- Center Column -->
+    <div class="center-column">
+        <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
+        <div class="settings-panel" id="settingsPanel">
+            <div class="setting-row">
+                <label>Player 1 Name</label>
+                <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+            </div>
+            <div class="setting-row">
+                <label>Player 2 Name</label>
+                <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+            </div>
+            <div class="setting-row">
+                <label>Levels to Win</label>
+                <input type="number" id="roundsInput" value="10" min="1" max="30" step="1">
+            </div>
+            <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
+        </div>
+        <div style="font-weight:700; color:#cbd5e1; letter-spacing:1px; font-size:0.8rem;">⚡ TUG OF WAR ⚡</div>
+        <div class="war-bar-container">
+            <div class="war-bar-blue" id="blueBar"></div>
+            <div class="war-bar-red" id="redBar"></div>
+            <div class="bar-divider" id="barDivider"></div>
+            <div class="bar-scores">
+                <span class="bar-score" id="blueScore">0</span>
+                <span class="bar-score" id="redScore">0</span>
+            </div>
+        </div>
+        <div class="score-summary">
+            <span style="color:var(--blue-light);">🔵 <span id="p1SummaryName">Player 1</span>: <strong id="p1ScoreChip">0</strong></span>
+            <span style="color:var(--red-light);">🔴 <span id="p2SummaryName">Player 2</span>: <strong id="p2ScoreChip">0</strong></span>
+        </div>
+    </div>
+
+    <!-- Player 2 Panel -->
+    <div class="player-panel p2" id="p2Panel">
+        <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+        <div class="level-badge" id="p2LevelBadge">Level 1 / 10</div>
+        <div class="target-box" id="p2Target">🎯 --:--</div>
+        <canvas class="clock-canvas" id="p2Canvas" width="300" height="300"></canvas>
+        <div class="selected-hand-msg" id="p2HandMsg">⚡ Tap hand to select</div>
+        <div class="control-row">
+            <button class="ctrl-btn" id="p2Anti">«</button>
+            <button class="ctrl-btn" id="p2ClockWise">»</button>
+            <button class="ctrl-btn" id="p2Reset">🔄</button>
+        </div>
+        <button class="submit-btn" id="p2Submit">✅ SUBMIT</button>
+    </div>
+</div>
+
+<!-- Victory Overlay -->
+<div class="overlay" id="overlay">
+    <div class="result-card">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-scores">
+            <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2rem; font-weight:900;" id="finalP1">0</div></div>
+            <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2rem; font-weight:900;" id="finalP2">0</div></div>
+        </div>
+        <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ──────────────────────────────
+    // CLOCK LEVELS (30 levels)
+    // ──────────────────────────────
+    const LEVELS = [
+        { hour: 3, minute: 0 }, { hour: 6, minute: 30 }, { hour: 9, minute: 45 },
+        { hour: 12, minute: 0 }, { hour: 4, minute: 20 }, { hour: 7, minute: 55 },
+        { hour: 2, minute: 35 }, { hour: 11, minute: 5 }, { hour: 1, minute: 50 },
+        { hour: 10, minute: 15 }, { hour: 5, minute: 10 }, { hour: 8, minute: 40 },
+        { hour: 12, minute: 30 }, { hour: 2, minute: 0 }, { hour: 9, minute: 20 },
+        { hour: 4, minute: 55 }, { hour: 7, minute: 15 }, { hour: 11, minute: 45 },
+        { hour: 3, minute: 35 }, { hour: 6, minute: 5 }, { hour: 1, minute: 25 },
+        { hour: 10, minute: 50 }, { hour: 5, minute: 45 }, { hour: 8, minute: 10 },
+        { hour: 12, minute: 15 }, { hour: 2, minute: 50 }, { hour: 9, minute: 0 },
+        { hour: 4, minute: 35 }, { hour: 7, minute: 20 }, { hour: 11, minute: 30 }
+    ];
+
+    // ──────────────────────────────
+    // DOM ELEMENTS
+    // ──────────────────────────────
+    const $ = id => document.getElementById(id);
+    const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
+    const p1LevelBadge = $('p1LevelBadge'), p2LevelBadge = $('p2LevelBadge');
+    const p1Target = $('p1Target'), p2Target = $('p2Target');
+    const p1Canvas = $('p1Canvas'), p2Canvas = $('p2Canvas');
+    const p1HandMsg = $('p1HandMsg'), p2HandMsg = $('p2HandMsg');
+    const p1Anti = $('p1Anti'), p2Anti = $('p2Anti');
+    const p1ClockWise = $('p1ClockWise'), p2ClockWise = $('p2ClockWise');
+    const p1Reset = $('p1Reset'), p2Reset = $('p2Reset');
+    const p1Submit = $('p1Submit'), p2Submit = $('p2Submit');
+    const blueBar = $('blueBar'), redBar = $('redBar'), barDivider = $('barDivider');
+    const blueScoreEl = $('blueScore'), redScoreEl = $('redScore');
+    const p1ScoreChip = $('p1ScoreChip'), p2ScoreChip = $('p2ScoreChip');
+    const p1SummaryName = $('p1SummaryName'), p2SummaryName = $('p2SummaryName');
+    const settingsToggle = $('settingsToggle'), settingsPanel = $('settingsPanel');
+    const p1NameInput = $('p1NameInput'), p2NameInput = $('p2NameInput');
+    const roundsInput = $('roundsInput'), applySettingsBtn = $('applySettingsBtn');
+    const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
+    const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
+    const finalP1 = $('finalP1'), finalP2 = $('finalP2');
+    const playAgainBtn = $('playAgainBtn');
+
+    // ──────────────────────────────
+    // GAME STATE
+    // ──────────────────────────────
+    let TOTAL_LEVELS = 10;
+    let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
+    let gameActive = true, barPosition = 50;
+
+    function createPlayerState(canvasId) {
+        return {
+            canvas: $(canvasId),
+            ctx: null,
+            totalScore: 0,
+            currentLevel: 0,
+            targetHour: 0,
+            targetMinute: 0,
+            clockHour: 0,      // 0-23
+            clockMinute: 0,
+            selectedHand: null, // 'hour' or 'minute'
+            locked: false,
+            levelCompleted: false,
+        };
+    }
+
+    const players = {
+        p1: createPlayerState('p1Canvas'),
+        p2: createPlayerState('p2Canvas'),
+    };
+
+    // Initialize contexts
+    players.p1.ctx = p1Canvas.getContext('2d');
+    players.p2.ctx = p2Canvas.getContext('2d');
+
+    // ──────────────────────────────
+    // UTILITIES
+    // ──────────────────────────────
+    function to12Hour(h) { let h12 = h % 12; return h12 === 0 ? 12 : h12; }
+    function formatTwo(n) { return n.toString().padStart(2, '0'); }
+    function formatTime(hour, minute) {
+        return `${to12Hour(hour)}:${formatTwo(minute)}`;
+    }
+    function timeToWords(hour, minute) {
+        const h12 = to12Hour(hour);
+        if (minute === 0) return `${h12} o'clock`;
+        if (minute === 15) return `quarter past ${h12}`;
+        if (minute === 30) return `half past ${h12}`;
+        if (minute === 45) {
+            let next = (hour + 1) % 12 || 12;
+            return `quarter to ${next}`;
+        }
+        if (minute < 30) return `${minute} min past ${h12}`;
+        let toMin = 60 - minute;
+        let next = (hour + 1) % 12 || 12;
+        return `${toMin} min to ${next}`;
+    }
+    function getRandomRepresentation(hour, minute) {
+        return Math.random() < 0.5 ? formatTime(hour, minute) : timeToWords(hour, minute);
+    }
+
+    // ──────────────────────────────
+    // BAR & SCORE
+    // ──────────────────────────────
+    function updateBar() {
+        blueBar.style.width = barPosition + '%';
+        redBar.style.width = (100 - barPosition) + '%';
+        barDivider.style.left = barPosition + '%';
+        blueScoreEl.textContent = players.p1.totalScore;
+        redScoreEl.textContent = players.p2.totalScore;
+        p1ScoreChip.textContent = players.p1.totalScore;
+        p2ScoreChip.textContent = players.p2.totalScore;
+    }
+
+    function shiftBar(favorBlue) {
+        barPosition = favorBlue ? Math.min(92, barPosition + 5) : Math.max(8, barPosition - 5);
+        updateBar();
+    }
+
+    function updateNames() {
+        p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
+        p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
+        p1SummaryName.textContent = PLAYER1;
+        p2SummaryName.textContent = PLAYER2;
+        finalP1Label.textContent = `🔵 ${PLAYER1}`;
+        finalP2Label.textContent = `🔴 ${PLAYER2}`;
+    }
+
+    // ──────────────────────────────
+    // GAME OVER
+    // ──────────────────────────────
+    function endGame(winner) {
+        if (!gameActive) return;
+        gameActive = false;
+        players.p1.locked = true;
+        players.p2.locked = true;
+        const p1 = players.p1, p2 = players.p2;
+        if (winner === 'p1') {
+            resultIcon.textContent = '🏆';
+            resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
+            resultTitle.style.color = 'var(--blue-light)';
+        } else if (winner === 'p2') {
+            resultIcon.textContent = '🏆';
+            resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
+            resultTitle.style.color = 'var(--red-light)';
+        } else {
+            resultIcon.textContent = '🤝';
+            resultTitle.textContent = "It's a Tie!";
+            resultTitle.style.color = '#fbbf24';
+        }
+        finalP1.textContent = p1.totalScore;
+        finalP2.textContent = p2.totalScore;
+        overlay.classList.add('active');
+    }
+
+    // ──────────────────────────────
+    // CLOCK DRAWING
+    // ──────────────────────────────
+    function drawClock(playerId) {
+        const p = players[playerId];
+        const ctx = p.ctx;
+        const w = p.canvas.width, h = p.canvas.height;
+        const cx = w/2, cy = h/2, r = Math.min(w, h) * 0.45;
+        ctx.clearRect(0, 0, w, h);
+        // Clock face
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+        ctx.fillStyle = '#fffef7'; ctx.fill();
+        ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 3; ctx.stroke();
+        // Tick marks
+        for (let i = 0; i < 60; i++) {
+            let angle = (i * 6 - 90) * Math.PI / 180;
+            let start = r - (i % 5 === 0 ? 14 : 8);
+            ctx.beginPath();
+            ctx.moveTo(cx + start * Math.cos(angle), cy + start * Math.sin(angle));
+            ctx.lineTo(cx + (r-2) * Math.cos(angle), cy + (r-2) * Math.sin(angle));
+            ctx.lineWidth = i % 5 === 0 ? 2 : 1;
+            ctx.strokeStyle = '#5c3a1e'; ctx.stroke();
+        }
+        // Numbers
+        ctx.font = 'bold 16px "Segoe UI"'; ctx.fillStyle = '#3e2a1f';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (let i = 1; i <= 12; i++) {
+            let angle = (i * 30 - 90) * Math.PI / 180;
+            let tx = cx + (r - 26) * Math.cos(angle);
+            let ty = cy + (r - 26) * Math.sin(angle);
+            ctx.fillText(i.toString(), tx, ty);
+        }
+        // Hands
+        const hourAngle = ((p.clockHour % 12) * 30) + (p.clockMinute * 0.5);
+        const minuteAngle = p.clockMinute * 6;
+        function drawHand(angle, length, width, color, isSelected) {
+            let rad = (angle - 90) * Math.PI / 180;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + length * Math.cos(rad), cy + length * Math.sin(rad));
+            ctx.lineWidth = width;
+            ctx.strokeStyle = isSelected ? '#E34234' : color;
+            ctx.stroke();
+            if (isSelected) {
+                ctx.beginPath();
+                ctx.arc(cx + (length-10)*Math.cos(rad)*0.4, cy + (length-10)*Math.sin(rad)*0.4, width+2, 0, 2*Math.PI);
+                ctx.fillStyle = '#ff8866aa'; ctx.fill();
+            }
+        }
+        drawHand(hourAngle, r-42, 6, '#2C4A2E', p.selectedHand === 'hour');
+        drawHand(minuteAngle, r-32, 4, '#2C5282', p.selectedHand === 'minute');
+        // Center dot
+        ctx.beginPath(); ctx.arc(cx, cy, 5, 0, 2*Math.PI); ctx.fillStyle = '#b57c48'; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 2, 0, 2*Math.PI); ctx.fillStyle = '#ffeaae'; ctx.fill();
+    }
+
+    // ──────────────────────────────
+    // HAND TAP DETECTION
+    // ──────────────────────────────
+    function getHandFromTap(playerId, clientX, clientY) {
+        const p = players[playerId];
+        const rect = p.canvas.getBoundingClientRect();
+        const scale = p.canvas.width / rect.width;
+        const cx = (clientX - rect.left) * scale, cy = (clientY - rect.top) * scale;
+        const dx = cx - p.canvas.width/2, dy = cy - p.canvas.height/2;
+        if (Math.hypot(dx, dy) < 20) return null;
+        let angle = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+        angle = (angle + 360) % 360;
+        const hourAng = ((p.clockHour % 12) * 30) + (p.clockMinute * 0.5);
+        const minAng = p.clockMinute * 6;
+        const diff = (a,b) => Math.min(Math.abs(a-b), 360-Math.abs(a-b));
+        const th = 25;
+        let hd = diff(angle, hourAng), md = diff(angle, minAng);
+        if (md < th && md <= hd) return 'minute';
+        if (hd < th) return 'hour';
+        return null;
+    }
+
+    function onCanvasTap(playerId, e) {
+        if (!gameActive || players[playerId].locked) return;
+        e.preventDefault();
+        const touch = e.touches ? e.touches[0] : e;
+        const hand = getHandFromTap(playerId, touch.clientX, touch.clientY);
+        if (hand) {
+            const p = players[playerId];
+            p.selectedHand = (p.selectedHand === hand) ? null : hand;
+            updateSelectedMsg(playerId);
+            drawClock(playerId);
+        }
+    }
+
+    function updateSelectedMsg(playerId) {
+        const p = players[playerId];
+        const msgEl = playerId === 'p1' ? p1HandMsg : p2HandMsg;
+        msgEl.textContent = p.selectedHand ? `🔴 ${p.selectedHand.toUpperCase()} hand selected` : '⚡ Tap hand to select';
+    }
+
+    // ──────────────────────────────
+    // HAND MOVEMENT
+    // ──────────────────────────────
+    function adjustHand(playerId, delta) {
+        const p = players[playerId];
+        if (!gameActive || p.locked || !p.selectedHand) return;
+        if (p.selectedHand === 'hour') {
+            p.clockHour = (p.clockHour + delta + 12) % 12;
+        } else if (p.selectedHand === 'minute') {
+            p.clockMinute = (p.clockMinute + delta + 60) % 60;
+        }
+        drawClock(playerId);
+    }
+
+    function resetClock(playerId) {
+        const p = players[playerId];
+        if (!gameActive || p.locked) return;
+        p.clockHour = 0; p.clockMinute = 0;
+        drawClock(playerId);
+    }
+
+    // ──────────────────────────────
+    // SUBMIT ANSWER
+    // ──────────────────────────────
+    function onSubmit(playerId) {
+        const p = players[playerId];
+        if (!gameActive || p.locked || p.levelCompleted) return;
+        const targetHour = p.targetHour % 12;
+        const currentHour = p.clockHour % 12;
+        const match = (currentHour === targetHour) && (p.clockMinute === p.targetMinute);
+        const panel = playerId === 'p1' ? $('p1Panel') : $('p2Panel');
+
+        if (match) {
+            // Correct
+            p.totalScore++;
+            shiftBar(playerId === 'p1');
+            updateBar();
+            // Flash green
+            panel.style.boxShadow = '0 0 20px #22c55e';
+            setTimeout(() => panel.style.boxShadow = '', 400);
+
+            // Advance level
+            p.currentLevel++;
+            if (p.currentLevel >= TOTAL_LEVELS) {
+                p.locked = true;
+                endGame(playerId);
+            } else {
+                loadLevel(playerId);
+            }
+        } else {
+            // Wrong
+            shiftBar(playerId !== 'p1');
+            if (p.totalScore > 0) p.totalScore--;
+            updateBar();
+            // Flash red
+            panel.style.boxShadow = '0 0 20px #ef4444';
+            setTimeout(() => panel.style.boxShadow = '', 400);
+            // Shake canvas briefly
+            p.canvas.style.animation = 'shake 0.4s ease';
+            setTimeout(() => p.canvas.style.animation = '', 400);
+        }
+    }
+
+    // ──────────────────────────────
+    // LOAD LEVEL
+    // ──────────────────────────────
+    function loadLevel(playerId) {
+        const p = players[playerId];
+        const level = LEVELS[p.currentLevel % LEVELS.length];
+        p.targetHour = level.hour;
+        p.targetMinute = level.minute;
+        p.levelCompleted = false;
+        // Randomize clock to a non-matching position
+        for (let tries = 0; tries < 50; tries++) {
+            let h = Math.floor(Math.random() * 12);
+            let m = Math.floor(Math.random() * 60);
+            if ((h % 12) !== (p.targetHour % 12) || m !== p.targetMinute) {
+                p.clockHour = h;
+                p.clockMinute = m;
+                break;
+            }
+        }
+        p.selectedHand = null;
+        updateSelectedMsg(playerId);
+        drawClock(playerId);
+        // Update target display
+        const targetEl = playerId === 'p1' ? p1Target : p2Target;
+        targetEl.textContent = '🎯 ' + getRandomRepresentation(p.targetHour, p.targetMinute);
+        // Update level badge
+        const badge = playerId === 'p1' ? p1LevelBadge : p2LevelBadge;
+        badge.textContent = `Level ${p.currentLevel+1} / ${TOTAL_LEVELS}`;
+    }
+
+    // ──────────────────────────────
+    // FULL RESET
+    // ──────────────────────────────
+    function fullReset() {
+        gameActive = true;
+        barPosition = 50;
+        players.p1 = createPlayerState('p1Canvas');
+        players.p2 = createPlayerState('p2Canvas');
+        players.p1.ctx = p1Canvas.getContext('2d');
+        players.p2.ctx = p2Canvas.getContext('2d');
+        loadLevel('p1');
+        loadLevel('p2');
+        updateBar();
+        updateNames();
+        overlay.classList.remove('active');
+        roundsInput.max = LEVELS.length;
+    }
+
+    // ──────────────────────────────
+    // SETTINGS
+    // ──────────────────────────────
+    function applySettings() {
+        const p1name = p1NameInput.value.trim() || 'Player 1';
+        const p2name = p2NameInput.value.trim() || 'Player 2';
+        let levels = parseInt(roundsInput.value, 10);
+        if (isNaN(levels) || levels < 1) levels = 1;
+        if (levels > LEVELS.length) levels = LEVELS.length;
+        roundsInput.value = levels;
+        PLAYER1 = p1name;
+        PLAYER2 = p2name;
+        TOTAL_LEVELS = levels;
+        settingsPanel.classList.remove('open');
+        fullReset();
+    }
+
+    settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+    applySettingsBtn.addEventListener('click', applySettings);
+    playAgainBtn.addEventListener('click', applySettings);
+
+    // ──────────────────────────────
+    // EVENT WIRING
+    // ──────────────────────────────
+    function setupPlayerEvents(playerId) {
+        const canvas = playerId === 'p1' ? p1Canvas : p2Canvas;
+        canvas.addEventListener('click', (e) => onCanvasTap(playerId, e));
+        canvas.addEventListener('touchstart', (e) => onCanvasTap(playerId, e), { passive: false });
+
+        const antiBtn = playerId === 'p1' ? p1Anti : p2Anti;
+        const cwBtn = playerId === 'p1' ? p1ClockWise : p2ClockWise;
+        const resetBtn = playerId === 'p1' ? p1Reset : p2Reset;
+        const submitBtn = playerId === 'p1' ? p1Submit : p2Submit;
+
+        antiBtn.addEventListener('click', () => adjustHand(playerId, -1));
+        cwBtn.addEventListener('click', () => adjustHand(playerId, 1));
+        resetBtn.addEventListener('click', () => resetClock(playerId));
+        submitBtn.addEventListener('click', () => onSubmit(playerId));
+    }
+
+    setupPlayerEvents('p1');
+    setupPlayerEvents('p2');
+
+    // Add shake animation
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+        @keyframes shake {
+            0%,100%{ transform: translateX(0); }
+            20%{ transform: translateX(-5px); }
+            40%{ transform: translateX(5px); }
+            60%{ transform: translateX(-3px); }
+            80%{ transform: translateX(3px); }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // ──────────────────────────────
+    // INIT
+    // ──────────────────────────────
+    roundsInput.max = LEVELS.length;
+    roundsInput.value = TOTAL_LEVELS;
+    updateNames();
+    fullReset();
+})();
+</script>
+</body>
+</html>

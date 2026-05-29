@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Word Brick Breaker Tug of War · Two‑Player</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --surface: #111b2e;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --red: #ef4444;
+            --red-light: #f87171;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --radius: 16px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 1.5vh, 16px);
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: clamp(6px, 1.2vw, 14px);
+            max-width: 1500px;
+        }
+        .player-panel {
+            flex: 1;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            padding: clamp(6px, 1vw, 12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(4px, 0.8vh, 8px);
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .player-panel.p1 {
+            border-top: 4px solid var(--blue);
+        }
+        .player-panel.p2 {
+            border-top: 4px solid var(--red);
+        }
+        .player-name {
+            font-weight: 700;
+            font-size: clamp(0.8rem, 1.4vw, 1.1rem);
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+        }
+        .p1 .player-name {
+            color: var(--blue-light);
+        }
+        .p2 .player-name {
+            color: var(--red-light);
+        }
+        .brick-area {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(180deg, #0b1a2e, #1a2a4e);
+            border: 2px solid #334155;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 4px 0;
+        }
+        .brick-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.5%;
+            margin: 2px 0;
+        }
+        .brick {
+            width: 5%;
+            height: 16px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .brick.red {
+            background: linear-gradient(135deg, #f44336, #c62828);
+        }
+        .shooter {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ff9800, #f57c00);
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff9800;
+            border: 2px solid #ffd700;
+            z-index: 5;
+        }
+        .bullet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            border-radius: 50%;
+            z-index: 3;
+            box-shadow: 0 0 8px #ff5252;
+        }
+        .target-sound {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fbbf24;
+            padding: 0.2rem 0.8rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        .word-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: #0f172a;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem;
+            color: #fbbf24;
+            min-height: 28px;
+            text-align: center;
+            width: 90%;
+            word-break: break-word;
+        }
+        .used-words {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 0.65rem;
+            height: 40px;
+            overflow-y: auto;
+            width: 90%;
+            color: #94a3b8;
+        }
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+            gap: 3px;
+            width: 100%;
+            max-width: 280px;
+            margin: 4px 0;
+        }
+        .key-btn {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 2px;
+            background: #334155;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+            text-transform: uppercase;
+            touch-action: manipulation;
+        }
+        .key-btn:active {
+            background: #475569;
+            transform: scale(0.95);
+        }
+        .ctrl-row {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            justify-content: center;
+        }
+        .ctrl-btn {
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            flex: 1;
+            touch-action: manipulation;
+        }
+        .ctrl-btn:active {
+            transform: scale(0.95);
+        }
+        .ctrl-btn.left {
+            background: #2563eb;
+        }
+        .ctrl-btn.right {
+            background: #2563eb;
+        }
+        .ctrl-btn.clear {
+            background: #b91c1c;
+        }
+        .ctrl-btn.fire {
+            background: #dc2626;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        .center-column {
+            flex: 0 0 clamp(230px, 24vw, 260px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .settings-toggle {
+            background: none;
+            border: 2px solid #334155;
+            color: #cbd5e1;
+            border-radius: 2rem;
+            padding: 0.3rem 1rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: inherit;
+        }
+        .settings-toggle:hover {
+            background: #1e293b;
+        }
+        .settings-panel {
+            display: none;
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            width: 100%;
+            flex-direction: column;
+            gap: 0.5rem;
+            border: 1px solid #334155;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .settings-panel.open {
+            display: flex;
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .setting-row label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        .setting-row input[type="text"],
+        .setting-row input[type="number"] {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 0.3rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+        .setting-row input[type="text"] {
+            width: 70px;
+        }
+        .setting-row input[type="number"] {
+            width: 50px;
+        }
+        .apply-settings-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+        .war-bar-container {
+            width: 100%;
+            position: relative;
+            height: 45px;
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+        }
+        .war-bar-blue,
+        .war-bar-red {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+        }
+        .war-bar-blue {
+            left: 0;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+            border-radius: 28px 0 0 28px;
+        }
+        .war-bar-red {
+            right: 0;
+            background: linear-gradient(180deg, #ef4444, #991b1b);
+            border-radius: 0 28px 28px 0;
+        }
+        .bar-divider {
+            position: absolute;
+            top: 5%;
+            height: 90%;
+            width: 4px;
+            background: white;
+            box-shadow: 0 0 10px white;
+            border-radius: 4px;
+            transition: left 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+            z-index: 5;
+        }
+        .bar-scores {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+        .bar-score {
+            font-weight: 900;
+            font-size: 0.9rem;
+            color: white;
+            text-shadow: 0 2px 6px black;
+        }
+        .score-summary {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .result-card {
+            background: #1e293b;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px black;
+            max-width: 400px;
+            width: 90%;
+        }
+        .result-icon {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .result-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+        }
+        .result-scores {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.2rem 0;
+        }
+        .play-again-btn {
+            background: #6366f1;
+            border: none;
+            color: white;
+            padding: 0.7rem 2rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        @media (max-width: 750px) {
+            .game-layout {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .center-column {
+                flex: 0 0 auto;
+                width: 100%;
+                order: -1;
+            }
+            .player-panel {
+                max-height: 40vh;
+            }
+            .brick-area {
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-layout">
+    <!-- Player 1 Panel -->
+    <div class="player-panel p1" id="p1Panel">
+        <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+        <div class="target-sound" id="p1TargetSound">Target: st</div>
+        <div class="brick-area" id="p1BrickArea">
+            <div class="brick-grid" id="p1BrickGrid"></div>
+            <div class="shooter" id="p1Shooter"></div>
+        </div>
+        <div class="word-display" id="p1CurrentWord"></div>
+        <div class="used-words" id="p1UsedWords">No words yet</div>
+        <div class="keyboard-grid" id="p1Keyboard"></div>
+        <div class="ctrl-row">
+            <button class="ctrl-btn left" id="p1Left">◀</button>
+            <button class="ctrl-btn clear" id="p1Clear">⌫</button>
+            <button class="ctrl-btn right" id="p1Right">▶</button>
+            <button class="ctrl-btn fire" id="p1Fire">FIRE</button>
+        </div>
+    </div>
+
+    <!-- Center Column -->
+    <div class="center-column">
+        <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
+        <div class="settings-panel" id="settingsPanel">
+            <div class="setting-row">
+                <label>Player 1 Name</label>
+                <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+            </div>
+            <div class="setting-row">
+                <label>Player 2 Name</label>
+                <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+            </div>
+            <div class="setting-row">
+                <label>Rows</label>
+                <input type="number" id="rowsInput" value="3" min="1" max="8">
+            </div>
+            <div class="setting-row">
+                <label>Bricks per row</label>
+                <input type="number" id="bricksPerRowInput" value="6" min="2" max="12">
+            </div>
+            <div class="setting-row">
+                <label>Target Sound</label>
+                <input type="text" id="targetSoundInput" value="st" maxlength="6">
+            </div>
+            <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
+        </div>
+        <div style="font-weight:700; color:#cbd5e1; letter-spacing:1px; font-size:0.7rem;">⚡ TUG OF WAR ⚡</div>
+        <div class="war-bar-container">
+            <div class="war-bar-blue" id="blueBar"></div>
+            <div class="war-bar-red" id="redBar"></div>
+            <div class="bar-divider" id="barDivider"></div>
+            <div class="bar-scores">
+                <span class="bar-score" id="blueScore">0</span>
+                <span class="bar-score" id="redScore">0</span>
+            </div>
+        </div>
+        <div class="score-summary">
+            <span style="color:var(--blue-light);">🔵 <span id="p1SummaryName">Player 1</span>: <strong id="p1ScoreChip">0</strong></span>
+            <span style="color:var(--red-light);">🔴 <span id="p2SummaryName">Player 2</span>: <strong id="p2ScoreChip">0</strong></span>
+        </div>
+    </div>
+
+    <!-- Player 2 Panel -->
+    <div class="player-panel p2" id="p2Panel">
+        <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+        <div class="target-sound" id="p2TargetSound">Target: st</div>
+        <div class="brick-area" id="p2BrickArea">
+            <div class="brick-grid" id="p2BrickGrid"></div>
+            <div class="shooter" id="p2Shooter"></div>
+        </div>
+        <div class="word-display" id="p2CurrentWord"></div>
+        <div class="used-words" id="p2UsedWords">No words yet</div>
+        <div class="keyboard-grid" id="p2Keyboard"></div>
+        <div class="ctrl-row">
+            <button class="ctrl-btn left" id="p2Left">◀</button>
+            <button class="ctrl-btn clear" id="p2Clear">⌫</button>
+            <button class="ctrl-btn right" id="p2Right">▶</button>
+            <button class="ctrl-btn fire" id="p2Fire">FIRE</button>
+        </div>
+    </div>
+</div>
+
+<!-- Victory Overlay -->
+<div class="overlay" id="overlay">
+    <div class="result-card">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-scores">
+            <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2rem; font-weight:900;" id="finalP1">0</div></div>
+            <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2rem; font-weight:900;" id="finalP2">0</div></div>
+        </div>
+        <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ───────────────────────────────────
+        // EXTENSIVE WORD BANK (1500+ common English words)
+        // All lowercase, contains various phonics patterns
+        // ───────────────────────────────────
+        const DICTIONARY = [
+            // st- words
+            "stop", "star", "step", "stone", "stove", "stick", "store", "storm", "stamp", "still",
+            "stand", "start", "state", "steel", "steam", "sting", "stump", "style", "stall", "stray",
+            "stable", "staple", "starch", "steady", "stealth", "stifle", "stigma", "stirup", "stroll",
+            "starve", "stun", "stoop", "stout", "stain", "stair", "stake", "stale", "stall", "stalk",
+            "stallion", "stanza", "stare", "stark", "starling", "startle", "stash", "station", "statue", "status",
+            "stave", "stay", "stead", "steak", "steal", "steam", "steed", "steep", "steer", "stem",
+            "stench", "stencil", "step", "stereo", "stern", "stew", "sticker", "stiff", "still", "stilt",
+            "stimuli", "stingy", "stink", "stint", "stipend", "stipule", "stir", "stitch", "stock", "stoic",
+            "stoke", "stomach", "stone", "stony", "stool", "stoop", "storage", "store", "storm", "story",
+            "stout", "stove", "stow", "strafe", "strain", "strait", "strand", "strange", "strap", "straw",
+            "stray", "streak", "stream", "street", "stress", "stretch", "strew", "strict", "stride", "strike",
+            "string", "strip", "stripe", "strobe", "stroke", "stroll", "strong", "struck", "struggle", "strut",
+            "stub", "stubble", "stubborn", "stud", "student", "study", "stuff", "stumble", "stump", "stun",
+            "stunt", "stupid", "sturdy", "stutter", "sty", "style", "stylish", "suave", "sub", "subject",
+            // sm- words
+            "smile", "small", "smash", "smoke", "smell", "smart", "smith", "smooth", "smack", "smudge",
+            "smear", "smelt", "smirk", "smite", "smock", "smog", "smoke", "smolder", "smooch", "smooth",
+            "smother", "smudge", "smug", "smuggle", "smush", "smut", "smack", "smarm", "smaze", "smell",
+            // sh- words
+            "shop", "ship", "shape", "sharp", "shake", "shame", "share", "shark", "shatter", "shave",
+            "shawl", "she", "shear", "sheath", "shed", "sheen", "sheep", "sheer", "sheet", "shelf",
+            "shell", "shelter", "shelve", "shepherd", "sherbet", "shield", "shift", "shill", "shimmer", "shin",
+            "shine", "shingle", "shiny", "ship", "shire", "shirk", "shirt", "shiver", "shoal", "shock",
+            "shoe", "shoot", "shop", "shore", "short", "shot", "shoulder", "shout", "shove", "shovel",
+            "show", "shower", "shred", "shrew", "shrink", "shroud", "shrub", "shrug", "shuck", "shudder",
+            "shuffle", "shun", "shunt", "shush", "shut", "shy", "shyly", "shadow", "shaft", "shallow",
+            "sham", "shamble", "shank", "shanty", "shard", "shark", "sharp", "shatter", "shaver", "shay",
+            // ch- words
+            "chair", "chain", "chalk", "chance", "change", "channel", "chant", "chaos", "chap", "chapel",
+            "chapter", "char", "charge", "charm", "chart", "chase", "chasm", "chat", "cheap", "cheat",
+            "check", "cheek", "cheer", "cheese", "chef", "cherry", "chess", "chest", "chick", "chief",
+            "child", "chill", "chimney", "chin", "chip", "chirp", "chisel", "chive", "chocolate", "choice",
+            "choir", "choke", "choose", "chop", "chord", "chore", "chuckle", "chum", "chunk", "church",
+            "churn", "chute", "cinch", "circle", "circus", "cite", "city", "civil", "claim", "clamp",
+            // th- words
+            "that", "this", "them", "then", "there", "these", "they", "thick", "thin", "thing",
+            "think", "third", "thirst", "thirteen", "thirty", "thong", "thorax", "thorn", "thorough", "those",
+            "though", "thought", "thousand", "thrash", "thread", "threat", "three", "threw", "throat", "throb",
+            "throne", "throng", "through", "throw", "thrust", "thumb", "thump", "thunder", "thus", "thyme",
+            "than", "thank", "thaw", "the", "theft", "their", "them", "theme", "then", "theory",
+            "there", "thermal", "these", "thick", "thief", "thigh", "thimble", "thin", "thing", "think",
+            // ee / ea words
+            "bee", "beef", "been", "beep", "beer", "beet", "deep", "deer", "feed", "feel",
+            "feet", "flee", "fleet", "free", "greed", "green", "greet", "heel", "keen", "keep",
+            "meet", "need", "peel", "peep", "peer", "queen", "reed", "reef", "seek", "seem",
+            "seen", "sheep", "sheet", "sleep", "sleet", "speech", "speed", "steel", "steep", "street",
+            "sweet", "teen", "teeth", "three", "tree", "week", "weep", "wheel", "breeze", "cheese",
+            "coffee", "freeze", "knee", "screen", "sneeze", "speak", "teach", "beach", "bead", "beam",
+            "bean", "bear", "beat", "bleak", "bleat", "cheap", "clean", "clear", "cream", "deal",
+            "dear", "dream", "each", "ear", "east", "easy", "eat", "fear", "feast", "grease",
+            "great", "hear", "heat", "lead", "leaf", "lean", "learn", "least", "leave", "meal",
+            "mean", "meat", "near", "neat", "peace", "peach", "peak", "pearl", "plead", "please",
+            "reach", "read", "ready", "real", "reap", "rear", "season", "seat", "shear", "steak",
+            "stream", "tea", "teach", "team", "tear", "treat", "weak", "wealth", "wear", "weather",
+            "yea", "year", "yeast", "zeal", "breathe", "feather", "leather", "measure", "pleasure", "treasure",
+            // oo words
+            "book", "cook", "foot", "good", "hood", "hook", "look", "nook", "rook", "shook",
+            "soot", "stood", "took", "wood", "wool", "bloom", "boom", "boot", "broom", "coo",
+            "cool", "doom", "food", "fool", "groom", "hoop", "hoot", "loop", "loose", "moo",
+            "moon", "noon", "pool", "proof", "roof", "room", "root", "scoop", "shoot", "soon",
+            "spoon", "stool", "stoop", "tool", "tooth", "troop", "zoo", "zoom", "balloon", "cartoon",
+            "choose", "loose", "lose", "move", "prove", "shoe", "who", "whose", "do", "to",
+            // ai words
+            "aid", "ail", "aim", "air", "bait", "brain", "chain", "claim", "drain", "fail",
+            "fair", "faith", "gain", "grain", "hail", "hair", "jail", "laid", "maid", "mail",
+            "main", "nail", "paint", "paid", "pail", "pain", "pair", "plain", "rain", "raise",
+            "sail", "saint", "stain", "tail", "train", "wait", "waist", "again", "against", "afraid",
+            "explain", "remain", "repair", "campaign", "mountain", "captain", "certain", "curtain",
+            // ou words
+            "about", "cloud", "found", "ground", "loud", "mount", "mouth", "out", "pound", "proud",
+            "round", "shout", "sound", "south", "spout", "stout", "thou", "count", "house", "mouse",
+            "blouse", "couch", "doubt", "flour", "hour", "our", "sour", "tour", "your", "youth",
+            "bounce", "council", "country", "couple", "courage", "cousin", "double", "enough", "rough", "tough",
+            "touch", "trouble", "young", "flourish", "nourish", "southern", "thorough",
+            // other common words
+            "apple", "banana", "orange", "grape", "melon", "peach", "berry", "cherry", "lemon", "mango",
+            "table", "chair", "window", "door", "floor", "wall", "roof", "garden", "kitchen", "bedroom",
+            "happy", "sad", "angry", "excited", "brave", "calm", "clever", "kind", "lazy", "wise",
+            "beautiful", "ugly", "big", "small", "fast", "slow", "high", "low", "long", "short",
+            "love", "hate", "like", "enjoy", "help", "give", "take", "make", "do", "go",
+            "come", "see", "hear", "feel", "taste", "smell", "think", "know", "understand", "remember",
+            "forget", "start", "finish", "open", "close", "push", "pull", "turn", "move", "stay",
+            "animal", "bird", "cat", "dog", "fish", "horse", "lion", "tiger", "bear", "wolf",
+            "color", "red", "blue", "green", "yellow", "black", "white", "brown", "purple", "pink",
+            "number", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+            "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "twenty", "thirty", "hundred", "thousand",
+            "family", "mother", "father", "sister", "brother", "baby", "child", "parent", "uncle", "aunt",
+            "school", "teacher", "student", "class", "lesson", "book", "pen", "paper", "pencil", "ruler",
+            "computer", "phone", "tablet", "screen", "keyboard", "mouse", "game", "play", "fun", "learn",
+            "water", "fire", "earth", "wind", "air", "sky", "sun", "moon", "star", "cloud",
+            "rain", "snow", "storm", "ice", "heat", "cold", "warm", "cool", "hot", "dry",
+            "wet", "light", "dark", "day", "night", "morning", "evening", "afternoon", "today", "tomorrow",
+            "yesterday", "now", "later", "soon", "always", "never", "sometimes", "often", "rarely", "usually",
+            "music", "song", "dance", "art", "draw", "paint", "sing", "play", "read", "write",
+            "speak", "listen", "walk", "run", "jump", "swim", "fly", "ride", "drive", "travel"
+        ];
+
+        // Ensure all words are lowercase (they are already, but just in case)
+        DICTIONARY.forEach((word, i) => DICTIONARY[i] = word.toLowerCase());
+
+        function getAllLetters() {
+            return [...new Set(DICTIONARY.join(''))].sort();
+        }
+
+        // ──────────────── DOM ELEMENTS ────────────────
+        const $ = id => document.getElementById(id);
+        const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
+        const p1TargetSound = $('p1TargetSound'), p2TargetSound = $('p2TargetSound');
+        const p1BrickArea = $('p1BrickArea'), p2BrickArea = $('p2BrickArea');
+        const p1BrickGrid = $('p1BrickGrid'), p2BrickGrid = $('p2BrickGrid');
+        const p1Shooter = $('p1Shooter'), p2Shooter = $('p2Shooter');
+        const p1CurrentWord = $('p1CurrentWord'), p2CurrentWord = $('p2CurrentWord');
+        const p1UsedWords = $('p1UsedWords'), p2UsedWords = $('p2UsedWords');
+        const p1Keyboard = $('p1Keyboard'), p2Keyboard = $('p2Keyboard');
+        const p1Left = $('p1Left'), p2Left = $('p2Left');
+        const p1Clear = $('p1Clear'), p2Clear = $('p2Clear');
+        const p1Right = $('p1Right'), p2Right = $('p2Right');
+        const p1Fire = $('p1Fire'), p2Fire = $('p2Fire');
+        const blueBar = $('blueBar'), redBar = $('redBar'), barDivider = $('barDivider');
+        const blueScoreEl = $('blueScore'), redScoreEl = $('redScore');
+        const p1ScoreChip = $('p1ScoreChip'), p2ScoreChip = $('p2ScoreChip');
+        const p1SummaryName = $('p1SummaryName'), p2SummaryName = $('p2SummaryName');
+        const settingsToggle = $('settingsToggle'), settingsPanel = $('settingsPanel');
+        const p1NameInput = $('p1NameInput'), p2NameInput = $('p2NameInput');
+        const rowsInput = $('rowsInput'), bricksPerRowInput = $('bricksPerRowInput');
+        const targetSoundInput = $('targetSoundInput'), applySettingsBtn = $('applySettingsBtn');
+        const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
+        const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
+        const finalP1 = $('finalP1'), finalP2 = $('finalP2');
+        const playAgainBtn = $('playAgainBtn');
+
+        // ──────────────── GAME STATE ────────────────
+        let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
+        let TARGET_SOUND = 'st';
+        let ROWS = 3, BRICKS_PER_ROW = 6;
+        let gameActive = true, barPosition = 50;
+
+        function createPlayerState(playerId) {
+            return {
+                id: playerId,
+                shooterPercent: 50,
+                bricks: [],
+                initialBrickCount: 0,
+                usedWords: new Set(),
+                currentWord: '',
+                totalScore: 0,
+                bulletActive: false
+            };
+        }
+
+        const players = {
+            p1: createPlayerState('p1'),
+            p2: createPlayerState('p2')
+        };
+
+        // ──────────────── UTILS ────────────────
+        function wordIsValid(word, playerId) {
+            const p = players[playerId];
+            const lower = word.toLowerCase().trim();
+            const target = TARGET_SOUND.trim().toLowerCase();
+
+            if (!DICTIONARY.includes(lower)) return false;
+            if (p.usedWords.has(lower)) return false;
+            // If target is empty, any word passes; otherwise must contain it
+            if (target && !lower.includes(target)) return false;
+            return true;
+        }
+
+        // ──────────────── BAR & SCORE ────────────────
+        function updateBar() {
+            blueBar.style.width = barPosition + '%';
+            redBar.style.width = (100 - barPosition) + '%';
+            barDivider.style.left = barPosition + '%';
+            blueScoreEl.textContent = players.p1.totalScore;
+            redScoreEl.textContent = players.p2.totalScore;
+            p1ScoreChip.textContent = players.p1.totalScore;
+            p2ScoreChip.textContent = players.p2.totalScore;
+        }
+
+        function shiftBar(favorBlue) {
+            barPosition = favorBlue ? Math.min(92, barPosition + 5) : Math.max(8, barPosition - 5);
+            updateBar();
+        }
+
+        function updateNames() {
+            p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
+            p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
+            p1SummaryName.textContent = PLAYER1;
+            p2SummaryName.textContent = PLAYER2;
+            finalP1Label.textContent = `🔵 ${PLAYER1}`;
+            finalP2Label.textContent = `🔴 ${PLAYER2}`;
+        }
+
+        // ──────────────── GAME OVER ────────────────
+        function endGame(winner) {
+            if (!gameActive) return;
+            gameActive = false;
+            const p1 = players.p1, p2 = players.p2;
+            if (winner === 'p1') {
+                resultIcon.textContent = '🏆';
+                resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
+                resultTitle.style.color = 'var(--blue-light)';
+            } else if (winner === 'p2') {
+                resultIcon.textContent = '🏆';
+                resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
+                resultTitle.style.color = 'var(--red-light)';
+            } else {
+                resultIcon.textContent = '🤝';
+                resultTitle.textContent = "It's a Tie!";
+                resultTitle.style.color = '#fbbf24';
+            }
+            finalP1.textContent = p1.totalScore;
+            finalP2.textContent = p2.totalScore;
+            overlay.classList.add('active');
+        }
+
+        // ──────────────── BRICK RENDERING ────────────────
+        function buildBricks(playerId) {
+            const p = players[playerId];
+            const grid = playerId === 'p1' ? p1BrickGrid : p2BrickGrid;
+            grid.innerHTML = '';
+            p.bricks = [];
+            for (let r = 0; r < ROWS; r++) {
+                const row = document.createElement('div');
+                row.className = 'brick-row';
+                for (let c = 0; c < BRICKS_PER_ROW; c++) {
+                    const brick = document.createElement('div');
+                    brick.className = 'brick';
+                    row.appendChild(brick);
+                    p.bricks.push(brick);
+                }
+                grid.appendChild(row);
+            }
+            p.initialBrickCount = p.bricks.length;
+        }
+
+        function addPenaltyBrick(playerId) {
+            const p = players[playerId];
+            const grid = playerId === 'p1' ? p1BrickGrid : p2BrickGrid;
+            const rows = grid.children;
+            for (let row of rows) {
+                if (row.children.length < BRICKS_PER_ROW) {
+                    const brick = document.createElement('div');
+                    brick.className = 'brick red';
+                    row.appendChild(brick);
+                    p.bricks.push(brick);
+                    return;
+                }
+            }
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            const brick = document.createElement('div');
+            brick.className = 'brick red';
+            newRow.appendChild(brick);
+            grid.appendChild(newRow);
+            p.bricks.push(brick);
+        }
+
+        function removeBrick(playerId, brickEl) {
+            const p = players[playerId];
+            brickEl.remove();
+            p.bricks = p.bricks.filter(b => b !== brickEl);
+        }
+
+        // ──────────────── SHOOTER & BULLET ────────────────
+        function updateShooter(playerId) {
+            const p = players[playerId];
+            const shooter = playerId === 'p1' ? p1Shooter : p2Shooter;
+            shooter.style.left = p.shooterPercent + '%';
+        }
+
+        function moveShooter(playerId, delta) {
+            if (!gameActive) return;
+            const p = players[playerId];
+            p.shooterPercent = Math.max(2, Math.min(98, p.shooterPercent + delta));
+            updateShooter(playerId);
+        }
+
+        function shoot(playerId) {
+            if (!gameActive) return;
+            const p = players[playerId];
+            if (p.bulletActive) return;
+            const word = p.currentWord.trim();
+            if (!word) return;
+
+            if (!wordIsValid(word, playerId)) {
+                p.currentWord = '';
+                updateWordDisplay(playerId);
+                addPenaltyBrick(playerId);
+                shiftBar(playerId !== 'p1');
+                flashPanel(playerId, 'red');
+                return;
+            }
+
+            p.bulletActive = true;
+            p.usedWords.add(word.toLowerCase());
+            p.currentWord = '';
+            updateWordDisplay(playerId);
+            updateUsedWords(playerId);
+
+            const area = playerId === 'p1' ? p1BrickArea : p2BrickArea;
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = p.shooterPercent + '%';
+            bullet.style.bottom = '24px';
+            area.appendChild(bullet);
+
+            let pos = 24;
+            const speed = 3;
+            const interval = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(interval);
+                    bullet.remove();
+                    p.bulletActive = false;
+                    return;
+                }
+                pos += speed;
+                bullet.style.bottom = pos + 'px';
+
+                const areaRect = area.getBoundingClientRect();
+                const bulletRect = bullet.getBoundingClientRect();
+                for (let i = 0; i < p.bricks.length; i++) {
+                    const brick = p.bricks[i];
+                    const brickRect = brick.getBoundingClientRect();
+                    if (bulletRect.left < brickRect.right &&
+                        bulletRect.right > brickRect.left &&
+                        bulletRect.top < brickRect.bottom &&
+                        bulletRect.bottom > brickRect.top) {
+                        clearInterval(interval);
+                        bullet.remove();
+                        p.bulletActive = false;
+                        removeBrick(playerId, brick);
+                        p.totalScore++;
+                        shiftBar(playerId === 'p1');
+                        updateBar();
+                        flashPanel(playerId, 'green');
+                        if (p.bricks.length === 0) {
+                            endGame(playerId);
+                        }
+                        return;
+                    }
+                }
+                if (pos > area.clientHeight) {
+                    clearInterval(interval);
+                    bullet.remove();
+                    p.bulletActive = false;
+                }
+            }, 16);
+        }
+
+        function flashPanel(playerId, color) {
+            const panel = playerId === 'p1' ? $('p1Panel') : $('p2Panel');
+            const boxShadow = color === 'green' ? '0 0 20px #22c55e' : '0 0 20px #ef4444';
+            panel.style.boxShadow = boxShadow;
+            setTimeout(() => panel.style.boxShadow = '', 400);
+        }
+
+        // ──────────────── WORD BUILDING ────────────────
+        function updateWordDisplay(playerId) {
+            const el = playerId === 'p1' ? p1CurrentWord : p2CurrentWord;
+            el.textContent = players[playerId].currentWord;
+        }
+
+        function updateUsedWords(playerId) {
+            const el = playerId === 'p1' ? p1UsedWords : p2UsedWords;
+            const arr = Array.from(players[playerId].usedWords);
+            el.textContent = arr.length ? arr.join(', ') : 'No words yet';
+        }
+
+        function addLetter(playerId, letter) {
+            if (!gameActive) return;
+            players[playerId].currentWord += letter;
+            updateWordDisplay(playerId);
+        }
+
+        function clearWord(playerId) {
+            if (!gameActive) return;
+            players[playerId].currentWord = '';
+            updateWordDisplay(playerId);
+        }
+
+        // ──────────────── KEYBOARD BUILD ────────────────
+        function buildKeyboard(playerId) {
+            const container = playerId === 'p1' ? p1Keyboard : p2Keyboard;
+            container.innerHTML = '';
+            const letters = getAllLetters();
+            letters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter.toUpperCase();
+                btn.addEventListener('click', () => addLetter(playerId, letter));
+                container.appendChild(btn);
+            });
+        }
+
+        function updateTargetDisplay() {
+            const text = TARGET_SOUND.trim() ? `Target: ${TARGET_SOUND}` : 'Target: (any word)';
+            p1TargetSound.textContent = text;
+            p2TargetSound.textContent = text;
+        }
+
+        // ──────────────── LIVE TARGET UPDATE ────────────────
+        targetSoundInput.addEventListener('input', () => {
+            TARGET_SOUND = targetSoundInput.value.trim().toLowerCase();
+            updateTargetDisplay();
+        });
+
+        // ──────────────── FULL RESET ────────────────
+        function fullReset() {
+            gameActive = true;
+            barPosition = 50;
+            players.p1 = createPlayerState('p1');
+            players.p2 = createPlayerState('p2');
+            buildBricks('p1');
+            buildBricks('p2');
+            updateShooter('p1');
+            updateShooter('p2');
+            updateWordDisplay('p1');
+            updateWordDisplay('p2');
+            updateUsedWords('p1');
+            updateUsedWords('p2');
+            updateBar();
+            updateNames();
+            updateTargetDisplay();
+            overlay.classList.remove('active');
+            buildKeyboard('p1');
+            buildKeyboard('p2');
+        }
+
+        // ──────────────── SETTINGS ────────────────
+        function applySettings() {
+            const p1name = p1NameInput.value.trim() || 'Player 1';
+            const p2name = p2NameInput.value.trim() || 'Player 2';
+            let rows = parseInt(rowsInput.value, 10);
+            if (isNaN(rows) || rows < 1) rows = 1;
+            if (rows > 8) rows = 8;
+            rowsInput.value = rows;
+            let bpr = parseInt(bricksPerRowInput.value, 10);
+            if (isNaN(bpr) || bpr < 2) bpr = 2;
+            if (bpr > 12) bpr = 12;
+            bricksPerRowInput.value = bpr;
+            TARGET_SOUND = targetSoundInput.value.trim().toLowerCase();
+            ROWS = rows;
+            BRICKS_PER_ROW = bpr;
+            PLAYER1 = p1name;
+            PLAYER2 = p2name;
+            settingsPanel.classList.remove('open');
+            fullReset();
+        }
+
+        settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+        applySettingsBtn.addEventListener('click', applySettings);
+        playAgainBtn.addEventListener('click', applySettings);
+
+        // ──────────────── EVENT BINDINGS ────────────────
+        function bindPlayerControls(playerId) {
+            const left = playerId === 'p1' ? p1Left : p2Left;
+            const right = playerId === 'p1' ? p1Right : p2Right;
+            const clear = playerId === 'p1' ? p1Clear : p2Clear;
+            const fire = playerId === 'p1' ? p1Fire : p2Fire;
+            left.addEventListener('click', () => moveShooter(playerId, -6));
+            right.addEventListener('click', () => moveShooter(playerId, 6));
+            clear.addEventListener('click', () => clearWord(playerId));
+            fire.addEventListener('click', () => shoot(playerId));
+        }
+        bindPlayerControls('p1');
+        bindPlayerControls('p2');
+
+        // ──────────────── INIT ────────────────
+        updateNames();
+        fullReset();
+    })();
+</script>
+</body>
+</html>

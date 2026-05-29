@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Phonics Tug of War · Two‑Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg: #0b1120;
+            --surface: #111b2e;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --red: #ef4444;
+            --red-light: #f87171;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --radius: 16px;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 2vh, 20px);
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: clamp(12px, 2vw, 24px);
+            max-width: 1400px;
+        }
+        .player-panel {
+            flex: 1;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            padding: clamp(12px, 2vw, 24px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(10px, 2vh, 18px);
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .player-panel.p1 {
+            border-top: 4px solid var(--blue);
+        }
+        .player-panel.p2 {
+            border-top: 4px solid var(--red);
+        }
+        .player-name {
+            font-weight: 700;
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.4rem 1.2rem;
+            border-radius: 2rem;
+        }
+        .p1 .player-name {
+            color: var(--blue-light);
+        }
+        .p2 .player-name {
+            color: var(--red-light);
+        }
+        .level-badge {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 1rem;
+            border-radius: 1rem;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 400px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .level-title {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.3;
+            color: #fbbf24;
+            margin: 4px 0;
+        }
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 5px;
+            width: 100%;
+        }
+        .word-tile {
+            font-weight: bold;
+            font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+            font-family: serif;
+            background: #f0f0f0;
+            color: black;
+            padding: 8px 4px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.1s, background 0.2s;
+            word-break: break-word;
+            touch-action: manipulation;
+        }
+        .word-tile:active {
+            transform: scale(0.92);
+        }
+        .word-tile.selected {
+            background: #fbbf24 !important;
+            box-shadow: 0 0 10px gold;
+        }
+        .word-tile.matched {
+            background: #c0c0c0;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 5px;
+        }
+        .cat-btn {
+            padding: 8px 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            touch-action: manipulation;
+            transition: transform 0.1s;
+            white-space: nowrap;
+        }
+        .cat-btn:active {
+            transform: scale(0.9);
+        }
+        .cat-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .center-column {
+            flex: 0 0 clamp(260px, 30vw, 340px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .settings-toggle {
+            background: none;
+            border: 2px solid #334155;
+            color: #cbd5e1;
+            border-radius: 2rem;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .settings-toggle:hover {
+            background: #1e293b;
+        }
+        .settings-panel {
+            display: none;
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 1rem;
+            width: 100%;
+            flex-direction: column;
+            gap: 0.8rem;
+            border: 1px solid #334155;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .settings-panel.open {
+            display: flex;
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .setting-row label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        .setting-row input[type="text"],
+        .setting-row input[type="number"] {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 0.4rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .setting-row input[type="text"] {
+            width: 90px;
+        }
+        .setting-row input[type="number"] {
+            width: 60px;
+        }
+        .apply-settings-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.6rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            margin-top: 0.2rem;
+        }
+        .war-bar-container {
+            width: 100%;
+            position: relative;
+            height: 70px;
+            background: white;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+        }
+        .war-bar-blue,
+        .war-bar-red {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: width 0.6s cubic-bezier(0.2, 0.9, 0.4, 1);
+        }
+        .war-bar-blue {
+            left: 0;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+            border-radius: 40px 0 0 40px;
+        }
+        .war-bar-red {
+            right: 0;
+            background: linear-gradient(180deg, #ef4444, #991b1b);
+            border-radius: 0 40px 40px 0;
+        }
+        .bar-divider {
+            position: absolute;
+            top: 5%;
+            height: 90%;
+            width: 4px;
+            background: white;
+            box-shadow: 0 0 12px white;
+            border-radius: 4px;
+            transition: left 0.6s cubic-bezier(0.2, 0.9, 0.4, 1);
+            z-index: 5;
+        }
+        .bar-scores {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .bar-score {
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: white;
+            text-shadow: 0 2px 8px black;
+            line-height: 1;
+        }
+        .score-summary {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-weight: 700;
+        }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .result-card {
+            background: #1e293b;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px black;
+            max-width: 400px;
+            width: 90%;
+        }
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+        }
+        .result-title {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+        .result-scores {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+        .play-again-btn {
+            background: #6366f1;
+            border: none;
+            color: white;
+            padding: 0.8rem 2.5rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        @media (max-width: 750px) {
+            .game-layout {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .center-column {
+                flex: 0 0 auto;
+                width: 100%;
+                order: -1;
+            }
+            .war-bar-container {
+                height: 50px;
+            }
+            .player-panel {
+                max-height: 45vh;
+            }
+            .words-grid {
+                grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-layout">
+    <!-- Player 1 Panel -->
+    <div class="player-panel p1" id="p1Panel">
+        <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+        <div class="level-badge" id="p1LevelBadge">Level 1 / 10</div>
+        <div class="game-container" id="p1GameContainer"></div>
+    </div>
+
+    <!-- Center Column (settings + war bar) -->
+    <div class="center-column">
+        <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
+        <div class="settings-panel" id="settingsPanel">
+            <div class="setting-row">
+                <label>Player 1 Name</label>
+                <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+            </div>
+            <div class="setting-row">
+                <label>Player 2 Name</label>
+                <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+            </div>
+            <div class="setting-row">
+                <label>Levels to Win</label>
+                <input type="number" id="roundsInput" value="10" min="1" max="20" step="1">
+            </div>
+            <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
+        </div>
+        <div style="font-weight:700; color:#cbd5e1; letter-spacing:1px;">⚡ TUG OF WAR ⚡</div>
+        <div class="war-bar-container">
+            <div class="war-bar-blue" id="blueBar"></div>
+            <div class="war-bar-red" id="redBar"></div>
+            <div class="bar-divider" id="barDivider"></div>
+            <div class="bar-scores">
+                <span class="bar-score" id="blueScore">0</span>
+                <span class="bar-score" id="redScore">0</span>
+            </div>
+        </div>
+        <div class="score-summary">
+            <span style="color:var(--blue-light);">🔵 <span id="p1SummaryName">Player 1</span>: <strong id="p1ScoreChip">0</strong></span>
+            <span style="color:var(--red-light);">🔴 <span id="p2SummaryName">Player 2</span>: <strong id="p2ScoreChip">0</strong></span>
+        </div>
+    </div>
+
+    <!-- Player 2 Panel -->
+    <div class="player-panel p2" id="p2Panel">
+        <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+        <div class="level-badge" id="p2LevelBadge">Level 1 / 10</div>
+        <div class="game-container" id="p2GameContainer"></div>
+    </div>
+</div>
+
+<!-- Game Over Overlay -->
+<div class="overlay" id="overlay">
+    <div class="result-card">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-scores">
+            <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
+            <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
+        </div>
+        <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ────────────── PHONICS DICTIONARY ──────────────
+    const DICTIONARY = [
+        {
+            title: "1. Match Words To Correct Vowel sounds",
+            categories: {
+                "short a": "mat sat cat fan rat".split(' '),
+                "short e": "net set get leg bed".split(' '),
+                "short i": "sit fin pin tin win".split(' '),
+                "short o": "not pot lot rob got".split(' '),
+                "short u": "sun gun mud jug run".split(' '),
+            }
+        },
+        {
+            title: "2. Match Words To Correct Vowel sounds",
+            categories: {
+                "Long a": "mate make rate bake take".split(' '),
+                "Long e": "mete eve fete rede here".split(' '),
+                "Long i": "site nice time bike kite".split(' '),
+                "Long o": "note dote mole hole pole".split(' '),
+                "Long u": "flute mute cute cube rube".split(' '),
+            }
+        },
+        {
+            title: "3a. Match Words To Correct Vowel sounds",
+            categories: {
+                "Long Vowel": "bake take mete eve bike kite hole pole cute cube".split(' '),
+                "Short Vowel": "fan rat leg bed tin win not got jug run".split(' '),
+            }
+        },
+        {
+            title: "3b.Match Words To Correct Vowel sounds",
+            categories: {
+                "Long Vowel": "fake make Pete eve like white stole role mute flute we she so go hi flu no lo be the".split(' '),
+                "Short Vowel": "fan rat leg bed tin win not got jug run".split(' '),
+            }
+        },
+        {
+            title: "4. Match Words To Correct sounds",
+            categories: {
+                "Blends": "bl cl dr fl gr pr tr sc sk squ st sm sn sp sw tw dw".split(' '),
+                "Digraphs": "ch,tch,th,ng,nk,sh".split(','),
+            }
+        },
+        {
+            title: "5. Match Words To Correct sounds",
+            categories: {
+                "Blends": "sk sp nd nt mp rd ld lp rk lf pt ft ct lk lt xt ts".split(' '),
+                "Digraphs": "ck,ph,wh,gn,kn,gh,wr".split(','),
+            }
+        },
+        {
+            title: "6. Match Words To Correct Blend",
+            categories: {
+                "Beginning Blends": "black flip snip glass slate brush graph crash tweak dwell".split(' '),
+                "Ending Blends": "bend tent text rasp husk walk cold hard must kept".split(' '),
+            }
+        },
+        {
+            title: "8. Match Words To Correct Blend or Digraph",
+            categories: {
+                "Blends": "text part twin grass blow pets cold dwell pray clap".split(' '),
+                "Digraph": "pink song thin that match chat ship link long thank".split(' '),
+            }
+        },
+        {
+            title: "9. Match Words To Correct Blend or Digraph",
+            categories: {
+                "Blends": "sand smart slap scrap soft went snip brass split fact".split(' '),
+                "Digraph": "ghost gnash know write chuck phone which Ghana gnome knap".split(' '),
+            }
+        },
+        {
+            title: "10. Complete Word With Correct Blend",
+            categories: {
+                "lk": "wa__ ta__ cha__ si__ bi__".split(' '),
+                "ld": "chi__ ho__ co__ mo__ wi__".split(' '),
+                "sw": "__im __ift __ing __ept __amp".split(' '),
+                "pl": "__ot __us __ea __ant __uck".split(' '),
+            }
+        },
+        {
+            title: "11.Match Words To Correct Vowel-Consonant-digraphs",
+            categories: {
+                "ang": "hang fang gang pang slang".split(' '),
+                "ing": "thing bring swing king spring".split(' '),
+                "ong": "long gong wrong strong tong".split(' '),
+                "ung": "lung sung hung sprung rung".split(' ')
+            }
+        },
+        {
+            title: "12.Match Words To Correct Vowel-Consonant-digraphs",
+            categories: {
+                "ank": "bank prank plank Frank tank".split(' '),
+                "ink": "link pink wink stink drink".split(' '),
+                "onk": "honk monk bonk clonk wonk".split(' '),
+                "unk": "sunk drunk chunk trunk skunk".split(' ')
+            }
+        }
+    ];
+
+    // ────────────── DOM ELEMENTS ──────────────
+    const $ = id => document.getElementById(id);
+    const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
+    const p1LevelBadge = $('p1LevelBadge'), p2LevelBadge = $('p2LevelBadge');
+    const p1GameContainer = $('p1GameContainer'), p2GameContainer = $('p2GameContainer');
+    const blueBar = $('blueBar'), redBar = $('redBar'), barDivider = $('barDivider');
+    const blueScoreEl = $('blueScore'), redScoreEl = $('redScore');
+    const p1ScoreChip = $('p1ScoreChip'), p2ScoreChip = $('p2ScoreChip');
+    const p1SummaryName = $('p1SummaryName'), p2SummaryName = $('p2SummaryName');
+    const settingsToggle = $('settingsToggle'), settingsPanel = $('settingsPanel');
+    const p1NameInput = $('p1NameInput'), p2NameInput = $('p2NameInput');
+    const roundsInput = $('roundsInput'), applySettingsBtn = $('applySettingsBtn');
+    const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
+    const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
+    const finalP1 = $('finalP1'), finalP2 = $('finalP2');
+    const playAgainBtn = $('playAgainBtn');
+
+    // ────────────── GAME STATE ──────────────
+    let TOTAL_LEVELS = 10;          // levels to win
+    let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
+    let gameActive = true, barPosition = 50;
+
+    // Per‑player state
+    function createPlayerState() {
+        return {
+            totalScore: 0,            // shown on bar
+            currentLevel: 0,          // index into DICTIONARY
+            levelMatched: 0,          // how many words matched in current level
+            levelWords: [],           // all words of current level (shuffled)
+            matchedWords: new Set(),  // words already correctly matched
+            selectedTile: null,       // currently selected DOM element
+            locked: false,            // true when level complete or game over
+            container: null,
+            gridEl: null,
+            catsEl: null,
+            levelTitleEl: null,
+        };
+    }
+
+    const players = {
+        p1: createPlayerState(),
+        p2: createPlayerState(),
+    };
+
+    // ────────────── UTILITIES ──────────────
+    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+    function getLevelData(levelIndex) {
+        return DICTIONARY[Math.min(levelIndex, DICTIONARY.length - 1)];
+    }
+
+    function buildLevelWords(levelData) {
+        const words = [];
+        for (const cat in levelData.categories) {
+            words.push(...levelData.categories[cat]);
+        }
+        return shuffle(words);
+    }
+
+    // ────────────── BAR & SCORE ──────────────
+    function updateBar() {
+        blueBar.style.width = barPosition + '%';
+        redBar.style.width = (100 - barPosition) + '%';
+        barDivider.style.left = barPosition + '%';
+        blueScoreEl.textContent = players.p1.totalScore;
+        redScoreEl.textContent = players.p2.totalScore;
+        p1ScoreChip.textContent = players.p1.totalScore;
+        p2ScoreChip.textContent = players.p2.totalScore;
+    }
+
+    function shiftBar(favorBlue) {
+        barPosition = favorBlue ? Math.min(92, barPosition + 5) : Math.max(8, barPosition - 5);
+        updateBar();
+    }
+
+    function updateNames() {
+        p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
+        p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
+        p1SummaryName.textContent = PLAYER1;
+        p2SummaryName.textContent = PLAYER2;
+        finalP1Label.textContent = `🔵 ${PLAYER1}`;
+        finalP2Label.textContent = `🔴 ${PLAYER2}`;
+    }
+
+    // ────────────── GAME OVER ──────────────
+    function endGame(winner) {
+        if (!gameActive) return;
+        gameActive = false;
+        players.p1.locked = true;
+        players.p2.locked = true;
+        disableAllTiles();
+
+        const p1 = players.p1, p2 = players.p2;
+        if (winner === 'p1') {
+            resultIcon.textContent = '🏆';
+            resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
+            resultTitle.style.color = 'var(--blue-light)';
+        } else if (winner === 'p2') {
+            resultIcon.textContent = '🏆';
+            resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
+            resultTitle.style.color = 'var(--red-light)';
+        } else {
+            resultIcon.textContent = '🤝';
+            resultTitle.textContent = "It's a Tie!";
+            resultTitle.style.color = '#fbbf24';
+        }
+        finalP1.textContent = p1.totalScore;
+        finalP2.textContent = p2.totalScore;
+        overlay.classList.add('active');
+    }
+
+    function disableAllTiles() {
+        document.querySelectorAll('.word-tile').forEach(t => t.style.pointerEvents = 'none');
+    }
+
+    // ────────────── LEVEL MANAGEMENT ──────────────
+    function advanceLevel(playerId) {
+        const p = players[playerId];
+        if (p.currentLevel + 1 >= TOTAL_LEVELS) {
+            // Player completed required levels → wins
+            p.locked = true;
+            endGame(playerId);
+        } else {
+            p.currentLevel++;
+            p.levelMatched = 0;
+            p.matchedWords.clear();
+            p.selectedTile = null;
+            renderLevel(playerId);
+            updateLevelBadge(playerId);
+        }
+    }
+
+    function updateLevelBadge(playerId) {
+        const badge = playerId === 'p1' ? p1LevelBadge : p2LevelBadge;
+        const level = players[playerId].currentLevel + 1;
+        badge.textContent = `Level ${level} / ${TOTAL_LEVELS}`;
+    }
+
+    // ────────────── RENDER MATCHING GAME ──────────────
+    function renderLevel(playerId) {
+        const p = players[playerId];
+        const container = playerId === 'p1' ? p1GameContainer : p2GameContainer;
+        container.innerHTML = '';
+
+        const levelData = getLevelData(p.currentLevel);
+        p.levelWords = buildLevelWords(levelData);
+        p.matchedWords = new Set();
+        p.selectedTile = null;
+        p.locked = false;
+
+        // Level title
+        const titleEl = document.createElement('div');
+        titleEl.className = 'level-title';
+        titleEl.textContent = levelData.title;
+        container.appendChild(titleEl);
+
+        // Words grid
+        const grid = document.createElement('div');
+        grid.className = 'words-grid';
+        p.levelWords.forEach(word => {
+            const tile = document.createElement('div');
+            tile.className = 'word-tile';
+            tile.textContent = word;
+            tile.dataset.word = word;
+            tile.addEventListener('click', (e) => onTileClick(e, playerId));
+            grid.appendChild(tile);
+        });
+        container.appendChild(grid);
+        p.gridEl = grid;
+
+        // Category buttons
+        const catsDiv = document.createElement('div');
+        catsDiv.className = 'categories';
+        const catNames = Object.keys(levelData.categories);
+        catNames.forEach((cat, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.textContent = cat;
+            btn.style.backgroundColor = `hsl(${(idx * 137.5) % 360}, 70%, 50%)`;
+            btn.addEventListener('click', () => onCategoryClick(cat, playerId));
+            catsDiv.appendChild(btn);
+        });
+        container.appendChild(catsDiv);
+        p.catsEl = catsDiv;
+    }
+
+    function onTileClick(e, playerId) {
+        const p = players[playerId];
+        if (!gameActive || p.locked) return;
+
+        const tile = e.currentTarget;
+        if (tile.classList.contains('matched')) return;
+
+        // Deselect previous
+        if (p.selectedTile && p.selectedTile !== tile) {
+            p.selectedTile.classList.remove('selected');
+        }
+        // Toggle selection
+        if (p.selectedTile === tile) {
+            tile.classList.remove('selected');
+            p.selectedTile = null;
+        } else {
+            tile.classList.add('selected');
+            p.selectedTile = tile;
+        }
+    }
+
+    function onCategoryClick(category, playerId) {
+        const p = players[playerId];
+        if (!gameActive || p.locked || !p.selectedTile) return;
+
+        const tile = p.selectedTile;
+        const word = tile.dataset.word;
+        const levelData = getLevelData(p.currentLevel);
+        const correctWords = levelData.categories[category] || [];
+
+        if (correctWords.includes(word) && !p.matchedWords.has(word)) {
+            // CORRECT
+            tile.classList.add('matched');
+            tile.classList.remove('selected');
+            p.matchedWords.add(word);
+            p.levelMatched++;
+            p.totalScore++;
+            p.selectedTile = null;
+            shiftBar(playerId === 'p1');   // correct → shift toward player
+
+            // Flash effect
+            tile.style.transform = 'scale(1.1)';
+            setTimeout(() => tile.style.transform = '', 200);
+
+            // Check if level complete
+            if (p.levelMatched === p.levelWords.length) {
+                p.locked = true;
+                // Small celebration, then advance
+                setTimeout(() => advanceLevel(playerId), 600);
+            }
+        } else {
+            // WRONG
+            tile.classList.add('wrong-flash');
+            tile.classList.remove('selected');
+            p.selectedTile = null;
+            // Penalty: shift bar away, lose 1 point (minimum 0)
+            shiftBar(playerId !== 'p1');
+            if (p.totalScore > 0) {
+                p.totalScore--;
+                updateBar();
+            }
+
+            // Shake animation
+            tile.style.animation = 'shake 0.4s ease';
+            setTimeout(() => {
+                tile.style.animation = '';
+                tile.classList.remove('wrong-flash');
+            }, 400);
+        }
+    }
+
+    // ────────────── INITIALIZE / RESET ──────────────
+    function fullReset() {
+        gameActive = true;
+        barPosition = 50;
+        players.p1 = createPlayerState();
+        players.p2 = createPlayerState();
+        renderLevel('p1');
+        renderLevel('p2');
+        updateLevelBadge('p1');
+        updateLevelBadge('p2');
+        updateBar();
+        updateNames();
+        overlay.classList.remove('active');
+        roundsInput.max = DICTIONARY.length;
+    }
+
+    // ────────────── SETTINGS ──────────────
+    function applySettings() {
+        const p1name = p1NameInput.value.trim() || 'Player 1';
+        const p2name = p2NameInput.value.trim() || 'Player 2';
+        let levels = parseInt(roundsInput.value, 10);
+        if (isNaN(levels) || levels < 1) levels = 1;
+        if (levels > DICTIONARY.length) levels = DICTIONARY.length;
+        roundsInput.value = levels;
+        PLAYER1 = p1name;
+        PLAYER2 = p2name;
+        TOTAL_LEVELS = levels;
+        settingsPanel.classList.remove('open');
+        fullReset();
+    }
+
+    // ────────────── EVENT LISTENERS ──────────────
+    settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+    applySettingsBtn.addEventListener('click', applySettings);
+    playAgainBtn.addEventListener('click', applySettings);
+
+    // Add shake keyframes dynamically
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+        @keyframes shake {
+            0%,100%{ transform: translateX(0); }
+            20%{ transform: translateX(-6px); }
+            40%{ transform: translateX(6px); }
+            60%{ transform: translateX(-4px); }
+            80%{ transform: translateX(4px); }
+        }
+        .wrong-flash { background-color: #fca5a5 !important; }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // ────────────── START ──────────────
+    updateNames();
+    fullReset();
+})();
+</script>
+</body>
+</html>
