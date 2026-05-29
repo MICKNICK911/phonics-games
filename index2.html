@@ -3,18 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>EduPlay – Free Educational Games</title>
+  <title>EduPlay – Free Learning Games</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Light theme (default) */
+    :root {
+      --bg-body: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+      --bg-container: rgba(255,255,255,0.75);
+      --text-primary: #1a2c3e;
+      --border-light: #cbdde6;
+      --card-bg: white;
+      --card-border: #e2edf2;
+      --cat-btn-bg: white;
+      --cat-btn-border: #cbdde6;
+      --cat-btn-text: #1f4e6e;
+      --cat-active-bg: #2a9d8f;
+      --cat-active-text: white;
+      --input-border: #cfdfe9;
+      --feedback-bg: #ffffffdd;
+      --footer-text: #4a627a;
+      --shadow: 0 12px 20px -12px rgba(0,0,0,0.15);
+      --icon-filter: none;
+    }
+
+    /* Dark theme */
+    body.dark {
+      --bg-body: linear-gradient(145deg, #121826 0%, #1a1f2c 100%);
+      --bg-container: rgba(30, 35, 48, 0.85);
+      --text-primary: #eef2f7;
+      --border-light: #2d3a46;
+      --card-bg: #232a37;
+      --card-border: #334152;
+      --cat-btn-bg: #1e2532;
+      --cat-btn-border: #3a485a;
+      --cat-btn-text: #cbdde6;
+      --cat-active-bg: #2a9d8f;
+      --cat-active-text: #ffffff;
+      --input-border: #3a485a;
+      --feedback-bg: #1e2532cc;
+      --footer-text: #9aaebf;
+      --shadow: 0 12px 20px -12px rgba(0,0,0,0.4);
+      --icon-filter: brightness(0.9);
     }
 
     body {
-      background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+      background: var(--bg-body);
       font-family: system-ui, 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
-      color: #1a2c3e;
+      color: var(--text-primary);
       line-height: 1.4;
       padding: 1rem;
       min-height: 100vh;
@@ -23,14 +64,14 @@
     .container {
       max-width: 1300px;
       margin: 0 auto;
-      background: rgba(255,255,255,0.75);
+      background: var(--bg-container);
       backdrop-filter: blur(2px);
       border-radius: 2rem;
       padding: 1.5rem;
       box-shadow: 0 25px 45px -12px rgba(0,0,0,0.2);
     }
 
-    /* header & support bar */
+    /* top bar with theme toggle */
     .top-bar {
       display: flex;
       flex-wrap: wrap;
@@ -39,7 +80,7 @@
       gap: 1rem;
       margin-bottom: 2rem;
       padding-bottom: 1rem;
-      border-bottom: 2px solid #cbdde6;
+      border-bottom: 2px solid var(--border-light);
     }
 
     .logo h1 {
@@ -54,13 +95,39 @@
     .logo p {
       font-size: 0.85rem;
       color: #2c6e49;
-      font-weight: 500;
+    }
+    body.dark .logo p {
+      color: #6fbf8a;
+    }
+
+    .right-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .theme-toggle {
+      background: var(--cat-btn-bg);
+      border: 1px solid var(--cat-btn-border);
+      border-radius: 60px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--cat-btn-text);
+      transition: 0.2s;
+    }
+    .theme-toggle:hover {
+      background: var(--cat-active-bg);
+      color: white;
     }
 
     .support-btn {
-      background: #ffb74d;
       background: linear-gradient(105deg, #ff9800, #f57c00);
-      padding: 0.75rem 1.5rem;
+      padding: 0.6rem 1.3rem;
       border-radius: 60px;
       font-weight: bold;
       text-decoration: none;
@@ -68,79 +135,61 @@
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      font-size: 1rem;
+      font-size: 0.95rem;
       transition: all 0.2s ease;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       border: 1px solid rgba(255,255,240,0.6);
     }
-
     .support-btn:hover {
       transform: translateY(-2px);
       background: #ff9100;
-      box-shadow: 0 12px 20px -12px #ff9800;
     }
 
-    /* search + category row */
+    /* search + category */
     .search-section {
       margin-bottom: 2rem;
     }
-
-    .search-box {
-      display: flex;
-      margin-bottom: 1.5rem;
-    }
-
     .search-box input {
-      flex: 1;
+      width: 100%;
       padding: 0.9rem 1.2rem;
       font-size: 1rem;
-      border: 2px solid #cfdfe9;
+      border: 2px solid var(--input-border);
       border-radius: 60px;
       outline: none;
-      background: white;
-      transition: 0.2s;
+      background: var(--card-bg);
+      color: var(--text-primary);
       font-family: inherit;
     }
-
-    .search-box input:focus {
-      border-color: #2a9d8f;
-      box-shadow: 0 0 0 3px rgba(42,157,143,0.2);
-    }
-
     .category-filters {
       display: flex;
       flex-wrap: wrap;
       gap: 0.75rem;
       justify-content: center;
+      margin-top: 1rem;
     }
-
     .cat-btn {
-      background: white;
-      border: none;
+      background: var(--cat-btn-bg);
+      border: 1px solid var(--cat-btn-border);
       padding: 0.6rem 1.5rem;
       border-radius: 40px;
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      border: 1px solid #cbdde6;
-      color: #1f4e6e;
+      color: var(--cat-btn-text);
+      transition: 0.2s;
     }
-
     .cat-btn.active {
-      background: #2a9d8f;
-      color: white;
-      border-color: #2a9d8f;
-      box-shadow: 0 6px 12px -8px #2a9d8f;
+      background: var(--cat-active-bg);
+      color: var(--cat-active-text);
+      border-color: var(--cat-active-bg);
+      box-shadow: 0 6px 12px -8px var(--cat-active-bg);
     }
-
     .cat-btn:hover:not(.active) {
-      background: #e9f3ef;
-      border-color: #88c0ad;
+      background: var(--cat-active-bg);
+      color: white;
+      opacity: 0.8;
     }
 
-    /* game grid */
     .section-title {
       font-size: 1.6rem;
       margin: 2rem 0 1rem 0;
@@ -148,33 +197,28 @@
       border-left: 5px solid #ff9800;
       padding-left: 1rem;
     }
-
     .games-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1.8rem;
       margin-bottom: 2rem;
     }
-
     .game-card {
-      background: white;
+      background: var(--card-bg);
       border-radius: 1.5rem;
       overflow: hidden;
-      transition: all 0.25s ease;
-      box-shadow: 0 12px 20px -12px rgba(0,0,0,0.15);
-      border: 1px solid #e2edf2;
+      transition: 0.25s ease;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--card-border);
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
     }
-
     .game-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 24px 30px -16px rgba(0,0,0,0.2);
-      border-color: #cde3dc;
+      box-shadow: 0 24px 30px -16px rgba(0,0,0,0.3);
     }
-
     .game-img {
       height: 140px;
       background: linear-gradient(125deg, #d9e8f0, #c2dbeb);
@@ -183,17 +227,17 @@
       justify-content: center;
       font-size: 3.5rem;
     }
-
+    body.dark .game-img {
+      background: linear-gradient(125deg, #2c3848, #1e2a36);
+    }
     .game-info {
       padding: 1.2rem;
     }
-
     .game-title {
       font-weight: 700;
       font-size: 1.2rem;
       margin-bottom: 0.4rem;
     }
-
     .game-category {
       display: inline-block;
       background: #eef3f0;
@@ -204,62 +248,41 @@
       text-transform: uppercase;
       color: #1f6e4a;
     }
-
+    body.dark .game-category {
+      background: #2c3e2b;
+      color: #b8e0b4;
+    }
     .play-badge {
       margin-top: 0.7rem;
       font-size: 0.85rem;
       font-weight: 500;
       color: #2a9d8f;
-      display: flex;
-      align-items: center;
-      gap: 5px;
     }
-
-    /* feedback form (WhatsApp) */
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      background: var(--feedback-bg);
+      border-radius: 2rem;
+      font-size: 1.2rem;
+    }
+    /* feedback */
     .feedback-section {
-      background: #ffffffdd;
+      background: var(--feedback-bg);
       backdrop-filter: blur(8px);
       border-radius: 2rem;
       padding: 1.8rem;
       margin-top: 2rem;
-      border: 1px solid #d5e8e0;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-light);
     }
-
-    .feedback-section h3 {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
     .form-group input, .form-group textarea {
       width: 100%;
       padding: 0.8rem 1rem;
       border-radius: 1.5rem;
-      border: 1px solid #cbdbe0;
+      border: 1px solid var(--input-border);
+      background: var(--card-bg);
+      color: var(--text-primary);
       font-family: inherit;
-      font-size: 1rem;
-      background: white;
-      transition: 0.2s;
     }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
-
-    .form-group input:focus, .form-group textarea:focus {
-      outline: none;
-      border-color: #25D366;
-      box-shadow: 0 0 0 3px #25d36630;
-    }
-
     .whatsapp-btn {
       background: #25D366;
       color: white;
@@ -267,99 +290,69 @@
       padding: 0.8rem 1.8rem;
       border-radius: 3rem;
       font-weight: bold;
-      font-size: 1rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      transition: 0.2s;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     }
-
-    .whatsapp-btn:hover {
-      background: #1da959;
-      transform: scale(0.97);
-    }
-
     footer {
       margin-top: 2rem;
       text-align: center;
       font-size: 0.8rem;
-      color: #4a627a;
-      border-top: 1px solid #c7dbd1;
+      color: var(--footer-text);
+      border-top: 1px solid var(--border-light);
       padding-top: 1.5rem;
     }
-
-    .no-results {
-      text-align: center;
-      padding: 3rem;
-      background: #f4f8fa;
-      border-radius: 2rem;
-      font-size: 1.2rem;
-      color: #5c6f87;
-    }
-
     @media (max-width: 640px) {
       .container { padding: 1rem; }
       .logo h1 { font-size: 1.4rem; }
-      .support-btn { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <!-- header with data store link -->
   <div class="top-bar">
     <div class="logo">
       <h1>🎮 EduPlay</h1>
-      <p>free learning games • math • science • phonics</p>
+      <p>free learning games • dynamic categories</p>
     </div>
-    <a href="#" id="dataStoreLink" class="support-btn" target="_blank" rel="noopener noreferrer">
-      📦 Support Me | Buy Data Bundles (MTN, AirtelTigo, Telecel)
-    </a>
+    <div class="right-actions">
+      <button id="themeToggleBtn" class="theme-toggle" aria-label="Dark/Light mode">🌓 Dark/Light</button>
+      <a href="#" id="dataStoreLink" class="support-btn" target="_blank" rel="noopener noreferrer">
+        📦 Buy Data (Support Me)
+      </a>
+    </div>
   </div>
 
-  <!-- search & categories -->
   <div class="search-section">
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Search games... (e.g., fractions, planets)">
+      <input type="text" id="searchInput" placeholder="🔍 Search games... (e.g., times, solar)">
     </div>
-    <div class="category-filters" id="categoryContainer">
-      <button data-cat="all" class="cat-btn active">All</button>
-      <button data-cat="math" class="cat-btn">📐 Math</button>
-      <button data-cat="science" class="cat-btn">🔬 Science</button>
-      <button data-cat="phonics" class="cat-btn">🔤 Phonics</button>
-    </div>
+    <div class="category-filters" id="categoryContainer"></div>
   </div>
 
-  <!-- game grid dynamic -->
   <h2 class="section-title">🎲 Play & Learn</h2>
   <div id="gamesGrid" class="games-grid"></div>
 
-  <!-- feedback form -> WhatsApp -->
   <div class="feedback-section">
     <h3>💬 Suggestions & Feedback</h3>
-    <p style="margin-bottom: 1rem;">Your ideas help us build better free games. Send directly via WhatsApp!</p>
+    <p style="margin-bottom: 1rem;">Ideas help us improve – send directly via WhatsApp.</p>
     <div class="form-group">
       <input type="text" id="feedbackName" placeholder="Your name (optional)">
     </div>
     <div class="form-group">
-      <textarea id="feedbackMsg" placeholder="Tell us what you think... request a game, report issue, or suggestion"></textarea>
+      <textarea id="feedbackMsg" placeholder="Game request, comment, or suggestion..."></textarea>
     </div>
-    <button class="whatsapp-btn" id="sendWhatsAppBtn">
-      📲 Send via WhatsApp
-    </button>
-    <p style="margin-top: 0.8rem; font-size: 0.75rem; color: #2c6e49;">We'll reply on WhatsApp within 24h. Your feedback keeps EduPlay growing.</p>
+    <button class="whatsapp-btn" id="sendWhatsAppBtn">📲 Send via WhatsApp</button>
   </div>
   <footer>
-    🧠 100% free educational games — support the mission by buying data from my store. Every purchase helps create more content.
+    🧠 100% free educational games — support the mission by buying data bundles (MTN, AirtelTigo, Telecel).
   </footer>
 </div>
 
 <script>
-  // ---------- SINGLE GAME ARRAY (all games in one place) ----------
-  // Replace these with your actual game URLs and details.
-  // For each game: title, category ('math', 'science', or 'phonics'), url, icon (emoji or text), description.
+  // ---------- GAMES DATABASE (single array) ----------
+  // Add any new game with any category – the category button will appear automatically.
   const games = [
     { title: "Times Table Blaster", category: "math", url: "#", icon: "✖️", description: "Practice multiplication 1-12" },
     { title: "Fraction Splat", category: "math", url: "#", icon: "🧮", description: "Compare and simplify fractions" },
@@ -373,15 +366,49 @@
     { title: "Letter Sound Match", category: "phonics", url: "#", icon: "📖", description: "Match phonemes to letters" },
     { title: "Word Family Train", category: "phonics", url: "#", icon: "🚂", description: "-at, -an, -ap word endings" },
     { title: "Digraph Detectives", category: "phonics", url: "#", icon: "🕵️", description: "sh, ch, th, wh sounds" }
+    // Add more games here – if you use a new category like "history", a button will appear automatically!
   ];
+
+  // ---------- DYNAMIC CATEGORY GENERATION ----------
+  function getUniqueCategories() {
+    const cats = games.map(g => g.category);
+    return ['all', ...new Set(cats)];
+  }
+
+  function generateCategoryButtons() {
+    const container = document.getElementById('categoryContainer');
+    const categories = getUniqueCategories();
+    // map category to display name with optional icons
+    const getDisplayName = (cat) => {
+      if (cat === 'all') return 'All';
+      if (cat === 'math') return '📐 Math';
+      if (cat === 'science') return '🔬 Science';
+      if (cat === 'phonics') return '🔤 Phonics';
+      return cat.charAt(0).toUpperCase() + cat.slice(1);  // fallback for any new category
+    };
+    container.innerHTML = categories.map(cat => `
+      <button data-cat="${cat}" class="cat-btn ${cat === activeCategory ? 'active' : ''}">
+        ${getDisplayName(cat)}
+      </button>
+    `).join('');
+
+    // attach event listeners
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const cat = btn.getAttribute('data-cat');
+        setActiveCategory(cat);
+      });
+    });
+  }
+
+  // ---------- GLOBAL STATE ----------
+  let activeCategory = 'all';
+  let searchTerm = '';
 
   // DOM elements
   const gamesGrid = document.getElementById('gamesGrid');
   const searchInput = document.getElementById('searchInput');
-  let activeCategory = 'all';   // 'all', 'math', 'science', 'phonics'
-  let searchTerm = '';
 
-  // Helper: escape HTML to prevent XSS
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -392,12 +419,9 @@
     });
   }
 
-  // Render games based on active filters
   function renderGames() {
     let filtered = games.filter(game => {
-      // category match
       if (activeCategory !== 'all' && game.category !== activeCategory) return false;
-      // search match (title + description)
       const haystack = (game.title + ' ' + game.description).toLowerCase();
       return haystack.includes(searchTerm.toLowerCase());
     });
@@ -412,22 +436,20 @@
         <div class="game-img">${game.icon || '🎮'}</div>
         <div class="game-info">
           <div class="game-title">${escapeHtml(game.title)}</div>
-          <span class="game-category">${game.category === 'math' ? '📐 MATH' : game.category === 'science' ? '🔬 SCIENCE' : '🔤 PHONICS'}</span>
+          <span class="game-category">${game.category.toUpperCase()}</span>
           <div class="play-badge">▶️ Click to play →</div>
-          <p style="font-size:0.8rem; margin-top:0.6rem; color:#4a6a78;">${escapeHtml(game.description)}</p>
+          <p style="font-size:0.8rem; margin-top:0.6rem;">${escapeHtml(game.description)}</p>
         </div>
       </a>
     `).join('');
     gamesGrid.innerHTML = gridHtml;
   }
 
-  // Update active category and UI
   function setActiveCategory(cat) {
     activeCategory = cat;
-    const btns = document.querySelectorAll('.cat-btn');
-    btns.forEach(btn => {
-      const btnCat = btn.getAttribute('data-cat');
-      if (btnCat === cat) {
+    // update button active styles
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      if (btn.getAttribute('data-cat') === cat) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
@@ -436,18 +458,6 @@
     renderGames();
   }
 
-  // Initialize category button listeners
-  function initCategoryListeners() {
-    const btns = document.querySelectorAll('.cat-btn');
-    btns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const cat = btn.getAttribute('data-cat');
-        setActiveCategory(cat);
-      });
-    });
-  }
-
-  // Initialize search input
   function initSearch() {
     searchInput.addEventListener('input', (e) => {
       searchTerm = e.target.value;
@@ -455,61 +465,77 @@
     });
   }
 
-  // WhatsApp feedback sender
+  // WhatsApp feedback
   function sendToWhatsApp() {
     let name = document.getElementById('feedbackName').value.trim();
     let message = document.getElementById('feedbackMsg').value.trim();
-    
     if (!message) {
       alert("📝 Please write a suggestion or comment before sending.");
       return;
     }
-
-    // Build WhatsApp message (properly encoded)
-    let fullMessage = `*New feedback from EduPlay visitor*%0A`;
-    if (name) {
-      fullMessage += `*Name:* ${encodeURIComponent(name)}%0A`;
-    } else {
-      fullMessage += `*Name:* (Anonymous)%0A`;
-    }
+    let fullMessage = `*New feedback from EduPlay*%0A`;
+    if (name) fullMessage += `*Name:* ${encodeURIComponent(name)}%0A`;
+    else fullMessage += `*Name:* (Anonymous)%0A`;
     fullMessage += `*Message:* ${encodeURIComponent(message)}%0A`;
-    fullMessage += `*Category filter:* ${activeCategory}%0A`;
-    fullMessage += `*Search term:* ${encodeURIComponent(searchTerm) || 'none'}%0A`;
-    fullMessage += `— %0A🙏 Support my data store to keep games free!`;
-    
-    const phoneNumber = "233279645804";  // Ghana number, no '+'
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${fullMessage}`;
-    window.open(whatsappUrl, '_blank');
-    
-    // Clear message field but keep name (optional)
+    fullMessage += `*Category:* ${activeCategory}%0A`;
+    fullMessage += `*Search:* ${encodeURIComponent(searchTerm) || 'none'}%0A`;
+    fullMessage += `— %0A🙏 Support: buy data bundles to keep games free!`;
+    const phone = "233279645804";
+    window.open(`https://wa.me/${phone}?text=${fullMessage}`, '_blank');
     document.getElementById('feedbackMsg').value = '';
-    alert("✓ Redirecting to WhatsApp. Tap 'Send' to share your feedback. Thank you!");
+    alert("✓ Opening WhatsApp. Please tap Send to share your feedback. Thank you!");
   }
 
-  // Set the data store link – IMPORTANT: REPLACE WITH YOUR ACTUAL STORE URL
+  // Data store link - replace with your actual URL
   function initDataStoreLink() {
     const storeLink = document.getElementById('dataStoreLink');
-    // *********************************************************
-    // ✅ EDIT THIS URL: replace with your real data bundle store link
-    const YOUR_STORE_URL = "https://your-data-store-link.com/buy-bundles";  // <-- CHANGE THIS
-    // *********************************************************
+    // *********************************************
+    // ✅ REPLACE THIS with your real data bundle store link
+    const YOUR_STORE_URL = "https://your-data-store-link.com/buy-bundles";
+    // *********************************************
     storeLink.href = YOUR_STORE_URL;
     if (YOUR_STORE_URL === "https://your-data-store-link.com/buy-bundles") {
-      console.warn("⚠️ Please update the data store URL in initDataStoreLink() to your actual store link.");
+      console.warn("⚠️ Please update the data store URL in initDataStoreLink()");
     }
   }
 
-  // Initialize everything when DOM is ready
+  // ---------- DARK MODE TOGGLE ----------
+  function initThemeToggle() {
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    // Check localStorage for saved preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      document.body.classList.remove('dark');
+    } else {
+      // optional: follow system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    toggleBtn.addEventListener('click', () => {
+      if (document.body.classList.contains('dark')) {
+        document.body.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+  }
+
+  // ---------- INITIALIZE EVERYTHING ----------
   document.addEventListener('DOMContentLoaded', () => {
-    initCategoryListeners();
+    generateCategoryButtons();   // dynamic buttons based on games array
     initSearch();
     renderGames();
     initDataStoreLink();
-    
+    initThemeToggle();
+
     const whatsappBtn = document.getElementById('sendWhatsAppBtn');
-    if (whatsappBtn) {
-      whatsappBtn.addEventListener('click', sendToWhatsApp);
-    }
+    if (whatsappBtn) whatsappBtn.addEventListener('click', sendToWhatsApp);
   });
 </script>
 </body>
