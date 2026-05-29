@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>EduPlay – Free Educational Games</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+      font-family: system-ui, 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
+      color: #1a2c3e;
+      line-height: 1.4;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(2px);
+      border-radius: 2rem;
+      padding: 1.5rem;
+      box-shadow: 0 25px 45px -12px rgba(0,0,0,0.2);
+    }
+
+    /* header & support bar */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #cbdde6;
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #1f7b4d, #2a9d8f);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+    }
+
+    .logo p {
+      font-size: 0.85rem;
+      color: #2c6e49;
+      font-weight: 500;
+    }
+
+    .support-btn {
+      background: #ffb74d;
+      background: linear-gradient(105deg, #ff9800, #f57c00);
+      padding: 0.75rem 1.5rem;
+      border-radius: 60px;
+      font-weight: bold;
+      text-decoration: none;
+      color: #1e2a2f;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,240,0.6);
+    }
+
+    .support-btn:hover {
+      transform: translateY(-2px);
+      background: #ff9100;
+      box-shadow: 0 12px 20px -12px #ff9800;
+    }
+
+    /* search + category row */
+    .search-section {
+      margin-bottom: 2rem;
+    }
+
+    .search-box {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      border: 2px solid #cfdfe9;
+      border-radius: 60px;
+      outline: none;
+      background: white;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+
+    .search-box input:focus {
+      border-color: #2a9d8f;
+      box-shadow: 0 0 0 3px rgba(42,157,143,0.2);
+    }
+
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .cat-btn {
+      background: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #cbdde6;
+      color: #1f4e6e;
+    }
+
+    .cat-btn.active {
+      background: #2a9d8f;
+      color: white;
+      border-color: #2a9d8f;
+      box-shadow: 0 6px 12px -8px #2a9d8f;
+    }
+
+    .cat-btn:hover:not(.active) {
+      background: #e9f3ef;
+      border-color: #88c0ad;
+    }
+
+    /* game grid */
+    .section-title {
+      font-size: 1.6rem;
+      margin: 2rem 0 1rem 0;
+      font-weight: 600;
+      border-left: 5px solid #ff9800;
+      padding-left: 1rem;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 2rem;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 12px 20px -12px rgba(0,0,0,0.15);
+      border: 1px solid #e2edf2;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 30px -16px rgba(0,0,0,0.2);
+      border-color: #cde3dc;
+    }
+
+    .game-img {
+      height: 140px;
+      background: linear-gradient(125deg, #d9e8f0, #c2dbeb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+
+    .game-info {
+      padding: 1.2rem;
+    }
+
+    .game-title {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .game-category {
+      display: inline-block;
+      background: #eef3f0;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #1f6e4a;
+    }
+
+    .play-badge {
+      margin-top: 0.7rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #2a9d8f;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* feedback form (WhatsApp) */
+    .feedback-section {
+      background: #ffffffdd;
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 1.8rem;
+      margin-top: 2rem;
+      border: 1px solid #d5e8e0;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+    }
+
+    .feedback-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 1.5rem;
+      border: 1px solid #cbdbe0;
+      font-family: inherit;
+      font-size: 1rem;
+      background: white;
+      transition: 0.2s;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #25D366;
+      box-shadow: 0 0 0 3px #25d36630;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.8rem;
+      border-radius: 3rem;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: 0.2s;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+
+    .whatsapp-btn:hover {
+      background: #1da959;
+      transform: scale(0.97);
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #4a627a;
+      border-top: 1px solid #c7dbd1;
+      padding-top: 1.5rem;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      background: #f4f8fa;
+      border-radius: 2rem;
+      font-size: 1.2rem;
+      color: #5c6f87;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+      .logo h1 { font-size: 1.4rem; }
+      .support-btn { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- header with data store link -->
+  <div class="top-bar">
+    <div class="logo">
+      <h1>🎮 EduPlay</h1>
+      <p>free learning games • math • science • phonics</p>
+    </div>
+    <a href="#" id="dataStoreLink" class="support-btn" target="_blank" rel="noopener noreferrer">
+      📦 Support Me | Buy Data Bundles (MTN, AirtelTigo, Telecel)
+    </a>
+  </div>
+
+  <!-- search & categories -->
+  <div class="search-section">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Search games... (e.g., fractions, planets)">
+    </div>
+    <div class="category-filters" id="categoryContainer">
+      <button data-cat="all" class="cat-btn active">All</button>
+      <button data-cat="math" class="cat-btn">📐 Math</button>
+      <button data-cat="science" class="cat-btn">🔬 Science</button>
+      <button data-cat="phonics" class="cat-btn">🔤 Phonics</button>
+    </div>
+  </div>
+
+  <!-- game grid dynamic -->
+  <h2 class="section-title">🎲 Play & Learn</h2>
+  <div id="gamesGrid" class="games-grid"></div>
+
+  <!-- feedback form -> WhatsApp -->
+  <div class="feedback-section">
+    <h3>💬 Suggestions & Feedback</h3>
+    <p style="margin-bottom: 1rem;">Your ideas help us build better free games. Send directly via WhatsApp!</p>
+    <div class="form-group">
+      <input type="text" id="feedbackName" placeholder="Your name (optional)">
+    </div>
+    <div class="form-group">
+      <textarea id="feedbackMsg" placeholder="Tell us what you think... request a game, report issue, or suggestion"></textarea>
+    </div>
+    <button class="whatsapp-btn" id="sendWhatsAppBtn">
+      📲 Send via WhatsApp
+    </button>
+    <p style="margin-top: 0.8rem; font-size: 0.75rem; color: #2c6e49;">We'll reply on WhatsApp within 24h. Your feedback keeps EduPlay growing.</p>
+  </div>
+  <footer>
+    🧠 100% free educational games — support the mission by buying data from my store. Every purchase helps create more content.
+  </footer>
+</div>
+
+<script>
+  // ---------- SINGLE GAME ARRAY (all games in one place) ----------
+  // Replace these with your actual game URLs and details.
+  // For each game: title, category ('math', 'science', or 'phonics'), url, icon (emoji or text), description.
+  const games = [
+    { title: "Times Table Blaster", category: "math", url: "#", icon: "✖️", description: "Practice multiplication 1-12" },
+    { title: "Fraction Splat", category: "math", url: "#", icon: "🧮", description: "Compare and simplify fractions" },
+    { title: "Geometry Dash (angles)", category: "math", url: "#", icon: "📐", description: "Identify acute, obtuse, right angles" },
+    { title: "Algebra Balance", category: "math", url: "#", icon: "⚖️", description: "Intro to equations" },
+    { title: "Solar System Explorer", category: "science", url: "#", icon: "🪐", description: "Learn planet order & facts" },
+    { title: "Human Body Quiz", category: "science", url: "#", icon: "🧬", description: "Organs, bones, and systems" },
+    { title: "Plant Life Cycle", category: "science", url: "#", icon: "🌱", description: "From seed to pollination" },
+    { title: "Animal Habitats", category: "science", url: "#", icon: "🐘", description: "Desert, rainforest, arctic" },
+    { title: "Phonics Fun: CVC", category: "phonics", url: "#", icon: "🔊", description: "Consonant-vowel-consonant blends" },
+    { title: "Letter Sound Match", category: "phonics", url: "#", icon: "📖", description: "Match phonemes to letters" },
+    { title: "Word Family Train", category: "phonics", url: "#", icon: "🚂", description: "-at, -an, -ap word endings" },
+    { title: "Digraph Detectives", category: "phonics", url: "#", icon: "🕵️", description: "sh, ch, th, wh sounds" }
+  ];
+
+  // DOM elements
+  const gamesGrid = document.getElementById('gamesGrid');
+  const searchInput = document.getElementById('searchInput');
+  let activeCategory = 'all';   // 'all', 'math', 'science', 'phonics'
+  let searchTerm = '';
+
+  // Helper: escape HTML to prevent XSS
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  // Render games based on active filters
+  function renderGames() {
+    let filtered = games.filter(game => {
+      // category match
+      if (activeCategory !== 'all' && game.category !== activeCategory) return false;
+      // search match (title + description)
+      const haystack = (game.title + ' ' + game.description).toLowerCase();
+      return haystack.includes(searchTerm.toLowerCase());
+    });
+
+    if (filtered.length === 0) {
+      gamesGrid.innerHTML = `<div class="no-results">😕 No games match "${escapeHtml(searchTerm)}" in ${activeCategory === 'all' ? 'all categories' : activeCategory}. Try another keyword!</div>`;
+      return;
+    }
+
+    const gridHtml = filtered.map(game => `
+      <a href="${game.url}" class="game-card" target="_blank" rel="noopener noreferrer">
+        <div class="game-img">${game.icon || '🎮'}</div>
+        <div class="game-info">
+          <div class="game-title">${escapeHtml(game.title)}</div>
+          <span class="game-category">${game.category === 'math' ? '📐 MATH' : game.category === 'science' ? '🔬 SCIENCE' : '🔤 PHONICS'}</span>
+          <div class="play-badge">▶️ Click to play →</div>
+          <p style="font-size:0.8rem; margin-top:0.6rem; color:#4a6a78;">${escapeHtml(game.description)}</p>
+        </div>
+      </a>
+    `).join('');
+    gamesGrid.innerHTML = gridHtml;
+  }
+
+  // Update active category and UI
+  function setActiveCategory(cat) {
+    activeCategory = cat;
+    const btns = document.querySelectorAll('.cat-btn');
+    btns.forEach(btn => {
+      const btnCat = btn.getAttribute('data-cat');
+      if (btnCat === cat) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    renderGames();
+  }
+
+  // Initialize category button listeners
+  function initCategoryListeners() {
+    const btns = document.querySelectorAll('.cat-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const cat = btn.getAttribute('data-cat');
+        setActiveCategory(cat);
+      });
+    });
+  }
+
+  // Initialize search input
+  function initSearch() {
+    searchInput.addEventListener('input', (e) => {
+      searchTerm = e.target.value;
+      renderGames();
+    });
+  }
+
+  // WhatsApp feedback sender
+  function sendToWhatsApp() {
+    let name = document.getElementById('feedbackName').value.trim();
+    let message = document.getElementById('feedbackMsg').value.trim();
+    
+    if (!message) {
+      alert("📝 Please write a suggestion or comment before sending.");
+      return;
+    }
+
+    // Build WhatsApp message (properly encoded)
+    let fullMessage = `*New feedback from EduPlay visitor*%0A`;
+    if (name) {
+      fullMessage += `*Name:* ${encodeURIComponent(name)}%0A`;
+    } else {
+      fullMessage += `*Name:* (Anonymous)%0A`;
+    }
+    fullMessage += `*Message:* ${encodeURIComponent(message)}%0A`;
+    fullMessage += `*Category filter:* ${activeCategory}%0A`;
+    fullMessage += `*Search term:* ${encodeURIComponent(searchTerm) || 'none'}%0A`;
+    fullMessage += `— %0A🙏 Support my data store to keep games free!`;
+    
+    const phoneNumber = "233279645804";  // Ghana number, no '+'
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${fullMessage}`;
+    window.open(whatsappUrl, '_blank');
+    
+    // Clear message field but keep name (optional)
+    document.getElementById('feedbackMsg').value = '';
+    alert("✓ Redirecting to WhatsApp. Tap 'Send' to share your feedback. Thank you!");
+  }
+
+  // Set the data store link – IMPORTANT: REPLACE WITH YOUR ACTUAL STORE URL
+  function initDataStoreLink() {
+    const storeLink = document.getElementById('dataStoreLink');
+    // *********************************************************
+    // ✅ EDIT THIS URL: replace with your real data bundle store link
+    const YOUR_STORE_URL = "https://your-data-store-link.com/buy-bundles";  // <-- CHANGE THIS
+    // *********************************************************
+    storeLink.href = YOUR_STORE_URL;
+    if (YOUR_STORE_URL === "https://your-data-store-link.com/buy-bundles") {
+      console.warn("⚠️ Please update the data store URL in initDataStoreLink() to your actual store link.");
+    }
+  }
+
+  // Initialize everything when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    initCategoryListeners();
+    initSearch();
+    renderGames();
+    initDataStoreLink();
+    
+    const whatsappBtn = document.getElementById('sendWhatsAppBtn');
+    if (whatsappBtn) {
+      whatsappBtn.addEventListener('click', sendToWhatsApp);
+    }
+  });
+</script>
+</body>
+</html>
