@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Math Grid Quest</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      min-height: 100vh;
+      color: #eee;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      color: #ffd700;
+      padding: 6px 18px;
+      border-radius: 25px;
+      font-size: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .circle:active { transform: scale(0.9); }
+    .orange { background: #ff6200; }
+    .yellow { background: #ffb300; }
+    .equation {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      color: #ffeb3b;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: bold;
+      padding: 12px 25px;
+      border-radius: 15px;
+      min-width: 200px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(30px, 10vw));
+      gap: 2px;
+      background: #222;
+      padding: 2px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+      width: 100%;
+      max-width: 600px;
+      justify-content: center;
+    }
+    .cell {
+      background: rgba(255,255,255,0.9);
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+      color: #1a1a1a;
+    }
+    .cell:hover { background: #f0f0f0; }
+    .selected {
+      background: #4caf50 !important;
+      color: white;
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.7);
+      border-radius: 50%;
+    }
+    .trail-green {
+      background: #a5d6a7 !important;
+      color: #1b5e20;
+    }
+    .trail-red {
+      background: #ef9a9a !important;
+      color: #c62828;
+    }
+    .controls {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .dpad {
+      display: grid;
+      grid-template-areas:
+        ". up ."
+        "left . right"
+        ". down .";
+      gap: 6px;
+    }
+    .dpad button {
+      width: 55px;
+      height: 55px;
+      background: #e63946;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.8rem;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: 0.15s;
+    }
+    .dpad button:active { transform: scale(0.85); }
+    .action-btn {
+      padding: 14px 28px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      transition: 0.2s;
+    }
+    .action-btn:active { transform: translateY(2px); }
+    .check { background: #2ecc71; }
+    .reset { background: #3498db; }
+    .feedback-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .feedback-content {
+      background: #2c3e50;
+      padding: 25px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 90%;
+      width: 320px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      color: #ecf0f1;
+    }
+    .feedback-content h2 { font-size: 1.8rem; margin-bottom: 15px; }
+    .success { color: #2ecc71; }
+    .fail { color: #e74c3c; }
+    .victory { color: #f1c40f; }
+    .modal-stats { margin: 20px 0; font-size: 1.1rem; line-height: 1.6; }
+    button.close, button.modal-btn {
+      margin-top: 15px;
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      background: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .settings-options { text-align: left; margin: 15px 0; }
+    .settings-options label { display: block; margin-bottom: 10px; }
+    select, input[type="number"] {
+      padding: 5px;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
+    @media (max-width: 500px) {
+      .dpad button { width: 45px; height: 45px; font-size: 1.5rem; }
+      .action-btn { padding: 12px 20px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stats">
+    <div class="stat">⭐ <span id="scoreDisplay">0</span></div>
+    <div class="stat">📊 <span id="levelDisplay">1</span></div>
+    <div class="stat" id="modeDisplay">Auto</div>
+  </div>
+
+  <div class="header">
+    <div class="circle orange" id="orangeBtn">⚙️</div>
+    <div class="equation" id="equation">1 + 4 = ?</div>
+    <div class="circle yellow" id="yellowBtn">❔</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="controls">
+    <div class="dpad">
+      <button class="up" id="up">▲</button>
+      <button class="left" id="left">◀</button>
+      <button class="right" id="right">▶</button>
+      <button class="down" id="down">▼</button>
+    </div>
+    <div>
+      <button class="action-btn check" id="check">✓ CHECK</button>
+      <button class="action-btn reset" id="reset" style="margin-top:10px;">↺ RESET</button>
+    </div>
+  </div>
+
+  <!-- Feedback Modal (also used for victory) -->
+  <div class="feedback-modal" id="feedbackModal">
+    <div class="feedback-content">
+      <h2 id="feedbackTitle"></h2>
+      <div class="modal-stats" id="modalStats"></div>
+      <button class="modal-btn" id="modalButton">Continue</button>
+    </div>
+  </div>
+
+  <!-- How to Play Modal -->
+  <div class="feedback-modal" id="howToPlayModal">
+    <div class="feedback-content">
+      <h2>How to Play</h2>
+      <p style="text-align:left; margin:10px 0;">1. Tap any number to start.</p>
+      <p style="text-align:left; margin:10px 0;">2. Use D‑pad or arrow keys to navigate.</p>
+      <p style="text-align:left; margin:10px 0;">3. Equation updates live as you move.</p>
+      <p style="text-align:left; margin:10px 0;">4. Reach the correct answer and tap CHECK.</p>
+      <button class="close" onclick="closeAllModals()">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="feedback-modal" id="settingsModal">
+    <div class="feedback-content">
+      <h2>Settings</h2>
+      <div class="settings-options">
+        <label>Mode:
+          <select id="modeSelect">
+            <option value="auto">Auto‑Generated</option>
+            <option value="bank">Question Banks</option>
+          </select>
+        </label>
+        <div id="autoOptions">
+          <label><input type="checkbox" id="additionToggle" checked> Addition (+)</label>
+          <label><input type="checkbox" id="subtractionToggle"> Subtraction (−)</label>
+        </div>
+        <div id="bankOptions" style="display:none;">
+          <label>Operation:
+            <select id="bankOperation">
+              <option value="+">Addition</option>
+              <option value="-">Subtraction</option>
+            </select>
+          </label>
+          <label>Difficulty:
+            <select id="bankDifficulty">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+        </div>
+        <hr style="margin:15px 0;">
+        <label>
+          <input type="checkbox" id="levelGoalCheckbox"> Set Level Goal
+        </label>
+        <div id="levelGoalInputContainer" style="display:none; margin-top:5px;">
+          <label>Levels to Win: <input type="number" id="levelsToWinInput" min="1" max="100" value="5" style="width:70px;"></label>
+        </div>
+      </div>
+      <button class="close" id="saveSettingsBtn">Save &amp; Apply</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- Question Banks (all answers ≤ 100) ----------
+      const questionBank = {
+        addition: {
+          easy: [
+            { a: 1, b: 2, answer: 3 }, { a: 5, b: 3, answer: 8 }, { a: 2, b: 7, answer: 9 },
+            { a: 4, b: 4, answer: 8 }, { a: 6, b: 1, answer: 7 }, { a: 3, b: 5, answer: 8 },
+            { a: 2, b: 2, answer: 4 }, { a: 7, b: 2, answer: 9 }, { a: 4, b: 3, answer: 7 },
+            { a: 5, b: 5, answer: 10 }
+          ],
+          medium: [
+            { a: 12, b: 15, answer: 27 }, { a: 23, b: 9, answer: 32 }, { a: 45, b: 27, answer: 72 },
+            { a: 18, b: 33, answer: 51 }, { a: 56, b: 14, answer: 70 }, { a: 67, b: 8, answer: 75 },
+            { a: 39, b: 42, answer: 81 }, { a: 81, b: 17, answer: 98 }, { a: 25, b: 63, answer: 88 },
+            { a: 74, b: 19, answer: 93 }
+          ],
+          hard: [
+            { a: 45, b: 45, answer: 90 }, { a: 63, b: 32, answer: 95 }, { a: 78, b: 21, answer: 99 },
+            { a: 82, b: 17, answer: 99 }, { a: 56, b: 42, answer: 98 }, { a: 91, b: 8, answer: 99 },
+            { a: 33, b: 66, answer: 99 }, { a: 24, b: 75, answer: 99 }, { a: 88, b: 11, answer: 99 },
+            { a: 50, b: 49, answer: 99 }
+          ]
+        },
+        subtraction: {
+          easy: [
+            { a: 9, b: 3, answer: 6 }, { a: 8, b: 2, answer: 6 }, { a: 7, b: 5, answer: 2 },
+            { a: 10, b: 7, answer: 3 }, { a: 6, b: 4, answer: 2 }, { a: 5, b: 1, answer: 4 },
+            { a: 9, b: 6, answer: 3 }, { a: 8, b: 7, answer: 1 }, { a: 4, b: 3, answer: 1 },
+            { a: 10, b: 2, answer: 8 }
+          ],
+          medium: [
+            { a: 45, b: 23, answer: 22 }, { a: 78, b: 35, answer: 43 }, { a: 62, b: 18, answer: 44 },
+            { a: 91, b: 47, answer: 44 }, { a: 56, b: 29, answer: 27 }, { a: 84, b: 56, answer: 28 },
+            { a: 73, b: 38, answer: 35 }, { a: 60, b: 25, answer: 35 }, { a: 99, b: 45, answer: 54 },
+            { a: 88, b: 33, answer: 55 }
+          ],
+          hard: [
+            { a: 99, b: 55, answer: 44 }, { a: 100, b: 67, answer: 33 }, { a: 95, b: 48, answer: 47 },
+            { a: 89, b: 32, answer: 57 }, { a: 78, b: 29, answer: 49 }, { a: 86, b: 39, answer: 47 },
+            { a: 73, b: 18, answer: 55 }, { a: 90, b: 45, answer: 45 }, { a: 88, b: 44, answer: 44 },
+            { a: 76, b: 23, answer: 53 }
+          ]
+        }
+      };
+
+      // Game State
+      let currentRow = null;
+      let currentCol = null;
+      let correctAnswer = 0;
+      let operation = '+';
+      let greenTrail = new Set();
+      let redTrail = new Set();
+      let gameStarted = false;
+      let score = 0;
+      let level = 1;
+      let startTime = Date.now();
+      let mode = 'auto';
+      let bankOperation = '+';
+      let bankDifficulty = 'easy';
+      let autoAddition = true;
+      let autoSubtraction = false;
+      let levelGoalEnabled = false;
+      let levelsToWin = 5;
+      let modalAutoCloseTimer = null;
+
+      const gridEl = document.getElementById('grid');
+      const equationEl = document.getElementById('equation');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const levelDisplay = document.getElementById('levelDisplay');
+      const modeDisplay = document.getElementById('modeDisplay');
+      const feedbackModal = document.getElementById('feedbackModal');
+      const feedbackTitle = document.getElementById('feedbackTitle');
+      const modalStats = document.getElementById('modalStats');
+      const modalButton = document.getElementById('modalButton');
+      const settingsModal = document.getElementById('settingsModal');
+      const howToPlayModal = document.getElementById('howToPlayModal');
+      const modeSelect = document.getElementById('modeSelect');
+      const autoOptions = document.getElementById('autoOptions');
+      const bankOptions = document.getElementById('bankOptions');
+      const additionToggle = document.getElementById('additionToggle');
+      const subtractionToggle = document.getElementById('subtractionToggle');
+      const bankOperationSelect = document.getElementById('bankOperation');
+      const bankDifficultySelect = document.getElementById('bankDifficulty');
+      const levelGoalCheckbox = document.getElementById('levelGoalCheckbox');
+      const levelGoalInputContainer = document.getElementById('levelGoalInputContainer');
+      const levelsToWinInput = document.getElementById('levelsToWinInput');
+
+      // Sound
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      // Resume audio context on first user gesture (browser policy)
+      document.addEventListener('click', () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      }, { once: true });
+
+      function playSound(freq, duration, type = 'sine', volume = 0.3) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.value = volume;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        setTimeout(() => osc.stop(), duration);
+      }
+      function playSuccess() { playSound(800, 150); setTimeout(() => playSound(1000, 150), 150); setTimeout(() => playSound(1200, 300), 350); }
+      function playFail() { playSound(400, 200, 'sawtooth', 0.5); setTimeout(() => playSound(300, 400, 'sawtooth', 0.5), 200); }
+      function playMove() { playSound(600, 50, 'triangle', 0.2); }
+
+      function createGrid() {
+        gridEl.innerHTML = '';
+        for (let i = 1; i <= 100; i++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.textContent = i;
+          cell.dataset.number = i;
+          cell.addEventListener('click', () => handleCellClick(i));
+          gridEl.appendChild(cell);
+        }
+      }
+
+      const getCellElements = () => [...gridEl.children];
+
+      function handleCellClick(num) {
+        if (!gameStarted) gameStarted = true;
+        const index = num - 1;
+        currentRow = Math.floor(index / 10);
+        currentCol = index % 10;
+        highlightCurrent();
+        updateEquation();
+      }
+
+      function highlightCurrent() {
+        const cells = getCellElements();
+        cells.forEach(cell => {
+          cell.classList.remove('selected', 'trail-green', 'trail-red');
+          const num = parseInt(cell.dataset.number);
+          if (greenTrail.has(num)) cell.classList.add('trail-green');
+          if (redTrail.has(num)) cell.classList.add('trail-red');
+        });
+        if (currentRow !== null) {
+          const idx = currentRow * 10 + currentCol;
+          if (cells[idx]) cells[idx].classList.add('selected');
+        }
+      }
+
+      function generateEquation() {
+        clearTimeout(modalAutoCloseTimer);
+        if (mode === 'auto') {
+          let a, b;
+          const difficulty = Math.min(80, 30 + level * 5);
+          if (operation === '+') {
+            a = Math.floor(Math.random() * (difficulty - 10)) + 5;
+            b = Math.floor(Math.random() * (100 - a - 5)) + 1;
+            correctAnswer = a + b;
+          } else {
+            a = Math.floor(Math.random() * difficulty) + 20;
+            b = Math.floor(Math.random() * (a - 10)) + 5;
+            correctAnswer = a - b;
+          }
+          equationEl.textContent = `${a} ${operation} ${b} = ?`;
+        } else {
+          const bank = questionBank[bankOperation === '+' ? 'addition' : 'subtraction'][bankDifficulty];
+          if (!bank || bank.length === 0) {
+            equationEl.textContent = 'No questions';
+            correctAnswer = 0;
+            return;
+          }
+          // Filter to only answers within grid range 1-100 (should be all now, but safe)
+          const validQuestions = bank.filter(q => q.answer >= 1 && q.answer <= 100);
+          if (validQuestions.length === 0) {
+            equationEl.textContent = 'No valid questions';
+            correctAnswer = 0;
+            return;
+          }
+          const q = validQuestions[Math.floor(Math.random() * validQuestions.length)];
+          operation = bankOperation;
+          equationEl.textContent = `${q.a} ${operation} ${q.b} = ?`;
+          correctAnswer = q.answer;
+        }
+        greenTrail.clear();
+        redTrail.clear();
+        currentRow = null;
+        currentCol = null;
+        gameStarted = false;
+        highlightCurrent();
+      }
+
+      function updateEquation() {
+        if (currentRow === null || correctAnswer === 0) return;
+        const currentNum = currentRow * 10 + currentCol + 1;
+        const base = equationEl.textContent.split('=')[0].trim();
+        equationEl.textContent = `${base} = ${currentNum}`;
+      }
+
+      function move(direction) {
+        if (currentRow === null || correctAnswer === 0) return;
+        playMove();
+        let isForwardOrDown = false;
+        switch(direction) {
+          case 'right':
+            currentCol++;
+            if (currentCol > 9) { currentCol = 0; currentRow = (currentRow + 1) % 10; }
+            isForwardOrDown = true;
+            break;
+          case 'left':
+            currentCol--;
+            if (currentCol < 0) { currentCol = 9; currentRow = (currentRow - 1 + 10) % 10; }
+            isForwardOrDown = false;
+            break;
+          case 'down':
+            currentRow++;
+            if (currentRow > 9) { currentRow = 0; currentCol = (currentCol + 1) % 10; }
+            isForwardOrDown = true;
+            break;
+          case 'up':
+            currentRow--;
+            if (currentRow < 0) { currentRow = 9; currentCol = (currentCol - 1 + 10) % 10; }
+            isForwardOrDown = false;
+            break;
+        }
+        const currentNum = currentRow * 10 + currentCol + 1;
+        if (isForwardOrDown) greenTrail.add(currentNum);
+        else redTrail.add(currentNum);
+        highlightCurrent();
+        updateEquation();
+      }
+
+      function gameWon() {
+        playSuccess();
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        feedbackTitle.innerHTML = '🏆 You Win!';
+        feedbackTitle.className = 'victory';
+        modalStats.innerHTML = `Final Score: <strong>${score}</strong><br>Levels Completed: <strong>${levelsToWin}</strong><br>Time: ${timeSpent}s`;
+        modalButton.textContent = 'Restart Game';
+        modalButton.onclick = () => location.reload();
+        feedbackModal.style.display = 'flex';
+        // No auto-close for victory
+      }
+
+      function showFeedback(isCorrect) {
+        clearTimeout(modalAutoCloseTimer);
+        if (isCorrect) {
+          playSuccess();
+          const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+          feedbackTitle.innerHTML = `✅ Level ${level} Complete!`;
+          feedbackTitle.className = 'success';
+          modalStats.innerHTML = `Score: <strong>${score}</strong><br>Time: ${timeSpent}s`;
+          modalButton.textContent = 'Next Level';
+
+          let handled = false;
+          const advanceLevel = () => {
+            if (handled) return;
+            handled = true;
+            feedbackModal.style.display = 'none';
+            level++;
+            levelDisplay.textContent = level;
+            if (levelGoalEnabled && level > levelsToWin) {
+              gameWon();
+            } else {
+              generateEquation();
+            }
+          };
+
+          modalButton.onclick = advanceLevel;
+          modalAutoCloseTimer = setTimeout(advanceLevel, 2000);
+          feedbackModal.style.display = 'flex';
+        } else {
+          playFail();
+          const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+          feedbackTitle.innerHTML = `❌ Game Over`;
+          feedbackTitle.className = 'fail';
+          modalStats.innerHTML = `Final Score: <strong>${score}</strong><br>Level Reached: <strong>${level}</strong><br>Time Played: <strong>${timeSpent}s</strong>`;
+          modalButton.textContent = 'Restart Game';
+          modalButton.onclick = () => location.reload();
+          feedbackModal.style.display = 'flex';
+        }
+      }
+
+      function checkAnswer() {
+        if (currentRow === null || correctAnswer === 0) return;
+        const selectedNum = currentRow * 10 + currentCol + 1;
+        if (selectedNum === correctAnswer) {
+          score += 10 + Math.floor(level * 2);
+          scoreDisplay.textContent = score;
+          showFeedback(true);
+        } else {
+          showFeedback(false);
+        }
+      }
+
+      function closeAllModals() {
+        [feedbackModal, howToPlayModal, settingsModal].forEach(m => m.style.display = 'none');
+        clearTimeout(modalAutoCloseTimer);
+      }
+
+      function updateUIfromState() {
+        modeDisplay.textContent = mode === 'auto' ? 'Auto' : 'Bank';
+        modeSelect.value = mode;
+        if (mode === 'auto') {
+          autoOptions.style.display = 'block';
+          bankOptions.style.display = 'none';
+          additionToggle.checked = autoAddition;
+          subtractionToggle.checked = autoSubtraction;
+        } else {
+          autoOptions.style.display = 'none';
+          bankOptions.style.display = 'block';
+          bankOperationSelect.value = bankOperation;
+          bankDifficultySelect.value = bankDifficulty;
+        }
+        levelGoalCheckbox.checked = levelGoalEnabled;
+        levelGoalInputContainer.style.display = levelGoalEnabled ? 'block' : 'none';
+        levelsToWinInput.value = levelsToWin;
+        if (mode === 'auto' && !additionToggle.checked && !subtractionToggle.checked) {
+          additionToggle.checked = true;
+          autoAddition = true;
+        }
+      }
+
+      function applySettingsFromUI() {
+        mode = modeSelect.value;
+        if (mode === 'auto') {
+          autoAddition = additionToggle.checked;
+          autoSubtraction = subtractionToggle.checked;
+          if (!autoAddition && !autoSubtraction) {
+            additionToggle.checked = true;
+            autoAddition = true;
+          }
+          if (autoAddition && autoSubtraction) {
+            operation = Math.random() > 0.5 ? '+' : '-';
+          } else if (autoAddition) {
+            operation = '+';
+          } else if (autoSubtraction) {
+            operation = '-';
+          }
+        } else {
+          bankOperation = bankOperationSelect.value;
+          bankDifficulty = bankDifficultySelect.value;
+          operation = bankOperation;
+        }
+        levelGoalEnabled = levelGoalCheckbox.checked;
+        levelsToWin = parseInt(levelsToWinInput.value, 10) || 5;
+        if (levelsToWin < 1) levelsToWin = 1;
+        if (levelsToWin > 100) levelsToWin = 100;
+        levelsToWinInput.value = levelsToWin;
+        updateUIfromState();
+      }
+
+      function initControls() {
+        document.getElementById('orangeBtn').addEventListener('click', () => {
+          closeAllModals();            // fix modal overlap
+          updateUIfromState();
+          settingsModal.style.display = 'flex';
+        });
+        document.getElementById('yellowBtn').addEventListener('click', () => {
+          closeAllModals();
+          howToPlayModal.style.display = 'flex';
+        });
+        document.getElementById('up').addEventListener('click', () => move('up'));
+        document.getElementById('down').addEventListener('click', () => move('down'));
+        document.getElementById('left').addEventListener('click', () => move('left'));
+        document.getElementById('right').addEventListener('click', () => move('right'));
+        document.getElementById('check').addEventListener('click', checkAnswer);
+        document.getElementById('reset').addEventListener('click', () => location.reload());
+
+        document.addEventListener('keydown', e => {
+          if (e.key === 'ArrowUp') { e.preventDefault(); move('up'); }
+          if (e.key === 'ArrowDown') { e.preventDefault(); move('down'); }
+          if (e.key === 'ArrowLeft') { e.preventDefault(); move('left'); }
+          if (e.key === 'ArrowRight') { e.preventDefault(); move('right'); }
+          if (e.key === 'Enter') checkAnswer();
+        });
+
+        document.querySelectorAll('.feedback-modal').forEach(modal => {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modal.style.display = 'none';
+              clearTimeout(modalAutoCloseTimer);
+            }
+          });
+        });
+
+        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+          applySettingsFromUI();
+          settingsModal.style.display = 'none';
+          generateEquation();
+        });
+
+        additionToggle.addEventListener('change', () => {
+          if (!additionToggle.checked && !subtractionToggle.checked) subtractionToggle.checked = true;
+        });
+        subtractionToggle.addEventListener('change', () => {
+          if (!additionToggle.checked && !subtractionToggle.checked) additionToggle.checked = true;
+        });
+
+        modeSelect.addEventListener('change', () => {
+          if (modeSelect.value === 'auto') {
+            autoOptions.style.display = 'block';
+            bankOptions.style.display = 'none';
+          } else {
+            autoOptions.style.display = 'none';
+            bankOptions.style.display = 'block';
+          }
+        });
+
+        levelGoalCheckbox.addEventListener('change', () => {
+          levelGoalInputContainer.style.display = levelGoalCheckbox.checked ? 'block' : 'none';
+        });
+      }
+
+      function init() {
+        createGrid();
+        updateUIfromState();
+        generateEquation();
+        initControls();
+        scoreDisplay.textContent = score;
+        levelDisplay.textContent = level;
+        startTime = Date.now();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
