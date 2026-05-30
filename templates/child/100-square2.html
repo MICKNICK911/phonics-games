@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Math Grid Quest – Fixed Rounds</title>
+  <title>Math Grid Quest</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -34,16 +34,6 @@
       font-size: 1rem;
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    .stat.warning {
-      background: rgba(255, 100, 100, 0.3);
-      color: #ffaaaa;
-      border: 1px solid rgba(255, 150, 150, 0.5);
-      animation: pulse 0.5s ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
     .header {
       display: flex;
       align-items: center;
@@ -66,6 +56,7 @@
       border: 2px solid rgba(255,255,255,0.3);
     }
     .circle:active { transform: scale(0.9); }
+    .orange { background: #ff6200; }
     .yellow { background: #ffb300; }
     .equation {
       background: rgba(0, 0, 0, 0.7);
@@ -107,21 +98,12 @@
       color: #1a1a1a;
     }
     .cell:hover { background: #f0f0f0; }
-    .cell.start-highlight {
-      background: #64b5f6 !important;
-      color: #0d47a1;
-      transform: scale(1.1);
-      box-shadow: 0 0 0 4px rgba(100, 181, 246, 0.7);
-      border-radius: 50%;
-      z-index: 2;
-    }
     .selected {
       background: #4caf50 !important;
       color: white;
       transform: scale(1.15);
       box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.7);
       border-radius: 50%;
-      z-index: 3;
     }
     .trail-green {
       background: #a5d6a7 !important;
@@ -212,32 +194,12 @@
       border-radius: 10px;
       cursor: pointer;
     }
-    .warning-message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(231, 76, 60, 0.95);
-      color: white;
-      padding: 15px 25px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      z-index: 2000;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-      text-align: center;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    }
-    .warning-message.show {
-      opacity: 1;
-      animation: shake 0.5s ease-in-out;
-    }
-    @keyframes shake {
-      0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-      25% { transform: translate(-50%, -50%) rotate(-3deg); }
-      75% { transform: translate(-50%, -50%) rotate(3deg); }
+    .settings-options { text-align: left; margin: 15px 0; }
+    .settings-options label { display: block; margin-bottom: 10px; }
+    select, input[type="number"] {
+      padding: 5px;
+      font-size: 1rem;
+      border-radius: 5px;
     }
     @media (max-width: 500px) {
       .dpad button { width: 45px; height: 45px; font-size: 1.3rem; }
@@ -250,12 +212,13 @@
   <div class="stats">
     <div class="stat">⭐ <span id="scoreDisplay">0</span></div>
     <div class="stat">📊 <span id="levelDisplay">1</span></div>
-    <div class="stat" id="modeDisplay">Round 1/15</div>
+    <div class="stat" id="modeDisplay">Auto</div>
   </div>
 
   <div class="header">
-    <div class="circle yellow" id="yellowBtn">❔</div>
+    <div class="circle orange" id="orangeBtn">⚙️</div>
     <div class="equation" id="equation">1 + 4 = ?</div>
+    <div class="circle yellow" id="yellowBtn">❔</div>
   </div>
 
   <div class="grid" id="grid"></div>
@@ -263,8 +226,8 @@
   <div class="controls">
     <div class="dpad">
       <button class="up" id="up">-10</button>
-      <button class="left" id="left">-</button>
-      <button class="right" id="right">+</button>
+      <button class="left" id="left">-1</button>
+      <button class="right" id="right">+1</button>
       <button class="down" id="down">+10</button>
     </div>
     <div>
@@ -272,9 +235,6 @@
       <button class="action-btn reset" id="reset" style="margin-top:10px;">↺ RESET</button>
     </div>
   </div>
-
-  <!-- Warning toast -->
-  <div class="warning-message" id="warningToast"></div>
 
   <!-- Feedback Modal (also used for victory) -->
   <div class="feedback-modal" id="feedbackModal">
@@ -289,56 +249,121 @@
   <div class="feedback-modal" id="howToPlayModal">
     <div class="feedback-content">
       <h2>How to Play</h2>
-      <p style="text-align:left; margin:10px 0;">1. Tap the <strong>first number</strong> in the equation to start.</p>
-      <p style="text-align:left; margin:10px 0;">2. Use D‑pad or arrow keys to <strong>navigate</strong> to the answer.</p>
-      <p style="text-align:left; margin:10px 0;">3. You must <strong>move</strong> – tapping the answer directly won't work.</p>
+      <p style="text-align:left; margin:10px 0;">1. Tap any number to start.</p>
+      <p style="text-align:left; margin:10px 0;">2. Use D‑pad or arrow keys to navigate.</p>
+      <p style="text-align:left; margin:10px 0;">3. Equation updates live as you move.</p>
       <p style="text-align:left; margin:10px 0;">4. Reach the correct answer and tap CHECK.</p>
       <button class="close" id="howToPlayCloseBtn">Got it!</button>
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div class="feedback-modal" id="settingsModal">
+    <div class="feedback-content">
+      <h2>Settings</h2>
+      <div class="settings-options">
+        <label>Mode:
+          <select id="modeSelect">
+            <option value="auto">Auto‑Generated</option>
+            <option value="bank">Question Banks</option>
+          </select>
+        </label>
+        <div id="autoOptions">
+          <label><input type="checkbox" id="additionToggle" checked> Addition (+)</label>
+          <label><input type="checkbox" id="subtractionToggle"> Subtraction (−)</label>
+        </div>
+        <div id="bankOptions" style="display:none;">
+          <label>Operation:
+            <select id="bankOperation">
+              <option value="+">Addition</option>
+              <option value="-">Subtraction</option>
+            </select>
+          </label>
+          <label>Difficulty:
+            <select id="bankDifficulty">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+        </div>
+        <hr style="margin:15px 0;">
+        <label>
+          <input type="checkbox" id="levelGoalCheckbox"> Set Level Goal
+        </label>
+        <div id="levelGoalInputContainer" style="display:none; margin-top:5px;">
+          <label>Levels to Win: <input type="number" id="levelsToWinInput" min="1" max="100" value="5" style="width:70px;"></label>
+        </div>
+      </div>
+      <button class="close" id="saveSettingsBtn">Save &amp; Apply</button>
+    </div>
+  </div>
+
   <script>
     (function() {
-      // ---------- Hard‑coded Rounds (the single source of truth) ----------
-      const rounds = [
-        { a: 1,  b: 2, op: '+', answer: 3 },
-        { a: 5,  b: 3, op: '+', answer: 8 },
-        { a: 9,  b: 3, op: '-', answer: 6 },
-        { a: 4,  b: 4, op: '+', answer: 8 },
-        { a: 10, b: 7, op: '-', answer: 3 },
-        { a: 6,  b: 4, op: '-', answer: 2 },
-        { a: 23, b: 9, op: '+', answer: 32 },
-        { a: 45, b: 23, op: '-', answer: 22 },
-        { a: 78, b: 35, op: '-', answer: 43 },
-        { a: 12, b: 15, op: '+', answer: 27 },
-        { a: 56, b: 14, op: '+', answer: 70 },
-        { a: 91, b: 47, op: '-', answer: 44 },
-        { a: 39, b: 42, op: '+', answer: 81 },
-        { a: 63, b: 32, op: '+', answer: 95 },
-        { a: 99, b: 55, op: '-', answer: 44 }
-      ];
-
-      const TOTAL_ROUNDS = rounds.length;
+      // ---------- Question Banks (all answers ≤ 100) ----------
+      const questionBank = {
+        addition: {
+          easy: [
+            { a: 1, b: 2, answer: 3 }, { a: 5, b: 3, answer: 8 }, { a: 2, b: 7, answer: 9 },
+            { a: 4, b: 4, answer: 8 }, { a: 6, b: 1, answer: 7 }, { a: 3, b: 5, answer: 8 },
+            { a: 2, b: 2, answer: 4 }, { a: 7, b: 2, answer: 9 }, { a: 4, b: 3, answer: 7 },
+            { a: 5, b: 5, answer: 10 }
+          ],
+          medium: [
+            { a: 12, b: 15, answer: 27 }, { a: 23, b: 9, answer: 32 }, { a: 45, b: 27, answer: 72 },
+            { a: 18, b: 33, answer: 51 }, { a: 56, b: 14, answer: 70 }, { a: 67, b: 8, answer: 75 },
+            { a: 39, b: 42, answer: 81 }, { a: 81, b: 17, answer: 98 }, { a: 25, b: 63, answer: 88 },
+            { a: 74, b: 19, answer: 93 }
+          ],
+          hard: [
+            { a: 45, b: 45, answer: 90 }, { a: 63, b: 32, answer: 95 }, { a: 78, b: 21, answer: 99 },
+            { a: 82, b: 17, answer: 99 }, { a: 56, b: 42, answer: 98 }, { a: 91, b: 8, answer: 99 },
+            { a: 33, b: 66, answer: 99 }, { a: 24, b: 75, answer: 99 }, { a: 88, b: 11, answer: 99 },
+            { a: 50, b: 49, answer: 99 }
+          ]
+        },
+        subtraction: {
+          easy: [
+            { a: 9, b: 3, answer: 6 }, { a: 8, b: 2, answer: 6 }, { a: 7, b: 5, answer: 2 },
+            { a: 10, b: 7, answer: 3 }, { a: 6, b: 4, answer: 2 }, { a: 5, b: 1, answer: 4 },
+            { a: 9, b: 6, answer: 3 }, { a: 8, b: 7, answer: 1 }, { a: 4, b: 3, answer: 1 },
+            { a: 10, b: 2, answer: 8 }
+          ],
+          medium: [
+            { a: 45, b: 23, answer: 22 }, { a: 78, b: 35, answer: 43 }, { a: 62, b: 18, answer: 44 },
+            { a: 91, b: 47, answer: 44 }, { a: 56, b: 29, answer: 27 }, { a: 84, b: 56, answer: 28 },
+            { a: 73, b: 38, answer: 35 }, { a: 60, b: 25, answer: 35 }, { a: 99, b: 45, answer: 54 },
+            { a: 88, b: 33, answer: 55 }
+          ],
+          hard: [
+            { a: 99, b: 55, answer: 44 }, { a: 100, b: 67, answer: 33 }, { a: 95, b: 48, answer: 47 },
+            { a: 89, b: 32, answer: 57 }, { a: 78, b: 29, answer: 49 }, { a: 86, b: 39, answer: 47 },
+            { a: 73, b: 18, answer: 55 }, { a: 90, b: 45, answer: 45 }, { a: 88, b: 44, answer: 44 },
+            { a: 76, b: 23, answer: 53 }
+          ]
+        }
+      };
 
       // Game State
       let currentRow = null;
       let currentCol = null;
-      let startRow = null;
-      let startCol = null;
       let correctAnswer = 0;
       let operation = '+';
-      let firstNumber = 0;
-      let secondNumber = 0;
       let greenTrail = new Set();
       let redTrail = new Set();
       let gameStarted = false;
-      let hasNavigated = false;      // Player must move at least once from start
       let score = 0;
       let level = 1;
       let startTime = Date.now();
-      let currentRoundIndex = 0;
+      let mode = 'auto';
+      let bankOperation = '+';
+      let bankDifficulty = 'easy';
+      let autoAddition = true;
+      let autoSubtraction = false;
+      let levelGoalEnabled = false;
+      let levelsToWin = 5;
       let modalAutoCloseTimer = null;
-      let warningTimer = null;
 
       const gridEl = document.getElementById('grid');
       const equationEl = document.getElementById('equation');
@@ -349,8 +374,18 @@
       const feedbackTitle = document.getElementById('feedbackTitle');
       const modalStats = document.getElementById('modalStats');
       const modalButton = document.getElementById('modalButton');
+      const settingsModal = document.getElementById('settingsModal');
       const howToPlayModal = document.getElementById('howToPlayModal');
-      const warningToast = document.getElementById('warningToast');
+      const modeSelect = document.getElementById('modeSelect');
+      const autoOptions = document.getElementById('autoOptions');
+      const bankOptions = document.getElementById('bankOptions');
+      const additionToggle = document.getElementById('additionToggle');
+      const subtractionToggle = document.getElementById('subtractionToggle');
+      const bankOperationSelect = document.getElementById('bankOperation');
+      const bankDifficultySelect = document.getElementById('bankDifficulty');
+      const levelGoalCheckbox = document.getElementById('levelGoalCheckbox');
+      const levelGoalInputContainer = document.getElementById('levelGoalInputContainer');
+      const levelsToWinInput = document.getElementById('levelsToWinInput');
 
       // Sound
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -373,7 +408,6 @@
       function playSuccess() { playSound(800, 150); setTimeout(() => playSound(1000, 150), 150); setTimeout(() => playSound(1200, 300), 350); }
       function playFail() { playSound(400, 200, 'sawtooth', 0.5); setTimeout(() => playSound(300, 400, 'sawtooth', 0.5), 200); }
       function playMove() { playSound(600, 50, 'triangle', 0.2); }
-      function playWarning() { playSound(300, 100, 'square', 0.3); setTimeout(() => playSound(250, 150, 'square', 0.3), 100); }
 
       function createGrid() {
         gridEl.innerHTML = '';
@@ -389,103 +423,68 @@
 
       const getCellElements = () => [...gridEl.children];
 
-      function showWarning(message) {
-        clearTimeout(warningTimer);
-        playWarning();
-        warningToast.textContent = message;
-        warningToast.classList.add('show');
-        warningTimer = setTimeout(() => {
-          warningToast.classList.remove('show');
-        }, 2000);
-      }
-
       function handleCellClick(num) {
+        if (!gameStarted) gameStarted = true;
         const index = num - 1;
-        const clickedRow = Math.floor(index / 10);
-        const clickedCol = index % 10;
-
-        if (!gameStarted) {
-          // Must start on the first number
-          if (num === firstNumber) {
-            gameStarted = true;
-            currentRow = clickedRow;
-            currentCol = clickedCol;
-            startRow = clickedRow;
-            startCol = clickedCol;
-            hasNavigated = false;
-            greenTrail.clear();
-            redTrail.clear();
-            greenTrail.add(num);  // Starting cell is green
-            highlightCurrent();
-            updateEquation();
-          } else {
-            showWarning(`⚠️ Start at ${firstNumber} first!`);
-          }
-        } else {
-          // Already started – just move selection (via tap)
-          // This counts as navigation
-          currentRow = clickedRow;
-          currentCol = clickedCol;
-          hasNavigated = true;
-          // Color based on movement direction relative to previous position
-          // For taps, we'll use green for simplicity
-          greenTrail.add(num);
-          highlightCurrent();
-          updateEquation();
-        }
+        currentRow = Math.floor(index / 10);
+        currentCol = index % 10;
+        highlightCurrent();
+        updateEquation();
       }
 
       function highlightCurrent() {
         const cells = getCellElements();
         cells.forEach(cell => {
-          cell.classList.remove('selected', 'start-highlight', 'trail-green', 'trail-red');
+          cell.classList.remove('selected', 'trail-green', 'trail-red');
           const num = parseInt(cell.dataset.number);
           if (greenTrail.has(num)) cell.classList.add('trail-green');
           if (redTrail.has(num)) cell.classList.add('trail-red');
         });
-
-        // Highlight starting cell if it hasn't been covered by a trail
-        if (startRow !== null && startCol !== null) {
-          const startIdx = startRow * 10 + startCol;
-          const startNum = startRow * 10 + startCol + 1;
-          if (cells[startIdx] && !greenTrail.has(startNum) && !redTrail.has(startNum)) {
-            cells[startIdx].classList.add('start-highlight');
-          }
-        }
-
-        // Highlight current position
         if (currentRow !== null) {
           const idx = currentRow * 10 + currentCol;
-          if (cells[idx]) {
-            cells[idx].classList.add('selected');
-          }
+          if (cells[idx]) cells[idx].classList.add('selected');
         }
       }
 
       function generateEquation() {
         clearTimeout(modalAutoCloseTimer);
-        if (currentRoundIndex >= TOTAL_ROUNDS) return;
-
-        const round = rounds[currentRoundIndex];
-        operation = round.op;
-        firstNumber = round.a;
-        secondNumber = round.b;
-        correctAnswer = round.answer;
-        equationEl.textContent = `${firstNumber} ${operation} ${secondNumber} = ?`;
-
+        if (mode === 'auto') {
+          let a, b;
+          const difficulty = Math.min(80, 30 + level * 5);
+          if (operation === '+') {
+            a = Math.floor(Math.random() * (difficulty - 10)) + 5;
+            b = Math.floor(Math.random() * (100 - a - 5)) + 1;
+            correctAnswer = a + b;
+          } else {
+            a = Math.floor(Math.random() * difficulty) + 20;
+            b = Math.floor(Math.random() * (a - 10)) + 5;
+            correctAnswer = a - b;
+          }
+          equationEl.textContent = `${a} ${operation} ${b} = ?`;
+        } else {
+          const bank = questionBank[bankOperation === '+' ? 'addition' : 'subtraction'][bankDifficulty];
+          if (!bank || bank.length === 0) {
+            equationEl.textContent = 'No questions';
+            correctAnswer = 0;
+            return;
+          }
+          const validQuestions = bank.filter(q => q.answer >= 1 && q.answer <= 100);
+          if (validQuestions.length === 0) {
+            equationEl.textContent = 'No valid questions';
+            correctAnswer = 0;
+            return;
+          }
+          const q = validQuestions[Math.floor(Math.random() * validQuestions.length)];
+          operation = bankOperation;
+          equationEl.textContent = `${q.a} ${operation} ${q.b} = ?`;
+          correctAnswer = q.answer;
+        }
         greenTrail.clear();
         redTrail.clear();
         currentRow = null;
         currentCol = null;
-        startRow = null;
-        startCol = null;
-        hasNavigated = false;
         gameStarted = false;
-
         highlightCurrent();
-        level = currentRoundIndex + 1;
-        levelDisplay.textContent = level;
-        modeDisplay.textContent = `Round ${level}/${TOTAL_ROUNDS}`;
       }
 
       function updateEquation() {
@@ -498,12 +497,7 @@
       function move(direction) {
         if (currentRow === null || correctAnswer === 0) return;
         playMove();
-        hasNavigated = true;  // Any move counts as navigation
-
         let isForwardOrDown = false;
-        const prevRow = currentRow;
-        const prevCol = currentCol;
-
         switch(direction) {
           case 'right':
             currentCol++;
@@ -526,22 +520,9 @@
             isForwardOrDown = false;
             break;
         }
-
         const currentNum = currentRow * 10 + currentCol + 1;
-        if (isForwardOrDown) {
-          greenTrail.add(currentNum);
-        } else {
-          redTrail.add(currentNum);
-        }
-
-        // Ensure start cell is in green trail if not already colored
-        if (startRow !== null && startCol !== null) {
-          const startNum = startRow * 10 + startCol + 1;
-          if (!greenTrail.has(startNum) && !redTrail.has(startNum)) {
-            greenTrail.add(startNum);
-          }
-        }
-
+        if (isForwardOrDown) greenTrail.add(currentNum);
+        else redTrail.add(currentNum);
         highlightCurrent();
         updateEquation();
       }
@@ -551,9 +532,9 @@
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
         feedbackTitle.innerHTML = '🏆 You Win!';
         feedbackTitle.className = 'victory';
-        modalStats.innerHTML = `Final Score: <strong>${score}</strong><br>Rounds Completed: <strong>${TOTAL_ROUNDS}</strong><br>Time: ${timeSpent}s`;
-        modalButton.textContent = 'Play Again';
-        modalButton.onclick = resetGame;
+        modalStats.innerHTML = `Final Score: <strong>${score}</strong><br>Levels Completed: <strong>${levelsToWin}</strong><br>Time: ${timeSpent}s`;
+        modalButton.textContent = 'Restart Game';
+        modalButton.onclick = () => location.reload();
         feedbackModal.style.display = 'flex';
       }
 
@@ -562,68 +543,42 @@
         if (isCorrect) {
           playSuccess();
           const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-          feedbackTitle.innerHTML = `✅ Round ${level} Complete!`;
+          feedbackTitle.innerHTML = `✅ Level ${level} Complete!`;
           feedbackTitle.className = 'success';
           modalStats.innerHTML = `Score: <strong>${score}</strong><br>Time: ${timeSpent}s`;
-          modalButton.textContent = 'Next';
+          modalButton.textContent = 'Next Level';
 
           let handled = false;
-          const advance = () => {
+          const advanceLevel = () => {
             if (handled) return;
             handled = true;
             feedbackModal.style.display = 'none';
-            currentRoundIndex++;
-            if (currentRoundIndex >= TOTAL_ROUNDS) {
+            level++;
+            levelDisplay.textContent = level;
+            if (levelGoalEnabled && level > levelsToWin) {
               gameWon();
             } else {
               generateEquation();
             }
           };
 
-          modalButton.onclick = advance;
-          modalAutoCloseTimer = setTimeout(advance, 2000);
+          modalButton.onclick = advanceLevel;
+          modalAutoCloseTimer = setTimeout(advanceLevel, 2000);
           feedbackModal.style.display = 'flex';
         } else {
           playFail();
           const timeSpent = Math.floor((Date.now() - startTime) / 1000);
           feedbackTitle.innerHTML = `❌ Game Over`;
           feedbackTitle.className = 'fail';
-          modalStats.innerHTML = `Final Score: <strong>${score}</strong><br>Round Reached: <strong>${level}</strong><br>Time Played: <strong>${timeSpent}s</strong>`;
-          modalButton.textContent = 'Restart';
-          modalButton.onclick = resetGame;
+          modalStats.innerHTML = `Final Score: <strong>${score}</strong><br>Level Reached: <strong>${level}</strong><br>Time Played: <strong>${timeSpent}s</strong>`;
+          modalButton.textContent = 'Restart Game';
+          modalButton.onclick = () => location.reload();
           feedbackModal.style.display = 'flex';
         }
       }
 
       function checkAnswer() {
-        // Guard: No selection at all
-        if (currentRow === null || correctAnswer === 0) {
-          showWarning('⚠️ Tap the first number to start!');
-          return;
-        }
-
-        // Guard: Player hasn't navigated (stayed on start cell or tapped answer directly)
-        if (!hasNavigated) {
-          const currentNum = currentRow * 10 + currentCol + 1;
-
-          // If they're on the start cell, tell them to navigate
-          if (currentRow === startRow && currentCol === startCol) {
-            showWarning('⚠️ Navigate from the starting number!');
-            return;
-          }
-
-          // They tapped somewhere else without using D-pad
-          // This means they tapped directly on a cell after starting
-          // Check if they tapped the answer directly
-          if (currentNum === correctAnswer) {
-            showWarning('⚠️ You must navigate! Tap the first number, then use D-pad to move.');
-          } else {
-            showWarning('⚠️ Use D-pad to navigate!');
-          }
-          return;
-        }
-
-        // Valid check
+        if (currentRow === null || correctAnswer === 0) return;
         const selectedNum = currentRow * 10 + currentCol + 1;
         if (selectedNum === correctAnswer) {
           score += 10 + Math.floor(level * 2);
@@ -634,48 +589,82 @@
         }
       }
 
-      function resetGame() {
+      function closeAllModals() {
+        [feedbackModal, howToPlayModal, settingsModal].forEach(m => m.style.display = 'none');
         clearTimeout(modalAutoCloseTimer);
-        clearTimeout(warningTimer);
-        feedbackModal.style.display = 'none';
-        warningToast.classList.remove('show');
-        score = 0;
-        level = 1;
-        currentRoundIndex = 0;
-        currentRow = null;
-        currentCol = null;
-        startRow = null;
-        startCol = null;
-        greenTrail.clear();
-        redTrail.clear();
-        gameStarted = false;
-        hasNavigated = false;
-        startTime = Date.now();
-        scoreDisplay.textContent = '0';
-        levelDisplay.textContent = '1';
-        modeDisplay.textContent = `Round 1/${TOTAL_ROUNDS}`;
-        generateEquation();
       }
 
-      function closeAllModals() {
-        [feedbackModal, howToPlayModal].forEach(m => m.style.display = 'none');
-        clearTimeout(modalAutoCloseTimer);
+      function updateUIfromState() {
+        modeDisplay.textContent = mode === 'auto' ? 'Auto' : 'Bank';
+        modeSelect.value = mode;
+        if (mode === 'auto') {
+          autoOptions.style.display = 'block';
+          bankOptions.style.display = 'none';
+          additionToggle.checked = autoAddition;
+          subtractionToggle.checked = autoSubtraction;
+        } else {
+          autoOptions.style.display = 'none';
+          bankOptions.style.display = 'block';
+          bankOperationSelect.value = bankOperation;
+          bankDifficultySelect.value = bankDifficulty;
+        }
+        levelGoalCheckbox.checked = levelGoalEnabled;
+        levelGoalInputContainer.style.display = levelGoalEnabled ? 'block' : 'none';
+        levelsToWinInput.value = levelsToWin;
+        if (mode === 'auto' && !additionToggle.checked && !subtractionToggle.checked) {
+          additionToggle.checked = true;
+          autoAddition = true;
+        }
+      }
+
+      function applySettingsFromUI() {
+        mode = modeSelect.value;
+        if (mode === 'auto') {
+          autoAddition = additionToggle.checked;
+          autoSubtraction = subtractionToggle.checked;
+          if (!autoAddition && !autoSubtraction) {
+            additionToggle.checked = true;
+            autoAddition = true;
+          }
+          if (autoAddition && autoSubtraction) {
+            operation = Math.random() > 0.5 ? '+' : '-';
+          } else if (autoAddition) {
+            operation = '+';
+          } else if (autoSubtraction) {
+            operation = '-';
+          }
+        } else {
+          bankOperation = bankOperationSelect.value;
+          bankDifficulty = bankDifficultySelect.value;
+          operation = bankOperation;
+        }
+        levelGoalEnabled = levelGoalCheckbox.checked;
+        levelsToWin = parseInt(levelsToWinInput.value, 10) || 5;
+        if (levelsToWin < 1) levelsToWin = 1;
+        if (levelsToWin > 100) levelsToWin = 100;
+        levelsToWinInput.value = levelsToWin;
+        updateUIfromState();
       }
 
       function initControls() {
+        document.getElementById('orangeBtn').addEventListener('click', () => {
+          closeAllModals();
+          updateUIfromState();
+          settingsModal.style.display = 'flex';
+        });
         document.getElementById('yellowBtn').addEventListener('click', () => {
           closeAllModals();
           howToPlayModal.style.display = 'flex';
         });
 
-        // D-pad
+        // D-pad buttons (now labeled -10, -, +, +10)
         document.getElementById('up').addEventListener('click', () => move('up'));
         document.getElementById('down').addEventListener('click', () => move('down'));
         document.getElementById('left').addEventListener('click', () => move('left'));
         document.getElementById('right').addEventListener('click', () => move('right'));
 
         document.getElementById('check').addEventListener('click', checkAnswer);
-        document.getElementById('reset').addEventListener('click', resetGame);
+        document.getElementById('reset').addEventListener('click', () => location.reload());
 
         // Keyboard
         document.addEventListener('keydown', e => {
@@ -696,18 +685,45 @@
           });
         });
 
+        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+          applySettingsFromUI();
+          settingsModal.style.display = 'none';
+          generateEquation();
+        });
+
         document.getElementById('howToPlayCloseBtn').addEventListener('click', () => {
           howToPlayModal.style.display = 'none';
+        });
+
+        // Operation toggles guard
+        additionToggle.addEventListener('change', () => {
+          if (!additionToggle.checked && !subtractionToggle.checked) subtractionToggle.checked = true;
+        });
+        subtractionToggle.addEventListener('change', () => {
+          if (!additionToggle.checked && !subtractionToggle.checked) additionToggle.checked = true;
+        });
+
+        modeSelect.addEventListener('change', () => {
+          if (modeSelect.value === 'auto') {
+            autoOptions.style.display = 'block';
+            bankOptions.style.display = 'none';
+          } else {
+            autoOptions.style.display = 'none';
+            bankOptions.style.display = 'block';
+          }
+        });
+
+        levelGoalCheckbox.addEventListener('change', () => {
+          levelGoalInputContainer.style.display = levelGoalCheckbox.checked ? 'block' : 'none';
         });
       }
 
       function init() {
         createGrid();
+        updateUIfromState();
         generateEquation();
         initControls();
-        scoreDisplay.textContent = '0';
-        levelDisplay.textContent = '1';
-        modeDisplay.textContent = `Round 1/${TOTAL_ROUNDS}`;
+        scoreDisplay.textContent = score;
         startTime = Date.now();
       }
 
