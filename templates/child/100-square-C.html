@@ -34,16 +34,6 @@
       font-size: 1rem;
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    .stat.warning {
-      background: rgba(255, 100, 100, 0.3);
-      color: #ffaaaa;
-      border: 1px solid rgba(255, 150, 150, 0.5);
-      animation: pulse 0.5s ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
     .header {
       display: flex;
       align-items: center;
@@ -107,6 +97,10 @@
       color: #1a1a1a;
     }
     .cell:hover { background: #f0f0f0; }
+    .cell.locked {
+      cursor: not-allowed;
+      pointer-events: none;
+    }
     .cell.start-highlight {
       background: #64b5f6 !important;
       color: #0d47a1;
@@ -290,8 +284,8 @@
     <div class="feedback-content">
       <h2>How to Play</h2>
       <p style="text-align:left; margin:10px 0;">1. Tap the <strong>first number</strong> in the equation to start.</p>
-      <p style="text-align:left; margin:10px 0;">2. Use D‑pad or arrow keys to <strong>navigate</strong> to the answer.</p>
-      <p style="text-align:left; margin:10px 0;">3. You must <strong>move</strong> – tapping the answer directly won't work.</p>
+      <p style="text-align:left; margin:10px 0;">2. Once started, <strong>grid taps are locked</strong> – only D‑pad works.</p>
+      <p style="text-align:left; margin:10px 0;">3. Use D‑pad or arrow keys to <strong>navigate</strong> to the answer.</p>
       <p style="text-align:left; margin:10px 0;">4. Reach the correct answer and tap CHECK.</p>
       <button class="close" id="howToPlayCloseBtn">Got it!</button>
     </div>
@@ -332,7 +326,8 @@
       let greenTrail = new Set();
       let redTrail = new Set();
       let gameStarted = false;
-      let hasNavigated = false;      // Player must move at least once from start
+      let gridLocked = false;       // Grid taps locked after start
+      let hasNavigated = false;
       let score = 0;
       let level = 1;
       let startTime = Date.now();
@@ -375,6 +370,18 @@
       function playMove() { playSound(600, 50, 'triangle', 0.2); }
       function playWarning() { playSound(300, 100, 'square', 0.3); setTimeout(() => playSound(250, 150, 'square', 0.3), 100); }
 
+      function lockGrid() {
+        gridLocked = true;
+        const cells = getCellElements();
+        cells.forEach(cell => cell.classList.add('locked'));
+      }
+
+      function unlockGrid() {
+        gridLocked = false;
+        const cells = getCellElements();
+        cells.forEach(cell => cell.classList.remove('locked'));
+      }
+
       function createGrid() {
         gridEl.innerHTML = '';
         for (let i = 1; i <= 100; i++) {
@@ -400,6 +407,12 @@
       }
 
       function handleCellClick(num) {
+        // If grid is locked, reject all taps
+        if (gridLocked) {
+          showWarning('🔒 Grid locked! Use D‑pad or press RESET.');
+          return;
+        }
+
         const index = num - 1;
         const clickedRow = Math.floor(index / 10);
         const clickedCol = index % 10;
@@ -415,24 +428,15 @@
             hasNavigated = false;
             greenTrail.clear();
             redTrail.clear();
-            greenTrail.add(num);  // Starting cell is green
+            greenTrail.add(num);
+            lockGrid();  // Lock immediately after start
             highlightCurrent();
             updateEquation();
           } else {
             showWarning(`⚠️ Start at ${firstNumber} first!`);
           }
-        } else {
-          // Already started – just move selection (via tap)
-          // This counts as navigation
-          currentRow = clickedRow;
-          currentCol = clickedCol;
-          hasNavigated = true;
-          // Color based on movement direction relative to previous position
-          // For taps, we'll use green for simplicity
-          greenTrail.add(num);
-          highlightCurrent();
-          updateEquation();
         }
+        // No else – grid is locked after game starts, so this path is unreachable
       }
 
       function highlightCurrent() {
@@ -444,7 +448,7 @@
           if (redTrail.has(num)) cell.classList.add('trail-red');
         });
 
-        // Highlight starting cell if it hasn't been covered by a trail
+        // Highlight starting cell if not covered by trail
         if (startRow !== null && startCol !== null) {
           const startIdx = startRow * 10 + startCol;
           const startNum = startRow * 10 + startCol + 1;
@@ -481,6 +485,7 @@
         startCol = null;
         hasNavigated = false;
         gameStarted = false;
+        unlockGrid();  // Unlock for new round
 
         highlightCurrent();
         level = currentRoundIndex + 1;
@@ -498,12 +503,9 @@
       function move(direction) {
         if (currentRow === null || correctAnswer === 0) return;
         playMove();
-        hasNavigated = true;  // Any move counts as navigation
+        hasNavigated = true;
 
         let isForwardOrDown = false;
-        const prevRow = currentRow;
-        const prevCol = currentCol;
-
         switch(direction) {
           case 'right':
             currentCol++;
@@ -534,7 +536,7 @@
           redTrail.add(currentNum);
         }
 
-        // Ensure start cell is in green trail if not already colored
+        // Ensure start cell is green
         if (startRow !== null && startCol !== null) {
           const startNum = startRow * 10 + startCol + 1;
           if (!greenTrail.has(startNum) && !redTrail.has(startNum)) {
@@ -596,34 +598,16 @@
       }
 
       function checkAnswer() {
-        // Guard: No selection at all
         if (currentRow === null || correctAnswer === 0) {
           showWarning('⚠️ Tap the first number to start!');
           return;
         }
 
-        // Guard: Player hasn't navigated (stayed on start cell or tapped answer directly)
         if (!hasNavigated) {
-          const currentNum = currentRow * 10 + currentCol + 1;
-
-          // If they're on the start cell, tell them to navigate
-          if (currentRow === startRow && currentCol === startCol) {
-            showWarning('⚠️ Navigate from the starting number!');
-            return;
-          }
-
-          // They tapped somewhere else without using D-pad
-          // This means they tapped directly on a cell after starting
-          // Check if they tapped the answer directly
-          if (currentNum === correctAnswer) {
-            showWarning('⚠️ You must navigate! Tap the first number, then use D-pad to move.');
-          } else {
-            showWarning('⚠️ Use D-pad to navigate!');
-          }
+          showWarning('⚠️ Use D‑pad to navigate from the starting number!');
           return;
         }
 
-        // Valid check
         const selectedNum = currentRow * 10 + currentCol + 1;
         if (selectedNum === correctAnswer) {
           score += 10 + Math.floor(level * 2);
@@ -650,6 +634,7 @@
         redTrail.clear();
         gameStarted = false;
         hasNavigated = false;
+        unlockGrid();
         startTime = Date.now();
         scoreDisplay.textContent = '0';
         levelDisplay.textContent = '1';
