@@ -123,11 +123,11 @@
     }
     .dpad {
       display: grid;
-      grid-template-areas:
-        ". up ."
-        "left . right"
-        ". down .";
+      grid-template-columns: auto auto auto;
+      grid-template-rows: auto auto auto;
       gap: 6px;
+      justify-content: center;
+      align-items: center;
     }
     .dpad button {
       width: 55px;
@@ -141,6 +141,10 @@
       transition: 0.15s;
     }
     .dpad button:active { transform: scale(0.85); }
+    .dpad .up    { grid-column: 2; grid-row: 1; }
+    .dpad .left  { grid-column: 1; grid-row: 2; }
+    .dpad .right { grid-column: 3; grid-row: 2; }
+    .dpad .down  { grid-column: 2; grid-row: 3; }
     .action-btn {
       padding: 14px 28px;
       font-size: 1.2rem;
@@ -248,7 +252,7 @@
       <p style="text-align:left; margin:10px 0;">2. Use D‑pad or arrow keys to navigate.</p>
       <p style="text-align:left; margin:10px 0;">3. Equation updates live as you move.</p>
       <p style="text-align:left; margin:10px 0;">4. Reach the correct answer and tap CHECK.</p>
-      <button class="close" onclick="closeAllModals()">Got it!</button>
+      <button class="close" id="howToPlayCloseBtn">Got it!</button>
     </div>
   </div>
 
@@ -384,7 +388,6 @@
 
       // Sound
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      // Resume audio context on first user gesture (browser policy)
       document.addEventListener('click', () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
       }, { once: true });
@@ -464,7 +467,6 @@
             correctAnswer = 0;
             return;
           }
-          // Filter to only answers within grid range 1-100 (should be all now, but safe)
           const validQuestions = bank.filter(q => q.answer >= 1 && q.answer <= 100);
           if (validQuestions.length === 0) {
             equationEl.textContent = 'No valid questions';
@@ -533,7 +535,6 @@
         modalButton.textContent = 'Restart Game';
         modalButton.onclick = () => location.reload();
         feedbackModal.style.display = 'flex';
-        // No auto-close for victory
       }
 
       function showFeedback(isCorrect) {
@@ -646,7 +647,7 @@
 
       function initControls() {
         document.getElementById('orangeBtn').addEventListener('click', () => {
-          closeAllModals();            // fix modal overlap
+          closeAllModals();
           updateUIfromState();
           settingsModal.style.display = 'flex';
         });
@@ -654,13 +655,17 @@
           closeAllModals();
           howToPlayModal.style.display = 'flex';
         });
+
+        // D-pad
         document.getElementById('up').addEventListener('click', () => move('up'));
         document.getElementById('down').addEventListener('click', () => move('down'));
         document.getElementById('left').addEventListener('click', () => move('left'));
         document.getElementById('right').addEventListener('click', () => move('right'));
+
         document.getElementById('check').addEventListener('click', checkAnswer);
         document.getElementById('reset').addEventListener('click', () => location.reload());
 
+        // Keyboard
         document.addEventListener('keydown', e => {
           if (e.key === 'ArrowUp') { e.preventDefault(); move('up'); }
           if (e.key === 'ArrowDown') { e.preventDefault(); move('down'); }
@@ -669,6 +674,7 @@
           if (e.key === 'Enter') checkAnswer();
         });
 
+        // Close modals on overlay click
         document.querySelectorAll('.feedback-modal').forEach(modal => {
           modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -678,12 +684,19 @@
           });
         });
 
+        // Settings save button (already bound, but ensure)
         document.getElementById('saveSettingsBtn').addEventListener('click', () => {
           applySettingsFromUI();
           settingsModal.style.display = 'none';
           generateEquation();
         });
 
+        // Close button in "How to Play" modal
+        document.getElementById('howToPlayCloseBtn').addEventListener('click', () => {
+          howToPlayModal.style.display = 'none';
+        });
+
+        // Operation toggles guard
         additionToggle.addEventListener('change', () => {
           if (!additionToggle.checked && !subtractionToggle.checked) subtractionToggle.checked = true;
         });
