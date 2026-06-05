@@ -296,7 +296,8 @@
     <div class="players-row">
         <div class="player-panel p1" id="p1Panel">
             <div class="player-name" id="p1NameDisplay">
-                <span class="player-avatar" id="p1Avatar"></span> PLAYER 1
+                <span class="player-avatar" id="p1Avatar"></span>
+                <span class="player-name-text">Player 1</span>
             </div>
             <div class="score-badge" id="p1ScoreBadge">Score: 0 / 10</div>
             <div class="answer-box placeholder" id="p1Answer">Your answer</div>
@@ -355,7 +356,8 @@
         </div>
         <div class="player-panel p2" id="p2Panel">
             <div class="player-name" id="p2NameDisplay">
-                <span class="player-avatar" id="p2Avatar"></span> PLAYER 2
+                <span class="player-avatar" id="p2Avatar"></span>
+                <span class="player-name-text">Player 2</span>
             </div>
             <div class="score-badge" id="p2ScoreBadge">Score: 0 / 10</div>
             <div class="answer-box placeholder" id="p2Answer">Your answer</div>
@@ -437,6 +439,8 @@
     const p1Panel = $('p1Panel'), p2Panel = $('p2Panel');
     const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
     const p1Avatar = $('p1Avatar'), p2Avatar = $('p2Avatar');
+    const p1NameText = document.querySelector('#p1NameDisplay .player-name-text');
+    const p2NameText = document.querySelector('#p2NameDisplay .player-name-text');
     const p1ScoreBadge = $('p1ScoreBadge'), p2ScoreBadge = $('p2ScoreBadge');
     const p1Answer = $('p1Answer'), p2Answer = $('p2Answer');
     const p1OptionsGrid = $('p1OptionsGrid'), p2OptionsGrid = $('p2OptionsGrid');
@@ -504,19 +508,9 @@
         return COLOR_PALETTE[idx] || COLOR_PALETTE[0];
     }
 
-    function updatePlayerNameElements() {
-        // Update the avatar background colors
-        const c1 = getPlayerColor(p1ColorIdx).light;
-        const c2 = getPlayerColor(p2ColorIdx).light;
-        p1Avatar.style.background = c1;
-        p2Avatar.style.background = c2;
-        // Update name texts (keeping the avatar span intact)
-        p1NameDisplay.childNodes.forEach(node => {
-            if (node.nodeType === Node.TEXT_NODE) node.textContent = ' ' + PLAYER1;
-        });
-        p2NameDisplay.childNodes.forEach(node => {
-            if (node.nodeType === Node.TEXT_NODE) node.textContent = ' ' + PLAYER2;
-        });
+    function updatePlayerNameDisplay() {
+        if (p1NameText) p1NameText.textContent = PLAYER1;
+        if (p2NameText) p2NameText.textContent = PLAYER2;
     }
 
     function applyPlayerColors() {
@@ -532,7 +526,11 @@
         redBar.style.background = `linear-gradient(180deg, ${c2.light}, ${c2.dark})`;
         p1ColorPreview.style.background = c1.light;
         p2ColorPreview.style.background = c2.light;
-        updatePlayerNameElements(); // update avatars and name text
+        // Update avatars
+        p1Avatar.style.background = c1.light;
+        p2Avatar.style.background = c2.light;
+        // Update name texts
+        updatePlayerNameDisplay();
     }
 
     function updateSharedQuestion() { sharedQuestion.textContent = currentQuestion.question; }
@@ -696,10 +694,9 @@
         player1 = { score: 0, answer: '', locked: false };
         player2 = { score: 0, answer: '', locked: false };
         questionQueue = []; queueIndex = 0; lastIdx = -1;
-        // updateNames() is replaced by applyPlayerColors which calls updatePlayerNameElements
         updateScoreBadges();
         updateBar();
-        applyPlayerColors(); // updates all color-dependent UI including avatars and names
+        applyPlayerColors(); // includes name update
         startNextQuestion();
         overlay.classList.remove('active');
         buildBankRadios();
@@ -756,7 +753,7 @@
             if (changingPlayer === 'p1') p1ColorIdx = newIdx;
             else p2ColorIdx = newIdx;
             updateColorPreviews();
-            applyPlayerColors(); // live preview in UI
+            applyPlayerColors(); // live preview
         }
     }
 
