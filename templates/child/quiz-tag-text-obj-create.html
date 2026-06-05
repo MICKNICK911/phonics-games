@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Question Bank Creator</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg:#0b1120; --surface:#111b2e; --text:#f1f5f9; --text-dim:#94a3b8;
+            --border:#1e293b; --blue:#3b82f6; --green:#22c55e; --red:#ef4444;
+            --yellow:#f59e0b; --radius:12px;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100dvh; display: flex; align-items: flex-start; justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .container {
+            width: 100%; max-width: 800px;
+            background: var(--surface); border: 2px solid var(--border);
+            border-radius: 1.5rem; padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-size: 1.8rem; text-align: center; margin-bottom: 1.2rem;
+            background: linear-gradient(135deg, var(--blue), #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .bank-name-row {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.5rem; margin-bottom: 1.2rem;
+        }
+        .bank-name-row label { font-weight: 600; font-size: 0.95rem; color: var(--text-dim); }
+        .bank-name-row input {
+            background: #0f172a; border: 2px solid #334155; border-radius: 2rem;
+            padding: 0.4rem 1rem; color: white; font-weight: 600; font-size: 0.95rem;
+            width: 180px; text-align: center;
+        }
+        .toolbar {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-bottom: 1.5rem;
+        }
+        .toolbar button, .toolbar label.button-label {
+            background: #1e293b; border: 2px solid #334155; color: white;
+            padding: 0.5rem 1.2rem; border-radius: 2rem; font-weight: 600; font-size: 0.9rem;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.4rem;
+        }
+        .toolbar button:hover, .toolbar label.button-label:hover { background: #2d3a52; border-color: #6366f1; }
+        .toolbar button.primary { background: var(--blue); border-color: var(--blue); }
+        .toolbar button.primary:hover { background: #2563eb; }
+        .toolbar button.danger { background: var(--red); border-color: var(--red); }
+        .toolbar button.danger:hover { background: #dc2626; }
+        #importFile { display: none; }
+
+        .questions-container {
+            display: flex; flex-direction: column; gap: 0.8rem;
+        }
+        .question-card {
+            background: #0f172a; border: 2px solid #334155; border-radius: var(--radius);
+            padding: 1rem; transition: 0.2s;
+        }
+        .question-card.editing {
+            border-color: var(--blue);
+            box-shadow: 0 0 12px rgba(59,130,246,0.3);
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 0.5rem; margin-bottom: 0.5rem;
+        }
+        .question-text {
+            font-weight: 700; font-size: 1.1rem; flex:1;
+        }
+        .card-actions {
+            display: flex; gap: 0.4rem;
+        }
+        .card-actions button {
+            background: none; border: 1px solid #334155; color: #cbd5e1;
+            border-radius: 0.5rem; padding: 0.3rem 0.6rem; cursor: pointer;
+            font-size: 0.8rem; transition: 0.2s;
+        }
+        .card-actions button:hover { background: #1e293b; }
+        .card-actions button.edit-btn:hover { border-color: var(--blue); color: var(--blue); }
+        .card-actions button.delete-btn:hover { border-color: var(--red); color: var(--red); }
+
+        .options-list {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0;
+        }
+        .option-tag {
+            background: #1e293b; padding: 0.2rem 0.8rem; border-radius: 1rem;
+            font-size: 0.85rem; border: 1px solid #334155;
+        }
+        .option-tag.correct {
+            background: #14532d; border-color: var(--green); color: #bbf7d0;
+            font-weight: 600;
+        }
+
+        .edit-form {
+            display: flex; flex-direction: column; gap: 0.6rem;
+        }
+        .edit-form input, .edit-form select {
+            background: #0f172a; border: 2px solid #334155; border-radius: 0.5rem;
+            padding: 0.4rem 0.7rem; color: white; font-weight: 500; font-size: 0.9rem;
+        }
+        .edit-form .options-input {
+            display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center;
+        }
+        .edit-form .option-chip {
+            background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem;
+            padding: 0.15rem 0.5rem; display: flex; align-items: center; gap: 0.3rem;
+            font-size: 0.85rem;
+        }
+        .edit-form .option-chip button {
+            background: none; border: none; color: #ef4444; cursor: pointer; font-weight: bold;
+        }
+        .edit-form .form-actions {
+            display: flex; gap: 0.5rem; justify-content: flex-end;
+        }
+        .empty-state {
+            text-align: center; color: var(--text-dim); padding: 2rem;
+            font-size: 1rem; border: 2px dashed #334155; border-radius: var(--radius);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📝 Question Bank Creator</h1>
+    <div class="bank-name-row">
+        <label>Bank Name: </label>
+        <input type="text" id="bankNameInput" placeholder="My Custom Bank" value="My Bank">
+    </div>
+    <div class="toolbar">
+        <button id="addQuestionBtn" class="primary">➕ Add Question</button>
+        <button id="importBtn">📂 Import JSON</button>
+        <button id="exportBtn">💾 Export JSON</button>
+        <input type="file" id="importFile" accept=".json">
+    </div>
+    <div class="questions-container" id="questionsContainer"></div>
+</div>
+
+<script>
+(function() {
+    // State
+    let questions = [];          // array of {question, options, answer}
+    let editingIndex = -1;       // index of currently editing card, -1 means none
+
+    // DOM elements
+    const questionsContainer = document.getElementById('questionsContainer');
+    const bankNameInput = document.getElementById('bankNameInput');
+    const addQuestionBtn = document.getElementById('addQuestionBtn');
+    const importBtn = document.getElementById('importBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFile = document.getElementById('importFile');
+
+    // ────────── RENDERING ──────────
+    function render() {
+        questionsContainer.innerHTML = '';
+        if (questions.length === 0) {
+            questionsContainer.innerHTML = `<div class="empty-state">No questions yet. Add one or import a bank.</div>`;
+            return;
+        }
+        questions.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = `question-card ${editingIndex === idx ? 'editing' : ''}`;
+            if (editingIndex === idx) {
+                card.innerHTML = renderEditForm(idx, q);
+            } else {
+                card.innerHTML = renderReadView(idx, q);
+            }
+            questionsContainer.appendChild(card);
+        });
+    }
+
+    function renderReadView(idx, q) {
+        const optionsHtml = q.options.map(opt => {
+            const isCorrect = opt === q.answer;
+            return `<span class="option-tag ${isCorrect ? 'correct' : ''}">${escapeHtml(opt)}${isCorrect ? ' ✓' : ''}</span>`;
+        }).join('');
+        return `
+            <div class="card-header">
+                <div class="question-text">${escapeHtml(q.question)}</div>
+                <div class="card-actions">
+                    <button class="edit-btn" data-action="edit" data-index="${idx}">✏️ Edit</button>
+                    <button class="delete-btn" data-action="delete" data-index="${idx}">🗑️ Delete</button>
+                </div>
+            </div>
+            <div class="options-list">${optionsHtml}</div>
+        `;
+    }
+
+    function renderEditForm(idx, q) {
+        const optionsChips = q.options.map((opt, i) => `
+            <span class="option-chip">
+                ${escapeHtml(opt)}
+                <button data-action="remove-option" data-option-index="${i}" data-question-index="${idx}">×</button>
+            </span>
+        `).join('');
+
+        const answerOptions = q.options.map(opt => `<option value="${escapeHtml(opt)}" ${opt === q.answer ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('');
+
+        return `
+            <div class="edit-form">
+                <label>Question:</label>
+                <input type="text" id="editQuestion-${idx}" value="${escapeHtml(q.question)}" placeholder="Enter question">
+                <label>Options (comma separated):</label>
+                <div class="options-input">
+                    <input type="text" id="editOptions-${idx}" placeholder="e.g. Paris, London, Berlin" value="${q.options.join(', ')}">
+                    <button data-action="update-options" data-index="${idx}">🔄 Update</button>
+                </div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">${optionsChips}</div>
+                <label>Correct Answer:</label>
+                <select id="editAnswer-${idx}">${answerOptions}</select>
+                <div class="form-actions">
+                    <button data-action="save" data-index="${idx}">✅ Save</button>
+                    <button data-action="cancel" data-index="${idx}">❌ Cancel</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(text) {
+        return String(text).replace(/[&<>"]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            if (m === '"') return '&quot;';
+            return m;
+        });
+    }
+
+    // ────────── CRUD OPERATIONS ──────────
+    function addQuestion() {
+        const newQ = { question: 'New question', options: ['Option 1', 'Option 2'], answer: 'Option 1' };
+        questions.push(newQ);
+        editingIndex = questions.length - 1;  // automatically edit the new one
+        render();
+    }
+
+    function deleteQuestion(idx) {
+        if (confirm('Delete this question?')) {
+            questions.splice(idx, 1);
+            if (editingIndex === idx) editingIndex = -1;
+            else if (editingIndex > idx) editingIndex--;
+            render();
+        }
+    }
+
+    function startEdit(idx) {
+        editingIndex = idx;
+        render();
+    }
+
+    function cancelEdit() {
+        editingIndex = -1;
+        render();
+    }
+
+    function saveQuestion(idx) {
+        const questionInput = document.getElementById(`editQuestion-${idx}`);
+        const answerSelect = document.getElementById(`editAnswer-${idx}`);
+        if (!questionInput || !answerSelect) return;
+
+        const newQuestion = questionInput.value.trim();
+        if (!newQuestion) {
+            alert('Question text cannot be empty.');
+            return;
+        }
+
+        // Options are already updated via the "Update Options" button, but we can also read from the current state
+        const q = questions[idx];
+        q.question = newQuestion;
+        q.answer = answerSelect.value;
+
+        if (!q.options.includes(q.answer)) {
+            alert('Answer must be one of the options.');
+            return;
+        }
+
+        editingIndex = -1;
+        render();
+    }
+
+    function updateOptions(idx) {
+        const optionsInput = document.getElementById(`editOptions-${idx}`);
+        if (!optionsInput) return;
+        const raw = optionsInput.value;
+        const options = raw.split(',').map(s => s.trim()).filter(s => s !== '');
+        if (options.length < 2) {
+            alert('At least 2 options required.');
+            return;
+        }
+        const q = questions[idx];
+        q.options = options;
+        // Ensure answer still valid
+        if (!q.options.includes(q.answer)) {
+            q.answer = q.options[0];
+        }
+        render(); // re-render to refresh options chips and answer dropdown
+    }
+
+    function removeOption(questionIdx, optionIdx) {
+        const q = questions[questionIdx];
+        if (q.options.length <= 2) {
+            alert('Minimum 2 options required.');
+            return;
+        }
+        const removedOpt = q.options[optionIdx];
+        q.options.splice(optionIdx, 1);
+        if (q.answer === removedOpt) {
+            q.answer = q.options[0]; // default
+        }
+        render();
+    }
+
+    // ────────── IMPORT / EXPORT ──────────
+    function importBank(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!Array.isArray(data)) throw new Error('JSON must be an array.');
+                for (let i = 0; i < data.length; i++) {
+                    const q = data[i];
+                    if (!q.question || typeof q.question !== 'string') throw new Error(`Item ${i+1}: missing "question".`);
+                    if (!Array.isArray(q.options) || q.options.length < 2) throw new Error(`Item ${i+1}: "options" must be array with ≥2 items.`);
+                    if (!q.answer || typeof q.answer !== 'string') throw new Error(`Item ${i+1}: missing "answer".`);
+                    if (!q.options.includes(q.answer)) throw new Error(`Item ${i+1}: answer not in options.`);
+                }
+                questions = data;
+                editingIndex = -1;
+                render();
+                alert(`Successfully imported ${data.length} questions.`);
+            } catch (err) {
+                alert('Import failed: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function exportBank() {
+        if (questions.length === 0) {
+            alert('Nothing to export. Add some questions first.');
+            return;
+        }
+        const json = JSON.stringify(questions, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const bankName = bankNameInput.value.trim() || 'question_bank';
+        a.href = url;
+        a.download = `${bankName.replace(/\s+/g, '_')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ────────── EVENT DELEGATION ──────────
+    questionsContainer.addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+        const action = target.dataset.action;
+        const idx = parseInt(target.dataset.index, 10);
+        const optionIdx = parseInt(target.dataset.optionIndex, 10);
+
+        if (action === 'edit') startEdit(idx);
+        else if (action === 'delete') deleteQuestion(idx);
+        else if (action === 'save') saveQuestion(idx);
+        else if (action === 'cancel') cancelEdit();
+        else if (action === 'update-options') updateOptions(idx);
+        else if (action === 'remove-option') removeOption(idx, optionIdx);
+    });
+
+    addQuestionBtn.addEventListener('click', addQuestion);
+    importBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            importBank(e.target.files[0]);
+            importFile.value = ''; // allow re-importing same file
+        }
+    });
+    exportBtn.addEventListener('click', exportBank);
+
+    // Initial render
+    render();
+})();
+</script>
+</body>
+</html>
