@@ -379,19 +379,17 @@
         <div class="result-icon" id="resultIcon">🏆</div>
         <div class="result-title" id="resultTitle"></div>
         <div class="result-scores">
-            <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
-            <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
+            <div><div id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
+            <div><div id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
         </div>
         <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
     </div>
 </div>
 <script>
 (function() {
-    // ──────────────────────── STORAGE KEY ────────────────────────
     const STORAGE_KEY = 'quiz_tug_of_war_banks';
     const SETTINGS_KEY = 'quiz_tug_of_war_settings';
 
-    // ──────────────────────── DEFAULT BANKS (hard-coded fallback) ────────────────────────
     const DEFAULT_BANKS = [
         {
             name: 'Science',
@@ -425,35 +423,24 @@
         }
     ];
 
-    // ──────────────────────── STORAGE HELPERS ────────────────────────
     function loadBanksFromStorage() {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored);
-                // Validate structure
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     for (const bank of parsed) {
                         if (!bank.name || !Array.isArray(bank.questions)) return null;
-                        for (const q of bank.questions) {
-                            if (!q.question || !Array.isArray(q.options) || !q.answer) return null;
-                        }
                     }
                     return parsed;
                 }
             }
-        } catch (e) {
-            // Silently fail, return null to use defaults
-        }
+        } catch (e) {}
         return null;
     }
 
     function saveBanksToStorage(banks) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(banks));
-        } catch (e) {
-            // Storage full or unavailable - silently continue
-        }
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(banks)); } catch (e) {}
     }
 
     function loadSettingsFromStorage() {
@@ -468,15 +455,11 @@
     }
 
     function saveSettingsToStorage(settings) {
-        try {
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-        } catch (e) {}
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
     }
 
-    // ──────────────────────── INITIALIZE BANKS ────────────────────────
     let questionBanks = loadBanksFromStorage() || JSON.parse(JSON.stringify(DEFAULT_BANKS));
 
-    // ──────────────────────── COLOR PALETTE ────────────────────────
     const COLOR_PALETTE = [
         { name: 'Red',    light: '#EF4444', dark: '#B91C1C' },
         { name: 'Orange', light: '#F97316', dark: '#C2410C' },
@@ -490,7 +473,6 @@
         { name: 'Lime',   light: '#84CC16', dark: '#4D7C0F' }
     ];
 
-    // ──────────────────────── DOM ELEMENTS ────────────────────────
     const $ = id => document.getElementById(id);
     const sharedQuestion = $('sharedQuestion');
     const p1Panel = $('p1Panel'), p2Panel = $('p2Panel');
@@ -518,7 +500,6 @@
     const finalP1 = $('finalP1'), finalP2 = $('finalP2');
     const playAgainBtn = $('playAgainBtn');
 
-    // ──────────────────────── GAME STATE ────────────────────────
     let TOTAL_ROUNDS = 10;
     let SELECTED_BANK_INDEX = 0;
     let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
@@ -531,7 +512,6 @@
     let currentQuestion = { question: '', answer: '', options: [] };
     let questionQueue = [], queueIndex = 0, lastIdx = -1;
 
-    // ──────────────────────── UTILITIES ────────────────────────
     const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
     const currentBank = () => questionBanks[SELECTED_BANK_INDEX] || questionBanks[0];
 
@@ -569,6 +549,8 @@
     function updatePlayerNameDisplay() {
         if (p1NameText) p1NameText.textContent = PLAYER1;
         if (p2NameText) p2NameText.textContent = PLAYER2;
+        finalP1Label.textContent = `🔵 ${PLAYER1}`;
+        finalP2Label.textContent = `🔴 ${PLAYER2}`;
     }
 
     function applyPlayerColors() {
@@ -759,7 +741,6 @@
         populateColorDropdowns();
     }
 
-    // ──────────────────────── SETTINGS / IMPORT / CREATE ────────────────────────
     function buildBankRadios() {
         bankGroup.innerHTML = '';
         questionBanks.forEach((bank, idx) => {
@@ -818,51 +799,35 @@
         if (data.length === 0) return 'The bank must contain at least one question.';
         for (let i = 0; i < data.length; i++) {
             const q = data[i];
-            if (!q.question || typeof q.question !== 'string') return `Question ${i+1}: missing or invalid "question" field.`;
-            if (!Array.isArray(q.options) || q.options.length < 2) return `Question ${i+1}: "options" must be an array with at least 2 items.`;
-            if (!q.answer || typeof q.answer !== 'string') return `Question ${i+1}: missing or invalid "answer" field.`;
-            if (!q.options.includes(q.answer)) return `Question ${i+1}: answer "${q.answer}" not found in options.`;
+            if (!q.question || typeof q.question !== 'string') return `Question ${i+1}: missing/invalid "question".`;
+            if (!Array.isArray(q.options) || q.options.length < 2) return `Question ${i+1}: "options" must be an array with ≥2 items.`;
+            if (!q.answer || typeof q.answer !== 'string') return `Question ${i+1}: missing/invalid "answer".`;
+            if (!q.options.includes(q.answer)) return `Question ${i+1}: answer not in options.`;
         }
         return null;
     }
 
     function importQuestions() {
         const file = importFileInput.files[0];
-        if (!file) {
-            alert('Please select a .json file first.');
-            return;
-        }
+        if (!file) { alert('Please select a .json file first.'); return; }
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const json = JSON.parse(e.target.result);
-
-                // Handle both flat question array and multi-bank array
                 let importedBanks = [];
                 if (Array.isArray(json)) {
                     if (json.length > 0 && json[0].hasOwnProperty('question') && json[0].hasOwnProperty('options')) {
-                        // Flat question array
-                        const name = file.name.replace(/\.[^/.]+$/, "") || 'Imported Bank';
-                        importedBanks = [{ name: name, questions: json }];
+                        importedBanks = [{ name: file.name.replace(/\.[^/.]+$/, "") || 'Imported Bank', questions: json }];
                     } else if (json.length > 0 && json[0].hasOwnProperty('name') && json[0].hasOwnProperty('questions')) {
-                        // Array of banks
                         importedBanks = json;
                     }
                 }
-
-                if (importedBanks.length === 0) {
-                    alert('Invalid file structure.');
-                    return;
-                }
-
-                // Validate
+                if (importedBanks.length === 0) { alert('Invalid file structure.'); return; }
                 for (const bank of importedBanks) {
-                    if (!bank.name || typeof bank.name !== 'string') throw new Error('Each bank must have a "name".');
-                    const error = validateImportedBank(bank.questions);
-                    if (error) throw new Error(`Bank "${bank.name}": ${error}`);
+                    if (!bank.name) throw new Error('Each bank must have a "name".');
+                    const err = validateImportedBank(bank.questions);
+                    if (err) throw new Error(`Bank "${bank.name}": ${err}`);
                 }
-
-                // Merge: replace existing banks with same name
                 importedBanks.forEach(ib => {
                     const existingIdx = questionBanks.findIndex(b => b.name === ib.name);
                     if (existingIdx >= 0) {
@@ -873,15 +838,10 @@
                         questionBanks.push(ib);
                     }
                 });
-
-                // Save to storage
                 saveBanksToStorage(questionBanks);
-
-                SELECTED_BANK_INDEX = questionBanks.length - 1;
                 buildBankRadios();
-                alert(`Successfully imported! Click "Apply & Restart" to use.`);
+                alert(`Successfully imported. Please select the bank and click "Apply & Restart".`);
                 importFileInput.value = '';
-
             } catch (err) {
                 alert('Import failed: ' + err.message);
             }
@@ -895,12 +855,11 @@
             saveBanksToStorage(questionBanks);
             SELECTED_BANK_INDEX = 0;
             buildBankRadios();
-            alert('Banks reset to defaults. Click "Apply & Restart" to play.');
+            alert('Banks reset. Click "Apply & Restart" to play with defaults.');
         }
     }
 
     function openCreator() {
-        // Save current banks to storage so creator can load them
         saveBanksToStorage(questionBanks);
         window.open('create.html', '_blank');
     }
@@ -917,8 +876,8 @@
         if (isNaN(bankIdx) || bankIdx < 0 || bankIdx >= questionBanks.length) bankIdx = 0;
         let newP1Idx = parseInt(p1ColorSelect.value, 10);
         let newP2Idx = parseInt(p2ColorSelect.value, 10);
-        if (isNaN(newP1Idx) || newP1Idx < 0 || newP1Idx >= COLOR_PALETTE.length) newP1Idx = 4;
-        if (isNaN(newP2Idx) || newP2Idx < 0 || newP2Idx >= COLOR_PALETTE.length) newP2Idx = 0;
+        if (isNaN(newP1Idx) || newP1Idx < 0) newP1Idx = 4;
+        if (isNaN(newP2Idx) || newP2Idx < 0) newP2Idx = 0;
         if (newP1Idx === newP2Idx) {
             newP2Idx = (newP1Idx + 1) % COLOR_PALETTE.length;
             p2ColorSelect.value = newP2Idx;
@@ -935,16 +894,12 @@
         SELECTED_BANK_INDEX = s.bankIdx;
         p1ColorIdx = s.newP1Idx;
         p2ColorIdx = s.newP2Idx;
-
-        // Save settings and banks to storage
         saveSettingsToStorage({ PLAYER1, PLAYER2, TOTAL_ROUNDS, SELECTED_BANK_INDEX, p1ColorIdx, p2ColorIdx });
         saveBanksToStorage(questionBanks);
-
         settingsPanel.classList.remove('open');
         fullReset();
     }
 
-    // ──────────────────────── LOAD SETTINGS ON START ────────────────────────
     function loadSavedSettings() {
         const saved = loadSettingsFromStorage();
         if (saved) {
@@ -959,7 +914,6 @@
         }
     }
 
-    // ──────────────────────── EVENT HANDLERS ────────────────────────
     p1OptionsGrid.addEventListener('pointerdown', e => {
         const btn = e.target.closest('.option-btn');
         if (!btn || btn.disabled || !roundActive || !gameActive || player1.locked) return;
@@ -989,7 +943,6 @@
     createBtn.addEventListener('click', openCreator);
     resetBanksBtn.addEventListener('click', resetBanksToDefault);
 
-    // ──────────────────────── INIT ────────────────────────
     loadSavedSettings();
     buildBankRadios();
     populateColorDropdowns();

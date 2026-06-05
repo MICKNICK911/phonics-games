@@ -67,8 +67,10 @@
             width: 180px; text-align: center;
         }
         .save-indicator {
-            font-size: 0.75rem; color: var(--green); text-align: center; margin-bottom: 0.5rem;
+            text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem;
+            transition: color 0.2s;
         }
+        .save-indicator.saved { color: var(--green); }
         .questions-container {
             display: flex; flex-direction: column; gap: 0.8rem; max-height: 60vh; overflow-y: auto;
             padding-right: 0.5rem;
@@ -171,7 +173,7 @@
         <label>Bank Name:</label>
         <input type="text" id="bankNameInput" placeholder="Bank Name" maxlength="30">
     </div>
-    <div class="save-indicator" id="saveIndicator">✅ Auto-saved to browser storage</div>
+    <div class="save-indicator" id="saveIndicator">All changes saved automatically</div>
     <div class="toolbar">
         <button id="addBankBtn" class="primary">➕ New Bank</button>
         <button id="addQuestionBtn">➕ Add Question</button>
@@ -188,36 +190,30 @@
     const STORAGE_KEY = 'quiz_tug_of_war_banks';
 
     const DEFAULT_BANKS = [
-        {
-            name: 'Science',
-            questions: [
-                { question: 'Which is a living thing?', options: ['Fish', 'Stone', 'Pen', 'Table'], answer: 'Fish' },
-                { question: 'What do plants need for photosynthesis?', options: ['Oxygen', 'Carbon dioxide', 'Nitrogen', 'Hydrogen'], answer: 'Carbon dioxide' },
-                { question: 'How many legs does a spider have?', options: ['6', '8', '10', '12'], answer: '8' },
-                { question: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], answer: 'Mars' },
-                { question: 'What is the boiling point of water in Celsius?', options: ['90°', '100°', '110°', '120°'], answer: '100°' },
-                { question: 'Which gas makes up most of the air?', options: ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Argon'], answer: 'Nitrogen' },
-                { question: 'What is the hardest natural substance?', options: ['Gold', 'Iron', 'Diamond', 'Quartz'], answer: 'Diamond' },
-                { question: 'Which animal is a mammal?', options: ['Shark', 'Eagle', 'Whale', 'Crocodile'], answer: 'Whale' },
-                { question: 'What force keeps us on the ground?', options: ['Magnetism', 'Friction', 'Gravity', 'Inertia'], answer: 'Gravity' },
-                { question: 'Which vitamin does the sun give us?', options: ['Vitamin A', 'Vitamin B', 'Vitamin C', 'Vitamin D'], answer: 'Vitamin D' },
-            ]
-        },
-        {
-            name: 'General Knowledge',
-            questions: [
-                { question: 'What is the capital of France?', options: ['London', 'Berlin', 'Paris', 'Madrid'], answer: 'Paris' },
-                { question: 'How many continents are there?', options: ['5', '6', '7', '8'], answer: '7' },
-                { question: 'Which language has the most native speakers?', options: ['English', 'Mandarin', 'Spanish', 'Hindi'], answer: 'Mandarin' },
-                { question: 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 'Pacific' },
-                { question: 'Which country is known as the Land of the Rising Sun?', options: ['China', 'Japan', 'South Korea', 'Thailand'], answer: 'Japan' },
-                { question: 'What is the currency of the United Kingdom?', options: ['Euro', 'Dollar', 'Pound', 'Yen'], answer: 'Pound' },
-                { question: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Picasso', 'Da Vinci', 'Rembrandt'], answer: 'Da Vinci' },
-                { question: 'What is the longest river in the world?', options: ['Amazon', 'Nile', 'Mississippi', 'Yangtze'], answer: 'Nile' },
-                { question: 'What year did the Titanic sink?', options: ['1910', '1912', '1914', '1916'], answer: '1912' },
-                { question: 'What is the chemical symbol for gold?', options: ['Ag', 'Au', 'Pb', 'Fe'], answer: 'Au' },
-            ]
-        }
+        { name: 'Science', questions: [
+            { question: 'Which is a living thing?', options: ['Fish', 'Stone', 'Pen', 'Table'], answer: 'Fish' },
+            { question: 'What do plants need for photosynthesis?', options: ['Oxygen', 'Carbon dioxide', 'Nitrogen', 'Hydrogen'], answer: 'Carbon dioxide' },
+            { question: 'How many legs does a spider have?', options: ['6', '8', '10', '12'], answer: '8' },
+            { question: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], answer: 'Mars' },
+            { question: 'What is the boiling point of water in Celsius?', options: ['90°', '100°', '110°', '120°'], answer: '100°' },
+            { question: 'Which gas makes up most of the air?', options: ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Argon'], answer: 'Nitrogen' },
+            { question: 'What is the hardest natural substance?', options: ['Gold', 'Iron', 'Diamond', 'Quartz'], answer: 'Diamond' },
+            { question: 'Which animal is a mammal?', options: ['Shark', 'Eagle', 'Whale', 'Crocodile'], answer: 'Whale' },
+            { question: 'What force keeps us on the ground?', options: ['Magnetism', 'Friction', 'Gravity', 'Inertia'], answer: 'Gravity' },
+            { question: 'Which vitamin does the sun give us?', options: ['Vitamin A', 'Vitamin B', 'Vitamin C', 'Vitamin D'], answer: 'Vitamin D' },
+        ]},
+        { name: 'General Knowledge', questions: [
+            { question: 'What is the capital of France?', options: ['London', 'Berlin', 'Paris', 'Madrid'], answer: 'Paris' },
+            { question: 'How many continents are there?', options: ['5', '6', '7', '8'], answer: '7' },
+            { question: 'Which language has the most native speakers?', options: ['English', 'Mandarin', 'Spanish', 'Hindi'], answer: 'Mandarin' },
+            { question: 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 'Pacific' },
+            { question: 'Which country is known as the Land of the Rising Sun?', options: ['China', 'Japan', 'South Korea', 'Thailand'], answer: 'Japan' },
+            { question: 'What is the currency of the United Kingdom?', options: ['Euro', 'Dollar', 'Pound', 'Yen'], answer: 'Pound' },
+            { question: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Picasso', 'Da Vinci', 'Rembrandt'], answer: 'Da Vinci' },
+            { question: 'What is the longest river in the world?', options: ['Amazon', 'Nile', 'Mississippi', 'Yangtze'], answer: 'Nile' },
+            { question: 'What year did the Titanic sink?', options: ['1910', '1912', '1914', '1916'], answer: '1912' },
+            { question: 'What is the chemical symbol for gold?', options: ['Ag', 'Au', 'Pb', 'Fe'], answer: 'Au' },
+        ]}
     ];
 
     function loadBanks() {
@@ -231,24 +227,6 @@
         return JSON.parse(JSON.stringify(DEFAULT_BANKS));
     }
 
-    function saveBanks() {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(banks));
-            showSaveIndicator();
-        } catch (e) {
-            alert('Could not save to browser storage. Storage may be full.');
-        }
-    }
-
-    function showSaveIndicator() {
-        const indicator = document.getElementById('saveIndicator');
-        indicator.textContent = '✅ Auto-saved to browser storage';
-        indicator.style.color = '#22c55e';
-        setTimeout(() => {
-            indicator.textContent = '✅ Auto-saved to browser storage';
-        }, 100);
-    }
-
     let banks = loadBanks();
     let activeBankIndex = 0;
     let editingIndex = -1;
@@ -257,6 +235,7 @@
     const bankNameInput = document.getElementById('bankNameInput');
     const questionsContainer = document.getElementById('questionsContainer');
     const importFile = document.getElementById('importFile');
+    const saveIndicator = document.getElementById('saveIndicator');
 
     function escapeHtml(text) {
         return String(text).replace(/[&<>"']/g, m => ({
@@ -266,6 +245,24 @@
 
     function getActiveBank() {
         return banks[activeBankIndex] || banks[0];
+    }
+
+    function flashSaveIndicator() {
+        saveIndicator.textContent = '✅ Saved!';
+        saveIndicator.classList.add('saved');
+        setTimeout(() => {
+            saveIndicator.textContent = 'All changes saved automatically';
+            saveIndicator.classList.remove('saved');
+        }, 1200);
+    }
+
+    function saveBanks() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(banks));
+            flashSaveIndicator();
+        } catch (e) {
+            alert('Could not save to browser storage. Storage may be full.');
+        }
     }
 
     function renderTabs() {
@@ -291,7 +288,7 @@
         const bank = getActiveBank();
         questionsContainer.innerHTML = '';
         if (!bank.questions || bank.questions.length === 0) {
-            questionsContainer.innerHTML = `<div class="empty-state">No questions in this bank. Click "+ Add Question" to create one.</div>`;
+            questionsContainer.innerHTML = '<div class="empty-state">No questions in this bank. Click "+ Add Question" to create one.</div>';
             return;
         }
         bank.questions.forEach((q, idx) => {
@@ -380,7 +377,7 @@
         }
         const duplicate = banks.find((b, i) => b.name === newName && i !== activeBankIndex);
         if (duplicate) {
-            alert('Another bank already has this name. Please choose a unique name.');
+            alert('Another bank already has this name.');
             bankNameInput.value = getActiveBank().name;
             return;
         }
@@ -391,11 +388,10 @@
 
     function deleteBank() {
         if (banks.length <= 1) {
-            alert('Cannot delete the last bank. At least one bank must exist.');
+            alert('Cannot delete the last bank.');
             return;
         }
-        const bank = getActiveBank();
-        if (!confirm(`Delete bank "${bank.name}" and all its questions?`)) return;
+        if (!confirm(`Delete bank "${getActiveBank().name}" and all its questions?`)) return;
         banks.splice(activeBankIndex, 1);
         if (activeBankIndex >= banks.length) activeBankIndex = banks.length - 1;
         editingIndex = -1;
@@ -405,8 +401,7 @@
 
     function addQuestion() {
         const bank = getActiveBank();
-        const newQ = { question: 'New question', options: ['Option 1', 'Option 2'], answer: 'Option 1' };
-        bank.questions.push(newQ);
+        bank.questions.push({ question: 'New question', options: ['Option 1', 'Option 2'], answer: 'Option 1' });
         editingIndex = bank.questions.length - 1;
         saveBanks();
         renderQuestions();
@@ -440,31 +435,25 @@
 
         const optionInputs = document.querySelectorAll(`#optionsEditor-${idx} .edit-option-input`);
         const options = [];
-        let duplicateCheck = new Set();
-
+        const seen = new Set();
         optionInputs.forEach(input => {
             const val = input.value.trim();
-            if (val && !duplicateCheck.has(val.toLowerCase())) {
-                duplicateCheck.add(val.toLowerCase());
+            if (val && !seen.has(val.toLowerCase())) {
+                seen.add(val.toLowerCase());
                 options.push(val);
             }
         });
 
         const questionText = questionInput.value.trim();
         if (!questionText) { alert('Question text cannot be empty.'); return; }
-        if (options.length < 2) { alert('At least 2 unique options are required.'); return; }
+        if (options.length < 2) { alert('At least 2 unique options required.'); return; }
 
         const answerIdx = parseInt(answerSelect.value, 10);
         if (isNaN(answerIdx) || answerIdx < 0 || answerIdx >= options.length) {
             alert('Invalid answer selection.'); return;
         }
 
-        bank.questions[idx] = {
-            question: questionText,
-            options: options,
-            answer: options[answerIdx]
-        };
-
+        bank.questions[idx] = { question: questionText, options, answer: options[answerIdx] };
         editingIndex = -1;
         saveBanks();
         renderQuestions();
@@ -473,19 +462,18 @@
     function addOption(idx) {
         const bank = getActiveBank();
         const q = bank.questions[idx];
-        const newOption = `Option ${q.options.length + 1}`;
-        q.options.push(newOption);
+        q.options.push(`Option ${q.options.length + 1}`);
         saveBanks();
-        renderQuestions();
+        renderQuestions(); // keeps edit mode open
     }
 
     function removeOption(questionIdx, optionIdx) {
         const bank = getActiveBank();
         const q = bank.questions[questionIdx];
         if (q.options.length <= 2) { alert('Minimum 2 options required.'); return; }
-        const removedOpt = q.options[optionIdx];
+        const removed = q.options[optionIdx];
         q.options.splice(optionIdx, 1);
-        if (q.answer === removedOpt) q.answer = q.options[0];
+        if (q.answer === removed) q.answer = q.options[0];
         saveBanks();
         renderQuestions();
     }
@@ -496,43 +484,34 @@
             try {
                 const data = JSON.parse(e.target.result);
                 let importedBanks = [];
-
                 if (Array.isArray(data)) {
                     if (data.length > 0 && data[0].hasOwnProperty('question') && data[0].hasOwnProperty('options')) {
-                        const name = file.name.replace(/\.[^/.]+$/, "") || 'Imported Bank';
-                        importedBanks = [{ name: name, questions: data }];
+                        importedBanks = [{ name: file.name.replace(/\.[^/.]+$/, "") || 'Imported Bank', questions: data }];
                     } else if (data.length > 0 && data[0].hasOwnProperty('name') && data[0].hasOwnProperty('questions')) {
                         importedBanks = data;
                     }
                 }
-
                 if (importedBanks.length === 0) { alert('Invalid file structure.'); return; }
-
                 importedBanks.forEach(ib => {
                     if (!ib.name || !Array.isArray(ib.questions)) throw new Error('Invalid bank structure.');
                     ib.questions.forEach((q, qi) => {
-                        if (!q.question || !Array.isArray(q.options) || q.options.length < 2) throw new Error(`Bank "${ib.name}", Q${qi+1}: invalid structure.`);
+                        if (!q.question || !Array.isArray(q.options) || q.options.length < 2) throw new Error(`Bank "${ib.name}", Q${qi+1}: invalid.`);
                         if (!q.answer || !q.options.includes(q.answer)) throw new Error(`Bank "${ib.name}", Q${qi+1}: answer not in options.`);
                     });
                 });
-
                 importedBanks.forEach(ib => {
                     const existingIdx = banks.findIndex(b => b.name === ib.name);
                     if (existingIdx >= 0) {
-                        if (confirm(`Bank "${ib.name}" already exists. Replace it?`)) {
-                            banks[existingIdx] = ib;
-                        }
+                        if (confirm(`Bank "${ib.name}" already exists. Replace it?`)) banks[existingIdx] = ib;
                     } else {
                         banks.push(ib);
                     }
                 });
-
                 activeBankIndex = banks.length - 1;
                 editingIndex = -1;
                 saveBanks();
                 renderAll();
-                alert(`Successfully imported ${importedBanks.length} bank(s).`);
-
+                alert('Import successful!');
             } catch (err) {
                 alert('Import failed: ' + err.message);
             }
@@ -542,38 +521,30 @@
 
     function exportBank() {
         const bank = getActiveBank();
-        if (!bank.questions || bank.questions.length === 0) {
-            alert('This bank is empty. Add questions before exporting.');
-            return;
-        }
-        const json = JSON.stringify(bank.questions, null, 2);
-        downloadJson(json, bank.name);
+        if (!bank.questions.length) { alert('Bank is empty.'); return; }
+        downloadJson(JSON.stringify(bank.questions, null, 2), bank.name);
     }
 
     function exportAllBanks() {
-        if (banks.length === 0) { alert('No banks to export.'); return; }
-        const json = JSON.stringify(banks, null, 2);
-        downloadJson(json, 'all_question_banks');
+        if (!banks.length) { alert('No banks to export.'); return; }
+        downloadJson(JSON.stringify(banks, null, 2), 'all_question_banks');
     }
 
     function downloadJson(json, filename) {
         const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
+        a.href = URL.createObjectURL(blob);
         a.download = `${filename.replace(/\s+/g, '_')}.json`;
         a.click();
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(a.href);
     }
 
-    // Event delegation
     questionsContainer.addEventListener('click', (e) => {
         const target = e.target.closest('button');
         if (!target) return;
         const action = target.dataset.action;
         const idx = parseInt(target.dataset.index, 10);
         const optIdx = parseInt(target.dataset.optionIndex, 10);
-
         switch (action) {
             case 'edit': startEdit(idx); break;
             case 'delete': deleteQuestion(idx); break;
@@ -591,15 +562,11 @@
     document.getElementById('addQuestionBtn').addEventListener('click', addQuestion);
     document.getElementById('importBtn').addEventListener('click', () => importFile.click());
     importFile.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            importBank(e.target.files[0]);
-            importFile.value = '';
-        }
+        if (e.target.files.length) { importBank(e.target.files[0]); importFile.value = ''; }
     });
     document.getElementById('exportBtn').addEventListener('click', exportBank);
     document.getElementById('exportAllBtn').addEventListener('click', exportAllBanks);
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's' && editingIndex >= 0) {
             e.preventDefault();
