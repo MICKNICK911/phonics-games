@@ -20,7 +20,7 @@
         .game-layout {
             display: flex; flex-direction: column; width:100%; height:100%;
             gap: clamp(8px,1.5vh,24px); max-width:1400px;
-            position: relative; /* anchor for mobile settings */
+            position: relative;
         }
         .top-area {
             display: flex; flex-direction: column; align-items: center;
@@ -59,10 +59,9 @@
             text-shadow:0 2px 10px black; line-height:1;
         }
 
-        /* players row – always side by side */
         .players-row {
             display: flex; gap: clamp(8px,1.5vw,24px); width:100%;
-            flex:1; min-height:0; position: relative; /* for absolute settings on mobile */
+            flex:1; min-height:0; position: relative;
         }
         .player-panel {
             flex:1; background: var(--surface); border-radius: var(--radius);
@@ -76,6 +75,13 @@
             font-weight:700; font-size: clamp(0.9rem,1.8vw,1.4rem); letter-spacing:1px;
             background: rgba(255,255,255,0.05); padding:0.3rem 0.9rem; border-radius:2rem;
             white-space: nowrap;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .player-avatar {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4);
+            display: inline-block; flex-shrink: 0;
+            transition: background 0.2s;
         }
         .score-badge {
             font-size:0.8rem; font-weight:600; color: var(--text-dim);
@@ -132,7 +138,6 @@
             80%{ transform:translateX(4px); }
         }
 
-        /* settings (center column) */
         .center-column {
             flex: 0 0 clamp(200px, 28vw, 340px);
             display: flex; flex-direction: column; align-items: center;
@@ -195,6 +200,16 @@
             padding:0.5rem; font-weight:700; cursor:pointer; font-size:0.9rem;
             letter-spacing:0.5px; margin-top:0.2rem;
         }
+        .import-row {
+            display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;
+        }
+        .import-btn, .create-btn {
+            background:#475569; border:none; color:white; padding:0.4rem 0.8rem;
+            border-radius:2rem; font-weight:600; font-size:0.8rem; cursor:pointer;
+            transition:0.2s; display:flex; align-items:center; gap:0.3rem;
+        }
+        .import-btn:hover, .create-btn:hover { background:#6366f1; }
+        #importFileInput { display:none; }
 
         .overlay {
             position:fixed; inset:0; background:rgba(0,0,0,0.85);
@@ -216,62 +231,31 @@
             border-radius:3rem; font-weight:700; font-size:1rem; cursor:pointer;
         }
 
-        /* ─────────── Mobile: side‑by‑side players, settings floating at top ─────────── */
         @media (max-width:750px) {
-            .players-row {
-                gap: 4px;
-            }
-            /* center column moves to the top of the game layout, absolutely positioned */
+            .players-row { gap: 4px; }
             .center-column {
-                position: absolute;
-                top: 8px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: auto;
-                flex: 0 0 auto;
-                z-index: 30;
-                flex-direction: row; /* keep toggle and panel horizontal */
-                gap: 0.4rem;
+                position: absolute; top: 8px; left: 50%;
+                transform: translateX(-50%); width: auto; flex: 0 0 auto;
+                z-index: 30; flex-direction: row; gap: 0.4rem;
             }
-            .settings-toggle {
-                font-size:0.7rem; padding:0.2rem 0.7rem;
-            }
+            .settings-toggle { font-size:0.7rem; padding:0.2rem 0.7rem; }
             .settings-panel {
-                position: absolute;
-                top: 100%;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 280px;
-                max-height: 60vh;
-                margin-top: 4px;
+                position: absolute; top: 100%; left: 50%;
+                transform: translateX(-50%); width: 280px; max-height: 60vh; margin-top: 4px;
             }
-
-            .player-panel {
-                padding: 4px 6px;
-                gap: 4px;
-                border-radius: 12px;
-            }
+            .player-panel { padding: 4px 6px; gap: 4px; border-radius: 12px; }
             .player-name { font-size:0.75rem; padding:0.2rem 0.5rem; }
             .score-badge { font-size:0.65rem; padding:0.1rem 0.4rem; }
-            .answer-box {
-                font-size:0.85rem; padding:0.3rem 0.5rem; min-width:70px;
-            }
+            .answer-box { font-size:0.85rem; padding:0.3rem 0.5rem; min-width:70px; }
             .answer-box.placeholder { font-size:0.75rem; }
-            .options-grid {
-                gap: 4px;
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .option-btn {
-                font-size:0.75rem; padding:0.4rem; min-height:38px;
-                border-radius:0.6rem;
-            }
+            .options-grid { gap: 4px; grid-template-columns: repeat(2, 1fr); }
+            .option-btn { font-size:0.75rem; padding:0.4rem; min-height:38px; border-radius:0.6rem; }
             .action-row { gap: 4px; }
             .action-btn { padding:0.4rem; font-size:0.75rem; }
             .shared-question { font-size:1.2rem; padding:0.6rem 1rem; }
             .war-bar-container { height:50px; }
         }
 
-        /* ─────────── Mobile landscape (further shrinkage) ─────────── */
         @media (max-height:500px) and (orientation: landscape) {
             body { padding: 4px; }
             .game-layout { gap: 4px; }
@@ -289,10 +273,7 @@
             .option-btn { font-size: 0.75rem; padding: 0.4rem; min-height: 38px; border-radius: 0.6rem; }
             .action-row { gap: 4px; }
             .action-btn { padding: 0.4rem; font-size: 0.75rem; }
-            .center-column {
-                /* keep floating but smaller */
-                top: 2px;
-            }
+            .center-column { top: 2px; }
             .settings-toggle { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
             .settings-panel { width: 240px; max-height: 40vh; }
         }
@@ -314,7 +295,9 @@
     </div>
     <div class="players-row">
         <div class="player-panel p1" id="p1Panel">
-            <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+            <div class="player-name" id="p1NameDisplay">
+                <span class="player-avatar" id="p1Avatar"></span> PLAYER 1
+            </div>
             <div class="score-badge" id="p1ScoreBadge">Score: 0 / 10</div>
             <div class="answer-box placeholder" id="p1Answer">Your answer</div>
             <div class="options-grid" id="p1OptionsGrid"></div>
@@ -356,11 +339,24 @@
                         <select id="p2ColorSelect"></select>
                     </div>
                 </div>
+                <div class="setting-row">
+                    <label>Import Questions</label>
+                    <div class="import-row">
+                        <input type="file" id="importFileInput" accept=".json">
+                        <button class="import-btn" id="importBtn">📂 Import .json</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Create Questions</label>
+                    <button class="create-btn" id="createBtn">➕ Open Creator</button>
+                </div>
                 <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
             </div>
         </div>
         <div class="player-panel p2" id="p2Panel">
-            <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+            <div class="player-name" id="p2NameDisplay">
+                <span class="player-avatar" id="p2Avatar"></span> PLAYER 2
+            </div>
             <div class="score-badge" id="p2ScoreBadge">Score: 0 / 10</div>
             <div class="answer-box placeholder" id="p2Answer">Your answer</div>
             <div class="options-grid" id="p2OptionsGrid"></div>
@@ -384,7 +380,8 @@
 </div>
 <script>
 (function() {
-    const QUESTION_BANKS = [
+    // ──────────────────────── QUESTION BANKS ────────────────────────
+    const BUILT_IN_BANKS = [
         {
             name: 'Science',
             questions: [
@@ -417,6 +414,10 @@
         }
     ];
 
+    let CUSTOM_BANKS = [];
+    function getAllBanks() { return [...BUILT_IN_BANKS, ...CUSTOM_BANKS]; }
+
+    // ──────────────────────── COLOR PALETTE ────────────────────────
     const COLOR_PALETTE = [
         { name: 'Red',    light: '#EF4444', dark: '#B91C1C' },
         { name: 'Orange', light: '#F97316', dark: '#C2410C' },
@@ -430,10 +431,12 @@
         { name: 'Lime',   light: '#84CC16', dark: '#4D7C0F' }
     ];
 
+    // ──────────────────────── DOM ELEMENTS ────────────────────────
     const $ = id => document.getElementById(id);
     const sharedQuestion = $('sharedQuestion');
     const p1Panel = $('p1Panel'), p2Panel = $('p2Panel');
     const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
+    const p1Avatar = $('p1Avatar'), p2Avatar = $('p2Avatar');
     const p1ScoreBadge = $('p1ScoreBadge'), p2ScoreBadge = $('p2ScoreBadge');
     const p1Answer = $('p1Answer'), p2Answer = $('p2Answer');
     const p1OptionsGrid = $('p1OptionsGrid'), p2OptionsGrid = $('p2OptionsGrid');
@@ -447,13 +450,16 @@
     const bankGroup = $('bankGroup');
     const p1ColorSelect = $('p1ColorSelect'), p2ColorSelect = $('p2ColorSelect');
     const p1ColorPreview = $('p1ColorPreview'), p2ColorPreview = $('p2ColorPreview');
+    const importFileInput = $('importFileInput'), importBtn = $('importBtn');
+    const createBtn = $('createBtn');
     const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
     const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
     const finalP1 = $('finalP1'), finalP2 = $('finalP2');
     const playAgainBtn = $('playAgainBtn');
 
+    // ──────────────────────── GAME STATE ────────────────────────
     let TOTAL_ROUNDS = 10;
-    let SELECTED_BANK = 0;
+    let SELECTED_BANK_INDEX = 0;
     let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
     let p1ColorIdx = 4; // Blue
     let p2ColorIdx = 0; // Red
@@ -465,7 +471,7 @@
     let questionQueue = [], queueIndex = 0, lastIdx = -1;
 
     const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-    const currentBank = () => QUESTION_BANKS[SELECTED_BANK] || QUESTION_BANKS[0];
+    const currentBank = () => getAllBanks()[SELECTED_BANK_INDEX] || BUILT_IN_BANKS[0];
 
     function buildQueue() {
         return shuffle(currentBank().questions.map((_, i) => i));
@@ -473,7 +479,7 @@
 
     function getNextQuestion() {
         const bank = currentBank();
-        if (!bank.questions.length) {
+        if (!bank.questions || !bank.questions.length) {
             currentQuestion = { question: 'No questions', answer: '', options: [] };
             return;
         }
@@ -498,6 +504,21 @@
         return COLOR_PALETTE[idx] || COLOR_PALETTE[0];
     }
 
+    function updatePlayerNameElements() {
+        // Update the avatar background colors
+        const c1 = getPlayerColor(p1ColorIdx).light;
+        const c2 = getPlayerColor(p2ColorIdx).light;
+        p1Avatar.style.background = c1;
+        p2Avatar.style.background = c2;
+        // Update name texts (keeping the avatar span intact)
+        p1NameDisplay.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) node.textContent = ' ' + PLAYER1;
+        });
+        p2NameDisplay.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) node.textContent = ' ' + PLAYER2;
+        });
+    }
+
     function applyPlayerColors() {
         const c1 = getPlayerColor(p1ColorIdx);
         const c2 = getPlayerColor(p2ColorIdx);
@@ -511,6 +532,7 @@
         redBar.style.background = `linear-gradient(180deg, ${c2.light}, ${c2.dark})`;
         p1ColorPreview.style.background = c1.light;
         p2ColorPreview.style.background = c2.light;
+        updatePlayerNameElements(); // update avatars and name text
     }
 
     function updateSharedQuestion() { sharedQuestion.textContent = currentQuestion.question; }
@@ -547,12 +569,6 @@
         blueScoreEl.textContent = player1.score;
         redScoreEl.textContent = player2.score;
     }
-    function updateNames() {
-        p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
-        p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
-        finalP1Label.textContent = `🔵 ${PLAYER1}`;
-        finalP2Label.textContent = `🔴 ${PLAYER2}`;
-    }
     function shiftBar(towardBlue) {
         barPosition = towardBlue ? Math.min(95, barPosition + 5) : Math.max(5, barPosition - 5);
         updateBar();
@@ -567,7 +583,6 @@
         undo.disabled = disable;
         check.disabled = disable || (player.answer === '' && !disable);
     }
-
     function lockAll(disable) { lockPlayer('p1', disable); lockPlayer('p2', disable); }
 
     function resetRoundUI() {
@@ -681,23 +696,26 @@
         player1 = { score: 0, answer: '', locked: false };
         player2 = { score: 0, answer: '', locked: false };
         questionQueue = []; queueIndex = 0; lastIdx = -1;
-        updateNames();
+        // updateNames() is replaced by applyPlayerColors which calls updatePlayerNameElements
         updateScoreBadges();
         updateBar();
-        applyPlayerColors();
+        applyPlayerColors(); // updates all color-dependent UI including avatars and names
         startNextQuestion();
         overlay.classList.remove('active');
         buildBankRadios();
         populateColorDropdowns();
     }
 
+    // ──────────────────────── SETTINGS / IMPORT / CREATE ────────────────────────
     function buildBankRadios() {
         bankGroup.innerHTML = '';
-        QUESTION_BANKS.forEach((bank, idx) => {
+        getAllBanks().forEach((bank, idx) => {
             const label = document.createElement('label');
             const radio = document.createElement('input');
-            radio.type = 'radio'; radio.name = 'bank'; radio.value = idx;
-            if (idx === SELECTED_BANK) radio.checked = true;
+            radio.type = 'radio';
+            radio.name = 'bank';
+            radio.value = idx;
+            if (idx === SELECTED_BANK_INDEX) radio.checked = true;
             label.appendChild(radio);
             label.appendChild(document.createTextNode(' ' + bank.name));
             bankGroup.appendChild(label);
@@ -709,7 +727,8 @@
             select.innerHTML = '';
             COLOR_PALETTE.forEach((color, idx) => {
                 const opt = document.createElement('option');
-                opt.value = idx; opt.textContent = color.name;
+                opt.value = idx;
+                opt.textContent = color.name;
                 select.appendChild(opt);
             });
         });
@@ -737,8 +756,61 @@
             if (changingPlayer === 'p1') p1ColorIdx = newIdx;
             else p2ColorIdx = newIdx;
             updateColorPreviews();
-            applyPlayerColors();
+            applyPlayerColors(); // live preview in UI
         }
+    }
+
+    function validateImportedBank(data) {
+        if (!Array.isArray(data)) return 'JSON must be an array of question objects.';
+        if (data.length === 0) return 'The bank must contain at least one question.';
+        for (let i = 0; i < data.length; i++) {
+            const q = data[i];
+            if (!q.question || typeof q.question !== 'string') return `Question ${i+1}: missing or invalid "question" field.`;
+            if (!Array.isArray(q.options) || q.options.length < 2) return `Question ${i+1}: "options" must be an array with at least 2 items.`;
+            if (!q.answer || typeof q.answer !== 'string') return `Question ${i+1}: missing or invalid "answer" field.`;
+            if (!q.options.includes(q.answer)) return `Question ${i+1}: answer "${q.answer}" not found in options.`;
+        }
+        return null;
+    }
+
+    function importQuestions() {
+        const file = importFileInput.files[0];
+        if (!file) {
+            alert('Please select a .json file first.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                const error = validateImportedBank(json);
+                if (error) {
+                    alert('Import failed: ' + error);
+                    return;
+                }
+                let baseName = file.name.replace(/\.[^/.]+$/, "") || 'Custom Bank';
+                let bankName = baseName;
+                let counter = 1;
+                const existingNames = getAllBanks().map(b => b.name);
+                while (existingNames.includes(bankName)) {
+                    bankName = `${baseName} (${counter})`;
+                    counter++;
+                }
+                const newBank = { name: bankName, questions: json };
+                CUSTOM_BANKS.push(newBank);
+                SELECTED_BANK_INDEX = getAllBanks().length - 1;
+                buildBankRadios();
+                alert(`Bank "${bankName}" imported successfully! Select it and click Apply & Restart.`);
+                importFileInput.value = '';
+            } catch (err) {
+                alert('Import failed: Invalid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function openCreator() {
+        window.open('create.html', '_blank');
     }
 
     function readSettings() {
@@ -748,9 +820,9 @@
         if (isNaN(rounds) || rounds < 1) rounds = 1;
         if (rounds > 20) rounds = 20;
         roundsInput.value = rounds;
-        let bank = 0;
-        document.getElementsByName('bank').forEach(r => { if (r.checked) bank = parseInt(r.value, 10); });
-        if (isNaN(bank) || bank < 0 || bank >= QUESTION_BANKS.length) bank = 0;
+        const selectedRadio = document.querySelector('input[name="bank"]:checked');
+        let bankIdx = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
+        if (isNaN(bankIdx) || bankIdx < 0 || bankIdx >= getAllBanks().length) bankIdx = 0;
         let newP1Idx = parseInt(p1ColorSelect.value, 10);
         let newP2Idx = parseInt(p2ColorSelect.value, 10);
         if (isNaN(newP1Idx) || newP1Idx < 0 || newP1Idx >= COLOR_PALETTE.length) newP1Idx = 4;
@@ -760,7 +832,7 @@
             p2ColorSelect.value = newP2Idx;
             updateColorPreviews();
         }
-        return { p1name, p2name, rounds, bank, newP1Idx, newP2Idx };
+        return { p1name, p2name, rounds, bankIdx, newP1Idx, newP2Idx };
     }
 
     function applySettings() {
@@ -768,13 +840,14 @@
         PLAYER1 = s.p1name;
         PLAYER2 = s.p2name;
         TOTAL_ROUNDS = s.rounds;
-        SELECTED_BANK = s.bank;
+        SELECTED_BANK_INDEX = s.bankIdx;
         p1ColorIdx = s.newP1Idx;
         p2ColorIdx = s.newP2Idx;
         settingsPanel.classList.remove('open');
         fullReset();
     }
 
+    // ──────────────────────── EVENT HANDLERS ────────────────────────
     p1OptionsGrid.addEventListener('pointerdown', e => {
         const btn = e.target.closest('.option-btn');
         if (!btn || btn.disabled || !roundActive || !gameActive || player1.locked) return;
@@ -800,10 +873,12 @@
     settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
     applySettingsBtn.addEventListener('click', applySettings);
     playAgainBtn.addEventListener('click', applySettings);
+    importBtn.addEventListener('click', importQuestions);
+    createBtn.addEventListener('click', openCreator);
 
+    // ──────────────────────── INIT ────────────────────────
     buildBankRadios();
     populateColorDropdowns();
-    updateNames();
     fullReset();
 })();
 </script>
