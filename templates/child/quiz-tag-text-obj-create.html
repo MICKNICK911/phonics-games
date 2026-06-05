@@ -320,7 +320,7 @@
         const optionsRows = q.options.map((opt, optIdx) => `
             <div class="option-row">
                 <input type="text" class="edit-option-input" data-option-index="${optIdx}" value="${escapeHtml(opt)}" placeholder="Option ${optIdx + 1}">
-                <button data-action="remove-option" data-option-index="${optIdx}" title="Remove option">×</button>
+                <button data-action="remove-option" data-option-index="${optIdx}" data-index="${idx}" title="Remove option">×</button>
             </div>
         `).join('');
 
@@ -335,12 +335,12 @@
                 <label>Options:</label>
                 <div class="options-editor" id="optionsEditor-${idx}">
                     ${optionsRows}
-                    <button class="add-option-btn" data-action="add-option">+ Add option</button>
+                    <button class="add-option-btn" data-action="add-option" data-index="${idx}">+ Add option</button>
                 </div>
                 <label for="editAnswer-${idx}">Correct Answer:</label>
                 <select id="editAnswer-${idx}">${answerOptions}</select>
                 <div class="form-actions">
-                    <button class="save-btn" data-action="save">✅ Save</button>
+                    <button class="save-btn" data-action="save" data-index="${idx}">✅ Save</button>
                     <button class="cancel-btn" data-action="cancel">Cancel</button>
                 </div>
             </div>
@@ -464,7 +464,7 @@
         const q = bank.questions[idx];
         q.options.push(`Option ${q.options.length + 1}`);
         saveBanks();
-        renderQuestions(); // keeps edit mode open
+        renderQuestions(); // re-renders, editingIndex unchanged, so edit form stays open
     }
 
     function removeOption(questionIdx, optionIdx) {
@@ -539,6 +539,7 @@
         URL.revokeObjectURL(a.href);
     }
 
+    // Event delegation for all card actions
     questionsContainer.addEventListener('click', (e) => {
         const target = e.target.closest('button');
         if (!target) return;
@@ -551,7 +552,7 @@
             case 'save': saveQuestion(idx); break;
             case 'cancel': cancelEdit(); break;
             case 'remove-option': removeOption(idx, optIdx); break;
-            case 'add-option': addOption(idx); break;
+            case 'add-option': addOption(idx); break;  // idx is available now
         }
     });
 
