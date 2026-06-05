@@ -7,8 +7,7 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg:#0b1120; --surface:#111b2e; --blue:#3b82f6; --blue-light:#60a5fa;
-            --red:#ef4444; --red-light:#f87171; --text:#f1f5f9; --text-dim:#94a3b8;
+            --bg:#0b1120; --surface:#111b2e; --text:#f1f5f9; --text-dim:#94a3b8;
             --border:#1e293b; --radius:16px;
         }
         body {
@@ -20,21 +19,21 @@
         }
         .game-layout {
             display: flex; flex-direction: column; width:100%; height:100%;
-            gap: clamp(12px,2vw,24px); max-width:1400px;
+            gap: clamp(8px,1.5vh,24px); max-width:1400px;
         }
         .top-area {
             display: flex; flex-direction: column; align-items: center;
-            gap: clamp(10px,2vh,18px); width:100%;
+            gap: clamp(6px,1.2vh,18px); width:100%;
         }
         .shared-question {
-            font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight:800;
-            background: rgba(0,0,0,0.4); padding:1rem 2rem; border-radius:2rem;
-            text-align:center; line-height:1.4; word-break:break-word;
+            font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight:800;
+            background: rgba(0,0,0,0.4); padding: clamp(0.6rem,1.5vw,1.5rem) clamp(1rem,2vw,2rem);
+            border-radius:2rem; text-align:center; line-height:1.4; word-break:break-word;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border:2px solid var(--border); width:100%;
         }
         .war-bar-container {
-            width:100%; height: clamp(60px, 10vh, 100px); position: relative;
+            width:100%; height: clamp(45px, 8vh, 100px); position: relative;
             background: white; border-radius: 50px; overflow: hidden;
             box-shadow: 0 6px 25px rgba(0,0,0,0.7);
         }
@@ -42,8 +41,8 @@
             position:absolute; top:0; height:100%;
             transition: width 0.6s cubic-bezier(0.2,0.9,0.4,1);
         }
-        .war-bar-blue { left:0; background:linear-gradient(180deg,#3b82f6,#1e40af); border-radius:50px 0 0 50px; }
-        .war-bar-red { right:0; background:linear-gradient(180deg,#ef4444,#991b1b); border-radius:0 50px 50px 0; }
+        .war-bar-blue { left:0; border-radius:50px 0 0 50px; }
+        .war-bar-red { right:0; border-radius:0 50px 50px 0; }
         .bar-divider {
             position:absolute; top:5%; height:90%; width:5px; background:white;
             box-shadow:0 0 20px white; border-radius:5px;
@@ -55,49 +54,48 @@
             justify-content:space-between; align-items:center; padding:0 20px;
         }
         .bar-score {
-            font-weight:900; font-size: clamp(1.5rem, 3vw, 2.2rem); color:white;
+            font-weight:900; font-size: clamp(1.2rem, 2.5vw, 2.2rem); color:white;
             text-shadow:0 2px 10px black; line-height:1;
         }
         .players-row {
-            display: flex; gap: clamp(12px,2vw,24px); width:100%;
+            display: flex; gap: clamp(8px,1.5vw,24px); width:100%;
             flex:1; min-height:0;
         }
         .player-panel {
             flex:1; background: var(--surface); border-radius: var(--radius);
-            border:2px solid var(--border); padding: clamp(12px,2vw,24px);
+            border:2px solid var(--border); padding: clamp(8px,1.5vh,24px);
             display: flex; flex-direction: column; align-items: center;
-            gap: clamp(8px,2vh,14px); min-width:0;
+            gap: clamp(6px,1vh,14px); min-width:0;
         }
-        .player-panel.p1 { border-top:4px solid var(--blue); }
-        .player-panel.p2 { border-top:4px solid var(--red); }
+        .player-panel.p1 { border-top:4px solid #3b82f6; }
+        .player-panel.p2 { border-top:4px solid #ef4444; }
         .player-name {
-            font-weight:700; font-size: clamp(1rem,2vw,1.4rem); letter-spacing:1px;
-            background: rgba(255,255,255,0.05); padding:0.4rem 1.2rem; border-radius:2rem;
+            font-weight:700; font-size: clamp(0.9rem,1.8vw,1.4rem); letter-spacing:1px;
+            background: rgba(255,255,255,0.05); padding:0.3rem 0.9rem; border-radius:2rem;
+            white-space: nowrap;
         }
-        .p1 .player-name { color: var(--blue-light); }
-        .p2 .player-name { color: var(--red-light); }
         .score-badge {
-            font-size:0.9rem; font-weight:600; color: var(--text-dim);
-            background: rgba(255,255,255,0.05); padding:0.3rem 1rem; border-radius:1rem;
+            font-size:0.8rem; font-weight:600; color: var(--text-dim);
+            background: rgba(255,255,255,0.05); padding:0.2rem 0.8rem; border-radius:1rem;
         }
         .answer-box {
             background: #0f172a; border:2px solid #334155; border-radius:1rem;
-            padding:0.6rem 1.2rem; font-size: clamp(1.2rem,3vw,1.8rem);
-            font-weight:700; text-align:center; min-width:160px;
+            padding:0.5rem 1rem; font-size: clamp(1rem,2vw,1.8rem);
+            font-weight:700; text-align:center; min-width:120px;
             transition: border-color 0.2s, background 0.2s;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             max-width: 90%;
         }
-        .answer-box.placeholder { color: #475569; font-weight:400; font-size:1rem; }
+        .answer-box.placeholder { color: #475569; font-weight:400; font-size:0.9rem; }
         .options-grid {
-            display: grid; gap:10px; width:100%; max-width:400px;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            display: grid; gap:8px; width:100%; max-width:400px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         }
         .option-btn {
-            font-size: clamp(0.9rem,2vw,1.3rem); font-weight:600;
+            font-size: clamp(0.8rem,1.6vw,1.3rem); font-weight:600;
             background:#1e293b; border:2px solid #334155; border-radius:0.8rem;
             color:white; cursor:pointer; transition: all 0.1s;
-            padding:0.8rem; min-height:56px;
+            padding:0.6rem; min-height:48px;
             display:flex; align-items:center; justify-content:center;
             word-break:break-word; text-align:center; line-height:1.3;
             touch-action:manipulation;
@@ -105,11 +103,9 @@
         .option-btn:active { transform:scale(0.92); background:#0f172a; }
         .option-btn:disabled { opacity:0.4; pointer-events:none; }
         .option-btn.selected { border-color:#fbbf24; background:#1e3a2f; box-shadow:0 0 14px rgba(251,191,36,0.45); }
-        .action-row {
-            display:flex; gap:10px; width:100%; max-width:400px;
-        }
+        .action-row { display:flex; gap:8px; width:100%; max-width:400px; }
         .action-btn {
-            flex:1; padding:0.8rem; font-weight:700; font-size:1rem;
+            flex:1; padding:0.6rem; font-weight:700; font-size:0.9rem;
             border:none; border-radius:2rem; cursor:pointer; text-transform:uppercase;
             letter-spacing:0.5px; transition:0.15s; display:flex;
             align-items:center; justify-content:center; gap:0.3rem;
@@ -133,42 +129,55 @@
             80%{ transform:translateX(4px); }
         }
         .center-column {
-            flex: 0 0 clamp(260px, 30vw, 340px);
+            flex: 0 0 clamp(200px, 28vw, 340px);
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; gap: 1rem;
+            justify-content: center; gap: 0.8rem;
         }
         .settings-toggle {
             background:none; border:2px solid #334155; color:#cbd5e1;
-            border-radius:2rem; padding:0.4rem 1.2rem; font-weight:600;
-            font-size:0.85rem; cursor:pointer; transition:0.2s;
+            border-radius:2rem; padding:0.3rem 1rem; font-weight:600;
+            font-size:0.8rem; cursor:pointer; transition:0.2s;
             display:flex; align-items:center; gap:0.4rem;
         }
         .settings-toggle:hover { background:#1e293b; }
         .settings-panel {
             display:none; background:#1e293b; border-radius:1rem;
-            padding:1rem; width:100%; flex-direction:column; gap:0.8rem;
-            border:1px solid #334155; max-height:60vh; overflow-y:auto;
+            padding:0.8rem; width:100%; flex-direction:column; gap:0.6rem;
+            border:1px solid #334155; max-height:50vh; overflow-y:auto;
         }
         .settings-panel.open { display:flex; }
         .setting-row {
             display:flex; justify-content:space-between; align-items:center;
-            flex-wrap:wrap; gap:0.4rem;
+            flex-wrap:wrap; gap:0.3rem;
         }
-        .setting-row label { font-size:0.85rem; font-weight:500; color:#cbd5e1; }
+        .setting-row label { font-size:0.75rem; font-weight:500; color:#cbd5e1; }
         .setting-row input[type="text"],
         .setting-row input[type="number"] {
             background:#0f172a; border:1px solid #334155; color:white;
-            padding:0.4rem 0.5rem; border-radius:0.5rem; font-weight:600; text-align:center;
+            padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:600; text-align:center;
         }
-        .setting-row input[type="text"] { width:90px; }
-        .setting-row input[type="number"] { width:60px; }
+        .setting-row input[type="text"] { width:80px; }
+        .setting-row input[type="number"] { width:55px; }
+        .color-selector {
+            display:flex; align-items:center; gap:0.4rem;
+        }
+        .color-selector select {
+            background:#0f172a; border:1px solid #334155; color:white;
+            padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:600;
+            font-size:0.75rem; max-width:120px;
+        }
+        .color-preview {
+            width:20px; height:20px; border-radius:50%;
+            border:2px solid white; box-shadow:0 0 6px rgba(0,0,0,0.6);
+            display:inline-block; transition: background 0.2s;
+        }
         .radio-group {
-            display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
+            display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;
         }
         .radio-group label {
-            display:flex; align-items:center; gap:0.2rem; font-size:0.8rem;
+            display:flex; align-items:center; gap:0.2rem; font-size:0.7rem;
             cursor:pointer; color:#cbd5e1; background:#0f172a;
-            padding:0.35rem 0.7rem; border-radius:1.5rem; border:1px solid #334155;
+            padding:0.25rem 0.6rem; border-radius:1.5rem; border:1px solid #334155;
             transition:0.2s; white-space:nowrap;
         }
         .radio-group label:has(input:checked) {
@@ -177,8 +186,8 @@
         .radio-group input[type="radio"] { accent-color:#6366f1; width:auto; margin:0; }
         .apply-settings-btn {
             background:#6366f1; color:white; border:none; border-radius:2rem;
-            padding:0.6rem; font-weight:700; cursor:pointer; letter-spacing:0.5px;
-            margin-top:0.2rem;
+            padding:0.5rem; font-weight:700; cursor:pointer; font-size:0.9rem;
+            letter-spacing:0.5px; margin-top:0.2rem;
         }
         .overlay {
             position:fixed; inset:0; background:rgba(0,0,0,0.85);
@@ -188,24 +197,51 @@
         }
         .overlay.active { opacity:1; pointer-events:auto; }
         .result-card {
-            background:#1e293b; border-radius:2rem; padding:2rem;
+            background:#1e293b; border-radius:2rem; padding:1.5rem;
             text-align:center; box-shadow:0 20px 40px black;
             max-width:400px; width:90%;
         }
-        .result-icon { font-size:4rem; margin-bottom:0.5rem; }
-        .result-title { font-size:2rem; font-weight:900; }
-        .result-scores { display:flex; justify-content:center; gap:2rem; margin:1.5rem 0; }
+        .result-icon { font-size:3.5rem; margin-bottom:0.5rem; }
+        .result-title { font-size:1.8rem; font-weight:900; }
+        .result-scores { display:flex; justify-content:center; gap:1.5rem; margin:1rem 0; }
         .play-again-btn {
-            background:#6366f1; border:none; color:white; padding:0.8rem 2.5rem;
-            border-radius:3rem; font-weight:700; font-size:1.1rem; cursor:pointer;
+            background:#6366f1; border:none; color:white; padding:0.7rem 2rem;
+            border-radius:3rem; font-weight:700; font-size:1rem; cursor:pointer;
         }
         @media (max-width:750px) {
             .players-row { flex-direction:column; }
             .center-column { flex: 0 0 auto; width:100%; order:-1; }
-            .shared-question { font-size:1.3rem; padding:0.8rem 1.2rem; }
+            .shared-question { font-size:1.2rem; padding:0.6rem 1rem; }
             .war-bar-container { height:50px; }
             .options-grid { max-width:300px; }
-            .option-btn { font-size:0.85rem; padding:0.6rem; }
+            .option-btn { font-size:0.85rem; padding:0.5rem; }
+            .answer-box { font-size:1rem; min-width:100px; }
+        }
+        @media (max-height:500px) and (orientation: landscape) {
+            body { padding: 4px; }
+            .game-layout { gap: 4px; }
+            .top-area { gap: 4px; }
+            .shared-question { font-size: 1rem; padding: 0.4rem 1rem; border-radius: 1rem; }
+            .war-bar-container { height: 36px; border-radius: 30px; }
+            .bar-scores { padding: 0 10px; }
+            .bar-score { font-size: 1rem; }
+            .players-row { gap: 4px; }
+            .player-panel { padding: 4px 8px; gap: 4px; border-radius: 12px; }
+            .player-name { font-size: 0.8rem; padding: 0.2rem 0.6rem; }
+            .score-badge { font-size: 0.65rem; padding: 0.1rem 0.5rem; }
+            .answer-box { font-size: 0.9rem; padding: 0.3rem 0.6rem; min-width: 80px; }
+            .options-grid { gap: 4px; max-width: 100%; }
+            .option-btn { font-size: 0.75rem; padding: 0.4rem; min-height: 38px; border-radius: 0.6rem; }
+            .action-row { gap: 4px; }
+            .action-btn { padding: 0.4rem; font-size: 0.75rem; }
+            .center-column { flex: 0 0 auto; width: 80px; gap: 0.3rem; }
+            .settings-toggle { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+            .settings-panel { padding: 0.4rem; gap: 0.3rem; max-height: 40vh; font-size: 0.65rem; }
+            .setting-row label { font-size: 0.65rem; }
+            .setting-row input[type="text"] { width: 60px; }
+            .setting-row input[type="number"] { width: 45px; }
+            .radio-group label { font-size: 0.6rem; padding: 0.2rem 0.4rem; }
+            .apply-settings-btn { padding: 0.3rem; font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -252,6 +288,20 @@
                 <div class="setting-row">
                     <label>Question Bank</label>
                     <div class="radio-group" id="bankGroup"></div>
+                </div>
+                <div class="setting-row">
+                    <label>🔵 P1 Color</label>
+                    <div class="color-selector">
+                        <div class="color-preview" id="p1ColorPreview"></div>
+                        <select id="p1ColorSelect"></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>🔴 P2 Color</label>
+                    <div class="color-selector">
+                        <div class="color-preview" id="p2ColorPreview"></div>
+                        <select id="p2ColorSelect"></select>
+                    </div>
                 </div>
                 <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
             </div>
@@ -315,7 +365,21 @@
         }
     ];
 
-    // ──────────────────────── DOM ELEMENTS ────────────────────────
+    // ──────────────────────── COLOR PALETTE (10 rainbow-rich colors) ────────────────────────
+    const COLOR_PALETTE = [
+        { name: 'Red',    light: '#EF4444', dark: '#B91C1C' },
+        { name: 'Orange', light: '#F97316', dark: '#C2410C' },
+        { name: 'Yellow', light: '#EAB308', dark: '#A16207' },
+        { name: 'Green',  light: '#22C55E', dark: '#15803D' },
+        { name: 'Blue',   light: '#3B82F6', dark: '#1E40AF' },
+        { name: 'Indigo', light: '#6366F1', dark: '#4338CA' },
+        { name: 'Violet', light: '#8B5CF6', dark: '#6D28D9' },
+        { name: 'Pink',   light: '#EC4899', dark: '#BE185D' },
+        { name: 'Cyan',   light: '#06B6D4', dark: '#0E7490' },
+        { name: 'Lime',   light: '#84CC16', dark: '#4D7C0F' }
+    ];
+
+    // ──────────────────────── DOM REFERENCES ────────────────────────
     const $ = id => document.getElementById(id);
     const sharedQuestion = $('sharedQuestion');
     const p1Panel = $('p1Panel'), p2Panel = $('p2Panel');
@@ -331,6 +395,8 @@
     const p1NameInput = $('p1NameInput'), p2NameInput = $('p2NameInput');
     const roundsInput = $('roundsInput'), applySettingsBtn = $('applySettingsBtn');
     const bankGroup = $('bankGroup');
+    const p1ColorSelect = $('p1ColorSelect'), p2ColorSelect = $('p2ColorSelect');
+    const p1ColorPreview = $('p1ColorPreview'), p2ColorPreview = $('p2ColorPreview');
     const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
     const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
     const finalP1 = $('finalP1'), finalP2 = $('finalP2');
@@ -340,6 +406,8 @@
     let TOTAL_ROUNDS = 10;
     let SELECTED_BANK = 0;
     let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
+    let p1ColorIdx = 4; // default Blue
+    let p2ColorIdx = 0; // default Red
     let gameActive = true, roundActive = true;
     let barPosition = 50;
     let player1 = { score: 0, answer: '', locked: false };
@@ -376,6 +444,34 @@
             answer: String(q.answer),
             options: shuffle(q.options)
         };
+    }
+
+    // ──────────────────────── COLOR APPLICATION ────────────────────────
+    function getPlayerColor(idx) {
+        return COLOR_PALETTE[idx] || COLOR_PALETTE[0];
+    }
+
+    function applyPlayerColors() {
+        const c1 = getPlayerColor(p1ColorIdx);
+        const c2 = getPlayerColor(p2ColorIdx);
+
+        // Player panels: top border and name color
+        p1Panel.style.borderTopColor = c1.light;
+        p2Panel.style.borderTopColor = c2.light;
+        p1NameDisplay.style.color = c1.light;
+        p2NameDisplay.style.color = c2.light;
+
+        // Final overlay labels
+        finalP1Label.style.color = c1.light;
+        finalP2Label.style.color = c2.light;
+
+        // Bar gradients
+        blueBar.style.background = `linear-gradient(180deg, ${c1.light}, ${c1.dark})`;
+        redBar.style.background = `linear-gradient(180deg, ${c2.light}, ${c2.dark})`;
+
+        // Update color previews in settings
+        p1ColorPreview.style.background = c1.light;
+        p2ColorPreview.style.background = c2.light;
     }
 
     // ──────────────────────── UI UPDATES ────────────────────────
@@ -476,7 +572,6 @@
         if (!gameActive || !roundActive) return;
         roundActive = false;
         lockAll(true);
-
         const player = playerId === 'p1' ? player1 : player2;
         player.score++;
         shiftBar(playerId === 'p1');
@@ -496,7 +591,6 @@
             setTimeout(() => endGame(), 600);
             return;
         }
-
         setTimeout(() => {
             if (!gameActive) return;
             startNextQuestion();
@@ -507,8 +601,6 @@
         if (!gameActive || !roundActive) return;
         roundActive = false;
         lockAll(true);
-
-        // No points, no bar shift – simply advance after a moment
         setTimeout(() => {
             if (!gameActive) return;
             startNextQuestion();
@@ -518,17 +610,11 @@
     function handleIncorrect(playerId) {
         if (!gameActive || !roundActive) return;
         const answerBox = playerId === 'p1' ? p1Answer : p2Answer;
-        const grid = playerId === 'p1' ? p1OptionsGrid : p2OptionsGrid;
         const player = playerId === 'p1' ? player1 : player2;
-
         answerBox.classList.add('wrong-flash');
         setTimeout(() => answerBox.classList.remove('wrong-flash'), 400);
-
-        // Lock this player completely (they cannot try again)
         player.locked = true;
         lockPlayer(playerId, true);
-
-        // If both players are now locked (both answered incorrectly), advance
         if (player1.locked && player2.locked) {
             handleBothWrong();
         }
@@ -537,7 +623,7 @@
     function playerCheck(playerId) {
         if (!gameActive || !roundActive) return;
         const player = playerId === 'p1' ? player1 : player2;
-        if (player.locked) return; // extra safety
+        if (player.locked) return;
         if (player.answer === '') {
             const answerBox = playerId === 'p1' ? p1Answer : p2Answer;
             answerBox.classList.add('wrong-flash');
@@ -570,11 +656,11 @@
         if (player1.score > player2.score) {
             resultIcon.textContent = '🏆';
             resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
-            resultTitle.style.color = 'var(--blue-light)';
+            resultTitle.style.color = getPlayerColor(p1ColorIdx).light;
         } else if (player2.score > player1.score) {
             resultIcon.textContent = '🏆';
             resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
-            resultTitle.style.color = 'var(--red-light)';
+            resultTitle.style.color = getPlayerColor(p2ColorIdx).light;
         } else {
             resultIcon.textContent = '🤝';
             resultTitle.textContent = "It's a Tie!";
@@ -595,12 +681,14 @@
         updateNames();
         updateScoreBadges();
         updateBar();
+        applyPlayerColors(); // apply current colors to UI
         startNextQuestion();
         overlay.classList.remove('active');
         buildBankRadios();
+        populateColorDropdowns();
     }
 
-    // ──────────────────────── SETTINGS ────────────────────────
+    // ──────────────────────── SETTINGS & COLOR HANDLING ────────────────────────
     function buildBankRadios() {
         bankGroup.innerHTML = '';
         QUESTION_BANKS.forEach((bank, idx) => {
@@ -616,6 +704,54 @@
         });
     }
 
+    function populateColorDropdowns() {
+        // Fill dropdowns with color names, preselect current indices
+        [p1ColorSelect, p2ColorSelect].forEach(select => {
+            select.innerHTML = '';
+            COLOR_PALETTE.forEach((color, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = color.name;
+                select.appendChild(opt);
+            });
+        });
+        p1ColorSelect.value = p1ColorIdx;
+        p2ColorSelect.value = p2ColorIdx;
+        updateColorPreviews();
+
+        // Attach change handlers for conflict prevention
+        p1ColorSelect.onchange = () => handleColorChange('p1');
+        p2ColorSelect.onchange = () => handleColorChange('p2');
+    }
+
+    function updateColorPreviews() {
+        p1ColorPreview.style.background = getPlayerColor(parseInt(p1ColorSelect.value, 10)).light;
+        p2ColorPreview.style.background = getPlayerColor(parseInt(p2ColorSelect.value, 10)).light;
+    }
+
+    function handleColorChange(changingPlayer) {
+        const select = changingPlayer === 'p1' ? p1ColorSelect : p2ColorSelect;
+        const otherSelect = changingPlayer === 'p1' ? p2ColorSelect : p1ColorSelect;
+        const newIdx = parseInt(select.value, 10);
+
+        if (newIdx === parseInt(otherSelect.value, 10)) {
+            // Conflict: revert to previous stored index
+            const previousIdx = changingPlayer === 'p1' ? p1ColorIdx : p2ColorIdx;
+            select.value = previousIdx;
+            alert('Players cannot share the same color. Please pick a different one.');
+        } else {
+            // Update stored index
+            if (changingPlayer === 'p1') {
+                p1ColorIdx = newIdx;
+            } else {
+                p2ColorIdx = newIdx;
+            }
+            updateColorPreviews();
+            // Immediately apply colors to UI so they see live preview
+            applyPlayerColors();
+        }
+    }
+
     function readSettings() {
         const p1name = p1NameInput.value.trim() || 'Player 1';
         const p2name = p2NameInput.value.trim() || 'Player 2';
@@ -623,10 +759,25 @@
         if (isNaN(rounds) || rounds < 1) rounds = 1;
         if (rounds > 20) rounds = 20;
         roundsInput.value = rounds;
+
         let bank = 0;
         document.getElementsByName('bank').forEach(r => { if (r.checked) bank = parseInt(r.value, 10); });
         if (isNaN(bank) || bank < 0 || bank >= QUESTION_BANKS.length) bank = 0;
-        return { p1name, p2name, rounds, bank };
+
+        // Read colors and resolve conflicts
+        let newP1Idx = parseInt(p1ColorSelect.value, 10);
+        let newP2Idx = parseInt(p2ColorSelect.value, 10);
+        if (isNaN(newP1Idx) || newP1Idx < 0 || newP1Idx >= COLOR_PALETTE.length) newP1Idx = 4;
+        if (isNaN(newP2Idx) || newP2Idx < 0 || newP2Idx >= COLOR_PALETTE.length) newP2Idx = 0;
+
+        // If still identical (edge case), force p2 to next different color
+        if (newP1Idx === newP2Idx) {
+            newP2Idx = (newP1Idx + 1) % COLOR_PALETTE.length;
+            p2ColorSelect.value = newP2Idx;
+            updateColorPreviews();
+        }
+
+        return { p1name, p2name, rounds, bank, newP1Idx, newP2Idx };
     }
 
     function applySettings() {
@@ -635,6 +786,8 @@
         PLAYER2 = s.p2name;
         TOTAL_ROUNDS = s.rounds;
         SELECTED_BANK = s.bank;
+        p1ColorIdx = s.newP1Idx;
+        p2ColorIdx = s.newP2Idx;
         settingsPanel.classList.remove('open');
         fullReset();
     }
@@ -664,13 +817,13 @@
     p2Undo.addEventListener('click', () => playerUndo('p2'));
     p1Check.addEventListener('click', () => playerCheck('p1'));
     p2Check.addEventListener('click', () => playerCheck('p2'));
-
     settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
     applySettingsBtn.addEventListener('click', applySettings);
     playAgainBtn.addEventListener('click', applySettings);
 
     // ──────────────────────── INIT ────────────────────────
     buildBankRadios();
+    populateColorDropdowns();
     updateNames();
     fullReset();
 })();
