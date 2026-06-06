@@ -7,8 +7,7 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg:#0b1120; --surface:#111b2e; --blue:#3b82f6; --blue-light:#60a5fa;
-            --red:#ef4444; --red-light:#f87171; --text:#f1f5f9; --text-dim:#94a3b8;
+            --bg:#0b1120; --surface:#111b2e; --text:#f1f5f9; --text-dim:#94a3b8;
             --border:#1e293b; --radius:16px;
         }
         body {
@@ -20,21 +19,22 @@
         }
         .game-layout {
             display: flex; flex-direction: column; width:100%; height:100%;
-            gap: clamp(12px,2vw,24px); max-width:1400px;
+            gap: clamp(8px,1.5vh,24px); max-width:1400px;
+            position: relative;
         }
         .top-area {
             display: flex; flex-direction: column; align-items: center;
-            gap: clamp(10px,2vh,18px); width:100%;
+            gap: clamp(6px,1.2vh,18px); width:100%;
         }
         .shared-question {
-            font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight:800;
-            background: rgba(0,0,0,0.4); padding:1rem 2rem; border-radius:2rem;
-            text-align:center; line-height:1.4; word-break:break-word;
+            font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight:800;
+            background: rgba(0,0,0,0.4); padding: clamp(0.6rem,1.5vw,1.5rem) clamp(1rem,2vw,2rem);
+            border-radius:2rem; text-align:center; line-height:1.4; word-break:break-word;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border:2px solid var(--border); width:100%;
         }
         .war-bar-container {
-            width:100%; height: clamp(60px, 10vh, 100px); position: relative;
+            width:100%; height: clamp(45px, 8vh, 100px); position: relative;
             background: white; border-radius: 50px; overflow: hidden;
             box-shadow: 0 6px 25px rgba(0,0,0,0.7);
         }
@@ -42,8 +42,8 @@
             position:absolute; top:0; height:100%;
             transition: width 0.6s cubic-bezier(0.2,0.9,0.4,1);
         }
-        .war-bar-blue { left:0; background:linear-gradient(180deg,#3b82f6,#1e40af); border-radius:50px 0 0 50px; }
-        .war-bar-red { right:0; background:linear-gradient(180deg,#ef4444,#991b1b); border-radius:0 50px 50px 0; }
+        .war-bar-blue { left:0; border-radius:50px 0 0 50px; }
+        .war-bar-red { right:0; border-radius:0 50px 50px 0; }
         .bar-divider {
             position:absolute; top:5%; height:90%; width:5px; background:white;
             box-shadow:0 0 20px white; border-radius:5px;
@@ -55,49 +55,56 @@
             justify-content:space-between; align-items:center; padding:0 20px;
         }
         .bar-score {
-            font-weight:900; font-size: clamp(1.5rem, 3vw, 2.2rem); color:white;
+            font-weight:900; font-size: clamp(1.2rem, 2.5vw, 2.2rem); color:white;
             text-shadow:0 2px 10px black; line-height:1;
         }
+
         .players-row {
-            display: flex; gap: clamp(12px,2vw,24px); width:100%;
-            flex:1; min-height:0;
+            display: flex; gap: clamp(8px,1.5vw,24px); width:100%;
+            flex:1; min-height:0; position: relative;
         }
         .player-panel {
             flex:1; background: var(--surface); border-radius: var(--radius);
-            border:2px solid var(--border); padding: clamp(12px,2vw,24px);
+            border:2px solid var(--border); padding: clamp(8px,1.5vh,24px);
             display: flex; flex-direction: column; align-items: center;
-            gap: clamp(8px,2vh,14px); min-width:0;
+            gap: clamp(6px,1vh,14px); min-width:0;
         }
-        .player-panel.p1 { border-top:4px solid var(--blue); }
-        .player-panel.p2 { border-top:4px solid var(--red); }
+        .player-panel.p1 { border-top:4px solid #3b82f6; }
+        .player-panel.p2 { border-top:4px solid #ef4444; }
         .player-name {
-            font-weight:700; font-size: clamp(1rem,2vw,1.4rem); letter-spacing:1px;
-            background: rgba(255,255,255,0.05); padding:0.4rem 1.2rem; border-radius:2rem;
+            font-weight:700; font-size: clamp(0.9rem,1.8vw,1.4rem); letter-spacing:1px;
+            background: rgba(255,255,255,0.05); padding:0.3rem 0.9rem; border-radius:2rem;
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 0.4rem;
         }
-        .p1 .player-name { color: var(--blue-light); }
-        .p2 .player-name { color: var(--red-light); }
+        .player-avatar {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4);
+            display: inline-block; flex-shrink: 0;
+            transition: background 0.2s;
+        }
         .score-badge {
-            font-size:0.9rem; font-weight:600; color: var(--text-dim);
-            background: rgba(255,255,255,0.05); padding:0.3rem 1rem; border-radius:1rem;
+            font-size:0.8rem; font-weight:600; color: var(--text-dim);
+            background: rgba(255,255,255,0.05); padding:0.2rem 0.8rem; border-radius:1rem;
         }
         .answer-box {
             background: #0f172a; border:2px solid #334155; border-radius:1rem;
-            padding:0.6rem 1.2rem; font-size: clamp(1.2rem,3vw,1.8rem);
-            font-weight:700; text-align:center; min-width:160px;
+            padding:0.5rem 1rem; font-size: clamp(1rem,2vw,1.8rem);
+            font-weight:700; text-align:center; min-width:120px;
             transition: border-color 0.2s, background 0.2s;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             max-width: 90%;
         }
-        .answer-box.placeholder { color: #475569; font-weight:400; font-size:1rem; }
+        .answer-box.placeholder { color: #475569; font-weight:400; font-size:0.9rem; }
         .options-grid {
-            display: grid; gap:10px; width:100%; max-width:400px;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            display: grid; gap:8px; width:100%; max-width:400px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         }
         .option-btn {
-            font-size: clamp(0.9rem,2vw,1.3rem); font-weight:600;
+            font-size: clamp(0.8rem,1.6vw,1.3rem); font-weight:600;
             background:#1e293b; border:2px solid #334155; border-radius:0.8rem;
             color:white; cursor:pointer; transition: all 0.1s;
-            padding:0.8rem; min-height:56px;
+            padding:0.6rem; min-height:48px;
             display:flex; align-items:center; justify-content:center;
             word-break:break-word; text-align:center; line-height:1.3;
             touch-action:manipulation;
@@ -105,11 +112,9 @@
         .option-btn:active { transform:scale(0.92); background:#0f172a; }
         .option-btn:disabled { opacity:0.4; pointer-events:none; }
         .option-btn.selected { border-color:#fbbf24; background:#1e3a2f; box-shadow:0 0 14px rgba(251,191,36,0.45); }
-        .action-row {
-            display:flex; gap:10px; width:100%; max-width:400px;
-        }
+        .action-row { display:flex; gap:8px; width:100%; max-width:400px; }
         .action-btn {
-            flex:1; padding:0.8rem; font-weight:700; font-size:1rem;
+            flex:1; padding:0.6rem; font-weight:700; font-size:0.9rem;
             border:none; border-radius:2rem; cursor:pointer; text-transform:uppercase;
             letter-spacing:0.5px; transition:0.15s; display:flex;
             align-items:center; justify-content:center; gap:0.3rem;
@@ -132,43 +137,58 @@
             60%{ transform:translateX(-4px); }
             80%{ transform:translateX(4px); }
         }
+
         .center-column {
-            flex: 0 0 clamp(260px, 30vw, 340px);
+            flex: 0 0 clamp(200px, 28vw, 340px);
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; gap: 1rem;
+            justify-content: center; gap: 0.8rem;
+            z-index: 20;
         }
         .settings-toggle {
             background:none; border:2px solid #334155; color:#cbd5e1;
-            border-radius:2rem; padding:0.4rem 1.2rem; font-weight:600;
-            font-size:0.85rem; cursor:pointer; transition:0.2s;
+            border-radius:2rem; padding:0.3rem 1rem; font-weight:600;
+            font-size:0.8rem; cursor:pointer; transition:0.2s;
             display:flex; align-items:center; gap:0.4rem;
         }
         .settings-toggle:hover { background:#1e293b; }
         .settings-panel {
             display:none; background:#1e293b; border-radius:1rem;
-            padding:1rem; width:100%; flex-direction:column; gap:0.8rem;
-            border:1px solid #334155; max-height:60vh; overflow-y:auto;
+            padding:0.8rem; width:100%; flex-direction:column; gap:0.6rem;
+            border:1px solid #334155; max-height:50vh; overflow-y:auto;
         }
         .settings-panel.open { display:flex; }
         .setting-row {
             display:flex; justify-content:space-between; align-items:center;
-            flex-wrap:wrap; gap:0.4rem;
+            flex-wrap:wrap; gap:0.3rem;
         }
-        .setting-row label { font-size:0.85rem; font-weight:500; color:#cbd5e1; }
+        .setting-row label { font-size:0.75rem; font-weight:500; color:#cbd5e1; }
         .setting-row input[type="text"],
         .setting-row input[type="number"] {
             background:#0f172a; border:1px solid #334155; color:white;
-            padding:0.4rem 0.5rem; border-radius:0.5rem; font-weight:600; text-align:center;
+            padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:600; text-align:center;
         }
-        .setting-row input[type="text"] { width:90px; }
-        .setting-row input[type="number"] { width:60px; }
+        .setting-row input[type="text"] { width:80px; }
+        .setting-row input[type="number"] { width:55px; }
+        .color-selector {
+            display:flex; align-items:center; gap:0.4rem;
+        }
+        .color-selector select {
+            background:#0f172a; border:1px solid #334155; color:white;
+            padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:600;
+            font-size:0.75rem; max-width:120px;
+        }
+        .color-preview {
+            width:20px; height:20px; border-radius:50%;
+            border:2px solid white; box-shadow:0 0 6px rgba(0,0,0,0.6);
+            display:inline-block; transition: background 0.2s;
+        }
         .radio-group {
-            display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
+            display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;
         }
         .radio-group label {
-            display:flex; align-items:center; gap:0.2rem; font-size:0.8rem;
+            display:flex; align-items:center; gap:0.2rem; font-size:0.7rem;
             cursor:pointer; color:#cbd5e1; background:#0f172a;
-            padding:0.35rem 0.7rem; border-radius:1.5rem; border:1px solid #334155;
+            padding:0.25rem 0.6rem; border-radius:1.5rem; border:1px solid #334155;
             transition:0.2s; white-space:nowrap;
         }
         .radio-group label:has(input:checked) {
@@ -177,9 +197,21 @@
         .radio-group input[type="radio"] { accent-color:#6366f1; width:auto; margin:0; }
         .apply-settings-btn {
             background:#6366f1; color:white; border:none; border-radius:2rem;
-            padding:0.6rem; font-weight:700; cursor:pointer; letter-spacing:0.5px;
-            margin-top:0.2rem;
+            padding:0.5rem; font-weight:700; cursor:pointer; font-size:0.9rem;
+            letter-spacing:0.5px; margin-top:0.2rem;
         }
+        .import-row {
+            display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;
+        }
+        .import-btn, .create-btn, .reset-btn {
+            background:#475569; border:none; color:white; padding:0.4rem 0.8rem;
+            border-radius:2rem; font-weight:600; font-size:0.8rem; cursor:pointer;
+            transition:0.2s; display:flex; align-items:center; gap:0.3rem;
+        }
+        .import-btn:hover, .create-btn:hover { background:#6366f1; }
+        .reset-btn:hover { background:#ef4444; }
+        #importFileInput { display:none; }
+
         .overlay {
             position:fixed; inset:0; background:rgba(0,0,0,0.85);
             backdrop-filter:blur(8px); display:flex; align-items:center;
@@ -188,24 +220,63 @@
         }
         .overlay.active { opacity:1; pointer-events:auto; }
         .result-card {
-            background:#1e293b; border-radius:2rem; padding:2rem;
+            background:#1e293b; border-radius:2rem; padding:1.5rem;
             text-align:center; box-shadow:0 20px 40px black;
             max-width:400px; width:90%;
         }
-        .result-icon { font-size:4rem; margin-bottom:0.5rem; }
-        .result-title { font-size:2rem; font-weight:900; }
-        .result-scores { display:flex; justify-content:center; gap:2rem; margin:1.5rem 0; }
+        .result-icon { font-size:3.5rem; margin-bottom:0.5rem; }
+        .result-title { font-size:1.8rem; font-weight:900; }
+        .result-scores { display:flex; justify-content:center; gap:1.5rem; margin:1rem 0; }
         .play-again-btn {
-            background:#6366f1; border:none; color:white; padding:0.8rem 2.5rem;
-            border-radius:3rem; font-weight:700; font-size:1.1rem; cursor:pointer;
+            background:#6366f1; border:none; color:white; padding:0.7rem 2rem;
+            border-radius:3rem; font-weight:700; font-size:1rem; cursor:pointer;
         }
+
         @media (max-width:750px) {
-            .players-row { flex-direction:column; }
-            .center-column { flex: 0 0 auto; width:100%; order:-1; }
-            .shared-question { font-size:1.3rem; padding:0.8rem 1.2rem; }
+            .players-row { gap: 4px; }
+            .center-column {
+                position: absolute; top: 8px; left: 50%;
+                transform: translateX(-50%); width: auto; flex: 0 0 auto;
+                z-index: 30; flex-direction: row; gap: 0.4rem;
+            }
+            .settings-toggle { font-size:0.7rem; padding:0.2rem 0.7rem; }
+            .settings-panel {
+                position: absolute; top: 100%; left: 50%;
+                transform: translateX(-50%); width: 280px; max-height: 60vh; margin-top: 4px;
+            }
+            .player-panel { padding: 4px 6px; gap: 4px; border-radius: 12px; }
+            .player-name { font-size:0.75rem; padding:0.2rem 0.5rem; }
+            .score-badge { font-size:0.65rem; padding:0.1rem 0.4rem; }
+            .answer-box { font-size:0.85rem; padding:0.3rem 0.5rem; min-width:70px; }
+            .answer-box.placeholder { font-size:0.75rem; }
+            .options-grid { gap: 4px; grid-template-columns: repeat(2, 1fr); }
+            .option-btn { font-size:0.75rem; padding:0.4rem; min-height:38px; border-radius:0.6rem; }
+            .action-row { gap: 4px; }
+            .action-btn { padding:0.4rem; font-size:0.75rem; }
+            .shared-question { font-size:1.2rem; padding:0.6rem 1rem; }
             .war-bar-container { height:50px; }
-            .options-grid { max-width:300px; }
-            .option-btn { font-size:0.85rem; padding:0.6rem; }
+        }
+
+        @media (max-height:500px) and (orientation: landscape) {
+            body { padding: 4px; }
+            .game-layout { gap: 4px; }
+            .top-area { gap: 4px; }
+            .shared-question { font-size: 1rem; padding: 0.4rem 1rem; border-radius: 1rem; }
+            .war-bar-container { height: 36px; border-radius: 30px; }
+            .bar-scores { padding: 0 10px; }
+            .bar-score { font-size: 1rem; }
+            .players-row { gap: 4px; }
+            .player-panel { padding: 4px 8px; gap: 4px; border-radius: 12px; }
+            .player-name { font-size: 0.8rem; padding: 0.2rem 0.6rem; }
+            .score-badge { font-size: 0.65rem; padding: 0.1rem 0.5rem; }
+            .answer-box { font-size: 0.9rem; padding: 0.3rem 0.6rem; min-width: 80px; }
+            .options-grid { gap: 4px; max-width: 100%; grid-template-columns: repeat(2, 1fr); }
+            .option-btn { font-size: 0.75rem; padding: 0.4rem; min-height: 38px; border-radius: 0.6rem; }
+            .action-row { gap: 4px; }
+            .action-btn { padding: 0.4rem; font-size: 0.75rem; }
+            .center-column { top: 2px; }
+            .settings-toggle { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+            .settings-panel { width: 240px; max-height: 40vh; }
         }
     </style>
 </head>
@@ -225,7 +296,10 @@
     </div>
     <div class="players-row">
         <div class="player-panel p1" id="p1Panel">
-            <div class="player-name" id="p1NameDisplay">🔵 PLAYER 1</div>
+            <div class="player-name" id="p1NameDisplay">
+                <span class="player-avatar" id="p1Avatar"></span>
+                <span class="player-name-text">Player 1</span>
+            </div>
             <div class="score-badge" id="p1ScoreBadge">Score: 0 / 10</div>
             <div class="answer-box placeholder" id="p1Answer">Your answer</div>
             <div class="options-grid" id="p1OptionsGrid"></div>
@@ -253,11 +327,43 @@
                     <label>Question Bank</label>
                     <div class="radio-group" id="bankGroup"></div>
                 </div>
+                <div class="setting-row">
+                    <label>🔵 P1 Color</label>
+                    <div class="color-selector">
+                        <div class="color-preview" id="p1ColorPreview"></div>
+                        <select id="p1ColorSelect"></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>🔴 P2 Color</label>
+                    <div class="color-selector">
+                        <div class="color-preview" id="p2ColorPreview"></div>
+                        <select id="p2ColorSelect"></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Import Questions</label>
+                    <div class="import-row">
+                        <input type="file" id="importFileInput" accept=".json">
+                        <button class="import-btn" id="importBtn">📂 Import .json</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Create Questions</label>
+                    <button class="create-btn" id="createBtn">➕ Open Creator</button>
+                </div>
+                <div class="setting-row">
+                    <label>Reset to Default</label>
+                    <button class="reset-btn" id="resetBanksBtn">🔄 Reset Banks</button>
+                </div>
                 <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
             </div>
         </div>
         <div class="player-panel p2" id="p2Panel">
-            <div class="player-name" id="p2NameDisplay">🔴 PLAYER 2</div>
+            <div class="player-name" id="p2NameDisplay">
+                <span class="player-avatar" id="p2Avatar"></span>
+                <span class="player-name-text">Player 2</span>
+            </div>
             <div class="score-badge" id="p2ScoreBadge">Score: 0 / 10</div>
             <div class="answer-box placeholder" id="p2Answer">Your answer</div>
             <div class="options-grid" id="p2OptionsGrid"></div>
@@ -273,16 +379,18 @@
         <div class="result-icon" id="resultIcon">🏆</div>
         <div class="result-title" id="resultTitle"></div>
         <div class="result-scores">
-            <div><div style="color:var(--blue-light);" id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
-            <div><div style="color:var(--red-light);" id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
+            <div><div id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
+            <div><div id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
         </div>
         <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
     </div>
 </div>
 <script>
 (function() {
-    // ──────────────────────── QUESTION BANKS ────────────────────────
-    const QUESTION_BANKS = [
+    const STORAGE_KEY = 'quiz_tug_of_war_banks';
+    const SETTINGS_KEY = 'quiz_tug_of_war_settings';
+
+    const DEFAULT_BANKS = [
         {
             name: 'Science',
             questions: [
@@ -315,11 +423,63 @@
         }
     ];
 
-    // ──────────────────────── DOM ELEMENTS ────────────────────────
+    function loadBanksFromStorage() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    for (const bank of parsed) {
+                        if (!bank.name || !Array.isArray(bank.questions)) return null;
+                    }
+                    return parsed;
+                }
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    function saveBanksToStorage(banks) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(banks)); } catch (e) {}
+    }
+
+    function loadSettingsFromStorage() {
+        try {
+            const stored = localStorage.getItem(SETTINGS_KEY);
+            if (stored) {
+                const settings = JSON.parse(stored);
+                if (settings && typeof settings === 'object') return settings;
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    function saveSettingsToStorage(settings) {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    }
+
+    let questionBanks = loadBanksFromStorage() || JSON.parse(JSON.stringify(DEFAULT_BANKS));
+
+    const COLOR_PALETTE = [
+        { name: 'Red',    light: '#EF4444', dark: '#B91C1C' },
+        { name: 'Orange', light: '#F97316', dark: '#C2410C' },
+        { name: 'Yellow', light: '#EAB308', dark: '#A16207' },
+        { name: 'Green',  light: '#22C55E', dark: '#15803D' },
+        { name: 'Blue',   light: '#3B82F6', dark: '#1E40AF' },
+        { name: 'Indigo', light: '#6366F1', dark: '#4338CA' },
+        { name: 'Violet', light: '#8B5CF6', dark: '#6D28D9' },
+        { name: 'Pink',   light: '#EC4899', dark: '#BE185D' },
+        { name: 'Cyan',   light: '#06B6D4', dark: '#0E7490' },
+        { name: 'Lime',   light: '#84CC16', dark: '#4D7C0F' }
+    ];
+
     const $ = id => document.getElementById(id);
     const sharedQuestion = $('sharedQuestion');
     const p1Panel = $('p1Panel'), p2Panel = $('p2Panel');
     const p1NameDisplay = $('p1NameDisplay'), p2NameDisplay = $('p2NameDisplay');
+    const p1Avatar = $('p1Avatar'), p2Avatar = $('p2Avatar');
+    const p1NameText = document.querySelector('#p1NameDisplay .player-name-text');
+    const p2NameText = document.querySelector('#p2NameDisplay .player-name-text');
     const p1ScoreBadge = $('p1ScoreBadge'), p2ScoreBadge = $('p2ScoreBadge');
     const p1Answer = $('p1Answer'), p2Answer = $('p2Answer');
     const p1OptionsGrid = $('p1OptionsGrid'), p2OptionsGrid = $('p2OptionsGrid');
@@ -331,15 +491,20 @@
     const p1NameInput = $('p1NameInput'), p2NameInput = $('p2NameInput');
     const roundsInput = $('roundsInput'), applySettingsBtn = $('applySettingsBtn');
     const bankGroup = $('bankGroup');
+    const p1ColorSelect = $('p1ColorSelect'), p2ColorSelect = $('p2ColorSelect');
+    const p1ColorPreview = $('p1ColorPreview'), p2ColorPreview = $('p2ColorPreview');
+    const importFileInput = $('importFileInput'), importBtn = $('importBtn');
+    const createBtn = $('createBtn'), resetBanksBtn = $('resetBanksBtn');
     const overlay = $('overlay'), resultIcon = $('resultIcon'), resultTitle = $('resultTitle');
     const finalP1Label = $('finalP1Label'), finalP2Label = $('finalP2Label');
     const finalP1 = $('finalP1'), finalP2 = $('finalP2');
     const playAgainBtn = $('playAgainBtn');
 
-    // ──────────────────────── GAME STATE ────────────────────────
     let TOTAL_ROUNDS = 10;
-    let SELECTED_BANK = 0;
+    let SELECTED_BANK_INDEX = 0;
     let PLAYER1 = 'Player 1', PLAYER2 = 'Player 2';
+    let p1ColorIdx = 4; // Blue
+    let p2ColorIdx = 0; // Red
     let gameActive = true, roundActive = true;
     let barPosition = 50;
     let player1 = { score: 0, answer: '', locked: false };
@@ -347,9 +512,8 @@
     let currentQuestion = { question: '', answer: '', options: [] };
     let questionQueue = [], queueIndex = 0, lastIdx = -1;
 
-    // ──────────────────────── UTILITIES ────────────────────────
     const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-    const currentBank = () => QUESTION_BANKS[SELECTED_BANK] || QUESTION_BANKS[0];
+    const currentBank = () => questionBanks[SELECTED_BANK_INDEX] || questionBanks[0];
 
     function buildQueue() {
         return shuffle(currentBank().questions.map((_, i) => i));
@@ -357,8 +521,8 @@
 
     function getNextQuestion() {
         const bank = currentBank();
-        if (!bank.questions.length) {
-            currentQuestion = { question: 'No questions', answer: '', options: [] };
+        if (!bank || !bank.questions || !bank.questions.length) {
+            currentQuestion = { question: 'No questions available', answer: '', options: [] };
             return;
         }
         if (!questionQueue.length || queueIndex >= questionQueue.length) {
@@ -374,15 +538,40 @@
         currentQuestion = {
             question: q.question,
             answer: String(q.answer),
-            options: shuffle(q.options)
+            options: shuffle([...q.options])
         };
     }
 
-    // ──────────────────────── UI UPDATES ────────────────────────
-    function updateSharedQuestion() {
-        sharedQuestion.textContent = currentQuestion.question;
+    function getPlayerColor(idx) {
+        return COLOR_PALETTE[idx] || COLOR_PALETTE[0];
     }
 
+    function updatePlayerNameDisplay() {
+        if (p1NameText) p1NameText.textContent = PLAYER1;
+        if (p2NameText) p2NameText.textContent = PLAYER2;
+        finalP1Label.textContent = `🔵 ${PLAYER1}`;
+        finalP2Label.textContent = `🔴 ${PLAYER2}`;
+    }
+
+    function applyPlayerColors() {
+        const c1 = getPlayerColor(p1ColorIdx);
+        const c2 = getPlayerColor(p2ColorIdx);
+        p1Panel.style.borderTopColor = c1.light;
+        p2Panel.style.borderTopColor = c2.light;
+        p1NameDisplay.style.color = c1.light;
+        p2NameDisplay.style.color = c2.light;
+        finalP1Label.style.color = c1.light;
+        finalP2Label.style.color = c2.light;
+        blueBar.style.background = `linear-gradient(180deg, ${c1.light}, ${c1.dark})`;
+        redBar.style.background = `linear-gradient(180deg, ${c2.light}, ${c2.dark})`;
+        p1ColorPreview.style.background = c1.light;
+        p2ColorPreview.style.background = c2.light;
+        p1Avatar.style.background = c1.light;
+        p2Avatar.style.background = c2.light;
+        updatePlayerNameDisplay();
+    }
+
+    function updateSharedQuestion() { sharedQuestion.textContent = currentQuestion.question; }
     function renderOptions(grid) {
         grid.innerHTML = '';
         currentQuestion.options.forEach(val => {
@@ -393,13 +582,9 @@
             grid.appendChild(btn);
         });
     }
-
     function highlightSelected(grid, answer) {
-        grid.querySelectorAll('.option-btn').forEach(btn => {
-            btn.classList.toggle('selected', btn.dataset.value === answer);
-        });
+        grid.querySelectorAll('.option-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.value === answer));
     }
-
     function updateAnswerBox(grid, answerBox, answer) {
         if (answer === '') {
             answerBox.textContent = 'Your answer';
@@ -409,12 +594,10 @@
             answerBox.classList.remove('placeholder');
         }
     }
-
     function updateScoreBadges() {
         p1ScoreBadge.textContent = `Score: ${player1.score} / ${TOTAL_ROUNDS}`;
         p2ScoreBadge.textContent = `Score: ${player2.score} / ${TOTAL_ROUNDS}`;
     }
-
     function updateBar() {
         blueBar.style.width = barPosition + '%';
         redBar.style.width = (100 - barPosition) + '%';
@@ -422,14 +605,6 @@
         blueScoreEl.textContent = player1.score;
         redScoreEl.textContent = player2.score;
     }
-
-    function updateNames() {
-        p1NameDisplay.textContent = `🔵 ${PLAYER1}`;
-        p2NameDisplay.textContent = `🔴 ${PLAYER2}`;
-        finalP1Label.textContent = `🔵 ${PLAYER1}`;
-        finalP2Label.textContent = `🔴 ${PLAYER2}`;
-    }
-
     function shiftBar(towardBlue) {
         barPosition = towardBlue ? Math.min(95, barPosition + 5) : Math.max(5, barPosition - 5);
         updateBar();
@@ -444,11 +619,7 @@
         undo.disabled = disable;
         check.disabled = disable || (player.answer === '' && !disable);
     }
-
-    function lockAll(disable) {
-        lockPlayer('p1', disable);
-        lockPlayer('p2', disable);
-    }
+    function lockAll(disable) { lockPlayer('p1', disable); lockPlayer('p2', disable); }
 
     function resetRoundUI() {
         player1.answer = ''; player1.locked = false;
@@ -457,8 +628,7 @@
         updateAnswerBox(p2OptionsGrid, p2Answer, '');
         highlightSelected(p1OptionsGrid, '');
         highlightSelected(p2OptionsGrid, '');
-        p1Check.disabled = true;
-        p2Check.disabled = true;
+        p1Check.disabled = true; p2Check.disabled = true;
         lockAll(false);
         roundActive = true;
     }
@@ -471,84 +641,54 @@
         resetRoundUI();
     }
 
-    // ──────────────────────── GAME LOGIC ────────────────────────
     function handleCorrect(playerId) {
         if (!gameActive || !roundActive) return;
         roundActive = false;
         lockAll(true);
-
         const player = playerId === 'p1' ? player1 : player2;
         player.score++;
         shiftBar(playerId === 'p1');
         updateScoreBadges();
         updateBar();
-
         const panel = playerId === 'p1' ? p1Panel : p2Panel;
         const answerBox = playerId === 'p1' ? p1Answer : p2Answer;
         answerBox.classList.add('feedback-flash');
         panel.style.boxShadow = '0 0 30px #22c55e';
-        setTimeout(() => {
-            answerBox.classList.remove('feedback-flash');
-            panel.style.boxShadow = '';
-        }, 500);
-
-        if (player.score >= TOTAL_ROUNDS) {
-            setTimeout(() => endGame(), 600);
-            return;
-        }
-
-        setTimeout(() => {
-            if (!gameActive) return;
-            startNextQuestion();
-        }, 600);
+        setTimeout(() => { answerBox.classList.remove('feedback-flash'); panel.style.boxShadow = ''; }, 500);
+        if (player.score >= TOTAL_ROUNDS) { setTimeout(() => endGame(), 600); return; }
+        setTimeout(() => { if (gameActive) startNextQuestion(); }, 600);
     }
 
     function handleBothWrong() {
         if (!gameActive || !roundActive) return;
         roundActive = false;
         lockAll(true);
-
-        // No points, no bar shift – simply advance after a moment
-        setTimeout(() => {
-            if (!gameActive) return;
-            startNextQuestion();
-        }, 800);
+        setTimeout(() => { if (gameActive) startNextQuestion(); }, 800);
     }
 
     function handleIncorrect(playerId) {
         if (!gameActive || !roundActive) return;
         const answerBox = playerId === 'p1' ? p1Answer : p2Answer;
-        const grid = playerId === 'p1' ? p1OptionsGrid : p2OptionsGrid;
         const player = playerId === 'p1' ? player1 : player2;
-
         answerBox.classList.add('wrong-flash');
         setTimeout(() => answerBox.classList.remove('wrong-flash'), 400);
-
-        // Lock this player completely (they cannot try again)
         player.locked = true;
         lockPlayer(playerId, true);
-
-        // If both players are now locked (both answered incorrectly), advance
-        if (player1.locked && player2.locked) {
-            handleBothWrong();
-        }
+        if (player1.locked && player2.locked) handleBothWrong();
     }
 
     function playerCheck(playerId) {
         if (!gameActive || !roundActive) return;
         const player = playerId === 'p1' ? player1 : player2;
-        if (player.locked) return; // extra safety
+        if (player.locked) return;
         if (player.answer === '') {
             const answerBox = playerId === 'p1' ? p1Answer : p2Answer;
             answerBox.classList.add('wrong-flash');
             setTimeout(() => answerBox.classList.remove('wrong-flash'), 400);
             return;
         }
-        if (player.answer === currentQuestion.answer) {
-            handleCorrect(playerId);
-        } else {
-            handleIncorrect(playerId);
-        }
+        if (player.answer === currentQuestion.answer) handleCorrect(playerId);
+        else handleIncorrect(playerId);
     }
 
     function playerUndo(playerId) {
@@ -569,12 +709,12 @@
         lockAll(true);
         if (player1.score > player2.score) {
             resultIcon.textContent = '🏆';
-            resultTitle.textContent = `🔵 ${PLAYER1} Wins!`;
-            resultTitle.style.color = 'var(--blue-light)';
+            resultTitle.textContent = `${PLAYER1} Wins!`;
+            resultTitle.style.color = getPlayerColor(p1ColorIdx).light;
         } else if (player2.score > player1.score) {
             resultIcon.textContent = '🏆';
-            resultTitle.textContent = `🔴 ${PLAYER2} Wins!`;
-            resultTitle.style.color = 'var(--red-light)';
+            resultTitle.textContent = `${PLAYER2} Wins!`;
+            resultTitle.style.color = getPlayerColor(p2ColorIdx).light;
         } else {
             resultIcon.textContent = '🤝';
             resultTitle.textContent = "It's a Tie!";
@@ -592,28 +732,136 @@
         player1 = { score: 0, answer: '', locked: false };
         player2 = { score: 0, answer: '', locked: false };
         questionQueue = []; queueIndex = 0; lastIdx = -1;
-        updateNames();
         updateScoreBadges();
         updateBar();
+        applyPlayerColors();
         startNextQuestion();
         overlay.classList.remove('active');
         buildBankRadios();
+        populateColorDropdowns();
     }
 
-    // ──────────────────────── SETTINGS ────────────────────────
     function buildBankRadios() {
         bankGroup.innerHTML = '';
-        QUESTION_BANKS.forEach((bank, idx) => {
+        questionBanks.forEach((bank, idx) => {
             const label = document.createElement('label');
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.name = 'bank';
             radio.value = idx;
-            if (idx === SELECTED_BANK) radio.checked = true;
+            if (idx === SELECTED_BANK_INDEX) radio.checked = true;
             label.appendChild(radio);
             label.appendChild(document.createTextNode(' ' + bank.name));
             bankGroup.appendChild(label);
         });
+    }
+
+    function populateColorDropdowns() {
+        [p1ColorSelect, p2ColorSelect].forEach(select => {
+            select.innerHTML = '';
+            COLOR_PALETTE.forEach((color, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = color.name;
+                select.appendChild(opt);
+            });
+        });
+        p1ColorSelect.value = p1ColorIdx;
+        p2ColorSelect.value = p2ColorIdx;
+        updateColorPreviews();
+        p1ColorSelect.onchange = () => handleColorChange('p1');
+        p2ColorSelect.onchange = () => handleColorChange('p2');
+    }
+
+    function updateColorPreviews() {
+        p1ColorPreview.style.background = getPlayerColor(parseInt(p1ColorSelect.value, 10)).light;
+        p2ColorPreview.style.background = getPlayerColor(parseInt(p2ColorSelect.value, 10)).light;
+    }
+
+    function handleColorChange(changingPlayer) {
+        const select = changingPlayer === 'p1' ? p1ColorSelect : p2ColorSelect;
+        const otherSelect = changingPlayer === 'p1' ? p2ColorSelect : p1ColorSelect;
+        const newIdx = parseInt(select.value, 10);
+        if (newIdx === parseInt(otherSelect.value, 10)) {
+            const prev = changingPlayer === 'p1' ? p1ColorIdx : p2ColorIdx;
+            select.value = prev;
+            alert('Players cannot share the same color. Please pick a different one.');
+        } else {
+            if (changingPlayer === 'p1') p1ColorIdx = newIdx;
+            else p2ColorIdx = newIdx;
+            updateColorPreviews();
+            applyPlayerColors();
+        }
+    }
+
+    function validateImportedBank(data) {
+        if (!Array.isArray(data)) return 'JSON must be an array of question objects.';
+        if (data.length === 0) return 'The bank must contain at least one question.';
+        for (let i = 0; i < data.length; i++) {
+            const q = data[i];
+            if (!q.question || typeof q.question !== 'string') return `Question ${i+1}: missing/invalid "question".`;
+            if (!Array.isArray(q.options) || q.options.length < 2) return `Question ${i+1}: "options" must be an array with ≥2 items.`;
+            if (!q.answer || typeof q.answer !== 'string') return `Question ${i+1}: missing/invalid "answer".`;
+            if (!q.options.includes(q.answer)) return `Question ${i+1}: answer not in options.`;
+        }
+        return null;
+    }
+
+    function importQuestions() {
+        const file = importFileInput.files[0];
+        if (!file) { alert('Please select a .json file first.'); return; }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                let importedBanks = [];
+                if (Array.isArray(json)) {
+                    if (json.length > 0 && json[0].hasOwnProperty('question') && json[0].hasOwnProperty('options')) {
+                        importedBanks = [{ name: file.name.replace(/\.[^/.]+$/, "") || 'Imported Bank', questions: json }];
+                    } else if (json.length > 0 && json[0].hasOwnProperty('name') && json[0].hasOwnProperty('questions')) {
+                        importedBanks = json;
+                    }
+                }
+                if (importedBanks.length === 0) { alert('Invalid file structure.'); return; }
+                for (const bank of importedBanks) {
+                    if (!bank.name) throw new Error('Each bank must have a "name".');
+                    const err = validateImportedBank(bank.questions);
+                    if (err) throw new Error(`Bank "${bank.name}": ${err}`);
+                }
+                importedBanks.forEach(ib => {
+                    const existingIdx = questionBanks.findIndex(b => b.name === ib.name);
+                    if (existingIdx >= 0) {
+                        if (confirm(`Bank "${ib.name}" already exists. Replace it?`)) {
+                            questionBanks[existingIdx] = ib;
+                        }
+                    } else {
+                        questionBanks.push(ib);
+                    }
+                });
+                saveBanksToStorage(questionBanks);
+                buildBankRadios();
+                alert(`Successfully imported. Please select the bank and click "Apply & Restart".`);
+                importFileInput.value = '';
+            } catch (err) {
+                alert('Import failed: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function resetBanksToDefault() {
+        if (confirm('Reset all question banks to default? Custom banks will be lost.')) {
+            questionBanks = JSON.parse(JSON.stringify(DEFAULT_BANKS));
+            saveBanksToStorage(questionBanks);
+            SELECTED_BANK_INDEX = 0;
+            buildBankRadios();
+            alert('Banks reset. Click "Apply & Restart" to play with defaults.');
+        }
+    }
+
+    function openCreator() {
+        saveBanksToStorage(questionBanks);
+        window.open('quiz-tag-text-obj-create.html', '_blank');
     }
 
     function readSettings() {
@@ -623,10 +871,19 @@
         if (isNaN(rounds) || rounds < 1) rounds = 1;
         if (rounds > 20) rounds = 20;
         roundsInput.value = rounds;
-        let bank = 0;
-        document.getElementsByName('bank').forEach(r => { if (r.checked) bank = parseInt(r.value, 10); });
-        if (isNaN(bank) || bank < 0 || bank >= QUESTION_BANKS.length) bank = 0;
-        return { p1name, p2name, rounds, bank };
+        const selectedRadio = document.querySelector('input[name="bank"]:checked');
+        let bankIdx = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
+        if (isNaN(bankIdx) || bankIdx < 0 || bankIdx >= questionBanks.length) bankIdx = 0;
+        let newP1Idx = parseInt(p1ColorSelect.value, 10);
+        let newP2Idx = parseInt(p2ColorSelect.value, 10);
+        if (isNaN(newP1Idx) || newP1Idx < 0) newP1Idx = 4;
+        if (isNaN(newP2Idx) || newP2Idx < 0) newP2Idx = 0;
+        if (newP1Idx === newP2Idx) {
+            newP2Idx = (newP1Idx + 1) % COLOR_PALETTE.length;
+            p2ColorSelect.value = newP2Idx;
+            updateColorPreviews();
+        }
+        return { p1name, p2name, rounds, bankIdx, newP1Idx, newP2Idx };
     }
 
     function applySettings() {
@@ -634,12 +891,29 @@
         PLAYER1 = s.p1name;
         PLAYER2 = s.p2name;
         TOTAL_ROUNDS = s.rounds;
-        SELECTED_BANK = s.bank;
+        SELECTED_BANK_INDEX = s.bankIdx;
+        p1ColorIdx = s.newP1Idx;
+        p2ColorIdx = s.newP2Idx;
+        saveSettingsToStorage({ PLAYER1, PLAYER2, TOTAL_ROUNDS, SELECTED_BANK_INDEX, p1ColorIdx, p2ColorIdx });
+        saveBanksToStorage(questionBanks);
         settingsPanel.classList.remove('open');
         fullReset();
     }
 
-    // ──────────────────────── EVENT HANDLERS ────────────────────────
+    function loadSavedSettings() {
+        const saved = loadSettingsFromStorage();
+        if (saved) {
+            if (saved.PLAYER1) { PLAYER1 = saved.PLAYER1; p1NameInput.value = PLAYER1; }
+            if (saved.PLAYER2) { PLAYER2 = saved.PLAYER2; p2NameInput.value = PLAYER2; }
+            if (saved.TOTAL_ROUNDS) { TOTAL_ROUNDS = saved.TOTAL_ROUNDS; roundsInput.value = TOTAL_ROUNDS; }
+            if (typeof saved.SELECTED_BANK_INDEX === 'number' && saved.SELECTED_BANK_INDEX < questionBanks.length) {
+                SELECTED_BANK_INDEX = saved.SELECTED_BANK_INDEX;
+            }
+            if (typeof saved.p1ColorIdx === 'number') p1ColorIdx = saved.p1ColorIdx;
+            if (typeof saved.p2ColorIdx === 'number') p2ColorIdx = saved.p2ColorIdx;
+        }
+    }
+
     p1OptionsGrid.addEventListener('pointerdown', e => {
         const btn = e.target.closest('.option-btn');
         if (!btn || btn.disabled || !roundActive || !gameActive || player1.locked) return;
@@ -649,7 +923,6 @@
         p1Check.disabled = false;
         highlightSelected(p1OptionsGrid, player1.answer);
     });
-
     p2OptionsGrid.addEventListener('pointerdown', e => {
         const btn = e.target.closest('.option-btn');
         if (!btn || btn.disabled || !roundActive || !gameActive || player2.locked) return;
@@ -659,19 +932,20 @@
         p2Check.disabled = false;
         highlightSelected(p2OptionsGrid, player2.answer);
     });
-
     p1Undo.addEventListener('click', () => playerUndo('p1'));
     p2Undo.addEventListener('click', () => playerUndo('p2'));
     p1Check.addEventListener('click', () => playerCheck('p1'));
     p2Check.addEventListener('click', () => playerCheck('p2'));
-
     settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
     applySettingsBtn.addEventListener('click', applySettings);
     playAgainBtn.addEventListener('click', applySettings);
+    importBtn.addEventListener('click', importQuestions);
+    createBtn.addEventListener('click', openCreator);
+    resetBanksBtn.addEventListener('click', resetBanksToDefault);
 
-    // ──────────────────────── INIT ────────────────────────
+    loadSavedSettings();
     buildBankRadios();
-    updateNames();
+    populateColorDropdowns();
     fullReset();
 })();
 </script>

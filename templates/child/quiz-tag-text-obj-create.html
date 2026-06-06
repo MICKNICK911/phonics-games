@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Question Bank Creator</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg:#0b1120; --surface:#111b2e; --text:#f1f5f9; --text-dim:#94a3b8;
+            --border:#1e293b; --blue:#3b82f6; --green:#22c55e; --red:#ef4444;
+            --yellow:#f59e0b; --radius:12px;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100dvh; display: flex; align-items: flex-start; justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .container {
+            width: 100%; max-width: 900px;
+            background: var(--surface); border: 2px solid var(--border);
+            border-radius: 1.5rem; padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-size: 1.8rem; text-align: center; margin-bottom: 1.2rem;
+            background: linear-gradient(135deg, var(--blue), #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .banks-tabs {
+            display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;
+            justify-content: center;
+        }
+        .bank-tab {
+            background: #1e293b; border: 2px solid #334155; color: #cbd5e1;
+            padding: 0.4rem 1rem; border-radius: 2rem; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: 0.2s;
+        }
+        .bank-tab.active {
+            background: var(--blue); border-color: var(--blue); color: white;
+        }
+        .bank-tab:hover:not(.active) { border-color: #6366f1; }
+        .toolbar {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-bottom: 1rem;
+            align-items: center;
+        }
+        .toolbar button, .toolbar .button-label {
+            background: #1e293b; border: 2px solid #334155; color: white;
+            padding: 0.5rem 1.2rem; border-radius: 2rem; font-weight: 600; font-size: 0.9rem;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 0.4rem;
+        }
+        .toolbar button:hover, .toolbar .button-label:hover { background: #2d3a52; border-color: #6366f1; }
+        .toolbar button.primary { background: var(--blue); border-color: var(--blue); }
+        .toolbar button.primary:hover { background: #2563eb; }
+        .toolbar button.danger { background: var(--red); border-color: var(--red); }
+        .toolbar button.danger:hover { background: #dc2626; }
+        #importFile { display: none; }
+        .bank-info {
+            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .bank-info label { font-weight: 600; color: var(--text-dim); font-size: 0.9rem; }
+        .bank-info input {
+            background: #0f172a; border: 2px solid #334155; border-radius: 2rem;
+            padding: 0.3rem 0.8rem; color: white; font-weight: 600; font-size: 0.9rem;
+            width: 180px; text-align: center;
+        }
+        .save-indicator {
+            text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem;
+            transition: color 0.2s;
+        }
+        .save-indicator.saved { color: var(--green); }
+        .questions-container {
+            display: flex; flex-direction: column; gap: 0.8rem; max-height: 60vh; overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        .question-card {
+            background: #0f172a; border: 2px solid #334155; border-radius: var(--radius);
+            padding: 1rem; transition: 0.2s;
+        }
+        .question-card.editing {
+            border-color: var(--blue);
+            box-shadow: 0 0 15px rgba(59,130,246,0.3);
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;
+        }
+        .question-number {
+            font-weight: 700; color: var(--text-dim); font-size: 0.8rem; min-width: 30px;
+        }
+        .question-text {
+            font-weight: 700; font-size: 1rem; flex:1; word-break: break-word;
+        }
+        .card-actions {
+            display: flex; gap: 0.4rem;
+        }
+        .card-actions button {
+            background: none; border: 1px solid #334155; color: #cbd5e1;
+            border-radius: 0.5rem; padding: 0.3rem 0.6rem; cursor: pointer;
+            font-size: 0.8rem; transition: 0.2s;
+        }
+        .card-actions button:hover { background: #1e293b; }
+        .card-actions button.edit-btn:hover { border-color: var(--blue); color: var(--blue); }
+        .card-actions button.delete-btn:hover { border-color: var(--red); color: var(--red); }
+        .options-list {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0;
+        }
+        .option-tag {
+            background: #1e293b; padding: 0.25rem 0.7rem; border-radius: 1rem;
+            font-size: 0.85rem; border: 1px solid #334155;
+        }
+        .option-tag.correct {
+            background: #14532d; border-color: var(--green); color: #bbf7d0; font-weight: 600;
+        }
+        .edit-form {
+            display: flex; flex-direction: column; gap: 0.6rem;
+        }
+        .edit-form label {
+            font-weight: 600; font-size: 0.8rem; color: var(--text-dim); margin-bottom: -0.4rem;
+        }
+        .edit-form input[type="text"],
+        .edit-form select {
+            background: #0f172a; border: 2px solid #334155; border-radius: 0.5rem;
+            padding: 0.5rem 0.7rem; color: white; font-weight: 500; font-size: 0.9rem;
+        }
+        .edit-form select { cursor: pointer; }
+        .options-editor {
+            display: flex; flex-direction: column; gap: 0.3rem;
+        }
+        .option-row {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .option-row input {
+            flex: 1; background: #0f172a; border: 2px solid #334155; border-radius: 0.5rem;
+            padding: 0.4rem 0.6rem; color: white; font-weight: 500; font-size: 0.85rem;
+        }
+        .option-row button {
+            background: none; border: 1px solid #334155; color: var(--red);
+            border-radius: 0.5rem; padding: 0.2rem 0.5rem; cursor: pointer;
+            font-size: 1rem; font-weight: bold; transition: 0.2s;
+        }
+        .option-row button:hover { background: #3b0a0a; }
+        .add-option-btn {
+            background: none; border: 1px dashed #334155; color: var(--green);
+            padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.8rem;
+            cursor: pointer; transition: 0.2s; align-self: flex-start;
+        }
+        .add-option-btn:hover { background: #0f291a; border-color: var(--green); }
+        .form-actions {
+            display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;
+        }
+        .form-actions button {
+            padding: 0.4rem 1rem; border-radius: 2rem; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: 0.2s; border: none;
+        }
+        .save-btn { background: var(--green); color: white; }
+        .save-btn:hover { background: #15803d; }
+        .cancel-btn { background: #475569; color: white; }
+        .cancel-btn:hover { background: #334155; }
+        .empty-state {
+            text-align: center; color: var(--text-dim); padding: 2rem;
+            font-size: 1rem; border: 2px dashed #334155; border-radius: var(--radius);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📝 Question Bank Creator</h1>
+    <div class="banks-tabs" id="banksTabs"></div>
+    <div class="bank-info">
+        <label>Bank Name:</label>
+        <input type="text" id="bankNameInput" placeholder="Bank Name" maxlength="30">
+    </div>
+    <div class="save-indicator" id="saveIndicator">All changes saved automatically</div>
+    <div class="toolbar">
+        <button id="addBankBtn" class="primary">➕ New Bank</button>
+        <button id="addQuestionBtn">➕ Add Question</button>
+        <button id="importBtn">📂 Import JSON</button>
+        <button id="exportBtn">💾 Export Bank</button>
+        <button id="exportAllBtn">💾 Export All Banks</button>
+        <input type="file" id="importFile" accept=".json">
+    </div>
+    <div class="questions-container" id="questionsContainer"></div>
+</div>
+
+<script>
+(function() {
+    const STORAGE_KEY = 'quiz_tug_of_war_banks';
+
+    const DEFAULT_BANKS = [
+        { name: 'Science', questions: [
+            { question: 'Which is a living thing?', options: ['Fish', 'Stone', 'Pen', 'Table'], answer: 'Fish' },
+            { question: 'What do plants need for photosynthesis?', options: ['Oxygen', 'Carbon dioxide', 'Nitrogen', 'Hydrogen'], answer: 'Carbon dioxide' },
+            { question: 'How many legs does a spider have?', options: ['6', '8', '10', '12'], answer: '8' },
+            { question: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], answer: 'Mars' },
+            { question: 'What is the boiling point of water in Celsius?', options: ['90°', '100°', '110°', '120°'], answer: '100°' },
+            { question: 'Which gas makes up most of the air?', options: ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Argon'], answer: 'Nitrogen' },
+            { question: 'What is the hardest natural substance?', options: ['Gold', 'Iron', 'Diamond', 'Quartz'], answer: 'Diamond' },
+            { question: 'Which animal is a mammal?', options: ['Shark', 'Eagle', 'Whale', 'Crocodile'], answer: 'Whale' },
+            { question: 'What force keeps us on the ground?', options: ['Magnetism', 'Friction', 'Gravity', 'Inertia'], answer: 'Gravity' },
+            { question: 'Which vitamin does the sun give us?', options: ['Vitamin A', 'Vitamin B', 'Vitamin C', 'Vitamin D'], answer: 'Vitamin D' },
+        ]},
+        { name: 'General Knowledge', questions: [
+            { question: 'What is the capital of France?', options: ['London', 'Berlin', 'Paris', 'Madrid'], answer: 'Paris' },
+            { question: 'How many continents are there?', options: ['5', '6', '7', '8'], answer: '7' },
+            { question: 'Which language has the most native speakers?', options: ['English', 'Mandarin', 'Spanish', 'Hindi'], answer: 'Mandarin' },
+            { question: 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 'Pacific' },
+            { question: 'Which country is known as the Land of the Rising Sun?', options: ['China', 'Japan', 'South Korea', 'Thailand'], answer: 'Japan' },
+            { question: 'What is the currency of the United Kingdom?', options: ['Euro', 'Dollar', 'Pound', 'Yen'], answer: 'Pound' },
+            { question: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Picasso', 'Da Vinci', 'Rembrandt'], answer: 'Da Vinci' },
+            { question: 'What is the longest river in the world?', options: ['Amazon', 'Nile', 'Mississippi', 'Yangtze'], answer: 'Nile' },
+            { question: 'What year did the Titanic sink?', options: ['1910', '1912', '1914', '1916'], answer: '1912' },
+            { question: 'What is the chemical symbol for gold?', options: ['Ag', 'Au', 'Pb', 'Fe'], answer: 'Au' },
+        ]}
+    ];
+
+    function loadBanks() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+        } catch (e) {}
+        return JSON.parse(JSON.stringify(DEFAULT_BANKS));
+    }
+
+    let banks = loadBanks();
+    let activeBankIndex = 0;
+    let editingIndex = -1;
+
+    const banksTabs = document.getElementById('banksTabs');
+    const bankNameInput = document.getElementById('bankNameInput');
+    const questionsContainer = document.getElementById('questionsContainer');
+    const importFile = document.getElementById('importFile');
+    const saveIndicator = document.getElementById('saveIndicator');
+
+    function escapeHtml(text) {
+        return String(text).replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m]);
+    }
+
+    function getActiveBank() {
+        return banks[activeBankIndex] || banks[0];
+    }
+
+    function flashSaveIndicator() {
+        saveIndicator.textContent = '✅ Saved!';
+        saveIndicator.classList.add('saved');
+        setTimeout(() => {
+            saveIndicator.textContent = 'All changes saved automatically';
+            saveIndicator.classList.remove('saved');
+        }, 1200);
+    }
+
+    function saveBanks() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(banks));
+            flashSaveIndicator();
+        } catch (e) {
+            alert('Could not save to browser storage. Storage may be full.');
+        }
+    }
+
+    function renderTabs() {
+        banksTabs.innerHTML = '';
+        banks.forEach((bank, idx) => {
+            const tab = document.createElement('button');
+            tab.className = `bank-tab ${idx === activeBankIndex ? 'active' : ''}`;
+            tab.textContent = bank.name || 'Untitled';
+            tab.addEventListener('click', () => {
+                activeBankIndex = idx;
+                editingIndex = -1;
+                renderAll();
+            });
+            banksTabs.appendChild(tab);
+        });
+    }
+
+    function renderBankInfo() {
+        bankNameInput.value = getActiveBank().name || '';
+    }
+
+    function renderQuestions() {
+        const bank = getActiveBank();
+        questionsContainer.innerHTML = '';
+        if (!bank.questions || bank.questions.length === 0) {
+            questionsContainer.innerHTML = '<div class="empty-state">No questions in this bank. Click "+ Add Question" to create one.</div>';
+            return;
+        }
+        bank.questions.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = `question-card ${editingIndex === idx ? 'editing' : ''}`;
+            card.innerHTML = editingIndex === idx ? renderEditForm(idx, q) : renderReadView(idx, q);
+            questionsContainer.appendChild(card);
+        });
+    }
+
+    function renderReadView(idx, q) {
+        const optionsHtml = q.options.map(opt =>
+            `<span class="option-tag ${opt === q.answer ? 'correct' : ''}">${escapeHtml(opt)}${opt === q.answer ? ' ✓' : ''}</span>`
+        ).join('');
+        return `
+            <div class="card-header">
+                <span class="question-number">#${idx + 1}</span>
+                <div class="question-text">${escapeHtml(q.question)}</div>
+                <div class="card-actions">
+                    <button class="edit-btn" data-action="edit" data-index="${idx}">✏️ Edit</button>
+                    <button class="delete-btn" data-action="delete" data-index="${idx}">🗑️</button>
+                </div>
+            </div>
+            <div class="options-list">${optionsHtml}</div>
+        `;
+    }
+
+    function renderEditForm(idx, q) {
+        const optionsRows = q.options.map((opt, optIdx) => `
+            <div class="option-row">
+                <input type="text" class="edit-option-input" data-option-index="${optIdx}" value="${escapeHtml(opt)}" placeholder="Option ${optIdx + 1}">
+                <button data-action="remove-option" data-option-index="${optIdx}" data-index="${idx}" title="Remove option">×</button>
+            </div>
+        `).join('');
+
+        const answerOptions = q.options.map((opt, optIdx) =>
+            `<option value="${optIdx}" ${opt === q.answer ? 'selected' : ''}>${escapeHtml(opt)}</option>`
+        ).join('');
+
+        return `
+            <div class="edit-form">
+                <label for="editQuestion-${idx}">Question:</label>
+                <input type="text" id="editQuestion-${idx}" value="${escapeHtml(q.question)}" placeholder="Enter question text">
+                <label>Options:</label>
+                <div class="options-editor" id="optionsEditor-${idx}">
+                    ${optionsRows}
+                    <button class="add-option-btn" data-action="add-option" data-index="${idx}">+ Add option</button>
+                </div>
+                <label for="editAnswer-${idx}">Correct Answer:</label>
+                <select id="editAnswer-${idx}">${answerOptions}</select>
+                <div class="form-actions">
+                    <button class="save-btn" data-action="save" data-index="${idx}">✅ Save</button>
+                    <button class="cancel-btn" data-action="cancel">Cancel</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderAll() {
+        renderTabs();
+        renderBankInfo();
+        renderQuestions();
+    }
+
+    function addBank() {
+        const name = prompt('Enter new bank name:', 'New Bank');
+        if (!name || !name.trim()) return;
+        const trimmed = name.trim();
+        if (banks.some(b => b.name === trimmed)) {
+            alert('A bank with this name already exists.');
+            return;
+        }
+        banks.push({ name: trimmed, questions: [] });
+        activeBankIndex = banks.length - 1;
+        editingIndex = -1;
+        saveBanks();
+        renderAll();
+    }
+
+    function renameBank() {
+        const newName = bankNameInput.value.trim();
+        if (!newName) {
+            alert('Bank name cannot be empty.');
+            bankNameInput.value = getActiveBank().name;
+            return;
+        }
+        const duplicate = banks.find((b, i) => b.name === newName && i !== activeBankIndex);
+        if (duplicate) {
+            alert('Another bank already has this name.');
+            bankNameInput.value = getActiveBank().name;
+            return;
+        }
+        getActiveBank().name = newName;
+        saveBanks();
+        renderTabs();
+    }
+
+    function deleteBank() {
+        if (banks.length <= 1) {
+            alert('Cannot delete the last bank.');
+            return;
+        }
+        if (!confirm(`Delete bank "${getActiveBank().name}" and all its questions?`)) return;
+        banks.splice(activeBankIndex, 1);
+        if (activeBankIndex >= banks.length) activeBankIndex = banks.length - 1;
+        editingIndex = -1;
+        saveBanks();
+        renderAll();
+    }
+
+    function addQuestion() {
+        const bank = getActiveBank();
+        bank.questions.push({ question: 'New question', options: ['Option 1', 'Option 2'], answer: 'Option 1' });
+        editingIndex = bank.questions.length - 1;
+        saveBanks();
+        renderQuestions();
+    }
+
+    function deleteQuestion(idx) {
+        if (!confirm('Delete this question?')) return;
+        const bank = getActiveBank();
+        bank.questions.splice(idx, 1);
+        if (editingIndex === idx) editingIndex = -1;
+        else if (editingIndex > idx) editingIndex--;
+        saveBanks();
+        renderQuestions();
+    }
+
+    function startEdit(idx) {
+        editingIndex = idx;
+        renderQuestions();
+    }
+
+    function cancelEdit() {
+        editingIndex = -1;
+        renderQuestions();
+    }
+
+    function saveQuestion(idx) {
+        const bank = getActiveBank();
+        const questionInput = document.getElementById(`editQuestion-${idx}`);
+        const answerSelect = document.getElementById(`editAnswer-${idx}`);
+        if (!questionInput || !answerSelect) return;
+
+        const optionInputs = document.querySelectorAll(`#optionsEditor-${idx} .edit-option-input`);
+        const options = [];
+        const seen = new Set();
+        optionInputs.forEach(input => {
+            const val = input.value.trim();
+            if (val && !seen.has(val.toLowerCase())) {
+                seen.add(val.toLowerCase());
+                options.push(val);
+            }
+        });
+
+        const questionText = questionInput.value.trim();
+        if (!questionText) { alert('Question text cannot be empty.'); return; }
+        if (options.length < 2) { alert('At least 2 unique options required.'); return; }
+
+        const answerIdx = parseInt(answerSelect.value, 10);
+        if (isNaN(answerIdx) || answerIdx < 0 || answerIdx >= options.length) {
+            alert('Invalid answer selection.'); return;
+        }
+
+        bank.questions[idx] = { question: questionText, options, answer: options[answerIdx] };
+        editingIndex = -1;
+        saveBanks();
+        renderQuestions();
+    }
+
+    function addOption(idx) {
+        const bank = getActiveBank();
+        const q = bank.questions[idx];
+        q.options.push(`Option ${q.options.length + 1}`);
+        saveBanks();
+        renderQuestions(); // re-renders, editingIndex unchanged, so edit form stays open
+    }
+
+    function removeOption(questionIdx, optionIdx) {
+        const bank = getActiveBank();
+        const q = bank.questions[questionIdx];
+        if (q.options.length <= 2) { alert('Minimum 2 options required.'); return; }
+        const removed = q.options[optionIdx];
+        q.options.splice(optionIdx, 1);
+        if (q.answer === removed) q.answer = q.options[0];
+        saveBanks();
+        renderQuestions();
+    }
+
+    function importBank(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                let importedBanks = [];
+                if (Array.isArray(data)) {
+                    if (data.length > 0 && data[0].hasOwnProperty('question') && data[0].hasOwnProperty('options')) {
+                        importedBanks = [{ name: file.name.replace(/\.[^/.]+$/, "") || 'Imported Bank', questions: data }];
+                    } else if (data.length > 0 && data[0].hasOwnProperty('name') && data[0].hasOwnProperty('questions')) {
+                        importedBanks = data;
+                    }
+                }
+                if (importedBanks.length === 0) { alert('Invalid file structure.'); return; }
+                importedBanks.forEach(ib => {
+                    if (!ib.name || !Array.isArray(ib.questions)) throw new Error('Invalid bank structure.');
+                    ib.questions.forEach((q, qi) => {
+                        if (!q.question || !Array.isArray(q.options) || q.options.length < 2) throw new Error(`Bank "${ib.name}", Q${qi+1}: invalid.`);
+                        if (!q.answer || !q.options.includes(q.answer)) throw new Error(`Bank "${ib.name}", Q${qi+1}: answer not in options.`);
+                    });
+                });
+                importedBanks.forEach(ib => {
+                    const existingIdx = banks.findIndex(b => b.name === ib.name);
+                    if (existingIdx >= 0) {
+                        if (confirm(`Bank "${ib.name}" already exists. Replace it?`)) banks[existingIdx] = ib;
+                    } else {
+                        banks.push(ib);
+                    }
+                });
+                activeBankIndex = banks.length - 1;
+                editingIndex = -1;
+                saveBanks();
+                renderAll();
+                alert('Import successful!');
+            } catch (err) {
+                alert('Import failed: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function exportBank() {
+        const bank = getActiveBank();
+        if (!bank.questions.length) { alert('Bank is empty.'); return; }
+        downloadJson(JSON.stringify(bank.questions, null, 2), bank.name);
+    }
+
+    function exportAllBanks() {
+        if (!banks.length) { alert('No banks to export.'); return; }
+        downloadJson(JSON.stringify(banks, null, 2), 'all_question_banks');
+    }
+
+    function downloadJson(json, filename) {
+        const blob = new Blob([json], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${filename.replace(/\s+/g, '_')}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    // Event delegation for all card actions
+    questionsContainer.addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+        const action = target.dataset.action;
+        const idx = parseInt(target.dataset.index, 10);
+        const optIdx = parseInt(target.dataset.optionIndex, 10);
+        switch (action) {
+            case 'edit': startEdit(idx); break;
+            case 'delete': deleteQuestion(idx); break;
+            case 'save': saveQuestion(idx); break;
+            case 'cancel': cancelEdit(); break;
+            case 'remove-option': removeOption(idx, optIdx); break;
+            case 'add-option': addOption(idx); break;  // idx is available now
+        }
+    });
+
+    bankNameInput.addEventListener('change', renameBank);
+    bankNameInput.addEventListener('blur', renameBank);
+
+    document.getElementById('addBankBtn').addEventListener('click', addBank);
+    document.getElementById('addQuestionBtn').addEventListener('click', addQuestion);
+    document.getElementById('importBtn').addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', (e) => {
+        if (e.target.files.length) { importBank(e.target.files[0]); importFile.value = ''; }
+    });
+    document.getElementById('exportBtn').addEventListener('click', exportBank);
+    document.getElementById('exportAllBtn').addEventListener('click', exportAllBanks);
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's' && editingIndex >= 0) {
+            e.preventDefault();
+            saveQuestion(editingIndex);
+        }
+        if (e.key === 'Escape' && editingIndex >= 0) cancelEdit();
+    });
+
+    renderAll();
+})();
+</script>
+</body>
+</html>
