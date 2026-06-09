@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Segmenter - Phoneme Identification Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 25px 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            margin: auto 0;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 6px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.85;
+            font-weight: 300;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 10px 0;
+        }
+
+        /* Info tabs at top */
+        .info-tabs {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(5px);
+            padding: 12px 18px;
+            border-radius: 16px;
+            gap: 8px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .info-tabs > div {
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timer-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 18px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            margin: 2px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 12px;
+        }
+
+        /* Word display */
+        .word-display {
+            font-size: 4.4rem;
+            font-weight: 800;
+            text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+            margin: 10px 0;
+            min-height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            padding: 18px 20px;
+            width: 100%;
+            letter-spacing: 2px;
+        }
+
+        .letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            margin: 4px;
+            border-radius: 14px;
+            background-color: rgba(255, 255, 255, 0.22);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+            min-width: 62px;
+            min-height: 62px;
+            font-size: inherit;
+            border: 2px solid transparent;
+            outline: none;
+        }
+
+        .letter:hover:not(.marked) {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .letter:active:not(.marked) {
+            transform: scale(0.92);
+            transition: transform 0.1s ease;
+        }
+
+        .letter.selected {
+            background-color: #4CAF50 !important;
+            transform: scale(1.08);
+            box-shadow: 0 0 22px rgba(76, 175, 80, 0.7);
+            border-color: #81C784;
+            animation: pulse-selected 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-selected {
+            0%, 100% { box-shadow: 0 0 22px rgba(76, 175, 80, 0.7); }
+            50% { box-shadow: 0 0 35px rgba(76, 175, 80, 0.9); }
+        }
+
+        .letter.marked {
+            cursor: default;
+            pointer-events: none;
+            border-color: rgba(255, 255, 255, 0.65);
+            animation: mark-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes mark-pop {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.2); }
+            100% { transform: scale(1.04); }
+        }
+
+        /* 12 sound colours */
+        .letter.sound-0  { background-color: #FF5252 !important; box-shadow: 0 0 16px rgba(255,82,82,0.55); }
+        .letter.sound-1  { background-color: #FF9800 !important; box-shadow: 0 0 16px rgba(255,152,0,0.55); }
+        .letter.sound-2  { background-color: #FFEB3B !important; color: #333; box-shadow: 0 0 16px rgba(255,235,59,0.55); }
+        .letter.sound-3  { background-color: #4CAF50 !important; box-shadow: 0 0 16px rgba(76,175,80,0.55); }
+        .letter.sound-4  { background-color: #2196F3 !important; box-shadow: 0 0 16px rgba(33,150,243,0.55); }
+        .letter.sound-5  { background-color: #9C27B0 !important; box-shadow: 0 0 16px rgba(156,39,176,0.55); }
+        .letter.sound-6  { background-color: #00BCD4 !important; box-shadow: 0 0 16px rgba(0,188,212,0.55); }
+        .letter.sound-7  { background-color: #E91E63 !important; box-shadow: 0 0 16px rgba(233,30,99,0.55); }
+        .letter.sound-8  { background-color: #8BC34A !important; box-shadow: 0 0 16px rgba(139,195,74,0.55); }
+        .letter.sound-9  { background-color: #FFC107 !important; box-shadow: 0 0 16px rgba(255,193,7,0.55); }
+        .letter.sound-10 { background-color: #795548 !important; box-shadow: 0 0 16px rgba(121,85,72,0.55); }
+        .letter.sound-11 { background-color: #607D8B !important; box-shadow: 0 0 16px rgba(96,125,139,0.55); }
+
+        .sound-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 8px 0 12px;
+            max-width: 100%;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 8px 0 12px;
+        }
+
+        button {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            outline: none;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        button:active:not(:disabled) { transform: translateY(1px); }
+
+        button:disabled {
+            background: linear-gradient(to right, #a0a0a0, #777);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+
+        #foundBtn { background: linear-gradient(to right, #4CAF50, #2E7D32); }
+        #foundBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #checkBtn { background: linear-gradient(to right, #2196F3, #0D47A1); }
+        #checkBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #resetBtn { background: linear-gradient(to right, #FF7043, #BF360C); }
+        #resetBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #hintBtn { background: linear-gradient(to right, #FFA726, #E65100); }
+        #hintBtn:disabled { background: linear-gradient(to right, #8a8a8a, #666); }
+        #instructionsToggleBtn { background: linear-gradient(to right, #7C4DFF, #311B92); border: 2px solid rgba(255,255,255,0.25); }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1e3a5f, #1a2a4a);
+            padding: 30px 25px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+
+        #wellDoneModal .modal-content { background: linear-gradient(145deg, #1b5e20, #2e7d32); }
+        #tryAgainModal .modal-content { background: linear-gradient(145deg, #b71c1c, #c62828); }
+        #gameOverModal .modal-content { background: linear-gradient(145deg, #1a2a6c, #b21f1f); }
+
+        .modal-icon {
+            font-size: 3.8rem;
+            margin-bottom: 12px;
+            animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bounce-in {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.3); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 { font-size: 2rem; margin-bottom: 12px; }
+        .modal-content p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 15px; }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 18px;
+            border-radius: 15px;
+            min-width: 85px;
+        }
+        .stat-value { font-size: 2.2rem; font-weight: bold; }
+        .stat-label { font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; }
+
+        #instructionsModal .modal-content {
+            text-align: left;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        #instructionsModal h2 { text-align: center; }
+        #instructionsModal ol { padding-left: 22px; }
+        #instructionsModal li { margin-bottom: 10px; line-height: 1.5; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .container { padding: 15px 12px; }
+            h1 { font-size: 2rem; }
+            .word-display { font-size: 2.8rem; min-height: 90px; padding: 12px; gap: 4px; }
+            .letter { padding: 8px 12px; min-width: 48px; min-height: 48px; border-radius: 10px; }
+            .info-tabs { font-size: 0.9rem; padding: 8px 10px; gap: 4px; }
+            .controls { flex-direction: column; align-items: center; }
+            button { width: 100%; max-width: 260px; padding: 10px 20px; }
+            .stats-row { gap: 10px; }
+            .stat-item { padding: 12px 14px; min-width: 75px; }
+            .stat-value { font-size: 1.8rem; }
+            .sound-legend { gap: 4px; }
+            .legend-item { font-size: 0.7rem; padding: 3px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="gameContainer">
+        <h1>🔊 Sound Segmenter</h1>
+        <p class="subtitle">Tap letters to build sounds • press "Found Sound" to confirm</p>
+
+        <div class="game-area">
+            <div class="info-tabs">
+                <div>⭐ <span id="score">0</span></div>
+                <div>📝 <span id="wordCount">0</span>/10</div>
+                <div>❤️ <span id="lives">3</span></div>
+                <div class="timer-box">⏱ <span id="timer">00:00</span></div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+
+            <div class="word-display" id="wordDisplay"></div>
+
+            <div class="sound-legend" id="soundLegend"></div>
+
+            <div class="controls">
+                <button id="foundBtn" disabled>✅ Found Sound</button>
+                <button id="checkBtn">🔍 Check Sounds</button>
+                <button id="resetBtn" disabled>↺ Reset Selection</button>
+                <button id="hintBtn">💡 Show Hint</button>
+                <button id="instructionsToggleBtn">📖 How to Play</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div class="modal-overlay" id="instructionsModal">
+        <div class="modal-content">
+            <h2>📖 How to Play</h2>
+            <ol>
+                <li>Tap adjacent letters that form a <strong>single sound</strong> (e.g., "sh", "ee", "p").</li>
+                <li>Click <strong>"Found Sound"</strong> to lock them – they get a unique colour.</li>
+                <li>Cover <strong>every letter</strong> (except silent letters – they make no sound).</li>
+                <li>Click <strong>"Check Sounds"</strong> to verify your answer.</li>
+                <li>✅ Correct → next word. If you grouped a silent letter, you'll get a gentle reminder.</li>
+                <li>❌ Wrong → you lose one ❤️ and try again.</li>
+                <li>After 3 wrong attempts → game over. Finish all 10 words to win!</li>
+            </ol>
+            <p style="text-align:center;margin-top:12px;opacity:0.8;">Press Esc or tap outside to close</p>
+        </div>
+    </div>
+
+    <!-- Well Done Modal -->
+    <div class="modal-overlay" id="wellDoneModal">
+        <div class="modal-content">
+            <div class="modal-icon">🎉</div>
+            <h2>Well Done!</h2>
+            <p id="wellDoneMessage">Correct segmentation!</p>
+        </div>
+    </div>
+
+    <!-- Try Again Modal -->
+    <div class="modal-overlay" id="tryAgainModal">
+        <div class="modal-content">
+            <div class="modal-icon">😕</div>
+            <h2>Try Again</h2>
+            <p id="tryAgainMessage">That wasn't quite right.</p>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal-overlay" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">Game Over</h2>
+            <p id="gameOverMessage">Better luck next time!</p>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-value" id="finalScore">0</div>
+                    <div class="stat-label">Total Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalTime">00:00</div>
+                    <div class="stat-label">Time Spent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalWords">0/10</div>
+                    <div class="stat-label">Words Done</div>
+                </div>
+            </div>
+            <button id="restartBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --------------------------------------------------------------
+            // WORD LIST – now includes silent letters
+            // silentIndices: array of positions (0‑based) that are not pronounced
+            // sounds: the expected phoneme groups (silent letters are excluded)
+            // --------------------------------------------------------------
+            const wordList = [
+  // ========== Silent e words (a_e, e_e, i_e, o_e, u_e) ==========
+  // a_e (long a)
+  { word: "cake", sounds: ["c", "a", "k"], silentIndices: [3] },
+  { word: "name", sounds: ["n", "a", "m"], silentIndices: [3] },
+  { word: "lane", sounds: ["l", "a", "n"], silentIndices: [3] },
+  { word: "gate", sounds: ["g", "a", "t"], silentIndices: [3] },
+  { word: "pace", sounds: ["p", "a", "c"], silentIndices: [3] },
+  { word: "mate", sounds: ["m", "a", "t"], silentIndices: [3] },
+  { word: "safe", sounds: ["s", "a", "f"], silentIndices: [3] },
+  { word: "tape", sounds: ["t", "a", "p"], silentIndices: [3] },
+  { word: "vase", sounds: ["v", "a", "s"], silentIndices: [3] },
+  { word: "wave", sounds: ["w", "a", "v"], silentIndices: [3] },
+  // e_e (long e)
+  { word: "eve", sounds: ["e", "v"], silentIndices: [2] },
+  { word: "scene", sounds: ["sc", "e", "n"], silentIndices: [4] },
+  { word: "these", sounds: ["th", "e", "s"], silentIndices: [4] },
+  { word: "concrete", sounds: ["c", "o", "n", "cr", "e", "t"], silentIndices: [7] },
+  { word: "complete", sounds: ["c", "o", "m", "pl", "e", "t"], silentIndices: [7] },
+  { word: "delete", sounds: ["d", "e", "l", "e", "t"], silentIndices: [5] },
+  { word: "extreme", sounds: ["e", "x", "tr", "e", "m"], silentIndices: [6] },
+  { word: "supreme", sounds: ["s", "u", "p", "r", "e", "m"], silentIndices: [7] },
+  { word: "athlete", sounds: ["a", "th", "l", "e", "t"], silentIndices: [6] },
+  { word: "scheme", sounds: ["sch", "e", "m"], silentIndices: [4] },
+  // i_e (long i)
+  { word: "kite", sounds: ["k", "i", "t"], silentIndices: [3] },
+  { word: "bike", sounds: ["b", "i", "k"], silentIndices: [3] },
+  { word: "time", sounds: ["t", "i", "m"], silentIndices: [3] },
+  { word: "nine", sounds: ["n", "i", "n"], silentIndices: [3] },
+  { word: "prize", sounds: ["pr", "i", "z"], silentIndices: [4] },
+  { word: "slide", sounds: ["sl", "i", "d"], silentIndices: [4] },
+  { word: "dive", sounds: ["d", "i", "v"], silentIndices: [3] },
+  { word: "ripe", sounds: ["r", "i", "p"], silentIndices: [3] },
+  { word: "wife", sounds: ["w", "i", "f"], silentIndices: [3] },
+  { word: "spine", sounds: ["sp", "i", "n"], silentIndices: [4] },
+  // o_e (long o)
+  { word: "hope", sounds: ["h", "o", "p"], silentIndices: [3] },
+  { word: "bone", sounds: ["b", "o", "n"], silentIndices: [3] },
+  { word: "rope", sounds: ["r", "o", "p"], silentIndices: [3] },
+  { word: "vote", sounds: ["v", "o", "t"], silentIndices: [3] },
+  { word: "joke", sounds: ["j", "o", "k"], silentIndices: [3] },
+  { word: "cone", sounds: ["c", "o", "n"], silentIndices: [3] },
+  { word: "note", sounds: ["n", "o", "t"], silentIndices: [3] },
+  { word: "dose", sounds: ["d", "o", "s"], silentIndices: [3] },
+  { word: "robe", sounds: ["r", "o", "b"], silentIndices: [3] },
+  { word: "choke", sounds: ["ch", "o", "k"], silentIndices: [4] },
+  // u_e (long u /yoo/)
+  { word: "cute", sounds: ["c", "u", "t"], silentIndices: [3] },
+  { word: "cube", sounds: ["c", "u", "b"], silentIndices: [3] },
+  { word: "fuse", sounds: ["f", "u", "s"], silentIndices: [3] },
+  { word: "mule", sounds: ["m", "u", "l"], silentIndices: [3] },
+  { word: "tune", sounds: ["t", "u", "n"], silentIndices: [3] },
+  { word: "huge", sounds: ["h", "u", "g"], silentIndices: [3] },
+  { word: "use", sounds: ["u", "s"], silentIndices: [2] },
+  { word: "fume", sounds: ["f", "u", "m"], silentIndices: [3] },
+  { word: "pure", sounds: ["p", "u", "r"], silentIndices: [3] },
+  // u_e (long u /oo/)
+  { word: "flute", sounds: ["fl", "u", "t"], silentIndices: [4] },
+  { word: "rude", sounds: ["r", "u", "d"], silentIndices: [3] },
+  { word: "rule", sounds: ["r", "u", "l"], silentIndices: [3] },
+  { word: "June", sounds: ["J", "u", "n"], silentIndices: [3] },
+  { word: "brute", sounds: ["br", "u", "t"], silentIndices: [4] },
+  { word: "crude", sounds: ["cr", "u", "d"], silentIndices: [4] },
+  { word: "prune", sounds: ["pr", "u", "n"], silentIndices: [4] },
+  { word: "include", sounds: ["i", "n", "cl", "u", "d"], silentIndices: [7] },
+  { word: "exclude", sounds: ["e", "x", "cl", "u", "d"], silentIndices: [7] },
+  { word: "conclude", sounds: ["c", "o", "n", "cl", "u", "d"], silentIndices: [8] },
+
+  // ========== Words ending in silent e (not a pure VCe pattern, e.g., "age", "engine") ==========
+  { word: "age", sounds: ["a", "g"], silentIndices: [2] },
+  { word: "page", sounds: ["p", "a", "g"], silentIndices: [3] },
+  { word: "stage", sounds: ["st", "a", "g"], silentIndices: [4] },
+  { word: "change", sounds: ["ch", "a", "n", "g"], silentIndices: [5] },
+  { word: "gem", sounds: ["g", "e", "m"], silentIndices: [] }, // no silent e
+  { word: "giant", sounds: ["g", "i", "a", "nt"], silentIndices: [] },
+  { word: "giraffe", sounds: ["g", "i", "r", "a", "ff", "e"], silentIndices: [6] }, // final e silent
+  { word: "magic", sounds: ["m", "a", "g", "i", "c"], silentIndices: [] },
+  { word: "engine", sounds: ["e", "n", "g", "i", "n"], silentIndices: [5] },
+  { word: "garage", sounds: ["g", "a", "r", "a", "g"], silentIndices: [6] },
+  { word: "hinge", sounds: ["h", "i", "n", "g"], silentIndices: [4] },
+  // dge words (the 'e' is part of the trigraph, so no separate silent index)
+  { word: "bridge", sounds: ["br", "i", "dge"], silentIndices: [] },
+  { word: "judge", sounds: ["j", "u", "dge"], silentIndices: [] },
+  { word: "pledge", sounds: ["pl", "e", "dge"], silentIndices: [] },
+  { word: "badge", sounds: ["b", "a", "dge"], silentIndices: [] },
+  { word: "edge", sounds: ["e", "dge"], silentIndices: [] },
+  { word: "fridge", sounds: ["fr", "i", "dge"], silentIndices: [] },
+  { word: "lodge", sounds: ["l", "o", "dge"], silentIndices: [] },
+  { word: "knowledge", sounds: ["kn", "o", "w", "l", "e", "dge"], silentIndices: [0,2] }, // k and w silent, final e part of dge
+
+  // ========== R‑Controlled Vowels ==========
+  { word: "bar", sounds: ["b", "ar"], silentIndices: [] },
+  { word: "dark", sounds: ["d", "ar", "k"], silentIndices: [] },
+  { word: "mark", sounds: ["m", "ar", "k"], silentIndices: [] },
+  { word: "park", sounds: ["p", "ar", "k"], silentIndices: [] },
+  { word: "hard", sounds: ["h", "ar", "d"], silentIndices: [] },
+  { word: "star", sounds: ["st", "ar"], silentIndices: [] },
+  { word: "farm", sounds: ["f", "ar", "m"], silentIndices: [] },
+  { word: "charm", sounds: ["ch", "ar", "m"], silentIndices: [] },
+  { word: "smart", sounds: ["sm", "ar", "t"], silentIndices: [] },
+  { word: "chart", sounds: ["ch", "ar", "t"], silentIndices: [] },
+  { word: "born", sounds: ["b", "or", "n"], silentIndices: [] },
+  { word: "fork", sounds: ["f", "or", "k"], silentIndices: [] },
+  { word: "torn", sounds: ["t", "or", "n"], silentIndices: [] },
+  { word: "cord", sounds: ["c", "or", "d"], silentIndices: [] },
+  { word: "fort", sounds: ["f", "or", "t"], silentIndices: [] },
+  { word: "scorn", sounds: ["sc", "or", "n"], silentIndices: [] },
+  { word: "corn", sounds: ["c", "or", "n"], silentIndices: [] },
+  { word: "storm", sounds: ["st", "or", "m"], silentIndices: [] },
+  { word: "for", sounds: ["f", "or"], silentIndices: [] },
+  { word: "worn", sounds: ["w", "or", "n"], silentIndices: [] },
+  { word: "her", sounds: ["h", "er"], silentIndices: [] },
+  { word: "herd", sounds: ["h", "er", "d"], silentIndices: [] },
+  { word: "term", sounds: ["t", "er", "m"], silentIndices: [] },
+  { word: "verse", sounds: ["v", "er", "s"], silentIndices: [4] }, // final e silent
+  { word: "there", sounds: ["th", "ere"], silentIndices: [] },
+  { word: "perm", sounds: ["p", "er", "m"], silentIndices: [] },
+  { word: "clerk", sounds: ["cl", "er", "k"], silentIndices: [] },
+  { word: "were", sounds: ["w", "ere"], silentIndices: [] },
+  { word: "jerk", sounds: ["j", "er", "k"], silentIndices: [] },
+  { word: "expert", sounds: ["e", "x", "p", "er", "t"], silentIndices: [] },
+  { word: "stir", sounds: ["st", "ir"], silentIndices: [] },
+  { word: "third", sounds: ["th", "ir", "d"], silentIndices: [] },
+  { word: "dirt", sounds: ["d", "ir", "t"], silentIndices: [] },
+  { word: "bird", sounds: ["b", "ir", "d"], silentIndices: [] },
+  { word: "girl", sounds: ["g", "ir", "l"], silentIndices: [] },
+  { word: "first", sounds: ["f", "ir", "st"], silentIndices: [] },
+  { word: "sir", sounds: ["s", "ir"], silentIndices: [] },
+  { word: "firm", sounds: ["f", "ir", "m"], silentIndices: [] },
+  { word: "birth", sounds: ["b", "ir", "th"], silentIndices: [] },
+  { word: "shirt", sounds: ["sh", "ir", "t"], silentIndices: [] },
+  { word: "hurt", sounds: ["h", "ur", "t"], silentIndices: [] },
+  { word: "burn", sounds: ["b", "ur", "n"], silentIndices: [] },
+  { word: "turn", sounds: ["t", "ur", "n"], silentIndices: [] },
+  { word: "curb", sounds: ["c", "ur", "b"], silentIndices: [] },
+  { word: "curve", sounds: ["c", "ur", "v"], silentIndices: [4] },
+  { word: "burst", sounds: ["b", "ur", "st"], silentIndices: [] },
+  { word: "curl", sounds: ["c", "ur", "l"], silentIndices: [] },
+  { word: "surf", sounds: ["s", "ur", "f"], silentIndices: [] },
+  { word: "lurk", sounds: ["l", "ur", "k"], silentIndices: [] },
+  { word: "churn", sounds: ["ch", "ur", "n"], silentIndices: [] },
+  // ar(or) like war
+  { word: "war", sounds: ["w", "ar"], silentIndices: [] },
+  { word: "warm", sounds: ["w", "ar", "m"], silentIndices: [] },
+  { word: "ward", sounds: ["w", "ar", "d"], silentIndices: [] },
+  { word: "award", sounds: ["a", "w", "ar", "d"], silentIndices: [] },
+  { word: "reward", sounds: ["r", "e", "w", "ar", "d"], silentIndices: [] },
+  { word: "toward", sounds: ["t", "o", "w", "ar", "d"], silentIndices: [] },
+  { word: "forward", sounds: ["f", "or", "w", "ar", "d"], silentIndices: [] },
+  { word: "dwarf", sounds: ["dw", "ar", "f"], silentIndices: [] },
+  { word: "warn", sounds: ["w", "ar", "n"], silentIndices: [] },
+  { word: "warp", sounds: ["w", "ar", "p"], silentIndices: [] },
+  // or(er) like worm
+  { word: "worm", sounds: ["w", "or", "m"], silentIndices: [] },
+  { word: "word", sounds: ["w", "or", "d"], silentIndices: [] },
+  { word: "work", sounds: ["w", "or", "k"], silentIndices: [] },
+  { word: "world", sounds: ["w", "or", "ld"], silentIndices: [] },
+  { word: "worse", sounds: ["w", "or", "s"], silentIndices: [4] },
+  { word: "worst", sounds: ["w", "or", "st"], silentIndices: [] },
+  { word: "worth", sounds: ["w", "or", "th"], silentIndices: [] },
+  { word: "worship", sounds: ["w", "or", "sh", "i", "p"], silentIndices: [] },
+  { word: "worsen", sounds: ["w", "or", "s", "e", "n"], silentIndices: [] },
+  { word: "works", sounds: ["w", "or", "ks"], silentIndices: [] },
+  // -or and -er suffixes
+  { word: "actor", sounds: ["a", "c", "t", "or"], silentIndices: [] },
+  { word: "doctor", sounds: ["d", "o", "c", "t", "or"], silentIndices: [] },
+  { word: "visitor", sounds: ["v", "i", "s", "i", "t", "or"], silentIndices: [] },
+  { word: "sector", sounds: ["s", "e", "c", "t", "or"], silentIndices: [] },
+  { word: "vector", sounds: ["v", "e", "c", "t", "or"], silentIndices: [] },
+  { word: "creator", sounds: ["c", "r", "e", "a", "t", "or"], silentIndices: [] },
+  { word: "tailor", sounds: ["t", "ai", "l", "or"], silentIndices: [] },
+  { word: "vendor", sounds: ["v", "e", "n", "d", "or"], silentIndices: [] },
+  { word: "educator", sounds: ["e", "d", "u", "c", "a", "t", "or"], silentIndices: [] },
+  { word: "orator", sounds: ["or", "a", "t", "or"], silentIndices: [] },
+  { word: "camper", sounds: ["c", "a", "m", "p", "er"], silentIndices: [] },
+  { word: "bigger", sounds: ["b", "i", "gg", "er"], silentIndices: [] },
+  { word: "better", sounds: ["b", "e", "tt", "er"], silentIndices: [] },
+  { word: "water", sounds: ["w", "a", "t", "er"], silentIndices: [] },
+  { word: "helper", sounds: ["h", "e", "l", "p", "er"], silentIndices: [] },
+  { word: "never", sounds: ["n", "e", "v", "er"], silentIndices: [] },
+  { word: "summer", sounds: ["s", "u", "mm", "er"], silentIndices: [] },
+  { word: "fever", sounds: ["f", "e", "v", "er"], silentIndices: [] },
+  { word: "smaller", sounds: ["sm", "a", "ll", "er"], silentIndices: [] },
+  { word: "lower", sounds: ["l", "ow", "er"], silentIndices: [] },
+
+  // ========== Phonograms with Short Vowels ==========
+  { word: "ball", sounds: ["b", "all"], silentIndices: [] },
+  { word: "tall", sounds: ["t", "all"], silentIndices: [] },
+  { word: "wall", sounds: ["w", "all"], silentIndices: [] },
+  { word: "call", sounds: ["c", "all"], silentIndices: [] },
+  { word: "hall", sounds: ["h", "all"], silentIndices: [] },
+  { word: "mall", sounds: ["m", "all"], silentIndices: [] },
+  { word: "fall", sounds: ["f", "all"], silentIndices: [] },
+  { word: "install", sounds: ["i", "n", "st", "all"], silentIndices: [] },
+  { word: "pall", sounds: ["p", "all"], silentIndices: [] },
+  { word: "small", sounds: ["sm", "all"], silentIndices: [] },
+  { word: "walk", sounds: ["w", "al", "k"], silentIndices: [] },
+  { word: "chalk", sounds: ["ch", "al", "k"], silentIndices: [] },
+  { word: "malt", sounds: ["m", "al", "t"], silentIndices: [] },
+  { word: "halt", sounds: ["h", "al", "t"], silentIndices: [] },
+  { word: "false", sounds: ["f", "al", "s"], silentIndices: [4] },
+  { word: "bald", sounds: ["b", "al", "d"], silentIndices: [] },
+  { word: "already", sounds: ["al", "r", "e", "a", "d", "y"], silentIndices: [] },
+  { word: "also", sounds: ["al", "s", "o"], silentIndices: [] },
+  { word: "talk", sounds: ["t", "al", "k"], silentIndices: [] },
+  { word: "wait", sounds: ["w", "ai", "t"], silentIndices: [] },
+
+  // ========== Vowel Digraphs (ai, ay) ==========
+  { word: "bail", sounds: ["b", "ai", "l"], silentIndices: [] },
+  { word: "wail", sounds: ["w", "ai", "l"], silentIndices: [] },
+  { word: "jail", sounds: ["j", "ai", "l"], silentIndices: [] },
+  { word: "mail", sounds: ["m", "ai", "l"], silentIndices: [] },
+  { word: "gain", sounds: ["g", "ai", "n"], silentIndices: [] },
+  { word: "wait", sounds: ["w", "ai", "t"], silentIndices: [] },
+  { word: "brain", sounds: ["br", "ai", "n"], silentIndices: [] },
+  { word: "grain", sounds: ["gr", "ai", "n"], silentIndices: [] },
+  { word: "train", sounds: ["tr", "ai", "n"], silentIndices: [] },
+  { word: "strain", sounds: ["str", "ai", "n"], silentIndices: [] },
+  { word: "lay", sounds: ["l", "ay"], silentIndices: [] },
+  { word: "pay", sounds: ["p", "ay"], silentIndices: [] },
+  { word: "ray", sounds: ["r", "ay"], silentIndices: [] },
+  { word: "stay", sounds: ["st", "ay"], silentIndices: [] },
+  { word: "stray", sounds: ["str", "ay"], silentIndices: [] },
+  { word: "way", sounds: ["w", "ay"], silentIndices: [] },
+  { word: "may", sounds: ["m", "ay"], silentIndices: [] },
+  { word: "day", sounds: ["d", "ay"], silentIndices: [] },
+  { word: "say", sounds: ["s", "ay"], silentIndices: [] },
+  { word: "play", sounds: ["pl", "ay"], silentIndices: [] },
+
+  // ========== ee, ey ==========
+  { word: "see", sounds: ["s", "ee"], silentIndices: [] },
+  { word: "fee", sounds: ["f", "ee"], silentIndices: [] },
+  { word: "tree", sounds: ["tr", "ee"], silentIndices: [] },
+  { word: "sleep", sounds: ["sl", "ee", "p"], silentIndices: [] },
+  { word: "week", sounds: ["w", "ee", "k"], silentIndices: [] },
+  { word: "sweet", sounds: ["sw", "ee", "t"], silentIndices: [] },
+  { word: "free", sounds: ["fr", "ee"], silentIndices: [] },
+  { word: "weed", sounds: ["w", "ee", "d"], silentIndices: [] },
+  { word: "sheep", sounds: ["sh", "ee", "p"], silentIndices: [] },
+  { word: "green", sounds: ["gr", "ee", "n"], silentIndices: [] },
+  { word: "key", sounds: ["k", "ey"], silentIndices: [] },
+  { word: "money", sounds: ["m", "o", "n", "ey"], silentIndices: [] },
+  { word: "honey", sounds: ["h", "o", "n", "ey"], silentIndices: [] },
+  { word: "attorney", sounds: ["a", "tt", "or", "n", "ey"], silentIndices: [] },
+  { word: "hockey", sounds: ["h", "o", "ck", "ey"], silentIndices: [] },
+  { word: "volley", sounds: ["v", "o", "ll", "ey"], silentIndices: [] },
+  { word: "valley", sounds: ["v", "a", "ll", "ey"], silentIndices: [] },
+  { word: "monkey", sounds: ["m", "o", "nk", "ey"], silentIndices: [] },
+  { word: "donkey", sounds: ["d", "o", "nk", "ey"], silentIndices: [] },
+  { word: "turkey", sounds: ["t", "ur", "k", "ey"], silentIndices: [] },
+
+  // ========== ea (long e, short e, long a) ==========
+  { word: "beat", sounds: ["b", "ea", "t"], silentIndices: [] },
+  { word: "meat", sounds: ["m", "ea", "t"], silentIndices: [] },
+  { word: "seat", sounds: ["s", "ea", "t"], silentIndices: [] },
+  { word: "speak", sounds: ["sp", "ea", "k"], silentIndices: [] },
+  { word: "team", sounds: ["t", "ea", "m"], silentIndices: [] },
+  { word: "read", sounds: ["r", "ea", "d"], silentIndices: [] },
+  { word: "steal", sounds: ["st", "ea", "l"], silentIndices: [] },
+  { word: "cheap", sounds: ["ch", "ea", "p"], silentIndices: [] },
+  { word: "bean", sounds: ["b", "ea", "n"], silentIndices: [] },
+  { word: "heat", sounds: ["h", "ea", "t"], silentIndices: [] },
+  { word: "threat", sounds: ["th", "ea", "t"], silentIndices: [] },
+  { word: "real", sounds: ["r", "ea", "l"], silentIndices: [] },
+  { word: "tread", sounds: ["tr", "ea", "d"], silentIndices: [] },
+  { word: "bread", sounds: ["br", "ea", "d"], silentIndices: [] },
+  { word: "dead", sounds: ["d", "ea", "d"], silentIndices: [] },
+  { word: "death", sounds: ["d", "ea", "th"], silentIndices: [] },
+  { word: "health", sounds: ["h", "ea", "l", "th"], silentIndices: [] },
+  { word: "sweat", sounds: ["sw", "ea", "t"], silentIndices: [] },
+  { word: "swear", sounds: ["sw", "ea", "r"], silentIndices: [] },
+  { word: "create", sounds: ["c", "r", "ea", "t"], silentIndices: [5] },
+  { word: "break", sounds: ["br", "ea", "k"], silentIndices: [] },
+  { word: "great", sounds: ["gr", "ea", "t"], silentIndices: [] },
+  { word: "steak", sounds: ["st", "ea", "k"], silentIndices: [] },
+  { word: "yea", sounds: ["y", "ea"], silentIndices: [] },
+  { word: "breakup", sounds: ["br", "ea", "k", "u", "p"], silentIndices: [] },
+  { word: "breakdown", sounds: ["br", "ea", "k", "d", "ow", "n"], silentIndices: [] },
+  { word: "outbreak", sounds: ["ou", "t", "br", "ea", "k"], silentIndices: [] },
+
+  // ========== ie (long e, long i) ==========
+  { word: "priest", sounds: ["pr", "ie", "st"], silentIndices: [] },
+  { word: "field", sounds: ["f", "ie", "ld"], silentIndices: [] },
+  { word: "brief", sounds: ["br", "ie", "f"], silentIndices: [] },
+  { word: "grief", sounds: ["gr", "ie", "f"], silentIndices: [] },
+  { word: "thief", sounds: ["th", "ie", "f"], silentIndices: [] },
+  { word: "yield", sounds: ["y", "ie", "ld"], silentIndices: [] },
+  { word: "relief", sounds: ["r", "e", "l", "ie", "f"], silentIndices: [] },
+  { word: "belief", sounds: ["b", "e", "l", "ie", "f"], silentIndices: [] },
+  { word: "retrieve", sounds: ["r", "e", "tr", "ie", "v"], silentIndices: [7] },
+  { word: "chief", sounds: ["ch", "ie", "f"], silentIndices: [] },
+  { word: "lie", sounds: ["l", "ie"], silentIndices: [] },
+  { word: "tie", sounds: ["t", "ie"], silentIndices: [] },
+  { word: "die", sounds: ["d", "ie"], silentIndices: [] },
+  { word: "pie", sounds: ["p", "ie"], silentIndices: [] },
+  { word: "flies", sounds: ["fl", "ie", "s"], silentIndices: [] },
+  { word: "tried", sounds: ["tr", "ie", "d"], silentIndices: [] },
+  { word: "spies", sounds: ["sp", "ie", "s"], silentIndices: [] },
+  { word: "cried", sounds: ["cr", "ie", "d"], silentIndices: [] },
+  { word: "dried", sounds: ["dr", "ie", "d"], silentIndices: [] },
+  { word: "fried", sounds: ["fr", "ie", "d"], silentIndices: [] },
+
+  // ========== aw, au ==========
+  { word: "law", sounds: ["l", "aw"], silentIndices: [] },
+  { word: "saw", sounds: ["s", "aw"], silentIndices: [] },
+  { word: "crawl", sounds: ["cr", "aw", "l"], silentIndices: [] },
+  { word: "hawk", sounds: ["h", "aw", "k"], silentIndices: [] },
+  { word: "paw", sounds: ["p", "aw"], silentIndices: [] },
+  { word: "draw", sounds: ["dr", "aw"], silentIndices: [] },
+  { word: "claw", sounds: ["cl", "aw"], silentIndices: [] },
+  { word: "yawn", sounds: ["y", "aw", "n"], silentIndices: [] },
+  { word: "dawn", sounds: ["d", "aw", "n"], silentIndices: [] },
+  { word: "pawpaw", sounds: ["p", "aw", "p", "aw"], silentIndices: [] },
+  { word: "pause", sounds: ["p", "au", "s"], silentIndices: [4] },
+  { word: "cause", sounds: ["c", "au", "s"], silentIndices: [4] },
+  { word: "fault", sounds: ["f", "au", "lt"], silentIndices: [] },
+  { word: "haul", sounds: ["h", "au", "l"], silentIndices: [] },
+  { word: "sauce", sounds: ["s", "au", "c"], silentIndices: [4] },
+  { word: "autumn", sounds: ["au", "t", "u", "m", "n"], silentIndices: [] },
+  { word: "vault", sounds: ["v", "au", "lt"], silentIndices: [] },
+  { word: "launch", sounds: ["l", "au", "nch"], silentIndices: [] },
+  { word: "Paul", sounds: ["P", "au", "l"], silentIndices: [] },
+  { word: "fraud", sounds: ["fr", "au", "d"], silentIndices: [] },
+
+  // ========== oa, oe ==========
+  { word: "boat", sounds: ["b", "oa", "t"], silentIndices: [] },
+  { word: "coat", sounds: ["c", "oa", "t"], silentIndices: [] },
+  { word: "soak", sounds: ["s", "oa", "k"], silentIndices: [] },
+  { word: "toad", sounds: ["t", "oa", "d"], silentIndices: [] },
+  { word: "loaf", sounds: ["l", "oa", "f"], silentIndices: [] },
+  { word: "road", sounds: ["r", "oa", "d"], silentIndices: [] },
+  { word: "toast", sounds: ["t", "oa", "st"], silentIndices: [] },
+  { word: "coast", sounds: ["c", "oa", "st"], silentIndices: [] },
+  { word: "roast", sounds: ["r", "oa", "st"], silentIndices: [] },
+  { word: "throat", sounds: ["thr", "oa", "t"], silentIndices: [] },
+  { word: "foe", sounds: ["f", "oe"], silentIndices: [] },
+  { word: "toe", sounds: ["t", "oe"], silentIndices: [] },
+  { word: "doe", sounds: ["d", "oe"], silentIndices: [] },
+  { word: "hoe", sounds: ["h", "oe"], silentIndices: [] },
+  { word: "woe", sounds: ["w", "oe"], silentIndices: [] },
+  { word: "Joe", sounds: ["J", "oe"], silentIndices: [] },
+  { word: "goes", sounds: ["g", "oe", "s"], silentIndices: [] },
+  { word: "hoed", sounds: ["h", "oe", "d"], silentIndices: [] },
+  { word: "tiptoe", sounds: ["t", "i", "p", "t", "oe"], silentIndices: [] },
+  { word: "Chloe", sounds: ["Chl", "oe"], silentIndices: [] },
+
+  // ========== ow (long o) ==========
+  { word: "row", sounds: ["r", "ow"], silentIndices: [] },
+  { word: "grow", sounds: ["gr", "ow"], silentIndices: [] },
+  { word: "follow", sounds: ["f", "o", "ll", "ow"], silentIndices: [] },
+  { word: "show", sounds: ["sh", "ow"], silentIndices: [] },
+  { word: "flow", sounds: ["fl", "ow"], silentIndices: [] },
+  { word: "pillow", sounds: ["p", "i", "ll", "ow"], silentIndices: [] },
+  { word: "blow", sounds: ["bl", "ow"], silentIndices: [] },
+  { word: "glow", sounds: ["gl", "ow"], silentIndices: [] },
+  { word: "window", sounds: ["w", "i", "n", "d", "ow"], silentIndices: [] },
+  { word: "slow", sounds: ["sl", "ow"], silentIndices: [] },
+
+  // ========== ue, ew ==========
+  { word: "glue", sounds: ["gl", "ue"], silentIndices: [] },
+  { word: "blue", sounds: ["bl", "ue"], silentIndices: [] },
+  { word: "true", sounds: ["tr", "ue"], silentIndices: [] },
+  { word: "due", sounds: ["d", "ue"], silentIndices: [] },
+  { word: "sue", sounds: ["s", "ue"], silentIndices: [] },
+  { word: "hue", sounds: ["h", "ue"], silentIndices: [] },
+  { word: "clue", sounds: ["cl", "ue"], silentIndices: [] },
+  { word: "cue", sounds: ["c", "ue"], silentIndices: [] },
+  { word: "pursue", sounds: ["p", "ur", "s", "ue"], silentIndices: [] },
+  { word: "subdue", sounds: ["s", "u", "b", "d", "ue"], silentIndices: [] },
+  { word: "blew", sounds: ["bl", "ew"], silentIndices: [] },
+  { word: "flew", sounds: ["fl", "ew"], silentIndices: [] },
+  { word: "news", sounds: ["n", "ew", "s"], silentIndices: [] },
+  { word: "brew", sounds: ["br", "ew"], silentIndices: [] },
+  { word: "threw", sounds: ["thr", "ew"], silentIndices: [] },
+  { word: "grew", sounds: ["gr", "ew"], silentIndices: [] },
+  { word: "chew", sounds: ["ch", "ew"], silentIndices: [] },
+  { word: "stew", sounds: ["st", "ew"], silentIndices: [] },
+  { word: "crew", sounds: ["cr", "ew"], silentIndices: [] },
+  { word: "few", sounds: ["f", "ew"], silentIndices: [] },
+
+  // ========== Diphthongs ow, ou (as in cow, cloud) ==========
+  { word: "how", sounds: ["h", "ow"], silentIndices: [] },
+  { word: "cow", sounds: ["c", "ow"], silentIndices: [] },
+  { word: "crowd", sounds: ["cr", "ow", "d"], silentIndices: [] },
+  { word: "bow", sounds: ["b", "ow"], silentIndices: [] },
+  { word: "howl", sounds: ["h", "ow", "l"], silentIndices: [] },
+  { word: "town", sounds: ["t", "ow", "n"], silentIndices: [] },
+  { word: "down", sounds: ["d", "ow", "n"], silentIndices: [] },
+  { word: "frown", sounds: ["fr", "ow", "n"], silentIndices: [] },
+  { word: "clown", sounds: ["cl", "ow", "n"], silentIndices: [] },
+  { word: "now", sounds: ["n", "ow"], silentIndices: [] },
+  { word: "cloud", sounds: ["cl", "ou", "d"], silentIndices: [] },
+  { word: "scout", sounds: ["sc", "ou", "t"], silentIndices: [] },
+  { word: "found", sounds: ["f", "ou", "nd"], silentIndices: [] },
+  { word: "mouse", sounds: ["m", "ou", "s"], silentIndices: [4] },
+  { word: "out", sounds: ["ou", "t"], silentIndices: [] },
+  { word: "sound", sounds: ["s", "ou", "nd"], silentIndices: [] },
+  { word: "count", sounds: ["c", "ou", "nt"], silentIndices: [] },
+  { word: "ground", sounds: ["gr", "ou", "nd"], silentIndices: [] },
+  { word: "shout", sounds: ["sh", "ou", "t"], silentIndices: [] },
+  { word: "loud", sounds: ["l", "ou", "d"], silentIndices: [] },
+
+  // ========== oi, oy ==========
+  { word: "boil", sounds: ["b", "oi", "l"], silentIndices: [] },
+  { word: "soil", sounds: ["s", "oi", "l"], silentIndices: [] },
+  { word: "toil", sounds: ["t", "oi", "l"], silentIndices: [] },
+  { word: "joint", sounds: ["j", "oi", "nt"], silentIndices: [] },
+  { word: "coin", sounds: ["c", "oi", "n"], silentIndices: [] },
+  { word: "spoil", sounds: ["sp", "oi", "l"], silentIndices: [] },
+  { word: "oil", sounds: ["oi", "l"], silentIndices: [] },
+  { word: "join", sounds: ["j", "oi", "n"], silentIndices: [] },
+  { word: "foil", sounds: ["f", "oi", "l"], silentIndices: [] },
+  { word: "point", sounds: ["p", "oi", "nt"], silentIndices: [] },
+  { word: "boy", sounds: ["b", "oy"], silentIndices: [] },
+  { word: "toy", sounds: ["t", "oy"], silentIndices: [] },
+  { word: "joy", sounds: ["j", "oy"], silentIndices: [] },
+  { word: "oyster", sounds: ["oy", "st", "er"], silentIndices: [] },
+  { word: "Troy", sounds: ["Tr", "oy"], silentIndices: [] },
+  { word: "Joyce", sounds: ["J", "oy", "c"], silentIndices: [4] },
+  { word: "decoy", sounds: ["d", "e", "c", "oy"], silentIndices: [] },
+  { word: "ploy", sounds: ["pl", "oy"], silentIndices: [] },
+  { word: "deploy", sounds: ["d", "e", "pl", "oy"], silentIndices: [] },
+  { word: "employ", sounds: ["e", "m", "pl", "oy"], silentIndices: [] },
+
+  // ========== oo (long u and short u) ==========
+  { word: "boot", sounds: ["b", "oo", "t"], silentIndices: [] },
+  { word: "moon", sounds: ["m", "oo", "n"], silentIndices: [] },
+  { word: "soon", sounds: ["s", "oo", "n"], silentIndices: [] },
+  { word: "roof", sounds: ["r", "oo", "f"], silentIndices: [] },
+  { word: "spoon", sounds: ["sp", "oo", "n"], silentIndices: [] },
+  { word: "smooth", sounds: ["sm", "oo", "th"], silentIndices: [] },
+  { word: "shoot", sounds: ["sh", "oo", "t"], silentIndices: [] },
+  { word: "too", sounds: ["t", "oo"], silentIndices: [] },
+  { word: "cool", sounds: ["c", "oo", "l"], silentIndices: [] },
+  { word: "food", sounds: ["f", "oo", "d"], silentIndices: [] },
+  { word: "good", sounds: ["g", "oo", "d"], silentIndices: [] },
+  { word: "hood", sounds: ["h", "oo", "d"], silentIndices: [] },
+  { word: "shook", sounds: ["sh", "oo", "k"], silentIndices: [] },
+  { word: "foot", sounds: ["f", "oo", "t"], silentIndices: [] },
+  { word: "look", sounds: ["l", "oo", "k"], silentIndices: [] },
+  { word: "hook", sounds: ["h", "oo", "k"], silentIndices: [] },
+  { word: "wood", sounds: ["w", "oo", "d"], silentIndices: [] },
+  { word: "took", sounds: ["t", "oo", "k"], silentIndices: [] },
+  { word: "book", sounds: ["b", "oo", "k"], silentIndices: [] },
+  { word: "stood", sounds: ["st", "oo", "d"], silentIndices: [] },
+
+  // ========== Phonograms with Long Vowels (old, oll, olt, oth, ost, ind, ild, ull, ush, ul, ut) ==========
+  { word: "cold", sounds: ["c", "old"], silentIndices: [] },
+  { word: "bold", sounds: ["b", "old"], silentIndices: [] },
+  { word: "sold", sounds: ["s", "old"], silentIndices: [] },
+  { word: "hold", sounds: ["h", "old"], silentIndices: [] },
+  { word: "gold", sounds: ["g", "old"], silentIndices: [] },
+  { word: "poll", sounds: ["p", "oll"], silentIndices: [] },
+  { word: "toll", sounds: ["t", "oll"], silentIndices: [] },
+  { word: "roll", sounds: ["r", "oll"], silentIndices: [] },
+  { word: "scroll", sounds: ["scr", "oll"], silentIndices: [] },
+  { word: "stroll", sounds: ["str", "oll"], silentIndices: [] },
+  { word: "bolt", sounds: ["b", "olt"], silentIndices: [] },
+  { word: "volt", sounds: ["v", "olt"], silentIndices: [] },
+  { word: "jolt", sounds: ["j", "olt"], silentIndices: [] },
+  { word: "molt", sounds: ["m", "olt"], silentIndices: [] },
+  { word: "both", sounds: ["b", "oth"], silentIndices: [] },
+  { word: "most", sounds: ["m", "ost"], silentIndices: [] },
+  { word: "post", sounds: ["p", "ost"], silentIndices: [] },
+  { word: "host", sounds: ["h", "ost"], silentIndices: [] },
+  { word: "ghost", sounds: ["gh", "ost"], silentIndices: [] },
+  { word: "almost", sounds: ["al", "m", "ost"], silentIndices: [] },
+  { word: "bind", sounds: ["b", "ind"], silentIndices: [] },
+  { word: "find", sounds: ["f", "ind"], silentIndices: [] },
+  { word: "kind", sounds: ["k", "ind"], silentIndices: [] },
+  { word: "mind", sounds: ["m", "ind"], silentIndices: [] },
+  { word: "blind", sounds: ["bl", "ind"], silentIndices: [] },
+  { word: "mild", sounds: ["m", "ild"], silentIndices: [] },
+  { word: "wild", sounds: ["w", "ild"], silentIndices: [] },
+  { word: "child", sounds: ["ch", "ild"], silentIndices: [] },
+  { word: "full", sounds: ["f", "ull"], silentIndices: [] },
+  { word: "bull", sounds: ["b", "ull"], silentIndices: [] },
+  { word: "pull", sounds: ["p", "ull"], silentIndices: [] },
+  { word: "push", sounds: ["p", "ush"], silentIndices: [] },
+  { word: "bush", sounds: ["b", "ush"], silentIndices: [] },
+  { word: "cushion", sounds: ["c", "ush", "i", "on"], silentIndices: [] },
+  { word: "careful", sounds: ["c", "are", "f", "ul"], silentIndices: [] },
+  { word: "fulfill", sounds: ["f", "ul", "f", "ill"], silentIndices: [] },
+  { word: "put", sounds: ["p", "ut"], silentIndices: [] },
+  { word: "brut", sounds: ["br", "ut"], silentIndices: [] },
+
+  // ========== Y as Vowel ==========
+  { word: "myth", sounds: ["m", "y", "th"], silentIndices: [] },
+  { word: "gym", sounds: ["g", "y", "m"], silentIndices: [] },
+  { word: "symbol", sounds: ["s", "y", "m", "b", "o", "l"], silentIndices: [] },
+  { word: "syrup", sounds: ["s", "y", "r", "u", "p"], silentIndices: [] },
+  { word: "hymn", sounds: ["h", "y", "m"], silentIndices: [3] },
+  { word: "system", sounds: ["s", "y", "st", "e", "m"], silentIndices: [] },
+  { word: "cymbals", sounds: ["c", "y", "m", "b", "a", "l", "s"], silentIndices: [] },
+  { word: "lyrics", sounds: ["l", "y", "r", "i", "c", "s"], silentIndices: [] },
+  { word: "typical", sounds: ["t", "y", "p", "i", "c", "a", "l"], silentIndices: [] },
+  { word: "pyramid", sounds: ["p", "y", "r", "a", "m", "i", "d"], silentIndices: [] },
+  { word: "fly", sounds: ["fl", "y"], silentIndices: [] },
+  { word: "try", sounds: ["tr", "y"], silentIndices: [] },
+  { word: "cry", sounds: ["cr", "y"], silentIndices: [] },
+  { word: "dry", sounds: ["dr", "y"], silentIndices: [] },
+  { word: "shy", sounds: ["sh", "y"], silentIndices: [] },
+  { word: "sky", sounds: ["sk", "y"], silentIndices: [] },
+  { word: "my", sounds: ["m", "y"], silentIndices: [] },
+  { word: "why", sounds: ["wh", "y"], silentIndices: [] },
+  { word: "ply", sounds: ["pl", "y"], silentIndices: [] },
+  { word: "spy", sounds: ["sp", "y"], silentIndices: [] },
+  { word: "army", sounds: ["ar", "m", "y"], silentIndices: [] },
+  { word: "handy", sounds: ["h", "a", "nd", "y"], silentIndices: [] },
+  { word: "happy", sounds: ["h", "a", "pp", "y"], silentIndices: [] },
+  { word: "party", sounds: ["p", "ar", "t", "y"], silentIndices: [] },
+  { word: "candy", sounds: ["c", "a", "nd", "y"], silentIndices: [] },
+  { word: "thirty", sounds: ["th", "ir", "t", "y"], silentIndices: [] },
+  { word: "sleepy", sounds: ["sl", "ee", "p", "y"], silentIndices: [] },
+  { word: "funny", sounds: ["f", "u", "nn", "y"], silentIndices: [] },
+  { word: "baby", sounds: ["b", "a", "b", "y"], silentIndices: [] },
+  { word: "mommy", sounds: ["m", "o", "mm", "y"], silentIndices: [] },
+
+  // ========== Words Beginning With short a (a- as schwa) ==========
+  { word: "awake", sounds: ["a", "w", "a", "k"], silentIndices: [4] }, // last e silent
+  { word: "amaze", sounds: ["a", "m", "a", "z"], silentIndices: [4] },
+  { word: "aside", sounds: ["a", "s", "i", "d"], silentIndices: [4] },
+  { word: "amuse", sounds: ["a", "m", "u", "s"], silentIndices: [4] },
+  { word: "apart", sounds: ["a", "p", "ar", "t"], silentIndices: [] },
+  { word: "alike", sounds: ["a", "l", "i", "k"], silentIndices: [4] },
+  { word: "about", sounds: ["a", "b", "ou", "t"], silentIndices: [] },
+  { word: "asleep", sounds: ["a", "sl", "ee", "p"], silentIndices: [] },
+  { word: "ahead", sounds: ["a", "h", "ea", "d"], silentIndices: [] },
+  { word: "around", sounds: ["a", "r", "ou", "nd"], silentIndices: [] },
+
+  // ========== Rainbow C & J (c = s, g = j, dge already done) ==========
+  { word: "cent", sounds: ["c", "e", "nt"], silentIndices: [] },
+  { word: "center", sounds: ["c", "e", "n", "t", "er"], silentIndices: [] },
+  { word: "nice", sounds: ["n", "i", "c"], silentIndices: [3] },
+  { word: "mice", sounds: ["m", "i", "c"], silentIndices: [3] },
+  { word: "cycle", sounds: ["c", "y", "c", "l"], silentIndices: [4] },
+  { word: "city", sounds: ["c", "i", "t", "y"], silentIndices: [] },
+  { word: "circle", sounds: ["c", "ir", "c", "l"], silentIndices: [5] },
+  { word: "circus", sounds: ["c", "ir", "c", "u", "s"], silentIndices: [] },
+  { word: "celery", sounds: ["c", "e", "l", "e", "r", "y"], silentIndices: [] },
+  { word: "cinder", sounds: ["c", "i", "n", "d", "er"], silentIndices: [] },
+
+  // ========== Sounds of gh ==========
+  { word: "ghost", sounds: ["gh", "ost"], silentIndices: [] },
+  { word: "ghast", sounds: ["gh", "a", "st"], silentIndices: [] },
+  { word: "ghetto", sounds: ["gh", "e", "tt", "o"], silentIndices: [] },
+  { word: "Ghana", sounds: ["Gh", "a", "n", "a"], silentIndices: [] },
+  { word: "ghoul", sounds: ["gh", "ou", "l"], silentIndices: [] },
+  { word: "thigh", sounds: ["th", "igh"], silentIndices: [] },
+  { word: "right", sounds: ["r", "igh", "t"], silentIndices: [] },
+  { word: "taught", sounds: ["t", "au", "ght"], silentIndices: [] },
+  { word: "light", sounds: ["l", "igh", "t"], silentIndices: [] },
+  { word: "fight", sounds: ["f", "igh", "t"], silentIndices: [] },
+  { word: "slight", sounds: ["sl", "igh", "t"], silentIndices: [] },
+  { word: "high", sounds: ["h", "igh"], silentIndices: [] },
+  { word: "sigh", sounds: ["s", "igh"], silentIndices: [] },
+  { word: "weigh", sounds: ["w", "eigh"], silentIndices: [] },
+  { word: "eight", sounds: ["eigh", "t"], silentIndices: [] },
+  { word: "laugh", sounds: ["l", "au", "gh"], silentIndices: [] },
+  { word: "tough", sounds: ["t", "ou", "gh"], silentIndices: [] },
+  { word: "trough", sounds: ["tr", "ou", "gh"], silentIndices: [] },
+  { word: "cough", sounds: ["c", "ou", "gh"], silentIndices: [] },
+  { word: "rough", sounds: ["r", "ou", "gh"], silentIndices: [] },
+  { word: "enough", sounds: ["e", "n", "ou", "gh"], silentIndices: [] },
+  { word: "slough", sounds: ["sl", "ou", "gh"], silentIndices: [] },
+  { word: "draught", sounds: ["dr", "au", "ght"], silentIndices: [] },
+
+  // ========== Sounds of ch ==========
+  { word: "chaos", sounds: ["ch", "a", "o", "s"], silentIndices: [] },
+  { word: "chorus", sounds: ["ch", "o", "r", "u", "s"], silentIndices: [] },
+  { word: "chrome", sounds: ["ch", "r", "o", "m"], silentIndices: [4] },
+  { word: "chasm", sounds: ["ch", "a", "sm"], silentIndices: [] },
+  { word: "chemist", sounds: ["ch", "e", "m", "i", "st"], silentIndices: [] },
+  { word: "chord", sounds: ["ch", "or", "d"], silentIndices: [] },
+  { word: "chlorine", sounds: ["ch", "l", "o", "r", "i", "n"], silentIndices: [7] },
+  { word: "chameleon", sounds: ["ch", "a", "m", "e", "l", "e", "on"], silentIndices: [] },
+  { word: "character", sounds: ["ch", "a", "r", "a", "c", "t", "er"], silentIndices: [] },
+  { word: "chronic", sounds: ["ch", "r", "o", "n", "i", "c"], silentIndices: [] },
+  { word: "church", sounds: ["ch", "ur", "ch"], silentIndices: [] },
+  { word: "child", sounds: ["ch", "ild"], silentIndices: [] },
+  { word: "chair", sounds: ["ch", "air"], silentIndices: [] },
+  { word: "cheese", sounds: ["ch", "ee", "s"], silentIndices: [4] },
+  { word: "champion", sounds: ["ch", "a", "m", "p", "i", "on"], silentIndices: [] },
+  { word: "chocolate", sounds: ["ch", "o", "c", "o", "l", "a", "t"], silentIndices: [8] },
+  { word: "chest", sounds: ["ch", "e", "st"], silentIndices: [] },
+  { word: "chase", sounds: ["ch", "a", "s"], silentIndices: [4] },
+  { word: "chill", sounds: ["ch", "i", "ll"], silentIndices: [] },
+  { word: "chop", sounds: ["ch", "o", "p"], silentIndices: [] },
+  { word: "chef", sounds: ["ch", "e", "f"], silentIndices: [] },
+  { word: "champagne", sounds: ["ch", "a", "m", "p", "a", "gn"], silentIndices: [7] },
+  { word: "chateau", sounds: ["ch", "a", "t", "eau"], silentIndices: [] },
+  { word: "chauffeur", sounds: ["ch", "au", "ff", "eur"], silentIndices: [] },
+  { word: "chic", sounds: ["ch", "i", "c"], silentIndices: [] },
+  { word: "moustache", sounds: ["m", "ou", "st", "a", "ch"], silentIndices: [6] },
+  { word: "parachute", sounds: ["p", "a", "r", "a", "ch", "u", "t"], silentIndices: [8] },
+  { word: "chalet", sounds: ["ch", "a", "l", "e", "t"], silentIndices: [] },
+  { word: "chandelier", sounds: ["ch", "a", "n", "d", "e", "l", "ie", "r"], silentIndices: [] },
+  { word: "brochure", sounds: ["br", "o", "ch", "ur"], silentIndices: [5] },
+
+  // ========== Silent Letters (k, w, t, b, l) ==========
+  { word: "knot", sounds: ["n", "o", "t"], silentIndices: [0] },
+  { word: "knee", sounds: ["n", "ee"], silentIndices: [0] },
+  { word: "knife", sounds: ["n", "i", "f"], silentIndices: [0] },
+  { word: "know", sounds: ["n", "ow"], silentIndices: [0] },
+  { word: "knock", sounds: ["n", "o", "ck"], silentIndices: [0] },
+  { word: "knapsack", sounds: ["n", "a", "p", "s", "a", "ck"], silentIndices: [0] },
+  { word: "knight", sounds: ["n", "igh", "t"], silentIndices: [0] },
+  { word: "knob", sounds: ["n", "o", "b"], silentIndices: [0] },
+  { word: "knit", sounds: ["n", "i", "t"], silentIndices: [0] },
+  { word: "knuckle", sounds: ["n", "u", "ck", "l"], silentIndices: [0] },
+  { word: "write", sounds: ["r", "i", "t"], silentIndices: [0, 4] },
+  { word: "wrote", sounds: ["r", "o", "t"], silentIndices: [0, 4] },
+  { word: "wrist", sounds: ["r", "i", "st"], silentIndices: [0] },
+  { word: "wrong", sounds: ["r", "o", "ng"], silentIndices: [0] },
+  { word: "wrinkle", sounds: ["r", "i", "nk", "l"], silentIndices: [0] },
+  { word: "wreath", sounds: ["r", "ea", "th"], silentIndices: [0] },
+  { word: "wretch", sounds: ["r", "e", "tch"], silentIndices: [0] },
+  { word: "wrap", sounds: ["r", "a", "p"], silentIndices: [0] },
+  { word: "wrath", sounds: ["r", "a", "th"], silentIndices: [0] },
+  { word: "sword", sounds: ["s", "or", "d"], silentIndices: [1] },
+  { word: "chasten", sounds: ["ch", "a", "s", "en"], silentIndices: [4] },
+  { word: "listen", sounds: ["l", "i", "s", "en"], silentIndices: [3] },
+  { word: "hasten", sounds: ["h", "a", "s", "en"], silentIndices: [3] },
+  { word: "fasten", sounds: ["f", "a", "s", "en"], silentIndices: [3] },
+  { word: "soften", sounds: ["s", "o", "f", "en"], silentIndices: [3] },
+  { word: "glisten", sounds: ["g", "l", "i", "s", "en"], silentIndices: [4] },
+  { word: "moisten", sounds: ["m", "oi", "s", "en"], silentIndices: [4] },
+  { word: "rapport", sounds: ["r", "a", "pp", "or"], silentIndices: [6] },
+  { word: "buffet", sounds: ["b", "u", "ff", "ay"], silentIndices: [5] },
+  { word: "debut", sounds: ["d", "e", "b", "u"], silentIndices: [4] },
+  { word: "bomb", sounds: ["b", "o", "m"], silentIndices: [3] },
+  { word: "comb", sounds: ["c", "o", "m"], silentIndices: [3] },
+  { word: "climb", sounds: ["cl", "i", "m"], silentIndices: [4] },
+  { word: "crumb", sounds: ["cr", "u", "m"], silentIndices: [4] },
+  { word: "dumb", sounds: ["d", "u", "m"], silentIndices: [3] },
+  { word: "lamb", sounds: ["l", "a", "m"], silentIndices: [3] },
+  { word: "limb", sounds: ["l", "i", "m"], silentIndices: [3] },
+  { word: "numb", sounds: ["n", "u", "m"], silentIndices: [3] },
+  { word: "plumb", sounds: ["pl", "u", "m"], silentIndices: [4] },
+  { word: "thumb", sounds: ["th", "u", "m"], silentIndices: [4] },
+  { word: "would", sounds: ["w", "oo", "d"], silentIndices: [2] },
+  { word: "could", sounds: ["c", "oo", "d"], silentIndices: [2] },
+  { word: "should", sounds: ["sh", "oo", "d"], silentIndices: [3] },
+  { word: "calf", sounds: ["c", "a", "f"], silentIndices: [2] },
+  { word: "half", sounds: ["h", "a", "f"], silentIndices: [2] },
+  { word: "calm", sounds: ["c", "a", "m"], silentIndices: [2] },
+  { word: "palm", sounds: ["p", "a", "m"], silentIndices: [2] },
+  { word: "psalm", sounds: ["s", "a", "m"], silentIndices: [1, 2] }, // p and l silent
+];
+
+// End of wordList – all words from your source, with silent e applied correctly.
+            const TOTAL_WORDS = wordList.length;
+            const SOUND_COLORS = 12;
+
+            // DOM elements
+            const wordDisplay = document.getElementById('wordDisplay');
+            const soundLegend = document.getElementById('soundLegend');
+            const foundBtn = document.getElementById('foundBtn');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const hintBtn = document.getElementById('hintBtn');
+            const instructionsToggleBtn = document.getElementById('instructionsToggleBtn');
+            const scoreDisplay = document.getElementById('score');
+            const wordCountDisplay = document.getElementById('wordCount');
+            const livesDisplay = document.getElementById('lives');
+            const timerDisplay = document.getElementById('timer');
+            const progressBar = document.getElementById('progressBar');
+
+            const instructionsModal = document.getElementById('instructionsModal');
+            const wellDoneModal = document.getElementById('wellDoneModal');
+            const wellDoneMessage = document.getElementById('wellDoneMessage');
+            const tryAgainModal = document.getElementById('tryAgainModal');
+            const tryAgainMessage = document.getElementById('tryAgainMessage');
+            const gameOverModal = document.getElementById('gameOverModal');
+            const gameOverTitle = document.getElementById('gameOverTitle');
+            const gameOverMessage = document.getElementById('gameOverMessage');
+            const finalScoreDisplay = document.getElementById('finalScore');
+            const finalTimeDisplay = document.getElementById('finalTime');
+            const finalWordsDisplay = document.getElementById('finalWords');
+            const restartBtn = document.getElementById('restartBtn');
+
+            // State
+            let currentWordIndex = 0;
+            let score = 0;
+            let lives = 3;
+            let gameWords = [];
+            let currentSelection = [];
+            let markedSounds = [];           // { indices: [], soundColorIndex: number }
+            let gameStartTime = null;
+            let timerInterval = null;
+            let isProcessing = false;
+            let gameEnded = false;
+
+            // ---- UTILITIES ----
+            function shuffleArray(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            function formatTime(sec) {
+                const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function getElapsed() {
+                return gameStartTime ? (Date.now() - gameStartTime) / 1000 : 0;
+            }
+
+            // ---- TIMER ----
+            function startTimer() {
+                stopTimer();
+                gameStartTime = Date.now();
+                timerDisplay.textContent = '00:00';
+                timerInterval = setInterval(() => { timerDisplay.textContent = formatTime(getElapsed()); }, 200);
+            }
+
+            function stopTimer() {
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                timerDisplay.textContent = formatTime(getElapsed());
+            }
+
+            // ---- MODALS ----
+            function showModal(modal) { modal.classList.add('active'); }
+            function hideModal(modal) { modal.classList.remove('active'); }
+            function hideAllModals() {
+                [instructionsModal, wellDoneModal, tryAgainModal, gameOverModal].forEach(m => hideModal(m));
+            }
+
+            // ---- UI UPDATES ----
+            function updateScore() { scoreDisplay.textContent = score; }
+            function updateLives() { livesDisplay.textContent = lives; }
+            function updateProgress() {
+                progressBar.style.width = `${(currentWordIndex / TOTAL_WORDS) * 100}%`;
+                wordCountDisplay.textContent = `${currentWordIndex + 1}/${TOTAL_WORDS}`;
+            }
+
+            // ---- COVERAGE CHECK (silent letters are optional) ----
+            function areAllLettersCovered() {
+                const word = gameWords[currentWordIndex];
+                const covered = new Set();
+                markedSounds.forEach(s => s.indices.forEach(i => covered.add(i)));
+                currentSelection.forEach(i => covered.add(i));
+
+                // every non‑silent index must be covered
+                for (let i = 0; i < word.word.length; i++) {
+                    if (word.silentIndices && word.silentIndices.includes(i)) continue;
+                    if (!covered.has(i)) return false;
+                }
+                return true;
+            }
+
+            // ---- BUTTON STATE ----
+            function updateButtons() {
+                const hasSel = currentSelection.length > 0;
+                const allCovered = areAllLettersCovered();
+                foundBtn.disabled = !hasSel || isProcessing || gameEnded;
+                resetBtn.disabled = (!hasSel && markedSounds.length === 0) || isProcessing || gameEnded;
+                checkBtn.disabled = !allCovered || isProcessing || gameEnded;
+                hintBtn.disabled = isProcessing || gameEnded;
+                instructionsToggleBtn.disabled = isProcessing || gameEnded;
+            }
+
+            // ---- GET LETTER ELEMENT ----
+            function getLetterEl(idx) {
+                return wordDisplay.querySelector(`[data-index="${idx}"]`);
+            }
+
+            // ---- LOAD WORD (no visual clue for silent letters) ----
+            function loadWord() {
+                if (gameEnded || currentWordIndex >= TOTAL_WORDS) return;
+                const word = gameWords[currentWordIndex];
+                wordDisplay.innerHTML = '';
+                currentSelection = [];
+                markedSounds = [];
+                isProcessing = false;
+
+                for (let i = 0; i < word.word.length; i++) {
+                    const span = document.createElement('span');
+                    span.className = 'letter';
+                    span.textContent = word.word[i];
+                    span.dataset.index = i;
+                    // No extra class for silent letters – they look identical
+                    span.addEventListener('click', handleLetterClick);
+                    span.addEventListener('touchend', (e) => { e.preventDefault(); handleLetterClick.call(span, e); });
+                    wordDisplay.appendChild(span);
+                }
+
+                updateProgress();
+                updateButtons();
+                createLegend();
+            }
+
+            // ---- LEGEND ----
+            function createLegend() {
+                soundLegend.innerHTML = '';
+                const colors = [
+                    { name:'Sound 1', bg:'#FF5252' }, { name:'Sound 2', bg:'#FF9800' },
+                    { name:'Sound 3', bg:'#FFEB3B' }, { name:'Sound 4', bg:'#4CAF50' },
+                    { name:'Sound 5', bg:'#2196F3' }, { name:'Sound 6', bg:'#9C27B0' },
+                    { name:'Sound 7', bg:'#00BCD4' }, { name:'Sound 8', bg:'#E91E63' },
+                    { name:'Sound 9', bg:'#8BC34A' }, { name:'Sound 10', bg:'#FFC107' },
+                    { name:'Sound 11', bg:'#795548' }, { name:'Sound 12', bg:'#607D8B' }
+                ];
+                colors.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    const box = document.createElement('div');
+                    box.className = 'legend-color';
+                    box.style.backgroundColor = c.bg;
+                    const lbl = document.createElement('span');
+                    lbl.textContent = c.name;
+                    item.appendChild(box);
+                    item.appendChild(lbl);
+                    soundLegend.appendChild(item);
+                });
+            }
+
+            // ---- LETTER CLICK HANDLER ----
+            function handleLetterClick(e) {
+                if (isProcessing || gameEnded) return;
+                const el = e.target;
+                const idx = parseInt(el.dataset.index);
+                if (el.classList.contains('marked')) {
+                    el.style.animation = 'none';
+                    void el.offsetWidth;
+                    el.style.animation = 'shake 0.4s ease';
+                    return;
+                }
+                if (el.classList.contains('selected')) {
+                    const pos = currentSelection.indexOf(idx);
+                    if (pos !== -1 && (idx === currentSelection[currentSelection.length - 1] || currentSelection.length === 1)) {
+                        currentSelection.splice(pos, 1);
+                        el.classList.remove('selected');
+                    }
+                    updateButtons();
+                    return;
+                }
+                if (currentSelection.length === 0) {
+                    currentSelection.push(idx);
+                    el.classList.add('selected');
+                    updateButtons();
+                    return;
+                }
+                const last = currentSelection[currentSelection.length - 1];
+                const first = currentSelection[0];
+                if (idx === last + 1 || idx === first - 1) {
+                    const target = getLetterEl(idx);
+                    if (target && target.classList.contains('marked')) return;
+                    if (idx === last + 1) currentSelection.push(idx);
+                    else currentSelection.unshift(idx);
+                    el.classList.add('selected');
+                    updateButtons();
+                    return;
+                }
+                clearCurrentSelection();
+                currentSelection = [idx];
+                el.classList.add('selected');
+                updateButtons();
+            }
+
+            function clearCurrentSelection() {
+                currentSelection.forEach(i => {
+                    const el = getLetterEl(i);
+                    if (el && !el.classList.contains('marked')) el.classList.remove('selected');
+                });
+                currentSelection = [];
+            }
+
+            // ---- MARK FOUND SOUND ----
+            function markFoundSound() {
+                if (isProcessing || gameEnded || currentSelection.length === 0) return;
+                const colorIdx = markedSounds.length;
+                const newSound = {
+                    indices: [...currentSelection].sort((a, b) => a - b),
+                    soundColorIndex: colorIdx
+                };
+                newSound.indices.forEach(i => {
+                    const el = getLetterEl(i);
+                    if (el) {
+                        el.classList.remove('selected');
+                        el.classList.add('marked', `sound-${colorIdx % SOUND_COLORS}`);
+                    }
+                });
+                markedSounds.push(newSound);
+                currentSelection = [];
+                updateButtons();
+            }
+
+            // ---- RESET ----
+            function resetSelection() {
+                if (isProcessing || gameEnded) return;
+                if (currentSelection.length > 0) {
+                    clearCurrentSelection();
+                    updateButtons();
+                } else if (markedSounds.length > 0) {
+                    markedSounds = [];
+                    document.querySelectorAll('.letter').forEach(l => { l.className = 'letter'; });
+                    updateButtons();
+                }
+            }
+
+            // ---- HELPER: clean a player sound by removing silent letters ----
+            function cleanPlayerSound(indices) {
+                const word = gameWords[currentWordIndex];
+                return indices
+                    .filter(i => !(word.silentIndices && word.silentIndices.includes(i)))
+                    .map(i => word.word[i])
+                    .join('');
+            }
+
+            function getCleanedPlayerSegmentation() {
+                const sorted = [...markedSounds].sort((a, b) => a.indices[0] - b.indices[0]);
+                return sorted.map(s => cleanPlayerSound(s.indices)).filter(str => str.length > 0);
+            }
+
+            // ---- CHECK ANSWER ----
+            function checkSegmentation() {
+                if (isProcessing || gameEnded) return;
+                if (currentSelection.length > 0) return;
+                if (!areAllLettersCovered()) return;
+
+                const currentWord = gameWords[currentWordIndex];
+                const cleanedSeg = getCleanedPlayerSegmentation();
+                const isCorrect = JSON.stringify(cleanedSeg) === JSON.stringify(currentWord.sounds);
+
+                if (isCorrect) {
+                    // Check whether any silent letter was included in a sound group
+                    const silentIncluded = markedSounds.some(s =>
+                        currentWord.silentIndices && currentWord.silentIndices.some(si => s.indices.includes(si))
+                    );
+
+                    score += 10;
+                    updateScore();
+                    isProcessing = true;
+                    disableAllButtons();
+
+                    // Build message
+                    let msg = `"${currentWord.word}" = ${currentWord.sounds.join(' - ')}`;
+                    if (silentIncluded) {
+                        const includedLetters = [];
+                        currentWord.silentIndices.forEach(si => {
+                            if (markedSounds.some(s => s.indices.includes(si))) {
+                                includedLetters.push(currentWord.word[si]);
+                            }
+                        });
+                        const unique = [...new Set(includedLetters)];
+                        msg += `\n⚠️ Note: The letter${unique.length > 1 ? 's' : ''} '${unique.join("', '")}' ${unique.length > 1 ? 'are' : 'is'} silent in this word.`;
+                    }
+                    wellDoneMessage.innerText = msg;
+
+                    showModal(wellDoneModal);
+                    setTimeout(() => {
+                        hideModal(wellDoneModal);
+                        currentWordIndex++;
+                        if (currentWordIndex >= TOTAL_WORDS) {
+                            isProcessing = false;
+                            endGame(true);
+                        } else {
+                            isProcessing = false;
+                            loadWord();
+                        }
+                    }, 2000);
+                } else {
+                    // Wrong segmentation
+                    lives--;
+                    updateLives();
+                    isProcessing = true;
+                    disableAllButtons();
+                    tryAgainMessage.textContent = `Correct: "${currentWord.sounds.join(' - ')}". You have ${lives} ❤️ left.`;
+                    showModal(tryAgainModal);
+                    setTimeout(() => {
+                        hideModal(tryAgainModal);
+                        if (lives <= 0) {
+                            isProcessing = false;
+                            endGame(false);
+                        } else {
+                            resetGameForCurrentWord();
+                            isProcessing = false;
+                            updateButtons();
+                        }
+                    }, 2000);
+                }
+            }
+
+            // ---- PER‑WORD RESET (after a wrong attempt) ----
+            function resetGameForCurrentWord() {
+                markedSounds = [];
+                currentSelection = [];
+                document.querySelectorAll('.letter').forEach(l => { l.className = 'letter'; });
+            }
+
+            // ---- HINT ----
+            function showHint() {
+                if (isProcessing || gameEnded) return;
+                const word = gameWords[currentWordIndex];
+                alert(`💡 This word has ${word.sounds.length} sound(s).`);
+                hintBtn.disabled = true;
+                if (score >= 2) score -= 2; else score = 0;
+                updateScore();
+                setTimeout(() => { if (!isProcessing && !gameEnded) hintBtn.disabled = false; }, 3000);
+            }
+
+            function disableAllButtons() {
+                foundBtn.disabled = checkBtn.disabled = resetBtn.disabled = hintBtn.disabled = instructionsToggleBtn.disabled = true;
+            }
+
+            // ---- END GAME ----
+            function endGame(isWin) {
+                gameEnded = true;
+                isProcessing = false;
+                stopTimer();
+                disableAllButtons();
+                hideAllModals();
+                const elapsed = formatTime(getElapsed());
+                finalScoreDisplay.textContent = score;
+                finalTimeDisplay.textContent = elapsed;
+                finalWordsDisplay.textContent = `${currentWordIndex}/${TOTAL_WORDS}`;
+                if (isWin) {
+                    gameOverTitle.textContent = '🏆 Victory!';
+                    gameOverMessage.textContent = 'You mastered all the phonemes!';
+                } else {
+                    gameOverTitle.textContent = '💔 Game Over';
+                    gameOverMessage.textContent = `You completed ${currentWordIndex} of ${TOTAL_WORDS} words.`;
+                }
+                showModal(gameOverModal);
+            }
+
+            // ---- RESTART ----
+            function restartGame() {
+                hideAllModals();
+                stopTimer();
+                gameEnded = false;
+                isProcessing = false;
+                currentWordIndex = 0;
+                score = 0;
+                lives = 3;
+                gameWords = shuffleArray(wordList);
+                updateScore();
+                updateLives();
+                hintBtn.disabled = false;
+                loadWord();
+                startTimer();
+            }
+
+            // ---- EVENT LISTENERS ----
+            foundBtn.addEventListener('click', markFoundSound);
+            checkBtn.addEventListener('click', checkSegmentation);
+            resetBtn.addEventListener('click', resetSelection);
+            hintBtn.addEventListener('click', showHint);
+            restartBtn.addEventListener('click', restartGame);
+
+            instructionsToggleBtn.addEventListener('click', () => {
+                if (!isProcessing && !gameEnded) showModal(instructionsModal);
+            });
+            instructionsModal.addEventListener('click', (e) => {
+                if (e.target === instructionsModal) hideModal(instructionsModal);
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (instructionsModal.classList.contains('active')) hideModal(instructionsModal);
+                }
+                if (isProcessing || gameEnded) return;
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                switch (e.key.toLowerCase()) {
+                    case 'f': if (!foundBtn.disabled) markFoundSound(); break;
+                    case 'c': if (!checkBtn.disabled) checkSegmentation(); break;
+                    case 'r': if (!resetBtn.disabled) resetSelection(); break;
+                    case 'h': if (!hintBtn.disabled) showHint(); break;
+                    case 'i': if (!instructionsToggleBtn.disabled) showModal(instructionsModal); break;
+                }
+            });
+
+            // Prevent closing well‑done / try‑again by clicking on them
+            [wellDoneModal, tryAgainModal].forEach(m => m.addEventListener('click', (e) => e.stopPropagation()));
+
+            // ---- INIT ----
+            window.addEventListener('DOMContentLoaded', () => {
+                hideAllModals();
+                gameWords = shuffleArray(wordList);
+                updateScore();
+                updateLives();
+                loadWord();
+                startTimer();
+            });
+        })();
+    </script>
+</body>
+</html>
