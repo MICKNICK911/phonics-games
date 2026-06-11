@@ -837,6 +837,10 @@
         const sorted=[...playerObj.markedSounds].sort((a,b)=>a.indices[0]-b.indices[0]);
         return sorted.map(s=>cleanPlayerSound(playerObj,s.indices)).filter(str=>str.length>0);
     }
+    function clearWordPanelsImmediately(){
+        p1WordDisplay.innerHTML='';
+        p2WordDisplay.innerHTML='';
+    }
     function checkPlayer(which){
         if(!roundActive||!gameActive)return;
         const p=which==='p1'?player1:player2;
@@ -847,6 +851,7 @@
             roundActive=false;
             const other=which==='p1'?player2:player1;
             p.locked=true;other.locked=true;
+            clearWordPanelsImmediately(); // <-- INSTANT visual reset
             p.score++;
             if(which==='p1')shiftBar(true);else shiftBar(false);
             updateScoreBadges();updateBar();
@@ -864,7 +869,7 @@
             if(p.attempts<=0){
                 p.locked=true;status.textContent='No tries left';
                 const other=which==='p1'?player2:player1;
-                if(other.locked){roundActive=false;setTimeout(()=>{if(gameActive)startNextRound();},1000);}
+                if(other.locked){roundActive=false;clearWordPanelsImmediately();setTimeout(()=>{if(gameActive)startNextRound();},1000);}
             }
             updateButtons(which);
         }
