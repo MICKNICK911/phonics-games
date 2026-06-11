@@ -135,7 +135,6 @@
             30%{ transform:scale(1.2); }
             100%{ transform:scale(1.04); }
         }
-        /* 12 sound colours */
         .letter.sound-0  { background-color:#FF5252 !important; box-shadow:0 0 16px rgba(255,82,82,0.55); }
         .letter.sound-1  { background-color:#FF9800 !important; box-shadow:0 0 16px rgba(255,152,0,0.55); }
         .letter.sound-2  { background-color:#FFEB3B !important; color:#333; box-shadow:0 0 16px rgba(255,235,59,0.55); }
@@ -664,6 +663,7 @@
     let player2={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
     let currentWord=null;
     let wordQueue=[],queueIndex=0,lastIdx=-1;
+    let p1HintTimeout=null, p2HintTimeout=null;
 
     const shuffle=arr=>[...arr].sort(()=>Math.random()-0.5);
     const currentBank=()=>questionBanks[SELECTED_BANK_INDEX]||questionBanks[0];
@@ -879,20 +879,33 @@
         p1ScoreBadge.textContent=`Score: ${player1.score} / ${TOTAL_ROUNDS}`;
         p2ScoreBadge.textContent=`Score: ${player2.score} / ${TOTAL_ROUNDS}`;
     }
-    function resetRoundState(){
-        player1.selection=[];player1.markedSounds=[];player1.attempts=3;player1.locked=false;
-        player2.selection=[];player2.markedSounds=[];player2.attempts=3;player2.locked=false;
-        p1Status.textContent='Select letters';p1Status.classList.add('placeholder');
-        p2Status.textContent='Select letters';p2Status.classList.add('placeholder');
-        updateButtons('p1');updateButtons('p2');
-        roundActive=true;
-    }
     function startNextRound(){
         getNextWord();
         updateSharedQuestion();
+
+        // Clear previous round state BEFORE rendering
+        player1.selection=[]; player1.markedSounds=[]; player1.attempts=3; player1.locked=false;
+        player2.selection=[]; player2.markedSounds=[]; player2.attempts=3; player2.locked=false;
+
+        // Clear any pending hint timeouts
+        if(p1HintTimeout){clearTimeout(p1HintTimeout);p1HintTimeout=null;}
+        if(p2HintTimeout){clearTimeout(p2HintTimeout);p2HintTimeout=null;}
+
+        // Render clean word displays
         renderWordDisplay(p1WordDisplay,player1);
         renderWordDisplay(p2WordDisplay,player2);
-        resetRoundState();
+
+        // Reset status texts and button states
+        p1Status.textContent='Select letters';
+        p1Status.classList.remove('feedback-flash','wrong-flash'); 
+        p1Status.classList.add('placeholder');
+        p2Status.textContent='Select letters';
+        p2Status.classList.remove('feedback-flash','wrong-flash'); 
+        p2Status.classList.add('placeholder');
+
+        updateButtons('p1');
+        updateButtons('p2');
+        roundActive=true;
     }
     function endGame(){
         gameActive=false;roundActive=false;
@@ -1050,8 +1063,22 @@
     p2Check.addEventListener('click',()=>checkPlayer('p2'));
     p1Reset.addEventListener('click',()=>resetPlayer('p1'));
     p2Reset.addEventListener('click',()=>resetPlayer('p2'));
-    p1Hint.addEventListener('click',()=>{alert(`💡 This word has ${currentWord.sounds.length} sound(s).`);p1Hint.disabled=true;setTimeout(()=>{if(gameActive&&roundActive&&!player1.locked)p1Hint.disabled=false;},3000);});
-    p2Hint.addEventListener('click',()=>{alert(`💡 This word has ${currentWord.sounds.length} sound(s).`);p2Hint.disabled=true;setTimeout(()=>{if(gameActive&&roundActive&&!player2.locked)p2Hint.disabled=false;},3000);});
+    p1Hint.addEventListener('click',()=>{
+        if(p1HintTimeout)clearTimeout(p1HintTimeout);
+        p1Hint.disabled=true;
+        p1HintTimeout=setTimeout(()=>{
+            if(gameActive&&roundActive&&!player1.locked) p1Hint.disabled=false;
+            p1HintTimeout=null;
+        },3000);
+    });
+    p2Hint.addEventListener('click',()=>{
+        if(p2HintTimeout)clearTimeout(p2HintTimeout);
+        p2Hint.disabled=true;
+        p2HintTimeout=setTimeout(()=>{
+            if(gameActive&&roundActive&&!player2.locked) p2Hint.disabled=false;
+            p2HintTimeout=null;
+        },3000);
+    });
     settingsToggle.addEventListener('click',()=>settingsPanel.classList.toggle('open'));
     applySettingsBtn.addEventListener('click',applySettings);
     playAgainBtn.addEventListener('click',applySettings);
