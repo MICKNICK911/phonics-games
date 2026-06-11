@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Phoneme Tug of War · Two‑Player</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg:#0b1120; --surface:#111b2e; --text:#f1f5f9; --text-dim:#94a3b8;
+            --border:#1e293b; --radius:16px;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            height: 100dvh; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: clamp(8px,2vh,20px);
+            user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        .game-layout {
+            display: flex; flex-direction: column; width:100%; height:100%;
+            gap: clamp(8px,1.5vh,24px); max-width:1400px;
+            position: relative;
+        }
+        .top-area {
+            display: flex; flex-direction: column; align-items: center;
+            gap: clamp(6px,1.2vh,18px); width:100%;
+        }
+        .shared-question {
+            font-size: clamp(2rem, 5vw, 3.5rem); font-weight:800;
+            background: rgba(0,0,0,0.4); padding: clamp(0.6rem,1.5vw,1.5rem) clamp(1rem,2vw,2rem);
+            border-radius:2rem; text-align:center; line-height:1.4; word-break:break-word;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border:2px solid var(--border); width:100%;
+            letter-spacing: 2px;
+        }
+        .war-bar-container {
+            width:100%; height: clamp(45px, 8vh, 100px); position: relative;
+            background: white; border-radius: 50px; overflow: hidden;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.7);
+        }
+        .war-bar-blue, .war-bar-red {
+            position:absolute; top:0; height:100%;
+            transition: width 0.6s cubic-bezier(0.2,0.9,0.4,1);
+        }
+        .war-bar-blue { left:0; border-radius:50px 0 0 50px; }
+        .war-bar-red { right:0; border-radius:0 50px 50px 0; }
+        .bar-divider {
+            position:absolute; top:5%; height:90%; width:5px; background:white;
+            box-shadow:0 0 20px white; border-radius:5px;
+            transition: left 0.6s cubic-bezier(0.2,0.9,0.4,1); z-index:5;
+        }
+        .bar-scores {
+            position:absolute; top:0; left:0; right:0; bottom:0;
+            pointer-events:none; z-index:10; display:flex;
+            justify-content:space-between; align-items:center; padding:0 20px;
+        }
+        .bar-score {
+            font-weight:900; font-size: clamp(1.2rem, 2.5vw, 2.2rem); color:white;
+            text-shadow:0 2px 10px black; line-height:1;
+        }
+        .players-row {
+            display: flex; gap: clamp(8px,1.5vw,24px); width:100%;
+            flex:1; min-height:0; position: relative;
+        }
+        .player-panel {
+            flex:1; background: var(--surface); border-radius: var(--radius);
+            border:2px solid var(--border); padding: clamp(8px,1.5vh,24px);
+            display: flex; flex-direction: column; align-items: center;
+            gap: clamp(6px,1vh,14px); min-width:0;
+        }
+        .player-panel.p1 { border-top:4px solid #3b82f6; }
+        .player-panel.p2 { border-top:4px solid #ef4444; }
+        .player-name {
+            font-weight:700; font-size: clamp(0.9rem,1.8vw,1.4rem); letter-spacing:1px;
+            background: rgba(255,255,255,0.05); padding:0.3rem 0.9rem; border-radius:2rem;
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .player-avatar {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4);
+            display: inline-block; flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .score-badge {
+            font-size:0.8rem; font-weight:600; color: var(--text-dim);
+            background: rgba(255,255,255,0.05); padding:0.2rem 0.8rem; border-radius:1rem;
+        }
+        .status-box {
+            background: #0f172a; border:2px solid #334155; border-radius:1rem;
+            padding:0.5rem 1rem; font-size: clamp(0.9rem,2vw,1.3rem);
+            font-weight:700; text-align:center; min-width:120px;
+            transition: border-color 0.2s, background 0.2s;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 90%;
+        }
+        .status-box.placeholder { color: #475569; font-weight:400; font-size:0.9rem; }
+        .word-display {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+            background: rgba(255,255,255,0.05); border-radius:1rem;
+            padding:0.8rem; width:100%; min-height:60px; align-items:center;
+        }
+        .letter {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 10px 16px; margin: 2px; border-radius: 12px;
+            background-color: rgba(255,255,255,0.22); cursor: pointer;
+            transition: all 0.25s ease; user-select: none;
+            min-width: 50px; min-height: 50px;
+            font-size: clamp(1rem,2.5vw,1.6rem); font-weight:700;
+            border: 2px solid transparent; outline: none; color:white;
+        }
+        .letter:hover:not(.marked) {
+            background-color: rgba(255,255,255,0.4); transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+            border-color: rgba(255,255,255,0.6);
+        }
+        .letter:active:not(.marked) { transform:scale(0.92); transition: transform 0.1s ease; }
+        .letter.selected {
+            background-color: #4CAF50 !important; transform:scale(1.08);
+            box-shadow: 0 0 22px rgba(76,175,80,0.7); border-color:#81C784;
+            animation: pulse-selected 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse-selected {
+            0%,100%{ box-shadow: 0 0 22px rgba(76,175,80,0.7); }
+            50%{ box-shadow: 0 0 35px rgba(76,175,80,0.9); }
+        }
+        .letter.marked {
+            cursor:default; pointer-events:none;
+            border-color:rgba(255,255,255,0.65);
+            animation: mark-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes mark-pop {
+            0%{ transform:scale(1); }
+            30%{ transform:scale(1.2); }
+            100%{ transform:scale(1.04); }
+        }
+        /* 12 sound colours */
+        .letter.sound-0  { background-color:#FF5252 !important; box-shadow:0 0 16px rgba(255,82,82,0.55); }
+        .letter.sound-1  { background-color:#FF9800 !important; box-shadow:0 0 16px rgba(255,152,0,0.55); }
+        .letter.sound-2  { background-color:#FFEB3B !important; color:#333; box-shadow:0 0 16px rgba(255,235,59,0.55); }
+        .letter.sound-3  { background-color:#4CAF50 !important; box-shadow:0 0 16px rgba(76,175,80,0.55); }
+        .letter.sound-4  { background-color:#2196F3 !important; box-shadow:0 0 16px rgba(33,150,243,0.55); }
+        .letter.sound-5  { background-color:#9C27B0 !important; box-shadow:0 0 16px rgba(156,39,176,0.55); }
+        .letter.sound-6  { background-color:#00BCD4 !important; box-shadow:0 0 16px rgba(0,188,212,0.55); }
+        .letter.sound-7  { background-color:#E91E63 !important; box-shadow:0 0 16px rgba(233,30,99,0.55); }
+        .letter.sound-8  { background-color:#8BC34A !important; box-shadow:0 0 16px rgba(139,195,74,0.55); }
+        .letter.sound-9  { background-color:#FFC107 !important; box-shadow:0 0 16px rgba(255,193,7,0.55); }
+        .letter.sound-10 { background-color:#795548 !important; box-shadow:0 0 16px rgba(121,85,72,0.55); }
+        .letter.sound-11 { background-color:#607D8B !important; box-shadow:0 0 16px rgba(96,125,139,0.55); }
+        .sound-legend {
+            display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin:4px 0; max-width:100%;
+        }
+        .legend-item {
+            display:flex; align-items:center; gap:2px; font-size:0.65rem;
+            background:rgba(0,0,0,0.3); padding:3px 8px; border-radius:15px; white-space:nowrap;
+        }
+        .legend-color { width:12px; height:12px; border-radius:3px; }
+        .action-row {
+            display:flex; gap:8px; width:100%; flex-wrap:wrap; justify-content:center;
+        }
+        .action-btn {
+            flex:1; padding:0.6rem; font-weight:700; font-size:0.8rem;
+            border:none; border-radius:2rem; cursor:pointer; text-transform:uppercase;
+            letter-spacing:0.5px; transition:0.15s; display:flex;
+            align-items:center; justify-content:center; gap:0.3rem; color:white; min-width:80px;
+        }
+        .undo-btn { background:#f59e0b; color:#0f172a; }
+        .undo-btn:active { background:#b45309; }
+        .check-btn { background:#22c55e; }
+        .check-btn:active { background:#15803d; }
+        .found-btn { background:#8b5cf6; }
+        .found-btn:active { background:#6d28d9; }
+        .hint-btn { background:#6366f1; }
+        .hint-btn:active { background:#4338ca; }
+        .action-btn:disabled { opacity:0.5; pointer-events:none; }
+        .feedback-flash { animation: flashBorder 0.5s ease-out; }
+        @keyframes flashBorder {
+            0%{ border-color:#22c55e; box-shadow:0 0 20px #22c55e; }
+            100%{ border-color:#334155; box-shadow:none; }
+        }
+        .wrong-flash { animation: shake 0.4s ease; }
+        @keyframes shake {
+            0%,100%{ transform:translateX(0); }
+            20%{ transform:translateX(-6px); }
+            40%{ transform:translateX(6px); }
+            60%{ transform:translateX(-4px); }
+            80%{ transform:translateX(4px); }
+        }
+        .center-column {
+            flex: 0 0 clamp(200px, 28vw, 340px);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 0.8rem; z-index: 20;
+        }
+        .settings-toggle {
+            background:none; border:2px solid #334155; color:#cbd5e1;
+            border-radius:2rem; padding:0.3rem 1rem; font-weight:600;
+            font-size:0.8rem; cursor:pointer; transition:0.2s;
+            display:flex; align-items:center; gap:0.4rem;
+        }
+        .settings-toggle:hover { background:#1e293b; }
+        .settings-panel {
+            display:none; background:#1e293b; border-radius:1rem;
+            padding:0.8rem; width:100%; flex-direction:column; gap:0.6rem;
+            border:1px solid #334155; max-height:50vh; overflow-y:auto;
+        }
+        .settings-panel.open { display:flex; }
+        .setting-row {
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:0.3rem;
+        }
+        .setting-row label { font-size:0.75rem; font-weight:500; color:#cbd5e1; }
+        .setting-row input[type="text"],
+        .setting-row input[type="number"] {
+            background:#0f172a; border:1px solid #334155; color:white;
+            padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:600; text-align:center;
+        }
+        .setting-row input[type="text"] { width:80px; }
+        .setting-row input[type="number"] { width:55px; }
+        .color-selector {
+            display:flex; align-items:center; gap:0.4rem;
+        }
+        .color-selector select {
+            background:#0f172a; border:1px solid #334155; color:white;
+            padding:0.3rem 0.5rem; border-radius:0.5rem; font-weight:600;
+            font-size:0.75rem; max-width:120px;
+        }
+        .color-preview {
+            width:20px; height:20px; border-radius:50%;
+            border:2px solid white; box-shadow:0 0 6px rgba(0,0,0,0.6);
+            display:inline-block; transition: background 0.2s;
+        }
+        .radio-group {
+            display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;
+        }
+        .radio-group label {
+            display:flex; align-items:center; gap:0.2rem; font-size:0.7rem;
+            cursor:pointer; color:#cbd5e1; background:#0f172a;
+            padding:0.25rem 0.6rem; border-radius:1.5rem; border:1px solid #334155;
+            transition:0.2s; white-space:nowrap;
+        }
+        .radio-group label:has(input:checked) {
+            border-color:#6366f1; background:#1a1f3a; color:#a5b4fc;
+        }
+        .radio-group input[type="radio"] { accent-color:#6366f1; width:auto; margin:0; }
+        .apply-settings-btn {
+            background:#6366f1; color:white; border:none; border-radius:2rem;
+            padding:0.5rem; font-weight:700; cursor:pointer; font-size:0.9rem;
+            letter-spacing:0.5px; margin-top:0.2rem;
+        }
+        .import-row {
+            display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;
+        }
+        .import-btn, .reset-btn {
+            background:#475569; border:none; color:white; padding:0.4rem 0.8rem;
+            border-radius:2rem; font-weight:600; font-size:0.8rem; cursor:pointer;
+            transition:0.2s; display:flex; align-items:center; gap:0.3rem;
+        }
+        .import-btn:hover { background:#6366f1; }
+        .reset-btn:hover { background:#ef4444; }
+        .hidden-file-input { display: none; }
+        .overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.85);
+            backdrop-filter:blur(8px); display:flex; align-items:center;
+            justify-content:center; z-index:50; opacity:0; pointer-events:none;
+            transition:opacity 0.4s;
+        }
+        .overlay.active { opacity:1; pointer-events:auto; }
+        .result-card {
+            background:#1e293b; border-radius:2rem; padding:1.5rem;
+            text-align:center; box-shadow:0 20px 40px black;
+            max-width:400px; width:90%;
+        }
+        .result-icon { font-size:3.5rem; margin-bottom:0.5rem; }
+        .result-title { font-size:1.8rem; font-weight:900; }
+        .result-scores { display:flex; justify-content:center; gap:1.5rem; margin:1rem 0; }
+        .play-again-btn {
+            background:#6366f1; border:none; color:white; padding:0.7rem 2rem;
+            border-radius:3rem; font-weight:700; font-size:1rem; cursor:pointer;
+        }
+        @media (max-width:750px) {
+            .players-row { gap: 4px; }
+            .center-column {
+                position: absolute; top: 8px; left: 50%;
+                transform: translateX(-50%); width: auto; flex: 0 0 auto;
+                z-index: 30; flex-direction: row; gap: 0.4rem;
+            }
+            .settings-toggle { font-size:0.7rem; padding:0.2rem 0.7rem; }
+            .settings-panel {
+                position: absolute; top: 100%; left: 50%;
+                transform: translateX(-50%); width: 280px; max-height: 60vh; margin-top: 4px;
+            }
+            .player-panel { padding: 4px 6px; gap: 4px; border-radius: 12px; }
+            .player-name { font-size:0.75rem; padding:0.2rem 0.5rem; }
+            .score-badge { font-size:0.65rem; padding:0.1rem 0.4rem; }
+            .status-box { font-size:0.85rem; padding:0.3rem 0.5rem; min-width:70px; }
+            .word-display { gap: 4px; padding:0.4rem; }
+            .letter { font-size:0.9rem; padding:6px 10px; min-width:38px; min-height:38px; border-radius:8px; }
+            .action-btn { padding:0.4rem; font-size:0.7rem; min-width:60px; }
+            .shared-question { font-size:1.6rem; padding:0.6rem 1rem; }
+            .war-bar-container { height:50px; }
+        }
+        @media (max-height:500px) and (orientation: landscape) {
+            body { padding: 4px; }
+            .game-layout { gap: 4px; }
+            .top-area { gap: 4px; }
+            .shared-question { font-size: 1.2rem; padding: 0.4rem 1rem; border-radius: 1rem; }
+            .war-bar-container { height: 36px; border-radius: 30px; }
+            .bar-scores { padding: 0 10px; }
+            .bar-score { font-size: 1rem; }
+            .players-row { gap: 4px; }
+            .player-panel { padding: 4px 8px; gap: 4px; border-radius: 12px; }
+            .word-display { padding: 0.2rem; gap: 2px; }
+            .letter { font-size: 0.75rem; padding: 4px 8px; min-width: 32px; min-height: 32px; border-radius: 6px; }
+            .action-btn { padding: 0.3rem; font-size: 0.65rem; min-width: 55px; }
+            .center-column { top: 2px; }
+            .settings-toggle { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+            .settings-panel { width: 240px; max-height: 40vh; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-layout">
+    <div class="top-area">
+        <div class="shared-question" id="sharedQuestion">Loading...</div>
+        <div class="war-bar-container">
+            <div class="war-bar-blue" id="blueBar"></div>
+            <div class="war-bar-red" id="redBar"></div>
+            <div class="bar-divider" id="barDivider"></div>
+            <div class="bar-scores">
+                <span class="bar-score" id="blueScore">0</span>
+                <span class="bar-score" id="redScore">0</span>
+            </div>
+        </div>
+    </div>
+    <div class="players-row">
+        <div class="player-panel p1" id="p1Panel">
+            <div class="player-name" id="p1NameDisplay">
+                <span class="player-avatar" id="p1Avatar"></span>
+                <span class="player-name-text">Player 1</span>
+            </div>
+            <div class="score-badge" id="p1ScoreBadge">Score: 0 / 10</div>
+            <div class="status-box placeholder" id="p1Status">Select letters</div>
+            <div class="word-display" id="p1WordDisplay"></div>
+            <div class="sound-legend" id="p1Legend"></div>
+            <div class="action-row">
+                <button class="action-btn found-btn" id="p1Found" disabled>✅ Found Sound</button>
+                <button class="action-btn check-btn" id="p1Check" disabled>🔍 Check Sound</button>
+                <button class="action-btn undo-btn" id="p1Reset" disabled>↺ Reset</button>
+                <button class="action-btn hint-btn" id="p1Hint" disabled>💡 Hint</button>
+            </div>
+        </div>
+        <div class="center-column">
+            <button class="settings-toggle" id="settingsToggle">⚙️ Settings</button>
+            <div class="settings-panel" id="settingsPanel">
+                <div class="setting-row">
+                    <label>Player 1 Name</label>
+                    <input type="text" id="p1NameInput" value="Player 1" maxlength="12">
+                </div>
+                <div class="setting-row">
+                    <label>Player 2 Name</label>
+                    <input type="text" id="p2NameInput" value="Player 2" maxlength="12">
+                </div>
+                <div class="setting-row">
+                    <label>Points to Win</label>
+                    <input type="number" id="roundsInput" value="10" min="1" max="20" step="1">
+                </div>
+                <div class="setting-row">
+                    <label>Word Bank</label>
+                    <div class="radio-group" id="bankGroup"></div>
+                </div>
+                <div class="setting-row">
+                    <label>🔵 P1 Color</label>
+                    <div class="color-selector">
+                        <div class="color-preview" id="p1ColorPreview"></div>
+                        <select id="p1ColorSelect"></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>🔴 P2 Color</label>
+                    <div class="color-selector">
+                        <div class="color-preview" id="p2ColorPreview"></div>
+                        <select id="p2ColorSelect"></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Show Hint Buttons</label>
+                    <input type="checkbox" id="hintToggleCheckbox" checked>
+                </div>
+                <div class="setting-row">
+                    <label>Import Words</label>
+                    <div class="import-row">
+                        <input type="file" id="importFileInput" accept=".json" class="hidden-file-input">
+                        <button class="import-btn" id="importBtn">📂 Import .json</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Reset to Default</label>
+                    <button class="reset-btn" id="resetBanksBtn">🔄 Reset Banks</button>
+                </div>
+                <button class="apply-settings-btn" id="applySettingsBtn">Apply & Restart</button>
+            </div>
+        </div>
+        <div class="player-panel p2" id="p2Panel">
+            <div class="player-name" id="p2NameDisplay">
+                <span class="player-avatar" id="p2Avatar"></span>
+                <span class="player-name-text">Player 2</span>
+            </div>
+            <div class="score-badge" id="p2ScoreBadge">Score: 0 / 10</div>
+            <div class="status-box placeholder" id="p2Status">Select letters</div>
+            <div class="word-display" id="p2WordDisplay"></div>
+            <div class="sound-legend" id="p2Legend"></div>
+            <div class="action-row">
+                <button class="action-btn found-btn" id="p2Found" disabled>✅ Found Sound</button>
+                <button class="action-btn check-btn" id="p2Check" disabled>🔍 Check Sound</button>
+                <button class="action-btn undo-btn" id="p2Reset" disabled>↺ Reset</button>
+                <button class="action-btn hint-btn" id="p2Hint" disabled>💡 Hint</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="overlay" id="overlay">
+    <div class="result-card">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-scores">
+            <div><div id="finalP1Label">🔵 P1</div><div style="font-size:2.5rem; font-weight:900;" id="finalP1">0</div></div>
+            <div><div id="finalP2Label">🔴 P2</div><div style="font-size:2.5rem; font-weight:900;" id="finalP2">0</div></div>
+        </div>
+        <button class="play-again-btn" id="playAgainBtn">🔄 Play Again</button>
+    </div>
+</div>
+<script>
+(function() {
+    const DEFAULT_WORDS = [
+        { word: "blast", sounds: ["bl","a","st"], silentIndices: [] },
+        { word: "black", sounds: ["bl","a","ck"], silentIndices: [] },
+        { word: "blend", sounds: ["bl","e","nd"], silentIndices: [] },
+        { word: "blink", sounds: ["bl","i","nk"], silentIndices: [] },
+        { word: "bliss", sounds: ["bl","i","ss"], silentIndices: [] },
+        { word: "blob", sounds: ["bl","o","b"], silentIndices: [] },
+        { word: "clap", sounds: ["cl","a","p"], silentIndices: [] },
+        { word: "clip", sounds: ["cl","i","p"], silentIndices: [] },
+        { word: "club", sounds: ["cl","u","b"], silentIndices: [] },
+        { word: "clog", sounds: ["cl","o","g"], silentIndices: [] },
+        { word: "cliff", sounds: ["cl","i","ff"], silentIndices: [] },
+        { word: "flip", sounds: ["fl","i","p"], silentIndices: [] },
+        { word: "flat", sounds: ["fl","a","t"], silentIndices: [] },
+        { word: "flask", sounds: ["fl","a","sk"], silentIndices: [] },
+        { word: "flag", sounds: ["fl","a","g"], silentIndices: [] },
+        { word: "flock", sounds: ["fl","o","ck"], silentIndices: [] },
+        { word: "glad", sounds: ["gl","a","d"], silentIndices: [] },
+        { word: "glass", sounds: ["gl","a","ss"], silentIndices: [] },
+        { word: "gloss", sounds: ["gl","o","ss"], silentIndices: [] },
+        { word: "glum", sounds: ["gl","u","m"], silentIndices: [] },
+        { word: "plant", sounds: ["pl","a","nt"], silentIndices: [] },
+        { word: "plum", sounds: ["pl","u","m"], silentIndices: [] },
+        { word: "plop", sounds: ["pl","o","p"], silentIndices: [] },
+        { word: "pluck", sounds: ["pl","u","ck"], silentIndices: [] },
+        { word: "plot", sounds: ["pl","o","t"], silentIndices: [] },
+        { word: "slip", sounds: ["sl","i","p"], silentIndices: [] },
+        { word: "slap", sounds: ["sl","a","p"], silentIndices: [] },
+        { word: "sled", sounds: ["sl","e","d"], silentIndices: [] },
+        { word: "slosh", sounds: ["sl","o","sh"], silentIndices: [] },
+        { word: "brush", sounds: ["br","u","sh"], silentIndices: [] },
+        { word: "crab", sounds: ["cr","a","b"], silentIndices: [] },
+        { word: "crash", sounds: ["cr","a","sh"], silentIndices: [] },
+        { word: "crisp", sounds: ["cr","i","sp"], silentIndices: [] },
+        { word: "drop", sounds: ["dr","o","p"], silentIndices: [] },
+        { word: "drum", sounds: ["dr","u","m"], silentIndices: [] },
+        { word: "dress", sounds: ["dr","e","ss"], silentIndices: [] },
+        { word: "drip", sounds: ["dr","i","p"], silentIndices: [] },
+        { word: "frog", sounds: ["fr","o","g"], silentIndices: [] },
+        { word: "frost", sounds: ["fr","o","st"], silentIndices: [] },
+        { word: "front", sounds: ["fr","o","nt"], silentIndices: [] },
+        { word: "grip", sounds: ["gr","i","p"], silentIndices: [] },
+        { word: "grass", sounds: ["gr","a","ss"], silentIndices: [] },
+        { word: "grand", sounds: ["gr","a","nd"], silentIndices: [] },
+        { word: "grin", sounds: ["gr","i","n"], silentIndices: [] },
+        { word: "press", sounds: ["pr","e","ss"], silentIndices: [] },
+        { word: "prank", sounds: ["pr","a","nk"], silentIndices: [] },
+        { word: "print", sounds: ["pr","i","nt"], silentIndices: [] },
+        { word: "trust", sounds: ["tr","u","st"], silentIndices: [] },
+        { word: "trap", sounds: ["tr","a","p"], silentIndices: [] },
+        { word: "truck", sounds: ["tr","u","ck"], silentIndices: [] },
+        { word: "trip", sounds: ["tr","i","p"], silentIndices: [] },
+        { word: "track", sounds: ["tr","a","ck"], silentIndices: [] },
+        { word: "trick", sounds: ["tr","i","ck"], silentIndices: [] },
+        { word: "scan", sounds: ["sc","a","n"], silentIndices: [] },
+        { word: "scold", sounds: ["sc","o","ld"], silentIndices: [] },
+        { word: "scrap", sounds: ["sc","r","a","p"], silentIndices: [] },
+        { word: "skin", sounds: ["sk","i","n"], silentIndices: [] },
+        { word: "skip", sounds: ["sk","i","p"], silentIndices: [] },
+        { word: "sketch", sounds: ["sk","e","tch"], silentIndices: [] },
+        { word: "smash", sounds: ["sm","a","sh"], silentIndices: [] },
+        { word: "smell", sounds: ["sm","e","ll"], silentIndices: [] },
+        { word: "smock", sounds: ["sm","o","ck"], silentIndices: [] },
+        { word: "snap", sounds: ["sn","a","p"], silentIndices: [] },
+        { word: "snip", sounds: ["sn","i","p"], silentIndices: [] },
+        { word: "snack", sounds: ["sn","a","ck"], silentIndices: [] },
+        { word: "spend", sounds: ["sp","e","nd"], silentIndices: [] },
+        { word: "spell", sounds: ["sp","e","ll"], silentIndices: [] },
+        { word: "spot", sounds: ["sp","o","t"], silentIndices: [] },
+        { word: "spin", sounds: ["sp","i","n"], silentIndices: [] },
+        { word: "spill", sounds: ["sp","i","ll"], silentIndices: [] },
+        { word: "stop", sounds: ["st","o","p"], silentIndices: [] },
+        { word: "step", sounds: ["st","e","p"], silentIndices: [] },
+        { word: "stamp", sounds: ["st","a","mp"], silentIndices: [] },
+        { word: "stem", sounds: ["st","e","m"], silentIndices: [] },
+        { word: "sting", sounds: ["st","i","ng"], silentIndices: [] },
+        { word: "stun", sounds: ["st","u","n"], silentIndices: [] },
+        { word: "swim", sounds: ["sw","i","m"], silentIndices: [] },
+        { word: "swing", sounds: ["sw","i","ng"], silentIndices: [] },
+        { word: "swan", sounds: ["sw","a","n"], silentIndices: [] },
+        { word: "swell", sounds: ["sw","e","ll"], silentIndices: [] },
+        { word: "swap", sounds: ["sw","a","p"], silentIndices: [] },
+        { word: "squat", sounds: ["squ","a","t"], silentIndices: [] },
+        { word: "squid", sounds: ["squ","i","d"], silentIndices: [] },
+        { word: "squint", sounds: ["squ","i","nt"], silentIndices: [] },
+        { word: "squash", sounds: ["squ","a","sh"], silentIndices: [] },
+        { word: "hand", sounds: ["h","a","nd"], silentIndices: [] },
+        { word: "land", sounds: ["l","a","nd"], silentIndices: [] },
+        { word: "send", sounds: ["s","e","nd"], silentIndices: [] },
+        { word: "went", sounds: ["w","e","nt"], silentIndices: [] },
+        { word: "hunt", sounds: ["h","u","nt"], silentIndices: [] },
+        { word: "sink", sounds: ["s","i","nk"], silentIndices: [] },
+        { word: "bank", sounds: ["b","a","nk"], silentIndices: [] },
+        { word: "jump", sounds: ["j","u","mp"], silentIndices: [] },
+        { word: "camp", sounds: ["c","a","mp"], silentIndices: [] },
+        { word: "lamp", sounds: ["l","a","mp"], silentIndices: [] },
+        { word: "list", sounds: ["l","i","st"], silentIndices: [] },
+        { word: "fast", sounds: ["f","a","st"], silentIndices: [] },
+        { word: "nest", sounds: ["n","e","st"], silentIndices: [] },
+        { word: "desk", sounds: ["d","e","sk"], silentIndices: [] },
+        { word: "mask", sounds: ["m","a","sk"], silentIndices: [] },
+        { word: "gasp", sounds: ["g","a","sp"], silentIndices: [] },
+        { word: "help", sounds: ["h","e","lp"], silentIndices: [] },
+        { word: "gulp", sounds: ["g","u","lp"], silentIndices: [] },
+        { word: "kept", sounds: ["k","e","pt"], silentIndices: [] },
+        { word: "slept", sounds: ["sl","e","pt"], silentIndices: [] },
+        { word: "left", sounds: ["l","e","ft"], silentIndices: [] },
+        { word: "soft", sounds: ["s","o","ft"], silentIndices: [] },
+        { word: "gift", sounds: ["g","i","ft"], silentIndices: [] },
+        { word: "fact", sounds: ["f","a","ct"], silentIndices: [] },
+        { word: "act", sounds: ["a","ct"], silentIndices: [] },
+        { word: "milk", sounds: ["m","i","lk"], silentIndices: [] },
+        { word: "silk", sounds: ["s","i","lk"], silentIndices: [] },
+        { word: "felt", sounds: ["f","e","lt"], silentIndices: [] },
+        { word: "melt", sounds: ["m","e","lt"], silentIndices: [] },
+        { word: "belt", sounds: ["b","e","lt"], silentIndices: [] },
+        { word: "text", sounds: ["t","e","xt"], silentIndices: [] },
+        { word: "next", sounds: ["n","e","xt"], silentIndices: [] },
+        { word: "pets", sounds: ["p","e","ts"], silentIndices: [] },
+        { word: "cats", sounds: ["c","a","ts"], silentIndices: [] },
+        { word: "ship", sounds: ["sh","i","p"], silentIndices: [] },
+        { word: "shop", sounds: ["sh","o","p"], silentIndices: [] },
+        { word: "trash", sounds: ["tr","a","sh"], silentIndices: [] },
+        { word: "fish", sounds: ["f","i","sh"], silentIndices: [] },
+        { word: "chat", sounds: ["ch","a","t"], silentIndices: [] },
+        { word: "chop", sounds: ["ch","o","p"], silentIndices: [] },
+        { word: "chip", sounds: ["ch","i","p"], silentIndices: [] },
+        { word: "chin", sounds: ["ch","i","n"], silentIndices: [] },
+        { word: "chest", sounds: ["ch","e","st"], silentIndices: [] },
+        { word: "chick", sounds: ["ch","i","ck"], silentIndices: [] },
+        { word: "chill", sounds: ["ch","i","ll"], silentIndices: [] },
+        { word: "match", sounds: ["m","a","tch"], silentIndices: [] },
+        { word: "fetch", sounds: ["f","e","tch"], silentIndices: [] },
+        { word: "catch", sounds: ["c","a","tch"], silentIndices: [] },
+        { word: "patch", sounds: ["p","a","tch"], silentIndices: [] },
+        { word: "stitch", sounds: ["st","i","tch"], silentIndices: [] },
+        { word: "thumb", sounds: ["th","u","m"], silentIndices: [4] },
+        { word: "thin", sounds: ["th","i","n"], silentIndices: [] },
+        { word: "thank", sounds: ["th","a","nk"], silentIndices: [] },
+        { word: "thick", sounds: ["th","i","ck"], silentIndices: [] },
+        { word: "thing", sounds: ["th","i","ng"], silentIndices: [] },
+        { word: "think", sounds: ["th","i","nk"], silentIndices: [] },
+        { word: "bath", sounds: ["b","a","th"], silentIndices: [] },
+        { word: "ring", sounds: ["r","i","ng"], silentIndices: [] },
+        { word: "king", sounds: ["k","i","ng"], silentIndices: [] },
+        { word: "song", sounds: ["s","o","ng"], silentIndices: [] },
+        { word: "long", sounds: ["l","o","ng"], silentIndices: [] },
+        { word: "wing", sounds: ["w","i","ng"], silentIndices: [] },
+        { word: "string", sounds: ["str","i","ng"], silentIndices: [] },
+        { word: "which", sounds: ["wh","i","ch"], silentIndices: [] },
+        { word: "what", sounds: ["wh","a","t"], silentIndices: [] },
+        { word: "when", sounds: ["wh","e","n"], silentIndices: [] },
+        { word: "graph", sounds: ["gr","a","ph"], silentIndices: [] },
+        { word: "dolphin", sounds: ["d","o","l","ph","i","n"], silentIndices: [] },
+        { word: "phonics", sounds: ["ph","o","n","i","cs"], silentIndices: [] },
+        { word: "track", sounds: ["tr","a","ck"], silentIndices: [] },
+        { word: "back", sounds: ["b","a","ck"], silentIndices: [] },
+        { word: "pick", sounds: ["p","i","ck"], silentIndices: [] },
+        { word: "duck", sounds: ["d","u","ck"], silentIndices: [] },
+        { word: "neck", sounds: ["n","e","ck"], silentIndices: [] },
+        { word: "clock", sounds: ["cl","o","ck"], silentIndices: [] },
+        { word: "wrap", sounds: ["r","a","p"], silentIndices: [0] },
+        { word: "wrath", sounds: ["r","a","th"], silentIndices: [0] },
+        { word: "wrist", sounds: ["r","i","st"], silentIndices: [0] },
+        { word: "wrong", sounds: ["r","o","ng"], silentIndices: [0] },
+        { word: "wreck", sounds: ["r","e","ck"], silentIndices: [0] },
+        { word: "wrench", sounds: ["r","e","nch"], silentIndices: [0] },
+        { word: "knap", sounds: ["n","a","p"], silentIndices: [0] },
+        { word: "knot", sounds: ["n","o","t"], silentIndices: [0] },
+        { word: "knob", sounds: ["n","o","b"], silentIndices: [0] },
+        { word: "knock", sounds: ["n","o","ck"], silentIndices: [0] },
+        { word: "knit", sounds: ["n","i","t"], silentIndices: [0] },
+        { word: "gnash", sounds: ["n","a","sh"], silentIndices: [0] },
+        { word: "gnat", sounds: ["n","a","t"], silentIndices: [0] },
+        { word: "gnostic", sounds: ["n","o","st","i","c"], silentIndices: [0] }
+    ];
+    const DEFAULT_BANKS = [{ name: 'Phonics', words: DEFAULT_WORDS }];
+    const STORAGE_KEY = 'quiz_tug_of_war_banks';
+    const SETTINGS_KEY = 'quiz_tug_of_war_settings';
+    const COLOR_PALETTE = [
+        { name:'Red',    light:'#EF4444', dark:'#B91C1C' },
+        { name:'Orange', light:'#F97316', dark:'#C2410C' },
+        { name:'Yellow', light:'#EAB308', dark:'#A16207' },
+        { name:'Green',  light:'#22C55E', dark:'#15803D' },
+        { name:'Blue',   light:'#3B82F6', dark:'#1E40AF' },
+        { name:'Indigo', light:'#6366F1', dark:'#4338CA' },
+        { name:'Violet', light:'#8B5CF6', dark:'#6D28D9' },
+        { name:'Pink',   light:'#EC4899', dark:'#BE185D' },
+        { name:'Cyan',   light:'#06B6D4', dark:'#0E7490' },
+        { name:'Lime',   light:'#84CC16', dark:'#4D7C0F' }
+    ];
+    const $=id=>document.getElementById(id);
+    const sharedQuestion=$('sharedQuestion');
+    const p1Panel=$('p1Panel'),p2Panel=$('p2Panel');
+    const p1NameText=document.querySelector('#p1NameDisplay .player-name-text'),p2NameText=document.querySelector('#p2NameDisplay .player-name-text');
+    const p1Avatar=$('p1Avatar'),p2Avatar=$('p2Avatar');
+    const p1ScoreBadge=$('p1ScoreBadge'),p2ScoreBadge=$('p2ScoreBadge');
+    const p1Status=$('p1Status'),p2Status=$('p2Status');
+    const p1WordDisplay=$('p1WordDisplay'),p2WordDisplay=$('p2WordDisplay');
+    const p1Legend=$('p1Legend'),p2Legend=$('p2Legend');
+    const p1Found=$('p1Found'),p2Found=$('p2Found');
+    const p1Check=$('p1Check'),p2Check=$('p2Check');
+    const p1Reset=$('p1Reset'),p2Reset=$('p2Reset');
+    const p1Hint=$('p1Hint'),p2Hint=$('p2Hint');
+    const blueBar=$('blueBar'),redBar=$('redBar'),barDivider=$('barDivider');
+    const blueScoreEl=$('blueScore'),redScoreEl=$('redScore');
+    const settingsToggle=$('settingsToggle'),settingsPanel=$('settingsPanel');
+    const p1NameInput=$('p1NameInput'),p2NameInput=$('p2NameInput');
+    const roundsInput=$('roundsInput'),applySettingsBtn=$('applySettingsBtn');
+    const bankGroup=$('bankGroup');
+    const p1ColorSelect=$('p1ColorSelect'),p2ColorSelect=$('p2ColorSelect');
+    const p1ColorPreview=$('p1ColorPreview'),p2ColorPreview=$('p2ColorPreview');
+    const hintToggleCheckbox=$('hintToggleCheckbox');
+    const importFileInput=$('importFileInput'),importBtn=$('importBtn');
+    const resetBanksBtn=$('resetBanksBtn');
+    const overlay=$('overlay'),resultIcon=$('resultIcon'),resultTitle=$('resultTitle');
+    const finalP1Label=$('finalP1Label'),finalP2Label=$('finalP2Label');
+    const finalP1=$('finalP1'),finalP2=$('finalP2');
+    const playAgainBtn=$('playAgainBtn');
+
+    let questionBanks=[];
+    let TOTAL_ROUNDS=10;
+    let SELECTED_BANK_INDEX=0;
+    let PLAYER1='Player 1',PLAYER2='Player 2';
+    let p1ColorIdx=4,p2ColorIdx=0;
+    let hintButtonsVisible=true;
+    let gameActive=true,roundActive=true;
+    let barPosition=50;
+    let player1={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
+    let player2={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
+    let currentWord=null;
+    let wordQueue=[],queueIndex=0,lastIdx=-1;
+
+    const shuffle=arr=>[...arr].sort(()=>Math.random()-0.5);
+    const currentBank=()=>questionBanks[SELECTED_BANK_INDEX]||questionBanks[0];
+    const getPlayerColor=idx=>COLOR_PALETTE[idx]||COLOR_PALETTE[0];
+
+    function buildQueue(){ return shuffle(currentBank().words.map((_,i)=>i)); }
+    function getNextWord(){
+        const bank=currentBank();
+        if(!bank||!bank.words||!bank.words.length){currentWord={word:'NO WORDS',sounds:[],silentIndices:[]};return;}
+        if(!wordQueue.length||queueIndex>=wordQueue.length){
+            wordQueue=buildQueue();
+            queueIndex=0;
+            if(wordQueue.length>1&&lastIdx>=0&&wordQueue[0]===lastIdx)[wordQueue[0],wordQueue[1]]=[wordQueue[1],wordQueue[0]];
+        }
+        const idx=wordQueue[queueIndex++];
+        lastIdx=idx;
+        currentWord=bank.words[idx];
+    }
+    function updatePlayerNameDisplay(){
+        if(p1NameText)p1NameText.textContent=PLAYER1;
+        if(p2NameText)p2NameText.textContent=PLAYER2;
+        finalP1Label.textContent=`🔵 ${PLAYER1}`;
+        finalP2Label.textContent=`🔴 ${PLAYER2}`;
+    }
+    function applyPlayerColors(){
+        const c1=getPlayerColor(p1ColorIdx),c2=getPlayerColor(p2ColorIdx);
+        p1Panel.style.borderTopColor=c1.light; p2Panel.style.borderTopColor=c2.light;
+        p1NameText.parentElement.style.color=c1.light; p2NameText.parentElement.style.color=c2.light;
+        finalP1Label.style.color=c1.light; finalP2Label.style.color=c2.light;
+        blueBar.style.background=`linear-gradient(180deg,${c1.light},${c1.dark})`;
+        redBar.style.background=`linear-gradient(180deg,${c2.light},${c2.dark})`;
+        p1ColorPreview.style.background=c1.light; p2ColorPreview.style.background=c2.light;
+        p1Avatar.style.background=c1.light; p2Avatar.style.background=c2.light;
+        updatePlayerNameDisplay();
+    }
+    function updateHintVisibility(){
+        const display=hintButtonsVisible?'':'none';
+        p1Hint.style.display=display;
+        p2Hint.style.display=display;
+    }
+    function updateSharedQuestion(){ sharedQuestion.textContent=currentWord.word; }
+    function renderWordDisplay(wordEl,playerObj){
+        const word=currentWord.word;
+        wordEl.innerHTML='';
+        for(let i=0;i<word.length;i++){
+            const span=document.createElement('span');
+            span.className='letter';
+            span.textContent=word[i];
+            span.dataset.index=i;
+            span.addEventListener('pointerdown',e=>handleLetterClick(e,playerObj,wordEl));
+            wordEl.appendChild(span);
+        }
+        updateLetterStyles(wordEl,playerObj);
+    }
+    function updateLetterStyles(wordEl,playerObj){
+        const letters=wordEl.querySelectorAll('.letter');
+        letters.forEach(l=>{
+            const idx=parseInt(l.dataset.index);
+            l.className='letter';
+            if(playerObj.markedSounds.some(s=>s.indices.includes(idx))){
+                const sound=playerObj.markedSounds.find(s=>s.indices.includes(idx));
+                l.classList.add('marked',`sound-${sound.soundColorIndex%12}`);
+            }
+            if(playerObj.selection.includes(idx))l.classList.add('selected');
+        });
+    }
+    function handleLetterClick(e,playerObj,wordEl){
+        e.preventDefault();
+        if(!gameActive||!roundActive||playerObj.locked)return;
+        const el=e.target;
+        if(!el.classList.contains('letter'))return;
+        const idx=parseInt(el.dataset.index);
+        if(el.classList.contains('marked'))return;
+        if(playerObj.selection.includes(idx)){
+            const pos=playerObj.selection.indexOf(idx);
+            if(pos!==-1&&(idx===playerObj.selection[playerObj.selection.length-1]||playerObj.selection.length===1)){
+                playerObj.selection.splice(pos,1);
+                el.classList.remove('selected');
+                updateButtons(playerObj===player1?'p1':'p2');
+                return;
+            }
+        }
+        if(playerObj.selection.length===0){
+            playerObj.selection.push(idx);
+            el.classList.add('selected');
+            updateButtons(playerObj===player1?'p1':'p2');
+            return;
+        }
+        const last=playerObj.selection[playerObj.selection.length-1];
+        const first=playerObj.selection[0];
+        if(idx===last+1||idx===first-1){
+            const target=wordEl.querySelector(`[data-index="${idx}"]`);
+            if(target&&target.classList.contains('marked'))return;
+            if(idx===last+1)playerObj.selection.push(idx);
+            else playerObj.selection.unshift(idx);
+            el.classList.add('selected');
+            updateButtons(playerObj===player1?'p1':'p2');
+            return;
+        }
+        playerObj.selection.forEach(i=>{
+            const el2=wordEl.querySelector(`[data-index="${i}"]`);
+            if(el2&&!el2.classList.contains('marked'))el2.classList.remove('selected');
+        });
+        playerObj.selection=[idx];
+        el.classList.add('selected');
+        updateButtons(playerObj===player1?'p1':'p2');
+    }
+    function areAllCovered(playerObj){
+        const covered=new Set();
+        playerObj.markedSounds.forEach(s=>s.indices.forEach(i=>covered.add(i)));
+        playerObj.selection.forEach(i=>covered.add(i));
+        const silent=currentWord.silentIndices||[];
+        for(let i=0;i<currentWord.word.length;i++){
+            if(silent.includes(i))continue;
+            if(!covered.has(i))return false;
+        }
+        return true;
+    }
+    function updateButtons(which){
+        const p=which==='p1'?player1:player2;
+        const foundBtn=which==='p1'?p1Found:p2Found;
+        const checkBtn=which==='p1'?p1Check:p2Check;
+        const resetBtn=which==='p1'?p1Reset:p2Reset;
+        const hintBtn=which==='p1'?p1Hint:p2Hint;
+        const allCovered=areAllCovered(p);
+        const hasSelection=p.selection.length>0;
+        const isLocked=p.locked||!roundActive||!gameActive;
+        foundBtn.disabled=!hasSelection||isLocked;
+        checkBtn.disabled=!allCovered||isLocked;
+        resetBtn.disabled=(!hasSelection&&p.markedSounds.length===0)||isLocked;
+        hintBtn.disabled=isLocked;
+    }
+    function markFoundSound(which){
+        if(!roundActive||!gameActive)return;
+        const p=which==='p1'?player1:player2;
+        if(p.locked||p.selection.length===0)return;
+        const colorIdx=p.markedSounds.length;
+        const newSound={indices:[...p.selection].sort((a,b)=>a-b),soundColorIndex:colorIdx};
+        p.markedSounds.push(newSound);
+        const wordEl=which==='p1'?p1WordDisplay:p2WordDisplay;
+        p.selection.forEach(i=>{
+            const el=wordEl.querySelector(`[data-index="${i}"]`);
+            if(el){el.classList.remove('selected');el.classList.add('marked',`sound-${colorIdx%12}`);}
+        });
+        p.selection=[];
+        updateButtons(which);
+    }
+    function resetPlayer(which){
+        if(!roundActive||!gameActive)return;
+        const p=which==='p1'?player1:player2;
+        if(p.locked)return;
+        const wordEl=which==='p1'?p1WordDisplay:p2WordDisplay;
+        if(p.selection.length>0){
+            p.selection.forEach(i=>{
+                const el=wordEl.querySelector(`[data-index="${i}"]`);
+                if(el&&!el.classList.contains('marked'))el.classList.remove('selected');
+            });
+            p.selection=[];
+        }else if(p.markedSounds.length>0){
+            p.markedSounds=[];
+            const letters=wordEl.querySelectorAll('.letter');
+            letters.forEach(l=>{l.className='letter';});
+        }
+        updateButtons(which);
+    }
+    function cleanPlayerSound(playerObj,indices){
+        const silent=currentWord.silentIndices||[];
+        return indices.filter(i=>!silent.includes(i)).map(i=>currentWord.word[i]).join('');
+    }
+    function getCleanedSegmentation(playerObj){
+        const sorted=[...playerObj.markedSounds].sort((a,b)=>a.indices[0]-b.indices[0]);
+        return sorted.map(s=>cleanPlayerSound(playerObj,s.indices)).filter(str=>str.length>0);
+    }
+    function checkPlayer(which){
+        if(!roundActive||!gameActive)return;
+        const p=which==='p1'?player1:player2;
+        if(p.locked||p.selection.length>0||!areAllCovered(p))return;
+        const cleanedSeg=getCleanedSegmentation(p);
+        const isCorrect=JSON.stringify(cleanedSeg)===JSON.stringify(currentWord.sounds);
+        if(isCorrect){
+            roundActive=false;
+            const other=which==='p1'?player2:player1;
+            p.locked=true;other.locked=true;
+            p.score++;
+            if(which==='p1')shiftBar(true);else shiftBar(false);
+            updateScoreBadges();updateBar();
+            const status=which==='p1'?p1Status:p2Status;
+            status.textContent='✅ Correct!';status.classList.remove('placeholder');status.classList.add('feedback-flash');
+            setTimeout(()=>status.classList.remove('feedback-flash'),500);
+            updateButtons('p1');updateButtons('p2');
+            if(p.score>=TOTAL_ROUNDS){setTimeout(()=>endGame(),600);return;}
+            setTimeout(()=>{if(gameActive)startNextRound();},800);
+        }else{
+            p.attempts--;
+            const status=which==='p1'?p1Status:p2Status;
+            status.textContent=`❌ Wrong! ${p.attempts} left`;status.classList.remove('placeholder');status.classList.add('wrong-flash');
+            setTimeout(()=>status.classList.remove('wrong-flash'),400);
+            if(p.attempts<=0){
+                p.locked=true;status.textContent='No tries left';
+                const other=which==='p1'?player2:player1;
+                if(other.locked){roundActive=false;setTimeout(()=>{if(gameActive)startNextRound();},1000);}
+            }
+            updateButtons(which);
+        }
+    }
+    function shiftBar(towardBlue){barPosition=towardBlue?Math.min(95,barPosition+5):Math.max(5,barPosition-5);updateBar();}
+    function updateBar(){
+        blueBar.style.width=barPosition+'%';redBar.style.width=(100-barPosition)+'%';
+        barDivider.style.left=barPosition+'%';
+        blueScoreEl.textContent=player1.score;redScoreEl.textContent=player2.score;
+    }
+    function updateScoreBadges(){
+        p1ScoreBadge.textContent=`Score: ${player1.score} / ${TOTAL_ROUNDS}`;
+        p2ScoreBadge.textContent=`Score: ${player2.score} / ${TOTAL_ROUNDS}`;
+    }
+    function resetRoundState(){
+        player1.selection=[];player1.markedSounds=[];player1.attempts=3;player1.locked=false;
+        player2.selection=[];player2.markedSounds=[];player2.attempts=3;player2.locked=false;
+        p1Status.textContent='Select letters';p1Status.classList.add('placeholder');
+        p2Status.textContent='Select letters';p2Status.classList.add('placeholder');
+        updateButtons('p1');updateButtons('p2');
+        roundActive=true;
+    }
+    function startNextRound(){
+        getNextWord();
+        updateSharedQuestion();
+        renderWordDisplay(p1WordDisplay,player1);
+        renderWordDisplay(p2WordDisplay,player2);
+        resetRoundState();
+    }
+    function endGame(){
+        gameActive=false;roundActive=false;
+        p1Found.disabled=p2Found.disabled=true;p1Check.disabled=p2Check.disabled=true;
+        p1Reset.disabled=p2Reset.disabled=true;p1Hint.disabled=p2Hint.disabled=true;
+        if(player1.score>player2.score){resultIcon.textContent='🏆';resultTitle.textContent=`${PLAYER1} Wins!`;resultTitle.style.color=getPlayerColor(p1ColorIdx).light;}
+        else if(player2.score>player1.score){resultIcon.textContent='🏆';resultTitle.textContent=`${PLAYER2} Wins!`;resultTitle.style.color=getPlayerColor(p2ColorIdx).light;}
+        else{resultIcon.textContent='🤝';resultTitle.textContent="It's a Tie!";resultTitle.style.color='#fbbf24';}
+        finalP1.textContent=player1.score;finalP2.textContent=player2.score;
+        overlay.classList.add('active');
+    }
+    function fullReset(){
+        gameActive=true;roundActive=true;barPosition=50;
+        player1={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
+        player2={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
+        wordQueue=[];queueIndex=0;lastIdx=-1;
+        updateScoreBadges();updateBar();applyPlayerColors();
+        startNextRound();
+        overlay.classList.remove('active');
+        buildBankRadios();populateColorDropdowns();
+        updateHintVisibility();
+    }
+    function buildBankRadios(){
+        bankGroup.innerHTML='';
+        questionBanks.forEach((bank,idx)=>{
+            const label=document.createElement('label');
+            const radio=document.createElement('input');
+            radio.type='radio';radio.name='bank';radio.value=idx;
+            if(idx===SELECTED_BANK_INDEX)radio.checked=true;
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(' '+bank.name));
+            bankGroup.appendChild(label);
+        });
+    }
+    function populateColorDropdowns(){
+        [p1ColorSelect,p2ColorSelect].forEach(select=>{
+            select.innerHTML='';
+            COLOR_PALETTE.forEach((color,idx)=>{
+                const opt=document.createElement('option');
+                opt.value=idx;opt.textContent=color.name;
+                select.appendChild(opt);
+            });
+        });
+        p1ColorSelect.value=p1ColorIdx;p2ColorSelect.value=p2ColorIdx;
+        updateColorPreviews();
+        p1ColorSelect.onchange=()=>handleColorChange('p1');
+        p2ColorSelect.onchange=()=>handleColorChange('p2');
+    }
+    function updateColorPreviews(){
+        p1ColorPreview.style.background=getPlayerColor(parseInt(p1ColorSelect.value,10)).light;
+        p2ColorPreview.style.background=getPlayerColor(parseInt(p2ColorSelect.value,10)).light;
+    }
+    function handleColorChange(changingPlayer){
+        const select=changingPlayer==='p1'?p1ColorSelect:p2ColorSelect;
+        const otherSelect=changingPlayer==='p1'?p2ColorSelect:p1ColorSelect;
+        const newIdx=parseInt(select.value,10);
+        if(newIdx===parseInt(otherSelect.value,10)){
+            const prev=changingPlayer==='p1'?p1ColorIdx:p2ColorIdx;
+            select.value=prev;
+            alert('Players cannot share the same color. Pick a different one.');
+        }else{
+            if(changingPlayer==='p1')p1ColorIdx=newIdx;else p2ColorIdx=newIdx;
+            updateColorPreviews();applyPlayerColors();
+        }
+    }
+    function loadBanksFromStorage(){
+        try{const stored=localStorage.getItem(STORAGE_KEY);if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)&&parsed.length>0&&parsed[0].words)return parsed;}}catch(e){}
+        return null;
+    }
+    function saveBanksToStorage(banks){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(banks));}catch(e){}}
+    function loadSettingsFromStorage(){
+        try{const stored=localStorage.getItem(SETTINGS_KEY);if(stored){const s=JSON.parse(stored);if(s&&typeof s==='object')return s;}}catch(e){}
+        return null;
+    }
+    function saveSettingsToStorage(settings){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));}catch(e){}}
+    function importQuestions(){
+        if(!importFileInput.files||importFileInput.files.length===0){alert('No file selected.');return;}
+        const file=importFileInput.files[0];
+        const reader=new FileReader();
+        reader.onload=(e)=>{
+            try{
+                const json=JSON.parse(e.target.result);
+                let importedBanks=[];
+                if(Array.isArray(json)){
+                    if(json.length>0&&json[0].hasOwnProperty('word')&&json[0].hasOwnProperty('sounds')){
+                        importedBanks=[{name:file.name.replace(/\.[^/.]+$/,"")||'Imported',words:json}];
+                    }else if(json.length>0&&json[0].hasOwnProperty('name')&&json[0].hasOwnProperty('words')){
+                        importedBanks=json;
+                    }
+                }
+                if(importedBanks.length===0){alert('Invalid file structure.');importFileInput.value='';return;}
+                for(const bank of importedBanks){if(!bank.name||!Array.isArray(bank.words))throw new Error('Invalid bank format.');}
+                importedBanks.forEach(ib=>{
+                    const existing=questionBanks.findIndex(b=>b.name===ib.name);
+                    if(existing>=0){if(confirm(`Bank "${ib.name}" exists. Replace?`))questionBanks[existing]=ib;}
+                    else questionBanks.push(ib);
+                });
+                saveBanksToStorage(questionBanks);
+                buildBankRadios();
+                alert(`Imported. Click "Apply & Restart" to use.`);
+            }catch(err){alert('Import failed: '+err.message);}
+            finally{importFileInput.value='';}
+        };
+        reader.readAsText(file);
+    }
+    function resetBanksToDefault(){
+        if(confirm('Reset all word banks to default? Custom banks will be lost.')){
+            questionBanks=JSON.parse(JSON.stringify(DEFAULT_BANKS));
+            saveBanksToStorage(questionBanks);
+            SELECTED_BANK_INDEX=0;
+            buildBankRadios();
+            alert('Banks reset. Click "Apply & Restart".');
+        }
+    }
+    function readSettings(){
+        const p1name=p1NameInput.value.trim()||'Player 1';
+        const p2name=p2NameInput.value.trim()||'Player 2';
+        let rounds=parseInt(roundsInput.value,10);if(isNaN(rounds)||rounds<1)rounds=1;if(rounds>20)rounds=20;
+        roundsInput.value=rounds;
+        const selectedRadio=document.querySelector('input[name="bank"]:checked');
+        let bankIdx=selectedRadio?parseInt(selectedRadio.value,10):0;
+        if(isNaN(bankIdx)||bankIdx<0||bankIdx>=questionBanks.length)bankIdx=0;
+        let newP1Idx=parseInt(p1ColorSelect.value,10);let newP2Idx=parseInt(p2ColorSelect.value,10);
+        if(isNaN(newP1Idx)||newP1Idx<0)newP1Idx=4;if(isNaN(newP2Idx)||newP2Idx<0)newP2Idx=0;
+        if(newP1Idx===newP2Idx){newP2Idx=(newP1Idx+1)%COLOR_PALETTE.length;p2ColorSelect.value=newP2Idx;updateColorPreviews();}
+        const hintVisible=hintToggleCheckbox.checked;
+        return {p1name,p2name,rounds,bankIdx,newP1Idx,newP2Idx,hintVisible};
+    }
+    function applySettings(){
+        const s=readSettings();
+        PLAYER1=s.p1name;PLAYER2=s.p2name;TOTAL_ROUNDS=s.rounds;SELECTED_BANK_INDEX=s.bankIdx;
+        p1ColorIdx=s.newP1Idx;p2ColorIdx=s.newP2Idx;hintButtonsVisible=s.hintVisible;
+        saveSettingsToStorage({PLAYER1,PLAYER2,TOTAL_ROUNDS,SELECTED_BANK_INDEX,p1ColorIdx,p2ColorIdx,hintButtonsVisible});
+        saveBanksToStorage(questionBanks);
+        settingsPanel.classList.remove('open');
+        fullReset();
+    }
+    function loadSavedSettings(){
+        const saved=loadSettingsFromStorage();
+        if(saved){
+            if(saved.PLAYER1){PLAYER1=saved.PLAYER1;p1NameInput.value=PLAYER1;}
+            if(saved.PLAYER2){PLAYER2=saved.PLAYER2;p2NameInput.value=PLAYER2;}
+            if(saved.TOTAL_ROUNDS){TOTAL_ROUNDS=saved.TOTAL_ROUNDS;roundsInput.value=TOTAL_ROUNDS;}
+            if(typeof saved.SELECTED_BANK_INDEX==='number'&&saved.SELECTED_BANK_INDEX<questionBanks.length)SELECTED_BANK_INDEX=saved.SELECTED_BANK_INDEX;
+            if(typeof saved.p1ColorIdx==='number')p1ColorIdx=saved.p1ColorIdx;
+            if(typeof saved.p2ColorIdx==='number')p2ColorIdx=saved.p2ColorIdx;
+            if(typeof saved.hintButtonsVisible==='boolean'){hintButtonsVisible=saved.hintButtonsVisible;hintToggleCheckbox.checked=hintButtonsVisible;}
+        }
+    }
+
+    // Event listeners
+    p1Found.addEventListener('click',()=>markFoundSound('p1'));
+    p2Found.addEventListener('click',()=>markFoundSound('p2'));
+    p1Check.addEventListener('click',()=>checkPlayer('p1'));
+    p2Check.addEventListener('click',()=>checkPlayer('p2'));
+    p1Reset.addEventListener('click',()=>resetPlayer('p1'));
+    p2Reset.addEventListener('click',()=>resetPlayer('p2'));
+    p1Hint.addEventListener('click',()=>{alert(`💡 This word has ${currentWord.sounds.length} sound(s).`);p1Hint.disabled=true;setTimeout(()=>{if(gameActive&&roundActive&&!player1.locked)p1Hint.disabled=false;},3000);});
+    p2Hint.addEventListener('click',()=>{alert(`💡 This word has ${currentWord.sounds.length} sound(s).`);p2Hint.disabled=true;setTimeout(()=>{if(gameActive&&roundActive&&!player2.locked)p2Hint.disabled=false;},3000);});
+    settingsToggle.addEventListener('click',()=>settingsPanel.classList.toggle('open'));
+    applySettingsBtn.addEventListener('click',applySettings);
+    playAgainBtn.addEventListener('click',applySettings);
+    resetBanksBtn.addEventListener('click',resetBanksToDefault);
+    importBtn.addEventListener('click',()=>importFileInput.click());
+    importFileInput.addEventListener('change',()=>{if(importFileInput.files&&importFileInput.files.length>0)importQuestions();});
+
+    // Init
+    questionBanks=loadBanksFromStorage()||JSON.parse(JSON.stringify(DEFAULT_BANKS));
+    loadSavedSettings();
+    buildBankRadios();
+    populateColorDropdowns();
+    fullReset();
+})();
+</script>
+</body>
+</html>
