@@ -33,6 +33,28 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border:2px solid var(--border); width:100%;
             letter-spacing: 2px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .shared-word-text {
+            z-index: 2;
+        }
+        .shared-sound-count {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .shared-sound-count.left {
+            left: 20px;
+        }
+        .shared-sound-count.right {
+            right: 20px;
         }
         .war-bar-container {
             width:100%; height: clamp(45px, 8vh, 100px); position: relative;
@@ -321,7 +343,11 @@
 <body>
 <div class="game-layout">
     <div class="top-area">
-        <div class="shared-question" id="sharedQuestion">Loading...</div>
+        <div class="shared-question" id="sharedQuestion">
+            <span class="shared-sound-count left" id="sharedP1Count">0</span>
+            <span class="shared-word-text" id="sharedWordText">Loading...</span>
+            <span class="shared-sound-count right" id="sharedP2Count">0</span>
+        </div>
         <div class="war-bar-container">
             <div class="war-bar-blue" id="blueBar"></div>
             <div class="war-bar-red" id="redBar"></div>
@@ -385,6 +411,11 @@
                 <div class="setting-row">
                     <label>Show Hint Buttons</label>
                     <input type="checkbox" id="hintToggleCheckbox" checked>
+                </div>
+                <div class="setting-row">
+                    <label>Limit Attempts</label>
+                    <input type="checkbox" id="attemptsToggleCheckbox" checked>
+                    <input type="number" id="attemptsNumberInput" value="3" min="0" max="20" step="1" style="width:55px;">
                 </div>
                 <div class="setting-row">
                     <label>Import Words</label>
@@ -624,6 +655,9 @@
     ];
     const $=id=>document.getElementById(id);
     const sharedQuestion=$('sharedQuestion');
+    const sharedWordText=$('sharedWordText');
+    const sharedP1Count=$('sharedP1Count');
+    const sharedP2Count=$('sharedP2Count');
     const p1Panel=$('p1Panel'),p2Panel=$('p2Panel');
     const p1NameText=document.querySelector('#p1NameDisplay .player-name-text'),p2NameText=document.querySelector('#p2NameDisplay .player-name-text');
     const p1Avatar=$('p1Avatar'),p2Avatar=$('p2Avatar');
@@ -644,6 +678,8 @@
     const p1ColorSelect=$('p1ColorSelect'),p2ColorSelect=$('p2ColorSelect');
     const p1ColorPreview=$('p1ColorPreview'),p2ColorPreview=$('p2ColorPreview');
     const hintToggleCheckbox=$('hintToggleCheckbox');
+    const attemptsToggleCheckbox=$('attemptsToggleCheckbox');
+    const attemptsNumberInput=$('attemptsNumberInput');
     const importFileInput=$('importFileInput'),importBtn=$('importBtn');
     const resetBanksBtn=$('resetBanksBtn');
     const overlay=$('overlay'),resultIcon=$('resultIcon'),resultTitle=$('resultTitle');
@@ -657,6 +693,8 @@
     let PLAYER1='Player 1',PLAYER2='Player 2';
     let p1ColorIdx=4,p2ColorIdx=0;
     let hintButtonsVisible=true;
+    let attemptsEnabled=true;
+    let maxAttempts=3;
     let gameActive=true,roundActive=true;
     let barPosition=50;
     let player1={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
@@ -668,6 +706,17 @@
     const shuffle=arr=>[...arr].sort(()=>Math.random()-0.5);
     const currentBank=()=>questionBanks[SELECTED_BANK_INDEX]||questionBanks[0];
     const getPlayerColor=idx=>COLOR_PALETTE[idx]||COLOR_PALETTE[0];
+
+    function getAttemptsForPlayer(){
+        if (!attemptsEnabled) return 1;
+        if (maxAttempts === 0) return Infinity;
+        return maxAttempts;
+    }
+
+    function updateSharedSoundCounts(){
+        sharedP1Count.textContent = player1.markedSounds.length;
+        sharedP2Count.textContent = player2.markedSounds.length;
+    }
 
     function buildQueue(){ return shuffle(currentBank().words.map((_,i)=>i)); }
     function getNextWord(){
@@ -697,6 +746,8 @@
         redBar.style.background=`linear-gradient(180deg,${c2.light},${c2.dark})`;
         p1ColorPreview.style.background=c1.light; p2ColorPreview.style.background=c2.light;
         p1Avatar.style.background=c1.light; p2Avatar.style.background=c2.light;
+        sharedP1Count.style.color = c1.light;
+        sharedP2Count.style.color = c2.light;
         updatePlayerNameDisplay();
     }
     function updateHintVisibility(){
@@ -704,8 +755,8 @@
         p1Hint.style.display=display;
         p2Hint.style.display=display;
     }
-    function updateSharedQuestion(){ sharedQuestion.textContent=currentWord.word; }
-    function renderWordDisplay(wordEl,playerObj){
+    function updateSharedQuestion(){ sharedWordText.textContent = currentWord.word; }
+    function renderWordDisplay(wordEl, playerObj){
         const word=currentWord.word;
         wordEl.innerHTML='';
         for(let i=0;i<word.length;i++){
@@ -810,6 +861,7 @@
         });
         p.selection=[];
         updateButtons(which);
+        updateSharedSoundCounts();
     }
     function resetPlayer(which){
         if(!roundActive||!gameActive)return;
@@ -828,6 +880,7 @@
             letters.forEach(l=>{l.className='letter';});
         }
         updateButtons(which);
+        updateSharedSoundCounts();
     }
     function cleanPlayerSound(playerObj,indices){
         const silent=currentWord.silentIndices||[];
@@ -851,7 +904,10 @@
             roundActive=false;
             const other=which==='p1'?player2:player1;
             p.locked=true;other.locked=true;
-            clearWordPanelsImmediately(); // <-- INSTANT visual reset
+            clearWordPanelsImmediately();
+            // Reset both sound collections so shared display shows 0 instantly
+            player1.markedSounds=[]; player2.markedSounds=[];
+            updateSharedSoundCounts();
             p.score++;
             if(which==='p1')shiftBar(true);else shiftBar(false);
             updateScoreBadges();updateBar();
@@ -862,14 +918,33 @@
             if(p.score>=TOTAL_ROUNDS){setTimeout(()=>endGame(),600);return;}
             setTimeout(()=>{if(gameActive)startNextRound();},800);
         }else{
-            p.attempts--;
+            if(p.attempts !== Infinity) {
+                p.attempts--;
+            }
             const status=which==='p1'?p1Status:p2Status;
-            status.textContent=`❌ Wrong! ${p.attempts} left`;status.classList.remove('placeholder');status.classList.add('wrong-flash');
+            const left = p.attempts === Infinity ? '∞' : p.attempts;
+            if (p.attempts === Infinity) {
+                status.textContent = '❌ Wrong! (∞ left)';
+            } else if (p.attempts > 0) {
+                status.textContent = `❌ Wrong! ${left} left`;
+            } else {
+                status.textContent = 'No tries left';
+            }
+            status.classList.remove('placeholder');status.classList.add('wrong-flash');
             setTimeout(()=>status.classList.remove('wrong-flash'),400);
-            if(p.attempts<=0){
-                p.locked=true;status.textContent='No tries left';
+            if(p.attempts <= 0 && p.attempts !== Infinity){
+                p.locked=true;
                 const other=which==='p1'?player2:player1;
-                if(other.locked){roundActive=false;clearWordPanelsImmediately();setTimeout(()=>{if(gameActive)startNextRound();},1000);}
+                if(other.locked){
+                    roundActive=false;
+                    clearWordPanelsImmediately();
+                    player1.markedSounds=[]; player2.markedSounds=[];
+                    updateSharedSoundCounts();
+                    setTimeout(()=>{if(gameActive)startNextRound();},1000);
+                }
+            } else {
+                // Reset only this player's panel so they must redo the segmentation
+                resetPlayer(which);
             }
             updateButtons(which);
         }
@@ -888,19 +963,16 @@
         getNextWord();
         updateSharedQuestion();
 
-        // Clear previous round state BEFORE rendering
-        player1.selection=[]; player1.markedSounds=[]; player1.attempts=3; player1.locked=false;
-        player2.selection=[]; player2.markedSounds=[]; player2.attempts=3; player2.locked=false;
+        const attempts = getAttemptsForPlayer();
+        player1.selection=[]; player1.markedSounds=[]; player1.attempts=attempts; player1.locked=false;
+        player2.selection=[]; player2.markedSounds=[]; player2.attempts=attempts; player2.locked=false;
 
-        // Clear any pending hint timeouts
         if(p1HintTimeout){clearTimeout(p1HintTimeout);p1HintTimeout=null;}
         if(p2HintTimeout){clearTimeout(p2HintTimeout);p2HintTimeout=null;}
 
-        // Render clean word displays
         renderWordDisplay(p1WordDisplay,player1);
         renderWordDisplay(p2WordDisplay,player2);
 
-        // Reset status texts and button states
         p1Status.textContent='Select letters';
         p1Status.classList.remove('feedback-flash','wrong-flash'); 
         p1Status.classList.add('placeholder');
@@ -910,6 +982,7 @@
 
         updateButtons('p1');
         updateButtons('p2');
+        updateSharedSoundCounts();
         roundActive=true;
     }
     function endGame(){
@@ -924,14 +997,16 @@
     }
     function fullReset(){
         gameActive=true;roundActive=true;barPosition=50;
-        player1={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
-        player2={score:0,selection:[],markedSounds:[],attempts:3,locked:false};
+        const initAttempts = getAttemptsForPlayer();
+        player1={score:0,selection:[],markedSounds:[],attempts:initAttempts,locked:false};
+        player2={score:0,selection:[],markedSounds:[],attempts:initAttempts,locked:false};
         wordQueue=[];queueIndex=0;lastIdx=-1;
         updateScoreBadges();updateBar();applyPlayerColors();
         startNextRound();
         overlay.classList.remove('active');
         buildBankRadios();populateColorDropdowns();
         updateHintVisibility();
+        updateAttemptsInputVisibility();
     }
     function buildBankRadios(){
         bankGroup.innerHTML='';
@@ -975,6 +1050,9 @@
             if(changingPlayer==='p1')p1ColorIdx=newIdx;else p2ColorIdx=newIdx;
             updateColorPreviews();applyPlayerColors();
         }
+    }
+    function updateAttemptsInputVisibility() {
+        attemptsNumberInput.style.display = attemptsToggleCheckbox.checked ? '' : 'none';
     }
     function loadBanksFromStorage(){
         try{const stored=localStorage.getItem(STORAGE_KEY);if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)&&parsed.length>0&&parsed[0].words)return parsed;}}catch(e){}
@@ -1037,13 +1115,19 @@
         if(isNaN(newP1Idx)||newP1Idx<0)newP1Idx=4;if(isNaN(newP2Idx)||newP2Idx<0)newP2Idx=0;
         if(newP1Idx===newP2Idx){newP2Idx=(newP1Idx+1)%COLOR_PALETTE.length;p2ColorSelect.value=newP2Idx;updateColorPreviews();}
         const hintVisible=hintToggleCheckbox.checked;
-        return {p1name,p2name,rounds,bankIdx,newP1Idx,newP2Idx,hintVisible};
+        const attemptsOn=attemptsToggleCheckbox.checked;
+        let attNum=parseInt(attemptsNumberInput.value,10);
+        if(isNaN(attNum)||attNum<0)attNum=0;
+        if(attNum>20)attNum=20;
+        attemptsNumberInput.value=attNum;
+        return {p1name,p2name,rounds,bankIdx,newP1Idx,newP2Idx,hintVisible,attemptsOn,attNum};
     }
     function applySettings(){
         const s=readSettings();
         PLAYER1=s.p1name;PLAYER2=s.p2name;TOTAL_ROUNDS=s.rounds;SELECTED_BANK_INDEX=s.bankIdx;
         p1ColorIdx=s.newP1Idx;p2ColorIdx=s.newP2Idx;hintButtonsVisible=s.hintVisible;
-        saveSettingsToStorage({PLAYER1,PLAYER2,TOTAL_ROUNDS,SELECTED_BANK_INDEX,p1ColorIdx,p2ColorIdx,hintButtonsVisible});
+        attemptsEnabled=s.attemptsOn;maxAttempts=s.attNum;
+        saveSettingsToStorage({PLAYER1,PLAYER2,TOTAL_ROUNDS,SELECTED_BANK_INDEX,p1ColorIdx,p2ColorIdx,hintButtonsVisible,attemptsEnabled,maxAttempts});
         saveBanksToStorage(questionBanks);
         settingsPanel.classList.remove('open');
         fullReset();
@@ -1058,10 +1142,14 @@
             if(typeof saved.p1ColorIdx==='number')p1ColorIdx=saved.p1ColorIdx;
             if(typeof saved.p2ColorIdx==='number')p2ColorIdx=saved.p2ColorIdx;
             if(typeof saved.hintButtonsVisible==='boolean'){hintButtonsVisible=saved.hintButtonsVisible;hintToggleCheckbox.checked=hintButtonsVisible;}
+            if(typeof saved.attemptsEnabled==='boolean'){attemptsEnabled=saved.attemptsEnabled;attemptsToggleCheckbox.checked=attemptsEnabled;}
+            if(typeof saved.maxAttempts==='number'){maxAttempts=saved.maxAttempts;attemptsNumberInput.value=maxAttempts;}
         }
+        updateAttemptsInputVisibility();
     }
 
     // Event listeners
+    attemptsToggleCheckbox.addEventListener('change', updateAttemptsInputVisibility);
     p1Found.addEventListener('click',()=>markFoundSound('p1'));
     p2Found.addEventListener('click',()=>markFoundSound('p2'));
     p1Check.addEventListener('click',()=>checkPlayer('p1'));
