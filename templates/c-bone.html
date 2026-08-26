@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skeleton Emoji Quiz</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        #game-container {
+            background: #fff8f0;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 420px;
+            max-width: 95vw;
+            border: 4px solid #ff7e5f;
+        }
+
+        h1 {
+            color: #d35400;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #ffd700;
+        }
+
+        #score-display {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #d35400;
+        }
+
+        /* The Emoji Image Placeholder */
+        #image-container {
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, #ffffff, #ffe0d1);
+            border: 5px solid #ff7e5f;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 100px;
+            box-shadow: inset 0 0 15px rgba(211, 84, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        #image-container:hover {
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        #question-text {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #ffffff;
+            border: 3px solid #d35400;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .answer-btn:hover {
+            background-color: #ffd700;
+            border-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-box {
+            background: #fff8f0;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 4px solid #d35400;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            background-color: #d35400;
+            font-family: inherit;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background-color: #e67e22;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>💀 Bone-O-Matic 🦴</h1>
+        <div id="score-display">Score: 0</div>
+        
+        <!-- Emoji Image Placeholder (Changes per bone) -->
+        <div id="image-container">🦴</div>
+        
+        <div id="question-text">Guess this bone! 🧐</div>
+        
+        <div id="buttons-container">
+            <button class="answer-btn" id="btn1" onclick="handleAnswer(0)">Option 1</button>
+            <button class="answer-btn" id="btn2" onclick="handleAnswer(1)">Option 2</button>
+            <button class="answer-btn" id="btn3" onclick="handleAnswer(2)">Option 3</button>
+        </div>
+    </div>
+
+    <!-- Correct Popup -->
+    <div id="correct-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 class="modal-title" style="color: #27ae60;">✅ Correct!</h2>
+            <p id="correct-message" style="font-size: 1.2rem; font-weight: bold;"></p>
+            <button class="modal-btn" onclick="nextQuestion()">Next Bone ➡️</button>
+        </div>
+    </div>
+
+    <!-- Game Over Popup -->
+    <div id="gameover-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 class="modal-title" style="color: #c0392b;">💀 GAME OVER! 💀</h2>
+            <p id="final-score-message" style="font-size: 1.5rem; font-weight: bold;"></p>
+            <button class="modal-btn" onclick="restartGame()">🔄 Restart Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Data with highly specific emojis that closely resemble the bone shapes
+        const bones = [
+            { name: "Humerus", emoji: "🍖" },        // Long bone
+            { name: "Femur", emoji: "🍗" },          // Thigh bone
+            { name: "Cranium", emoji: "💀" },         // Skull
+            { name: "Tibia", emoji: "🥖" },           // Shin bone
+            { name: "Mandible", emoji: "🦷" },        // Jaw bone
+            { name: "Scapula", emoji: "🪽" },         // Shoulder blade (wing shape)
+            { name: "Radius", emoji: "🥢" },          // Forearm bone (stick shape)
+            { name: "Sternum", emoji: "🎽" },         // Chest plate
+            { name: "Ribs", emoji: "🥩" },            // Meat/ribs shape
+            { name: "Carpals", emoji: "⌚" },          // Wrist
+            { name: "Phalanges", emoji: "✋" },        // Fingers
+            { name: "Lumbar Vertebrae", emoji: "🎋" },// Spine
+            { name: "Pelvic Girdle", emoji: "🩲" },   // Hips
+            { name: "Patella", emoji: "🦵" },         // Knee
+            { name: "Tarsals", emoji: "🧦" },         // Ankle
+            { name: "Metatarsals", emoji: "🦶" }      // Foot
+        ];
+
+        let currentQuestionBone = "";
+        let score = 0;
+
+        // Start the game
+        function startGame() {
+            score = 0;
+            document.getElementById('score-display').innerText = `Score: ${score} 🏆`;
+            loadQuestion();
+        }
+
+        // Load a random question with random options
+        function loadQuestion() {
+            // Pick a random bone
+            currentQuestionBone = bones[Math.floor(Math.random() * bones.length)];
+            const correctName = currentQuestionBone.name;
+
+            // Update the image placeholder emoji
+            document.getElementById('image-container').innerText = currentQuestionBone.emoji;
+
+            // Generate options: 1 correct, 2 wrong
+            let options = [correctName];
+            
+            // Filter out the correct one and pick random wrong ones
+            let wrongOptions = bones.map(b => b.name).filter(name => name !== correctName);
+            
+            // Shuffle wrong options and take the first 2
+            wrongOptions.sort(() => Math.random() - 0.5);
+            options.push(wrongOptions[0], wrongOptions[1]);
+
+            // Shuffle the final options array
+            options.sort(() => Math.random() - 0.5);
+
+            // Update the UI
+            document.getElementById('btn1').innerText = options[0];
+            document.getElementById('btn2').innerText = options[1];
+            document.getElementById('btn3').innerText = options[2];
+            
+            // Store the options globally to check the answer
+            window.currentOptions = options;
+        }
+
+        // Handle button clicks
+        function handleAnswer(buttonIndex) {
+            const selectedText = window.currentOptions[buttonIndex];
+            const correctName = currentQuestionBone.name;
+
+            if (selectedText === correctName) {
+                // Correct!
+                score++;
+                document.getElementById('score-display').innerText = `Score: ${score} 🏆`;
+                document.getElementById('correct-message').innerText = `Yes! The ${currentQuestionBone.emoji} is the ${correctName}!`;
+                document.getElementById('correct-modal').classList.remove('hidden');
+            } else {
+                // Wrong! Game Over
+                document.getElementById('final-score-message').innerText = `Final Score: ${score} 😭`;
+                document.getElementById('gameover-modal').classList.remove('hidden');
+            }
+        }
+
+        // Next question button logic
+        function nextQuestion() {
+            document.getElementById('correct-modal').classList.add('hidden');
+            loadQuestion();
+        }
+
+        // Restart button logic
+        function restartGame() {
+            document.getElementById('gameover-modal').classList.add('hidden');
+            startGame();
+        }
+
+        // Initialize game on load
+        startGame();
+    </script>
+</body>
+</html>
