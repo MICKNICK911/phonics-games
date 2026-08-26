@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skeletal System Quiz - Images</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            background: #fff8f0;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 420px;
+            max-width: 95vw;
+            border: 4px solid #ff7e5f;
+        }
+
+        h1 {
+            color: #d35400;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #ffd700;
+        }
+
+        #score-display {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #d35400;
+        }
+
+        /* The Image Container */
+        #image-container {
+            width: 240px;
+            height: 240px;
+            background: #ffffff;
+            border: 4px solid #d35400;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+            overflow: hidden; /* Ensures image stays inside */
+        }
+
+        #image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Keeps the whole bone in frame */
+        }
+
+        #question-text {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #ffffff;
+            border: 3px solid #d35400;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .answer-btn:hover {
+            background-color: #ffd700;
+            border-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-box {
+            background: #fff8f0;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 4px solid #d35400;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            background-color: #d35400;
+            font-family: inherit;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background-color: #e67e22;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>💀 Bone Quiz 🦴</h1>
+        <div id="score-display">Score: 0 🏆</div>
+        
+        <!-- Real Image Placeholder -->
+        <div id="image-container">
+            <img id="bone-image" src="" alt="Bone Image" onerror="this.src='https://placehold.co/400x400?text=Image+Missing'">
+        </div>
+        
+        <div id="question-text">Guess this bone! 🧐</div>
+        
+        <div id="buttons-container">
+            <button class="answer-btn" id="btn1" onclick="handleAnswer(0)">Option 1</button>
+            <button class="answer-btn" id="btn2" onclick="handleAnswer(1)">Option 2</button>
+            <button class="answer-btn" id="btn3" onclick="handleAnswer(2)">Option 3</button>
+        </div>
+    </div>
+
+    <!-- Correct Popup -->
+    <div id="correct-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 class="modal-title" style="color: #27ae60;">✅ Correct!</h2>
+            <p id="correct-message" style="font-size: 1.2rem; font-weight: bold;"></p>
+            <button class="modal-btn" onclick="nextQuestion()">Next Bone ➡️</button>
+        </div>
+    </div>
+
+    <!-- Game Over Popup -->
+    <div id="gameover-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 class="modal-title" style="color: #c0392b;">💀 GAME OVER! 💀</h2>
+            <p id="final-score-message" style="font-size: 1.5rem; font-weight: bold;"></p>
+            <button class="modal-btn" onclick="restartGame()">🔄 Restart Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Data for the bones
+        // HOW TO USE LOCAL IMAGES:
+        // Replace "img:" with your local file path like: "images/femur.jpg"
+        // Ensure you have an 'images' folder in the same directory as this file.
+        const bones = [
+            { name: "Humerus", img: "https://placehold.co/400x400/png?text=Humerus" },
+            { name: "Femur", img: "https://placehold.co/400x400/png?text=Femur" },
+            { name: "Cranium", img: "https://placehold.co/400x400/png?text=Cranium" },
+            { name: "Tibia", img: "https://placehold.co/400x400/png?text=Tibia" },
+            { name: "Mandible", img: "https://placehold.co/400x400/png?text=Mandible" },
+            { name: "Scapula", img: "https://placehold.co/400x400/png?text=Scapula" },
+            { name: "Radius", img: "https://placehold.co/400x400/png?text=Radius" },
+            { name: "Sternum", img: "https://placehold.co/400x400/png?text=Sternum" },
+            { name: "Ribs", img: "https://placehold.co/400x400/png?text=Ribs" },
+            { name: "Carpals", img: "https://placehold.co/400x400/png?text=Carpals" },
+            { name: "Phalanges", img: "https://placehold.co/400x400/png?text=Phalanges" },
+            { name: "Pelvic Girdle", img: "https://placehold.co/400x400/png?text=Pelvic+Girdle" },
+            { name: "Patella", img: "https://placehold.co/400x400/png?text=Patella" }
+        ];
+
+        let currentQuestionBone = "";
+        let score = 0;
+
+        // Start the game
+        function startGame() {
+            score = 0;
+            document.getElementById('score-display').innerText = `Score: ${score} 🏆`;
+            loadQuestion();
+        }
+
+        // Load a random question with random options
+        function loadQuestion() {
+            // Pick a random bone
+            currentQuestionBone = bones[Math.floor(Math.random() * bones.length)];
+            const correctName = currentQuestionBone.name;
+
+            // Update the image source
+            document.getElementById('bone-image').src = currentQuestionBone.img;
+
+            // Generate options: 1 correct, 2 wrong
+            let options = [correctName];
+            
+            // Filter out the correct one and pick random wrong ones
+            let wrongOptions = bones.map(b => b.name).filter(name => name !== correctName);
+            
+            // Shuffle wrong options and take the first 2
+            wrongOptions.sort(() => Math.random() - 0.5);
+            options.push(wrongOptions[0], wrongOptions[1]);
+
+            // Shuffle the final options array
+            options.sort(() => Math.random() - 0.5);
+
+            // Update the UI
+            document.getElementById('btn1').innerText = options[0];
+            document.getElementById('btn2').innerText = options[1];
+            document.getElementById('btn3').innerText = options[2];
+            
+            // Store the options globally to check the answer
+            window.currentOptions = options;
+        }
+
+        // Handle button clicks
+        function handleAnswer(buttonIndex) {
+            const selectedText = window.currentOptions[buttonIndex];
+            const correctName = currentQuestionBone.name;
+
+            if (selectedText === correctName) {
+                // Correct!
+                score++;
+                document.getElementById('score-display').innerText = `Score: ${score} 🏆`;
+                document.getElementById('correct-message').innerText = `Yes! The ${correctName}!`;
+                document.getElementById('correct-modal').classList.remove('hidden');
+            } else {
+                // Wrong! Game Over
+                document.getElementById('final-score-message').innerText = `Final Score: ${score} 😭`;
+                document.getElementById('gameover-modal').classList.remove('hidden');
+            }
+        }
+
+        // Next question button logic
+        function nextQuestion() {
+            document.getElementById('correct-modal').classList.add('hidden');
+            loadQuestion();
+        }
+
+        // Restart button logic
+        function restartGame() {
+            document.getElementById('gameover-modal').classList.add('hidden');
+            startGame();
+        }
+
+        // Initialize game on load
+        startGame();
+    </script>
+</body>
+</html>
