@@ -14,56 +14,22 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-color: #E63946;      /* scarlet */
-            --primary-color-rgb: 230, 57, 70;
-            --secondary-color: #FFD700;    /* gold */
-            --secondary-color-rgb: 255, 215, 0;
-            --accent-color: #FF8C00;       /* orange */
-            --export-color: #D4A017;       /* dark gold */
-            --builder-color: #C62828;      /* deep scarlet */
-            --bg-color: #ffffff;
-            --bg-color-rgb: 255, 255, 255;
-            --text-color: #2C3E50;
-            --card-bg: #fef9f2;
-            --border-color: #f0dcc8;
-            --shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
-            --transition: all 0.3s ease;
-            --header-height: 70px;
-            --selected-color: #E63946;
-            --font-base: 1;
-        }
-
-        .dark-theme {
-            --primary-color: #FF6B6B;
-            --primary-color-rgb: 255, 107, 107;
-            --secondary-color: #FFD700;
-            --secondary-color-rgb: 255, 215, 0;
-            --accent-color: #FFA726;
-            --export-color: #FFB300;
-            --builder-color: #EF5350;
-            --bg-color: #1a1a1a;
-            --bg-color-rgb: 26, 26, 26;
-            --text-color: #f8f9fa;
-            --card-bg: #2d2a26;
-            --border-color: #4a3f35;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-            --selected-color: #FF6B6B;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #ffffff;
+            color: #2C3E50;
             line-height: 1.6;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             min-height: 100vh;
             padding-bottom: 40px;
             background-image:
                 radial-gradient(circle at 15% 50%, rgba(255, 140, 0, 0.04) 0%, rgba(255, 140, 0, 0) 25%),
                 radial-gradient(circle at 85% 30%, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0) 25%);
         }
-        .dark-theme body {
+
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f8f9fa;
             background-image:
                 radial-gradient(circle at 15% 50%, rgba(255, 140, 0, 0.06) 0%, rgba(255, 140, 0, 0) 25%),
                 radial-gradient(circle at 85% 30%, rgba(255, 215, 0, 0.06) 0%, rgba(255, 215, 0, 0) 25%);
@@ -157,11 +123,15 @@
             width: 100%;
             position: sticky;
             top: 0;
-            background-color: rgba(var(--bg-color-rgb), 0.9);
+            background-color: rgba(255,255,255,0.9);
             backdrop-filter: blur(8px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border-bottom: 2px solid rgba(255,215,0,0.3);
             z-index: 100;
+        }
+        body.dark-theme header {
+            background-color: rgba(26,26,26,0.9);
+            border-bottom-color: rgba(255,215,0,0.2);
         }
         .header-content {
             display: flex;
@@ -173,28 +143,36 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: calc(24px * var(--font-base));
+            font-size: 24px;
             font-weight: 700;
-            color: var(--primary-color);
+            color: #E63946;
             cursor: pointer;
             text-shadow: 0 1px 2px rgba(255,215,0,0.4);
         }
+        body.dark-theme .logo {
+            color: #FF6B6B;
+        }
         .logo span {
-            font-size: calc(28px * var(--font-base));
+            font-size: 28px;
         }
         .search-container {
             display: flex;
             flex: 1;
             max-width: 600px;
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 50px;
             overflow: hidden;
-            border: 2px solid var(--border-color);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
+            border: 2px solid #f0dcc8;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
+            transition: all 0.3s ease;
+        }
+        body.dark-theme .search-container {
+            background: #2d2a26;
+            border-color: #4a3f35;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
         }
         .search-container:focus-within {
-            border-color: var(--primary-color);
+            border-color: #E63946;
             box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
         }
         .search-container input {
@@ -202,26 +180,36 @@
             padding: 14px 20px;
             border: none;
             background: transparent;
-            color: var(--text-color);
-            font-size: calc(16px * var(--font-base));
+            color: #2C3E50;
+            font-size: 16px;
+        }
+        body.dark-theme .search-container input {
+            color: #f8f9fa;
         }
         .search-container input:focus {
             outline: none;
         }
         .search-btn {
-            background: var(--primary-color);
+            background: #E63946;
             color: white;
             border: none;
             padding: 0 25px;
             cursor: pointer;
-            font-size: calc(18px * var(--font-base));
-            transition: var(--transition);
+            font-size: 18px;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .search-btn:hover {
-            background: var(--secondary-color);
+            background: #FFD700;
+            color: #2C3E50;
+        }
+        body.dark-theme .search-btn {
+            background: #FF6B6B;
+        }
+        body.dark-theme .search-btn:hover {
+            background: #FFD700;
             color: #2C3E50;
         }
 
@@ -234,28 +222,37 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
+            background: #fef9f2;
+            border: 2px solid #f0dcc8;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: var(--text-color);
-            transition: var(--transition);
-            font-size: calc(18px * var(--font-base));
+            color: #2C3E50;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+        body.dark-theme .theme-toggle, body.dark-theme .history-toggle,
+        body.dark-theme .topics-toggle, body.dark-theme .help-toggle,
+        body.dark-theme .load-toggle, body.dark-theme .export-toggle,
+        body.dark-theme .slide-toggle, body.dark-theme .font-toggle,
+        body.dark-theme .case-toggle {
+            background: #2d2a26;
+            border-color: #4a3f35;
+            color: #f8f9fa;
         }
         .theme-toggle:hover, .history-toggle:hover, .topics-toggle:hover,
         .help-toggle:hover, .load-toggle:hover, .export-toggle:hover,
         .slide-toggle:hover, .font-toggle:hover, .case-toggle:hover {
-            background: var(--primary-color);
+            background: #E63946;
             color: white;
-            border-color: var(--primary-color);
+            border-color: #E63946;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
         }
         .export-toggle:hover {
-            background: var(--export-color);
-            border-color: var(--export-color);
+            background: #D4A017;
+            border-color: #D4A017;
         }
         .font-toggle:hover {
             background: #FF8C00;
@@ -279,29 +276,40 @@
         .no-results {
             text-align: center;
             padding: 40px 20px;
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 16px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
             max-width: 600px;
             margin: 50px auto;
             border: 2px solid rgba(255,215,0,0.3);
+        }
+        body.dark-theme .no-results {
+            background: #2d2a26;
+            border-color: rgba(255,215,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
         }
         .no-results span {
             font-size: 48px;
             margin-bottom: 20px;
             display: block;
-            color: var(--primary-color);
+            color: #E63946;
         }
         .entry-card {
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 16px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
             padding: 30px;
             margin-bottom: 30px;
-            transition: var(--transition);
-            border-left: 5px solid var(--primary-color);
+            transition: all 0.3s ease;
+            border-left: 5px solid #E63946;
             border-top: 2px solid rgba(255,215,0,0.2);
             animation: fadeIn 0.5s ease;
+        }
+        body.dark-theme .entry-card {
+            background: #2d2a26;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+            border-left-color: #FF6B6B;
+            border-top-color: rgba(255,215,0,0.2);
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -313,35 +321,38 @@
             border-bottom: 2px solid rgba(255,215,0,0.4);
         }
         .entry-header h1 {
-            font-size: calc(42px * var(--font-base));
-            color: var(--primary-color);
+            font-size: 42px;
+            color: #E63946;
             margin-bottom: 10px;
             text-shadow: 0 1px 2px rgba(255,215,0,0.3);
         }
+        body.dark-theme .entry-header h1 {
+            color: #FF6B6B;
+        }
         .entry-desc {
-            font-size: calc(20px * var(--font-base));
+            font-size: 20px;
             margin-bottom: 25px;
             line-height: 1.7;
             white-space: pre-line;
         }
-        @media (min-width: 768px) { .entry-desc { font-size: calc(24px * var(--font-base)); } }
-        @media (min-width: 992px) { .entry-desc { font-size: calc(28px * var(--font-base)); } }
-        @media (min-width: 1200px) { .entry-desc { font-size: calc(32px * var(--font-base)); } }
+        @media (min-width: 768px) { .entry-desc { font-size: 24px; } }
+        @media (min-width: 992px) { .entry-desc { font-size: 28px; } }
+        @media (min-width: 1200px) { .entry-desc { font-size: 32px; } }
 
         .markdown-content h2.markdown-h2 {
-            font-size: calc(28px * var(--font-base));
+            font-size: 28px;
             color: #FF8C00;
             margin: 20px 0 15px;
             padding-bottom: 10px;
             border-bottom: 2px solid rgba(255,140,0,0.4);
         }
         .markdown-content h3.markdown-h3 {
-            font-size: calc(22px * var(--font-base));
+            font-size: 22px;
             color: #E63946;
             margin: 18px 0 12px;
         }
         .markdown-content h4.markdown-h4 {
-            font-size: calc(20px * var(--font-base));
+            font-size: 20px;
             color: #D4A017;
             margin: 15px 0 10px;
         }
@@ -364,7 +375,7 @@
         .markdown-content ul.markdown-ul li.markdown-li:before {
             content: "•";
             color: #FFD700;
-            font-size: calc(24px * var(--font-base));
+            font-size: 24px;
             position: absolute;
             left: 0;
             top: -3px;
@@ -377,14 +388,14 @@
             margin-top: 20px;
         }
         .example-item {
-            background: var(--bg-color);
-            border: 2px solid var(--border-color);
+            background: #ffffff;
+            border: 2px solid #f0dcc8;
             border-radius: 10px;
             padding: 15px;
             text-align: center;
             cursor: pointer;
-            transition: var(--transition);
-            font-size: calc(20px * var(--font-base));
+            transition: all 0.3s ease;
+            font-size: 20px;
             font-weight: 500;
             min-height: 55px;
             display: flex;
@@ -394,27 +405,36 @@
             gap: 3px;
             position: relative;
         }
+        body.dark-theme .example-item {
+            background: #1a1a1a;
+            border-color: #4a3f35;
+            color: #f8f9fa;
+        }
         .example-item:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            border-color: var(--primary-color);
+            border-color: #E63946;
         }
         .example-item.selected {
-            background: var(--selected-color);
+            background: #E63946;
             color: white;
-            border-color: var(--selected-color);
+            border-color: #E63946;
             transform: scale(1.03);
+        }
+        body.dark-theme .example-item.selected {
+            background: #FF6B6B;
+            border-color: #FF6B6B;
         }
 
         .clear-selection {
-            background: var(--accent-color);
+            background: #FF8C00;
             color: white;
             border: none;
             border-radius: 8px;
             padding: 10px 20px;
             cursor: pointer;
             margin-top: 15px;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             font-weight: 500;
             display: inline-flex;
             align-items: center;
@@ -426,13 +446,18 @@
         }
 
         .instructions {
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 16px;
             padding: 25px;
             margin-top: 30px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
         }
-        .instructions h2 { margin-bottom: 15px; color: var(--primary-color); }
+        body.dark-theme .instructions {
+            background: #2d2a26;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+        }
+        .instructions h2 { margin-bottom: 15px; color: #E63946; }
+        body.dark-theme .instructions h2 { color: #FF6B6B; }
         .instructions ul { padding-left: 20px; }
         .instructions li { margin-bottom: 10px; }
 
@@ -444,21 +469,25 @@
             justify-content: center;
         }
         .history-item {
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
+            background: #fef9f2;
+            border: 2px solid #f0dcc8;
             border-radius: 50px;
             padding: 8px 18px;
             font-size: 14px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 6px;
         }
+        body.dark-theme .history-item {
+            background: #2d2a26;
+            border-color: #4a3f35;
+        }
         .history-item:hover {
-            background: var(--primary-color);
+            background: #E63946;
             color: white;
-            border-color: var(--primary-color);
+            border-color: #E63946;
         }
 
         /* ===== PANELS ===== */
@@ -466,13 +495,17 @@
             position: fixed;
             top: 0;
             width: 300px;
-            height: calc(100vh - var(--header-height));
-            background: var(--card-bg);
+            height: calc(100vh - 70px);
+            background: #fef9f2;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             padding: 20px;
             z-index: 9999;
             transition: transform 0.3s ease;
             overflow-y: auto;
+        }
+        body.dark-theme .history-panel, body.dark-theme .topics-panel {
+            background: #2d2a26;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
         .history-panel { right: 0; transform: translateX(100%); }
         .topics-panel { left: 0; transform: translateX(-100%); }
@@ -483,28 +516,35 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid #f0dcc8;
+        }
+        body.dark-theme .history-header, body.dark-theme .topics-header {
+            border-bottom-color: #4a3f35;
         }
         .history-header h2, .topics-header h2 {
-            color: var(--primary-color);
+            color: #E63946;
             font-size: 22px;
         }
         .history-list, .topics-list { display: flex; flex-direction: column; gap: 10px; }
         .history-item-panel, .topic-item {
-            background: var(--bg-color);
-            border: 2px solid var(--border-color);
+            background: #ffffff;
+            border: 2px solid #f0dcc8;
             border-radius: 8px;
             padding: 12px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        body.dark-theme .history-item-panel, body.dark-theme .topic-item {
+            background: #1a1a1a;
+            border-color: #4a3f35;
+        }
         .topic-item { display: flex; align-items: center; gap: 10px; font-weight: 500; }
         .history-item-panel:hover, .topic-item:hover {
-            border-color: var(--primary-color);
-            background: rgba(var(--primary-color-rgb), 0.1);
+            border-color: #E63946;
+            background: rgba(230,57,70,0.1);
         }
         .close-history, .close-topics { cursor: pointer; padding: 5px; font-size: 18px; }
 
@@ -523,7 +563,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             padding: 35px;
@@ -533,8 +573,12 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            border: 2px solid var(--secondary-color);
+            border: 2px solid #FFD700;
             text-align: center;
+        }
+        body.dark-theme .instructions-modal, body.dark-theme .instruction-modal {
+            background: #2d2a26;
+            border-color: #FFD700;
         }
         .instructions-modal.active, .instruction-modal.active {
             opacity: 1;
@@ -542,15 +586,16 @@
             transform: translate(-50%, -50%) scale(1);
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { color: var(--primary-color); }
+        .modal-header h2 { color: #E63946; }
+        body.dark-theme .modal-header h2 { color: #FF6B6B; }
         .close-modal { cursor: pointer; padding: 5px; font-size: 24px; }
-        .close-modal:hover { color: var(--accent-color); }
+        .close-modal:hover { color: #FF8C00; }
         .modal-content { line-height: 1.7; text-align: left; }
         .modal-content ul { padding-left: 20px; margin: 15px 0; }
         .modal-content li { margin-bottom: 10px; }
 
         .instruction-modal h2 {
-            color: var(--primary-color);
+            color: #E63946;
             font-size: 28px;
             margin-bottom: 20px;
             display: flex;
@@ -561,7 +606,10 @@
         .instruction-modal p {
             margin-bottom: 15px;
             line-height: 1.6;
-            color: var(--text-color);
+            color: #2C3E50;
+        }
+        body.dark-theme .instruction-modal p {
+            color: #f8f9fa;
         }
         .instruction-modal ul {
             text-align: left;
@@ -576,14 +624,14 @@
         }
         .instruction-modal li::before {
             content: "•";
-            color: var(--accent-color);
+            color: #FF8C00;
             font-size: 20px;
             position: absolute;
             left: -18px;
             top: -2px;
         }
         .instruction-modal button#closeInstruction {
-            background: var(--primary-color);
+            background: #E63946;
             color: white;
             border: none;
             border-radius: 50px;
@@ -592,12 +640,12 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(230,57,70,0.3);
             letter-spacing: 0.5px;
         }
         .instruction-modal button#closeInstruction:hover {
-            background: var(--secondary-color);
+            background: #FFD700;
             color: #2C3E50;
             transform: translateY(-3px);
             box-shadow: 0 6px 15px rgba(255,215,0,0.4);
@@ -610,7 +658,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: #f5f5f5;   /* neutral professional background */
+            background: #f5f5f5;
             z-index: 150;
             display: none;
             flex-direction: column;
@@ -631,7 +679,7 @@
         .slideshow-top { top: 0; }
         .slideshow-bottom { bottom: 0; }
         .slideshow-content {
-            font-size: calc(72px * var(--font-base));
+            font-size: 72px;
             text-align: center;
             max-width: 90%;
             padding: 20px;
@@ -699,11 +747,11 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: var(--primary-color);
+            background: #E63946;
             color: white;
             padding: 15px 25px;
             border-radius: 8px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -711,7 +759,7 @@
             transform: translateY(100px);
             opacity: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
-            border: 1px solid var(--secondary-color);
+            border: 1px solid #FFD700;
         }
         .dictionary-notification.active {
             transform: translateY(0);
@@ -722,8 +770,8 @@
             border-color: #fff;
         }
         .dictionary-notification.success {
-            background: var(--export-color);
-            border-color: var(--secondary-color);
+            background: #D4A017;
+            border-color: #FFD700;
         }
 
         /* ===== BUILDER ===== */
@@ -733,11 +781,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--bg-color);
+            background: #ffffff;
             z-index: 1000;
             overflow-y: auto;
             padding: 20px;
             display: none;
+        }
+        body.dark-theme .builder-container {
+            background: #1a1a1a;
         }
         .builder-container.active { display: block; }
         .builder-header {
@@ -746,15 +797,21 @@
             align-items: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid #f0dcc8;
+        }
+        body.dark-theme .builder-header {
+            border-bottom-color: #4a3f35;
         }
         .builder-title {
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 24px;
-            color: var(--builder-color);
+            color: #C62828;
             font-weight: 700;
+        }
+        body.dark-theme .builder-title {
+            color: #EF5350;
         }
         .builder-actions { display: flex; gap: 15px; }
         .builder-btn {
@@ -764,15 +821,15 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 500;
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
         .builder-cancel {
             background: #e0e0e0;
-            color: var(--text-color);
+            color: #2C3E50;
         }
         .builder-cancel:hover { background: #d0d0d0; }
         .builder-export {
-            background: var(--export-color);
+            background: #D4A017;
             color: white;
         }
         .builder-export:hover {
@@ -782,10 +839,14 @@
         .builder-form {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 16px;
             padding: 30px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
+        }
+        body.dark-theme .builder-form {
+            background: #2d2a26;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
         }
         .input-group { margin-bottom: 25px; }
         .input-group label {
@@ -793,31 +854,44 @@
             margin-bottom: 10px;
             font-weight: 600;
             font-size: 18px;
-            color: var(--text-color);
+            color: #2C3E50;
+        }
+        body.dark-theme .input-group label {
+            color: #f8f9fa;
         }
         .input-group input,
         .input-group textarea {
             width: 100%;
             padding: 14px;
-            border: 2px solid var(--border-color);
+            border: 2px solid #f0dcc8;
             border-radius: 8px;
             font-size: 16px;
-            background: var(--bg-color);
-            color: var(--text-color);
+            background: #ffffff;
+            color: #2C3E50;
             transition: border 0.3s;
+        }
+        body.dark-theme .input-group input,
+        body.dark-theme .input-group textarea {
+            background: #1a1a1a;
+            border-color: #4a3f35;
+            color: #f8f9fa;
         }
         .input-group input:focus,
         .input-group textarea:focus {
             outline: none;
-            border-color: var(--builder-color);
+            border-color: #C62828;
             box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.2);
         }
         .builder-preview {
             margin-top: 40px;
-            background: var(--card-bg);
+            background: #fef9f2;
             border-radius: 16px;
             padding: 30px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.10);
+        }
+        body.dark-theme .builder-preview {
+            background: #2d2a26;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
         }
         .preview-header {
             display: flex;
@@ -827,27 +901,31 @@
         }
         .preview-title {
             font-size: 22px;
-            color: var(--builder-color);
+            color: #C62828;
             font-weight: 700;
         }
         .preview-clear {
-            background: var(--accent-color);
+            background: #FF8C00;
             color: white;
             border: none;
             border-radius: 8px;
             padding: 8px 16px;
             cursor: pointer;
             font-size: 14px;
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
         .preview-clear:hover { background: #CC7000; }
         .preview-content {
-            background: var(--bg-color);
+            background: #ffffff;
             border-radius: 8px;
             padding: 20px;
             max-height: 300px;
             overflow-y: auto;
             font-family: monospace;
+        }
+        body.dark-theme .preview-content {
+            background: #1a1a1a;
+            color: #f8f9fa;
         }
         .entry-count {
             text-align: right;
@@ -856,7 +934,7 @@
             font-size: 14px;
         }
         .builder-add {
-            background: var(--builder-color);
+            background: #C62828;
             color: white;
             border: none;
             border-radius: 8px;
@@ -867,7 +945,7 @@
             align-items: center;
             gap: 8px;
             margin: 15px auto;
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
         .builder-add:hover {
             background: #9B1B1B;
@@ -884,25 +962,33 @@
         }
         .font-label {
             font-weight: 500;
-            color: var(--text-color);
+            color: #2C3E50;
+        }
+        body.dark-theme .font-label {
+            color: #f8f9fa;
         }
         .font-size-btn {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
+            background: #fef9f2;
+            border: 2px solid #f0dcc8;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             font-weight: bold;
-            transition: var(--transition);
+            transition: all 0.3s ease;
+        }
+        body.dark-theme .font-size-btn {
+            background: #2d2a26;
+            border-color: #4a3f35;
+            color: #f8f9fa;
         }
         .font-size-btn.active {
-            background: var(--primary-color);
+            background: #E63946;
             color: white;
-            border-color: var(--primary-color);
+            border-color: #E63946;
         }
 
         /* ===== RESPONSIVE ===== */
@@ -1115,1274 +1201,1277 @@
     </div>
 
     <script>
-        // ==== JAVASCRIPT UNCHANGED (original logic & features) ====
-        (function() {
-            const splashScreen = document.getElementById('splashScreen');
-            const loadingProgress = document.getElementById('loadingProgress');
-            loadingProgress.style.width = '100%';
-            setTimeout(() => {
-                splashScreen.style.opacity = '0';
-                splashScreen.style.pointerEvents = 'none';
-                setTimeout(() => { splashScreen.style.display = 'none'; }, 800);
-            }, 5000);
+    (function() {
+        // Polyfill for classList (for IE9 compatibility)
+        if (!("classList" in document.documentElement)) {
+            Object.defineProperty(HTMLElement.prototype, "classList", {
+                get: function() {
+                    var self = this;
+                    function update(fn) {
+                        return function(value) {
+                            var classes = self.className.split(/\s+/);
+                            var index = classes.indexOf(value);
+                            fn(classes, index, value);
+                            self.className = classes.join(" ");
+                        };
+                    }
+                    return {
+                        add: update(function(classes, index, value) {
+                            if (index === -1) classes.push(value);
+                        }),
+                        remove: update(function(classes, index) {
+                            if (index !== -1) classes.splice(index, 1);
+                        }),
+                        toggle: update(function(classes, index, value) {
+                            if (index === -1) classes.push(value);
+                            else classes.splice(index, 1);
+                        }),
+                        contains: function(value) {
+                            return self.className.split(/\s+/).indexOf(value) !== -1;
+                        }
+                    };
+                }
+            });
+        }
 
-            const DEFAULT_LESSONS = {
-  "21-consonants": {
-    "desc": "21 Consonants - B C D F G H J K L M N P Q R S T V W X Y Z",
-    "ex": [
-      "B","C","D","F","G","H","J","K","L","M","N","P","Q","R","S","T","V","W","X","Y","Z",
-      "I have a big bag","Do you see the cat?","My mat is red","The hat is on the mat","Look at the fat rat"
-    ]
-  },
-  "short-and-long-vowels": {
-    "desc": "Short & Long Vowels - Short: ă ĕ ĭ ŏ ŭ  ·  Long: ā ē ī ō ū  ·  Y",
-    "ex": [
-      "ă","ĕ","ĭ","ŏ","ŭ","ā","ē","ī","ō","ū","y",
-      "I have a big bag","Do you see the cat?","My mat is red","The hat is on the mat","Look at the fat rat"
-    ]
-  },
-  "short-vowel-cvc-words": {
-    "desc": "Short Vowel CVC Words - bag, cat, mat, hat, get, wet, net, let, sit, fix, hit, win, pot, hot, not, lot, sum, fun, bun, mud",
-    "ex": [
-      "bag","cat","mat","hat","rat","bat","sat","pat","fat","man","van","map",
-      "get","wet","net","let","pen","ten","hen","men","bed","red","led","fed",
-      "sit","fix","hit","win","pin","big","pig","dig","lid","kid","hid","rip",
-      "pot","hot","not","lot","got","dog","log","fog","hop","mop","top","cop",
-      "sum","fun","bun","mud","but","sun","run","cup","bug","rug","hug","tub",
-      "I have a big bag","Do you see the cat?","My mat is red","The hat is on the mat","Look at the fat rat",
-      "Can you get the net?","My shoes are wet","I will let you go","The pen is on the bed","Ten hens ran by",
-      "Please sit down","I can fix it","We want to win","That pin is big","The kid can dig",
-      "The pot is on the stove","It is hot today","We got a lot of fog","My dog can hop","Mop the top of the log",
-      "Add the sum for fun","I got mud on my leg","The sun is hot","We ran and had fun","Give me a hug"
-    ]
-  },
-  "special-consonants": {
-    "desc": "Special Consonants - box, fox, mix, six, quit, queen, quiz, quick, fly, try, sky, my",
-    "ex": [
-      "box","fox","mix","six","ax","ox","fix","wax","tax","next","flex","text",
-      "quit","queen","quiz","quick","quack","quill","quilt","quest","quench","quote","quail","quirk",
-      "fly","try","sky","my","by","why","spy","dry","fry","shy","myth","gym",
-      "The fox is in the box","I got six on the quiz","The queen can quit","Fix the box quickly","The duck can quack",
-      "The bird can fly high","I will try again","Look at the sky","This bike is my bike","Please dry the cup"
-    ]
-  },
-  "c-k-rule": {
-    "desc": "C/K Rule - cat, cot, cup, can, kid, kit, key, kick",
-    "ex": [
-      "cat","cot","cup","can","cap","cop","cub","cut","cab","cod","cuff","cost",
-      "kid","kit","key","keg","kiss","king","kick","kept","kite","kiwi","keep","kin",
-      "Where is the cat?","The baby sleeps in the cot","I see a cup on the table","Can I have a can of juice?","The cub is small",
-      "We have a first aid kit","Here is the key","The kid can kick the ball","I like to fly a kite","The king will keep his hat"
-    ]
-  },
-  "beginning-blends": {
-    "desc": "Beginning Blends - bl, cl, fl, gl, pl, sl, br, cr, dr, fr, gr, pr, tr, sc, sk, squ, st, sm, sn, sp, sw, tw, dw, spl, spr, str, scr, and words",
-    "ex": [
-      "bl","cl","fl","gl","pl","sl","br","cr","dr","fr","gr","pr","tr","sc","sk","squ","st","sm","sn","sp","sw","tw","dw","spl","spr","str","scr",
-      "class","clip","click","clap","club","clog","cluck","cliff","clock","clown","clam","clasp",
-      "flip","flat","flag","flame","flock","flood","flute","flash","flint","fluff","floss",
-      "glass","glow","glue","glad","glide","globe","gloss","glum","gloom","glaze","gland","glitch",
-      "plus","play","plant","plum","plop","pluck","plank","plot","plow","plaid","plume","plug",
-      "slip","slow","slide","slap","slim","slop","slack","sled","slid","slosh","slab","slink",
-      "brown","brush","bring","brick","bread","brave","branch","break","bright","bride","brim","brand",
-      "crab","crash","crop","crack","crawl","cream","crisp","crown","cradle","crumb","crust","crane",
-      "drop","drink","draw","drum","dress","dream","drive","drip","dragon","drill","drift","drape",
-      "fresh","frame","frog","frost","fruit","free","front","fry","frown","frill","fringe","friend",
-      "grape","grip","grow","grass","grand","green","ground","grain","gravel","grin","groom","grunt",
-      "pray","pride","price","press","prank","print","proud","proof","prime","prism","prize","prop",
-      "tree","try","trust","trap","truck","train","trip","track","trick","troop","trunk","trout",
-      "scale","scan","scalp","scare","score","scout","scold","scrap","scuff","scum","scorch","scoop",
-      "skin","skill","skip","skate","skid","skirt","sketch","sky","skunk","skit","skiff","skimp",
-      "small","smart","smile","smoke","smash","smell","smock","smooth","smirk","smug","smudge",
-      "snake","snap","sneeze","snip","snail","snore","snug","snack","snout","snow","sniff","snicker",
-      "start","stop","stone","step","stamp","star","stir","stem","sting","stun","stall","stare",
-      "sweet","swim","swing","swan","swap","sweep","sword","swamp","swirl","swift","swish","sway",
-      "twist","twin","twine","twice","twig","tweak","tweet","twirl","twang","twelve","dwell",
-      "square","squat","squeeze","squid","squint","squash","squirm","squeak","squeal","squad",
-      "My class is fun","Use a clip on the page","You can click the button","Let's clap for the clown","The clock is on the wall",
-      "I can flip the coin","The land is flat","Wave the flag high","A flock of birds flew by","I like to play the flute",
-      "I see a glass of milk","The star will glow at night","Use glue on the paper","I am glad to see you","The bird can glide",
-      "Two plus two is four","Let's play outside","Water the plant","I ate a ripe plum","Pull the plug",
-      "Do not slip on the ice","The old car is slow","Go down the slide","We rode the sled","The cat can slink away",
-      "The dog is brown","Use a brush on your hair","Please bring your bag","We built a wall with bricks","The sun is bright today",
-      "The crab walked on the sand","I heard a loud crash","Farmers grow a big crop","The baby will crawl soon","I like ice cream",
-      "Do not drop the cup","I like to drink water","Can you draw a dragon?","We beat the drum","I had a good dream",
-      "The bread is fresh","The picture is in a frame","The frog can jump far","I like to eat fruit","My friend is kind",
-      "I ate a green grape","Hold on with a firm grip","Plants grow in the sun","The grass is green","We sat on the ground",
-      "What is the price?","Please press the button","I can print my name","She is proud of her work","I won a big prize",
-      "The tree is very tall","I will try my best","The truck is big","We rode on the train","I caught a trout",
-      "Stand on the scale","The scout has a map","Do not scare the cat","We won the score","Scoop the ice cream",
-      "My skin is soft","She has great skill","Let's skip and jump","I can skate on ice","Look up at the sky",
-      "The mouse is small","You are very smart","Please smile for the photo","I love the smell of bread","The table is smooth",
-      "The snake is long","I heard a loud snap","The snail moved slowly","Let's have a snack","It began to snow",
-      "Let's start the game","Please stop at the sign","I found a smooth stone","Watch your first step","I can see a star",
-      "The mango is sweet","I can swim in the pool","Push the swing higher","The swan is white","Please sweep the floor",
-      "Twist the cap off the bottle","My sister is my twin","I picked up a small twig","The bird gave a happy tweet","She can twirl and dance",
-      "Squeeze the sponge dry","The box is a square","I saw a squid in the sea","Squint your eyes in the sun","The mouse gave a small squeak"
-    ]
-  },
-  "beginning-3-letter-blends": {
-    "desc": "Beginning 3-Letter Blends - splash, spring, street, scrub",
-    "ex": [
-      "spl","spr","str","scr","splash","spring","street","scrub","split","spray","strong","scream","splat","sprout","stripe","scroll",
-      "We had a big splash in the pool","Flowers bloom in the spring","Cars drove down the street","We can scrub the floor","I like the tiger's stripe"
-    ]
-  },
-  "ending-blends": {
-    "desc": "Ending Blends - st, sk, sp, nd, nt, nk, mp, rd, ld, lp, rk, lf, pt, ft, ct, lk, lt, xt, ts, and words",
-    "ex": [
-      "st","sk","sp","nd","nt","nk","mp","rd","ld","lp","rk","lf","pt","ft","ct","lk","lt","xt","ts",
-      "list","fast","best","last","cast","past","nest","rest","test","west","dust","rust",
-      "flask","husk","desk","task","mask","brisk","risk","disk","whisk","tusk","dusk",
-      "rasp","gasp","grasp","clasp","wisp","crisp","lisp","wasp",
-      "hand","land","blend","send","find","wind","stand","round",
-      "plant","went","rent","sent","bent","tent","hunt","pant","vent","lint","mint","dent",
-      "jump","camp","pump","lamp","stamp","lump","clump","plump","stomp","tramp","champ","romp",
-      "wild","hold","child","cold","fold","gold","mold","scold","told","bold","sold",
-      "help","gulp","scalp","yelp","pulp","kelp","whelp",
-      "kept","wept","slept","crept","leapt","swept",
-      "left","soft","swift","craft","loft","sift","drift","gift","lift","shift","raft",
-      "fact","act","react","exact","text","next","context",
-      "milk","walk","talk","chalk","stalk","folk","yolk","silk",
-      "salt","felt","malt","bolt","kilt","melt","belt","colt","wilt","guilt",
-      "hats","pets","pots","cats","rats","bats","mats","sits","bits","hits","fits","kits",
-      "bird","cord","ford","lord","ward","yard","curd",
-      "Raise your hand","We landed on the land","I will send you a letter","Help me find my shoe","Please stand up",
-      "Water the plant","We went to the shop","I sent a letter","We set up the tent","Let's go on a hunt",
-      "I can jump high","We set up camp","Turn on the lamp","I put a stamp on the letter","Stomp your feet like this",
-      "I made a list of names","The rabbit runs fast","This is the best cake","Let's rest for a bit","We took a spelling test",
-      "The book is on the desk","I have one more task","Put on your mask","The elephant has a tusk","We came home at dusk",
-      "I took a deep gasp","Grasp the rope tightly","Clasp the necklace shut","A wasp flew by my head","The chips are crisp",
-      "Please hold my hand","The child is happy","It is very cold outside","Fold your clothes","The ring is made of gold",
-      "Can you help me?","The dog gave a small yelp","Whales eat kelp","I took a big gulp of water","This orange has a lot of pulp",
-      "I kept my promise","The baby slept all night","The cat crept behind the chair","She swept the floor","He leapt over the fence",
-      "Turn left at the corner","The blanket is soft","I got a nice gift","Please lift the box","We rode on a raft",
-      "Here is a fun fact","Please act kindly to others","I sent a text message","What is the next step?","Read the context first",
-      "I drink milk every morning","We took a long walk","Let's talk about our day","The teacher used white chalk","The dress is made of silk",
-      "Pass the salt, please","The ice will melt in the sun","He wore a leather belt","The flower began to wilt","The baby horse is a colt",
-      "I love my pets","Two cats sat on the mats","We wore our hats outside","The bats fly at night","This shirt fits well",
-      "The rock is very hard","Spell this word for me","I saw a herd of cows","The bird can sing","We played in the yard"
-    ]
-  },
-  "digraphs-sh": {
-    "desc": "Digraphs SH - ship, shot, shop, wish",
-    "ex": [
-      "ship","shot","trash","crash","shop","wish","fish","dish","rush","shell","shut","shock",
-      "The ship sailed away","Please throw out the trash","We went to the shop","I wish for a new bike","I caught a big fish"
-    ]
-  },
-  "digraphs-ch": {
-    "desc": "Digraphs CH - chat, chop, chip, chin",
-    "ex": [
-      "chat","chop","branch","much","chip","chin","chest","chick","chase","chill","charm","check",
-      "We had a nice chat","Chop the vegetables","I want a chip and a chin strap","The little chick can peep","Let's chase the ball"
-    ]
-  },
-  "digraphs-tch": {
-    "desc": "Digraphs TCH - match, fetch, catch, watch",
-    "ex": [
-      "match","fetch","switch","scratch","catch","patch","watch","hatch","stitch","clutch","sketch","twitch",
-      "Light the match","Fetch the ball for me","Please catch the bus","I lost my watch","The eggs will hatch soon"
-    ]
-  },
-  "digraphs-th-voiced": {
-    "desc": "Digraphs TH (Voiced) - they, though, thus, those",
-    "ex": [
-      "they","though","thus","those","that","this","them","these","then",
-      "I like that book","Give the toy to them","Look at this picture","We will go then","They are my friends"
-    ]
-  },
-  "digraphs-th-unvoiced": {
-    "desc": "Digraphs TH (Unvoiced) - three, thumb, thick, think",
-    "ex": [
-      "three","thumb","thick","thing","think","bath","thaw","thrill","both",
-      "The paper is thin","Thank you for the gift","I will come with you","I have three apples","Let's take a bath"
-    ]
-  },
-  "digraphs-ng": {
-    "desc": "Digraphs NG - ring, king, sing, bang",
-    "ex": [
-      "ring","king","sing","bang","hang","strong","bring","swing","spring",
-      "Let's sing a song","The road is very long","The bird has one wing","I lost my ring","Hang your coat here"
-    ]
-  },
-  "digraphs-nk": {
-    "desc": "Digraphs NK - pink, link, sink, drink",
-    "ex": [
-      "pink","link","sink","drink","bank","thank","sank","blink","drunk","stink","chunk","plank",
-      "I like the color pink","Wash your hands in the sink","I need a drink of water","We keep money in the bank","Thank you very much"
-    ]
-  },
-  "digraphs-wh": {
-    "desc": "Digraphs WH - why, where, whale, wheel",
-    "ex": [
-      "why","where","whale","wheel","whisper","whistle","whisk","what","which",
-      "Which one do you want?","What is your name?","The snow is white","When will you come home?","I saw a big whale"
-    ]
-  },
-  "digraphs-ph": {
-    "desc": "Digraphs PH - phone, photo, graph, alphabet",
-    "ex": [
-      "phone","photo","graph","alphabet","dolphin","elephant","phrase","sphere","phonics",
-      "I called you on the phone","Take a photo of the class","The elephant is very big","Dolphins can swim fast","We learn phonics every day"
-    ]
-  },
-  "digraphs-ck": {
-    "desc": "Digraphs CK - track, back, black, pack",
-    "ex": [
-      "track","back","black","sack","pack","pick","sick","duck","neck","clock","stick","thick",
-      "The train is on the track","Come back home soon","Pack your bag for school","I feel sick today","The duck swims in the pond"
-    ]
-  },
-  "digraphs-wr": {
-    "desc": "Digraphs WR - write, wrote, wrap, wrist",
-    "ex": [
-      "write","wrote","wrap","wrist","wrong","wreck","wrench","wrinkle","wrestle","wring","wrath",
-      "Please write your name","I hurt my wrist","That answer is wrong","Wrap the gift for me","Use the wrench to fix it"
-    ]
-  },
-  "digraphs-gn-rh": {
-    "desc": "Digraphs GN / RH - gnat, gnaw, sign, rhyme",
-    "ex": [
-      "gnat","gnaw","sign","design","gnome","rhino","rhyme","rhythm",
-      "A gnat is a tiny bug","The dog will gnaw the bone","Please sign your name","The rhino is very strong","Can you find a rhyme for cat?"
-    ]
-  },
-  "digraphs-kn": {
-    "desc": "Digraphs KN - know, knot, knob, knee",
-    "ex": [
-      "know","knot","knob","knee","knife","knight","knock","knit","knack","knead",
-      "I know the answer","Tie a knot in the string","Turn the knob to open the door","I hurt my knee","Please knock on the door"
-    ]
-  },
-  "digraphs-gh": {
-    "desc": "Digraphs GH - ghost, Ghana, ghastly, ghoul",
-    "ex": [
-      "ghetto","gherkin","ghost","Ghana","ghastly","ghoul",
-      "I saw a ghost in the story","We live in Ghana","That was a ghastly storm","The film had a scary ghoul","My friend is Ghanaian"
-    ]
-  },
-  "silent-e-rule-a_e": {
-    "desc": "Silent E Rule (A_E) - cake, came, mate, gate",
-    "ex": [
-      "cake","came","mate","gate","date","name","lane","pace","safe","tape","lake","fame",
-      "I baked a cake","My friend came to visit","Close the gate","What is your name?","We drove down the lane"
-    ]
-  },
-  "silent-e-rule-e_e": {
-    "desc": "Silent E Rule (E_E) - these, scene, complete, extreme",
-    "ex": [
-      "these","scene","Pete","delete","extreme","athlete","eve","mete","fete","complete","Steve","gene",
-      "These shoes are new","That was a funny scene","Please complete your work","I will delete this file","The runner is an athlete"
-    ]
-  },
-  "silent-e-rule-i_e": {
-    "desc": "Silent E Rule (I_E) - line, kite, time, nine",
-    "ex": [
-      "line","kite","time","nine","prize","slide","dine","mine","like",
-      "I ride my bike to school","Bees live in a hive","I like to read books","I flew a kite in the park","Let's slide down the hill"
-    ]
-  },
-  "silent-e-rule-o_e": {
-    "desc": "Silent E Rule (O_E) - cone, bone, home, note",
-    "ex": [
-      "cone","bone","home","note","stone","hope","rope","vote","joke","dose","pole","mole",
-      "I want an ice cream cone","Let's go home now","Write me a note","I found a smooth stone","I hope to see you soon"
-    ]
-  },
-  "silent-e-rule-u_e": {
-    "desc": "Silent E Rule (U_E) - rule, cube, mute, tune",
-    "ex": [
-      "rule","cube","mute","tune","cute","flute","fuse","mule","huge","fume","pure","cure",
-      "An ice cube is cold","I can play a tune","The puppy is very cute","She plays the flute","That elephant is huge"
-    ]
-  },
-  "short-words-long-vowels": {
-    "desc": "Short Words with Long Vowel Sounds - sea, me, she, we",
-    "ex": [
-      "see","me","she","we","be","he","so","go","no","lo","hi","flu",
-      "Come with me","She is my sister","We can go now","Please be quiet","He said hi to me"
-    ]
-  },
-  "phonograms-with-long-vowels": {
-    "desc": "Phonograms with Long Vowels - cold, bold, sold, hold, bolt, volt, jolt, both, most, post, host, ghost, bind, find, kind, mind",
-    "ex": [
-      "cold","bold","sold","hold","gold","told","fold","poll","toll","roll","stroll","doll",
-      "bolt","volt","jolt","holt","molt","dolt","both","cloth",
-      "most","post","host","ghost","almost",
-      "bind","find","kind","mind","blind","grind","behind","mild","wild","child",
-      "It is very cold today","Please hold my hand","The ring is made of gold","Fold the paper in half","Let's roll the ball",
-      "Tighten the bolt","The car gave a sudden jolt","The colt ran in the field","Both of us like to read","The lamp needs more volts",
-      "I ate the most food","Mail the letter at the post","We are almost home","We live near the coast","I like toast for breakfast",
-      "Help me find my keys","She is very kind","Please mind the gap","I sat behind my friend","The child likes to play"
-    ]
-  },
-  "rhyming-words": {
-    "desc": "Rhyming Words - pat, sat, mat, fat, pot, spot, cot, hot, eat, sheet, beat, meat",
-    "ex": [
-      "pat","sat","mat","fat","rat","cat","hat","bat","vat","flat","chat","splat",
-      "pot","spot","cot","hot","lot","dot","got","not","rot","plot","slot",
-      "eat","sheet","beat","meat","feat","seat","neat","peat","treat","wheat","cheat","heat","meet","fete",
-      "The cat sat on the mat","I like my new flat hat","The rat ran under the flat rock","We had a cute fat cat","The bat can fly at night",
-      "The soup pot is hot","I see a red spot on top","The baby sleeps in a cot","We got a lot of rain","Find the dot on the map",
-      "I like to beat the drum","We ate meat for dinner","Take a seat, please","Bread is made from wheat","I got a sweet treat"
-    ]
-  },
-  "compound-words": {
-    "desc": "Compound Words - myself, keyboard, cupcake, popcorn",
-    "ex": [
-      "myself","keyboard","clockwise","cupcake","footprint","popcorn","napkin","rainbow","toothbrush","sunshine","butterfly","knapsack",
-      "I made a cupcake for the party","I saw my footprint in the sand","We ate popcorn at the movies","There is a rainbow in the sky","I brush my teeth with a toothbrush"
-    ]
-  },
-  "r-controlled-vowels-ar": {
-    "desc": "R-Controlled Vowels (AR) - car, dark, mark, park",
-    "ex": [
-      "car","dark","mark","park","hard","star","farm","charm","smart","chart","barn","cart",
-      "We drove the car to the park","The sky is dark tonight","Please mark your answer","I live on a farm","You are very smart"
-    ]
-  },
-  "r-controlled-vowels-or": {
-    "desc": "R-Controlled Vowels (OR) - born, fork, torn, cord",
-    "ex": [
-      "born","fork","torn","cord","worn","thorn","porch","form","lord",
-      "The baby was born in May","Use a fork to eat","My shirt is torn","We built a sand fort","There was a big storm"
-    ]
-  },
-  "r-controlled-vowels-er-ir-ur": {
-    "desc": "R-Controlled Vowels (ER/IR/UR) - her, term, shirt, girl",
-    "ex": [
-      "her","term","verse","shirt","girl","bird","curve","surf","sir","turn","burn","curb",
-      "This is her book","I bought a new shirt","The girl can sing well","The bird flew away","We watched the waves surf"
-    ]
-  },
-  "r-controlled-vowels-war": {
-    "desc": "R-Controlled Vowels (WAR) - war, warm, ward, award",
-    "ex": [
-      "war","warm","ward","award","reward","toward","forward","dwarf","warn","warp","wart","swarm",
-      "I want the war","We see warm ones","We have a ward","The award is red","He got a reward"
-    ]
-  },
-  "r-controlled-vowels-wor": {
-    "desc": "R-Controlled Vowels (WOR) - worse, worst, worth, worry",
-    "ex": [
-      "worse","worst","worth","worship","worn","worm","work","worthy",
-      "Where is the worm?","I like that word","I can work","She got a world","That worse is good"
-    ]
-  },
-  "agent-suffixes-or-er": {
-    "desc": "Agent Suffixes (-OR, -ER) - actor, doctor, visitor, sailor",
-    "ex": [
-      "actor","doctor","visitor","sailor","tailor","vendor","mayor","author","editor","senator","sponsor","tractor",
-      "bigger","better","summer","smaller","mother","faster",
-      "I see a actor and a author","We see a doctor","I want the visitor","Can we have a sailor?","A tailor is on the mat"
-    ]
-  },
-  "phonograms-with-ful": {
-    "desc": "Phonograms with -FUL - careful, helpful, playful, hopeful",
-    "ex": [
-      "careful","helpful","playful","hopeful","useful","thankful","put","brute",
-      "Be careful and helpful today","The playful dog is hopeful for a treat","This tool is useful and helpful","I am thankful for my careful friend","She is hopeful and thankful too"
-    ]
-  },
-  "phonograms-with-short-vowels": {
-    "desc": "Phonograms with Short Vowels - ball, tall, wall, call, bull, pull, fully, push",
-    "ex": [
-      "ball","tall","wall","call","hall","mall","fall","walk","talk","chalk","also","almost",
-      "bull","pull","full","push","bush","cushion",
-      "The tall wall is in the hall","I can call Mom to walk","We talk at the mall","Do not fall on the chalk","I also almost lost the ball",
-      "The cup is full of water","Pull the bull to the barn","Push the old bush aside","She sat on a soft cushion","Don't be so pushy, just pull gently"
-    ]
-  },
-  "vowel-digraphs-ai-ay": {
-    "desc": "Vowel Digraphs (AI, AY) - rain, mail, jail, wait, stay, may, gray, tray",
-    "ex": [
-      "rain","mail","jail","wait","gain","train","brain","chain","paint","tail",
-      "stay","may","gray","tray",
-      "I like that rain","The mail is fun","Can you see the jail?","What a big wait!","The gain is yellow",
-      "They play in the park","I like that day","My way is small","Do you say?","What a cute stay!"
-    ]
-  },
-  "vowel-digraphs-ee-ey": {
-    "desc": "Vowel Digraphs (EE, EY) - tree, see, bee, sleep, key, money, honey, monkey",
-    "ex": [
-      "tree","see","bee","sleep","week","sweet","free","deep","green","keep",
-      "key","money","honey","monkey","donkey","turkey",
-      "Can I have a tree?","He can see","The bee is red","I will sleep","That week is good",
-      "My key is small","I see a money on the table","We see a honey","Is that a monkey?","They see a donkey"
-    ]
-  },
-  "vowel-digraphs-ea": {
-    "desc": "Vowel Digraphs (EA) - beach, meat, seat, speak",
-    "ex": [
-      "beach","meat","seat","speak","leaf","cream",
-      "We got a beach","A meat is on the mat","A seat is on the mat","She can speak","What a cute team!"
-    ]
-  },
-  "vowel-digraphs-ie": {
-    "desc": "Vowel Digraphs (IE) - field, brief, chief, piece, lie, tie, die, pie",
-    "ex": [
-      "field","brief","chief","piece","shield","belief",
-      "lie","tie","die","pie","tried","cried",
-      "I got a field","I got a brief","She got a chief","They see a piece","I like my shield",
-      "Look at my lie","Put the tie here","That die is good","Can we have a pie?","My tried is small"
-    ]
-  },
-  "vowel-digraphs-aw-au": {
-    "desc": "Vowel Digraphs (AW, AU) - saw, law, paw, draw, sauce, cause, fault, haul",
-    "ex": [
-      "saw","law","paw","draw","claw","yawn","dawn","straw",
-      "sauce","cause","fault","haul","autumn","caught","taught",
-      "The saw is on the bed","The law is red","They got a paw","I draw with my friends","The claw is blue",
-      "I want the sauce","A cause is on the mat","I have a fault","We want a haul","We see a autumn"
-    ]
-  },
-  "vowel-digraphs-ow": {
-    "desc": "Vowel Digraphs (OW) - row, grow, show, flow",
-    "ex": [
-      "row","grow","show","flow","blow","glow","slow","snow",
-      "The row is green","They grow here","We can show","I love the flow","What is the blow?"
-    ]
-  },
-  "vowel-digraphs-ue-ew": {
-    "desc": "Vowel Digraphs (UE, EW) - glue, blue, true, due, new, few, flew, grew",
-    "ex": [
-      "glue","blue","true","due","clue","cue",
-      "new","few","flew","grew","chew","stew","crew","drew",
-      "Look at my glue","The blue one","I see a true and a cue","The due is here","He got a clue",
-      "It sounds new","The few is red","We see a flew","The grew is big","He chew fast"
-    ]
-  },
-  "vowel-digraphs-oa-oe": {
-    "desc": "Vowel Digraphs (OA, OE) - boat, coat, soak, toad, toe, doe, hoe",
-    "ex": [
-      "boat","coat","soak","toad","road","goal","toe","doe","hoe","joe","goes",
-      "I like that boat","Look at my coat","She got a road","We got a toe","Put the Joe here"
-    ]
-  },
-  "diphthongs-ow-ou": {
-    "desc": "Diphthongs (OW, OU) - how, cow, town, down, out, shout, house, mouse",
-    "ex": [
-      "how","cow","town","down","brown","crown","now","frown",
-      "out","shout","house","mouse","cloud","found","sound","ground","count","round","scout","loud",
-      "The how is fun","A cow is on the mat","We have a town","There is a down","It is brown",
-      "Put the cloud here","The found is red","We got a mouse","He got a out","My sound is nice"
-    ]
-  },
-  "diphthongs-oi-oy": {
-    "desc": "Diphthongs (OI, OY) - boil, soil, coin, boy, toy, joy",
-    "ex": [
-      "boil","soil","coin","oil","join","point","noise","voice","boy","toy","joy","enjoy",
-      "I want the boil","The coin is red","Look at the join","The boy is big","I have a toy"
-    ]
-  },
-  "diphthongs-oo-long": {
-    "desc": "Diphthongs (OO - LONG) - boot, moon, soon, roof",
-    "ex": [
-      "shoot","boot","moon","soon","roof","spoon","cool","food","pool",
-      "I like that boot","I see a moon and a boot","That soon is mine","The roof is blue","There is a spoon"
-    ]
-  },
-  "diphthongs-oo-short": {
-    "desc": "Diphthongs (OO - SHORT) - good, hood, foot, look",
-    "ex": [
-      "room","good","hood","foot","look","hook","wood","took","book",
-      "I like good things","The hood and the book are here","Can I have a foot?","We love to look","The hook and the foot are here"
-    ]
-  },
-  "words-beginning-with-a": {
-    "desc": "Words Beginning with A- - awake, aside, apart, alike",
-    "ex": [
-      "awake","aside","apart","alike","about","asleep","ahead","around",
-      "The awake is yellow","I want a aside","I see a apart and a ahead","What a big alike!","What a cute about!"
-    ]
-  },
-  "soft-c": {
-    "desc": "Soft C (S Sound) - cent, center, nice, city",
-    "ex": [
-      "cent","center","nice","mice","city","circle","cycle","cyclone",
-      "Look at the cent","Put the center here","We see nice ones","I want a mice","What is the city?"
-    ]
-  },
-  "soft-g": {
-    "desc": "Soft G (J Sound) - age, page, gym, stage",
-    "ex": [
-      "age","page","gym","stage","change","giant","digit","strange",
-      "The age is on the bed","We got a page","Can I have a gym?","The stage is big","We love to change"
-    ]
-  },
-  "soft-g-dge": {
-    "desc": "Soft G / -DGE - bridge, judge, badge, edge",
-    "ex": [
-      "bridge","judge","badge","edge","fridge","lodge",
-      "I see a bridge on the table","Put the judge here","I want the badge","Put the edge here","Here is a fridge"
-    ]
-  },
-  "silent-letters": {
-    "desc": "Silent Letters - often, castle, listen, fasten, comb, climb, crumb, lamb, would, could, should, half",
-    "ex": [
-      "often","castle","hasten","listen","fasten","soften",
-      "comb","climb","crumb","lamb","limb","thumb",
-      "would","could","should","calf","half","calm","talk","chalk",
-      "We listen every day","Put the hasten here","The fasten is on the bed","We want a soften","The often is big",
-      "What a cute comb!","They can climb","Can we have a crumb?","The lamb is green","Can you see the limb?",
-      "That would is mine","The could is green","The should is red","I have a calf","I see a half"
-    ]
-  },
-  "spelling-patterns-se": {
-    "desc": "Spelling Patterns (SE) - choose, cheese, tease, pose",
-    "ex": [
-      "choose","cheese","tease","pose","chose","rose","wise","please",
-      "Please choose the cheese","Do not pose and tease him","He chose his rose","He has this atlas","She is as wise as he is"
-    ]
-  },
-  "spelling-patterns-le": {
-    "desc": "Spelling Patterns (LE) - apple, table, little, candle",
-    "ex": [
-      "apple","table","little","candle","purple","circle","bubble","ruble","hustle","rattle","wrinkle",
-      "He got a apple","Do you see the table?","There is a little","The candle is yellow","It sounds purple"
-    ]
-  },
-  "spelling-patterns-ed": {
-    "desc": "Spelling Patterns (ED) - added, ended, wanted, landed, played, saved, stayed, filled",
-    "ex": [
-      "added","ended","wanted","landed","rested","counted",
-      "played","saved","stayed","filled","called","smiled",
-      "There is a added","I see a ended and a landed","Do you see the wanted?","There is a landed","I like that rested",
-      "I got a played","Here is a saved","The stayed is fun","That filled is mine","That called is mine"
-    ]
-  },
-  "long-vowels-open-syllables": {
-    "desc": "Long Vowels in Open Syllables - baker, paper, lady, hero",
-    "ex": [
-      "baker","paper","final","lady","hero","zero","open","silent",
-      "We see a baker","Look at the paper","I want the final","The lady is here","Get the hero"
-    ]
-  },
-  "closed-syllables-vc-cv": {
-    "desc": "Closed Syllables (VC/CV) - rabbit, muffin, basket, kitten",
-    "ex": [
-      "rabbit","muffin","basket","kitten","happy","puppy","number","under","blanket","traffic","sudden","mammal",
-      "I see a little rabbit","Where is the muffin?","The basket is on the table","My kitten is very soft","We have a happy puppy"
-    ]
-  },
-  "open-syllables-v-cv": {
-    "desc": "Open Syllables & V/CV Rule - tiger, paper, baby, music",
-    "ex": [
-      "tiger","paper","baby","silent","even","music","open","pilot","crazy","favor","unit","tutor",
-      "The tiger is big and strong","I have a piece of paper","The baby is sleeping","Stay silent during the movie","We will open the box now"
-    ]
-  },
-  "magic-e-syllables-vce": {
-    "desc": "Magic-E Syllables (VCe) - cake, bike, hope, smile",
-    "ex": [
-      "cake","bike","hope","smile","name","cone","flute","cube","pile","safe","joke","tune",
-      "I like to eat cake","Ride your bike to school","We have hope for the future","She has a big smile","My name is Sam"
-    ]
-  },
-  "consonant-le-syllables": {
-    "desc": "Consonant-le Syllables (Turtle Rule) - turtle, table, apple, bubble",
-    "ex": [
-      "turtle","table","apple","bubble","puzzle","candle","handle","saddle","little","bottle","noodle","pickle",
-      "Put the book on the table","I eat an apple every day","The bubble popped loudly","Can you solve the puzzle?","The turtle moves slowly"
-    ]
-  },
-  "sounds-of-gh": {
-    "desc": "Sounds of GH - night, right, light, high, ghost, laugh",
-    "ex": [
-      "silent","night","right","light","fight","high","sigh","cough","rough",
-      "ghost","ghastly","ghetto","Ghana","ghoul","gherkin","laugh","thigh","eight","weight",
-      "The light is very bright at night","I can fight for what is right","He gave a sigh and said eight","Do not laugh at the rough cough","I have had enough of the tough fight"
-    ]
-  },
-  "tion-sion": {
-    "desc": "TION / SION - station, nation, portion, action, lotion, vision, mission",
-    "ex": [
-      "station","nation","portion","mention","action","motion","mission","session","passion",
-      "lotion","vision","television","decision","explosion","division",
-      "I see a station and a action","That nation is good","My portion is small","The mission is on the bed","She got a session",
-      "I put lotion on my hand","The train is at the station","We watch television at home","I made a good decision","The rocket is in motion"
-    ]
-  },
-  "plurals": {
-    "desc": "Plurals (-S, -ES) - cats, dogs, birds, books, boxes, buses, dishes, wishes",
-    "ex": [
-      "cats","dogs","birds","books","hands","chairs","trees","plates","cups","lamps",
-      "boxes","buses","dishes","wishes","foxes","benches","babies","candies","ladies","puppies",
-      "The cats chased the dogs","I see three birds in the trees","Put the books on the shelf","We need more cups and plates","She has two hands full of lamps",
-      "The foxes ran past the boxes","She washed the dishes and cups","Two buses stopped at the benches","The babies played with the puppies","Ladies bought candies at the shop"
-    ]
-  },
-  "possessives": {
-    "desc": "Possessives - dog's, cat's, mom's, dad's",
-    "ex": [
-      "dog's","cat's","mom's","dad's","sister's","teacher's","boys","girls","friends","parents",
-      "The dog's bone is under the bed","Mom's car is in the garage","The teacher's desk is neat","The boys' shoes are by the door","My friends' house is down the street"
-    ]
-  },
-  "superlatives": {
-    "desc": "Superlatives - faster, fastest, taller, tallest",
-    "ex": [
-      "faster","fastest","taller","tallest","smaller","smallest","kinder","kindest","warmer","warmest",
-      "My dog runs faster than yours","She is the tallest girl in class","This box is smaller than that one","He is the kindest boy I know","Today is warmer than yesterday"
-    ]
-  },
-  "prefixes-re-un": {
-    "desc": "Prefixes (RE-, UN-) - redo, replay, rewrite, unhappy",
-    "ex": [
-      "redo","replay","rewrite","return","unhappy","unfair","undo","unlock","unpack","unsafe",
-      "I will redo my homework","Let's replay that song again","She was unhappy about the unfair game","Please unlock the door for me","We need to unpack the boxes"
-    ]
-  },
-  "prefixes-dis-pre": {
-    "desc": "Prefixes (DIS-, PRE-) - disagree, dislike, preview, prepare",
-    "ex": [
-      "disagree","dislike","disappear","disobey","preview","prepay","preheat","prepare","preschool","precook",
-      "I disagree with my sister sometimes","The magician made the rabbit disappear","Please preheat the oven first","We need to prepare for the trip","My little brother goes to preschool"
-    ]
-  },
-  "suffixes-less-ness": {
-    "desc": "Suffixes (-LESS, -NESS) - careless, fearless, kindness, happiness",
-    "ex": [
-      "careless","helpless","fearless","hopeless","kindness","happiness","darkness","sadness","sickness","softness",
-      "Being careless can lead to accidents","The fearless firefighter ran inside","Her kindness made everyone smile","The room was full of darkness","His sadness turned into happiness"
-    ]
-  },
-  "suffix-ment": {
-    "desc": "Suffix (-MENT) - enjoyment, movement, payment, treatment",
-    "ex": [
-      "enjoyment","movement","payment","treatment","agreement","statement","equipment","excitement",
-      "We felt great enjoyment at the park","The dancer's movement was smooth","Please make your payment on time","Everyone signed the agreement","The excitement filled the whole room"
-    ]
-  },
-  "contractions": {
-    "desc": "Contractions - isn't, aren't, wasn't, don't, you'll, we'll, I've, they've",
-    "ex": [
-      "isn't","aren't","wasn't","weren't","don't","doesn't","didn't","can't","won't","couldn't",
-      "you'll","we'll","they'll","i've","we've","you've","they've","i'm","we're",
-      "She isn't ready yet","They aren't home right now","He didn't finish his lunch","I can't find my shoes","We won't be late for school",
-      "I'll see you at school","We'll play outside after lunch","They've already eaten dinner","I've never seen that movie","I'm happy that we're friends"
-    ]
-  },
-  "multisyllable-words": {
-    "desc": "Multisyllable Words - disturbance, container, remarkable, celebration, afternoon, wonderful, particular, important",
-    "ex": [
-      "disturbance","container","mountainous","remarkable","entertain","thunderstorm","celebration","understanding",
-      "afternoon","wonderful","particular","department","important","character","umbrella","hamburger",
-      "The loud noise caused a disturbance","Put the food in a plastic container","The mountainous trail was steep","She gave a remarkable speech","The clowns will entertain the crowd",
-      "We will meet in the afternoon","She had a wonderful time at the party","This is a particular kind of flower","He works in a different department","It is important to be kind"
-    ]
-  },
-  "sight-words-grade1": {
-    "desc": "Sight Words Grade 1 - common words for first graders",
-    "ex": [
-      "the","of","and","a","to","in","is","you","that","it","he","was","for","on","are","as","with","his","they","I","at","be","this","have","from","or","one","had","by","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","no","way","could","people","my","than","first","water","been","called","who","am","its","now","find","long","down","day","did","get","come","made","may","part"
-    ]
-  },
-  "sight-words-grade2": {
-    "desc": "Sight Words Grade 2 - common words for second graders",
-    "ex": [
-      "over","new","sound","take","only","little","work","know","place","years","live","me","back","give","most","very","after","thing","our","just","name","good","sentence","man","think","say","great","where","help","through","much","before","line","right","too","mean","old","any","same","tell","boy","follow","came","want","show","also","around","form","three","small","set","put","end","does","another","well","large","must","big","even","such","because","turn","here","why","ask","went","men","read","need","land","different","home","us","move","try","kind","hand","picture","again","change","off","play","spell","air","away","animal","house","point","page","letter","mother","answer","found","study","still","learn","should","America","world"
-    ]
-  },
-  
-    "Reading - KG": {
-        "desc": "### Kindergarten Foundations\nFocus on *letter sounds, rhyming, and CVC words* in simple 3-5 word sentences",
-        "ex": [
-            "The cat sat.",
-            "I see a dog.",
-            "Mom has a bag.",
-            "Dad and I run.",
-            "The sun is hot.",
-            "A bug is on a log.",
-            "I like my red hat.",
-            "We jump in the mud.",
-            "She has ten pens.",
-            "It is in the box.",
-            "Look at the map.",
-            "We cut the cake.",
-            "I hop on one leg.",
-            "The pig is big.",
-            "Get the net, Sam.",
-            "A cub is in the den.",
-            "I see six dots.",
-            "The man has a van.",
-            "We see a bus.",
-            "Fix the lid, Pam.",
-            "The dog dug.",
-            "I see a hen.",
-            "The fox ran.",
-            "We put it up.",
-            "She has a hat.",
-            "The kid has a toy.",
-            "We see the sun.",
-            "I am at the top.",
-            "The cat can nap.",
-            "We go up."
-        ]
+        // Helper: get element by id
+        function $(id) { return document.getElementById(id); }
+
+        // Helper: querySelectorAll with fallback (IE9 supports it)
+        function qsa(selector, context) {
+            context = context || document;
+            return context.querySelectorAll(selector);
+        }
+
+        // Helper: add event listener cross-browser
+        function addEvent(element, type, handler) {
+            if (element.addEventListener) {
+                element.addEventListener(type, handler, false);
+            } else if (element.attachEvent) {
+                element.attachEvent("on" + type, handler);
+            } else {
+                element["on" + type] = handler;
+            }
+        }
+
+        // Class manipulation helpers
+        function addClass(el, cls) {
+            if (el.classList) el.classList.add(cls);
+            else {
+                var classes = el.className.split(/\s+/);
+                if (classes.indexOf(cls) === -1) classes.push(cls);
+                el.className = classes.join(" ");
+            }
+        }
+        function removeClass(el, cls) {
+            if (el.classList) el.classList.remove(cls);
+            else {
+                var classes = el.className.split(/\s+/);
+                var idx = classes.indexOf(cls);
+                if (idx !== -1) classes.splice(idx, 1);
+                el.className = classes.join(" ");
+            }
+        }
+        function toggleClass(el, cls) {
+            if (el.classList) el.classList.toggle(cls);
+            else {
+                var classes = el.className.split(/\s+/);
+                var idx = classes.indexOf(cls);
+                if (idx === -1) classes.push(cls);
+                else classes.splice(idx, 1);
+                el.className = classes.join(" ");
+            }
+        }
+
+        // Splash screen
+        var splashScreen = $("splashScreen");
+        var loadingProgress = $("loadingProgress");
+        loadingProgress.style.width = "100%";
+        setTimeout(function() {
+            splashScreen.style.opacity = "0";
+            splashScreen.style.pointerEvents = "none";
+            setTimeout(function() { splashScreen.style.display = "none"; }, 800);
+        }, 5000);
+
+        // Default lessons - full set
+        var DEFAULT_LESSONS = {
+    "21-consonants": {
+        "desc": "21 Consonants - B C D F G H J K L M N P Q R S T V W X Y Z",
+        "ex": ["B","C","D","F","G","H","J","K","L","M","N","P","Q","R","S","T","V","W","X","Y","Z","I have a big bag","Do you see the cat?","My mat is red","The hat is on the mat","Look at the fat rat"]
+    },
+    "short-and-long-vowels": {
+        "desc": "Short & Long Vowels - Short: ă ĕ ĭ ŏ ŭ  ·  Long: ā ē ī ō ū  ·  Y",
+        "ex": ["ă","ĕ","ĭ","ŏ","ŭ","ā","ē","ī","ō","ū","y","I have a big bag","Do you see the cat?","My mat is red","The hat is on the mat","Look at the fat rat"]
+    },
+    "short-vowel-cvc-words": {
+        "desc": "Short Vowel CVC Words - bag, cat, mat, hat, get, wet, net, let, sit, fix, hit, win, pot, hot, not, lot, sum, fun, bun, mud",
+        "ex": ["bag","cat","mat","hat","rat","bat","sat","pat","fat","man","van","map","get","wet","net","let","pen","ten","hen","men","bed","red","led","fed","sit","fix","hit","win","pin","big","pig","dig","lid","kid","hid","rip","pot","hot","not","lot","got","dog","log","fog","hop","mop","top","cop","sum","fun","bun","mud","but","sun","run","cup","bug","rug","hug","tub","I have a big bag","Do you see the cat?","My mat is red","The hat is on the mat","Look at the fat rat","Can you get the net?","My shoes are wet","I will let you go","The pen is on the bed","Ten hens ran by","Please sit down","I can fix it","We want to win","That pin is big","The kid can dig","The pot is on the stove","It is hot today","We got a lot of fog","My dog can hop","Mop the top of the log","Add the sum for fun","I got mud on my leg","The sun is hot","We ran and had fun","Give me a hug"]
+    },
+    "special-consonants": {
+        "desc": "Special Consonants - box, fox, mix, six, quit, queen, quiz, quick, fly, try, sky, my",
+        "ex": ["box","fox","mix","six","ax","ox","fix","wax","tax","next","flex","text","quit","queen","quiz","quick","quack","quill","quilt","quest","quench","quote","quail","quirk","fly","try","sky","my","by","why","spy","dry","fry","shy","myth","gym","The fox is in the box","I got six on the quiz","The queen can quit","Fix the box quickly","The duck can quack","The bird can fly high","I will try again","Look at the sky","This bike is my bike","Please dry the cup"]
+    },
+    "c-k-rule": {
+        "desc": "C/K Rule - cat, cot, cup, can, kid, kit, key, kick",
+        "ex": ["cat","cot","cup","can","cap","cop","cub","cut","cab","cod","cuff","cost","kid","kit","key","keg","kiss","king","kick","kept","kite","kiwi","keep","kin","Where is the cat?","The baby sleeps in the cot","I see a cup on the table","Can I have a can of juice?","The cub is small","We have a first aid kit","Here is the key","The kid can kick the ball","I like to fly a kite","The king will keep his hat"]
+    },
+    "beginning-blends": {
+        "desc": "Beginning Blends - bl, cl, fl, gl, pl, sl, br, cr, dr, fr, gr, pr, tr, sc, sk, squ, st, sm, sn, sp, sw, tw, dw, spl, spr, str, scr, and words",
+        "ex": ["bl","cl","fl","gl","pl","sl","br","cr","dr","fr","gr","pr","tr","sc","sk","squ","st","sm","sn","sp","sw","tw","dw","spl","spr","str","scr","class","clip","click","clap","club","clog","cluck","cliff","clock","clown","clam","clasp","flip","flat","flag","flame","flock","flood","flute","flash","flint","fluff","floss","glass","glow","glue","glad","glide","globe","gloss","glum","gloom","glaze","gland","glitch","plus","play","plant","plum","plop","pluck","plank","plot","plow","plaid","plume","plug","slip","slow","slide","slap","slim","slop","slack","sled","slid","slosh","slab","slink","brown","brush","bring","brick","bread","brave","branch","break","bright","bride","brim","brand","crab","crash","crop","crack","crawl","cream","crisp","crown","cradle","crumb","crust","crane","drop","drink","draw","drum","dress","dream","drive","drip","dragon","drill","drift","drape","fresh","frame","frog","frost","fruit","free","front","fry","frown","frill","fringe","friend","grape","grip","grow","grass","grand","green","ground","grain","gravel","grin","groom","grunt","pray","pride","price","press","prank","print","proud","proof","prime","prism","prize","prop","tree","try","trust","trap","truck","train","trip","track","trick","troop","trunk","trout","scale","scan","scalp","scare","score","scout","scold","scrap","scuff","scum","scorch","scoop","skin","skill","skip","skate","skid","skirt","sketch","sky","skunk","skit","skiff","skimp","small","smart","smile","smoke","smash","smell","smock","smooth","smirk","smug","smudge","snake","snap","sneeze","snip","snail","snore","snug","snack","snout","snow","sniff","snicker","start","stop","stone","step","stamp","star","stir","stem","sting","stun","stall","stare","sweet","swim","swing","swan","swap","sweep","sword","swamp","swirl","swift","swish","sway","twist","twin","twine","twice","twig","tweak","tweet","twirl","twang","twelve","dwell","square","squat","squeeze","squid","squint","squash","squirm","squeak","squeal","squad","My class is fun","Use a clip on the page","You can click the button","Let's clap for the clown","The clock is on the wall","I can flip the coin","The land is flat","Wave the flag high","A flock of birds flew by","I like to play the flute","I see a glass of milk","The star will glow at night","Use glue on the paper","I am glad to see you","The bird can glide","Two plus two is four","Let's play outside","Water the plant","I ate a ripe plum","Pull the plug","Do not slip on the ice","The old car is slow","Go down the slide","We rode the sled","The cat can slink away","The dog is brown","Use a brush on your hair","Please bring your bag","We built a wall with bricks","The sun is bright today","The crab walked on the sand","I heard a loud crash","Farmers grow a big crop","The baby will crawl soon","I like ice cream","Do not drop the cup","I like to drink water","Can you draw a dragon?","We beat the drum","I had a good dream","The bread is fresh","The picture is in a frame","The frog can jump far","I like to eat fruit","My friend is kind","I ate a green grape","Hold on with a firm grip","Plants grow in the sun","The grass is green","We sat on the ground","What is the price?","Please press the button","I can print my name","She is proud of her work","I won a big prize","The tree is very tall","I will try my best","The truck is big","We rode on the train","I caught a trout","Stand on the scale","The scout has a map","Do not scare the cat","We won the score","Scoop the ice cream","My skin is soft","She has great skill","Let's skip and jump","I can skate on ice","Look up at the sky","The mouse is small","You are very smart","Please smile for the photo","I love the smell of bread","The table is smooth","The snake is long","I heard a loud snap","The snail moved slowly","Let's have a snack","It began to snow","Let's start the game","Please stop at the sign","I found a smooth stone","Watch your first step","I can see a star","The mango is sweet","I can swim in the pool","Push the swing higher","The swan is white","Please sweep the floor","Twist the cap off the bottle","My sister is my twin","I picked up a small twig","The bird gave a happy tweet","She can twirl and dance","Squeeze the sponge dry","The box is a square","I saw a squid in the sea","Squint your eyes in the sun","The mouse gave a small squeak"]
+    },
+    
+  "beginning-blend-bl": {
+    "desc": "Beginning Blend BL - blast, black, blue",
+    "ex": ["blast","black","blue"]
+  },
+  "beginning-blend-cl": {
+    "desc": "Beginning Blend CL - class, clip, click, clap",
+    "ex": ["class","clip","click","clap","club","clog","cluck","cliff","clock","clown","clam","clasp","My class is fun","Use a clip on the page","You can click the button","Let's clap for the clown","The clock is on the wall"]
+  },
+  "beginning-blend-fl": {
+    "desc": "Beginning Blend FL - flip, flat, flag, flame",
+    "ex": ["flip","flat","flag","flame","flock","flood","flute","flash","flint","fluff","floss","I can flip the coin","The land is flat","Wave the flag high","A flock of birds flew by","I like to play the flute"]
+  },
+  "beginning-blend-gl": {
+    "desc": "Beginning Blend GL - glass, glow, glue, glad",
+    "ex": ["glass","glow","glue","glad","glide","globe","gloss","glum","gloom","glaze","gland","glitch","I see a glass of milk","The star will glow at night","Use glue on the paper","I am glad to see you","The bird can glide"]
+  },
+  "beginning-blend-pl": {
+    "desc": "Beginning Blend PL - plus, play, plant, plum",
+    "ex": ["plus","play","plant","plum","plop","pluck","plank","plot","plow","plaid","plume","plug","Two plus two is four","Let's play outside","Water the plant","I ate a ripe plum","Pull the plug"]
+  },
+  "beginning-blend-sl": {
+    "desc": "Beginning Blend SL - slip, slow, slide, slap",
+    "ex": ["slip","slow","slide","slap","slim","slop","slack","sled","slid","slosh","slab","slink","Do not slip on the ice","The old car is slow","Go down the slide","We rode the sled","The cat can slink away"]
+  },
+  "beginning-blend-br": {
+    "desc": "Beginning Blend BR - brown, brush, bring, brick",
+    "ex": ["brown","brush","bring","brick","bread","brave","branch","break","bright","bride","brim","brand","The dog is brown","Use a brush on your hair","Please bring your bag","We built a wall with bricks","The sun is bright today"]
+  },
+  "beginning-blend-cr": {
+    "desc": "Beginning Blend CR - crab, crash, crop, crack",
+    "ex": ["crab","crash","crop","crack","crawl","cream","crisp","crown","cradle","crumb","crust","crane","The crab walked on the sand","I heard a loud crash","Farmers grow a big crop","The baby will crawl soon","I like ice cream"]
+  },
+  "beginning-blend-dr": {
+    "desc": "Beginning Blend DR - drop, drink, draw, drum",
+    "ex": ["drop","drink","draw","drum","dress","dream","drive","drip","dragon","drill","drift","drape","Do not drop the cup","I like to drink water","Can you draw a dragon?","We beat the drum","I had a good dream"]
+  },
+  "beginning-blend-fr": {
+    "desc": "Beginning Blend FR - fresh, frame, frog, frost",
+    "ex": ["fresh","frame","frog","frost","fruit","free","front","fry","frown","frill","fringe","friend","The bread is fresh","The picture is in a frame","The frog can jump far","I like to eat fruit","My friend is kind"]
+  },
+  "beginning-blend-gr": {
+    "desc": "Beginning Blend GR - grape, grip, grow, grass",
+    "ex": ["grape","grip","grow","grass","grand","green","ground","grain","gravel","grin","groom","grunt","I ate a green grape","Hold on with a firm grip","Plants grow in the sun","The grass is green","We sat on the ground"]
+  },
+  "beginning-blend-pr": {
+    "desc": "Beginning Blend PR - pray, pride, price, press",
+    "ex": ["pray","pride","price","press","prank","print","proud","proof","prime","prism","prize","prop","What is the price?","Please press the button","I can print my name","She is proud of her work","I won a big prize"]
+  },
+  "beginning-blend-tr": {
+    "desc": "Beginning Blend TR - tree, try, trust, trap",
+    "ex": ["tree","try","trust","trap","truck","train","trip","track","trick","troop","trunk","trout","The tree is very tall","I will try my best","The truck is big","We rode on the train","I caught a trout"]
+  },
+  "beginning-blend-sc": {
+    "desc": "Beginning Blend SC - scale, scan, scalp, scare",
+    "ex": ["scale","scan","scalp","scare","score","scout","scold","scrap","scuff","scum","scorch","scoop","Stand on the scale","The scout has a map","Do not scare the cat","We won the score","Scoop the ice cream"]
+  },
+  "beginning-blend-sk": {
+    "desc": "Beginning Blend SK - skin, skill, skip, skate",
+    "ex": ["skin","skill","skip","skate","skid","skirt","sketch","sky","skunk","skit","skiff","skimp","My skin is soft","She has great skill","Let's skip and jump","I can skate on ice","Look up at the sky"]
+  },
+  "beginning-blend-sm": {
+    "desc": "Beginning Blend SM - small, smart, smile, smoke",
+    "ex": ["small","smart","smile","smoke","smash","smell","smock","smooth","smirk","smug","smudge","The mouse is small","You are very smart","Please smile for the photo","I love the smell of bread","The table is smooth"]
+  },
+  "beginning-blend-sn": {
+    "desc": "Beginning Blend SN - snake, snap, sneeze, snip",
+    "ex": ["snake","snap","sneeze","snip","snail","snore","snug","snack","snout","snow","sniff","snicker","The snake is long","I heard a loud snap","The snail moved slowly","Let's have a snack","It began to snow"]
+  },
+  "beginning-blend-st": {
+    "desc": "Beginning Blend ST - start, stop, stone, step",
+    "ex": ["start","stop","stone","step","stamp","star","stir","stem","sting","stun","stall","stare","Let's start the game","Please stop at the sign","I found a smooth stone","Watch your first step","I can see a star"]
+  },
+  "beginning-blend-sp": {
+    "desc": "Beginning Blend SP - spine, space, spend, spin",
+    "ex": ["spine","space","spend","spin","spit","spot","spell","speak","spark","spoon","sport","spill"]
+  },
+  "beginning-blend-sw": {
+    "desc": "Beginning Blend SW - sweet, swim, swing, swan",
+    "ex": ["sweet","swim","swing","swan","swap","sweep","sword","swamp","swirl","swift","swish","sway","The mango is sweet","I can swim in the pool","Push the swing higher","The swan is white","Please sweep the floor"]
+  },
+  "beginning-blend-tw": {
+    "desc": "Beginning Blend TW - twist, twin, twine, twice",
+    "ex": ["twist","twin","twine","twice","twig","tweak","tweet","twirl","twang","twelve","Twist the cap off the bottle","My sister is my twin","I picked up a small twig","The bird gave a happy tweet","She can twirl and dance"]
+  },
+  "beginning-blend-dw": {
+    "desc": "Beginning Blend DW - dwell, dwarf, dwine",
+    "ex": ["dwell","dwarf","dwine"]
+  },
+  "beginning-blend-squ": {
+    "desc": "Beginning Blend SQU - square, squat, squeeze, squid",
+    "ex": ["square","squat","squeeze","squid","squint","squash","squirm","squeak","squeal","squad","Squeeze the sponge dry","The box is a square","I saw a squid in the sea","Squint your eyes in the sun","The mouse gave a small squeak"]
+  },
+  "ending-blend-nd": {
+    "desc": "Ending Blend ND - hand, land, blend, send",
+    "ex": ["hand","land","blend","send","find","wind","stand","round","Raise your hand","We landed on the land","I will send you a letter","Help me find my shoe","Please stand up"]
+  },
+  "ending-blend-nt": {
+    "desc": "Ending Blend NT - plant, went, rent, sent",
+    "ex": ["plant","went","rent","sent","bent","tent","hunt","pant","vent","lint","mint","dent","Water the plant","We went to the shop","I sent a letter","We set up the tent","Let's go on a hunt"]
+  },
+  "ending-blend-mp": {
+    "desc": "Ending Blend MP - jump, camp, pump, lamp",
+    "ex": ["jump","camp","pump","lamp","stamp","lump","clump","plump","stomp","tramp","champ","romp","I can jump high","We set up camp","Turn on the lamp","I put a stamp on the letter","Stomp your feet like this"]
+  },
+  "ending-blend-st": {
+    "desc": "Ending Blend ST - list, fast, best, last",
+    "ex": ["list","fast","best","last","cast","past","nest","rest","test","west","dust","rust","I made a list of names","The rabbit runs fast","This is the best cake","Let's rest for a bit","We took a spelling test"]
+  },
+  "ending-blend-sk": {
+    "desc": "Ending Blend SK - flask, husk, desk, task",
+    "ex": ["flask","husk","desk","task","mask","brisk","risk","disk","whisk","tusk","dusk","The book is on the desk","I have one more task","Put on your mask","The elephant has a tusk","We came home at dusk"]
+  },
+  "ending-blend-sp": {
+    "desc": "Ending Blend SP - rasp, gasp, grasp, clasp",
+    "ex": ["rasp","gasp","grasp","clasp","wisp","crisp","lisp","wasp","I took a deep gasp","Grasp the rope tightly","Clasp the necklace shut","A wasp flew by my head","The chips are crisp"]
+  },
+  "ending-blend-ld": {
+    "desc": "Ending Blend LD - wild, hold, child, cold",
+    "ex": ["wild","hold","child","cold","fold","gold","mold","scold","told","bold","sold","Please hold my hand","The child is happy","It is very cold outside","Fold your clothes","The ring is made of gold"]
+  },
+  "ending-blend-lp": {
+    "desc": "Ending Blend LP - help, gulp, scalp, yelp",
+    "ex": ["help","gulp","scalp","yelp","pulp","kelp","whelp","Can you help me?","The dog gave a small yelp","Whales eat kelp","I took a big gulp of water","This orange has a lot of pulp"]
+  },
+  "ending-blend-pt": {
+    "desc": "Ending Blend PT - kept, wept, slept, crept",
+    "ex": ["kept","wept","slept","crept","leapt","swept","I kept my promise","The baby slept all night","The cat crept behind the chair","She swept the floor","He leapt over the fence"]
+  },
+  "ending-blend-ft": {
+    "desc": "Ending Blend FT - left, soft, swift, craft",
+    "ex": ["left","soft","swift","craft","loft","sift","drift","gift","lift","shift","raft","Turn left at the corner","The blanket is soft","I got a nice gift","Please lift the box","We rode on a raft"]
+  },
+  "ending-blend-ct": {
+    "desc": "Ending Blend CT - fact, act, react, exact",
+    "ex": ["fact","act","react","exact","text","next","context","Here is a fun fact","Please act kindly to others","I sent a text message","What is the next step?","Read the context first"]
+  },
+  "ending-blend-lk": {
+    "desc": "Ending Blend LK - milk, walk, talk, chalk",
+    "ex": ["milk","walk","talk","chalk","stalk","folk","yolk","silk","I drink milk every morning","We took a long walk","Let's talk about our day","The teacher used white chalk","The dress is made of silk"]
+  },
+  "ending-blend-lt": {
+    "desc": "Ending Blend LT - salt, felt, malt, bolt",
+    "ex": ["salt","felt","malt","bolt","kilt","melt","belt","colt","wilt","guilt","Pass the salt, please","The ice will melt in the sun","He wore a leather belt","The flower began to wilt","The baby horse is a colt"]
+  },
+  "ending-blend-ts": {
+    "desc": "Ending Blend TS - hats, pets, pots, cats",
+    "ex": ["hats","pets","pots","cats","rats","bats","mats","sits","bits","hits","fits","kits","I love my pets","Two cats sat on the mats","We wore our hats outside","The bats fly at night","This shirt fits well"]
+  },
+  "ending-blend-rd": {
+    "desc": "Ending Blend RD - bird, cord, ford, lord",
+    "ex": ["bird","cord","ford","lord","ward","yard","curd","The rock is very hard","Spell this word for me","I saw a herd of cows","The bird can sing","We played in the yard"]
+  },
+  "ending-blend-nk": {
+    "desc": "Ending Blend NK - pink, link, sink, drink",
+    "ex": ["pink","link","sink","drink","bank","thank","sank","blink","drunk","stink","chunk","plank","I like the color pink","Wash your hands in the sink","I need a drink of water","We keep money in the bank","Thank you very much"]
+  },
+  "ending-blend-lf": {
+    "desc": "Ending Blend LF - shelf, wolf, elf, self",
+    "ex": ["shelf","wolf","elf","self","calf","half","gulf","sylph"]
+  },
+  "ending-blend-rk": {
+    "desc": "Ending Blend RK - work, park, dark, mark",
+    "ex": ["work","park","dark","mark","bark","lark","shark","spark","We drove the car to the park","The sky is dark tonight","Please mark your answer","I live on a farm","You are very smart"]
+  },
+  "ending-blend-xt": {
+    "desc": "Ending Blend XT - text, next, context, exact",
+    "ex": ["text","next","context","exact","sixth","I sent a text message","What is the next step?","Read the context first"]
+  },
+    "beginning-3-letter-blends": {
+        "desc": "Beginning 3-Letter Blends - splash, spring, street, scrub",
+        "ex": ["spl","spr","str","scr","splash","spring","street","scrub","split","spray","strong","scream","splat","sprout","stripe","scroll","We had a big splash in the pool","Flowers bloom in the spring","Cars drove down the street","We can scrub the floor","I like the tiger's stripe"]
+    },
+    "ending-blends": {
+        "desc": "Ending Blends - st, sk, sp, nd, nt, nk, mp, rd, ld, lp, rk, lf, pt, ft, ct, lk, lt, xt, ts, and words",
+        "ex": ["st","sk","sp","nd","nt","nk","mp","rd","ld","lp","rk","lf","pt","ft","ct","lk","lt","xt","ts","list","fast","best","last","cast","past","nest","rest","test","west","dust","rust","flask","husk","desk","task","mask","brisk","risk","disk","whisk","tusk","dusk","rasp","gasp","grasp","clasp","wisp","crisp","lisp","wasp","hand","land","blend","send","find","wind","stand","round","plant","went","rent","sent","bent","tent","hunt","pant","vent","lint","mint","dent","jump","camp","pump","lamp","stamp","lump","clump","plump","stomp","tramp","champ","romp","wild","hold","child","cold","fold","gold","mold","scold","told","bold","sold","help","gulp","scalp","yelp","pulp","kelp","whelp","kept","wept","slept","crept","leapt","swept","left","soft","swift","craft","loft","sift","drift","gift","lift","shift","raft","fact","act","react","exact","text","next","context","milk","walk","talk","chalk","stalk","folk","yolk","silk","salt","felt","malt","bolt","kilt","melt","belt","colt","wilt","guilt","hats","pets","pots","cats","rats","bats","mats","sits","bits","hits","fits","kits","bird","cord","ford","lord","ward","yard","curd","Raise your hand","We landed on the land","I will send you a letter","Help me find my shoe","Please stand up","Water the plant","We went to the shop","I sent a letter","We set up the tent","Let's go on a hunt","I can jump high","We set up camp","Turn on the lamp","I put a stamp on the letter","Stomp your feet like this","I made a list of names","The rabbit runs fast","This is the best cake","Let's rest for a bit","We took a spelling test","The book is on the desk","I have one more task","Put on your mask","The elephant has a tusk","We came home at dusk","I took a deep gasp","Grasp the rope tightly","Clasp the necklace shut","A wasp flew by my head","The chips are crisp","Please hold my hand","The child is happy","It is very cold outside","Fold your clothes","The ring is made of gold","Can you help me?","The dog gave a small yelp","Whales eat kelp","I took a big gulp of water","This orange has a lot of pulp","I kept my promise","The baby slept all night","The cat crept behind the chair","She swept the floor","He leapt over the fence","Turn left at the corner","The blanket is soft","I got a nice gift","Please lift the box","We rode on a raft","Here is a fun fact","Please act kindly to others","I sent a text message","What is the next step?","Read the context first","I drink milk every morning","We took a long walk","Let's talk about our day","The teacher used white chalk","The dress is made of silk","Pass the salt, please","The ice will melt in the sun","He wore a leather belt","The flower began to wilt","The baby horse is a colt","I love my pets","Two cats sat on the mats","We wore our hats outside","The bats fly at night","This shirt fits well","The rock is very hard","Spell this word for me","I saw a herd of cows","The bird can sing","We played in the yard"]
+    },
+    "digraphs-sh": {
+        "desc": "Digraphs SH - ship, shot, shop, wish",
+        "ex": ["ship","shot","trash","crash","shop","wish","fish","dish","rush","shell","shut","shock","The ship sailed away","Please throw out the trash","We went to the shop","I wish for a new bike","I caught a big fish"]
+    },
+    "digraphs-ch": {
+        "desc": "Digraphs CH - chat, chop, chip, chin",
+        "ex": ["chat","chop","branch","much","chip","chin","chest","chick","chase","chill","charm","check","We had a nice chat","Chop the vegetables","I want a chip and a chin strap","The little chick can peep","Let's chase the ball"]
+    },
+    "digraphs-tch": {
+        "desc": "Digraphs TCH - match, fetch, catch, watch",
+        "ex": ["match","fetch","switch","scratch","catch","patch","watch","hatch","stitch","clutch","sketch","twitch","Light the match","Fetch the ball for me","Please catch the bus","I lost my watch","The eggs will hatch soon"]
+    },
+    "digraphs-th-voiced": {
+        "desc": "Digraphs TH (Voiced) - they, though, thus, those",
+        "ex": ["they","though","thus","those","that","this","them","these","then","I like that book","Give the toy to them","Look at this picture","We will go then","They are my friends"]
+    },
+    "digraphs-th-unvoiced": {
+        "desc": "Digraphs TH (Unvoiced) - three, thumb, thick, think",
+        "ex": ["three","thumb","thick","thing","think","bath","thaw","thrill","both","The paper is thin","Thank you for the gift","I will come with you","I have three apples","Let's take a bath"]
+    },
+    "digraphs-ng": {
+        "desc": "Digraphs NG - ring, king, sing, bang",
+        "ex": ["ring","king","sing","bang","hang","strong","bring","swing","spring","Let's sing a song","The road is very long","The bird has one wing","I lost my ring","Hang your coat here"]
+    },
+    "digraphs-nk": {
+        "desc": "Digraphs NK - pink, link, sink, drink",
+        "ex": ["pink","link","sink","drink","bank","thank","sank","blink","drunk","stink","chunk","plank","I like the color pink","Wash your hands in the sink","I need a drink of water","We keep money in the bank","Thank you very much"]
+    },
+    "digraphs-wh": {
+        "desc": "Digraphs WH - why, where, whale, wheel",
+        "ex": ["why","where","whale","wheel","whisper","whistle","whisk","what","which","Which one do you want?","What is your name?","The snow is white","When will you come home?","I saw a big whale"]
+    },
+    "digraphs-ph": {
+        "desc": "Digraphs PH - phone, photo, graph, alphabet",
+        "ex": ["phone","photo","graph","alphabet","dolphin","elephant","phrase","sphere","phonics","I called you on the phone","Take a photo of the class","The elephant is very big","Dolphins can swim fast","We learn phonics every day"]
+    },
+    "digraphs-ck": {
+        "desc": "Digraphs CK - track, back, black, pack",
+        "ex": ["track","back","black","sack","pack","pick","sick","duck","neck","clock","stick","thick","The train is on the track","Come back home soon","Pack your bag for school","I feel sick today","The duck swims in the pond"]
+    },
+    "digraphs-wr": {
+        "desc": "Digraphs WR - write, wrote, wrap, wrist",
+        "ex": ["write","wrote","wrap","wrist","wrong","wreck","wrench","wrinkle","wrestle","wring","wrath","Please write your name","I hurt my wrist","That answer is wrong","Wrap the gift for me","Use the wrench to fix it"]
+    },
+    "digraphs-gn-rh": {
+        "desc": "Digraphs GN / RH - gnat, gnaw, sign, rhyme",
+        "ex": ["gnat","gnaw","sign","design","gnome","rhino","rhyme","rhythm","A gnat is a tiny bug","The dog will gnaw the bone","Please sign your name","The rhino is very strong","Can you find a rhyme for cat?"]
+    },
+    "digraphs-kn": {
+        "desc": "Digraphs KN - know, knot, knob, knee",
+        "ex": ["know","knot","knob","knee","knife","knight","knock","knit","knack","knead","I know the answer","Tie a knot in the string","Turn the knob to open the door","I hurt my knee","Please knock on the door"]
+    },
+    "digraphs-gh": {
+        "desc": "Digraphs GH - ghost, Ghana, ghastly, ghoul",
+        "ex": ["ghetto","gherkin","ghost","Ghana","ghastly","ghoul","I saw a ghost in the story","We live in Ghana","That was a ghastly storm","The film had a scary ghoul","My friend is Ghanaian"]
+    },
+    
+    "silent-e-rule-a_e": {
+        "desc": "Silent E Rule (A_E) - cake, came, mate, gate",
+        "ex": ["cake","came","mate","gate","date","name","lane","pace","safe","tape","lake","fame","I baked a cake","My friend came to visit","Close the gate","What is your name?","We drove down the lane"]
+    },
+    "silent-e-rule-e_e": {
+        "desc": "Silent E Rule (E_E) - these, scene, complete, extreme",
+        "ex": ["these","scene","Pete","delete","extreme","athlete","eve","mete","fete","complete","Steve","gene","These shoes are new","That was a funny scene","Please complete your work","I will delete this file","The runner is an athlete"]
+    },
+    "silent-e-rule-i_e": {
+        "desc": "Silent E Rule (I_E) - line, kite, time, nine",
+        "ex": ["line","kite","time","nine","prize","slide","dine","mine","like","I ride my bike to school","Bees live in a hive","I like to read books","I flew a kite in the park","Let's slide down the hill"]
+    },
+    "silent-e-rule-o_e": {
+        "desc": "Silent E Rule (O_E) - cone, bone, home, note",
+        "ex": ["cone","bone","home","note","stone","hope","rope","vote","joke","dose","pole","mole","I want an ice cream cone","Let's go home now","Write me a note","I found a smooth stone","I hope to see you soon"]
+    },
+    "silent-e-rule-u_e": {
+        "desc": "Silent E Rule (U_E) - rule, cube, mute, tune",
+        "ex": ["rule","cube","mute","tune","cute","flute","fuse","mule","huge","fume","pure","cure","An ice cube is cold","I can play a tune","The puppy is very cute","She plays the flute","That elephant is huge"]
+    },
+    "short-words-long-vowels": {
+        "desc": "Short Words with Long Vowel Sounds - sea, me, she, we",
+        "ex": ["see","me","she","we","be","he","so","go","no","lo","hi","flu","Come with me","She is my sister","We can go now","Please be quiet","He said hi to me"]
+    },
+    "phonograms-with-long-vowels": {
+        "desc": "Phonograms with Long Vowels - cold, bold, sold, hold, bolt, volt, jolt, both, most, post, host, ghost, bind, find, kind, mind",
+        "ex": ["cold","bold","sold","hold","gold","told","fold","poll","toll","roll","stroll","doll","bolt","volt","jolt","holt","molt","dolt","both","cloth","most","post","host","ghost","almost","bind","find","kind","mind","blind","grind","behind","mild","wild","child","It is very cold today","Please hold my hand","The ring is made of gold","Fold the paper in half","Let's roll the ball","Tighten the bolt","The car gave a sudden jolt","The colt ran in the field","Both of us like to read","The lamp needs more volts","I ate the most food","Mail the letter at the post","We are almost home","We live near the coast","I like toast for breakfast","Help me find my keys","She is very kind","Please mind the gap","I sat behind my friend","The child likes to play"]
+    },
+    "rhyming-words": {
+        "desc": "Rhyming Words - pat, sat, mat, fat, pot, spot, cot, hot, eat, sheet, beat, meat",
+        "ex": ["pat","sat","mat","fat","rat","cat","hat","bat","vat","flat","chat","splat","pot","spot","cot","hot","lot","dot","got","not","rot","plot","slot","eat","sheet","beat","meat","feat","seat","neat","peat","treat","wheat","cheat","heat","meet","fete","The cat sat on the mat","I like my new flat hat","The rat ran under the flat rock","We had a cute fat cat","The bat can fly at night","The soup pot is hot","I see a red spot on top","The baby sleeps in a cot","We got a lot of rain","Find the dot on the map","I like to beat the drum","We ate meat for dinner","Take a seat, please","Bread is made from wheat","I got a sweet treat"]
+    },
+    "compound-words": {
+        "desc": "Compound Words - myself, keyboard, cupcake, popcorn",
+        "ex": ["myself","keyboard","clockwise","cupcake","footprint","popcorn","napkin","rainbow","toothbrush","sunshine","butterfly","knapsack","I made a cupcake for the party","I saw my footprint in the sand","We ate popcorn at the movies","There is a rainbow in the sky","I brush my teeth with a toothbrush"]
+    },
+    "r-controlled-vowels-ar": {
+        "desc": "R-Controlled Vowels (AR) - car, dark, mark, park",
+        "ex": ["car","dark","mark","park","hard","star","farm","charm","smart","chart","barn","cart","We drove the car to the park","The sky is dark tonight","Please mark your answer","I live on a farm","You are very smart"]
+    },
+    "r-controlled-vowels-or": {
+        "desc": "R-Controlled Vowels (OR) - born, fork, torn, cord",
+        "ex": ["born","fork","torn","cord","worn","thorn","porch","form","lord","The baby was born in May","Use a fork to eat","My shirt is torn","We built a sand fort","There was a big storm"]
+    },
+    "r-controlled-vowels-er-ir-ur": {
+        "desc": "R-Controlled Vowels (ER/IR/UR) - her, term, shirt, girl",
+        "ex": ["her","term","verse","shirt","girl","bird","curve","surf","sir","turn","burn","curb","This is her book","I bought a new shirt","The girl can sing well","The bird flew away","We watched the waves surf"]
+    },
+    "digraph-blends-shr": {
+        "desc": "Digraph-Blends (SHR) - shred, shrimp, shrink, shrub",
+        "ex": ["shred","shrimp","shrink","shrub","shrug","shrine","shroud","shrew","shriek","shrill","shrank","shrewd","I like my shred","The shrimp is on the bed","I got a shrink","What a cute shrub!","He got a shrug"]
+    },
+    "digraph-blends-thr": {
+        "desc": "Digraph-Blends (THR) - throw, throat, three, thread",
+        "ex": ["throw","throat","three","thread","thrill","throne","thrash","thrift","throng","thrive","throb","thrust","I can throw","I see a throat","I got a three","I want the thread","Do you see the thrill?"]
+    },
+    "digraph-blends-sch": {
+        "desc": "Digraph-Blends (SCH) - school, schedule, scheme, scholar",
+        "ex": ["school","schedule","scheme","scholar","schooner","schnauzer","The school is fun","The schedule is fun","They got a scheme","Can I have a scholar?","The schooner is yellow"]
+    },
+    "r-controlled-vowels-war": {
+        "desc": "R-Controlled Vowels (WAR) - war, warm, ward, award",
+        "ex": ["war","warm","ward","award","reward","toward","forward","dwarf","warn","warp","wart","swarm","I want the war","We see warm ones","We have a ward","The award is red","He got a reward"]
+    },
+    "r-controlled-vowels-wor": {
+        "desc": "R-Controlled Vowels (WOR) - worse, worst, worth, worry",
+        "ex": ["worse","worst","worth","worship","worn","worm","work","worthy","Where is the worm?","I like that word","I can work","She got a world","That worse is good"]
+    },
+    "agent-suffixes-or-er": {
+        "desc": "Agent Suffixes (-OR, -ER) - actor, doctor, visitor, sailor",
+        "ex": ["actor","doctor","visitor","sailor","tailor","vendor","mayor","author","editor","senator","sponsor","tractor","bigger","better","summer","smaller","mother","faster","I see a actor and a author","We see a doctor","I want the visitor","Can we have a sailor?","A tailor is on the mat"]
+    },
+    "phonograms-with-ful": {
+        "desc": "Phonograms with -FUL - careful, helpful, playful, hopeful",
+        "ex": ["careful","helpful","playful","hopeful","useful","thankful","put","brute","Be careful and helpful today","The playful dog is hopeful for a treat","This tool is useful and helpful","I am thankful for my careful friend","She is hopeful and thankful too"]
+    },
+    "phonograms-with-short-vowels": {
+        "desc": "Phonograms with Short Vowels - ball, tall, wall, call, bull, pull, fully, push",
+        "ex": ["ball","tall","wall","call","hall","mall","fall","walk","talk","chalk","also","almost","bull","pull","full","push","bush","cushion","The tall wall is in the hall","I can call Mom to walk","We talk at the mall","Do not fall on the chalk","I also almost lost the ball","The cup is full of water","Pull the bull to the barn","Push the old bush aside","She sat on a soft cushion","Don't be so pushy, just pull gently"]
+    },
+    "vowel-digraphs-ai-ay": {
+        "desc": "Vowel Digraphs (AI, AY) - rain, mail, jail, wait, stay, may, gray, tray",
+        "ex": ["rain","mail","jail","wait","gain","train","brain","chain","paint","tail","stay","may","gray","tray","I like that rain","The mail is fun","Can you see the jail?","What a big wait!","The gain is yellow","They play in the park","I like that day","My way is small","Do you say?","What a cute stay!"]
+    },
+    "vowel-digraphs-ee-ey": {
+        "desc": "Vowel Digraphs (EE, EY) - tree, see, bee, sleep, key, money, honey, monkey",
+        "ex": ["tree","see","bee","sleep","week","sweet","free","deep","green","keep","key","money","honey","monkey","donkey","turkey","Can I have a tree?","He can see","The bee is red","I will sleep","That week is good","My key is small","I see a money on the table","We see a honey","Is that a monkey?","They see a donkey"]
+    },
+    "vowel-digraphs-ea": {
+        "desc": "Vowel Digraphs (EA) - beach, meat, seat, speak",
+        "ex": ["beach","meat","seat","speak","leaf","cream","We got a beach","A meat is on the mat","A seat is on the mat","She can speak","What a cute team!"]
+    },
+    "vowel-digraphs-ie": {
+        "desc": "Vowel Digraphs (IE) - field, brief, chief, piece, lie, tie, die, pie",
+        "ex": ["field","brief","chief","piece","shield","belief","lie","tie","die","pie","tried","cried","I got a field","I got a brief","She got a chief","They see a piece","I like my shield","Look at my lie","Put the tie here","That die is good","Can we have a pie?","My tried is small"]
+    },
+    "vowel-digraphs-aw-au": {
+        "desc": "Vowel Digraphs (AW, AU) - saw, law, paw, draw, sauce, cause, fault, haul",
+        "ex": ["saw","law","paw","draw","claw","yawn","dawn","straw","sauce","cause","fault","haul","autumn","caught","taught","The saw is on the bed","The law is red","They got a paw","I draw with my friends","The claw is blue","I want the sauce","A cause is on the mat","I have a fault","We want a haul","We see a autumn"]
+    },
+    "vowel-digraphs-ow": {
+        "desc": "Vowel Digraphs (OW) - row, grow, show, flow",
+        "ex": ["row","grow","show","flow","blow","glow","slow","snow","The row is green","They grow here","We can show","I love the flow","What is the blow?"]
+    },
+    "vowel-digraphs-ue-ew": {
+        "desc": "Vowel Digraphs (UE, EW) - glue, blue, true, due, new, few, flew, grew",
+        "ex": ["glue","blue","true","due","clue","cue","new","few","flew","grew","chew","stew","crew","drew","Look at my glue","The blue one","I see a true and a cue","The due is here","He got a clue","It sounds new","The few is red","We see a flew","The grew is big","He chew fast"]
+    },
+    "vowel-digraphs-oa-oe": {
+        "desc": "Vowel Digraphs (OA, OE) - boat, coat, soak, toad, toe, doe, hoe",
+        "ex": ["boat","coat","soak","toad","road","goal","toe","doe","hoe","joe","goes","I like that boat","Look at my coat","She got a road","We got a toe","Put the Joe here"]
+    },
+    "diphthongs-ow-ou": {
+        "desc": "Diphthongs (OW, OU) - how, cow, town, down, out, shout, house, mouse",
+        "ex": ["how","cow","town","down","brown","crown","now","frown","out","shout","house","mouse","cloud","found","sound","ground","count","round","scout","loud","The how is fun","A cow is on the mat","We have a town","There is a down","It is brown","Put the cloud here","The found is red","We got a mouse","He got a out","My sound is nice"]
+    },
+    "diphthongs-oi-oy": {
+        "desc": "Diphthongs (OI, OY) - boil, soil, coin, boy, toy, joy",
+        "ex": ["boil","soil","coin","oil","join","point","noise","voice","boy","toy","joy","enjoy","I want the boil","The coin is red","Look at the join","The boy is big","I have a toy"]
+    },
+    "diphthongs-oo-long": {
+        "desc": "Diphthongs (OO - LONG) - boot, moon, soon, roof",
+        "ex": ["shoot","boot","moon","soon","roof","spoon","cool","food","pool","I like that boot","I see a moon and a boot","That soon is mine","The roof is blue","There is a spoon"]
+    },
+    "diphthongs-oo-short": {
+        "desc": "Diphthongs (OO - SHORT) - good, hood, foot, look",
+        "ex": ["room","good","hood","foot","look","hook","wood","took","book","I like good things","The hood and the book are here","Can I have a foot?","We love to look","The hook and the foot are here"]
+    },
+    "words-beginning-with-a": {
+        "desc": "Words Beginning with A- - awake, aside, apart, alike",
+        "ex": ["awake","aside","apart","alike","about","asleep","ahead","around","The awake is yellow","I want a aside","I see a apart and a ahead","What a big alike!","What a cute about!"]
+    },
+    "soft-c": {
+        "desc": "Soft C (S Sound) - cent, center, nice, city",
+        "ex": ["cent","center","nice","mice","city","circle","cycle","cyclone","Look at the cent","Put the center here","We see nice ones","I want a mice","What is the city?"]
+    },
+    "soft-g": {
+        "desc": "Soft G (J Sound) - age, page, gym, stage",
+        "ex": ["age","page","gym","stage","change","giant","digit","strange","The age is on the bed","We got a page","Can I have a gym?","The stage is big","We love to change"]
+    },
+    "soft-g-dge": {
+        "desc": "Soft G / -DGE - bridge, judge, badge, edge",
+        "ex": ["bridge","judge","badge","edge","fridge","lodge","I see a bridge on the table","Put the judge here","I want the badge","Put the edge here","Here is a fridge"]
+    },
+    "silent-letters": {
+        "desc": "Silent Letters - often, castle, listen, fasten, comb, climb, crumb, lamb, would, could, should, half",
+        "ex": ["often","castle","hasten","listen","fasten","soften","comb","climb","crumb","lamb","limb","thumb","would","could","should","calf","half","calm","talk","chalk","We listen every day","Put the hasten here","The fasten is on the bed","We want a soften","The often is big","What a cute comb!","They can climb","Can we have a crumb?","The lamb is green","Can you see the limb?","That would is mine","The could is green","The should is red","I have a calf","I see a half"]
+    },
+    "spelling-patterns-se": {
+        "desc": "Spelling Patterns (SE) - choose, cheese, tease, pose",
+        "ex": ["choose","cheese","tease","pose","chose","rose","wise","please","Please choose the cheese","Do not pose and tease him","He chose his rose","He has this atlas","She is as wise as he is"]
+    },
+    "spelling-patterns-le": {
+        "desc": "Spelling Patterns (LE) - apple, table, little, candle",
+        "ex": ["apple","table","little","candle","purple","circle","bubble","ruble","hustle","rattle","wrinkle","He got a apple","Do you see the table?","There is a little","The candle is yellow","It sounds purple"]
+    },
+    "spelling-patterns-ed": {
+        "desc": "Spelling Patterns (ED) - added, ended, wanted, landed, played, saved, stayed, filled",
+        "ex": ["added","ended","wanted","landed","rested","counted","played","saved","stayed","filled","called","smiled","There is a added","I see a ended and a landed","Do you see the wanted?","There is a landed","I like that rested","I got a played","Here is a saved","The stayed is fun","That filled is mine","That called is mine"]
+    },
+    "long-vowels-open-syllables": {
+        "desc": "Long Vowels in Open Syllables - baker, paper, lady, hero",
+        "ex": ["baker","paper","final","lady","hero","zero","open","silent","We see a baker","Look at the paper","I want the final","The lady is here","Get the hero"]
+    },
+    "closed-syllables-vc-cv": {
+        "desc": "Closed Syllables (VC/CV) - rabbit, muffin, basket, kitten",
+        "ex": ["rabbit","muffin","basket","kitten","happy","puppy","number","under","blanket","traffic","sudden","mammal","I see a little rabbit","Where is the muffin?","The basket is on the table","My kitten is very soft","We have a happy puppy"]
+    },
+    "open-syllables-v-cv": {
+        "desc": "Open Syllables & V/CV Rule - tiger, paper, baby, music",
+        "ex": ["tiger","paper","baby","silent","even","music","open","pilot","crazy","favor","unit","tutor","The tiger is big and strong","I have a piece of paper","The baby is sleeping","Stay silent during the movie","We will open the box now"]
+    },
+    "magic-e-syllables-vce": {
+        "desc": "Magic-E Syllables (VCe) - cake, bike, hope, smile",
+        "ex": ["cake","bike","hope","smile","name","cone","flute","cube","pile","safe","joke","tune","I like to eat cake","Ride your bike to school","We have hope for the future","She has a big smile","My name is Sam"]
+    },
+    "consonant-le-syllables": {
+        "desc": "Consonant-le Syllables (Turtle Rule) - turtle, table, apple, bubble",
+        "ex": ["turtle","table","apple","bubble","puzzle","candle","handle","saddle","little","bottle","noodle","pickle","Put the book on the table","I eat an apple every day","The bubble popped loudly","Can you solve the puzzle?","The turtle moves slowly"]
+    },
+    "sounds-of-gh": {
+        "desc": "Sounds of GH - night, right, light, high, ghost, laugh",
+        "ex": ["silent","night","right","light","fight","high","sigh","cough","rough","ghost","ghastly","ghetto","Ghana","ghoul","gherkin","laugh","thigh","eight","weight","The light is very bright at night","I can fight for what is right","He gave a sigh and said eight","Do not laugh at the rough cough","I have had enough of the tough fight"]
+    },
+    "tion-sion": {
+        "desc": "TION / SION - station, nation, portion, action, lotion, vision, mission",
+        "ex": ["station","nation","portion","mention","action","motion","mission","session","passion","lotion","vision","television","decision","explosion","division","I see a station and a action","That nation is good","My portion is small","The mission is on the bed","She got a session","I put lotion on my hand","The train is at the station","We watch television at home","I made a good decision","The rocket is in motion"]
+    },
+    "plurals": {
+        "desc": "Plurals (-S, -ES) - cats, dogs, birds, books, boxes, buses, dishes, wishes",
+        "ex": ["cats","dogs","birds","books","hands","chairs","trees","plates","cups","lamps","boxes","buses","dishes","wishes","foxes","benches","babies","candies","ladies","puppies","The cats chased the dogs","I see three birds in the trees","Put the books on the shelf","We need more cups and plates","She has two hands full of lamps","The foxes ran past the boxes","She washed the dishes and cups","Two buses stopped at the benches","The babies played with the puppies","Ladies bought candies at the shop"]
+    },
+    "possessives": {
+        "desc": "Possessives - dog's, cat's, mom's, dad's",
+        "ex": ["dog's","cat's","mom's","dad's","sister's","teacher's","boys","girls","friends","parents","The dog's bone is under the bed","Mom's car is in the garage","The teacher's desk is neat","The boys' shoes are by the door","My friends' house is down the street"]
+    },
+    "superlatives": {
+        "desc": "Superlatives - faster, fastest, taller, tallest",
+        "ex": ["faster","fastest","taller","tallest","smaller","smallest","kinder","kindest","warmer","warmest","My dog runs faster than yours","She is the tallest girl in class","This box is smaller than that one","He is the kindest boy I know","Today is warmer than yesterday"]
+    },
+    "prefixes-re-un": {
+        "desc": "Prefixes (RE-, UN-) - redo, replay, rewrite, unhappy",
+        "ex": ["redo","replay","rewrite","return","unhappy","unfair","undo","unlock","unpack","unsafe","I will redo my homework","Let's replay that song again","She was unhappy about the unfair game","Please unlock the door for me","We need to unpack the boxes"]
+    },
+    "prefixes-dis-pre": {
+        "desc": "Prefixes (DIS-, PRE-) - disagree, dislike, preview, prepare",
+        "ex": ["disagree","dislike","disappear","disobey","preview","prepay","preheat","prepare","preschool","precook","I disagree with my sister sometimes","The magician made the rabbit disappear","Please preheat the oven first","We need to prepare for the trip","My little brother goes to preschool"]
+    },
+    "suffixes-less-ness": {
+        "desc": "Suffixes (-LESS, -NESS) - careless, fearless, kindness, happiness",
+        "ex": ["careless","helpless","fearless","hopeless","kindness","happiness","darkness","sadness","sickness","softness","Being careless can lead to accidents","The fearless firefighter ran inside","Her kindness made everyone smile","The room was full of darkness","His sadness turned into happiness"]
+    },
+    "suffix-ment": {
+        "desc": "Suffix (-MENT) - enjoyment, movement, payment, treatment",
+        "ex": ["enjoyment","movement","payment","treatment","agreement","statement","equipment","excitement","We felt great enjoyment at the park","The dancer's movement was smooth","Please make your payment on time","Everyone signed the agreement","The excitement filled the whole room"]
+    },
+    "contractions": {
+        "desc": "Contractions - isn't, aren't, wasn't, don't, you'll, we'll, I've, they've",
+        "ex": ["isn't","aren't","wasn't","weren't","don't","doesn't","didn't","can't","won't","couldn't","you'll","we'll","they'll","i've","we've","you've","they've","i'm","we're","She isn't ready yet","They aren't home right now","He didn't finish his lunch","I can't find my shoes","We won't be late for school","I'll see you at school","We'll play outside after lunch","They've already eaten dinner","I've never seen that movie","I'm happy that we're friends"]
+    },
+    "multisyllable-words": {
+        "desc": "Multisyllable Words - disturbance, container, remarkable, celebration, afternoon, wonderful, particular, important",
+        "ex": ["disturbance","container","mountainous","remarkable","entertain","thunderstorm","celebration","understanding","afternoon","wonderful","particular","department","important","character","umbrella","hamburger","The loud noise caused a disturbance","Put the food in a plastic container","The mountainous trail was steep","She gave a remarkable speech","The clowns will entertain the crowd","We will meet in the afternoon","She had a wonderful time at the party","This is a particular kind of flower","He works in a different department","It is important to be kind"]
     },
     "Reading - Grade 1": {
-        "desc": "### First Grade Building Blocks\nDevelop *blend/digraph recognition, silent e, and basic sight words* in 5-7 word sentences",
-        "ex": [
-            "The black cat sits on a mat.",
-            "She will bake a cake for me.",
-            "My dog likes to chase balls.",
-            "We see three little ducks.",
-            "The ship sails on the blue sea.",
-            "I ride my bike down the path.",
-            "That bird has a long wing.",
-            "Five fish swim in the pond.",
-            "He found a round stone.",
-            "The clock says it is time.",
-            "Please give me that book.",
-            "They went to the green park.",
-            "Look at the pretty flower.",
-            "We play with our new toys.",
-            "The brown bear eats honey.",
-            "She makes art with white chalk.",
-            "I hear a frog croak.",
-            "They jump over the old log.",
-            "My mom drives a fast car.",
-            "The wind blows the tall tree.",
-            "We sleep in soft beds.",
-            "He has a sharp pencil.",
-            "The queen wears a gold crown.",
-            "We eat lunch at twelve noon.",
-            "She reads a good book.",
-            "The train goes very fast.",
-            "I see my house from here.",
-            "They help their dad work.",
-            "The moon shines at night.",
-            "We sing a happy song."
-        ]
+        "desc": "Sentences Grade 1 - from flashcard deck",
+        "ex": ["I have a big dog.","The cat is on the mat.","You and I can go.","He was at the park.","She said it was fun.","They have a red ball.","This is my new hat.","We can look at the water.","What do you like to do?","I will go with him.","Can you find my book?","There are two dogs by the tree.","My mom will make lunch now.","Look at all the stars.","We had a good time.","It is time to go home.","She will write her name.","He can not see the sun.","This water is for you.","I like to play with them.","They were at my house.","Do you have a first name?","We will use this one.","Some people like to walk.","How many were there?","I said I would go.","Come and see my new toy.","Her cat likes to look up.","We can not find it now.","This is the way to go.","I will get my hat and go.","They made a big cake for us.","Would you like more water?","He did not have his book.","Can we go down to the water?","She has been here all day.","I like this one, but not that one.","We will write it down now.","My dad called them on time.","The sun is up now.","Other people can come too.","I am so happy about this day.","We went into the big house.","Is this your book or mine?","They will find it and then go.","What time did you get up?","I could not see the long road.","She likes to look at the water.","We had part of the cake.","Which one do you like more?","I will go by myself now.","He has a first and a last name.","Look, there she is at the door!","We were not made to sit all day.","Their dog can run and play.","I have had a good day today.","Can they see us from here?","This is how we make a cake.","Many people go home at this time.","We will find a way to help you."]
     },
     "Reading - Grade 2": {
+        "desc": "Sentences Grade 2 - from flashcard deck",
+        "ex": ["I moved to a new home this year.","Our little dog followed us home.","Can you show me the way there?","Mother read a great sentence to us.","The man went to work early.","We must try to find the answer.","I think this is the right page.","Three boys came to play after school.","She put the letter on the table.","Turn the page and study the picture.","We live in a small house near the land.","I need help to move this large box.","Should we take a walk in the air?","Where did you learn to spell that word?","The animal ran away from the house.","Even now, I still think about it.","We found a different way to end the game.","Our hand hurt after we tried to play.","Just ask her to change the sound.","Many years ago, our family came here.","Only good work will help us win.","I want to know why the sky turns dark.","Give me the picture, and I will show it.","Set the page down and go outside to play.","We put our name on the same line.","The men went back to work after lunch.","Take another look before you say no.","Her thing was found by the old house.","This is a great place to build a home.","We form a line and wait for our turn.","The boy said he would help us move.","I like to read before I go to sleep.","Off in the distance, we saw a small light.","Our teacher will help us learn the answer.","Does she need a form to fill out?","The land around here is very different.","We must think about what we say to others.","I found my old picture on the wall.","The kind man gave us a new page.","Study hard and you will learn much more.","Our house has a big yard and a small pond.","Even the youngest boy can play this game.","Just try again if it does not work.","We went through the woods to find our way home.","Her mother will help us set the table.","I think America is a very large place.","Follow the line to find the right answer.","Take a picture before we move the boxes.","Why did you turn the sound off?","The world is a great and different place.","We need to change our plan before we go.","Our small dog likes to follow me around.","Ask your mother if we can go outside.","The letter came from a man in another town.","I put my hand up to answer the question.","We should study before we go to play.","Give the picture back to her, please.","Our new home has a very large yard.","Away from home, we found a great place to live.","Well, I must think about it again."]
+    },
+    "sight-words-grade1": {
+        "desc": "Sight Words Grade 1 - common words for first graders",
+        "ex": ["the","of","and","a","to","in","is","you","that","it","he","was","for","on","are","as","with","his","they","I","at","be","this","have","from","or","one","had","by","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","no","way","could","people","my","than","first","water","been","called","who","am","its","now","find","long","down","day","did","get","come","made","may","part"]
+    },
+    "sight-words-grade2": {
+        "desc": "Sight Words Grade 2 - common words for second graders",
+        "ex": ["over","new","sound","take","only","little","work","know","place","years","live","me","back","give","most","very","after","thing","our","just","name","good","sentence","man","think","say","great","where","help","through","much","before","line","right","too","mean","old","any","same","tell","boy","follow","came","want","show","also","around","form","three","small","set","put","end","does","another","well","large","must","big","even","such","because","turn","here","why","ask","went","men","read","need","land","different","home","us","move","try","kind","hand","picture","again","change","off","play","spell","air","away","animal","house","point","page","letter","mother","answer","found","study","still","learn","should","America","world"]
+    },
+    "Reading - KG": {
+        "desc": "### Kindergarten Foundations\nFocus on *letter sounds, rhyming, and CVC words* in simple 3-5 word sentences",
+        "ex": ["The cat sat.","I see a dog.","Mom has a bag.","Dad and I run.","The sun is hot.","A bug is on a log.","I like my red hat.","We jump in the mud.","She has ten pens.","It is in the box.","Look at the map.","We cut the cake.","I hop on one leg.","The pig is big.","Get the net, Sam.","A cub is in the den.","I see six dots.","The man has a van.","We see a bus.","Fix the lid, Pam.","The dog dug.","I see a hen.","The fox ran.","We put it up.","She has a hat.","The kid has a toy.","We see the sun.","I am at the top.","The cat can nap.","We go up."]
+    },
+    "Reading - Grade 1a": {
+        "desc": "### First Grade Building Blocks\nDevelop *blend/digraph recognition, silent e, and basic sight words* in 5-7 word sentences",
+        "ex": ["The black cat sits on a mat.","She will bake a cake for me.","My dog likes to chase balls.","We see three little ducks.","The ship sails on the blue sea.","I ride my bike down the path.","That bird has a long wing.","Five fish swim in the pond.","He found a round stone.","The clock says it is time.","Please give me that book.","They went to the green park.","Look at the pretty flower.","We play with our new toys.","The brown bear eats honey.","She makes art with white chalk.","I hear a frog croak.","They jump over the old log.","My mom drives a fast car.","The wind blows the tall tree.","We sleep in soft beds.","He has a sharp pencil.","The queen wears a gold crown.","We eat lunch at twelve noon.","She reads a good book.","The train goes very fast.","I see my house from here.","They help their dad work.","The moon shines at night.","We sing a happy song."]
+    },
+    "Reading - Grade 2a": {
         "desc": "### Second Grade Fluency\nMaster *vowel teams, r-controlled vowels, and multisyllabic words* in 7-9 word sentences",
-        "ex": [
-            "The actor wore a smart costume.",
-            "We avoid poison ivy in the woods.",
-            "My neighbor mows his lawn weekly.",
-            "She uses chalk to draw on pavement.",
-            "Eight birds flew south for autumn.",
-            "Children enjoy chocolate cookies.",
-            "We brought sandwiches for our picnic.",
-            "Grandmother told an old folktale.",
-            "The athlete broke a world record.",
-            "Fireflies glow in summer evenings.",
-            "We measure rainfall with a gauge.",
-            "They built a fortress with cushions.",
-            "The librarian organized the section.",
-            "We bought fresh cauliflower.",
-            "Engineers design modern bridges.",
-            "The knight fought with courage.",
-            "We pour milk on our cereal.",
-            "The musician played a beautiful tune.",
-            "Volunteers help clean the highway.",
-            "Farmers grow grain and soybeans.",
-            "We hang paintings on the wall.",
-            "The detective found a secret clue.",
-            "Astronomers study distant planets.",
-            "Children build castles in sandboxes.",
-            "We prepare for winter's approach.",
-            "The author wrote an exciting chapter.",
-            "Geologists examine rock formations.",
-            "We appreciate our teacher's guidance.",
-            "The athlete won a gold medal.",
-            "Scientists observe chemical reactions."
-        ]
-    }                                                                                                                                                   
+        "ex": ["The actor wore a smart costume.","We avoid poison ivy in the woods.","My neighbor mows his lawn weekly.","She uses chalk to draw on pavement.","Eight birds flew south for autumn.","Children enjoy chocolate cookies.","We brought sandwiches for our picnic.","Grandmother told an old folktale.","The athlete broke a world record.","Fireflies glow in summer evenings.","We measure rainfall with a gauge.","They built a fortress with cushions.","The librarian organized the section.","We bought fresh cauliflower.","Engineers design modern bridges.","The knight fought with courage.","We pour milk on our cereal.","The musician played a beautiful tune.","Volunteers help clean the highway.","Farmers grow grain and soybeans.","We hang paintings on the wall.","The detective found a secret clue.","Astronomers study distant planets.","Children build castles in sandboxes.","We prepare for winter's approach.","The author wrote an exciting chapter.","Geologists examine rock formations.","We appreciate our teacher's guidance.","The athlete won a gold medal.","Scientists observe chemical reactions."]
+    }
 };
-            let lessons = { ...DEFAULT_LESSONS };
+        var lessons = {};
+        for (var key in DEFAULT_LESSONS) {
+            if (DEFAULT_LESSONS.hasOwnProperty(key)) lessons[key] = DEFAULT_LESSONS[key];
+        }
 
-            const slideToggle = document.getElementById('slideToggle');
-            const loadToggle = document.getElementById('loadToggle');
-            const exportToggle = document.getElementById('exportToggle');
-            const dictionaryFileInput = document.getElementById('dictionaryFileInput');
-            const dictionaryNotification = document.getElementById('dictionaryNotification');
-            const notificationText = document.getElementById('notificationText');
-            const notificationIcon = document.getElementById('notificationIcon');
-            const searchInput = document.getElementById('searchInput');
-            const searchBtn = document.getElementById('searchBtn');
-            const resultsContainer = document.getElementById('resultsContainer');
-            const themeToggle = document.getElementById('themeToggle');
-            const fontToggle = document.getElementById('fontToggle');
-            const caseToggle = document.getElementById('caseToggle');
-            const historyToggle = document.getElementById('historyToggle');
-            const topicsToggle = document.getElementById('topicsToggle');
-            const helpToggle = document.getElementById('helpToggle');
-            const appLogo = document.getElementById('appLogo');
-            const historyPanel = document.getElementById('historyPanel');
-            const topicsPanel = document.getElementById('topicsPanel');
-            const topicsList = document.getElementById('topicsList');
-            const historyList = document.getElementById('historyList');
-            const closeHistory = document.getElementById('closeHistory');
-            const closeTopics = document.getElementById('closeTopics');
-            const overlay = document.getElementById('overlay');
-            const instructionsModal = document.getElementById('instructionsModal');
-            const closeModal = document.getElementById('closeModal');
-            const appContainer = document.getElementById('appContainer');
+        // Get all necessary elements
+        var slideToggle = $("slideToggle");
+        var loadToggle = $("loadToggle");
+        var exportToggle = $("exportToggle");
+        var dictionaryFileInput = $("dictionaryFileInput");
+        var dictionaryNotification = $("dictionaryNotification");
+        var notificationText = $("notificationText");
+        var notificationIcon = $("notificationIcon");
+        var searchInput = $("searchInput");
+        var searchBtn = $("searchBtn");
+        var resultsContainer = $("resultsContainer");
+        var themeToggle = $("themeToggle");
+        var fontToggle = $("fontToggle");
+        var caseToggle = $("caseToggle");
+        var historyToggle = $("historyToggle");
+        var topicsToggle = $("topicsToggle");
+        var helpToggle = $("helpToggle");
+        var appLogo = $("appLogo");
+        var historyPanel = $("historyPanel");
+        var topicsPanel = $("topicsPanel");
+        var topicsList = $("topicsList");
+        var historyList = $("historyList");
+        var closeHistory = $("closeHistory");
+        var closeTopics = $("closeTopics");
+        var overlay = $("overlay");
+        var instructionsModal = $("instructionsModal");
+        var closeModal = $("closeModal");
+        var appContainer = $("appContainer");
 
-            const slideshowOverlay = document.getElementById('slideshowOverlay');
-            const slideshowContent = document.getElementById('slideshowContent');
-            const slideshowTop = document.getElementById('slideshowTop');
-            const slideshowBottom = document.getElementById('slideshowBottom');
-            const slideshowClose = document.getElementById('slideshowClose');
-            const slideshowIndicator = document.getElementById('slideshowIndicator');
-            const instructionModal = document.getElementById('instructionModal');
-            const closeInstruction = document.getElementById('closeInstruction');
+        var slideshowOverlay = $("slideshowOverlay");
+        var slideshowContent = $("slideshowContent");
+        var slideshowTop = $("slideshowTop");
+        var slideshowBottom = $("slideshowBottom");
+        var slideshowClose = $("slideshowClose");
+        var slideshowIndicator = $("slideshowIndicator");
+        var instructionModal = $("instructionModal");
+        var closeInstruction = $("closeInstruction");
 
-            const builderContainer = document.getElementById('builderContainer');
-            const builderCancel = document.getElementById('builderCancel');
-            const builderExport = document.getElementById('builderExport');
-            const builderTopic = document.getElementById('builderTopic');
-            const builderDesc = document.getElementById('builderDesc');
-            const builderEx = document.getElementById('builderEx');
-            const builderAdd = document.getElementById('builderAdd');
-            const builderPreview = document.getElementById('builderPreview');
-            const builderEntryCount = document.getElementById('builderEntryCount');
-            const previewClear = document.getElementById('previewClear');
+        var builderContainer = $("builderContainer");
+        var builderCancel = $("builderCancel");
+        var builderExport = $("builderExport");
+        var builderTopic = $("builderTopic");
+        var builderDesc = $("builderDesc");
+        var builderEx = $("builderEx");
+        var builderAdd = $("builderAdd");
+        var builderPreview = $("builderPreview");
+        var builderEntryCount = $("builderEntryCount");
+        var previewClear = $("previewClear");
 
-            const fontSizeBtns = document.querySelectorAll('.font-size-btn');
+        var fontSizeBtns = qsa(".font-size-btn");
 
-            let isDarkTheme = localStorage.getItem('dictionaryTheme') === 'dark';
-            let isUpperCase = localStorage.getItem('dictionaryCaseState') === 'uppercase';
-            const searchHistory = JSON.parse(localStorage.getItem('dictionarySearchHistory')) || [];
-            let currentTopic = null;
-            let currentSlideshow = null;
-            let currentSlideIndex = 0;
-            let slideColors = {};
-            const COLOR_CYCLE = ['#000000', '#FF0000', '#FFA500', '#008000', '#0000FF', '#4B0082', '#8F00FF', '#FFFFFF'];
-            let builderDictionary = {};
+        // State variables
+        var isDarkTheme = localStorage.getItem("dictionaryTheme") === "dark";
+        var isUpperCase = localStorage.getItem("dictionaryCaseState") === "uppercase";
+        var searchHistory = [];
+        try {
+            searchHistory = JSON.parse(localStorage.getItem("dictionarySearchHistory")) || [];
+        } catch(e) {
+            searchHistory = [];
+        }
+        var currentTopic = null;
+        var currentSlideshow = null;
+        var currentSlideIndex = 0;
+        var slideColors = {};
+        var COLOR_CYCLE = ["#000000", "#FF0000", "#FFA500", "#008000", "#0000FF", "#4B0082", "#8F00FF", "#FFFFFF"];
+        var builderDictionary = {};
 
-            function init() {
-                const savedDictionary = localStorage.getItem('customDictionary');
-                if (savedDictionary) {
-                    try { lessons = JSON.parse(savedDictionary); showNotification('Custom Notes loaded successfully', '✅'); }
-                    catch(e) { showNotification('Error loading Notes', '❌', true); }
-                }
-                const savedFontSize = localStorage.getItem('dictionaryFontSize');
-                if (savedFontSize) {
-                    document.documentElement.style.setProperty('--font-base', savedFontSize);
-                    fontSizeBtns.forEach(btn => btn.classList.remove('active'));
-                    const activeBtn = Array.from(fontSizeBtns).find(b => b.dataset.size === savedFontSize);
-                    if(activeBtn) activeBtn.classList.add('active');
-                }
-                if (isUpperCase) caseToggle.classList.add('active');
-
-                if (isDarkTheme) {
-                    document.body.classList.add('dark-theme');
-                    themeToggle.textContent = '☀️';
-                } else {
-                    themeToggle.textContent = '🌙';
-                }
-
-                fontSizeBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const size = btn.dataset.size;
-                        document.documentElement.style.setProperty('--font-base', size);
-                        localStorage.setItem('dictionaryFontSize', size);
-                        fontSizeBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        if (currentTopic) displayResults(currentTopic);
-                    });
-                });
-
-                loadToggle.addEventListener('click', () => dictionaryFileInput.click());
-                dictionaryFileInput.addEventListener('change', handleFileSelect);
-
-                exportToggle.addEventListener('click', () => {
-                    appContainer.style.display = 'none';
-                    builderContainer.classList.add('active');
-                });
-                builderCancel.addEventListener('click', () => {
-                    builderContainer.classList.remove('active');
-                    appContainer.style.display = 'block';
-                });
-                builderExport.addEventListener('click', exportBuilderDictionary);
-                builderAdd.addEventListener('click', addBuilderEntry);
-                previewClear.addEventListener('click', () => {
-                    if (Object.keys(builderDictionary).length > 0 && confirm('Clear all entries?')) {
-                        builderDictionary = {};
-                        updateBuilderPreview();
-                    }
-                });
-
-                slideToggle.addEventListener('click', startSlideshow);
-                slideshowClose.addEventListener('click', closeSlideshow);
-                slideshowTop.addEventListener('click', nextSlide);
-                slideshowBottom.addEventListener('click', prevSlide);
-                closeInstruction.addEventListener('click', () => {
-                    instructionModal.classList.remove('active');
-                    overlay.classList.remove('active');
-                    beginSlideshow();
-                });
-
-                searchBtn.addEventListener('click', handleSearch);
-                searchInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') handleSearch(); });
-
-                themeToggle.addEventListener('click', toggleTheme);
-                fontToggle.addEventListener('click', () => {
-                    const controls = document.querySelector('.font-controls');
-                    controls.style.display = controls.style.display === 'flex' ? 'none' : 'flex';
-                });
-                caseToggle.addEventListener('click', toggleCase);
-
-                historyToggle.addEventListener('click', toggleHistoryPanel);
-                topicsToggle.addEventListener('click', toggleTopicsPanel);
-                helpToggle.addEventListener('click', toggleInstructionsModal);
-                appLogo.addEventListener('click', resetToHome);
-                closeHistory.addEventListener('click', toggleHistoryPanel);
-                closeTopics.addEventListener('click', toggleTopicsPanel);
-                closeModal.addEventListener('click', toggleInstructionsModal);
-                overlay.addEventListener('click', closeAllPanels);
-
-                document.querySelectorAll('.history-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        searchInput.value = item.textContent.replace('🔍','').trim();
-                        handleSearch();
-                    });
-                });
-
-                renderHistoryPanel();
-                renderTopicsList();
-
-                if (!localStorage.getItem('instructionsShown')) {
-                    setTimeout(() => {
-                        toggleInstructionsModal();
-                        localStorage.setItem('instructionsShown', 'true');
-                    }, 5500);
+        // Font scaling (workaround for old browsers)
+        var baseFontScale = 1;
+        function applyFontScale() {
+            var selectors = [
+                ".logo", ".entry-header h1", ".entry-desc",
+                ".markdown-content h2.markdown-h2", ".markdown-content h3.markdown-h3",
+                ".markdown-content h4.markdown-h4", ".example-item",
+                ".slideshow-content", ".color-letter", ".color-word"
+            ];
+            for (var i = 0; i < selectors.length; i++) {
+                var elements = qsa(selectors[i]);
+                for (var j = 0; j < elements.length; j++) {
+                    var el = elements[j];
+                    var base = 16;
+                    if (selectors[i] === ".logo") base = 24;
+                    else if (selectors[i] === ".entry-header h1") base = 42;
+                    else if (selectors[i] === ".entry-desc") base = 20;
+                    else if (selectors[i] === ".markdown-content h2.markdown-h2") base = 28;
+                    else if (selectors[i] === ".markdown-content h3.markdown-h3") base = 22;
+                    else if (selectors[i] === ".markdown-content h4.markdown-h4") base = 20;
+                    else if (selectors[i] === ".example-item") base = 20;
+                    else if (selectors[i] === ".slideshow-content") base = 72;
+                    el.style.fontSize = (base * baseFontScale) + "px";
                 }
             }
+        }
 
-            function showNotification(message, icon, isError = false, isSuccess = false) {
-                notificationText.textContent = message;
-                notificationIcon.textContent = icon;
-                dictionaryNotification.classList.remove('error','success');
-                if (isError) dictionaryNotification.classList.add('error');
-                else if (isSuccess) dictionaryNotification.classList.add('success');
-                dictionaryNotification.classList.add('active');
-                setTimeout(() => dictionaryNotification.classList.remove('active'), 3000);
+        function init() {
+            var savedDictionary = localStorage.getItem("customDictionary");
+            if (savedDictionary) {
+                try {
+                    lessons = JSON.parse(savedDictionary);
+                    showNotification("Custom Notes loaded successfully", "✅");
+                } catch(e) {
+                    showNotification("Error loading Notes", "❌", true);
+                }
             }
-
-            function formatMarkdown(text) {
-                const lines = text.split('\n');
-                let output = '';
-                let inOrderedList = false;
-                let inUnorderedList = false;
-                for (let line of lines) {
-                    line = line.trim();
-                    if (!line) continue;
-                    if (line.startsWith('### ')) {
-                        if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
-                        if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
-                        output += `<h2 class="markdown-h2">${processInlineMarkdown(line.slice(4))}</h2>`;
-                    } else if (line.startsWith('## ')) {
-                        if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
-                        if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
-                        output += `<h3 class="markdown-h3">${processInlineMarkdown(line.slice(3))}</h3>`;
-                    } else if (line.startsWith('# ')) {
-                        if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
-                        if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
-                        output += `<strong class="markdown-strong">${processInlineMarkdown(line.slice(2))}</strong>`;
-                    } else if (line.startsWith('- ')) {
-                        if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
-                        if (!inOrderedList) { output += '<ol class="markdown-ol">'; inOrderedList = true; }
-                        output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
-                    } else if (line.startsWith('+ ')) {
-                        if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
-                        if (!inUnorderedList) { output += '<ul class="markdown-ul">'; inUnorderedList = true; }
-                        output += `<li class="markdown-li">${processInlineMarkdown(line.slice(2))}</li>`;
-                    } else {
-                        if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
-                        if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
-                        output += `<p class="markdown-p">${processInlineMarkdown(line)}</p>`;
+            var savedFontSize = localStorage.getItem("dictionaryFontSize");
+            if (savedFontSize) {
+                baseFontScale = parseFloat(savedFontSize) || 1;
+                var activeBtn = null;
+                for (var i = 0; i < fontSizeBtns.length; i++) {
+                    if (fontSizeBtns[i].getAttribute("data-size") === savedFontSize) {
+                        activeBtn = fontSizeBtns[i];
+                        break;
                     }
                 }
-                if (inOrderedList) output += '</ol>';
-                if (inUnorderedList) output += '</ul>';
-                return output;
-            }
-            function processInlineMarkdown(text) {
-                text = text.replace(/\[([^\]]+)\]/g, '<span class="theme-color">$1</span>');
-                text = text.replace(/_([^_]+)_/g, '<u class="markdown-u">$1</u>');
-                text = text.replace(/\*([^*]+)\*/g, '<em class="markdown-em">$1</em>');
-                return text;
-            }
-
-            function toggleCase() {
-                isUpperCase = !isUpperCase;
-                caseToggle.classList.toggle('active', isUpperCase);
-                localStorage.setItem('dictionaryCaseState', isUpperCase ? 'uppercase' : 'normal');
-                if (currentTopic) displayResults(currentTopic);
-            }
-            function applyCase(text) { return isUpperCase ? text.toUpperCase() : text.toLowerCase(); }
-
-            function handleSearch() {
-                const term = searchInput.value.trim();
-                if (!term) return;
-                if (!searchHistory.some(item => item.term === term)) {
-                    searchHistory.unshift({ term: term, time: new Date().toISOString() });
-                    if (searchHistory.length > 10) searchHistory.pop();
-                    localStorage.setItem('dictionarySearchHistory', JSON.stringify(searchHistory));
-                    renderHistoryPanel();
-                }
-                displayResults(term);
-            }
-
-            function displayResults(term) {
-                currentTopic = term;
-                const topic = lessons[term];
-                if (!topic) {
-                    resultsContainer.innerHTML = `
-                        <div class="no-results">
-                            <span>🔍</span>
-                            <h2>Topic Not Found</h2>
-                            <p>No results found for "${term}". Try one of these:</p>
-                            <div class="search-history">${Object.keys(lessons).map(key => `<div class="history-item">🔍 ${key}</div>`).join('')}</div>
-                            <div class="font-controls">
-                                <span class="font-label">Font Size:</span>
-                                ${Array.from(fontSizeBtns).map(btn => btn.outerHTML).join('')}
-                            </div>
-                        </div>
-                        <div class="feature-highlight"><h2>📚 Browse All Topics</h2><p>Click the topics icon 📚 in the top right corner</p></div>`;
-                    attachDynamicListeners();
-                    return;
-                }
-                const displayDesc = isUpperCase ? topic.desc.toUpperCase() : topic.desc.toLowerCase();
-                const displayEx = topic.ex.map(ex => isUpperCase ? ex.toUpperCase() : ex.toLowerCase());
-                resultsContainer.innerHTML = `
-                    <div class="entry-card">
-                        <div class="entry-header"><h1>${applyCase(term)}</h1></div>
-                        <div class="entry-desc">${formatMarkdown(displayDesc)}</div>
-                        <h3>Examples & Word Bank:</h3>
-                        <div class="examples-grid">
-                            ${displayEx.map((example, index) => `<div class="example-item" data-index="${index}">${example}</div>`).join('')}
-                        </div>
-                        <button class="clear-selection" id="clearSelection"><span>✕</span> Clear Selection</button>
-                    </div>`;
-                document.querySelectorAll('.example-item').forEach(item => {
-                    item.addEventListener('click', () => item.classList.toggle('selected'));
-                });
-                document.getElementById('clearSelection')?.addEventListener('click', () => {
-                    document.querySelectorAll('.example-item').forEach(item => item.classList.remove('selected'));
-                });
-                attachDynamicListeners();
-            }
-
-            function resetToHome() {
-                resultsContainer.innerHTML = `
-                    <div class="no-results">
-                        <span>📖</span>
-                        <h2>Enhanced Digital Notes</h2>
-                        <p>Search for topics to see their details and examples</p>
-                        <p>Try these examples:</p>
-                        <div class="search-history">${Object.keys(lessons).map(key => `<div class="history-item">🔍 ${key}</div>`).join('')}</div>
-                        <div class="font-controls">
-                            <span class="font-label">Font Size:</span>
-                            ${Array.from(fontSizeBtns).map(btn => btn.outerHTML).join('')}
-                        </div>
-                    </div>
-                    <div class="feature-highlight"><h2>📚 Browse All Topics</h2><p>Click the topics icon 📚 in the top right corner</p></div>`;
-                attachDynamicListeners();
-            }
-
-            function attachDynamicListeners() {
-                document.querySelectorAll('.font-size-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const size = btn.dataset.size;
-                        document.documentElement.style.setProperty('--font-base', size);
-                        localStorage.setItem('dictionaryFontSize', size);
-                        document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        if (currentTopic) displayResults(currentTopic);
-                    });
-                });
-                document.querySelectorAll('.history-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        searchInput.value = item.textContent.replace('🔍','').trim();
-                        handleSearch();
-                    });
-                });
-                const clearBtn = document.getElementById('clearSelection');
-                if (clearBtn) {
-                    clearBtn.addEventListener('click', () => document.querySelectorAll('.example-item').forEach(i => i.classList.remove('selected')));
+                if (activeBtn) {
+                    for (var j = 0; j < fontSizeBtns.length; j++) {
+                        removeClass(fontSizeBtns[j], "active");
+                    }
+                    addClass(activeBtn, "active");
                 }
             }
+            if (isUpperCase) addClass(caseToggle, "active");
 
-            function toggleTheme() {
-                isDarkTheme = !isDarkTheme;
-                document.body.classList.toggle('dark-theme', isDarkTheme);
-                themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
-                localStorage.setItem('dictionaryTheme', isDarkTheme ? 'dark' : 'light');
-            }
-
-            function toggleHistoryPanel() {
-                historyPanel.classList.toggle('active');
-                overlay.classList.toggle('active');
-                document.body.style.overflow = historyPanel.classList.contains('active') ? 'hidden' : 'auto';
-                topicsPanel.classList.remove('active');
-            }
-            function toggleTopicsPanel() {
-                topicsPanel.classList.toggle('active');
-                overlay.classList.toggle('active');
-                document.body.style.overflow = topicsPanel.classList.contains('active') ? 'hidden' : 'auto';
-                historyPanel.classList.remove('active');
-            }
-            function toggleInstructionsModal() {
-                instructionsModal.classList.toggle('active');
-                overlay.classList.toggle('active');
-                document.body.style.overflow = instructionsModal.classList.contains('active') ? 'hidden' : 'auto';
-            }
-            function closeAllPanels() {
-                historyPanel.classList.remove('active');
-                topicsPanel.classList.remove('active');
-                instructionsModal.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.style.overflow = 'auto';
+            if (isDarkTheme) {
+                addClass(document.body, "dark-theme");
+                themeToggle.textContent = "☀️";
+            } else {
+                themeToggle.textContent = "🌙";
             }
 
-            function renderHistoryPanel() {
-                historyList.innerHTML = '';
-                if (searchHistory.length === 0) { historyList.innerHTML = '<p>No search history yet</p>'; return; }
-                searchHistory.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'history-item-panel';
-                    div.innerHTML = `<div class="term">🔍 ${item.term}</div><div class="time">${formatTime(item.time)}</div>`;
-                    div.addEventListener('click', () => { searchInput.value = item.term; handleSearch(); closeAllPanels(); });
-                    historyList.appendChild(div);
-                });
-            }
-            function renderTopicsList() {
-                topicsList.innerHTML = '';
-                Object.keys(lessons).forEach(topic => {
-                    const div = document.createElement('div');
-                    div.className = 'topic-item';
-                    div.innerHTML = `<span>📄</span><div>${topic}</div>`;
-                    div.addEventListener('click', () => { searchInput.value = topic; handleSearch(); closeAllPanels(); });
-                    topicsList.appendChild(div);
-                });
-            }
-            function formatTime(iso) { return new Date(iso).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-
-            function handleFileSelect(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const newDict = JSON.parse(e.target.result);
-                        for (const key in newDict) {
-                            if (!newDict[key].desc || !Array.isArray(newDict[key].ex)) throw new Error('Invalid structure');
+            // Event listeners
+            for (var i = 0; i < fontSizeBtns.length; i++) {
+                (function(btn) {
+                    addEvent(btn, "click", function() {
+                        var size = btn.getAttribute("data-size");
+                        baseFontScale = parseFloat(size);
+                        localStorage.setItem("dictionaryFontSize", size);
+                        for (var j = 0; j < fontSizeBtns.length; j++) {
+                            removeClass(fontSizeBtns[j], "active");
                         }
-                        lessons = newDict;
-                        localStorage.setItem('customDictionary', JSON.stringify(lessons));
-                        renderTopicsList();
-                        showNotification('Notes loaded successfully!', '✅', false, true);
-                        appLogo.click();
-                    } catch(err) {
-                        showNotification('Error loading Notes. Invalid format.', '❌', true);
+                        addClass(btn, "active");
+                        applyFontScale();
+                        if (currentTopic) displayResults(currentTopic);
+                    });
+                })(fontSizeBtns[i]);
+            }
+
+            addEvent(loadToggle, "click", function() {
+                dictionaryFileInput.click();
+            });
+            addEvent(dictionaryFileInput, "change", handleFileSelect);
+
+            addEvent(exportToggle, "click", function() {
+                appContainer.style.display = "none";
+                addClass(builderContainer, "active");
+            });
+            addEvent(builderCancel, "click", function() {
+                removeClass(builderContainer, "active");
+                appContainer.style.display = "block";
+            });
+            addEvent(builderExport, "click", exportBuilderDictionary);
+            addEvent(builderAdd, "click", addBuilderEntry);
+            addEvent(previewClear, "click", function() {
+                if (Object.keys(builderDictionary).length > 0 && confirm("Clear all entries?")) {
+                    builderDictionary = {};
+                    updateBuilderPreview();
+                }
+            });
+
+            addEvent(slideToggle, "click", startSlideshow);
+            addEvent(slideshowClose, "click", closeSlideshow);
+            addEvent(slideshowTop, "click", nextSlide);
+            addEvent(slideshowBottom, "click", prevSlide);
+            addEvent(closeInstruction, "click", function() {
+                removeClass(instructionModal, "active");
+                removeClass(overlay, "active");
+                beginSlideshow();
+            });
+
+            addEvent(searchBtn, "click", handleSearch);
+            addEvent(searchInput, "keyup", function(e) {
+                if (e.key === "Enter") handleSearch();
+            });
+
+            addEvent(themeToggle, "click", toggleTheme);
+            addEvent(fontToggle, "click", function() {
+                var controls = document.querySelector(".font-controls");
+                controls.style.display = controls.style.display === "flex" ? "none" : "flex";
+            });
+            addEvent(caseToggle, "click", toggleCase);
+
+            addEvent(historyToggle, "click", toggleHistoryPanel);
+            addEvent(topicsToggle, "click", toggleTopicsPanel);
+            addEvent(helpToggle, "click", toggleInstructionsModal);
+            addEvent(appLogo, "click", resetToHome);
+            addEvent(closeHistory, "click", toggleHistoryPanel);
+            addEvent(closeTopics, "click", toggleTopicsPanel);
+            addEvent(closeModal, "click", toggleInstructionsModal);
+            addEvent(overlay, "click", closeAllPanels);
+
+            // Initial history items (clickable)
+            var historyItems = qsa(".history-item");
+            for (var i = 0; i < historyItems.length; i++) {
+                (function(item) {
+                    addEvent(item, "click", function() {
+                        searchInput.value = item.textContent.replace("🔍", "").trim();
+                        handleSearch();
+                    });
+                })(historyItems[i]);
+            }
+
+            renderHistoryPanel();
+            renderTopicsList();
+
+            if (!localStorage.getItem("instructionsShown")) {
+                setTimeout(function() {
+                    toggleInstructionsModal();
+                    localStorage.setItem("instructionsShown", "true");
+                }, 5500);
+            }
+            applyFontScale();
+        }
+
+        // Utility functions for class manipulation (IE9 safe)
+        function addClass(el, cls) {
+            if (el.classList) el.classList.add(cls);
+            else {
+                var classes = el.className.split(/\s+/);
+                if (classes.indexOf(cls) === -1) classes.push(cls);
+                el.className = classes.join(" ");
+            }
+        }
+        function removeClass(el, cls) {
+            if (el.classList) el.classList.remove(cls);
+            else {
+                var classes = el.className.split(/\s+/);
+                var idx = classes.indexOf(cls);
+                if (idx !== -1) classes.splice(idx, 1);
+                el.className = classes.join(" ");
+            }
+        }
+        function toggleClass(el, cls) {
+            if (el.classList) el.classList.toggle(cls);
+            else {
+                var classes = el.className.split(/\s+/);
+                var idx = classes.indexOf(cls);
+                if (idx === -1) classes.push(cls);
+                else classes.splice(idx, 1);
+                el.className = classes.join(" ");
+            }
+        }
+
+        // Notification
+        function showNotification(message, icon, isError, isSuccess) {
+            notificationText.textContent = message;
+            notificationIcon.textContent = icon;
+            removeClass(dictionaryNotification, "error");
+            removeClass(dictionaryNotification, "success");
+            if (isError) addClass(dictionaryNotification, "error");
+            else if (isSuccess) addClass(dictionaryNotification, "success");
+            addClass(dictionaryNotification, "active");
+            setTimeout(function() {
+                removeClass(dictionaryNotification, "active");
+            }, 3000);
+        }
+
+        // Markdown formatting
+        function processInlineMarkdown(text) {
+            text = text.replace(/\[([^\]]+)\]/g, '<span class="theme-color">$1</span>');
+            text = text.replace(/_([^_]+)_/g, '<u class="markdown-u">$1</u>');
+            text = text.replace(/\*([^*]+)\*/g, '<em class="markdown-em">$1</em>');
+            return text;
+        }
+        function formatMarkdown(text) {
+            var lines = text.split('\n');
+            var output = '';
+            var inOrderedList = false;
+            var inUnorderedList = false;
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if (!line) continue;
+                if (line.indexOf('### ') === 0) {
+                    if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
+                    if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
+                    output += '<h2 class="markdown-h2">' + processInlineMarkdown(line.slice(4)) + '</h2>';
+                } else if (line.indexOf('## ') === 0) {
+                    if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
+                    if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
+                    output += '<h3 class="markdown-h3">' + processInlineMarkdown(line.slice(3)) + '</h3>';
+                } else if (line.indexOf('# ') === 0) {
+                    if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
+                    if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
+                    output += '<strong class="markdown-strong">' + processInlineMarkdown(line.slice(2)) + '</strong>';
+                } else if (line.indexOf('- ') === 0) {
+                    if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
+                    if (!inOrderedList) { output += '<ol class="markdown-ol">'; inOrderedList = true; }
+                    output += '<li class="markdown-li">' + processInlineMarkdown(line.slice(2)) + '</li>';
+                } else if (line.indexOf('+ ') === 0) {
+                    if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
+                    if (!inUnorderedList) { output += '<ul class="markdown-ul">'; inUnorderedList = true; }
+                    output += '<li class="markdown-li">' + processInlineMarkdown(line.slice(2)) + '</li>';
+                } else {
+                    if (inOrderedList) { output += '</ol>'; inOrderedList = false; }
+                    if (inUnorderedList) { output += '</ul>'; inUnorderedList = false; }
+                    output += '<p class="markdown-p">' + processInlineMarkdown(line) + '</p>';
+                }
+            }
+            if (inOrderedList) output += '</ol>';
+            if (inUnorderedList) output += '</ul>';
+            return output;
+        }
+
+        // Case toggle
+        function toggleCase() {
+            isUpperCase = !isUpperCase;
+            if (isUpperCase) addClass(caseToggle, "active");
+            else removeClass(caseToggle, "active");
+            localStorage.setItem("dictionaryCaseState", isUpperCase ? "uppercase" : "normal");
+            if (currentTopic) displayResults(currentTopic);
+        }
+        function applyCase(text) { return isUpperCase ? text.toUpperCase() : text.toLowerCase(); }
+
+        // Search
+        function handleSearch() {
+            var term = searchInput.value.trim();
+            if (!term) return;
+            if (!searchHistory.some(function(item) { return item.term === term; })) {
+                searchHistory.unshift({ term: term, time: new Date().toISOString() });
+                if (searchHistory.length > 10) searchHistory.pop();
+                localStorage.setItem("dictionarySearchHistory", JSON.stringify(searchHistory));
+                renderHistoryPanel();
+            }
+            displayResults(term);
+        }
+
+        // Display results
+        function displayResults(term) {
+            currentTopic = term;
+            var topic = lessons[term];
+            if (!topic) {
+                var html = '';
+                html += '<div class="no-results">';
+                html += '<span>🔍</span>';
+                html += '<h2>Topic Not Found</h2>';
+                html += '<p>No results found for "' + term + '". Try one of these:</p>';
+                html += '<div class="search-history">';
+                var keys = Object.keys(lessons);
+                for (var i = 0; i < keys.length; i++) {
+                    html += '<div class="history-item">🔍 ' + keys[i] + '</div>';
+                }
+                html += '</div>';
+                html += '<div class="font-controls">';
+                html += '<span class="font-label">Font Size:</span>';
+                for (var j = 0; j < fontSizeBtns.length; j++) {
+                    html += fontSizeBtns[j].outerHTML;
+                }
+                html += '</div></div>';
+                html += '<div class="feature-highlight"><h2>📚 Browse All Topics</h2><p>Click the topics icon 📚 in the top right corner</p></div>';
+                resultsContainer.innerHTML = html;
+                attachDynamicListeners();
+                return;
+            }
+            var displayDesc = isUpperCase ? topic.desc.toUpperCase() : topic.desc.toLowerCase();
+            var displayEx = topic.ex.map(function(ex) { return isUpperCase ? ex.toUpperCase() : ex.toLowerCase(); });
+            var html = '';
+            html += '<div class="entry-card">';
+            html += '<div class="entry-header"><h1>' + applyCase(term) + '</h1></div>';
+            html += '<div class="entry-desc">' + formatMarkdown(displayDesc) + '</div>';
+            html += '<h3>Examples & Word Bank:</h3>';
+            html += '<div class="examples-grid">';
+            for (var i = 0; i < displayEx.length; i++) {
+                html += '<div class="example-item" data-index="' + i + '">' + displayEx[i] + '</div>';
+            }
+            html += '</div>';
+            html += '<button class="clear-selection" id="clearSelection"><span>✕</span> Clear Selection</button>';
+            html += '</div>';
+            resultsContainer.innerHTML = html;
+
+            var exampleItems = qsa(".example-item");
+            for (var i = 0; i < exampleItems.length; i++) {
+                (function(item) {
+                    addEvent(item, "click", function() {
+                        toggleClass(item, "selected");
+                    });
+                })(exampleItems[i]);
+            }
+            var clearBtn = $("clearSelection");
+            if (clearBtn) {
+                addEvent(clearBtn, "click", function() {
+                    var items = qsa(".example-item");
+                    for (var j = 0; j < items.length; j++) {
+                        removeClass(items[j], "selected");
                     }
-                    dictionaryFileInput.value = '';
-                };
-                reader.onerror = () => showNotification('Error reading file', '❌', true);
-                reader.readAsText(file);
+                });
             }
+            attachDynamicListeners();
+        }
 
-            function addBuilderEntry() {
-                const topic = builderTopic.value.trim();
-                const desc = builderDesc.value.trim();
-                const ex = builderEx.value.trim();
-                if (!topic || !desc || !ex) { alert('Please fill in all fields'); return; }
-                builderDictionary[topic] = { desc: desc, ex: ex.split(',').map(s => s.trim()) };
-                updateBuilderPreview();
-                builderTopic.value = ''; builderDesc.value = ''; builderEx.value = '';
-                builderTopic.focus();
+        function resetToHome() {
+            var html = '';
+            html += '<div class="no-results">';
+            html += '<span>📖</span>';
+            html += '<h2>Enhanced Digital Notes</h2>';
+            html += '<p>Search for topics to see their details and examples</p>';
+            html += '<p>Try these examples:</p>';
+            html += '<div class="search-history">';
+            var keys = Object.keys(lessons);
+            for (var i = 0; i < keys.length; i++) {
+                html += '<div class="history-item">🔍 ' + keys[i] + '</div>';
             }
-            function updateBuilderPreview() {
-                builderPreview.textContent = Object.keys(builderDictionary).length === 0 ? 'No entries yet' : JSON.stringify(builderDictionary, null, 2);
-                builderEntryCount.textContent = `${Object.keys(builderDictionary).length} entries`;
+            html += '</div>';
+            html += '<div class="font-controls">';
+            html += '<span class="font-label">Font Size:</span>';
+            for (var j = 0; j < fontSizeBtns.length; j++) {
+                html += fontSizeBtns[j].outerHTML;
             }
-            function exportBuilderDictionary() {
-                if (Object.keys(builderDictionary).length === 0) { alert('No entries to export'); return; }
-                const dateStr = new Date().toISOString().split('T')[0];
-                const filename = `E_Notes_${dateStr}.json`;
-                const blob = new Blob([JSON.stringify(builderDictionary, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = filename; a.click();
-                URL.revokeObjectURL(url);
-                showNotification(`Notes exported as ${filename}`, '📤', false, true);
-            }
+            html += '</div></div>';
+            html += '<div class="feature-highlight"><h2>📚 Browse All Topics</h2><p>Click the topics icon 📚 in the top right corner</p></div>';
+            resultsContainer.innerHTML = html;
+            attachDynamicListeners();
+        }
 
-            function startSlideshow() {
-                const term = searchInput.value.trim();
-                if (!term || !lessons[term]) { alert("Please search for a valid topic first"); return; }
-                if (!lessons[term].ex || lessons[term].ex.length === 0) { alert("No examples available for this topic"); return; }
-                currentSlideshow = term;
-                currentSlideIndex = 0;
-                slideColors = {};
-                instructionModal.classList.add('active');
-                overlay.classList.add('active');
+        function attachDynamicListeners() {
+            var fontBtns = qsa(".font-size-btn");
+            for (var i = 0; i < fontBtns.length; i++) {
+                (function(btn) {
+                    addEvent(btn, "click", function() {
+                        var size = btn.getAttribute("data-size");
+                        baseFontScale = parseFloat(size);
+                        localStorage.setItem("dictionaryFontSize", size);
+                        for (var j = 0; j < fontBtns.length; j++) {
+                            removeClass(fontBtns[j], "active");
+                        }
+                        addClass(btn, "active");
+                        applyFontScale();
+                        if (currentTopic) displayResults(currentTopic);
+                    });
+                })(fontBtns[i]);
             }
-            function beginSlideshow() {
-                document.querySelector('header').style.display = 'none';
-                slideshowOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                updateSlideshow();
+            var historyItems = qsa(".history-item");
+            for (var i = 0; i < historyItems.length; i++) {
+                (function(item) {
+                    addEvent(item, "click", function() {
+                        searchInput.value = item.textContent.replace("🔍", "").trim();
+                        handleSearch();
+                    });
+                })(historyItems[i]);
             }
-            function updateSlideshow() {
-                const examples = lessons[currentSlideshow].ex;
-                const currentExample = examples[currentSlideIndex];
-                slideshowContent.innerHTML = '';
-                const tokens = currentExample.trim().split(/\s+/).filter(t => t.length > 0);
-                const isSingleWord = tokens.length <= 1;
-                const items = isSingleWord ? (currentExample.trim().split('')) : tokens;
-                if (!slideColors[currentSlideIndex]) slideColors[currentSlideIndex] = {};
-                items.forEach((item, index) => {
-                    const span = document.createElement('span');
-                    span.className = isSingleWord ? 'color-letter' : 'color-word';
-                    const colorIndex = slideColors[currentSlideIndex][index] !== undefined ? slideColors[currentSlideIndex][index] : 0;
-                    span.style.color = COLOR_CYCLE[colorIndex];
-                    span.textContent = item;
-                    span.dataset.index = index;
-                    span.addEventListener('click', (e) => {
+            var clearBtn = $("clearSelection");
+            if (clearBtn) {
+                addEvent(clearBtn, "click", function() {
+                    var items = qsa(".example-item");
+                    for (var j = 0; j < items.length; j++) {
+                        removeClass(items[j], "selected");
+                    }
+                });
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            if (isDarkTheme) addClass(document.body, "dark-theme");
+            else removeClass(document.body, "dark-theme");
+            themeToggle.textContent = isDarkTheme ? "☀️" : "🌙";
+            localStorage.setItem("dictionaryTheme", isDarkTheme ? "dark" : "light");
+        }
+
+        // Panel toggles
+        function toggleHistoryPanel() {
+            toggleClass(historyPanel, "active");
+            toggleClass(overlay, "active");
+            document.body.style.overflow = historyPanel.classList.contains("active") ? "hidden" : "auto";
+            removeClass(topicsPanel, "active");
+        }
+        function toggleTopicsPanel() {
+            toggleClass(topicsPanel, "active");
+            toggleClass(overlay, "active");
+            document.body.style.overflow = topicsPanel.classList.contains("active") ? "hidden" : "auto";
+            removeClass(historyPanel, "active");
+        }
+        function toggleInstructionsModal() {
+            toggleClass(instructionsModal, "active");
+            toggleClass(overlay, "active");
+            document.body.style.overflow = instructionsModal.classList.contains("active") ? "hidden" : "auto";
+        }
+        function closeAllPanels() {
+            removeClass(historyPanel, "active");
+            removeClass(topicsPanel, "active");
+            removeClass(instructionsModal, "active");
+            removeClass(overlay, "active");
+            document.body.style.overflow = "auto";
+        }
+
+        // History & Topics rendering
+        function renderHistoryPanel() {
+            historyList.innerHTML = '';
+            if (searchHistory.length === 0) { historyList.innerHTML = '<p>No search history yet</p>'; return; }
+            for (var i = 0; i < searchHistory.length; i++) {
+                var item = searchHistory[i];
+                var div = document.createElement('div');
+                div.className = 'history-item-panel';
+                div.innerHTML = '<div class="term">🔍 ' + item.term + '</div><div class="time">' + formatTime(item.time) + '</div>';
+                (function(div, term) {
+                    addEvent(div, "click", function() { searchInput.value = term; handleSearch(); closeAllPanels(); });
+                })(div, item.term);
+                historyList.appendChild(div);
+            }
+        }
+        function renderTopicsList() {
+            topicsList.innerHTML = '';
+            var keys = Object.keys(lessons);
+            for (var i = 0; i < keys.length; i++) {
+                var topic = keys[i];
+                var div = document.createElement('div');
+                div.className = 'topic-item';
+                div.innerHTML = '<span>📄</span><div>' + topic + '</div>';
+                (function(div, topic) {
+                    addEvent(div, "click", function() { searchInput.value = topic; handleSearch(); closeAllPanels(); });
+                })(div, topic);
+                topicsList.appendChild(div);
+            }
+        }
+        function formatTime(iso) {
+            var d = new Date(iso);
+            var hours = d.getHours();
+            var minutes = d.getMinutes();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        }
+
+        // File handling
+        function handleFileSelect(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var newDict = JSON.parse(e.target.result);
+                    for (var key in newDict) {
+                        if (!newDict[key].desc || !Array.isArray(newDict[key].ex)) throw new Error('Invalid structure');
+                    }
+                    lessons = newDict;
+                    localStorage.setItem('customDictionary', JSON.stringify(lessons));
+                    renderTopicsList();
+                    showNotification('Notes loaded successfully!', '✅', false, true);
+                    appLogo.click();
+                } catch(err) {
+                    showNotification('Error loading Notes. Invalid format.', '❌', true);
+                }
+                dictionaryFileInput.value = '';
+            };
+            reader.onerror = function() { showNotification('Error reading file', '❌', true); };
+            reader.readAsText(file);
+        }
+
+        // Builder
+        function addBuilderEntry() {
+            var topic = builderTopic.value.trim();
+            var desc = builderDesc.value.trim();
+            var ex = builderEx.value.trim();
+            if (!topic || !desc || !ex) { alert('Please fill in all fields'); return; }
+            builderDictionary[topic] = { desc: desc, ex: ex.split(',').map(function(s) { return s.trim(); }) };
+            updateBuilderPreview();
+            builderTopic.value = ''; builderDesc.value = ''; builderEx.value = '';
+            builderTopic.focus();
+        }
+        function updateBuilderPreview() {
+            var keys = Object.keys(builderDictionary);
+            builderPreview.textContent = keys.length === 0 ? 'No entries yet' : JSON.stringify(builderDictionary, null, 2);
+            builderEntryCount.textContent = keys.length + ' entries';
+        }
+        function exportBuilderDictionary() {
+            if (Object.keys(builderDictionary).length === 0) { alert('No entries to export'); return; }
+            var dateStr = new Date().toISOString().split('T')[0];
+            var filename = 'E_Notes_' + dateStr + '.json';
+            var blob = new Blob([JSON.stringify(builderDictionary, null, 2)], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Notes exported as ' + filename, '📤', false, true);
+        }
+
+        // Slideshow
+        function startSlideshow() {
+            var term = searchInput.value.trim();
+            if (!term || !lessons[term]) { alert("Please search for a valid topic first"); return; }
+            if (!lessons[term].ex || lessons[term].ex.length === 0) { alert("No examples available for this topic"); return; }
+            currentSlideshow = term;
+            currentSlideIndex = 0;
+            slideColors = {};
+            addClass(instructionModal, "active");
+            addClass(overlay, "active");
+        }
+        function beginSlideshow() {
+            document.querySelector('header').style.display = 'none';
+            addClass(slideshowOverlay, "active");
+            document.body.style.overflow = 'hidden';
+            updateSlideshow();
+        }
+        function updateSlideshow() {
+            var examples = lessons[currentSlideshow].ex;
+            var currentExample = examples[currentSlideIndex];
+            slideshowContent.innerHTML = '';
+            var tokens = currentExample.trim().split(/\s+/).filter(function(t) { return t.length > 0; });
+            var isSingleWord = tokens.length <= 1;
+            var items = isSingleWord ? currentExample.trim().split('') : tokens;
+            if (!slideColors[currentSlideIndex]) slideColors[currentSlideIndex] = {};
+            for (var i = 0; i < items.length; i++) {
+                var span = document.createElement('span');
+                span.className = isSingleWord ? 'color-letter' : 'color-word';
+                var colorIndex = slideColors[currentSlideIndex][i] !== undefined ? slideColors[currentSlideIndex][i] : 0;
+                span.style.color = COLOR_CYCLE[colorIndex];
+                span.textContent = items[i];
+                span.setAttribute('data-index', i);
+                (function(span, idx) {
+                    addEvent(span, "click", function(e) {
                         e.stopPropagation();
-                        const idx = parseInt(span.dataset.index);
-                        const currentIdx = slideColors[currentSlideIndex][idx] !== undefined ? slideColors[currentSlideIndex][idx] : 0;
-                        const nextIdx = (currentIdx + 1) % COLOR_CYCLE.length;
+                        var currentIdx = slideColors[currentSlideIndex][idx] !== undefined ? slideColors[currentSlideIndex][idx] : 0;
+                        var nextIdx = (currentIdx + 1) % COLOR_CYCLE.length;
                         slideColors[currentSlideIndex][idx] = nextIdx;
                         span.style.color = COLOR_CYCLE[nextIdx];
                     });
-                    slideshowContent.appendChild(span);
-                    if (index < items.length - 1 && !isSingleWord) slideshowContent.appendChild(document.createTextNode(' '));
-                });
-                slideshowIndicator.textContent = `${currentSlideIndex + 1}/${examples.length}`;
+                })(span, i);
+                slideshowContent.appendChild(span);
+                // FIXED: use 'i' instead of 'index'
+                if (i < items.length - 1 && !isSingleWord) slideshowContent.appendChild(document.createTextNode(' '));
             }
-            function nextSlide() {
-                const examples = lessons[currentSlideshow].ex;
-                currentSlideIndex = (currentSlideIndex + 1) % examples.length;
-                updateSlideshow();
-            }
-            function prevSlide() {
-                const examples = lessons[currentSlideshow].ex;
-                currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
-                updateSlideshow();
-            }
-            function closeSlideshow() {
-                slideshowOverlay.classList.remove('active');
-                document.querySelector('header').style.display = 'flex';
-                document.body.style.overflow = 'auto';
-            }
+            slideshowIndicator.textContent = (currentSlideIndex + 1) + '/' + examples.length;
+        }
+        function nextSlide() {
+            var examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex + 1) % examples.length;
+            updateSlideshow();
+        }
+        function prevSlide() {
+            var examples = lessons[currentSlideshow].ex;
+            currentSlideIndex = (currentSlideIndex - 1 + examples.length) % examples.length;
+            updateSlideshow();
+        }
+        function closeSlideshow() {
+            removeClass(slideshowOverlay, "active");
+            document.querySelector('header').style.display = 'flex';
+            document.body.style.overflow = 'auto';
+        }
 
-            document.addEventListener('keydown', (e) => {
-                if (!slideshowOverlay.classList.contains('active')) return;
-                if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
-                else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
-                else if (e.key === 'Escape') closeSlideshow();
-            });
+        // Keyboard events for slideshow
+        document.addEventListener('keydown', function(e) {
+            if (!slideshowOverlay.classList.contains('active')) return;
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+            else if (e.key === 'Escape') closeSlideshow();
+        });
 
-            init();
-        })();
+        // Initialize
+        init();
+    })();
     </script>
 </body>
 </html>
