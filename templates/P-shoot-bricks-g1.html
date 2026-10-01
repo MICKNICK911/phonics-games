@@ -1403,122 +1403,180 @@
 
         /* =========================================================================
            FIREWORKS OVERLAY
+           Zero-allocation design:
+             • Fixed-capacity typed-array pools (no per-particle objects → no GC)
+             • Swap-remove keeps all live particles packed at the front
+             • Pre-interned colour strings (no per-frame string building)
+             • fillRect instead of arc + shadowBlur (no blur buffer, no path tessellation)
+             • Total particle count is hard-capped, so memory is bounded no matter
+               how long the celebration runs.
            ========================================================================= */
         const Fireworks = (() => {
             const canvas = document.getElementById('fireworksCanvas');
             const cx = canvas.getContext('2d');
-            let particles = [];
-            let rockets = [];
+
+            const MAX_PARTICLES = 320;   // hard memory ceiling
+            const MAX_ROCKETS   = 8;
+
+            const COLORS = [
+                '#ff3b30', '#ff9500', '#ffcc00', '#34c759',
+                '#00c7be', '#0a84ff', '#5e5ce6', '#bf5af2',
+                '#ff2d55', '#ffffff'
+            ];
+            const COLOR_COUNT = COLORS.length;
+
+            /* ---- particle pools (structure-of-arrays) ---- */
+            const pX     = new Float32Array(MAX_PARTICLES);
+            const pY     = new Float32Array(MAX_PARTICLES);
+            const pVX    = new Float32Array(MAX_PARTICLES);
+            const pVY    = new Float32Array(MAX_PARTICLES);
+            const pLife  = new Float32Array(MAX_PARTICLES);
+            const pDecay = new Float32Array(MAX_PARTICLES);
+            const pSize  = new Float32Array(MAX_PARTICLES);
+            const pCol   = new Uint8Array(MAX_PARTICLES);
+            let pCount = 0;
+
+            /* ---- rocket pools ---- */
+            const rX       = new Float32Array(MAX_ROCKETS);
+            const rY       = new Float32Array(MAX_ROCKETS);
+            const rVY      = new Float32Array(MAX_ROCKETS);
+            const rTargetY = new Float32Array(MAX_ROCKETS);
+            const rCol     = new Uint8Array(MAX_ROCKETS);
+            let rCount = 0;
+
             let running = false;
-            let rafId = null;
+            let rafId = 0;
             let lastSpawn = 0;
             let endTime = 0;
-            const spawnInterval = 320;
+            let W = 0, H = 0;
+
+            const SPAWN_INTERVAL = 380;   // ms between rockets
+            const BURST_MIN = 22;
+            const BURST_MAX = 34;
 
             function resize() {
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width  = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                canvas.style.width  = W + 'px';
+                canvas.style.height = H + 'px';
                 cx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
 
             function spawnRocket() {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const x = w * (0.12 + Math.random() * 0.76);
-                const targetY = h * (0.12 + Math.random() * 0.35);
-                const startY = h + 10;
-                const dy = startY - targetY;
-                const vy = -Math.sqrt(2 * 0.09 * dy);
-                const hue = Math.random() * 360;
-                rockets.push({ x, y: startY, vy, targetY, hue });
+                if (rCount >= MAX_ROCKETS) return;
+                const i = rCount++;
+                const targetY = H * (0.12 + Math.random() * 0.35);
+                const dy = (H + 10) - targetY;
+                rX[i] = W * (0.12 + Math.random() * 0.76);
+                rY[i] = H + 10;
+                rTargetY[i] = targetY;
+                rVY[i] = -Math.sqrt(2 * 0.09 * dy);
+                rCol[i] = (Math.random() * COLOR_COUNT) | 0;
             }
 
-            function burst(x, y, hue) {
-                const count = 70 + Math.floor(Math.random() * 40);
-                for (let i = 0; i < count; i++) {
-                    const angle = (i / count) * Math.PI * 2 + Math.random() * 0.15;
-                    const speed = 1.5 + Math.random() * 4.2;
-                    particles.push({
-                        x, y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        life: 1,
-                        decay: 0.006 + Math.random() * 0.012,
-                        hue: hue + (Math.random() * 40 - 20),
-                        size: 1.4 + Math.random() * 2.2
-                    });
+            function burst(x, y, colorIdx) {
+                const room = MAX_PARTICLES - pCount;
+                if (room <= 0) return;
+                let count = BURST_MIN + ((Math.random() * (BURST_MAX - BURST_MIN)) | 0);
+                if (count > room) count = room;   // never exceed the pool
+
+                for (let n = 0; n < count; n++) {
+                    const i = pCount++;
+                    const angle = (n / count) * Math.PI * 2 + Math.random() * 0.2;
+                    const speed = 1.2 + Math.random() * 3.6;
+                    pX[i] = x;
+                    pY[i] = y;
+                    pVX[i] = Math.cos(angle) * speed;
+                    pVY[i] = Math.sin(angle) * speed;
+                    pLife[i] = 1;
+                    pDecay[i] = 0.012 + Math.random() * 0.016;
+                    pSize[i] = 1.5 + Math.random() * 1.8;
+                    pCol[i] = Math.random() < 0.12 ? (COLOR_COUNT - 1) : colorIdx;
                 }
             }
 
             function loop(t) {
                 if (!running) return;
-                cx.globalCompositeOperation = 'source-over';
-                cx.fillStyle = 'rgba(0, 0, 0, 0.16)';
-                cx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-                if (t - lastSpawn > spawnInterval && t < endTime - 900) {
+                /* Trail fade: one translucent full-screen fill, no extra buffers */
+                cx.globalCompositeOperation = 'source-over';
+                cx.globalAlpha = 1;
+                cx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+                cx.fillRect(0, 0, W, H);
+
+                if (t - lastSpawn > SPAWN_INTERVAL && t < endTime - 800) {
                     spawnRocket();
                     lastSpawn = t;
                     SoundEngine.launch();
                 }
 
-                for (let i = rockets.length - 1; i >= 0; i--) {
-                    const r = rockets[i];
-                    r.y += r.vy;
-                    r.vy += 0.16;
-                    cx.beginPath();
-                    cx.arc(r.x, r.y, 2.2, 0, Math.PI * 2);
-                    cx.fillStyle = `hsl(${r.hue}, 100%, 75%)`;
-                    cx.fill();
-                    if (r.y <= r.targetY || r.vy >= 0) {
-                        burst(r.x, r.y, r.hue);
+                cx.globalCompositeOperation = 'lighter';
+
+                /* ---- rockets ---- */
+                for (let i = rCount - 1; i >= 0; i--) {
+                    rY[i] += rVY[i];
+                    rVY[i] += 0.16;
+
+                    cx.fillStyle = COLORS[rCol[i]];
+                    cx.fillRect(rX[i] - 1.5, rY[i] - 1.5, 3, 3);
+
+                    if (rY[i] <= rTargetY[i] || rVY[i] >= 0) {
+                        burst(rX[i], rY[i], rCol[i]);
                         SoundEngine.burst();
-                        rockets.splice(i, 1);
+
+                        const last = --rCount;
+                        rX[i] = rX[last]; rY[i] = rY[last]; rVY[i] = rVY[last];
+                        rTargetY[i] = rTargetY[last]; rCol[i] = rCol[last];
                     }
                 }
 
-                cx.globalCompositeOperation = 'lighter';
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.05;
-                    p.vx *= 0.99;
-                    p.vy *= 0.99;
-                    p.life -= p.decay;
-                    if (p.life <= 0) {
-                        particles.splice(i, 1);
+                /* ---- particles ---- */
+                for (let i = pCount - 1; i >= 0; i--) {
+                    pVY[i] += 0.05;
+                    pVX[i] *= 0.99;
+                    pVY[i] *= 0.99;
+                    pX[i] += pVX[i];
+                    pY[i] += pVY[i];
+
+                    const life = pLife[i] - pDecay[i];
+                    if (life <= 0) {
+                        const last = --pCount;                 // swap-remove
+                        pX[i] = pX[last]; pY[i] = pY[last];
+                        pVX[i] = pVX[last]; pVY[i] = pVY[last];
+                        pLife[i] = pLife[last]; pDecay[i] = pDecay[last];
+                        pSize[i] = pSize[last]; pCol[i] = pCol[last];
                         continue;
                     }
-                    cx.globalAlpha = p.life;
-                    cx.beginPath();
-                    cx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    cx.fillStyle = `hsl(${p.hue}, 100%, 60%)`;
-                    cx.shadowBlur = 14;
-                    cx.shadowColor = `hsl(${p.hue}, 100%, 60%)`;
-                    cx.fill();
+                    pLife[i] = life;
+
+                    cx.globalAlpha = life;
+                    cx.fillStyle = COLORS[pCol[i]];            // interned string
+                    const s = pSize[i];
+                    cx.fillRect(pX[i] - s * 0.5, pY[i] - s * 0.5, s, s);
                 }
+
                 cx.globalAlpha = 1;
-                cx.shadowBlur = 0;
                 cx.globalCompositeOperation = 'source-over';
 
-                if (t >= endTime && rockets.length === 0 && particles.length === 0) {
+                if (t >= endTime && rCount === 0 && pCount === 0) {
                     stop();
                     return;
                 }
                 rafId = requestAnimationFrame(loop);
             }
 
-            function start(duration = CONFIG.FIREWORKS_DURATION_MS) {
+            function start(duration = 7000) {
                 if (running) return;
                 resize();
-                cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                pCount = 0;
+                rCount = 0;
+                lastSpawn = 0;
+                cx.clearRect(0, 0, W, H);
                 canvas.classList.add('active');
                 running = true;
-                lastSpawn = 0;
                 endTime = performance.now() + duration;
                 rafId = requestAnimationFrame(loop);
             }
@@ -1526,16 +1584,19 @@
             function stop() {
                 running = false;
                 if (rafId) cancelAnimationFrame(rafId);
-                rafId = null;
+                rafId = 0;
+                pCount = 0;
+                rCount = 0;
                 canvas.classList.remove('active');
-                cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                particles = [];
-                rockets = [];
+                cx.setTransform(1, 0, 0, 1, 0, 0);
+                cx.clearRect(0, 0, canvas.width, canvas.height);
             }
 
             window.addEventListener('resize', () => { if (running) resize(); });
             return { start, stop };
         })();
+
+
 
         /* ================= Game State ================= */
         const allLetters = [...new Set(words.join(''))].sort();
@@ -1552,18 +1613,57 @@
         const GRID_GAP = CONFIG.GRID_GAP;
 
         /* ================= Column geometry ================= */
-        function getColumnCenterX(col) {
-            const grid = document.getElementById('brickGrid');
-            const gridWidth = grid.clientWidth;
-            if (gridWidth === 0) return 0;
-            const N = Math.max(1, parseInt(document.getElementById('target-bricks').value) || 1);
-            const innerWidth = gridWidth - GRID_PADDING * 2;
-            const colWidth = (innerWidth - (N - 1) * GRID_GAP) / N;
-            return GRID_PADDING + col * (colWidth + GRID_GAP) + colWidth / 2;
-        }
+        const BRICK_RATIO  = 2.4;   // must match .brick aspect-ratio
+        const MAX_BRICK_W  = 72;    // stops a 1–2 column grid looking like a billboard
+        const MIN_BRICK_W  = 18;
+        let brickWidth = 56;
 
         function currentColumnCount() {
-            return Math.max(1, parseInt(document.getElementById('target-bricks').value) || 1);
+            return Math.max(1, Math.min(15, parseInt(document.getElementById('target-bricks').value) || 8));
+        }
+
+        function currentRowCount() {
+            return Math.max(1, Math.min(10, parseInt(document.getElementById('target-row').value) || 3));
+        }
+
+        /* Sizes the brick columns to a *fixed pixel width* instead of a
+           fraction of the play area. Few columns → bricks keep a sane size
+           and the whole grid just centres itself; many columns → the grid
+           shrinks so it still fits both the width and the height budget. */
+        function layoutGrid() {
+            const grid      = document.getElementById('brickGrid');
+            const container = document.getElementById('gameContainer');
+            const N    = currentColumnCount();
+            const rows = currentRowCount();
+
+            const containerW = container.clientWidth  || 320;
+            const containerH = container.clientHeight || 320;
+
+            const availW = Math.max(40, containerW - GRID_PADDING * 2);
+            const availH = Math.max(60, containerH - 120);   // keep clear of the shooter
+
+            // Width-limited size
+            let bw = (availW - (N - 1) * GRID_GAP) / N;
+
+            // Height-limited size (brick height = bw / BRICK_RATIO)
+            const maxBrickH = (availH - (rows - 1) * GRID_GAP) / rows;
+            bw = Math.min(bw, maxBrickH * BRICK_RATIO, MAX_BRICK_W);
+            bw = Math.max(bw, MIN_BRICK_W);
+
+            brickWidth = bw;
+            grid.style.setProperty('--cols', N);
+            grid.style.gridTemplateColumns = `repeat(${N}, ${bw.toFixed(2)}px)`;
+            grid.style.justifyContent = 'center';
+        }
+
+        function getColumnCenterX(col) {
+            const container  = document.getElementById('gameContainer');
+            const N          = currentColumnCount();
+            const containerW = container.clientWidth || 320;
+            const innerW     = containerW - GRID_PADDING * 2;
+            const gridW      = N * brickWidth + (N - 1) * GRID_GAP;
+            const offset     = GRID_PADDING + (innerW - gridW) / 2;  // matches justify-content:center
+            return offset + col * (brickWidth + GRID_GAP) + brickWidth / 2;
         }
 
         function updateShooterPosition() {
@@ -1572,6 +1672,7 @@
             const x = getColumnCenterX(shooterCol);
             document.getElementById('shooter').style.left = x + 'px';
         }
+
 
         /* ================= UI config ================= */
         function applyUIConfig() {
@@ -1608,8 +1709,11 @@
                 : Math.floor((N - 1) / 2);
             createCustomKeyboard();
             initializeBricks();
-            requestAnimationFrame(updateShooterPosition);
             updateTargetSound();
+            requestAnimationFrame(() => {
+                layoutGrid();
+                updateShooterPosition();
+            });
             document.getElementById('brickCount').textContent = bricks.length;
             document.getElementById('wordsUsed').textContent = usedWords.length;
             document.getElementById('targetSound').textContent = targetSound;
@@ -1619,7 +1723,7 @@
             const brickGrid = document.getElementById('brickGrid');
             brickGrid.innerHTML = '';
             bricks = [];
-            const rows = parseInt(document.getElementById('target-row').value);
+            const rows = currentRowCount();
             const N = currentColumnCount();
             brickGrid.style.setProperty('--cols', N);
             for (let r = 0; r < rows; r++) {
@@ -1862,7 +1966,10 @@
             document.getElementById('wordsUsed').textContent = '0';
             updateTargetSound();
             initializeBricks();
-            requestAnimationFrame(updateShooterPosition);
+            requestAnimationFrame(() => {
+                layoutGrid();
+                updateShooterPosition();
+            });
         }
 
         function createCustomKeyboard() {
@@ -1970,7 +2077,10 @@
         });
 
         window.addEventListener('resize', () => {
-            requestAnimationFrame(updateShooterPosition);
+            requestAnimationFrame(() => {
+                layoutGrid();
+                updateShooterPosition();
+            });
         });
 
         if (CONFIG.UNLOCK_AUDIO_ON_FIRST_GESTURE) {
