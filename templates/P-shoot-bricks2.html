@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>Word Brick Breaker</title>
+    <style>
+        /* ============================================================
+           WORD BRICK BREAKER — viewport-locked shell
+           Mobile:  single column, game area absorbs all slack
+           Desktop: two columns, game on left, rail on right
+           ============================================================ */
+
+        :root {
+            --gold: #ffd700;
+            --panel-bg: rgba(0, 0, 0, 0.4);
+            --panel-bg-solid: rgba(10, 10, 30, 0.97);
+            --brick-green: linear-gradient(135deg, #4CAF50, #2E7D32);
+            --brick-red: linear-gradient(135deg, #f44336, #c62828);
+            --key-blue: linear-gradient(to bottom, #4a86e8, #1c5bb6);
+            --key-green: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            --key-red: linear-gradient(to bottom, #f44336, #c62828);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
+            touch-action: manipulation;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        /* ---------- Title bar ---------- */
+        #titlebar {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            gap: 8px;
+        }
+
+        #titlebar h1 {
+            font-size: clamp(0.95rem, 3.8vw, 1.8rem);
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #ff8c00, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .titlebar-actions {
+            display: flex;
+            gap: 4px;
+            flex: 0 0 auto;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: var(--gold);
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .icon-btn:active {
+            background: rgba(255, 215, 0, 0.25);
+        }
+
+        /* ---------- Stat strip ---------- */
+        #statStrip {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 8px;
+            margin: 0 10px 4px;
+            padding: 4px 10px;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-icon {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        .stat-value {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        /* ---------- Game area ---------- */
+        #gameContainer {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin: 4px 10px 6px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0b3d91 0%, #1a237e 100%);
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Brick grid anchored to the TOP; only grows as tall as its rows */
+        #brickGrid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: grid;
+            grid-template-columns: repeat(var(--cols, 8), minmax(0, 1fr));
+            gap: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+            /* No height — the grid only grows as tall as its rows need */
+        }
+
+        /* Row wrappers are transparent to the grid */
+        .brick-row {
+            display: contents;
+        }
+
+        .brick {
+            width: 100%;
+            aspect-ratio: 2.4 / 1;   /* height follows from column width */
+            background: var(--brick-green);
+            border-radius: 4px;
+            transition: all 0.25s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .brick.red {
+            background: var(--brick-red);
+        }
+
+        #shooter {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(34px, 7vw, 60px);
+            height: clamp(34px, 7vw, 60px);
+            background: radial-gradient(circle, #ff9800 0%, #f57c00 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff9800;
+            border: 2px solid var(--gold);
+            z-index: 10;
+        }
+
+        /* Small barrel so the shooter faces up */
+        #shooter::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22%;
+            height: 16px;
+            background: linear-gradient(to bottom, #ffd700, #f57c00);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .bullet {
+            position: absolute;
+            width: clamp(10px, 1.8vmin, 16px);
+            height: clamp(10px, 1.8vmin, 16px);
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 8px #ff5252;
+            transform: translateX(-50%);
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* ---------- Game over overlay ---------- */
+        .gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 14px;
+            display: none;
+            z-index: 1000;
+            width: 82%;
+            max-width: 360px;
+            border: 3px solid var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .gameOver h2 {
+            font-size: 1.9rem;
+            margin-bottom: 12px;
+            color: var(--gold);
+        }
+
+        .gameOver p {
+            font-size: 1.05rem;
+            margin-bottom: 18px;
+        }
+
+        /* ---------- Word display ---------- */
+        #playArea {
+            flex: 0 0 auto;
+            padding: 0 12px;
+        }
+
+        #currentWord {
+            text-align: center;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            font-weight: bold;
+            height: 1.7em;
+            line-height: 1.7em;
+            letter-spacing: 3px;
+            color: var(--gold);
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* ---------- Move bar ---------- */
+        #moveBar {
+            flex: 0 0 auto;
+            display: flex;
+            gap: 6px;
+            padding: 4px 12px;
+        }
+
+        #moveBar button {
+            flex: 1;
+        }
+
+        .key-btn-lf {
+            padding: 10px 4px;
+            font-size: clamp(0.8rem, 2.8vw, 1rem);
+            font-weight: bold;
+            background: var(--key-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 3px 0 #1b5e20, 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+
+        .key-btn-lf:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #1b5e20, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ---------- Keyboard ---------- */
+        #customKeyboard {
+            flex: 0 0 auto;
+            display: grid;
+            grid-template-columns: repeat(9, minmax(0, 1fr));
+            gap: 4px;
+            padding: 4px 12px;
+        }
+
+        .key-btn {
+            padding: 9px 2px;
+            font-size: clamp(0.8rem, 3.2vw, 1.1rem);
+            font-weight: bold;
+            background: var(--key-blue);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 3px 0 #0d3c8a, 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+
+        .key-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #0d3c8a, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ---------- Action bar ---------- */
+        #actionBar {
+            flex: 0 0 auto;
+            display: flex;
+            gap: 8px;
+            padding: 6px 12px 10px;
+        }
+
+        #actionBar #replay {
+            flex: 0 0 auto;
+            padding: 10px 16px;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+        }
+
+        .key-btn-shoot {
+            flex: 1;
+            padding: 12px;
+            font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+            font-weight: bold;
+            background: var(--key-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 4px 0 #b71c1c, 0 5px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .key-btn-shoot:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b71c1c, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ---------- Used-words panel (mobile overlay) ---------- */
+        #wordsPanel {
+            position: fixed;
+            inset: 0;
+            background: var(--panel-bg-solid);
+            z-index: 500;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #wordsPanel.open {
+            display: flex;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .panel-close {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        #usedWords {
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid var(--gold);
+            font-size: 1rem;
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        .word-chip {
+            display: inline-block;
+            background: var(--key-blue);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin: 2px 3px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* ---------- Dialogs ---------- */
+        dialog {
+            border: 3px solid var(--gold);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 0;
+            width: min(92vw, 400px);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.45);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(3px);
+        }
+
+        .dialog-content {
+            padding: 22px;
+        }
+
+        .dialog-content h2 {
+            color: var(--gold);
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .dialog-content p,
+        .dialog-content li {
+            font-size: 0.95rem;
+            line-height: 1.55;
+            margin-bottom: 8px;
+        }
+
+        .dialog-content ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .dialog-field {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 14px;
+        }
+
+        .dialog-field label {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .dialog-field input {
+            padding: 9px;
+            border: 1px solid var(--gold);
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .dialog-actions button {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255,255,255,0.25) !important;
+        }
+
+        .btn-primary {
+            background: var(--key-green);
+            box-shadow: 0 3px 0 #1b5e20;
+        }
+
+        /* ============================================================
+           DESKTOP / LANDSCAPE TABLET  (≥ 900px)
+           ============================================================ */
+        @media (min-width: 900px) {
+            #app {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 380px;
+                grid-template-rows: auto minmax(0, 1fr);
+                gap: 12px;
+                padding: 12px;
+            }
+
+            #titlebar {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                padding: 0;
+            }
+
+            #titlebar h1 {
+                font-size: 1.8rem;
+            }
+
+            #gameContainer {
+                grid-column: 1;
+                grid-row: 2;
+                margin: 0;
+                border-width: 3px;
+            }
+
+            /* Rail wrapper — children stack vertically on the right */
+            #rail {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                grid-column: 2;
+                grid-row: 2;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            #statStrip {
+                margin: 0;
+                padding: 8px 14px;
+                font-size: 0.95rem;
+            }
+
+            .stat-value {
+                font-size: 1.25rem;
+            }
+
+            #playArea {
+                padding: 0;
+            }
+
+            #currentWord {
+                font-size: 2rem;
+            }
+
+            #moveBar {
+                padding: 0;
+            }
+
+            #customKeyboard {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+                padding: 0;
+                gap: 5px;
+            }
+
+            .key-btn {
+                padding: 10px 4px;
+                font-size: 1.05rem;
+            }
+
+            #actionBar {
+                padding: 0;
+            }
+
+            /* Used-words panel becomes an always-visible rail card */
+            #wordsPanel {
+                position: static;
+                display: flex;
+                background: var(--panel-bg);
+                border-radius: 10px;
+                padding: 12px;
+                flex: 1 1 auto;
+                min-height: 0;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .panel-close {
+                display: none;
+            }
+
+            #wordsToggle {
+                display: none;
+            }
+
+            #usedWords {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Larger desktop — give the rail a bit more room */
+        @media (min-width: 1400px) {
+            #app {
+                grid-template-columns: minmax(0, 1fr) 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+
+        <!-- ===== Title bar ===== -->
+        <header id="titlebar">
+            <h1>WORD BRICK BREAKER</h1>
+            <div class="titlebar-actions">
+                <button class="icon-btn" id="wordsToggle" title="Used words">📝</button>
+                <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+                <button class="icon-btn" id="helpBtn" title="Help">❔</button>
+            </div>
+        </header>
+
+        <!-- ===== Game area ===== -->
+        <main id="gameContainer">
+            <div id="brickGrid"></div>
+            <div id="shooter"></div>
+            <div id="gameOver" class="gameOver">
+                <h2 id="gameOverText">Game Over!</h2>
+                <p id="gameOverMessage">
+                    You've used <span id="finalWords">0</span> words and cleared
+                    <span id="clearedBricks">0</span> bricks!
+                </p>
+                <button class="key-btn" onclick="restartGame()">Play Again</button>
+            </div>
+        </main>
+
+        <!-- ===== Right rail (desktop) / inline stack (mobile) ===== -->
+        <aside id="rail">
+
+            <!-- Stats -->
+            <div id="statStrip">
+                <div class="stat">
+                    <span class="stat-icon">🧱</span>
+                    <span id="brickCount" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">📝</span>
+                    <span id="wordsUsed" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🔊</span>
+                    <span id="targetSound" class="stat-value">st</span>
+                </div>
+            </div>
+
+            <!-- Current word -->
+            <div id="playArea">
+                <div id="currentWord"></div>
+            </div>
+
+            <!-- Movement controls -->
+            <div id="moveBar">
+                <button class="key-btn-lf" id="leftBtn">◀◀ LEFT</button>
+                <button class="key-btn-lf" id="backspaceBtn">CLEAR</button>
+                <button class="key-btn-lf" id="rightBtn">RIGHT ▶▶</button>
+            </div>
+
+            <!-- On-screen keyboard -->
+            <div id="customKeyboard"></div>
+
+            <!-- Restart / Fire -->
+            <div id="actionBar">
+                <button class="key-btn" id="replay" onclick="restartGame()">Restart</button>
+                <button class="key-btn-shoot" id="shootBtn">FIRE! 🔥</button>
+            </div>
+
+            <!-- Used words (overlay on mobile, rail card on desktop) -->
+            <div id="wordsPanel">
+                <div class="panel-header">
+                    <span>📝 Used Words</span>
+                    <button class="panel-close" id="wordsClose">✕</button>
+                </div>
+                <div id="usedWords">No words used yet...</div>
+            </div>
+
+        </aside>
+    </div>
+
+    <!-- ===== Settings dialog ===== -->
+    <dialog id="settingsDialog">
+        <div class="dialog-content">
+            <h2>⚙ Settings</h2>
+            <div class="dialog-field">
+                <label for="target-row">Rows</label>
+                <input type="number" id="target-row" min="1" max="10" value="3">
+            </div>
+            <div class="dialog-field">
+                <label for="target-bricks">Bricks per Row</label>
+                <input type="number" id="target-bricks" min="1" max="15" value="8">
+            </div>
+            <div class="dialog-field">
+                <label for="target-sound">Target Sound</label>
+                <input type="text" id="target-sound" value="st">
+            </div>
+            <div class="dialog-actions">
+                <button type="button" class="btn-secondary" id="settingsCancel">Cancel</button>
+                <button type="button" class="btn-primary" id="settingsApply">Apply &amp; Restart</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- ===== Help dialog ===== -->
+    <dialog id="helpDialog">
+        <div class="dialog-content">
+            <h2>❔ How to Play</h2>
+            <p>Create words that contain the <strong>target sound</strong> to fire at the bricks.</p>
+            <ul>
+                <li>Type a word using the on-screen keyboard or your physical keyboard.</li>
+                <li>Move the shooter with <strong>◀</strong> and <strong>▶</strong>.</li>
+                <li>Press <strong>FIRE</strong> (or Enter) to shoot.</li>
+                <li>Valid words destroy one brick.</li>
+                <li>Invalid or repeated words add a red penalty brick.</li>
+                <li>Clear all bricks to win. If penalty bricks exceed 5, you lose.</li>
+            </ul>
+            <div class="dialog-actions">
+                <button type="button" class="btn-primary" id="helpClose">Got it</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        /* =========================================================================
+           HARD-CODED WORD LIST — no external file needed.
+           Add / remove words freely. They are lowercased, trimmed,
+           de-duplicated, and filtered to a-z automatically.
+           ========================================================================= */
+        const wordList = [
+            /* ---------- "st" words (default target sound) ---------- */
+            "stamp", "stand", "standard", "star", "start", "state", "station", "statue",
+            "status", "stay", "steady", "steak", "steal", "steam", "steel", "steep",
+            "steer", "stem", "step", "stereo", "stern", "stew", "stick", "sticky",
+            "stiff", "still", "sting", "stir", "stitch", "stock", "stole", "stomach",
+            "stone", "stool", "stoop", "stop", "store", "storm", "stormy", "story",
+            "stove", "strap", "strategy", "straw", "strawberry", "stream", "street",
+            "stress", "stretch", "strike", "string", "strip", "stroke", "strong",
+            "struggle", "stuck", "student", "study", "stuff", "stump", "stun",
+            "stunning", "stunt", "sturdy", "style", "stash", "blast", "boast", "burst",
+            "coast", "cost", "crest", "chest", "dust", "exist", "fast", "feast",
+            "fist", "frost", "ghost", "guest", "harvest", "honest", "host", "insist",
+            "invest", "last", "list", "master", "mist", "mistake", "modest", "monster",
+            "most", "must", "mystery", "nest", "past", "pasta", "pastor", "pest",
+            "post", "poster", "quest", "rest", "roast", "roster", "rust", "sister",
+            "test", "toast", "toaster", "trust", "twist", "vast", "vest", "waist",
+            "west", "wrist", "worst", "first", "thirst", "instead", "understand",
+            "yesterday", "arrest", "assist", "contest", "contrast", "digest", "mister",
+            "muster", "consist", "costume", "custom", "destiny", "distance", "forest",
+            "instant", "lifestyle", "mountain", "monstrous", "obstacle", "piston",
+            "postcard", "restore", "scientist", "stadium", "staircase", "stamina",
+            "staple", "startle", "starvation", "statement", "steering", "stereotype",
+            "stethoscope", "stigma", "stimulate", "stingray", "stipend", "stirring",
+            "stomachache", "stonework", "stopwatch", "storage", "stout", "straight",
+            "strain", "strand", "strangle", "strategic", "stray", "streak",
+            "streamline", "strenuous", "striking", "stripe", "strive", "stroll",
+            "structure", "stubborn", "studious", "stumble", "substitute", "superstar",
+            "testify", "testimony", "toastmaster", "twister", "unstable", "upholstery",
+            "wasteland", "western",
+
+            /* ---------- "sh" words ---------- */
+            "ship", "shop", "shell", "shelf", "shine", "shirt", "shock", "shoe",
+            "shoot", "shore", "short", "shout", "show", "shower", "shut", "shake",
+            "shape", "share", "sharp", "shave", "sheep", "sheet", "shed", "shrimp",
+            "brush", "crash", "crush", "dash", "dish", "finish", "fish", "flash",
+            "flesh", "fresh", "push", "rush", "wash", "wish", "trash", "splash",
+            "smash", "shrub", "shrine", "shoulder", "shark", "shadow", "shallow",
+            "shame", "shampoo", "shiver", "shortcut", "shorts", "shovel", "shuffle",
+            "shy", "ashamed", "bush", "cash", "clash", "cushion", "establish",
+            "fashion", "flourish", "furnish", "harsh", "marsh", "mesh", "mushroom",
+            "nourish", "polish", "publish", "punish", "shabby", "shack", "shade",
+            "shaft", "shaken", "shambles", "shatter", "shawl", "shear", "sheath",
+            "sheer", "shelter", "shepherd", "sheriff", "shield", "shift", "shimmer",
+            "shin", "shipment", "shortage", "shorthand", "should", "showcase",
+            "shred", "shrewd", "shriek", "shrink", "shrug", "shudder", "shun",
+            "shutter", "shuttle", "squash", "sunshine", "thrash", "thresh", "vanish",
+            "worship",
+
+            /* ---------- "ch" words ---------- */
+            "chair", "chalk", "chance", "change", "chapter", "charge", "chart",
+            "chase", "cheap", "cheat", "check", "cheek", "cheer", "cheese", "chess",
+            "chicken", "chief", "child", "chill", "chimney", "chin", "chip",
+            "chocolate", "choice", "choose", "chop", "church", "coach", "beach",
+            "bench", "branch", "catch", "chain", "charm", "chat", "cherry", "lunch",
+            "match", "march", "much", "peach", "pitch", "punch", "reach", "rich",
+            "sandwich", "scratch", "speech", "teach", "torch", "touch", "watch",
+            "which", "witch", "champion", "channel", "chant", "chaos", "charcoal",
+            "charity", "cheerful", "chef", "chemistry", "cherish", "chestnut",
+            "chew", "chick", "chide", "chime", "chirp", "chisel", "chives",
+            "chorus", "chuckle", "chunk", "churn", "couch", "crouch", "ditch",
+            "drench", "fetch", "hatch", "hitch", "hunch", "itch", "ketchup",
+            "kitchen", "latch", "launch", "merchant", "notch", "patch", "pinch",
+            "pouch", "preach", "ranch", "scorch", "sketch", "snatch", "switch",
+            "thatch", "trench", "twitch", "wrench",
+
+            /* ---------- "th" words ---------- */
+            "than", "thank", "that", "their", "them", "then", "there", "these",
+            "they", "thick", "thief", "thin", "thing", "think", "third", "thirsty",
+            "this", "thorn", "those", "though", "thought", "thread", "three",
+            "threw", "throat", "throne", "through", "throw", "thumb", "thunder",
+            "thus", "bath", "both", "breath", "breathe", "brother", "cloth",
+            "clothes", "earth", "feather", "fifth", "fourth", "father", "mother",
+            "health", "month", "mouth", "north", "path", "south", "teeth", "tooth",
+            "truth", "weather", "with", "worth", "smooth", "theater", "theory",
+            "therapy", "thicket", "thigh", "thimble", "thistle", "thorough",
+            "thousand", "threat", "thrill", "thrive", "throb", "throng", "throttle",
+            "thud", "thump", "thwart", "bother", "broth", "depth", "either",
+            "farther", "further", "gather", "growth", "heather", "lather", "leather",
+            "method", "nether", "other", "rather", "rhythm", "seventh", "sixth",
+            "slither", "smother", "tenth", "thermos", "whether", "wither", "wreath",
+
+            /* ---------- "ck" words ---------- */
+            "back", "black", "block", "brick", "buck", "chick", "clock", "crack",
+            "deck", "dock", "duck", "flock", "jack", "kick", "lick", "lock",
+            "luck", "neck", "pack", "pick", "pocket", "quick", "rack", "rock",
+            "sack", "sick", "slick", "smack", "snack", "sock", "stack", "tick",
+            "track", "trick", "truck", "attack", "bucket", "click", "cricket",
+            "knock", "lucky", "packet", "peck", "pluck", "prick", "quack",
+            "rocket", "slack", "speck", "struck", "suck", "thick", "wreck",
+
+            /* ---------- "ng" words ---------- */
+            "angel", "anger", "bang", "bring", "cling", "finger", "gang", "hang",
+            "hunger", "king", "long", "lung", "morning", "ring", "sang", "sing",
+            "singer", "slang", "song", "spring", "sung", "swing", "wing", "young",
+            "wrong", "among", "belong", "ceiling", "evening", "flying", "gong",
+            "jungle", "meaning", "nothing", "opening", "painting", "pudding",
+            "running", "sailing", "something", "sting", "string", "strong", "thing",
+            "tongue", "training", "walking", "warning", "writing",
+
+            /* ---------- "ee" words ---------- */
+            "bee", "beef", "been", "beep", "beer", "creep", "deep", "deer", "feed",
+            "feel", "feet", "free", "freedom", "green", "greed", "greet", "heel",
+            "jeep", "keep", "knee", "meet", "need", "peel", "queen", "reef",
+            "reel", "screen", "seed", "seek", "seem", "seen", "sleep", "sleeve",
+            "speed", "sweet", "tree", "week", "wheel", "agree", "asleep", "breeze",
+            "cheese", "cheek", "cheer", "coffee", "degree", "employee", "energy",
+            "fifteen", "fleece", "fleet", "freeze", "greedy", "guarantee",
+            "jellybean", "meeting", "needle", "referee", "seventeen", "squeeze",
+            "steel", "street", "teeth", "three", "tween", "wheelchair",
+
+            /* ---------- "oo" words ---------- */
+            "book", "boom", "boot", "broom", "cool", "food", "fool", "foot",
+            "goose", "hoop", "hoot", "loop", "loose", "mood", "moon", "noon",
+            "pool", "poor", "roof", "room", "root", "school", "soon", "spoon",
+            "tool", "tooth", "zoo", "blood", "flood", "balloon", "bamboo",
+            "bloom", "booth", "cartoon", "cocoon", "doom", "gloom", "groom",
+            "hoof", "igloo", "kangaroo", "moonlight", "noodle", "poodle",
+            "proof", "raccoon", "rooster", "scoop", "shampoo", "snooker",
+            "stool", "troop", "tattoo", "wool", "zoom",
+
+            /* ---------- "ai" words ---------- */
+            "brain", "chain", "chair", "claim", "drain", "faint", "fair", "faith",
+            "gain", "grain", "hail", "hair", "jail", "mail", "main", "nail",
+            "pain", "paint", "pair", "plain", "rain", "raise", "sail", "saint",
+            "snail", "stain", "stair", "train", "wait", "waist", "afraid",
+            "against", "available", "bait", "braid", "detail", "explain",
+            "failure", "fairy", "maid", "mountain", "portrait", "praise",
+            "railway", "remain", "repair", "tail", "trail", "vain",
+
+            /* ---------- "ea" words ---------- */
+            "beach", "bead", "beak", "beam", "bean", "bear", "beast", "beat",
+            "bread", "breath", "cheap", "cheat", "clean", "cream", "dream",
+            "each", "east", "eat", "feast", "heat", "lead", "leaf", "lean",
+            "leap", "least", "meat", "mean", "meal", "peace", "peach", "pear",
+            "please", "reach", "read", "real", "sea", "seal", "seat", "speak",
+            "steam", "tea", "teach", "team", "treat", "weak", "wear", "beacon",
+            "creature", "deadline", "eager", "feather", "headline", "healthy",
+            "jealous", "knead", "meadow", "measure", "peanut", "pleasant",
+            "reason", "season", "steady", "treasure", "wealthy", "weapon",
+
+            /* ---------- "ou" / "ow" words ---------- */
+            "about", "aloud", "around", "cloud", "count", "couch", "doubt",
+            "house", "loud", "mouth", "pound", "proud", "round", "shout",
+            "sound", "south", "sprout", "thousand", "found", "ground", "hound",
+            "mouse", "ounce", "bounce", "boundary", "council", "courage",
+            "flour", "fountain", "hour", "journal", "mound", "mountain",
+            "outdoor", "power", "scout", "shower", "spouse", "tower", "trouble",
+            "vowel", "brown", "clown", "cow", "crown", "down", "drown", "flower",
+            "frown", "gown", "growl", "howl", "owl", "towel", "town",
+
+            /* ---------- "oi" / "oy" words ---------- */
+            "boy", "boil", "coin", "join", "joy", "oil", "point", "soil",
+            "spoil", "toy", "voice", "noise", "choice", "annoy", "boiler",
+            "coil", "destroy", "employ", "enjoy", "joyful", "loyal", "moist",
+            "oyster", "poison", "royal", "toilet",
+
+            /* ---------- general words for full alphabet coverage ---------- */
+            "amazing", "apple", "animal", "answer", "april", "autumn", "banana",
+            "basket", "beautiful", "because", "before", "begin", "behind",
+            "believe", "between", "bicycle", "birthday", "bottom", "broccoli",
+            "butterfly", "camera", "candle", "carpet", "carrot", "castle",
+            "caterpillar", "celebrate", "certain", "circle", "city", "clever",
+            "climate", "collect", "color", "comfortable", "computer", "concert",
+            "cookie", "corner", "country", "cousin", "crystal", "curious",
+            "dangerous", "decide", "delicious", "describe", "dessert",
+            "diamond", "dinosaur", "direction", "discover", "doctor", "dolphin",
+            "dragon", "drawing", "elephant", "eleven", "empty", "enough",
+            "evening", "example", "excited", "exercise", "expensive", "explore",
+            "family", "favorite", "festival", "fireworks", "flamingo", "flavor",
+            "flower", "friendly", "galaxy", "garden", "gigantic", "ginger",
+            "giraffe", "glitter", "grateful", "guitar", "gymnastics", "hamburger",
+            "happiness", "harmony", "helicopter", "holiday", "hospital",
+            "hundred", "husband", "important", "impossible", "incredible",
+            "industry", "invitation", "island", "jacket", "january", "journey",
+            "jungle", "kangaroo", "keyboard", "kindness", "knowledge", "ladder",
+            "language", "laughter", "lavender", "lemonade", "library", "lizard",
+            "machine", "magazine", "magnificent", "magnet", "medicine",
+            "memory", "microwave", "minute", "miracle", "molecule", "moment",
+            "motorcycle", "mushroom", "mysterious", "natural", "neighbor",
+            "notebook", "november", "number", "ocean", "october", "office",
+            "orange", "orchestra", "ordinary", "outside", "oxygen", "painting",
+            "parachute", "paradise", "paragraph", "parent", "particular",
+            "passenger", "patient", "penguin", "people", "pepper", "perfect",
+            "perhaps", "picture", "pineapple", "planet", "plastic", "playground",
+            "popular", "potato", "powerful", "practice", "present", "president",
+            "pretty", "problem", "program", "promise", "protect", "pumpkin",
+            "puzzle", "pyramid", "quality", "quantity", "quarter", "question",
+            "quiet", "quilt", "quiz", "rainbow", "raspberry", "remember",
+            "restaurant", "rhinoceros", "river", "robot", "sandwich",
+            "sapphire", "saturday", "science", "scissors", "secret",
+            "sentence", "september", "shadow", "skeleton", "skyscraper",
+            "snowflake", "society", "spaghetti", "special", "spider",
+            "squirrel", "stranger", "strawberry", "subject", "submarine",
+            "success", "sudden", "sugar", "summer", "sunflower", "supermarket",
+            "surprise", "swimming", "sympathy", "tangerine", "teacher",
+            "telephone", "television", "temperature", "tentacle", "terrible",
+            "thanksgiving", "thunderstorm", "tiger", "tomato", "tomorrow",
+            "tornado", "tortoise", "traffic", "travel", "triangle", "tropical",
+            "turtle", "umbrella", "universe", "vacation", "vegetable",
+            "vehicle", "victory", "village", "violin", "volcano", "volleyball",
+            "waffle", "watermelon", "wednesday", "welcome", "whisper",
+            "wonderful", "xylophone", "yellow", "yogurt", "zebra", "zeppelin",
+            "zigzag", "zipper", "zucchini"
+        ];
+
+        // Build the working word set: lowercase, trimmed, de-duplicated, a-z only
+        const words = [...new Set(
+            wordList
+                .map(word => String(word).trim().toLowerCase())
+                .filter(word => /^[a-z]+$/.test(word))
+        )];
+
+        // Game variables
+        const allLetters = [...new Set(words.join(''))].sort();
+        let bricks = [];
+        let InitialBricks = [];
+        let shooterPosition = 50;
+        let bulletSpeed = 8;
+        let usedWords = [];
+        let gameActive = true;
+        let clearedBricks = 0;
+        let targetSound = "st";
+
+        function initializeGame() {
+            createCustomKeyboard();
+            initializeBricks();
+            updateShooterPosition();
+            updateTargetSound();
+
+            document.getElementById('brickCount').textContent = bricks.length;
+            document.getElementById('wordsUsed').textContent = usedWords.length;
+            document.getElementById('targetSound').textContent = targetSound;
+        }
+
+        function initializeBricks() {
+            const brickGrid = document.getElementById('brickGrid');
+            brickGrid.innerHTML = '';
+            bricks = [];
+            InitialBricks = [];
+
+            const rows = parseInt(document.getElementById('target-row').value);
+            const bricksPerRow = parseInt(document.getElementById('target-bricks').value);
+
+            // Tell the CSS grid how many columns to use
+            brickGrid.style.setProperty('--cols', bricksPerRow);
+
+            for (let i = 0; i < rows; i++) {
+                const row = document.createElement('div');
+                row.className = 'brick-row';
+                for (let j = 0; j < bricksPerRow; j++) {
+                    const brick = createBrick();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    InitialBricks.push(brick);
+                }
+                brickGrid.appendChild(row);
+            }
+
+            updateBrickCount();
+        }
+
+        function createBrick() {
+            const brick = document.createElement('div');
+            brick.className = 'brick';
+            return brick;
+        }
+
+        function createBrickRed() {
+            const brick = document.createElement('div');
+            brick.className = 'brick red';
+            return brick;
+        }
+
+        function addRedBrickToGrid() {
+            const brickGrid = document.getElementById('brickGrid');
+            const rows = brickGrid.children;
+            const bricksPerRow = parseInt(document.getElementById('target-bricks').value);
+
+            for (let row of rows) {
+                if (row.children.length < bricksPerRow) {
+                    const brick = createBrickRed();
+                    row.appendChild(brick);
+                    bricks.push(brick);
+                    return;
+                }
+            }
+
+            const newRow = document.createElement('div');
+            newRow.className = 'brick-row';
+            newRow.appendChild(createBrickRed());
+            brickGrid.appendChild(newRow);
+            bricks.push(newRow.firstChild);
+        }
+
+        function updateShooterPosition() {
+            document.getElementById('shooter').style.left = `${shooterPosition}%`;
+        }
+
+        function updateTargetSound() {
+            targetSound = document.getElementById('target-sound').value.toLowerCase();
+            document.getElementById('targetSound').textContent = targetSound;
+        }
+
+        function checkWord() {
+            const input = document.getElementById('currentWord').textContent.toLowerCase();
+            if (!input) return false;
+
+            const isValidTag = input.includes(targetSound);
+            const isValid = words.includes(input);
+            const isUsed = usedWords.includes(input);
+
+            return isValidTag && isValid && !isUsed;
+        }
+
+        function createParticles(x, y, color) {
+            const particleCount = 15;
+            const container = document.getElementById('gameContainer');
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.backgroundColor = color;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                container.appendChild(particle);
+
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+
+                let opacity = 1;
+                const particleAnimation = setInterval(() => {
+                    const left = parseFloat(particle.style.left);
+                    const top = parseFloat(particle.style.top);
+
+                    particle.style.left = `${left + vx}px`;
+                    particle.style.top = `${top + vy}px`;
+                    opacity -= 0.03;
+                    particle.style.opacity = opacity;
+
+                    if (opacity <= 0) {
+                        particle.remove();
+                        clearInterval(particleAnimation);
+                    }
+                }, 30);
+            }
+        }
+
+        function shootBullet() {
+            if (!gameActive) return;
+
+            const currentWord = document.getElementById('currentWord').textContent;
+            if (!currentWord) return;
+
+            if (!checkWord()) {
+                addRedBrickToGrid();
+                updateBrickCount();
+
+                if (bricks.length >= InitialBricks.length + 5) {
+                    showGameOver(false);
+                }
+
+                document.getElementById('currentWord').textContent = '';
+                return;
+            }
+
+            usedWords.push(currentWord);
+            renderUsedWords();
+            document.getElementById('wordsUsed').textContent = usedWords.length;
+            document.getElementById('currentWord').textContent = '';
+
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = `${shooterPosition}%`;
+            bullet.style.bottom = '40px';
+            document.getElementById('gameContainer').appendChild(bullet);
+
+            const animation = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(animation);
+                    return;
+                }
+
+                const currentBottom = parseFloat(bullet.style.bottom) || 40;
+                const newBottom = currentBottom + bulletSpeed;
+                bullet.style.bottom = `${newBottom}px`;
+
+                const bulletRect = bullet.getBoundingClientRect();
+                const containerRect = document.getElementById('gameContainer').getBoundingClientRect();
+
+                for (let i = 0; i < bricks.length; i++) {
+                    const brick = bricks[i];
+                    const brickRect = brick.getBoundingClientRect();
+
+                    const adjBulletRect = {
+                        left: bulletRect.left - containerRect.left,
+                        top: bulletRect.top - containerRect.top,
+                        right: bulletRect.right - containerRect.left,
+                        bottom: bulletRect.bottom - containerRect.top
+                    };
+
+                    const adjBrickRect = {
+                        left: brickRect.left - containerRect.left,
+                        top: brickRect.top - containerRect.top,
+                        right: brickRect.right - containerRect.left,
+                        bottom: brickRect.bottom - containerRect.top
+                    };
+
+                    if (adjBulletRect.left < adjBrickRect.right &&
+                        adjBulletRect.right > adjBrickRect.left &&
+                        adjBulletRect.top < adjBrickRect.bottom &&
+                        adjBulletRect.bottom > adjBrickRect.top) {
+
+                        const collisionX = (adjBrickRect.left + adjBrickRect.right) / 2;
+                        const collisionY = (adjBrickRect.top + adjBrickRect.bottom) / 2;
+                        const color = brick.classList.contains('red') ? '#f44336' : '#4CAF50';
+                        createParticles(collisionX, collisionY, color);
+
+                        brick.remove();
+                        bricks.splice(i, 1);
+                        clearedBricks++;
+
+                        bullet.remove();
+                        clearInterval(animation);
+
+                        updateBrickCount();
+
+                        if (bricks.length === 0) {
+                            showGameOver(true);
+                        }
+                        return;
+                    }
+                }
+
+                if (newBottom > document.getElementById('gameContainer').clientHeight) {
+                    bullet.remove();
+                    clearInterval(animation);
+                }
+            }, 16);
+        }
+
+        function updateBrickCount() {
+            document.getElementById('brickCount').textContent = bricks.length;
+        }
+
+        function renderUsedWords() {
+            const el = document.getElementById('usedWords');
+            if (!usedWords.length) {
+                el.textContent = 'No words used yet...';
+                return;
+            }
+            el.innerHTML = usedWords
+                .map(w => `<span class="word-chip">${w}</span>`)
+                .join('');
+        }
+
+        function showGameOver(won) {
+            gameActive = false;
+            const gameOver = document.getElementById('gameOver');
+            document.getElementById('gameOverText').textContent =
+                won ? 'You Win!' : 'Game Over!';
+
+            document.getElementById('finalWords').textContent = usedWords.length;
+            document.getElementById('clearedBricks').textContent = clearedBricks;
+
+            gameOver.style.display = 'block';
+        }
+
+        function restartGame() {
+            gameActive = true;
+            document.getElementById('gameOver').style.display = 'none';
+            shooterPosition = 50;
+            usedWords = [];
+            clearedBricks = 0;
+            renderUsedWords();
+            document.getElementById('currentWord').textContent = '';
+            document.getElementById('wordsUsed').textContent = '0';
+            updateTargetSound();
+            initializeBricks();
+            updateShooterPosition();
+        }
+
+        function createCustomKeyboard() {
+            const keyboard = document.getElementById('customKeyboard');
+            keyboard.innerHTML = '';
+
+            allLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter.toUpperCase();
+                btn.onclick = () => {
+                    document.getElementById('currentWord').textContent += letter;
+                };
+                keyboard.appendChild(btn);
+            });
+        }
+
+        /* ================= Event Listeners ================= */
+
+        document.getElementById('leftBtn').addEventListener('click', () => {
+            shooterPosition = Math.max(2, shooterPosition - 4);
+            updateShooterPosition();
+        });
+
+        document.getElementById('rightBtn').addEventListener('click', () => {
+            shooterPosition = Math.min(94, shooterPosition + 4);
+            updateShooterPosition();
+        });
+
+        document.getElementById('backspaceBtn').addEventListener('click', () => {
+            const current = document.getElementById('currentWord');
+            current.textContent = current.textContent.slice(0, -1);
+        });
+
+        document.getElementById('shootBtn').addEventListener('click', shootBullet);
+
+        // Config clamping (inputs now live inside the settings dialog)
+        document.getElementById('target-row').addEventListener('change', function () {
+            this.value = Math.max(1, Math.min(10, parseInt(this.value) || 3));
+        });
+
+        document.getElementById('target-bricks').addEventListener('change', function () {
+            this.value = Math.max(1, Math.min(15, parseInt(this.value) || 8));
+        });
+
+        document.getElementById('target-sound').addEventListener('input', function () {
+            updateTargetSound();
+        });
+
+        // Settings dialog
+        const settingsDialog = document.getElementById('settingsDialog');
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            settingsDialog.showModal();
+        });
+        document.getElementById('settingsCancel').addEventListener('click', () => {
+            settingsDialog.close();
+        });
+        document.getElementById('settingsApply').addEventListener('click', () => {
+            settingsDialog.close();
+            restartGame();
+        });
+
+        // Help dialog
+        const helpDialog = document.getElementById('helpDialog');
+        document.getElementById('helpBtn').addEventListener('click', () => {
+            helpDialog.showModal();
+        });
+        document.getElementById('helpClose').addEventListener('click', () => {
+            helpDialog.close();
+        });
+
+        // Used-words overlay toggle (mobile)
+        document.getElementById('wordsToggle').addEventListener('click', () => {
+            document.getElementById('wordsPanel').classList.toggle('open');
+        });
+        document.getElementById('wordsClose').addEventListener('click', () => {
+            document.getElementById('wordsPanel').classList.remove('open');
+        });
+
+        // Physical keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            if (e.key === 'Escape') return;
+
+            if (e.key === 'ArrowLeft') {
+                shooterPosition = Math.max(2, shooterPosition - 4);
+                updateShooterPosition();
+            } else if (e.key === 'ArrowRight') {
+                shooterPosition = Math.min(94, shooterPosition + 4);
+                updateShooterPosition();
+            } else if (e.key === 'Backspace') {
+                const current = document.getElementById('currentWord');
+                current.textContent = current.textContent.slice(0, -1);
+            } else if (e.key === 'Enter') {
+                shootBullet();
+            } else if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
+                document.getElementById('currentWord').textContent += e.key.toLowerCase();
+            }
+        });
+
+        // Boot
+        initializeGame();
+    </script>
+</body>
+</html>
