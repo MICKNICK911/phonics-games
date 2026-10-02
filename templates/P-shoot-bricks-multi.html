@@ -140,7 +140,9 @@
             left: 0;
             right: 0;
             display: grid;
+            /* grid-template-columns is set explicitly by layoutGrid() in JS */
             grid-template-columns: repeat(var(--cols, 8), minmax(0, 1fr));
+            justify-content: center;
             gap: 5px;
             padding: 10px;
             box-sizing: border-box;
@@ -241,7 +243,6 @@
             margin-bottom: 18px;
         }
 
-        /* Victory image placeholder */
         #victoryImage {
             display: block;
             max-width: 100%;
@@ -432,22 +433,19 @@
         }
 
         dialog {
-    /* Explicit centering — some mobile browsers place modals at the top-left
-       because their UA stylesheet doesn't fully honour the dialog:modal
-       inset:0 + margin:auto centering. Declaring it here fixes that. */
-    position: fixed;
-    inset: 0;
-    margin: auto;
-    width: min(92vw, 400px);
-    max-height: 88vh;
-    overflow-y: auto;
-    border: 3px solid var(--gold);
-    border-radius: 14px;
-    background: linear-gradient(135deg, #1a237e, #0d47a1);
-    color: white;
-    padding: 0;
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.45);
-}
+            position: fixed;
+            inset: 0;
+            margin: auto;
+            width: min(92vw, 400px);
+            max-height: 88vh;
+            overflow-y: auto;
+            border: 3px solid var(--gold);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 0;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.45);
+        }
 
         dialog::backdrop {
             background: rgba(0, 0, 0, 0.7);
@@ -759,7 +757,6 @@
         </div>
     </dialog>
 
-    <!-- Level transition / intro modal -->
     <dialog id="levelModal">
         <div class="dialog-content" style="text-align:center; padding: 28px 22px;">
             <h2 id="levelModalTitle" style="margin-bottom: 10px;">Level 1</h2>
@@ -769,56 +766,41 @@
 
     <script>
         /* =========================================================================
-           HARD-CODED CONFIG — tweak everything from here
+           HARD-CODED CONFIG
            ========================================================================= */
         const CONFIG = {
-            /* ---- UI toggles (hard-coded booleans) ---- */
             SHOW_SETTINGS_BUTTON:  false,
             SHOW_HELP_BUTTON:      true,
             SHOW_SOUND_TOGGLE:     true,
             SHOW_WORDS_BUTTON:     true,
             SHOW_SETTINGS_DIALOG:  false,
 
-            /* ---- Multi-level sequence ----
-               Format: "sound(rows x bricks), sound(rows x bricks), ..."
-               Example: 'bl(2x3), st(2x5), gl(3x8)'
-               The game strictly follows this sequence. No runtime override. */
             DEFAULT_LEVELS:        'bl(1x1), st(1x1), gl(1x1)',
+            DEFAULT_SOUND_ENABLED: true,
 
-            DEFAULT_SOUND_ENABLED:   true,
-
-            /* ---- Gameplay tweaks ---- */
             BULLET_SPEED:            8,
             MAX_PENALTIES:           5,
-            GRID_PADDING:            10,   // must match #brickGrid padding in CSS
-            GRID_GAP:                5,    // must match #brickGrid gap in CSS
+            GRID_PADDING:            10,
+            GRID_GAP:                5,
 
-            /* ---- Sound tweaks ---- */
+            /* ---- Brick sizing ---- */
+            BRICK_RATIO:             2.4,  // width / height, must match .brick aspect-ratio
+            MAX_BRICK_W:             72,   // caps brick size when only 1–2 columns exist
+            MIN_BRICK_W:             18,
+
             MASTER_VOLUME:           0.55,
 
-            /* ---- Fireworks overlay ---- */
             FIREWORKS_DURATION_MS:   7500,
+            MAX_FIREWORK_PARTICLES:  320,  // hard memory ceiling
+            MAX_FIREWORK_ROCKETS:    8,
 
-            /* ---- Level transition modal ---- */
-            LEVEL_MODAL_MS:          2000,   // how long the level modal stays visible
-
-            /* ---- Shooter ---- */
-            SHOOTER_START_COL:       null,  // null = centre; number = 0-based column
-
-            /* ---- Input ---- */
+            LEVEL_MODAL_MS:          2000,
+            SHOOTER_START_COL:       null,
             ALLOW_PHYSICAL_KEYBOARD: true,
             UNLOCK_AUDIO_ON_FIRST_GESTURE: true,
 
-            /* ---- Victory image placeholder ----
-               Leave empty ('') to hide. Fill with any of:
-                 - a path:      'images/trophy.png'
-                 - a URL:       'https://example.com/win.png'
-                 - a data URI:  'data:image/svg+xml;utf8,<svg ...>'
-               Suggested size: roughly square or 4:3, at least 200×200px. */
             VICTORY_IMAGE: '',
             VICTORY_IMAGE_ALT: 'Victory!',
-
-            /* Show the image only on win (true) or on any game-over (false) */
             VICTORY_IMAGE_ONLY_ON_WIN: true
         };
 
@@ -827,8 +809,6 @@
            ========================================================================= */
         const wordList = [
     /* ================= BEGINNING BLENDS ================= */
-
-    /* ---------- "bl" words ---------- */
     "black", "blackberry", "blackboard", "blacken", "blackout", "blacksmith", "blacktop",
     "bladder", "blade", "blame", "bland", "blank", "blanket", "blare", "blast",
     "blaze", "blazer", "bleach", "bleachers", "bleak", "bleary", "bleat", "bleed",
@@ -840,8 +820,6 @@
     "blowtorch", "blubber", "blue", "bluebell", "blueberry", "bluebird", "bluegrass",
     "blueprint", "bluff", "blunder", "blunt", "blur", "blurb", "blurry", "blurt",
     "blush", "blushing", "blustery",
-
-    /* ---------- "cl" words ---------- */
     "clack", "clad", "claim", "clam", "clamber", "clammy", "clamor", "clamp", "clan",
     "clang", "clank", "clap", "clapper", "clarify", "clarinet", "clarity", "clash",
     "clasp", "class", "classic", "classify", "classmate", "classroom", "clatter",
@@ -853,8 +831,6 @@
     "closet", "closure", "clot", "cloth", "clothe", "clothes", "clothing", "cloud",
     "cloudy", "clout", "clove", "clover", "clown", "club", "cluck", "clue", "clump",
     "clumsy", "clung", "cluster", "clutch", "clutter",
-
-    /* ---------- "fl" words ---------- */
     "flab", "flabby", "flag", "flagpole", "flair", "flake", "flaky", "flame",
     "flamingo", "flank", "flannel", "flap", "flapjack", "flare", "flash", "flashback",
     "flashlight", "flask", "flat", "flatten", "flatter", "flavor", "flaw", "flawless",
@@ -866,16 +842,12 @@
     "flowery", "flown", "flu", "fluctuate", "fluent", "fluff", "fluffy", "fluid",
     "fluke", "flung", "flunk", "fluorescent", "flurry", "flush", "fluster", "flute",
     "flutter", "flux", "fly", "flyer", "flyway",
-
-    /* ---------- "gl" words ---------- */
     "glacier", "glad", "gladden", "glade", "gladiator", "glamor", "glance", "gland",
     "glare", "glass", "glasses", "glaze", "gleam", "glean", "glee", "glen", "glide",
     "glider", "glimmer", "glimpse", "glint", "glisten", "glitch", "glitter", "gloat",
     "global", "globe", "gloom", "gloomy", "glory", "gloss", "glossary", "glossy",
     "glove", "glow", "glower", "glowworm", "glucose", "glue", "glum", "glut",
     "glutton",
-
-    /* ---------- "pl" words ---------- */
     "placard", "place", "placemat", "placid", "plague", "plaid", "plain", "plainly",
     "plait", "plan", "plane", "planet", "plank", "plankton", "planner", "plant",
     "plantation", "plaque", "plasma", "plaster", "plastic", "plate", "plateau",
@@ -885,8 +857,6 @@
     "plight", "plod", "plop", "plot", "plough", "plow", "pluck", "plug", "plum",
     "plumber", "plume", "plump", "plunder", "plunge", "plural", "plus", "plush",
     "plywood",
-
-    /* ---------- "sl" words ---------- */
     "slab", "slack", "slacks", "slain", "slam", "slander", "slang", "slant", "slap",
     "slapstick", "slash", "slat", "slate", "sled", "sledge", "sleek", "sleep",
     "sleeper", "sleepy", "sleet", "sleeve", "sleigh", "slender", "slept", "sleuth",
@@ -895,8 +865,6 @@
     "sliver", "slobber", "slogan", "slop", "slope", "sloppy", "slosh", "sloth",
     "slouch", "slow", "sludge", "slug", "slum", "slumber", "slump", "slung", "slunk",
     "slurp", "slush", "sly",
-
-    /* ---------- "br" words ---------- */
     "brace", "bracelet", "bracket", "brag", "braid", "braille", "brain", "brainy",
     "brake", "bramble", "bran", "branch", "brand", "brandish", "brass", "brat",
     "brave", "bravery", "bravo", "brawl", "bray", "brazen", "breach", "bread",
@@ -908,8 +876,6 @@
     "broker", "bronze", "brooch", "brood", "brook", "broom", "broth", "brother",
     "brought", "brow", "brown", "brownie", "browse", "bruise", "brunch", "brunette",
     "brunt", "brush", "brutal", "brute",
-
-    /* ---------- "cr" words ---------- */
     "crab", "crack", "cracker", "crackle", "cradle", "craft", "crafty", "crag",
     "cram", "cramp", "cranberry", "crane", "crank", "cranky", "crash", "crate",
     "crater", "crave", "crawl", "crayon", "craze", "crazy", "creak", "cream",
@@ -922,8 +888,6 @@
     "crucial", "crude", "cruel", "cruise", "crumb", "crumble", "crumple", "crunch",
     "crusade", "crush", "crust", "crusty", "crutch", "cry", "crying", "crypt",
     "crystal",
-
-    /* ---------- "dr" words ---------- */
     "drab", "draft", "drag", "dragon", "dragonfly", "drain", "drainage", "drake",
     "drama", "dramatic", "drank", "drape", "drastic", "draw", "drawbridge", "drawer",
     "drawing", "drawl", "drawn", "dread", "dreadful", "dream", "dreamer", "dreamy",
@@ -932,8 +896,6 @@
     "driven", "driver", "driveway", "drizzle", "droop", "drop", "droplet", "dropper",
     "drought", "drove", "drown", "drowsy", "drudge", "drum", "drummer", "drumstick",
     "dry", "dryer",
-
-    /* ---------- "fr" words ---------- */
     "fraction", "fragile", "fragment", "fragrance", "frail", "frame", "framework",
     "franc", "frank", "frantic", "fraud", "fray", "freak", "freckle", "free",
     "freedom", "freeway", "freeze", "freezer", "freight", "frequent", "fresh",
@@ -942,8 +904,6 @@
     "fritter", "frizzy", "frock", "frog", "frolic", "from", "front", "frontier",
     "frost", "frosting", "frosty", "froth", "frown", "froze", "frozen", "frugal",
     "fruit", "fruitful", "fry", "frying",
-
-    /* ---------- "gr" words ---------- */
     "grab", "grace", "graceful", "gracious", "grade", "gradual", "graduate",
     "graffiti", "graft", "grain", "gram", "grammar", "granary", "grand", "grandchild",
     "grandfather", "grandma", "grandmother", "grandpa", "grandparent", "grandson",
@@ -956,8 +916,6 @@
     "grope", "gross", "grotto", "ground", "grounds", "group", "grouse", "grove",
     "grow", "growl", "grown", "growth", "grub", "grudge", "gruel", "gruff",
     "grumble", "grumpy", "grunt",
-
-    /* ---------- "pr" words ---------- */
     "practical", "practice", "praise", "prance", "prank", "prawn", "pray", "prayer",
     "preach", "precious", "precise", "predict", "prefer", "prefix", "prehistoric",
     "prepare", "present", "preserve", "president", "press", "pressure", "pretend",
@@ -969,8 +927,6 @@
     "prompt", "prone", "pronoun", "pronounce", "proof", "prop", "propeller",
     "proper", "property", "protect", "protein", "protest", "proud", "prove",
     "proverb", "provide", "prowl", "prune", "pry",
-
-    /* ---------- "tr" words ---------- */
     "trace", "track", "tractor", "trade", "trader", "tradition", "traffic",
     "tragedy", "trail", "trailer", "train", "trainer", "trait", "tramp", "trample",
     "trampoline", "trance", "tranquil", "transfer", "transform", "translate",
@@ -983,8 +939,6 @@
     "tropical", "trot", "trouble", "trough", "trousers", "trout", "trowel", "truce",
     "truck", "trudge", "true", "truly", "trumpet", "trunk", "trust", "truth", "try",
     "trying",
-
-    /* ---------- "sc" words ---------- */
     "scab", "scaffold", "scald", "scale", "scallop", "scalp", "scamper", "scan",
     "scandal", "scanner", "scant", "scar", "scarce", "scare", "scarecrow", "scarf",
     "scarlet", "scary", "scatter", "scholar", "school", "schoolboy", "schoolhouse",
@@ -994,24 +948,17 @@
     "scream", "screech", "screen", "screw", "screwdriver", "scribble", "scribe",
     "script", "scroll", "scrub", "scrumptious", "scuba", "scuff", "sculpt",
     "sculptor", "sculpture", "scurry", "scuttle",
-    /* sc spelled but said /s/ (soft c) - delete this line's words if you only want the /sk/ sound */
     "scene", "scenery", "scent", "schedule", "scheme", "science", "scientist",
     "scissors",
-
-    /* ---------- "sk" words ---------- */
     "skate", "skateboard", "skater", "skeleton", "sketch", "sketchy", "skewer",
     "ski", "skid", "skier", "skiff", "skill", "skilled", "skillet", "skillful",
     "skim", "skimp", "skin", "skinny", "skip", "skipper", "skirmish", "skirt",
     "skit", "skittle", "skulk", "skull", "skunk", "sky", "skylark", "skylight",
     "skyline", "skyscraper",
-
-    /* ---------- "squ" words ---------- */
     "squabble", "squad", "squadron", "squalid", "squall", "squander", "square",
     "squash", "squat", "squawk", "squeak", "squeaky", "squeal", "squeamish",
     "squeeze", "squid", "squiggle", "squint", "squire", "squirm", "squirrel",
     "squirt", "squish", "squishy",
-
-    /* ---------- "st" words (beginning) ---------- */
     "stab", "stability", "stable", "stack", "stadium", "staff", "stag", "stage",
     "stagger", "stain", "stair", "staircase", "stake", "stale", "stalk", "stall",
     "stallion", "stamina", "stammer", "stamp", "stampede", "stand", "standard",
@@ -1034,22 +981,16 @@
     "student", "studio", "study", "stuff", "stuffing", "stuffy", "stumble", "stump",
     "stun", "stung", "stunk", "stunt", "stupid", "sturdy", "stutter", "style",
     "stylish",
-
-    /* ---------- "sm" words ---------- */
     "smack", "small", "smart", "smarter", "smash", "smear", "smell", "smelly",
     "smelt", "smile", "smirk", "smith", "smock", "smog", "smoke", "smoker",
     "smokestack", "smoky", "smolder", "smooth", "smoothie", "smother", "smudge",
     "smug", "smuggle",
-
-    /* ---------- "sn" words ---------- */
     "snack", "snag", "snail", "snake", "snap", "snapshot", "snare", "snarl",
     "snatch", "sneak", "sneaker", "sneer", "sneeze", "snicker", "sniff", "sniffle",
     "snip", "snipe", "snippet", "snob", "snoop", "snooze", "snore", "snorkel",
     "snort", "snout", "snow", "snowball", "snowboard", "snowdrift", "snowfall",
     "snowflake", "snowman", "snowstorm", "snowy", "snub", "snuck", "snuff", "snug",
     "snuggle",
-
-    /* ---------- "sp" words (beginning) ---------- */
     "space", "spacecraft", "spaceship", "spacious", "spade", "spaghetti", "span",
     "spangle", "spaniel", "spare", "spark", "sparkle", "sparrow", "sparse", "spasm",
     "spat", "spatula", "spawn", "speak", "speaker", "spear", "special", "species",
@@ -1062,26 +1003,17 @@
     "spout", "sprain", "sprang", "sprawl", "spray", "spread", "spree", "sprig",
     "spring", "springboard", "sprinkle", "sprint", "sprout", "spruce", "sprung",
     "spun", "spur", "spurt", "spy",
-
-    /* ---------- "sw" words ---------- */
     "swab", "swagger", "swallow", "swam", "swamp", "swan", "swap", "swarm", "sway",
     "swear", "sweat", "sweater", "sweaty", "sweep", "sweeper", "sweet", "sweeten",
     "sweetheart", "sweetly", "swell", "swept", "swerve", "swift", "swim", "swimmer",
     "swimming", "swindle", "swine", "swing", "swipe", "swirl", "swish", "switch",
     "switchboard", "swivel", "swollen", "swoop", "sword", "swordfish", "swore",
     "sworn", "swum", "swung",
-
-    /* ---------- "tw" words ---------- */
     "tweak", "tweed", "tweet", "tweeter", "tweezers", "twelfth", "twelve", "twenty",
     "twice", "twiddle", "twig", "twilight", "twin", "twine", "twinge", "twinkle",
     "twirl", "twist", "twister", "twitch", "twitter", "two", "twofold",
-
-    /* ---------- "dw" words ---------- */
     "dwarf", "dwell", "dweller", "dwelling", "dwelt", "dwindle",
-
     /* ================= ENDING BLENDS ================= */
-
-    /* ---------- "st" words (ending) ---------- */
     "adjust", "almost", "amidst", "armrest", "arrest", "assist", "august", "backrest",
     "beast", "best", "biggest", "blast", "boast", "bravest", "breakfast", "breast",
     "broadcast", "burst", "cast", "cheapest", "checklist", "chest", "closest",
@@ -1097,17 +1029,11 @@
     "sunburst", "tallest", "test", "thirst", "toast", "trust", "twist", "unjust",
     "unrest", "vast", "vest", "waist", "west", "wishlist", "worst", "wrist", "yeast",
     "youngest", "zest",
-
-    /* ---------- "sk" words (ending) ---------- */
     "ask", "asterisk", "bask", "brisk", "cask", "desk", "disk", "dusk", "flask",
     "frisk", "husk", "kiosk", "mask", "mollusk", "multitask", "musk", "obelisk",
     "risk", "rusk", "task", "tusk", "unmask", "whisk",
-
-    /* ---------- "sp" words (ending) ---------- */
     "asp", "clasp", "crisp", "cusp", "gasp", "grasp", "hasp", "lisp", "rasp",
     "unclasp", "wasp", "wisp",
-
-    /* ---------- "nd" words ---------- */
     "almond", "and", "around", "ascend", "astound", "attend", "background", "backhand",
     "band", "behind", "bend", "beyond", "bland", "blend", "blind", "blond", "bond",
     "bound", "brand", "command", "compound", "contend", "correspond", "defend",
@@ -1122,8 +1048,6 @@
     "thousand", "trend", "underground", "understand", "unkind", "unwind", "wand",
     "wasteland", "weekend", "wetland", "wind", "withstand", "wonderland", "woodland",
     "wound",
-
-    /* ---------- "nt" words ---------- */
     "accident", "account", "agent", "agreement", "ailment", "amount", "amusement",
     "ancient", "ant", "apartment", "appoint", "argument", "ascent", "assistant",
     "aunt", "basement", "bent", "blunt", "brunt", "bunt", "cement", "cent", "chant",
@@ -1143,8 +1067,6 @@
     "splint", "sprint", "squint", "statement", "stint", "student", "stunt",
     "supplement", "talent", "taunt", "tent", "tint", "tournament", "treatment",
     "urgent", "vacant", "vent", "violent", "want", "warrant", "went",
-
-    /* ---------- "nk" words ---------- */
     "bank", "blank", "blink", "bonk", "brink", "bunk", "chink", "chunk", "clank",
     "clink", "clonk", "clunk", "conk", "crank", "drank", "drink", "dunk", "fink",
     "flank", "flunk", "frank", "hank", "honk", "hoodwink", "hunk", "ink", "junk",
@@ -1153,8 +1075,6 @@
     "sank", "shank", "shrank", "shrink", "shrunk", "sink", "skink", "skunk",
     "slink", "slunk", "snowbank", "spank", "spunk", "stank", "stink", "stunk",
     "sunk", "swank", "tank", "thank", "think", "thunk", "trunk", "wink", "yank",
-
-    /* ---------- "mp" words ---------- */
     "airpump", "blimp", "bump", "camp", "champ", "chimp", "chomp", "chump", "clamp",
     "clump", "cramp", "crimp", "damp", "decamp", "dump", "encamp", "frump", "grump",
     "handpump", "headlamp", "hemp", "hump", "jump", "lamp", "limp",
@@ -1162,8 +1082,6 @@
     "scamp", "scrimp", "shrimp", "skimp", "slump", "stamp", "stomp", "streetlamp",
     "stump", "sump", "sunlamp", "swamp", "tamp", "temp", "thump", "tramp", "trump",
     "tromp", "vamp", "wimp",
-
-    /* ---------- "rd" words ---------- */
     "aboard", "accord", "afford", "afterward", "award", "awkward", "backward",
     "backyard", "bard", "barnyard", "baseboard", "beard", "billboard", "billiard",
     "bird", "blackbird", "blackboard", "blizzard", "board", "bodyguard", "bluebird",
@@ -1184,8 +1102,6 @@
     "switchboard", "sword", "third", "toward", "upward", "vanguard", "vineyard",
     "ward", "warlord", "washboard", "watchword", "westward", "whiteboard",
     "windward", "wizard", "word", "yard",
-
-    /* ---------- "ld" words ---------- */
     "bald", "behold", "billfold", "blindfold", "bold", "build", "child", "cold",
     "emerald", "enfold", "field", "fold", "foothold", "foretold", "freehold",
     "gild", "godchild", "gold", "grandchild", "guild", "handhold", "held", "herald",
@@ -1196,11 +1112,7 @@
     "wild", "windshield", "withhold", "world", "yield", "airfield", "battlefield",
     "cornfield", "infield", "midfield", "playfield", "underworld", "threshold",
     "threefold", "tenfold", "fourfold", "centerfold", "schoolchild",
-
-    /* ---------- "lp" words ---------- */
     "alp", "gulp", "help", "kelp", "pulp", "scalp", "whelp", "yelp",
-
-    /* ---------- "rk" words ---------- */
     "aardvark", "artwork", "ballpark", "bark", "benchmark", "birthmark", "bookmark",
     "bookwork", "bulwark", "clerk", "clockwork", "cork", "coursework", "dark",
     "dork", "earmark", "earthwork", "embark", "fieldwork", "firework", "fork",
@@ -1210,21 +1122,15 @@
     "pork", "postmark", "quirk", "remark", "rework", "shark", "shirk", "skylark",
     "smirk", "snark", "spark", "stark", "stork", "teamwork", "trademark",
     "uncork", "watermark", "woodwork", "work",
-
-    /* ---------- "lf" words ---------- */
     "behalf", "bookshelf", "calf", "elf", "engulf", "golf", "gulf", "half",
     "herself", "himself", "itself", "minigolf", "myself", "oneself", "pelf",
     "self", "shelf", "thyself", "werewolf", "wolf", "yourself",
-
-    /* ---------- "pt" words ---------- */
     "abrupt", "accept", "adapt", "adept", "adopt", "apt", "attempt", "bankrupt",
     "concept", "contempt", "conscript", "corrupt", "crept", "crypt", "disrupt",
     "erupt", "except", "exempt", "inept", "intercept", "interrupt", "kept", "leapt",
     "manuscript", "nondescript", "opt", "overslept", "postscript", "preempt",
     "precept", "prompt", "rapt", "receipt", "script", "slept", "subscript",
     "superscript", "swept", "tempt", "transcript", "unkempt", "wept",
-
-    /* ---------- "ft" words ---------- */
     "adrift", "aft", "aircraft", "airlift", "airshaft", "bereft", "camshaft",
     "chairlift", "cleft", "craft", "crankshaft", "croft", "daft", "deft",
     "downdraft", "draft", "drift", "driveshaft", "facelift", "forklift", "gearshift",
@@ -1233,8 +1139,6 @@
     "shift", "shoplift", "sift", "snowdrift", "soft", "spacecraft", "spendthrift",
     "stagecraft", "stickshift", "swift", "theft", "thrift", "tuft", "updraft",
     "uplift", "waft", "watercraft", "weft", "witchcraft", "woodcraft",
-
-    /* ---------- "ct" words ---------- */
     "abduct", "abstract", "act", "addict", "affect", "afflict", "aqueduct",
     "architect", "artifact", "aspect", "attract", "bisect", "byproduct", "collect",
     "compact", "conduct", "conflict", "connect", "construct", "contact", "contract",
@@ -1250,15 +1154,11 @@
     "refract", "reject", "resurrect", "respect", "restrict", "retract", "select",
     "strict", "subject", "subtract", "suspect", "tact", "tract", "transact",
     "verdict", "viaduct",
-
-    /* ---------- "lk" words ---------- */
     "backtalk", "balk", "beanstalk", "bilk", "boardwalk", "bulk", "buttermilk",
     "catwalk", "caulk", "chalk", "cornstalk", "crosstalk", "crosswalk", "elk",
     "folk", "hulk", "ilk", "jaywalk", "kinfolk", "menfolk", "milk", "moonwalk",
     "sidewalk", "silk", "skulk", "sleepwalk", "spacewalk", "stalk", "sulk",
     "talk", "walk", "womenfolk", "yolk",
-
-    /* ---------- "lt" words ---------- */
     "adult", "asphalt", "assault", "basalt", "belt", "bolt", "built", "catapult",
     "cobalt", "colt", "consult", "cult", "dealt", "deadbolt", "default", "difficult",
     "dolt", "dwelt", "exalt", "exult", "fault", "felt", "gilt", "greenbelt",
@@ -1267,12 +1167,8 @@
     "result", "revolt", "salt", "seatbelt", "shalt", "silt", "smelt", "somersault",
     "spelt", "spilt", "stilt", "sunbelt", "thunderbolt", "tilt", "toolbelt",
     "tumult", "unbolt", "vault", "volt", "welt", "wilt",
-
-    /* ---------- "xt" words ---------- */
     "context", "fulltext", "hypertext", "intertext", "next", "plaintext", "pretext",
     "subtext", "teletext", "text",
-
-    /* ---------- "ts" words ---------- */
     "accidents", "acts", "adults", "agents", "ants", "arts", "aunts", "bats",
     "beasts", "beets", "belts", "bets", "bits", "blasts", "blots", "boats", "bolts",
     "boots", "brats", "buckets", "bunts", "carrots", "cats", "cents", "chants",
@@ -1307,7 +1203,7 @@
         )];
 
         /* =========================================================================
-           SOUND ENGINE — Web Audio API, all synthesised (no files)
+           SOUND ENGINE
            ========================================================================= */
         const SoundEngine = (() => {
             let ctx = null;
@@ -1427,110 +1323,165 @@
         })();
 
         /* =========================================================================
-           FIREWORKS OVERLAY
+           FIREWORKS OVERLAY — allocation-free
+           -------------------------------------------------------------------------
+           • Fixed-capacity typed-array pools → no per-particle objects, no GC churn
+           • Swap-remove keeps all live particles packed at the front of the arrays
+           • Pre-interned colour strings → no per-frame string building
+           • fillRect (no arc, no shadowBlur) → no path tessellation / blur buffers
+           • Hard particle + rocket caps → memory stays bounded no matter how long
+             the celebration runs.
            ========================================================================= */
         const Fireworks = (() => {
             const canvas = document.getElementById('fireworksCanvas');
             const cx = canvas.getContext('2d');
-            let particles = [];
-            let rockets = [];
+
+            const MAX_PARTICLES = CONFIG.MAX_FIREWORK_PARTICLES;
+            const MAX_ROCKETS   = CONFIG.MAX_FIREWORK_ROCKETS;
+
+            const COLORS = [
+                '#ff3b30', '#ff9500', '#ffcc00', '#34c759',
+                '#00c7be', '#0a84ff', '#5e5ce6', '#bf5af2',
+                '#ff2d55', '#ffffff'
+            ];
+            const COLOR_COUNT = COLORS.length;
+
+            /* particle pools (structure-of-arrays) */
+            const pX     = new Float32Array(MAX_PARTICLES);
+            const pY     = new Float32Array(MAX_PARTICLES);
+            const pVX    = new Float32Array(MAX_PARTICLES);
+            const pVY    = new Float32Array(MAX_PARTICLES);
+            const pLife  = new Float32Array(MAX_PARTICLES);
+            const pDecay = new Float32Array(MAX_PARTICLES);
+            const pSize  = new Float32Array(MAX_PARTICLES);
+            const pCol   = new Uint8Array(MAX_PARTICLES);
+            let pCount = 0;
+
+            /* rocket pools */
+            const rX       = new Float32Array(MAX_ROCKETS);
+            const rY       = new Float32Array(MAX_ROCKETS);
+            const rVY      = new Float32Array(MAX_ROCKETS);
+            const rTargetY = new Float32Array(MAX_ROCKETS);
+            const rCol     = new Uint8Array(MAX_ROCKETS);
+            let rCount = 0;
+
             let running = false;
-            let rafId = null;
+            let rafId = 0;
             let lastSpawn = 0;
             let endTime = 0;
-            const spawnInterval = 320;
+            let W = 0, H = 0;
+
+            const SPAWN_INTERVAL = 380;
+            const BURST_MIN = 22;
+            const BURST_MAX = 34;
 
             function resize() {
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width  = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                canvas.style.width  = W + 'px';
+                canvas.style.height = H + 'px';
                 cx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
 
             function spawnRocket() {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const x = w * (0.12 + Math.random() * 0.76);
-                const targetY = h * (0.12 + Math.random() * 0.35);
-                const startY = h + 10;
-                const dy = startY - targetY;
-                const vy = -Math.sqrt(2 * 0.09 * dy);
-                const hue = Math.random() * 360;
-                rockets.push({ x, y: startY, vy, targetY, hue });
+                if (rCount >= MAX_ROCKETS) return;
+                const i = rCount++;
+                const targetY = H * (0.12 + Math.random() * 0.35);
+                const dy = (H + 10) - targetY;
+                rX[i] = W * (0.12 + Math.random() * 0.76);
+                rY[i] = H + 10;
+                rTargetY[i] = targetY;
+                rVY[i] = -Math.sqrt(2 * 0.09 * dy);
+                rCol[i] = (Math.random() * COLOR_COUNT) | 0;
             }
 
-            function burst(x, y, hue) {
-                const count = 70 + Math.floor(Math.random() * 40);
-                for (let i = 0; i < count; i++) {
-                    const angle = (i / count) * Math.PI * 2 + Math.random() * 0.15;
-                    const speed = 1.5 + Math.random() * 4.2;
-                    particles.push({
-                        x, y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        life: 1,
-                        decay: 0.006 + Math.random() * 0.012,
-                        hue: hue + (Math.random() * 40 - 20),
-                        size: 1.4 + Math.random() * 2.2
-                    });
+            function burst(x, y, colorIdx) {
+                const room = MAX_PARTICLES - pCount;
+                if (room <= 0) return;
+                let count = BURST_MIN + ((Math.random() * (BURST_MAX - BURST_MIN)) | 0);
+                if (count > room) count = room;   // never exceed the pool
+
+                for (let n = 0; n < count; n++) {
+                    const i = pCount++;
+                    const angle = (n / count) * Math.PI * 2 + Math.random() * 0.2;
+                    const speed = 1.2 + Math.random() * 3.6;
+                    pX[i] = x;
+                    pY[i] = y;
+                    pVX[i] = Math.cos(angle) * speed;
+                    pVY[i] = Math.sin(angle) * speed;
+                    pLife[i] = 1;
+                    pDecay[i] = 0.012 + Math.random() * 0.016;
+                    pSize[i] = 1.5 + Math.random() * 1.8;
+                    pCol[i] = Math.random() < 0.12 ? (COLOR_COUNT - 1) : colorIdx;
                 }
             }
 
             function loop(t) {
                 if (!running) return;
-                cx.globalCompositeOperation = 'source-over';
-                cx.fillStyle = 'rgba(0, 0, 0, 0.16)';
-                cx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-                if (t - lastSpawn > spawnInterval && t < endTime - 900) {
+                cx.globalCompositeOperation = 'source-over';
+                cx.globalAlpha = 1;
+                cx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+                cx.fillRect(0, 0, W, H);
+
+                if (t - lastSpawn > SPAWN_INTERVAL && t < endTime - 800) {
                     spawnRocket();
                     lastSpawn = t;
                     SoundEngine.launch();
                 }
 
-                for (let i = rockets.length - 1; i >= 0; i--) {
-                    const r = rockets[i];
-                    r.y += r.vy;
-                    r.vy += 0.16;
-                    cx.beginPath();
-                    cx.arc(r.x, r.y, 2.2, 0, Math.PI * 2);
-                    cx.fillStyle = `hsl(${r.hue}, 100%, 75%)`;
-                    cx.fill();
-                    if (r.y <= r.targetY || r.vy >= 0) {
-                        burst(r.x, r.y, r.hue);
+                cx.globalCompositeOperation = 'lighter';
+
+                /* ---- rockets ---- */
+                for (let i = rCount - 1; i >= 0; i--) {
+                    rY[i] += rVY[i];
+                    rVY[i] += 0.16;
+
+                    cx.fillStyle = COLORS[rCol[i]];
+                    cx.fillRect(rX[i] - 1.5, rY[i] - 1.5, 3, 3);
+
+                    if (rY[i] <= rTargetY[i] || rVY[i] >= 0) {
+                        burst(rX[i], rY[i], rCol[i]);
                         SoundEngine.burst();
-                        rockets.splice(i, 1);
+
+                        const last = --rCount;
+                        rX[i] = rX[last]; rY[i] = rY[last]; rVY[i] = rVY[last];
+                        rTargetY[i] = rTargetY[last]; rCol[i] = rCol[last];
                     }
                 }
 
-                cx.globalCompositeOperation = 'lighter';
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.05;
-                    p.vx *= 0.99;
-                    p.vy *= 0.99;
-                    p.life -= p.decay;
-                    if (p.life <= 0) {
-                        particles.splice(i, 1);
+                /* ---- particles ---- */
+                for (let i = pCount - 1; i >= 0; i--) {
+                    pVY[i] += 0.05;
+                    pVX[i] *= 0.99;
+                    pVY[i] *= 0.99;
+                    pX[i] += pVX[i];
+                    pY[i] += pVY[i];
+
+                    const life = pLife[i] - pDecay[i];
+                    if (life <= 0) {
+                        const last = --pCount;
+                        pX[i] = pX[last]; pY[i] = pY[last];
+                        pVX[i] = pVX[last]; pVY[i] = pVY[last];
+                        pLife[i] = pLife[last]; pDecay[i] = pDecay[last];
+                        pSize[i] = pSize[last]; pCol[i] = pCol[last];
                         continue;
                     }
-                    cx.globalAlpha = p.life;
-                    cx.beginPath();
-                    cx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    cx.fillStyle = `hsl(${p.hue}, 100%, 60%)`;
-                    cx.shadowBlur = 14;
-                    cx.shadowColor = `hsl(${p.hue}, 100%, 60%)`;
-                    cx.fill();
+                    pLife[i] = life;
+
+                    cx.globalAlpha = life;
+                    cx.fillStyle = COLORS[pCol[i]];
+                    const s = pSize[i];
+                    cx.fillRect(pX[i] - s * 0.5, pY[i] - s * 0.5, s, s);
                 }
+
                 cx.globalAlpha = 1;
-                cx.shadowBlur = 0;
                 cx.globalCompositeOperation = 'source-over';
 
-                if (t >= endTime && rockets.length === 0 && particles.length === 0) {
+                if (t >= endTime && rCount === 0 && pCount === 0) {
                     stop();
                     return;
                 }
@@ -1540,10 +1491,12 @@
             function start(duration = CONFIG.FIREWORKS_DURATION_MS) {
                 if (running) return;
                 resize();
-                cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                pCount = 0;
+                rCount = 0;
+                lastSpawn = 0;
+                cx.clearRect(0, 0, W, H);
                 canvas.classList.add('active');
                 running = true;
-                lastSpawn = 0;
                 endTime = performance.now() + duration;
                 rafId = requestAnimationFrame(loop);
             }
@@ -1551,11 +1504,12 @@
             function stop() {
                 running = false;
                 if (rafId) cancelAnimationFrame(rafId);
-                rafId = null;
+                rafId = 0;
+                pCount = 0;
+                rCount = 0;
                 canvas.classList.remove('active');
-                cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                particles = [];
-                rockets = [];
+                cx.setTransform(1, 0, 0, 1, 0, 0);
+                cx.clearRect(0, 0, canvas.width, canvas.height);
             }
 
             window.addEventListener('resize', () => { if (running) resize(); });
@@ -1564,7 +1518,6 @@
 
         /* ================= Level Parsing ================= */
         function parseLevels(str) {
-            // "bl(2x3), st(2x5), gl(3x8)" → [{sound:'bl', rows:2, bricks:3}, ...]
             const levels = [];
             const parts = String(str || '').split(',');
             for (const part of parts) {
@@ -1577,7 +1530,6 @@
                     });
                 }
             }
-            // Fallback single level if parsing failed
             if (levels.length === 0) {
                 levels.push({ sound: 'bl', rows: 3, bricks: 8 });
             }
@@ -1592,25 +1544,20 @@
         let shooterCol = 3;
         let usedWords = [];
         let gameActive = true;
-        let clearedBricks = 0;          // total across all levels
-        let levelClearedBricks = 0;     // bricks cleared in current level
+        let clearedBricks = 0;
+        let levelClearedBricks = 0;
         let penaltyCount = 0;
         let targetSound = levels[0].sound;
         let bulletSpeed = CONFIG.BULLET_SPEED;
         const MAX_PENALTIES = CONFIG.MAX_PENALTIES;
         const GRID_PADDING = CONFIG.GRID_PADDING;
         const GRID_GAP = CONFIG.GRID_GAP;
+        const BRICK_RATIO = CONFIG.BRICK_RATIO;
+        const MAX_BRICK_W = CONFIG.MAX_BRICK_W;
+        const MIN_BRICK_W = CONFIG.MIN_BRICK_W;
 
         /* ================= Column geometry ================= */
-        function getColumnCenterX(col) {
-            const grid = document.getElementById('brickGrid');
-            const gridWidth = grid.clientWidth;
-            if (gridWidth === 0) return 0;
-            const N = currentColumnCount();
-            const innerWidth = gridWidth - GRID_PADDING * 2;
-            const colWidth = (innerWidth - (N - 1) * GRID_GAP) / N;
-            return GRID_PADDING + col * (colWidth + GRID_GAP) + colWidth / 2;
-        }
+        let brickWidth = 56;   // actual computed px width of each brick column
 
         function currentColumnCount() {
             return levels[currentLevelIndex] ? levels[currentLevelIndex].bricks : 8;
@@ -1618,6 +1565,46 @@
 
         function currentRowCount() {
             return levels[currentLevelIndex] ? levels[currentLevelIndex].rows : 3;
+        }
+
+        /* Sizes the brick columns to a *fixed pixel width* instead of a
+           fraction of the play area. Few columns → bricks keep a sane size
+           and the whole grid just centres itself; many columns → the grid
+           shrinks so it still fits both the width and the height budget. */
+        function layoutGrid() {
+            const grid      = document.getElementById('brickGrid');
+            const container = document.getElementById('gameContainer');
+            const N    = currentColumnCount();
+            const rows = currentRowCount();
+
+            const containerW = container.clientWidth  || 320;
+            const containerH = container.clientHeight || 320;
+
+            const availW = Math.max(40, containerW - GRID_PADDING * 2);
+            const availH = Math.max(60, containerH - 120);   // keep clear of the shooter
+
+            // Width-limited size
+            let bw = (availW - (N - 1) * GRID_GAP) / N;
+
+            // Height-limited size (brick height = bw / BRICK_RATIO)
+            const maxBrickH = (availH - (rows - 1) * GRID_GAP) / rows;
+            bw = Math.min(bw, maxBrickH * BRICK_RATIO, MAX_BRICK_W);
+            bw = Math.max(bw, MIN_BRICK_W);
+
+            brickWidth = bw;
+            grid.style.setProperty('--cols', N);
+            grid.style.gridTemplateColumns = `repeat(${N}, ${bw.toFixed(2)}px)`;
+            grid.style.justifyContent = 'center';
+        }
+
+        function getColumnCenterX(col) {
+            const container  = document.getElementById('gameContainer');
+            const N          = currentColumnCount();
+            const containerW = container.clientWidth || 320;
+            const innerW     = containerW - GRID_PADDING * 2;
+            const gridW      = N * brickWidth + (N - 1) * GRID_GAP;
+            const offset     = GRID_PADDING + (innerW - gridW) / 2;  // matches justify-content:center
+            return offset + col * (brickWidth + GRID_GAP) + brickWidth / 2;
         }
 
         function updateShooterPosition() {
@@ -1647,7 +1634,6 @@
             st.textContent = CONFIG.DEFAULT_SOUND_ENABLED ? '🔊' : '🔇';
             st.title       = CONFIG.DEFAULT_SOUND_ENABLED ? 'Sound on' : 'Sound muted';
 
-            // Prepare the victory image placeholder
             const vimg = document.getElementById('victoryImage');
             if (CONFIG.VICTORY_IMAGE) {
                 vimg.src = CONFIG.VICTORY_IMAGE;
@@ -1688,7 +1674,6 @@
             const lvl = levels[currentLevelIndex];
             targetSound = lvl.sound;
 
-            // Reset per-level state
             usedWords = [];
             penaltyCount = 0;
             levelClearedBricks = 0;
@@ -1696,7 +1681,6 @@
             document.getElementById('wordsUsed').textContent = '0';
             renderUsedWords();
 
-            // Apply level geometry
             document.getElementById('targetSound').textContent = targetSound;
             updateLevelIndicator();
 
@@ -1706,10 +1690,13 @@
                 : Math.floor((N - 1) / 2);
 
             initializeBricks();
-            requestAnimationFrame(updateShooterPosition);
+            requestAnimationFrame(() => {
+                layoutGrid();
+                updateShooterPosition();
+            });
 
             if (showModal) {
-                gameActive = false; // freeze input while modal is up
+                gameActive = false;
                 await showLevelModal(currentLevelIndex, index === 0);
                 gameActive = true;
             }
@@ -1718,7 +1705,6 @@
         function initializeGame() {
             createCustomKeyboard();
             clearedBricks = 0;
-            // Start with intro modal for Level 1
             startLevel(0, true);
         }
 
@@ -1771,7 +1757,6 @@
 
         /* ================= Word / shot logic ================= */
         function updateTargetSound() {
-            // Target sound is now driven exclusively by the current level
             document.getElementById('targetSound').textContent = targetSound;
         }
 
@@ -1815,7 +1800,7 @@
 
         function shootBullet() {
             if (!gameActive) return;
-            if (document.querySelector('dialog[open]')) return;   // freeze while dialog is open
+            if (document.querySelector('dialog[open]')) return;
             const currentWord = document.getElementById('currentWord').textContent;
             if (!currentWord) return;
 
@@ -1853,7 +1838,7 @@
                     clearInterval(animation);
                     return;
                 }
-                if (document.querySelector('dialog[open]')) return;   // pause in-flight bullets while dialog is open
+                if (document.querySelector('dialog[open]')) return;
 
                 const currentBottom = parseFloat(bullet.style.bottom) || 40;
                 const newBottom = currentBottom + bulletSpeed;
@@ -1930,12 +1915,10 @@
             const isLast = currentLevelIndex >= levels.length - 1;
 
             if (isLast) {
-                // Final victory
                 showGameOver(true);
                 return;
             }
 
-            // Show transition modal then advance
             const nextIndex = currentLevelIndex + 1;
             await showLevelModal(nextIndex, false);
             await startLevel(nextIndex, false);
@@ -1954,7 +1937,7 @@
             if (shouldShow) {
                 vimg.classList.remove('hidden');
                 vimg.style.animation = 'none';
-                void vimg.offsetWidth; // reflow
+                void vimg.offsetWidth;
                 vimg.style.animation = '';
             } else {
                 vimg.classList.add('hidden');
@@ -1975,7 +1958,6 @@
             document.getElementById('gameOver').style.display = 'none';
             document.getElementById('victoryImage').classList.add('hidden');
             clearedBricks = 0;
-            // Restart from Level 1 with intro modal
             startLevel(0, true);
         }
 
@@ -2064,7 +2046,7 @@
         document.addEventListener('keydown', (e) => {
             if (!gameActive) return;
             if (!CONFIG.ALLOW_PHYSICAL_KEYBOARD) return;
-            if (document.querySelector('dialog[open]')) return;   // ignore typing while a dialog is open
+            if (document.querySelector('dialog[open]')) return;
             if (e.key === 'Escape') return;
 
             if (e.key === 'ArrowLeft') {
@@ -2084,7 +2066,10 @@
         });
 
         window.addEventListener('resize', () => {
-            requestAnimationFrame(updateShooterPosition);
+            requestAnimationFrame(() => {
+                layoutGrid();
+                updateShooterPosition();
+            });
         });
 
         if (CONFIG.UNLOCK_AUDIO_ON_FIRST_GESTURE) {
