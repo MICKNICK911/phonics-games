@@ -27,7 +27,6 @@
             position: relative;
         }
 
-        /* ----- Ambient background blobs ----- */
         .bg-blobs {
             position: fixed; inset: 0;
             pointer-events: none; z-index: 0;
@@ -62,7 +61,6 @@
             50%      { transform: translate(6vmin, -4vmin) scale(1.08); }
         }
 
-        /* ----- Glass container ----- */
         .container {
             position: relative;
             z-index: 1;
@@ -121,7 +119,6 @@
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ----- HUD chips ----- */
         .hud {
             display: flex;
             justify-content: space-between;
@@ -150,7 +147,6 @@
             border-color: rgba(236, 72, 153, 0.15);
         }
 
-        /* ----- Progress bar ----- */
         .progress-track {
             height: 8px;
             border-radius: 999px;
@@ -195,24 +191,24 @@
             min-width: clamp(24px, 6vw, 36px);
             line-height: 1;
         }
+
+        /* ----- Missing-letter dash ----- */
         .tile-slot {
             display: inline-flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            width: clamp(22px, 6vw, 36px);
+            width: clamp(20px, 5.5vw, 32px);
             height: clamp(30px, 7.5vw, 46px);
-            background: linear-gradient(180deg, #ffffff, #e0e7ff);
-            border: 2px dashed #8b5cf6;
-            border-radius: clamp(6px, 1.6vw, 10px);
-            animation: slotPulse 1.8s ease-in-out infinite;
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+            border-bottom: 4px solid #8b5cf6;
+            border-radius: 2px;
+            margin: 0 clamp(1px, 0.5vw, 3px);
+            animation: dashPulse 1.8s ease-in-out infinite;
         }
-        @keyframes slotPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15); }
-            50%      { transform: scale(1.05); box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
+        @keyframes dashPulse {
+            0%, 100% { border-bottom-color: #8b5cf6; transform: translateY(0); }
+            50%      { border-bottom-color: #ec4899; transform: translateY(-2px); }
         }
 
-        /* ----- Audio button ----- */
         .audio-btn {
             position: relative;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -248,7 +244,6 @@
         .audio-btn:hover { transform: scale(1.06); }
         .audio-btn:active { transform: scale(0.94); }
 
-        /* ----- Options ----- */
         .options-container {
             display: flex;
             flex-wrap: wrap;
@@ -294,7 +289,6 @@
             box-shadow: none;
         }
 
-        /* ----- Result screens ----- */
         .result-screen {
             padding: clamp(8px, 3vw, 20px);
             justify-content: center;
@@ -335,7 +329,6 @@
             letter-spacing: -0.01em;
         }
 
-        /* ----- Correct word (single, clean rule) ----- */
         .correct-word {
             font-size: clamp(1.4rem, 5.5vw, 1.9rem);
             font-weight: 800;
@@ -363,7 +356,6 @@
         }
         .score-display span { font-weight: 800; color: #4f46e5; }
 
-        /* ----- Primary button ----- */
         .btn {
             position: relative;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -392,10 +384,8 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(99, 102, 241, 0.5); }
         .btn:hover::before { opacity: 1; }
         .btn:active { transform: translateY(0) scale(0.98); }
-        /* The span inside .btn needs to sit above the ::before hover overlay */
         .btn > span { position: relative; z-index: 1; }
 
-        /* ----- Short viewports ----- */
         @media (max-height: 620px) {
             header { margin-bottom: 4px; }
             h1 { font-size: 1.05rem; }
@@ -405,7 +395,7 @@
             .progress-track { height: 6px; margin-bottom: 6px; }
             .word-display { margin: 4px 0; padding: 6px; min-height: 44px; gap: 4px; }
             .tile { font-size: 1.15rem; }
-            .tile-slot { width: 20px; height: 28px; }
+            .tile-slot { width: 18px; height: 26px; border-bottom-width: 3px; }
             .audio-btn { width: 42px; height: 42px; font-size: 1.05rem; margin: 2px auto; }
             .audio-btn::after { display: none; }
             .options-container { margin: 4px 0; gap: 6px; }
@@ -472,9 +462,6 @@
     </div>
 
     <script>
-        // =====================================================================
-        // WORDS — "ai" mid-word, "ay" end-of-word
-        // =====================================================================
         const words = [
             { target: "chain",   missing: "ai", options: ["ai", "ay"] },
             { target: "paint",   missing: "ai", options: ["ai", "ay"] },
@@ -529,12 +516,7 @@
             { target: "subway",    missing: "ay", options: ["ai", "ay"] }
         ];
 
-        // =====================================================================
-        // >>> THE ONE KNOB YOU EDIT <<<
-        // 0 or negative → 1 word. Greater than deck → capped at deck size.
-        // =====================================================================
         const SESSION_SIZE = 30;
-
         const AUTO_ADVANCE_MS = 2000;
 
         let sessionWords = [];
@@ -566,7 +548,6 @@
         const totalTime         = document.getElementById('totalTime');
         const playAgainBtn      = document.getElementById('playAgainBtn');
 
-        // ----- Utilities -----
         function shuffle(arr) {
             const a = arr.slice();
             for (let i = a.length - 1; i > 0; i--) {
@@ -576,7 +557,6 @@
             return a;
         }
 
-        // ----- Timer helpers -----
         function startTimer() {
             clearInterval(gameTimer);
             startTime = Date.now() - elapsedTime * 1000;
@@ -600,7 +580,6 @@
             timer.textContent = '0s';
         }
 
-        // ----- Game lifecycle -----
         function initGame() {
             speechSupported = 'speechSynthesis' in window;
             if (!speechSupported) audioBtn.style.display = 'none';
