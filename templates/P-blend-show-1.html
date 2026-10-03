@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phonics Blends Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-base: #f6f7fb;
+        --bg-soft: #eef1f9;
+        --surface: #ffffff;
+        --surface-soft: #fafbff;
+        --border: #e5e8f0;
+        --border-strong: #d4d9e6;
+
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-soft: #eef2ff;
+        --accent: #8b5cf6;
+
+        --success: #10b981;
+        --success-dark: #059669;
+        --success-soft: #d1fae5;
+
+        --danger: #ef4444;
+        --danger-soft: #fee2e2;
+
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+        --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+        --shadow-lg: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+        --shadow-glow: 0 8px 24px -6px rgba(99, 102, 241, 0.35);
+
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+        --radius-full: 999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        background:
+            radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 50%),
+            radial-gradient(1000px 600px at 110% 110%, #fce7f3 0%, transparent 55%),
+            var(--bg-base);
+        min-height: 100vh;
+        padding: 24px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        line-height: 1.55;
+    }
+
+    .game-container {
+        width: 100%;
+        max-width: 760px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .game-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--accent), #ec4899, var(--accent), var(--primary));
+        background-size: 200% 100%;
+        animation: shimmer 8s linear infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    header { text-align: center; margin-bottom: 32px; }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: var(--radius-full);
+        margin-bottom: 16px;
+    }
+
+    .badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #0f172a 0%, #6366f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.15;
+    }
+
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .word-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 40px 24px;
+        margin: 0 0 20px;
+        background: linear-gradient(180deg, #fafbff 0%, #f5f7ff 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        min-height: 160px;
+    }
+
+    .letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 18px;
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        min-width: 64px;
+        min-height: 64px;
+    }
+
+    .letter:hover {
+        border-color: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px -6px rgba(99, 102, 241, 0.3);
+    }
+
+    .letter:active:not(.found) {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    .letter.selected {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .letter.selected:hover { border-color: transparent; }
+
+    .letter.found {
+        background: var(--success-soft);
+        color: #047857;
+        border-color: #a7f3d0;
+        box-shadow: none;
+    }
+
+    .letter.found:hover {
+        transform: none;
+        border-color: #a7f3d0;
+        box-shadow: none;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: var(--bg-soft);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .progress {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+        border-radius: var(--radius-full);
+        width: 0%;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+
+    button {
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 13px 26px;
+        border-radius: var(--radius-md);
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        color: white;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(99, 102, 241, 0.4);
+        letter-spacing: -0.01em;
+    }
+
+    button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 12px 24px -8px rgba(99, 102, 241, 0.5);
+    }
+
+    button:active:not(:disabled) { transform: translateY(0); }
+
+    button:disabled {
+        background: var(--bg-soft);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        box-shadow: none;
+        border-color: var(--border);
+    }
+
+    #checkWordBtn {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(16, 185, 129, 0.4);
+    }
+
+    #checkWordBtn:hover:not(:disabled) {
+        box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 12px 24px -8px rgba(16, 185, 129, 0.5);
+    }
+
+    #checkWordBtn:disabled {
+        background: var(--bg-soft);
+        color: var(--text-muted);
+    }
+
+    #clearSelectionBtn {
+        background: var(--surface);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+    }
+
+    #clearSelectionBtn:hover:not(:disabled) {
+        background: var(--bg-soft);
+        color: var(--text-primary);
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-md);
+    }
+
+    #clearSelectionBtn:disabled {
+        background: var(--bg-soft);
+        color: var(--text-muted);
+        border-color: var(--border);
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px 12px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        border-color: var(--border-strong);
+        transform: translateY(-2px);
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .attempts {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 18px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        width: fit-content;
+        margin: 0 auto 32px;
+    }
+
+    .attempt {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--success);
+        transition: all 0.3s ease;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .attempt.used {
+        background: var(--border-strong);
+        box-shadow: none;
+    }
+
+    .feedback-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px 40px;
+        min-width: 320px;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.25);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1000;
+    }
+
+    .feedback-popup.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .feedback-popup.correct { border-top: 4px solid var(--success); }
+    .feedback-popup.incorrect { border-top: 4px solid var(--danger); }
+
+    .feedback-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+        line-height: 1;
+    }
+
+    .feedback-popup.correct .feedback-icon {
+        color: var(--success);
+        background: var(--success-soft);
+    }
+
+    .feedback-popup.incorrect .feedback-icon {
+        color: var(--danger);
+        background: var(--danger-soft);
+    }
+
+    .feedback-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .feedback-popup.correct .feedback-title { color: var(--success); }
+    .feedback-popup.incorrect .feedback-title { color: var(--danger); }
+
+    .feedback-message {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .game-over, .victory {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .game-over-content, .victory-content {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.4);
+        animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .game-over h2, .victory h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 12px;
+    }
+
+    .game-over h2 { color: var(--danger); }
+    .victory h2 { color: var(--success); }
+
+    .game-over p, .victory p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .game-over button, .victory button {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .instructions {
+        padding: 24px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+    }
+
+    .instructions h3 {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .instructions ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .instructions li {
+        position: relative;
+        padding-left: 22px;
+        margin-bottom: 10px;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .instructions li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+    }
+
+    .instructions li:last-child { margin-bottom: 0; }
+
+    .instructions strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+        .game-container {
+            padding: 26px 20px;
+            border-radius: var(--radius-lg);
+        }
+
+        h1 { font-size: 1.75rem; }
+        .subtitle { font-size: 0.9rem; }
+
+        .word-display {
+            padding: 28px 16px;
+            min-height: 130px;
+            gap: 8px;
+        }
+
+        .letter {
+            font-size: 1.75rem;
+            min-width: 52px;
+            min-height: 52px;
+            padding: 10px 14px;
+        }
+
+        .controls { flex-direction: column; }
+        .controls button { width: 100%; }
+
+        .stat-value { font-size: 1.5rem; }
+        .stat-card { padding: 14px 8px; }
+
+        .feedback-popup {
+            padding: 28px 24px;
+            min-width: unset;
+            width: calc(100% - 32px);
+        }
+
+        .instructions { padding: 20px; }
+    }
+
+    @media (max-width: 380px) {
+        .stats { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<div class="game-container">
+    <header>
+        <span class="badge">Phonics Practice</span>
+        <h1>Blends Game</h1>
+        <p class="subtitle" id="subtitle">Identify consonant blends in words</p>
+    </header>
+
+    <div class="game-area">
+        <div class="word-display" id="wordDisplay"></div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+
+        <div class="controls">
+            <button id="checkWordBtn" disabled>Check Selection</button>
+            <button id="clearSelectionBtn">Clear Selection</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="wordsCompleted">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="blendsFound">0</div>
+                <div class="stat-label">Blends</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="accuracyRate">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <div class="attempts" id="attempts"></div>
+    </div>
+
+    <div class="instructions">
+        <h3>How to Play</h3>
+        <ul>
+            <li>Tap one letter, then tap another to highlight all letters between them</li>
+            <li>Tap a single letter twice to select just that letter (not a valid blend)</li>
+            <li>Click "Check Selection" to verify if your selection is a valid blend in this word</li>
+            <li>You must find <strong>every</strong> blend in the word before moving on</li>
+            <li>You get <strong id="retryCount">3</strong> tries per blend — finding a blend refreshes your tries</li>
+        </ul>
+    </div>
+</div>
+
+<div class="feedback-popup" id="feedbackPopup">
+    <div class="feedback-icon" id="feedbackIcon"></div>
+    <h2 class="feedback-title" id="feedbackTitle"></h2>
+    <p class="feedback-message" id="feedbackMessage"></p>
+</div>
+
+<div class="game-over" id="gameOver">
+    <div class="game-over-content">
+        <h2>Game Over</h2>
+        <p>You've used all your attempts!</p>
+        <p>Words Completed: <span id="finalScore">0</span></p>
+        <button id="restartGameBtn">Play Again</button>
+    </div>
+</div>
+
+<div class="victory" id="victory">
+    <div class="victory-content">
+        <h2>CONTINUE!</h2>
+        <p>Your Final Challenge Ahead, Continue!</p>
+        <p>Words Completed: <span id="victoryScore">0</span></p>
+        <button id="playAgainBtn">Play Again</button>
+        <button id="PracBtn" style="display: none;">Continue</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ============================================================
+       CONFIG — adjust these to control the game
+       ============================================================ */
+    const CONFIG = {
+        // Total words to complete in one run. Clamped to the number of
+        // playable words if the pool is smaller.
+        totalWords: 70,
+
+        // Attempts per blend. Finding a blend resets the counter, so
+        // each blend in a multi-blend word gets its own budget.
+        maxRetriesPerWord: 3,
+
+        // A single-letter selection consumes an attempt.
+        singleLetterConsumesAttempt: true,
+
+        // Include s-cluster 3-letter blends (spr, scr, str, spl).
+        // When false, those words are removed from the game entirely.
+        // (squ is always included regardless of this flag.)
+        allowThreeLetterBlends: true,
+
+        // Avoid the same word twice in a row.
+        avoidImmediateRepeat: true
+    };
+
+    /* ============================================================
+       DATA — cleaned dataset
+       ============================================================ */
+    const gameData = {
+        beginningBlends: {
+            'bl': ['blast', 'black', 'blue', 'blob', 'blot', 'blur', 'blip', 'blend', 'blink', 'bluff'],
+            'cl': ['class', 'clip', 'click', 'clap', 'clog', 'cluck', 'clamp', 'clasp', 'cliff', 'clank'],
+            'fl': ['flip', 'flat', 'flask', 'flop', 'fluff', 'flock', 'flame', 'flute', 'flash', 'fling'],
+            'gl': ['glass', 'glow', 'glue', 'glad', 'globe', 'glide', 'gloss', 'glint', 'glare', 'glaze'],
+            'pl': ['plus', 'play', 'plant', 'plop', 'pluck', 'plum', 'plank', 'plaza', 'plead', 'plump'],
+            'sl': ['slip', 'slow', 'slide', 'slap', 'slop', 'slush', 'slab', 'sleek', 'slate', 'sling'],
+            'br': ['brown', 'brush', 'bring', 'brass', 'brick', 'brim', 'brook', 'brave', 'bride', 'brunt'],
+            'cr': ['crab', 'crash', 'crop', 'cram', 'crisp', 'crank', 'crust', 'crest', 'crunch', 'crate'],
+            'dr': ['drop', 'drink', 'draw', 'drum', 'drill', 'dress', 'drift', 'drone', 'draft', 'drain'],
+            'fr': ['from', 'fresh', 'frame', 'frog', 'frost', 'frill', 'frock', 'frond', 'frizz', 'frown'],
+            'gr': ['grape', 'grip', 'grow', 'grin', 'grub', 'grill', 'grump', 'grate', 'grind', 'grout'],
+            'pr': ['prune', 'pray', 'pride', 'prom', 'prong', 'prank', 'print', 'prism', 'probe', 'prone'],
+            'tr': ['tree', 'try', 'trust', 'trap', 'truck', 'trick', 'trunk', 'trout', 'tract', 'trump'],
+            'sc': ['scale', 'scan', 'scalp', 'scum', 'scuff', 'scamp', 'scold', 'scout', 'scowl'],
+            'sk': ['skull', 'skin', 'skill', 'skid', 'skimp', 'skate', 'skunk', 'skirt', 'skiff', 'skulk'],
+            'st': ['start', 'stop', 'stone', 'stamp', 'stunt', 'sting', 'stunk', 'stiff', 'stalk', 'stomp'],
+            'sm': ['small', 'smart', 'smile', 'smell', 'smack', 'smock', 'smash', 'smelt', 'smite', 'smoke'],
+            'sn': ['snake', 'snap', 'sneeze', 'snip', 'snob', 'snug', 'snack', 'snort', 'snout', 'snarl'],
+            'sp': ['spine', 'space', 'spend', 'spit', 'spun', 'spell', 'spent', 'spoil', 'spout', 'spark'],
+            'sw': ['sweet', 'swim', 'swing', 'swell', 'swamp', 'swift', 'swung', 'swept', 'sworn', 'swish'],
+            'tw': ['twist', 'twin', 'twine', 'tweet', 'tweed', 'twang', 'twerp', 'twirl', 'twice'],
+            'dw': ['dwarf', 'dwell', 'dwelt'],
+            'squ': ['squat', 'squeeze', 'square', 'squid', 'squash', 'squint', 'squirm', 'squeak', 'squeal', 'squall']
+        },
+        endingBlends: {
+            'st': ['list', 'fast', 'best', 'last', 'past', 'cost', 'dust', 'just', 'must', 'rest'],
+            'sk': ['flask', 'husk', 'desk', 'task', 'mask', 'risk', 'brisk', 'cask', 'disk', 'dusk'],
+            'sp': ['rasp', 'grasp', 'gasp', 'clasp', 'crisp', 'lisp', 'wasp', 'hasp', 'cusp', 'wisp'],
+            'nd': ['hand', 'land', 'blend', 'band', 'end', 'fond', 'gland', 'pond', 'sand', 'wind'],
+            'nt': ['plant', 'went', 'rent', 'ant', 'bent', 'cent', 'dent', 'gent', 'hint', 'lint'],
+            'mp': ['jump', 'camp', 'pump', 'bump', 'dump', 'hump', 'lump', 'plump', 'rump', 'vamp'],
+            'ld': ['wild', 'hold', 'child', 'bold', 'cold', 'fold', 'gold', 'mold', 'told', 'weld'],
+            'lp': ['help', 'gulp', 'scalp', 'pulp', 'yelp', 'kelp', 'whelp', 'alp'],
+            'pt': ['kept', 'wept', 'slept', 'crept', 'swept', 'apt', 'opt', 'rapt', 'adapt', 'adopt'],
+            'ft': ['left', 'soft', 'swift', 'craft', 'drift', 'gift', 'lift', 'sift', 'raft', 'waft'],
+            'ct': ['fact', 'erect', 'sect', 'act', 'duct', 'elect', 'pact', 'tact', 'strict', 'select'],
+            'lk': ['milk', 'walk', 'talk', 'chalk', 'stalk', 'bulk', 'hulk', 'sulk', 'elk', 'silk'],
+            'lt': ['salt', 'felt', 'malt', 'belt', 'celt', 'guilt', 'jolt', 'melt', 'tilt', 'silt'],
+            'xt': ['text', 'next', 'pretext', 'context', 'betwixt'],
+            'ts': ['pets', 'pots', 'cats', 'bats', 'rats', 'hats', 'mats', 'pats', 'vats', 'gets'],
+            'rd': ['hard', 'word', 'herd', 'bard', 'card', 'ford', 'lord', 'bird', 'ward', 'yard']
+        }
+    };
+
+    const sClusterBlends = {
+        'spr': ['spring', 'sprint', 'spray', 'sprout', 'spread', 'spruce', 'sprain', 'sprawl', 'sprig', 'spree'],
+        'scr': ['scratch', 'scrap', 'scrub', 'scream', 'screen', 'screw', 'scribe', 'scroll', 'scruff', 'scramble'],
+        'str': ['string', 'strong', 'strap', 'street', 'strain', 'stream', 'stress', 'strike', 'stroke', 'struck'],
+        'spl': ['splash', 'split', 'splint', 'spleen', 'splendid', 'splice', 'splurge', 'splatter', 'splotch', 'splutter']
+    };
+
+    if (CONFIG.allowThreeLetterBlends) {
+        Object.assign(gameData.beginningBlends, sClusterBlends);
+    }
+
+    /* ============================================================
+       TARGET COMPUTATION
+       Longest beginning match wins.
+       Longest ending match wins.
+       Internal blends required unless they overlap begin/end.
+       ============================================================ */
+    const allBlendKeys = new Set([
+        ...Object.keys(gameData.beginningBlends),
+        ...Object.keys(gameData.endingBlends)
+    ]);
+
+    function findAllBlendsInWord(word) {
+        const lc = word.toLowerCase();
+        const targets = [];
+
+        let beginBlend = null;
+        for (const blend of Object.keys(gameData.beginningBlends)) {
+            if (lc.startsWith(blend) && (!beginBlend || blend.length > beginBlend.length)) {
+                beginBlend = blend;
+            }
+        }
+
+        let endBlend = null;
+        for (const blend of Object.keys(gameData.endingBlends)) {
+            if (lc.endsWith(blend) && (!endBlend || blend.length > endBlend.length)) {
+                endBlend = blend;
+            }
+        }
+
+        const beginEnd = beginBlend ? beginBlend.length : 0;
+        const endStart = endBlend ? lc.length - endBlend.length : lc.length;
+
+        if (beginBlend) {
+            targets.push({
+                blend: beginBlend,
+                indices: Array.from({ length: beginBlend.length }, (_, i) => i),
+                type: 'beginning'
+            });
+        }
+
+        if (endBlend) {
+            targets.push({
+                blend: endBlend,
+                indices: Array.from({ length: endBlend.length }, (_, i) => endStart + i),
+                type: 'ending'
+            });
+        }
+
+        const seen = new Set();
+        for (let start = 1; start < lc.length - 1; start++) {
+            for (const blend of allBlendKeys) {
+                const end = start + blend.length;
+                if (end > lc.length) continue;
+                if (lc.slice(start, end) !== blend) continue;
+
+                const indices = Array.from({ length: blend.length }, (_, i) => start + i);
+                if (beginBlend && indices.some(i => i < beginEnd)) continue;
+                if (endBlend && indices.some(i => i >= endStart)) continue;
+
+                const key = indices.join(',');
+                if (seen.has(key)) continue;
+                seen.add(key);
+
+                targets.push({ blend, indices, type: 'internal' });
+                break;
+            }
+        }
+
+        return targets;
+    }
+
+    /* ============================================================
+       WORD POOL
+       ============================================================ */
+    const rawWords = [];
+    for (const blend in gameData.beginningBlends) rawWords.push(...gameData.beginningBlends[blend]);
+    for (const blend in gameData.endingBlends) rawWords.push(...gameData.endingBlends[blend]);
+
+    const uniqueWords = [...new Set(rawWords.map(w => w.toLowerCase()))];
+    const playableWords = uniqueWords.filter(w => findAllBlendsInWord(w).length > 0);
+    const effectiveTotalWords = Math.min(CONFIG.totalWords, playableWords.length);
+
+    /* ============================================================
+       STATE
+       ============================================================ */
+    const gameState = {
+        currentWord: '',
+        selectedLetters: [],
+        wordsCompleted: 0,
+        blendsFound: 0,
+        totalAttempts: 0,
+        correctAttempts: 0,
+        attemptsRemaining: CONFIG.maxRetriesPerWord,
+        gameActive: true,
+        allBlendsInWord: [],
+        foundBlends: [],
+        inputLocked: false,
+        lastWord: ''
+    };
+
+    let feedbackTimer = null;
+    let transitionTimer = null;
+
+    /* ============================================================
+       DOM
+       ============================================================ */
+    const wordDisplay = document.getElementById('wordDisplay');
+    const subtitle = document.getElementById('subtitle');
+    const checkWordBtn = document.getElementById('checkWordBtn');
+    const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+    const feedbackPopup = document.getElementById('feedbackPopup');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const wordsCompletedElement = document.getElementById('wordsCompleted');
+    const blendsFoundElement = document.getElementById('blendsFound');
+    const accuracyRateElement = document.getElementById('accuracyRate');
+    const attemptsContainer = document.getElementById('attempts');
+    const gameOverScreen = document.getElementById('gameOver');
+    const victoryScreen = document.getElementById('victory');
+    const finalScoreElement = document.getElementById('finalScore');
+    const victoryScoreElement = document.getElementById('victoryScore');
+    const restartGameBtn = document.getElementById('restartGameBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const pracBtn = document.getElementById('PracBtn');
+    const progressBar = document.getElementById('progressBar');
+
+    document.getElementById('retryCount').textContent = CONFIG.maxRetriesPerWord;
+
+    /* ============================================================
+       INIT
+       ============================================================ */
+    function initGame() {
+        gameState.wordsCompleted = 0;
+        gameState.blendsFound = 0;
+        gameState.totalAttempts = 0;
+        gameState.correctAttempts = 0;
+        gameState.attemptsRemaining = CONFIG.maxRetriesPerWord;
+        gameState.gameActive = true;
+        gameState.inputLocked = false;
+        gameState.lastWord = '';
+
+        clearTimeout(feedbackTimer);
+        clearTimeout(transitionTimer);
+
+        updateStats();
+        updateAttemptsDisplay();
+        updateProgressBar();
+        hideFeedback();
+
+        gameOverScreen.style.display = 'none';
+        victoryScreen.style.display = 'none';
+
+        nextWord();
+    }
+
+    function nextWord() {
+        if (!gameState.gameActive) return;
+
+        gameState.selectedLetters = [];
+        gameState.foundBlends = [];
+        gameState.inputLocked = false;
+        gameState.attemptsRemaining = CONFIG.maxRetriesPerWord;
+        updateAttemptsDisplay();
+
+        let word;
+        let safety = 0;
+        do {
+            word = playableWords[Math.floor(Math.random() * playableWords.length)];
+            safety++;
+        } while (
+            CONFIG.avoidImmediateRepeat &&
+            playableWords.length > 1 &&
+            word === gameState.lastWord &&
+            safety < 20
+        );
+        gameState.lastWord = word;
+        gameState.currentWord = word;
+
+        gameState.allBlendsInWord = findAllBlendsInWord(word);
+
+        displayWord(word);
+        updateWordHint();
+        checkWordBtn.disabled = true;
+        hideFeedback();
+    }
+
+    function updateWordHint() {
+        const n = gameState.allBlendsInWord.length;
+        if (n === 1) {
+            subtitle.textContent = 'Find the blend in this word';
+        } else {
+            subtitle.textContent = `Find all ${n} blends in this word`;
+        }
+    }
+
+    /* ============================================================
+       RENDER
+       ============================================================ */
+    function displayWord(word) {
+        wordDisplay.innerHTML = '';
+        for (let i = 0; i < word.length; i++) {
+            const letter = document.createElement('span');
+            letter.className = 'letter';
+            letter.textContent = word[i];
+            letter.dataset.index = i;
+
+            letter.addEventListener('click', function () {
+                if (!gameState.gameActive || gameState.inputLocked) return;
+                handleLetterClick(parseInt(this.dataset.index));
+            });
+
+            wordDisplay.appendChild(letter);
+        }
+    }
+
+    function handleLetterClick(index) {
+        if (gameState.selectedLetters.length === 0) {
+            gameState.selectedLetters = [index];
+        } else if (gameState.selectedLetters.length === 1) {
+            const first = gameState.selectedLetters[0];
+            const start = Math.min(first, index);
+            const end = Math.max(first, index);
+            gameState.selectedLetters = [];
+            for (let i = start; i <= end; i++) gameState.selectedLetters.push(i);
+        } else {
+            gameState.selectedLetters = [index];
+        }
+        updateLetterSelection();
+    }
+
+    function updateLetterSelection() {
+        const letters = wordDisplay.querySelectorAll('.letter');
+        letters.forEach(l => l.classList.remove('selected'));
+        gameState.selectedLetters.forEach(i => {
+            if (letters[i]) letters[i].classList.add('selected');
+        });
+        checkWordBtn.disabled = gameState.selectedLetters.length === 0 || gameState.inputLocked;
+    }
+
+    function markFound(indices) {
+        const letters = wordDisplay.querySelectorAll('.letter');
+        indices.forEach(i => {
+            if (letters[i]) letters[i].classList.add('found');
+        });
+    }
+
+    /* ============================================================
+       HELPERS
+       ============================================================ */
+    function sameSelection(a, b) {
+        return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+    function findFoundBlend(text, indices) {
+        return gameState.foundBlends.find(b => b.blend === text && sameSelection(b.indices, indices));
+    }
+    function findTargetBlend(text, indices) {
+        return gameState.allBlendsInWord.find(b => b.blend === text && sameSelection(b.indices, indices));
+    }
+    function clearSelection() {
+        gameState.selectedLetters = [];
+        updateLetterSelection();
+    }
+
+    /* ============================================================
+       CHECK SELECTION
+       ============================================================ */
+    function checkSelection() {
+        if (!gameState.gameActive || gameState.inputLocked) return;
+        if (gameState.selectedLetters.length === 0) return;
+
+        const indices = [...gameState.selectedLetters].sort((a, b) => a - b);
+        const selectedText = indices.map(i => gameState.currentWord[i]).join('');
+
+        // (a) Already-found blend — no penalty
+        if (findFoundBlend(selectedText, indices)) {
+            showFeedback('Already found', `You already found "${selectedText}".`, 'correct', '✓');
+            clearSelection();
+            return;
+        }
+
+        // (b) Single-letter selection
+        if (selectedText.length < 2) {
+            if (CONFIG.singleLetterConsumesAttempt) {
+                gameState.totalAttempts++;
+                gameState.attemptsRemaining--;
+                updateAttemptsDisplay();
+                updateStats();
+            }
+            showFeedback('Not a blend', `"${selectedText}" is only one letter. Blends need at least two.`, 'incorrect', '✗');
+            clearSelection();
+            if (CONFIG.singleLetterConsumesAttempt) checkForGameOver();
+            return;
+        }
+
+        // (c) Correct target?
+        const match = findTargetBlend(selectedText, indices);
+        if (match) {
+            gameState.totalAttempts++;
+            gameState.correctAttempts++;
+            gameState.blendsFound++;
+            gameState.foundBlends.push(match);
+            gameState.allBlendsInWord = gameState.allBlendsInWord.filter(b => b !== match);
+
+            markFound(indices);
+            clearSelection();
+            updateStats();
+
+            showFeedback('Correct!', `"${selectedText}" is a ${match.type} blend.`, 'correct', '✓');
+
+            if (gameState.allBlendsInWord.length === 0) {
+                finishWord();
+            } else {
+                gameState.attemptsRemaining = CONFIG.maxRetriesPerWord;
+                updateAttemptsDisplay();
+                updateWordHint();
+            }
+            return;
+        }
+
+        // (d) Wrong
+        gameState.totalAttempts++;
+        gameState.attemptsRemaining--;
+        updateAttemptsDisplay();
+        updateStats();
+
+        const isKnownBlend = allBlendKeys.has(selectedText);
+        const insideTarget = gameState.allBlendsInWord.some(t =>
+            indices.every(i => t.indices.includes(i))
+        );
+
+        let msg;
+        if (insideTarget) {
+            msg = `"${selectedText}" is part of a longer blend. Try selecting all the letters.`;
+        } else if (isKnownBlend) {
+            msg = `"${selectedText}" is a blend, but not one in this word.`;
+        } else {
+            msg = `"${selectedText}" is not a valid blend.`;
+        }
+
+        showFeedback('Incorrect!', msg, 'incorrect', '✗');
+        clearSelection();
+        checkForGameOver();
+    }
+
+    function checkForGameOver() {
+        if (gameState.attemptsRemaining <= 0) {
+            gameState.inputLocked = true;
+            transitionTimer = setTimeout(showGameOver, 1900);
+        }
+    }
+
+    function finishWord() {
+        gameState.inputLocked = true;
+        gameState.wordsCompleted++;
+        updateStats();
+        updateProgressBar();
+
+        if (gameState.wordsCompleted >= effectiveTotalWords) {
+            transitionTimer = setTimeout(showVictory, 1900);
+        } else {
+            transitionTimer = setTimeout(nextWord, 1900);
+        }
+    }
+
+    /* ============================================================
+       FEEDBACK / STATS / UI
+       ============================================================ */
+    function showFeedback(title, message, type, icon) {
+        clearTimeout(feedbackTimer);
+        feedbackTitle.textContent = title;
+        feedbackMessage.textContent = message;
+        feedbackIcon.textContent = icon;
+        feedbackPopup.className = 'feedback-popup ' + type + ' show';
+        feedbackTimer = setTimeout(hideFeedback, 1400);
+    }
+
+    function hideFeedback() {
+        feedbackPopup.classList.remove('show');
+    }
+
+    function updateStats() {
+        wordsCompletedElement.textContent = gameState.wordsCompleted;
+        blendsFoundElement.textContent = gameState.blendsFound;
+        const acc = gameState.totalAttempts > 0
+            ? Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100)
+            : 100;
+        accuracyRateElement.textContent = acc + '%';
+    }
+
+    function updateProgressBar() {
+        const pct = (gameState.wordsCompleted / effectiveTotalWords) * 100;
+        progressBar.style.width = pct + '%';
+    }
+
+    function updateAttemptsDisplay() {
+        attemptsContainer.innerHTML = '';
+        for (let i = 0; i < CONFIG.maxRetriesPerWord; i++) {
+            const a = document.createElement('div');
+            a.className = i < gameState.attemptsRemaining ? 'attempt' : 'attempt used';
+            attemptsContainer.appendChild(a);
+        }
+    }
+
+    function showGameOver() {
+        gameState.gameActive = false;
+        gameState.inputLocked = true;
+        finalScoreElement.textContent = gameState.wordsCompleted;
+        gameOverScreen.style.display = 'flex';
+    }
+
+    function showVictory() {
+        gameState.gameActive = false;
+        gameState.inputLocked = true;
+        victoryScoreElement.textContent = gameState.wordsCompleted;
+        victoryScreen.style.display = 'flex';
+    }
+
+    /* ============================================================
+       EVENTS
+       ============================================================ */
+    checkWordBtn.addEventListener('click', checkSelection);
+    clearSelectionBtn.addEventListener('click', function () {
+        if (gameState.inputLocked) return;
+        clearSelection();
+    });
+    restartGameBtn.addEventListener('click', initGame);
+    playAgainBtn.addEventListener('click', initGame);
+    pracBtn.addEventListener('click', function () {
+        window.open('P-missingLet-B1.html', '_blank');
+    });
+
+    initGame();
+});
+</script>
+</body>
+</html>
