@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
     :root {
         --bg-base: #f6f7fb;
@@ -219,7 +220,6 @@
 
     .letter.selected:hover { border-color: transparent; }
 
-    /* Lock selected letter's active state so it doesn't nudge when pressed */
     .letter.selected:active {
         transform: translateY(-3px) scale(1.05);
     }
@@ -325,6 +325,46 @@
         color: var(--text-muted);
         border-color: var(--border);
     }
+
+    #shareWaBtn {
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(37, 211, 102, 0.45);
+    }
+    #shareWaBtn:hover:not(:disabled) {
+        box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 12px 24px -8px rgba(37, 211, 102, 0.55);
+    }
+    #shareWaBtn:disabled {
+        background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+        color: #065f46;
+    }
+
+    .share-note {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 10px;
+        line-height: 1.5;
+    }
+
+    .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 32px;
+        transform: translateX(-50%) translateY(80px);
+        background: #0f172a;
+        color: #ffffff;
+        padding: 12px 22px;
+        border-radius: var(--radius-full);
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35);
+        opacity: 0;
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+        z-index: 1100;
+        pointer-events: none;
+        max-width: 88vw;
+        text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     .stats {
         display: grid;
@@ -509,7 +549,6 @@
         width: 100%;
     }
 
-    /* Instructions — desktop inline */
     .instructions {
         padding: 24px;
         background: var(--surface-soft);
@@ -558,7 +597,6 @@
         font-weight: 600;
     }
 
-    /* Backdrop for mobile bottom sheet — hidden on desktop */
     .sheet-backdrop {
         display: none;
         position: fixed;
@@ -575,9 +613,6 @@
         pointer-events: auto;
     }
 
-    /* ============================================================
-       MOBILE — ≤640px
-       ============================================================ */
     @media (max-width: 640px) {
         body {
             padding: 12px;
@@ -727,6 +762,14 @@
         }
 
         .sheet-backdrop { display: block; }
+
+        .victory-content, .game-over-content {
+            padding: 32px 24px;
+        }
+
+        .victory h2, .game-over h2 {
+            font-size: 1.6rem;
+        }
     }
 
     @media (max-width: 380px) {
@@ -823,14 +866,18 @@
 </div>
 
 <div class="victory" id="victory" role="dialog" aria-modal="true" aria-labelledby="victoryTitle">
-    <div class="victory-content">
+    <div class="victory-content" id="victoryContent">
         <h2 id="victoryTitle">CONTINUE!</h2>
         <p>Your Final Challenge Ahead, Continue!</p>
         <p>Words Completed: <span id="victoryScore">0</span></p>
+        <button id="shareWaBtn">📤 Share to WhatsApp</button>
+        <p class="share-note">Opens WhatsApp with your result image.<br>Select your teacher's chat and send.</p>
         <button id="playAgainBtn">Play Again</button>
         <button id="PracBtn" style="display: none;">Continue</button>
     </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -889,9 +936,22 @@ document.addEventListener('DOMContentLoaded', function () {
             'ct': ['fact', 'erect', 'sect', 'act', 'duct', 'elect', 'pact', 'tact', 'strict', 'select'],
             'lk': ['milk', 'walk', 'talk', 'chalk', 'stalk', 'bulk', 'hulk', 'sulk', 'elk', 'silk'],
             'lt': ['salt', 'felt', 'malt', 'belt', 'celt', 'guilt', 'jolt', 'melt', 'tilt', 'silt'],
-            'xt': ['text', 'next', 'pretext', 'context', 'betwixt'],
+            'xt': ['text', 'next', 'context', 'pretext'],
             'ts': ['pets', 'pots', 'cats', 'bats', 'rats', 'hats', 'mats', 'pats', 'vats', 'gets'],
-            'rd': ['hard', 'word', 'herd', 'bard', 'card', 'ford', 'lord', 'bird', 'ward', 'yard']
+            'rd': [
+                'hard', 'word', 'herd', 'bard', 'card', 'ford', 'lord', 'bird', 'ward', 'yard',
+                'board', 'guard', 'sword', 'chord', 'third', 'award', 'reward', 'record'
+            ],
+            'rt': [
+                'art', 'cart', 'dart', 'part', 'start', 'chart', 'smart',
+                'hurt', 'dirt', 'shirt', 'skirt', 'sort', 'port', 'fort',
+                'short', 'sport', 'heart', 'alert', 'apart', 'depart'
+            ],
+            'rk': [
+                'ark', 'bark', 'dark', 'park', 'shark', 'spark', 'mark', 'lark',
+                'fork', 'cork', 'pork', 'stork', 'work', 'jerk', 'smirk', 'clerk',
+                'lurk', 'perk', 'quirk', 'stark'
+            ]
         }
     };
 
@@ -1006,6 +1066,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let feedbackTimer = null;
     let transitionTimer = null;
     let lastFocusedBeforeSheet = null;
+    let toastTimer = null;
 
     /* ============================================================
        DOM
@@ -1024,17 +1085,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const attemptsContainer = document.getElementById('attempts');
     const gameOverScreen = document.getElementById('gameOver');
     const victoryScreen = document.getElementById('victory');
+    const victoryContent = document.getElementById('victoryContent');
     const finalScoreElement = document.getElementById('finalScore');
     const victoryScoreElement = document.getElementById('victoryScore');
     const restartGameBtn = document.getElementById('restartGameBtn');
     const playAgainBtn = document.getElementById('playAgainBtn');
     const pracBtn = document.getElementById('PracBtn');
+    const shareWaBtn = document.getElementById('shareWaBtn');
     const progressBar = document.getElementById('progressBar');
     const helpBtn = document.getElementById('helpBtn');
     const instructionsPanel = document.getElementById('instructions');
     const sheetBackdrop = document.getElementById('sheetBackdrop');
+    const toast = document.getElementById('toast');
 
     document.getElementById('retryCount').textContent = CONFIG.maxRetriesPerWord;
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    function showToast(msg, ms) {
+        ms = ms || 2800;
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), ms);
+    }
 
     /* ============================================================
        MOBILE SHEET (with focus management)
@@ -1050,7 +1125,6 @@ document.addEventListener('DOMContentLoaded', function () {
         instructionsPanel.classList.add('open');
         sheetBackdrop.classList.add('show');
         document.body.style.overflow = 'hidden';
-        // Move focus into the sheet
         instructionsPanel.focus();
     }
 
@@ -1059,7 +1133,6 @@ document.addEventListener('DOMContentLoaded', function () {
         instructionsPanel.classList.remove('open');
         sheetBackdrop.classList.remove('show');
         document.body.style.overflow = '';
-        // Restore focus to the trigger if the sheet was actually open
         if (wasOpen && lastFocusedBeforeSheet && typeof lastFocusedBeforeSheet.focus === 'function') {
             lastFocusedBeforeSheet.focus();
         }
@@ -1073,12 +1146,10 @@ document.addEventListener('DOMContentLoaded', function () {
     sheetBackdrop.addEventListener('click', closeSheet);
 
     document.addEventListener('keydown', function (e) {
-        // Escape closes sheet
         if (e.key === 'Escape' && instructionsPanel.classList.contains('open')) {
             closeSheet();
             return;
         }
-        // Focus trap while sheet is open
         if (e.key === 'Tab' && instructionsPanel.classList.contains('open')) {
             const focusable = getFocusable(instructionsPanel);
             if (focusable.length === 0) return;
@@ -1371,7 +1442,6 @@ document.addEventListener('DOMContentLoaded', function () {
         gameState.inputLocked = true;
         finalScoreElement.textContent = gameState.wordsCompleted;
         gameOverScreen.style.display = 'flex';
-        // Move focus to the primary action
         restartGameBtn.focus();
     }
 
@@ -1380,8 +1450,89 @@ document.addEventListener('DOMContentLoaded', function () {
         gameState.inputLocked = true;
         victoryScoreElement.textContent = gameState.wordsCompleted;
         victoryScreen.style.display = 'flex';
-        // Move focus to the primary action
         playAgainBtn.focus();
+    }
+
+    /* ============================================================
+       WHATSAPP SHARE — captures clean image (no buttons),
+       uses native share sheet when available
+       ============================================================ */
+    async function shareToWhatsApp() {
+        const completed = gameState.wordsCompleted;
+        const blends = gameState.blendsFound;
+        const shareText =
+            `🏆 Phonics Blends Game — I completed ${completed} word${completed === 1 ? '' : 's'} ` +
+            `and found ${blends} blend${blends === 1 ? '' : 's'}!`;
+
+        const originalLabel = shareWaBtn.textContent;
+        shareWaBtn.disabled = true;
+
+        try {
+            if (typeof html2canvas === 'function') {
+                // Capture FIRST — before any label changes
+                const canvas = await html2canvas(victoryContent, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    onclone: function (clonedDoc) {
+                        // Hide action buttons in the captured image only
+                        ['shareWaBtn', 'playAgainBtn'].forEach(function (id) {
+                            const el = clonedDoc.getElementById(id);
+                            if (el) el.style.display = 'none';
+                        });
+                    }
+                });
+
+                // Now it's safe to change the label
+                shareWaBtn.textContent = 'Preparing image…';
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (!blob) throw new Error('toBlob returned null');
+
+                const file = new File([blob], 'phonics-blends-victory.png', { type: 'image/png' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Phonics Blends Victory',
+                            text: shareText
+                        });
+                        return;
+                    } catch (shareErr) {
+                        if (shareErr && shareErr.name === 'AbortError') return;
+                    }
+                }
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'phonics-blends-victory.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 4000);
+                showToast('Image saved! Attach it in WhatsApp.', 4200);
+                setTimeout(() => {
+                    window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
+                }, 700);
+                return;
+            }
+
+            shareWaBtn.textContent = 'Preparing image…';
+            window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
+            showToast('Tap 📎 in WhatsApp to attach your screenshot', 4200);
+
+        } catch (err) {
+            console.error('Share failed:', err);
+            try {
+                window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
+            } catch (e) { /* ignore */ }
+        } finally {
+            shareWaBtn.disabled = false;
+            shareWaBtn.textContent = originalLabel;
+        }
     }
 
     /* ============================================================
@@ -1394,6 +1545,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     restartGameBtn.addEventListener('click', initGame);
     playAgainBtn.addEventListener('click', initGame);
+    shareWaBtn.addEventListener('click', shareToWhatsApp);
     pracBtn.addEventListener('click', function () {
         window.open('P-missingLet-B1.html', '_blank');
     });
