@@ -6,11 +6,15 @@
     <title>Spelling Gap: Missing Letters Game</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent; }
+
         html, body { height: 100%; width: 100%; }
+
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             min-height: 100dvh;
+            background: #0f0c29;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 45%, #ec4899 100%);
             display: flex; justify-content: center; align-items: center;
             padding: 10px;
             padding:
@@ -18,202 +22,460 @@
                 calc(10px + env(safe-area-inset-right))
                 calc(10px + env(safe-area-inset-bottom))
                 calc(10px + env(safe-area-inset-left));
-            color: #333; overflow: hidden;
+            color: #1e293b;
+            overflow: hidden;
+            position: relative;
         }
+
+        /* ----- Ambient background blobs ----- */
+        .bg-blobs {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 0;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.55;
+        }
+        .blob-1 {
+            width: 55vmin; height: 55vmin;
+            background: #f472b6;
+            top: -15vmin; left: -10vmin;
+            animation: float 18s ease-in-out infinite;
+        }
+        .blob-2 {
+            width: 45vmin; height: 45vmin;
+            background: #60a5fa;
+            bottom: -12vmin; right: -8vmin;
+            animation: float 22s ease-in-out infinite reverse;
+        }
+        .blob-3 {
+            width: 35vmin; height: 35vmin;
+            background: #c084fc;
+            top: 40%; right: 30%;
+            animation: float 26s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%      { transform: translate(6vmin, -4vmin) scale(1.08); }
+        }
+
+        /* ----- Glass container ----- */
         .container {
-            background-color: rgba(255, 255, 255, 0.95);
-            border-radius: clamp(12px, 4vw, 20px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%; max-width: 500px; max-height: 100%;
-            padding: clamp(12px, 4vw, 30px);
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: clamp(20px, 5vw, 32px);
+            box-shadow:
+                0 20px 60px rgba(15, 12, 41, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            width: 100%;
+            max-width: 500px;
+            max-height: 100%;
+            padding: clamp(14px, 4.5vw, 32px);
             text-align: center;
             display: flex; flex-direction: column;
             overflow-y: auto;
         }
-        h1 {
-            color: #2575fc;
-            margin-bottom: clamp(8px, 2.5vw, 20px);
-            font-size: clamp(1.2rem, 4.5vw, 2rem);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            line-height: 1.2; flex-shrink: 0;
+
+        header {
+            flex-shrink: 0;
+            margin-bottom: clamp(8px, 2.5vw, 18px);
         }
+        h1 {
+            font-size: clamp(1.35rem, 5vw, 2rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.1;
+        }
+        .subtitle {
+            font-size: clamp(0.72rem, 2.6vw, 0.85rem);
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
         .screen {
-            display: none; animation: fadeIn 0.4s ease;
-            flex: 1 1 auto; flex-direction: column;
-            justify-content: center; min-height: 0;
+            display: none;
+            animation: screenIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            flex: 1 1 auto;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 0;
         }
         .active { display: flex; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes screenIn {
+            from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
+
+        /* ----- HUD chips ----- */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-bottom: 10px;
+        }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: clamp(4px, 1.5vw, 7px) clamp(10px, 3vw, 14px);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            color: #4f46e5;
+            font-size: clamp(0.72rem, 2.7vw, 0.85rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            flex-shrink: 0;
+        }
+        .chip-timer {
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+            color: #be185d;
+            border-color: rgba(236, 72, 153, 0.15);
+        }
+
+        /* ----- Progress bar ----- */
+        .progress-track {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.12);
+            overflow: hidden;
+            margin-bottom: clamp(10px, 3vw, 18px);
+            flex-shrink: 0;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+        }
+
+        /* ----- Word tiles ----- */
         .word-display {
-            font-size: clamp(1.5rem, 7.5vw, 2.4rem);
-            font-weight: bold;
-            letter-spacing: clamp(2px, 2vw, 5px);
-            margin: clamp(6px, 2vw, 18px) 0;
-            padding: clamp(6px, 2vw, 14px);
-            background: #f0f8ff; border-radius: 10px;
-            min-height: clamp(44px, 10vh, 72px);
-            display: flex; align-items: center; justify-content: center;
-            flex-wrap: wrap; flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(4px, 1.4vw, 8px);
+            margin: clamp(6px, 2vw, 14px) 0;
+            padding: clamp(10px, 3vw, 18px);
+            background: linear-gradient(180deg, #f8fafc, #eef2ff);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: clamp(14px, 3.5vw, 20px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08) inset;
+            min-height: clamp(56px, 13vh, 90px);
+            flex-shrink: 0;
         }
-        .dash {
-            display: inline-block;
-            width: clamp(16px, 4.5vw, 28px);
-            margin: 0 clamp(2px, 1vw, 5px);
-            text-align: center; color: transparent;
-            border-bottom: 3px solid red;
+        .tile {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.35rem, 6.5vw, 2.1rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #312e81;
+            min-width: clamp(24px, 6vw, 36px);
+            line-height: 1;
         }
+        .tile-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(22px, 6vw, 36px);
+            height: clamp(30px, 7.5vw, 46px);
+            background: linear-gradient(180deg, #ffffff, #e0e7ff);
+            border: 2px dashed #8b5cf6;
+            border-radius: clamp(6px, 1.6vw, 10px);
+            animation: slotPulse 1.8s ease-in-out infinite;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+        }
+        @keyframes slotPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15); }
+            50%      { transform: scale(1.05); box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
+        }
+
+        /* ----- Audio button ----- */
         .audio-btn {
-            background-color: #2575fc; color: white; border: none;
+            position: relative;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
             border-radius: 50%;
-            width: clamp(44px, 13vw, 64px); height: clamp(44px, 13vw, 64px);
-            font-size: clamp(1.1rem, 4.5vw, 1.7rem);
-            cursor: pointer; margin: clamp(4px, 1.5vw, 12px) auto;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease; flex-shrink: 0;
+            width: clamp(52px, 15vw, 68px);
+            height: clamp(52px, 15vw, 68px);
+            font-size: clamp(1.3rem, 5vw, 1.7rem);
+            cursor: pointer;
+            margin: clamp(4px, 1.5vw, 10px) auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 8px 24px rgba(139, 92, 246, 0.4),
+                0 0 0 0 rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            flex-shrink: 0;
         }
-        .audio-btn:hover { background-color: #1a5fd0; transform: scale(1.05); }
-        .audio-btn:active { transform: scale(0.95); }
+        .audio-btn::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            animation: pulseRing 2.4s ease-out infinite;
+        }
+        @keyframes pulseRing {
+            0%   { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+        .audio-btn:hover { transform: scale(1.06); }
+        .audio-btn:active { transform: scale(0.94); }
+
+        /* ----- Options ----- */
         .options-container {
-            display: flex; flex-wrap: wrap;
-            justify-content: center; align-content: center;
-            gap: clamp(6px, 2vw, 12px);
-            margin: clamp(6px, 2.5vw, 18px) 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: center;
+            gap: clamp(8px, 2.4vw, 14px);
+            margin: clamp(6px, 2vw, 14px) 0;
             flex-shrink: 0;
         }
         .option-btn {
-            flex: 1 1 40%; min-width: 60px;
-            background-color: #f0f8ff;
-            border: 2px solid #2575fc; border-radius: 10px;
-            padding: clamp(6px, 2.5vw, 14px);
-            font-size: clamp(0.95rem, 3.8vw, 1.15rem);
-            font-weight: bold; cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: clamp(36px, 9vh, 54px);
-            word-break: break-word; overflow-wrap: anywhere;
+            flex: 1 1 40%;
+            min-width: 70px;
+            position: relative;
+            background: #ffffff;
+            color: #312e81;
+            border: 2px solid rgba(99, 102, 241, 0.25);
+            border-radius: clamp(12px, 3vw, 16px);
+            padding: clamp(10px, 3vw, 16px);
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+            min-height: clamp(48px, 11vh, 62px);
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
         }
-        .option-btn:hover { background-color: #e0f0ff; transform: translateY(-3px); }
-        .option-btn:active { transform: translateY(1px); }
+        .option-btn:hover {
+            transform: translateY(-3px);
+            border-color: #8b5cf6;
+            background: linear-gradient(180deg, #ffffff, #f5f3ff);
+            box-shadow: 0 10px 24px rgba(139, 92, 246, 0.22);
+        }
+        .option-btn:active { transform: translateY(-1px) scale(0.98); }
         .option-btn:disabled {
-            opacity: 0.6; cursor: not-allowed;
-            transform: none; background-color: #f0f8ff;
+            opacity: 1;
+            cursor: not-allowed;
+            transform: none;
+            background: #f8fafc;
+            border-color: rgba(99, 102, 241, 0.15);
+            color: #94a3b8;
+            box-shadow: none;
         }
-        .progress {
-            margin-top: clamp(2px, 1vw, 12px);
-            font-weight: bold; color: #2575fc;
-            font-size: clamp(0.8rem, 3vw, 1rem); flex-shrink: 0;
-        }
-        .timer {
-            font-size: clamp(0.8rem, 3vw, 1.05rem);
-            font-weight: bold; color: #2575fc;
-            margin-top: clamp(2px, 1vw, 8px); flex-shrink: 0;
-        }
+
+        /* ----- Result screens ----- */
         .result-screen {
-            padding: clamp(8px, 3vw, 24px);
-            justify-content: center; align-items: center;
+            padding: clamp(8px, 3vw, 20px);
+            justify-content: center;
+            align-items: center;
         }
         .result-icon {
-            font-size: clamp(2.6rem, 11vw, 4.5rem);
-            margin: clamp(6px, 2vw, 16px) 0; line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(80px, 22vw, 110px);
+            height: clamp(80px, 22vw, 110px);
+            border-radius: 50%;
+            font-size: clamp(2.2rem, 9vw, 3.4rem);
+            margin: clamp(6px, 2vw, 14px) 0;
+            line-height: 1;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .success { color: #4caf50; }
-        .error   { color: #f44336; }
+        @keyframes popIn {
+            0%   { transform: scale(0.4); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .result-icon.success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #059669;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.28);
+        }
+        .result-icon.error {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #dc2626;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.28);
+        }
+
         .result-text {
-            font-size: clamp(1.1rem, 4.5vw, 1.6rem);
-            margin: clamp(8px, 2.5vw, 16px) 0;
-            font-weight: bold; line-height: 1.3;
-        }
-        .score-display {
-            font-size: clamp(0.95rem, 3.6vw, 1.2rem);
+            font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+            font-weight: 700;
+            color: #1e293b;
             margin: clamp(6px, 2vw, 12px) 0;
-            background: #f0f8ff;
-            padding: clamp(8px, 2.5vw, 14px);
-            border-radius: 10px; width: 100%;
+            letter-spacing: -0.01em;
         }
-        .btn {
-            background-color: #2575fc; color: white; border: none;
-            border-radius: 50px;
-            padding: clamp(10px, 2.8vw, 14px) clamp(18px, 5vw, 28px);
-            font-size: clamp(0.9rem, 3.4vw, 1.05rem);
-            font-weight: bold; cursor: pointer;
-            margin-top: clamp(8px, 2.5vw, 18px);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            min-height: 44px;
-        }
-        .btn:hover { background-color: #1a5fd0; transform: translateY(-3px); }
-        .btn:active { transform: translateY(1px); }
+
+        /* ----- Correct word (single, clean rule) ----- */
         .correct-word {
-            font-size: clamp(1.3rem, 5.5vw, 1.9rem);
-            color: #4caf50; font-weight: bold;
-            margin: clamp(8px, 2.5vw, 16px) 0;
+            font-size: clamp(1.4rem, 5.5vw, 1.9rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #059669;
+            margin: clamp(6px, 2vw, 12px) 0;
             padding: clamp(8px, 2.5vw, 14px);
-            background: #f0f8ff; border-radius: 10px;
-            word-break: break-word; width: 100%;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: clamp(12px, 3vw, 16px);
+            word-break: break-word;
+            width: 100%;
         }
+
+        .score-display {
+            font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+            font-weight: 600;
+            color: #334155;
+            margin: clamp(6px, 2vw, 10px) 0;
+            background: linear-gradient(180deg, #f8fafc, #eef2ff);
+            padding: clamp(10px, 3vw, 16px);
+            border-radius: clamp(12px, 3vw, 16px);
+            width: 100%;
+            border: 1px solid rgba(99, 102, 241, 0.12);
+        }
+        .score-display span { font-weight: 800; color: #4f46e5; }
+
+        /* ----- Primary button ----- */
+        .btn {
+            position: relative;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: clamp(12px, 3.2vw, 16px) clamp(24px, 7vw, 40px);
+            font-size: clamp(0.95rem, 3.6vw, 1.1rem);
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            margin-top: clamp(10px, 3vw, 18px);
+            transition: transform 0.15s ease, box-shadow 0.25s ease;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            min-height: 48px;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(99, 102, 241, 0.5); }
+        .btn:hover::before { opacity: 1; }
+        .btn:active { transform: translateY(0) scale(0.98); }
+        /* The span inside .btn needs to sit above the ::before hover overlay */
+        .btn > span { position: relative; z-index: 1; }
+
+        /* ----- Short viewports ----- */
         @media (max-height: 620px) {
-            h1 { font-size: 1rem; margin-bottom: 4px; }
-            .word-display { font-size: 1.3rem; margin: 4px 0; padding: 4px; min-height: 36px; }
-            .audio-btn { width: 38px; height: 38px; font-size: 0.95rem; margin: 2px auto; }
-            .options-container { margin: 4px 0; gap: 5px; }
-            .option-btn { padding: 5px; font-size: 0.85rem; min-height: 32px; }
-            .progress, .timer { font-size: 0.72rem; margin-top: 1px; }
-            .result-icon { font-size: 2.2rem; margin: 4px 0; }
-            .result-text { font-size: 0.95rem; margin: 4px 0; }
-            .score-display { padding: 5px; font-size: 0.85rem; margin: 3px 0; }
-            .btn { padding: 7px 14px; font-size: 0.85rem; margin-top: 6px; }
+            header { margin-bottom: 4px; }
+            h1 { font-size: 1.05rem; }
+            .subtitle { font-size: 0.65rem; }
+            .hud { margin-bottom: 4px; }
+            .chip { padding: 3px 8px; font-size: 0.68rem; }
+            .progress-track { height: 6px; margin-bottom: 6px; }
+            .word-display { margin: 4px 0; padding: 6px; min-height: 44px; gap: 4px; }
+            .tile { font-size: 1.15rem; }
+            .tile-slot { width: 20px; height: 28px; }
+            .audio-btn { width: 42px; height: 42px; font-size: 1.05rem; margin: 2px auto; }
+            .audio-btn::after { display: none; }
+            .options-container { margin: 4px 0; gap: 6px; }
+            .option-btn { padding: 7px; font-size: 0.9rem; min-height: 38px; }
+            .result-icon { width: 60px; height: 60px; font-size: 1.8rem; margin: 4px 0; }
+            .result-text { font-size: 1rem; margin: 4px 0; }
+            .correct-word { font-size: 1.15rem; padding: 6px; margin: 4px 0; }
+            .score-display { padding: 6px; font-size: 0.85rem; margin: 3px 0; }
+            .btn { padding: 8px 20px; font-size: 0.88rem; margin-top: 6px; min-height: 38px; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-blobs" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
     <div class="container">
-        <h1>Spelling Gap: Missing Letters</h1>
+        <header>
+            <h1>Spelling Gap</h1>
+            <p class="subtitle">Missing Letters</p>
+        </header>
 
         <div id="gameScreen" class="screen active">
+            <div class="hud">
+                <div class="chip" id="progress">1 / 1</div>
+                <div class="chip chip-timer" id="timer">0s</div>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
             <div class="word-display" id="wordDisplay"></div>
             <button class="audio-btn" id="audioBtn" aria-label="Hear the word">🔊</button>
             <div class="options-container" id="optionsContainer"></div>
-            <div class="progress" id="progress">Question 1 of 1</div>
-            <div class="timer" id="timer">Time: 0s</div>
         </div>
 
         <div id="correctScreen" class="screen result-screen">
             <div class="result-icon success">✓</div>
             <div class="correct-word" id="correctWordDisplay"></div>
-            <p class="result-text">Correct! Well done!</p>
-            <button class="btn" id="nextBtn">Next Word</button>
+            <p class="result-text">Nice work!</p>
+            <button class="btn" id="nextBtn"><span>Next Word</span></button>
         </div>
 
         <div id="gameOverScreen" class="screen result-screen">
             <div class="result-icon error">✗</div>
-            <p class="result-text">Game Over!</p>
-            <div class="score-display">Your score: <span id="finalScore">0</span></div>
-            <button class="btn" id="restartBtn">Play Again</button>
+            <p class="result-text">Game Over</p>
+            <div class="score-display">Score: <span id="finalScore">0</span></div>
+            <button class="btn" id="restartBtn"><span>Play Again</span></button>
         </div>
 
         <div id="congratsScreen" class="screen result-screen">
             <div class="result-icon success">🏆</div>
             <p class="result-text">Congratulations!</p>
             <div class="score-display">
-                Final Score: <span id="totalScore">0</span>/<span id="totalQuestions">0</span>
+                Final Score: <span id="totalScore">0</span> / <span id="totalQuestions">0</span>
             </div>
-            <div class="score-display">Total Time: <span id="totalTime">0</span> seconds</div>
-            <button class="btn" id="playAgainBtn">Play Again</button>
+            <div class="score-display">
+                Total Time: <span id="totalTime">0</span>s
+            </div>
+            <button class="btn" id="playAgainBtn"><span>Play Again</span></button>
         </div>
     </div>
 
     <script>
         // =====================================================================
-        // WORDS
-        // Two clean phonics rules:
-        //   - "ai" appears in the MIDDLE of a word (rain, paint, snail)
-        //   - "ay" appears at the END of a word   (day, play, today)
+        // WORDS — "ai" mid-word, "ay" end-of-word
         // =====================================================================
         const words = [
-            // ----- "ai" words (middle) -----
             { target: "chain",   missing: "ai", options: ["ai", "ay"] },
             { target: "paint",   missing: "ai", options: ["ai", "ay"] },
             { target: "train",   missing: "ai", options: ["ai", "ay"] },
@@ -240,7 +502,6 @@
             { target: "rainbow", missing: "ai", options: ["ai", "ay"] },
             { target: "sailor",  missing: "ai", options: ["ai", "ay"] },
 
-            // ----- "ay" words (end) -----
             { target: "stay",      missing: "ay", options: ["ai", "ay"] },
             { target: "way",       missing: "ay", options: ["ai", "ay"] },
             { target: "pray",      missing: "ay", options: ["ai", "ay"] },
@@ -270,10 +531,7 @@
 
         // =====================================================================
         // >>> THE ONE KNOB YOU EDIT <<<
-        // How many words per session.
-        //   - 0 or negative  → treated as 1
-        //   - 1 .. deck size → plays that many, random subset, fresh each play
-        //   - greater than deck size → capped at deck size
+        // 0 or negative → 1 word. Greater than deck → capped at deck size.
         // =====================================================================
         const SESSION_SIZE = 30;
 
@@ -297,6 +555,7 @@
         const audioBtn          = document.getElementById('audioBtn');
         const optionsContainer  = document.getElementById('optionsContainer');
         const progress          = document.getElementById('progress');
+        const progressFill      = document.getElementById('progressFill');
         const timer             = document.getElementById('timer');
         const correctWordDisplay= document.getElementById('correctWordDisplay');
         const nextBtn           = document.getElementById('nextBtn');
@@ -321,10 +580,10 @@
         function startTimer() {
             clearInterval(gameTimer);
             startTime = Date.now() - elapsedTime * 1000;
-            timer.textContent = `Time: ${elapsedTime}s`;
+            timer.textContent = `${elapsedTime}s`;
             gameTimer = setInterval(() => {
                 elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-                timer.textContent = `Time: ${elapsedTime}s`;
+                timer.textContent = `${elapsedTime}s`;
             }, 1000);
         }
         function pauseTimer() {
@@ -332,13 +591,13 @@
             clearInterval(gameTimer);
             gameTimer = null;
             elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-            timer.textContent = `Time: ${elapsedTime}s`;
+            timer.textContent = `${elapsedTime}s`;
         }
         function resetTimer() {
             clearInterval(gameTimer);
             gameTimer = null;
             elapsedTime = 0;
-            timer.textContent = 'Time: 0s';
+            timer.textContent = '0s';
         }
 
         // ----- Game lifecycle -----
@@ -353,9 +612,6 @@
             advanceTimer = null;
             if (speechSupported) window.speechSynthesis.cancel();
 
-            // Shuffle entire deck, then take SESSION_SIZE.
-            // Math.max(1, ...) → 0 or negative becomes 1.
-            // Math.min(..., words.length) → capped at deck size.
             const count = Math.max(1, Math.min(SESSION_SIZE, words.length));
             sessionWords = shuffle(words).slice(0, count);
 
@@ -376,7 +632,11 @@
             answered = false;
             const currentWord = sessionWords[currentIndex];
 
-            if (!currentWord || !currentWord.target.includes(currentWord.missing)) {
+            if (!currentWord ||
+                typeof currentWord.target !== 'string' ||
+                typeof currentWord.missing !== 'string' ||
+                !Array.isArray(currentWord.options) ||
+                !currentWord.target.includes(currentWord.missing)) {
                 console.error('Invalid word entry at index', currentIndex, currentWord);
                 nextWord();
                 return;
@@ -387,10 +647,14 @@
 
             wordDisplay.innerHTML = hidden
                 .split('')
-                .map(ch => ch === '_' ? '<span class="dash">_</span>' : ch)
+                .map(ch => ch === '_'
+                    ? '<span class="tile-slot"></span>'
+                    : `<span class="tile">${ch}</span>`)
                 .join('');
 
-            progress.textContent = `Question ${currentIndex + 1} of ${sessionWords.length}`;
+            const done = currentIndex + 1;
+            progress.textContent = `${done} / ${sessionWords.length}`;
+            progressFill.style.width = `${(done / sessionWords.length) * 100}%`;
 
             const shuffledOptions = shuffle(options);
             optionsContainer.innerHTML = '';
