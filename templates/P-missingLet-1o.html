@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Spelling Gap: Missing Letters Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -13,7 +14,6 @@
 
         body {
             min-height: 100dvh;
-            background: #0f0c29;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 45%, #ec4899 100%);
             display: flex; justify-content: center; align-items: center;
             padding: 10px;
@@ -38,24 +38,12 @@
             filter: blur(70px);
             opacity: 0.55;
         }
-        .blob-1 {
-            width: 55vmin; height: 55vmin;
-            background: #f472b6;
-            top: -15vmin; left: -10vmin;
-            animation: float 18s ease-in-out infinite;
-        }
-        .blob-2 {
-            width: 45vmin; height: 45vmin;
-            background: #60a5fa;
-            bottom: -12vmin; right: -8vmin;
-            animation: float 22s ease-in-out infinite reverse;
-        }
-        .blob-3 {
-            width: 35vmin; height: 35vmin;
-            background: #c084fc;
-            top: 40%; right: 30%;
-            animation: float 26s ease-in-out infinite;
-        }
+        .blob-1 { width: 55vmin; height: 55vmin; background: #f472b6;
+            top: -15vmin; left: -10vmin; animation: float 18s ease-in-out infinite; }
+        .blob-2 { width: 45vmin; height: 45vmin; background: #60a5fa;
+            bottom: -12vmin; right: -8vmin; animation: float 22s ease-in-out infinite reverse; }
+        .blob-3 { width: 35vmin; height: 35vmin; background: #c084fc;
+            top: 40%; right: 30%; animation: float 26s ease-in-out infinite; }
         @keyframes float {
             0%, 100% { transform: translate(0, 0) scale(1); }
             50%      { transform: translate(6vmin, -4vmin) scale(1.08); }
@@ -119,6 +107,40 @@
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
+        /* ----- Instructions ----- */
+        .instructions {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 2.4vw, 14px);
+            padding: clamp(8px, 2.5vw, 16px) 0;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(8px, 2.5vw, 14px);
+            font-size: clamp(0.88rem, 3.2vw, 1rem);
+            font-weight: 500;
+            color: #334155;
+            line-height: 1.4;
+        }
+        .step-num {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(26px, 7vw, 32px);
+            height: clamp(26px, 7vw, 32px);
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 800;
+            font-size: clamp(0.8rem, 3vw, 0.95rem);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.32);
+        }
+        .step-text { padding-top: 3px; }
+        .step-text strong { color: #4f46e5; font-weight: 800; }
+
         .hud {
             display: flex;
             justify-content: space-between;
@@ -164,7 +186,6 @@
             box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
         }
 
-        /* ----- Word tiles ----- */
         .word-display {
             display: flex;
             align-items: center;
@@ -191,8 +212,6 @@
             min-width: clamp(24px, 6vw, 36px);
             line-height: 1;
         }
-
-        /* ----- Missing-letter dash ----- */
         .tile-slot {
             display: inline-flex;
             align-items: flex-end;
@@ -223,10 +242,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow:
-                0 8px 24px rgba(139, 92, 246, 0.4),
-                0 0 0 0 rgba(139, 92, 246, 0.4);
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s ease;
             flex-shrink: 0;
         }
         .audio-btn::after {
@@ -256,7 +273,6 @@
         .option-btn {
             flex: 1 1 40%;
             min-width: 70px;
-            position: relative;
             background: #ffffff;
             color: #312e81;
             border: 2px solid rgba(99, 102, 241, 0.25);
@@ -266,7 +282,7 @@
             font-weight: 800;
             letter-spacing: 0.02em;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+            transition: transform 0.15s ease, box-shadow 0.25s ease, border-color 0.2s ease;
             min-height: clamp(48px, 11vh, 62px);
             word-break: break-word;
             overflow-wrap: anywhere;
@@ -320,7 +336,6 @@
             color: #dc2626;
             box-shadow: 0 10px 30px rgba(239, 68, 68, 0.28);
         }
-
         .result-text {
             font-size: clamp(1.15rem, 4.5vw, 1.5rem);
             font-weight: 700;
@@ -328,7 +343,6 @@
             margin: clamp(6px, 2vw, 12px) 0;
             letter-spacing: -0.01em;
         }
-
         .correct-word {
             font-size: clamp(1.4rem, 5.5vw, 1.9rem);
             font-weight: 800;
@@ -342,7 +356,6 @@
             word-break: break-word;
             width: 100%;
         }
-
         .score-display {
             font-size: clamp(0.95rem, 3.6vw, 1.15rem);
             font-weight: 600;
@@ -367,11 +380,12 @@
             font-weight: 700;
             letter-spacing: 0.01em;
             cursor: pointer;
-            margin-top: clamp(10px, 3vw, 18px);
+            margin-top: clamp(8px, 2.5vw, 14px);
             transition: transform 0.15s ease, box-shadow 0.25s ease;
             box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
             min-height: 48px;
             overflow: hidden;
+            width: 100%;
         }
         .btn::before {
             content: '';
@@ -385,6 +399,51 @@
         .btn:hover::before { opacity: 1; }
         .btn:active { transform: translateY(0) scale(0.98); }
         .btn > span { position: relative; z-index: 1; }
+
+        /* WhatsApp share button */
+        .btn-wa {
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+        }
+        .btn-wa::before { background: linear-gradient(135deg, #34e07e, #128c7e); }
+        .btn-wa:hover { box-shadow: 0 14px 36px rgba(37, 211, 102, 0.5); }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            box-shadow: none;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+        .btn-secondary::before { display: none; }
+        .btn-secondary:hover { background: #e2e8f0; box-shadow: none; }
+
+        .share-note {
+            font-size: clamp(0.72rem, 2.6vw, 0.82rem);
+            color: #64748b;
+            margin-top: 6px;
+            line-height: 1.35;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+            z-index: 100;
+            pointer-events: none;
+            max-width: 85vw;
+            text-align: center;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         @media (max-height: 620px) {
             header { margin-bottom: 4px; }
@@ -404,7 +463,10 @@
             .result-text { font-size: 1rem; margin: 4px 0; }
             .correct-word { font-size: 1.15rem; padding: 6px; margin: 4px 0; }
             .score-display { padding: 6px; font-size: 0.85rem; margin: 3px 0; }
-            .btn { padding: 8px 20px; font-size: 0.88rem; margin-top: 6px; min-height: 38px; }
+            .btn { padding: 8px 20px; font-size: 0.88rem; margin-top: 5px; min-height: 38px; }
+            .step { font-size: 0.8rem; gap: 8px; }
+            .step-num { width: 24px; height: 24px; font-size: 0.75rem; }
+            .instructions { gap: 6px; }
         }
     </style>
 </head>
@@ -421,7 +483,35 @@
             <p class="subtitle">Missing Letters</p>
         </header>
 
-        <div id="gameScreen" class="screen active">
+        <!-- INSTRUCTIONS SCREEN -->
+        <div id="instructionsScreen" class="screen active">
+            <div class="instructions">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <span class="step-text">Tap <strong>🔊</strong> to hear the word.</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <span class="step-text">Pick the missing letters: <strong>ai</strong> or <strong>ay</strong>.</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <span class="step-text">Correct → next word. Wrong → game over!</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">4</span>
+                    <span class="step-text">Finish all words to reach the <strong>🏆 Victory</strong> screen.</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">5</span>
+                    <span class="step-text">Tap <strong>Share to WhatsApp</strong> to send your result to your teacher.</span>
+                </div>
+            </div>
+            <button class="btn" id="startBtn"><span>Start Game</span></button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="gameScreen" class="screen">
             <div class="hud">
                 <div class="chip" id="progress">1 / 1</div>
                 <div class="chip chip-timer" id="timer">0s</div>
@@ -434,6 +524,7 @@
             <div class="options-container" id="optionsContainer"></div>
         </div>
 
+        <!-- CORRECT SCREEN -->
         <div id="correctScreen" class="screen result-screen">
             <div class="result-icon success">✓</div>
             <div class="correct-word" id="correctWordDisplay"></div>
@@ -441,6 +532,7 @@
             <button class="btn" id="nextBtn"><span>Next Word</span></button>
         </div>
 
+        <!-- GAME OVER SCREEN -->
         <div id="gameOverScreen" class="screen result-screen">
             <div class="result-icon error">✗</div>
             <p class="result-text">Game Over</p>
@@ -448,6 +540,7 @@
             <button class="btn" id="restartBtn"><span>Play Again</span></button>
         </div>
 
+        <!-- CONGRATS / VICTORY SCREEN -->
         <div id="congratsScreen" class="screen result-screen">
             <div class="result-icon success">🏆</div>
             <p class="result-text">Congratulations!</p>
@@ -457,9 +550,13 @@
             <div class="score-display">
                 Total Time: <span id="totalTime">0</span>s
             </div>
-            <button class="btn" id="playAgainBtn"><span>Play Again</span></button>
+            <button class="btn btn-wa" id="shareWaBtn"><span>📤 Share to WhatsApp</span></button>
+            <p class="share-note">Opens WhatsApp with your result image attached.<br>Select your teacher's chat and send.</p>
+            <button class="btn btn-secondary" id="playAgainBtn"><span>Play Again</span></button>
         </div>
     </div>
+
+    <div class="toast" id="toast"></div>
 
     <script>
         const words = [
@@ -488,7 +585,6 @@
             { target: "tailor",  missing: "ai", options: ["ai", "ay"] },
             { target: "rainbow", missing: "ai", options: ["ai", "ay"] },
             { target: "sailor",  missing: "ai", options: ["ai", "ay"] },
-
             { target: "stay",      missing: "ay", options: ["ai", "ay"] },
             { target: "way",       missing: "ay", options: ["ai", "ay"] },
             { target: "pray",      missing: "ay", options: ["ai", "ay"] },
@@ -529,6 +625,7 @@
         let answered = false;
         let speechSupported = false;
 
+        const instructionsScreen = document.getElementById('instructionsScreen');
         const gameScreen        = document.getElementById('gameScreen');
         const correctScreen     = document.getElementById('correctScreen');
         const gameOverScreen    = document.getElementById('gameOverScreen');
@@ -547,6 +644,9 @@
         const totalQuestions    = document.getElementById('totalQuestions');
         const totalTime         = document.getElementById('totalTime');
         const playAgainBtn      = document.getElementById('playAgainBtn');
+        const startBtn          = document.getElementById('startBtn');
+        const shareWaBtn        = document.getElementById('shareWaBtn');
+        const toast             = document.getElementById('toast');
 
         function shuffle(arr) {
             const a = arr.slice();
@@ -555,6 +655,13 @@
                 [a[i], a[j]] = [a[j], a[i]];
             }
             return a;
+        }
+
+        function showToast(msg, ms = 2600) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => toast.classList.remove('show'), ms);
         }
 
         function startTimer() {
@@ -583,7 +690,17 @@
         function initGame() {
             speechSupported = 'speechSynthesis' in window;
             if (!speechSupported) audioBtn.style.display = 'none';
-            startGame();
+            showInstructionsScreen();
+        }
+
+        function showInstructionsScreen() {
+            clearTimeout(advanceTimer);
+            advanceTimer = null;
+            clearInterval(gameTimer);
+            gameTimer = null;
+            if (speechSupported) window.speechSynthesis.cancel();
+            hideAllScreens();
+            instructionsScreen.classList.add('active');
         }
 
         function startGame() {
@@ -714,6 +831,7 @@
         }
 
         function hideAllScreens() {
+            instructionsScreen.classList.remove('active');
             gameScreen.classList.remove('active');
             correctScreen.classList.remove('active');
             gameOverScreen.classList.remove('active');
@@ -728,10 +846,73 @@
             window.speechSynthesis.speak(utterance);
         }
 
+        // =====================================================================
+        // Share the Victory screen to WhatsApp
+        // =====================================================================
+        async function shareToWhatsApp() {
+            const shareText = `🏆 I scored ${score}/${sessionWords.length} in Spelling Gap (missing letters ai / ay) in ${elapsedTime} seconds!`;
+
+            shareWaBtn.disabled = true;
+            const originalLabel = shareWaBtn.querySelector('span').textContent;
+            shareWaBtn.querySelector('span').textContent = 'Preparing image…';
+
+            try {
+                // Try to capture the congrats card as an image
+                if (typeof html2canvas === 'function') {
+                    const canvas = await html2canvas(congratsScreen, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        useCORS: true
+                    });
+
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    const file = new File([blob], 'spelling-gap-victory.png', { type: 'image/png' });
+
+                    // Prefer native share (works on mobile — lets user pick WhatsApp)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Spelling Gap Victory',
+                            text: shareText
+                        });
+                        return;
+                    }
+
+                    // Fallback: download the image, then open WhatsApp with text
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'spelling-gap-victory.png';
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 4000);
+                    showToast('Image saved! Now attach it in WhatsApp.', 4000);
+                    setTimeout(() => {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                    }, 600);
+                    return;
+                }
+
+                // No html2canvas: open WhatsApp with text only
+                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                showToast('Tap 📎 in WhatsApp to attach your screenshot', 4000);
+
+            } catch (err) {
+                // User cancelled the share sheet — silently ignore
+                if (err && err.name === 'AbortError') return;
+                console.error('Share failed:', err);
+                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+            } finally {
+                shareWaBtn.disabled = false;
+                shareWaBtn.querySelector('span').textContent = originalLabel;
+            }
+        }
+
         audioBtn.addEventListener('click', speakWord);
         nextBtn.addEventListener('click', nextWord);
         restartBtn.addEventListener('click', startGame);
         playAgainBtn.addEventListener('click', startGame);
+        startBtn.addEventListener('click', startGame);
+        shareWaBtn.addEventListener('click', shareToWhatsApp);
 
         window.addEventListener('load', initGame);
     </script>
