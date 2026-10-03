@@ -5,237 +5,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Spelling Gap: Missing Letters Game</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        html, body { height: 100%; width: 100%; }
         body {
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             min-height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Fallback for browsers without env() support */
+            display: flex; justify-content: center; align-items: center;
             padding: 10px;
-            /* Safe-area aware padding for notched devices */
             padding:
                 calc(10px + env(safe-area-inset-top))
                 calc(10px + env(safe-area-inset-right))
                 calc(10px + env(safe-area-inset-bottom))
                 calc(10px + env(safe-area-inset-left));
-            color: #333;
-            overflow: hidden;
+            color: #333; overflow: hidden;
         }
-
         .container {
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: clamp(12px, 4vw, 20px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 500px;
-            max-height: 100%;
+            width: 100%; max-width: 500px; max-height: 100%;
             padding: clamp(12px, 4vw, 30px);
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
+            display: flex; flex-direction: column;
             overflow-y: auto;
         }
-
         h1 {
             color: #2575fc;
             margin-bottom: clamp(8px, 2.5vw, 20px);
             font-size: clamp(1.2rem, 4.5vw, 2rem);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            line-height: 1.2;
-            flex-shrink: 0;
+            line-height: 1.2; flex-shrink: 0;
         }
-
         .screen {
-            display: none;
-            animation: fadeIn 0.4s ease;
-            flex: 1 1 auto;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 0;
+            display: none; animation: fadeIn 0.4s ease;
+            flex: 1 1 auto; flex-direction: column;
+            justify-content: center; min-height: 0;
         }
-
-        .active {
-            display: flex;
-        }
-
+        .active { display: flex; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .word-display {
             font-size: clamp(1.5rem, 7.5vw, 2.4rem);
             font-weight: bold;
             letter-spacing: clamp(2px, 2vw, 5px);
             margin: clamp(6px, 2vw, 18px) 0;
             padding: clamp(6px, 2vw, 14px);
-            background: #f0f8ff;
-            border-radius: 10px;
+            background: #f0f8ff; border-radius: 10px;
             min-height: clamp(44px, 10vh, 72px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            flex-wrap: wrap; flex-shrink: 0;
         }
-
         .dash {
             display: inline-block;
             width: clamp(16px, 4.5vw, 28px);
             margin: 0 clamp(2px, 1vw, 5px);
-            text-align: center;
-            color: transparent;
+            text-align: center; color: transparent;
             border-bottom: 3px solid red;
         }
-
         .audio-btn {
-            background-color: #2575fc;
-            color: white;
-            border: none;
+            background-color: #2575fc; color: white; border: none;
             border-radius: 50%;
-            width: clamp(44px, 13vw, 64px);
-            height: clamp(44px, 13vw, 64px);
+            width: clamp(44px, 13vw, 64px); height: clamp(44px, 13vw, 64px);
             font-size: clamp(1.1rem, 4.5vw, 1.7rem);
-            cursor: pointer;
-            margin: clamp(4px, 1.5vw, 12px) auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            cursor: pointer; margin: clamp(4px, 1.5vw, 12px) auto;
+            display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            flex-shrink: 0;
+            transition: all 0.3s ease; flex-shrink: 0;
         }
-
         .audio-btn:hover { background-color: #1a5fd0; transform: scale(1.05); }
         .audio-btn:active { transform: scale(0.95); }
-
         .options-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-content: center;
+            display: flex; flex-wrap: wrap;
+            justify-content: center; align-content: center;
             gap: clamp(6px, 2vw, 12px);
             margin: clamp(6px, 2.5vw, 18px) 0;
             flex-shrink: 0;
         }
-
         .option-btn {
-            flex: 1 1 40%;
-            min-width: 60px;
+            flex: 1 1 40%; min-width: 60px;
             background-color: #f0f8ff;
-            border: 2px solid #2575fc;
-            border-radius: 10px;
+            border: 2px solid #2575fc; border-radius: 10px;
             padding: clamp(6px, 2.5vw, 14px);
             font-size: clamp(0.95rem, 3.8vw, 1.15rem);
-            font-weight: bold;
-            cursor: pointer;
+            font-weight: bold; cursor: pointer;
             transition: all 0.2s ease;
             min-height: clamp(36px, 9vh, 54px);
-            word-break: break-word;
-            overflow-wrap: anywhere;
+            word-break: break-word; overflow-wrap: anywhere;
         }
-
         .option-btn:hover { background-color: #e0f0ff; transform: translateY(-3px); }
         .option-btn:active { transform: translateY(1px); }
-
         .option-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            background-color: #f0f8ff; /* pin bg so :hover doesn't bleed through */
+            opacity: 0.6; cursor: not-allowed;
+            transform: none; background-color: #f0f8ff;
         }
-
         .progress {
             margin-top: clamp(2px, 1vw, 12px);
-            font-weight: bold;
-            color: #2575fc;
-            font-size: clamp(0.8rem, 3vw, 1rem);
-            flex-shrink: 0;
+            font-weight: bold; color: #2575fc;
+            font-size: clamp(0.8rem, 3vw, 1rem); flex-shrink: 0;
         }
-
         .timer {
             font-size: clamp(0.8rem, 3vw, 1.05rem);
-            font-weight: bold;
-            color: #2575fc;
-            margin-top: clamp(2px, 1vw, 8px);
-            flex-shrink: 0;
+            font-weight: bold; color: #2575fc;
+            margin-top: clamp(2px, 1vw, 8px); flex-shrink: 0;
         }
-
         .result-screen {
             padding: clamp(8px, 3vw, 24px);
-            justify-content: center;
-            align-items: center;
+            justify-content: center; align-items: center;
         }
-
         .result-icon {
             font-size: clamp(2.6rem, 11vw, 4.5rem);
-            margin: clamp(6px, 2vw, 16px) 0;
-            line-height: 1;
+            margin: clamp(6px, 2vw, 16px) 0; line-height: 1;
         }
-
         .success { color: #4caf50; }
         .error   { color: #f44336; }
-
         .result-text {
             font-size: clamp(1.1rem, 4.5vw, 1.6rem);
             margin: clamp(8px, 2.5vw, 16px) 0;
-            font-weight: bold;
-            line-height: 1.3;
+            font-weight: bold; line-height: 1.3;
         }
-
         .score-display {
             font-size: clamp(0.95rem, 3.6vw, 1.2rem);
             margin: clamp(6px, 2vw, 12px) 0;
             background: #f0f8ff;
             padding: clamp(8px, 2.5vw, 14px);
-            border-radius: 10px;
-            width: 100%;
+            border-radius: 10px; width: 100%;
         }
-
         .btn {
-            background-color: #2575fc;
-            color: white;
-            border: none;
+            background-color: #2575fc; color: white; border: none;
             border-radius: 50px;
             padding: clamp(10px, 2.8vw, 14px) clamp(18px, 5vw, 28px);
             font-size: clamp(0.9rem, 3.4vw, 1.05rem);
-            font-weight: bold;
-            cursor: pointer;
+            font-weight: bold; cursor: pointer;
             margin-top: clamp(8px, 2.5vw, 18px);
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             min-height: 44px;
         }
-
         .btn:hover { background-color: #1a5fd0; transform: translateY(-3px); }
         .btn:active { transform: translateY(1px); }
-
         .correct-word {
             font-size: clamp(1.3rem, 5.5vw, 1.9rem);
-            color: #4caf50;
-            font-weight: bold;
+            color: #4caf50; font-weight: bold;
             margin: clamp(8px, 2.5vw, 16px) 0;
             padding: clamp(8px, 2.5vw, 14px);
-            background: #f0f8ff;
-            border-radius: 10px;
-            word-break: break-word;
-            width: 100%;
+            background: #f0f8ff; border-radius: 10px;
+            word-break: break-word; width: 100%;
         }
-
         @media (max-height: 620px) {
             h1 { font-size: 1rem; margin-bottom: 4px; }
             .word-display { font-size: 1.3rem; margin: 4px 0; padding: 4px; min-height: 36px; }
@@ -258,7 +176,7 @@
             <div class="word-display" id="wordDisplay"></div>
             <button class="audio-btn" id="audioBtn" aria-label="Hear the word">🔊</button>
             <div class="options-container" id="optionsContainer"></div>
-            <div class="progress" id="progress">Question 1 of 20</div>
+            <div class="progress" id="progress">Question 1 of 1</div>
             <div class="timer" id="timer">Time: 0s</div>
         </div>
 
@@ -288,33 +206,80 @@
     </div>
 
     <script>
-        // Options live in the word table — tweak freely per word.
-        // Works with any number of options (2, 3, 4, ...) and any pattern length.
+        // =====================================================================
+        // WORDS
+        // Two clean phonics rules:
+        //   - "ai" appears in the MIDDLE of a word (rain, paint, snail)
+        //   - "ay" appears at the END of a word   (day, play, today)
+        // =====================================================================
         const words = [
-            { target: "chain", missing: "ai", options: ["ai", "ay"] },
-            { target: "stay",  missing: "ay", options: ["ai", "ay"] },
-            { target: "paint", missing: "ai", options: ["ai", "ay"] },
-            { target: "way",   missing: "ay", options: ["ai", "ay"] },
-            { target: "train", missing: "ai", options: ["ai", "ay"] },
-            { target: "pray",  missing: "ay", options: ["ai", "ay"] },
-            { target: "tail",  missing: "ai", options: ["ai", "ay"] },
-            { target: "day",   missing: "ay", options: ["ai", "ay"] },
-            { target: "rain",  missing: "ai", options: ["ai", "ay"] },
-            { target: "clay",  missing: "ay", options: ["ai", "ay"] },
-            { target: "grain", missing: "ai", options: ["ai", "ay"] },
-            { target: "say",   missing: "ay", options: ["ai", "ay"] },
-            { target: "aim",   missing: "ai", options: ["ai", "ay"] },
-            { target: "tray",  missing: "ay", options: ["ai", "ay"] },
-            { target: "sail",  missing: "ai", options: ["ai", "ay"] },
-            { target: "hay",   missing: "ay", options: ["ai", "ay"] },
-            { target: "wait",  missing: "ai", options: ["ai", "ay"] },
-            { target: "play",  missing: "ay", options: ["ai", "ay"] },
-            { target: "brain", missing: "ai", options: ["ai", "ay"] },
-            { target: "may",   missing: "ay", options: ["ai", "ay"] }
+            // ----- "ai" words (middle) -----
+            { target: "chain",   missing: "ai", options: ["ai", "ay"] },
+            { target: "paint",   missing: "ai", options: ["ai", "ay"] },
+            { target: "train",   missing: "ai", options: ["ai", "ay"] },
+            { target: "tail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "rain",    missing: "ai", options: ["ai", "ay"] },
+            { target: "grain",   missing: "ai", options: ["ai", "ay"] },
+            { target: "aim",     missing: "ai", options: ["ai", "ay"] },
+            { target: "sail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "wait",    missing: "ai", options: ["ai", "ay"] },
+            { target: "brain",   missing: "ai", options: ["ai", "ay"] },
+            { target: "snail",   missing: "ai", options: ["ai", "ay"] },
+            { target: "trail",   missing: "ai", options: ["ai", "ay"] },
+            { target: "stain",   missing: "ai", options: ["ai", "ay"] },
+            { target: "plain",   missing: "ai", options: ["ai", "ay"] },
+            { target: "main",    missing: "ai", options: ["ai", "ay"] },
+            { target: "gain",    missing: "ai", options: ["ai", "ay"] },
+            { target: "mail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "nail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "jail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "rail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "fail",    missing: "ai", options: ["ai", "ay"] },
+            { target: "daisy",   missing: "ai", options: ["ai", "ay"] },
+            { target: "tailor",  missing: "ai", options: ["ai", "ay"] },
+            { target: "rainbow", missing: "ai", options: ["ai", "ay"] },
+            { target: "sailor",  missing: "ai", options: ["ai", "ay"] },
+
+            // ----- "ay" words (end) -----
+            { target: "stay",      missing: "ay", options: ["ai", "ay"] },
+            { target: "way",       missing: "ay", options: ["ai", "ay"] },
+            { target: "pray",      missing: "ay", options: ["ai", "ay"] },
+            { target: "day",       missing: "ay", options: ["ai", "ay"] },
+            { target: "clay",      missing: "ay", options: ["ai", "ay"] },
+            { target: "say",       missing: "ay", options: ["ai", "ay"] },
+            { target: "tray",      missing: "ay", options: ["ai", "ay"] },
+            { target: "hay",       missing: "ay", options: ["ai", "ay"] },
+            { target: "play",      missing: "ay", options: ["ai", "ay"] },
+            { target: "may",       missing: "ay", options: ["ai", "ay"] },
+            { target: "gray",      missing: "ay", options: ["ai", "ay"] },
+            { target: "pay",       missing: "ay", options: ["ai", "ay"] },
+            { target: "lay",       missing: "ay", options: ["ai", "ay"] },
+            { target: "ray",       missing: "ay", options: ["ai", "ay"] },
+            { target: "bay",       missing: "ay", options: ["ai", "ay"] },
+            { target: "jay",       missing: "ay", options: ["ai", "ay"] },
+            { target: "okay",      missing: "ay", options: ["ai", "ay"] },
+            { target: "today",     missing: "ay", options: ["ai", "ay"] },
+            { target: "away",      missing: "ay", options: ["ai", "ay"] },
+            { target: "delay",     missing: "ay", options: ["ai", "ay"] },
+            { target: "display",   missing: "ay", options: ["ai", "ay"] },
+            { target: "holiday",   missing: "ay", options: ["ai", "ay"] },
+            { target: "yesterday", missing: "ay", options: ["ai", "ay"] },
+            { target: "birthday",  missing: "ay", options: ["ai", "ay"] },
+            { target: "subway",    missing: "ay", options: ["ai", "ay"] }
         ];
+
+        // =====================================================================
+        // >>> THE ONE KNOB YOU EDIT <<<
+        // How many words per session.
+        //   - 0 or negative  → treated as 1
+        //   - 1 .. deck size → plays that many, random subset, fresh each play
+        //   - greater than deck size → capped at deck size
+        // =====================================================================
+        const SESSION_SIZE = 30;
 
         const AUTO_ADVANCE_MS = 2000;
 
+        let sessionWords = [];
         let currentIndex = 0;
         let score = 0;
         let startTime = 0;
@@ -342,25 +307,33 @@
         const totalTime         = document.getElementById('totalTime');
         const playAgainBtn      = document.getElementById('playAgainBtn');
 
-        // ----- Timer helpers (single source of truth) -----
+        // ----- Utilities -----
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        // ----- Timer helpers -----
         function startTimer() {
             clearInterval(gameTimer);
-            startTime = Date.now() - elapsedTime * 1000; // resume from last elapsed
+            startTime = Date.now() - elapsedTime * 1000;
             timer.textContent = `Time: ${elapsedTime}s`;
             gameTimer = setInterval(() => {
                 elapsedTime = Math.floor((Date.now() - startTime) / 1000);
                 timer.textContent = `Time: ${elapsedTime}s`;
             }, 1000);
         }
-
         function pauseTimer() {
-            if (gameTimer === null) return; // idempotent: already paused, don't recalc
+            if (gameTimer === null) return;
             clearInterval(gameTimer);
             gameTimer = null;
             elapsedTime = Math.floor((Date.now() - startTime) / 1000);
             timer.textContent = `Time: ${elapsedTime}s`;
         }
-
         function resetTimer() {
             clearInterval(gameTimer);
             gameTimer = null;
@@ -372,19 +345,25 @@
         function initGame() {
             speechSupported = 'speechSynthesis' in window;
             if (!speechSupported) audioBtn.style.display = 'none';
-            totalQuestions.textContent = words.length;
             startGame();
         }
 
         function startGame() {
             clearTimeout(advanceTimer);
             advanceTimer = null;
-
             if (speechSupported) window.speechSynthesis.cancel();
+
+            // Shuffle entire deck, then take SESSION_SIZE.
+            // Math.max(1, ...) → 0 or negative becomes 1.
+            // Math.min(..., words.length) → capped at deck size.
+            const count = Math.max(1, Math.min(SESSION_SIZE, words.length));
+            sessionWords = shuffle(words).slice(0, count);
 
             currentIndex = 0;
             score = 0;
             answered = false;
+
+            totalQuestions.textContent = sessionWords.length;
 
             resetTimer();
             startTimer();
@@ -395,7 +374,7 @@
 
         function loadWord() {
             answered = false;
-            const currentWord = words[currentIndex];
+            const currentWord = sessionWords[currentIndex];
 
             if (!currentWord || !currentWord.target.includes(currentWord.missing)) {
                 console.error('Invalid word entry at index', currentIndex, currentWord);
@@ -404,8 +383,6 @@
             }
 
             const { target, missing, options } = currentWord;
-
-            // replaceAll: handles patterns that occur more than once (e.g. "banana" + "a")
             const hidden = target.replaceAll(missing, '_'.repeat(missing.length));
 
             wordDisplay.innerHTML = hidden
@@ -413,10 +390,11 @@
                 .map(ch => ch === '_' ? '<span class="dash">_</span>' : ch)
                 .join('');
 
-            progress.textContent = `Question ${currentIndex + 1} of ${words.length}`;
+            progress.textContent = `Question ${currentIndex + 1} of ${sessionWords.length}`;
 
+            const shuffledOptions = shuffle(options);
             optionsContainer.innerHTML = '';
-            options.forEach(option => {
+            shuffledOptions.forEach(option => {
                 const button = document.createElement('button');
                 button.className = 'option-btn';
                 button.textContent = option;
@@ -428,12 +406,10 @@
         function checkAnswer(selectedOption) {
             if (answered) return;
             answered = true;
-
             optionsContainer.querySelectorAll('.option-btn')
                 .forEach(b => { b.disabled = true; });
 
-            const currentWord = words[currentIndex];
-
+            const currentWord = sessionWords[currentIndex];
             if (selectedOption === currentWord.missing) {
                 score++;
                 showCorrectScreen(currentWord.target);
@@ -443,8 +419,7 @@
         }
 
         function showCorrectScreen(targetWord) {
-            pauseTimer(); // timer stops while user reads feedback
-
+            pauseTimer();
             hideAllScreens();
             correctScreen.classList.add('active');
             correctWordDisplay.textContent = targetWord;
@@ -461,10 +436,10 @@
             advanceTimer = null;
 
             currentIndex++;
-            if (currentIndex < words.length) {
+            if (currentIndex < sessionWords.length) {
                 showGameScreen();
                 loadWord();
-                startTimer(); // resume from last elapsed
+                startTimer();
             } else {
                 showCongratsScreen();
             }
@@ -474,7 +449,6 @@
             clearTimeout(advanceTimer);
             advanceTimer = null;
             pauseTimer();
-
             hideAllScreens();
             gameOverScreen.classList.add('active');
             finalScore.textContent = score;
@@ -483,12 +457,11 @@
         function showCongratsScreen() {
             clearTimeout(advanceTimer);
             advanceTimer = null;
-            pauseTimer(); // idempotent — no-op if already paused
-
+            pauseTimer();
             hideAllScreens();
             congratsScreen.classList.add('active');
             totalScore.textContent = score;
-            totalQuestions.textContent = words.length;
+            totalQuestions.textContent = sessionWords.length;
             totalTime.textContent = elapsedTime;
         }
 
@@ -507,7 +480,7 @@
         function speakWord() {
             if (!speechSupported) return;
             window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(words[currentIndex].target);
+            const utterance = new SpeechSynthesisUtterance(sessionWords[currentIndex].target);
             utterance.rate = 0.9;
             window.speechSynthesis.speak(utterance);
         }
