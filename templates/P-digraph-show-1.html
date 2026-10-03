@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phonics Digraphs Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-base: #f6f7fb;
+        --bg-soft: #eef1f9;
+        --surface: #ffffff;
+        --surface-soft: #fafbff;
+        --border: #e5e8f0;
+        --border-strong: #d4d9e6;
+
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-soft: #eef2ff;
+        --accent: #8b5cf6;
+
+        --success: #10b981;
+        --success-dark: #059669;
+        --success-soft: #d1fae5;
+
+        --danger: #ef4444;
+        --danger-soft: #fee2e2;
+
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+        --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+        --shadow-lg: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+        --shadow-glow: 0 8px 24px -6px rgba(99, 102, 241, 0.35);
+
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+        --radius-full: 999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        background:
+            radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 50%),
+            radial-gradient(1000px 600px at 110% 110%, #fce7f3 0%, transparent 55%),
+            var(--bg-base);
+        min-height: 100vh;
+        padding: 24px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        line-height: 1.55;
+    }
+
+    .game-container {
+        width: 100%;
+        max-width: 760px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .game-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--accent), #ec4899, var(--accent), var(--primary));
+        background-size: 200% 100%;
+        animation: shimmer 8s linear infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    header { text-align: center; margin-bottom: 32px; position: relative; }
+
+    .help-btn {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        border: 1px solid transparent;
+        font-size: 1rem;
+        font-weight: 700;
+        box-shadow: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .help-btn:hover:not(:disabled) {
+        transform: none;
+        background: var(--primary);
+        color: white;
+        box-shadow: none;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: var(--radius-full);
+        margin-bottom: 16px;
+    }
+
+    .badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #0f172a 0%, #6366f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.15;
+    }
+
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .word-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 40px 24px;
+        margin: 0 0 20px;
+        background: linear-gradient(180deg, #fafbff 0%, #f5f7ff 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        min-height: 160px;
+    }
+
+    .letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 18px;
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        min-width: 64px;
+        min-height: 64px;
+    }
+
+    .letter:hover {
+        border-color: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px -6px rgba(99, 102, 241, 0.3);
+    }
+
+    .letter:active:not(.found) {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    .letter.selected {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .letter.selected:hover { border-color: transparent; }
+
+    .letter.selected:active {
+        transform: translateY(-3px) scale(1.05);
+    }
+
+    .letter.found {
+        background: var(--success-soft);
+        color: #047857;
+        border-color: #a7f3d0;
+        box-shadow: none;
+    }
+
+    .letter.found:hover {
+        transform: none;
+        border-color: #a7f3d0;
+        box-shadow: none;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: var(--bg-soft);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .progress {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+        border-radius: var(--radius-full);
+        width: 0%;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+
+    button {
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 13px 26px;
+        border-radius: var(--radius-md);
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        color: white;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(99, 102, 241, 0.4);
+        letter-spacing: -0.01em;
+    }
+
+    button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 12px 24px -8px rgba(99, 102, 241, 0.5);
+    }
+
+    button:active:not(:disabled) { transform: translateY(0); }
+
+    button:disabled {
+        background: var(--bg-soft);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        box-shadow: none;
+        border-color: var(--border);
+    }
+
+    #checkWordBtn {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px -4px rgba(16, 185, 129, 0.4);
+    }
+
+    #checkWordBtn:hover:not(:disabled) {
+        box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 12px 24px -8px rgba(16, 185, 129, 0.5);
+    }
+
+    #checkWordBtn:disabled {
+        background: var(--bg-soft);
+        color: var(--text-muted);
+    }
+
+    #clearSelectionBtn {
+        background: var(--surface);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+    }
+
+    #clearSelectionBtn:hover:not(:disabled) {
+        background: var(--bg-soft);
+        color: var(--text-primary);
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-md);
+    }
+
+    #clearSelectionBtn:disabled {
+        background: var(--bg-soft);
+        color: var(--text-muted);
+        border-color: var(--border);
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px 12px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        border-color: var(--border-strong);
+        transform: translateY(-2px);
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .attempts {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 18px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        width: fit-content;
+        margin: 0 auto 32px;
+    }
+
+    .attempt {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--success);
+        transition: all 0.3s ease;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .attempt.used {
+        background: var(--border-strong);
+        box-shadow: none;
+    }
+
+    .feedback-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px 40px;
+        min-width: 320px;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.25);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1000;
+    }
+
+    .feedback-popup.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .feedback-popup.correct { border-top: 4px solid var(--success); }
+    .feedback-popup.incorrect { border-top: 4px solid var(--danger); }
+
+    .feedback-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+        line-height: 1;
+    }
+
+    .feedback-popup.correct .feedback-icon {
+        color: var(--success);
+        background: var(--success-soft);
+    }
+
+    .feedback-popup.incorrect .feedback-icon {
+        color: var(--danger);
+        background: var(--danger-soft);
+    }
+
+    .feedback-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .feedback-popup.correct .feedback-title { color: var(--success); }
+    .feedback-popup.incorrect .feedback-title { color: var(--danger); }
+
+    .feedback-message {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .game-over, .victory {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 1001;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .game-over-content, .victory-content {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.4);
+        animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .game-over h2, .victory h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 12px;
+    }
+
+    .game-over h2 { color: var(--danger); }
+    .victory h2 { color: var(--success); }
+
+    .game-over p, .victory p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .game-over button, .victory button {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .instructions {
+        padding: 24px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+    }
+
+    .instructions h3 {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .instructions ul { list-style: none; padding: 0; }
+
+    .instructions li {
+        position: relative;
+        padding-left: 22px;
+        margin-bottom: 10px;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .instructions li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+    }
+
+    .instructions li:last-child { margin-bottom: 0; }
+
+    .instructions strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .sheet-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        z-index: 997;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .sheet-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    @media (max-width: 640px) {
+        body { padding: 12px; align-items: flex-start; }
+
+        .game-container {
+            padding: 18px 16px 20px;
+            border-radius: var(--radius-lg);
+        }
+
+        header { margin-bottom: 14px; padding-bottom: 0; }
+        .badge { display: none; }
+        h1 { font-size: 1.4rem; margin-bottom: 2px; }
+        .subtitle { font-size: 0.82rem; }
+
+        .help-btn {
+            display: inline-flex;
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+
+        .word-display {
+            padding: 22px 12px;
+            min-height: 100px;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .letter {
+            font-size: 1.4rem;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+        }
+
+        .progress-bar { margin-bottom: 14px; height: 6px; }
+
+        .controls { flex-direction: row; gap: 8px; margin-bottom: 14px; }
+
+        .controls button {
+            flex: 1;
+            width: auto;
+            padding: 11px 12px;
+            font-size: 0.85rem;
+        }
+
+        .stats {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card {
+            background: transparent;
+            border: none;
+            padding: 4px 2px;
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .stat-card:hover { transform: none; border: none; }
+
+        .stat-value { font-size: 1rem; margin-bottom: 0; letter-spacing: -0.02em; }
+
+        .stat-label {
+            font-size: 0.68rem;
+            text-transform: none;
+            letter-spacing: 0;
+            font-weight: 500;
+        }
+
+        .attempts { padding: 5px 10px; gap: 6px; margin-bottom: 14px; }
+        .attempt { width: 8px; height: 8px; }
+
+        .instructions {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            padding: 12px 22px 28px;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            box-shadow: 0 -20px 40px -12px rgba(15, 23, 42, 0.3);
+            max-height: 82vh;
+            overflow-y: auto;
+            transform: translateY(110%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 998;
+            outline: none;
+        }
+
+        .instructions.open { transform: translateY(0); }
+
+        .instructions h3 {
+            font-size: 0.72rem;
+            margin-bottom: 12px;
+            margin-top: 4px;
+        }
+
+        .instructions li {
+            font-size: 0.85rem;
+            padding-left: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sheet-backdrop { display: block; }
+    }
+
+    @media (max-width: 380px) {
+        h1 { font-size: 1.25rem; }
+        .letter {
+            font-size: 1.2rem;
+            min-width: 38px;
+            min-height: 38px;
+            padding: 5px 8px;
+        }
+        .stat-value { font-size: 0.9rem; }
+        .stat-label { font-size: 0.62rem; }
+        .controls button { padding: 10px 10px; font-size: 0.8rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="game-container">
+    <header>
+        <button class="help-btn" id="helpBtn" aria-label="How to play">?</button>
+        <span class="badge">Phonics Practice</span>
+        <h1>Digraphs Game</h1>
+        <p class="subtitle" id="subtitle">Identify digraphs in words</p>
+    </header>
+
+    <div class="game-area">
+        <div class="word-display" id="wordDisplay"></div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+
+        <div class="controls">
+            <button id="checkWordBtn" disabled>Check Selection</button>
+            <button id="clearSelectionBtn">Clear Selection</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="wordsCompleted">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="digraphsFound">0</div>
+                <div class="stat-label">Digraphs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="accuracyRate">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <div class="attempts" id="attempts"></div>
+    </div>
+
+    <div class="instructions" id="instructions" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle" tabindex="-1">
+        <h3 id="instructionsTitle">How to Play</h3>
+        <ul>
+            <li>Tap one letter, then tap another to highlight all letters between them</li>
+            <li>Tap a single letter twice to select just that letter (not a valid digraph)</li>
+            <li>Click "Check Selection" to verify if your selection is a valid digraph in this word</li>
+            <li>You must find <strong>every</strong> digraph in the word before moving on</li>
+            <li>You get <strong id="retryCount">3</strong> tries per digraph — finding a digraph refreshes your tries</li>
+        </ul>
+    </div>
+</div>
+
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+<div class="feedback-popup" id="feedbackPopup" role="status" aria-live="polite">
+    <div class="feedback-icon" id="feedbackIcon" aria-hidden="true"></div>
+    <h2 class="feedback-title" id="feedbackTitle"></h2>
+    <p class="feedback-message" id="feedbackMessage"></p>
+</div>
+
+<div class="game-over" id="gameOver" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+    <div class="game-over-content">
+        <h2 id="gameOverTitle">Game Over</h2>
+        <p>You've used all your attempts!</p>
+        <p>Words Completed: <span id="finalScore">0</span></p>
+        <button id="restartGameBtn">Play Again</button>
+    </div>
+</div>
+
+<div class="victory" id="victory" role="dialog" aria-modal="true" aria-labelledby="victoryTitle">
+    <div class="victory-content">
+        <h2 id="victoryTitle">CONTINUE!</h2>
+        <p>Your Final Challenge Ahead, Continue!</p>
+        <p>Words Completed: <span id="victoryScore">0</span></p>
+        <button id="playAgainBtn">Play Again</button>
+        <button id="PracBtn" style="display: none;">Continue</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ============================================================
+       CONFIG
+       ============================================================ */
+    const CONFIG = {
+        totalWords: 70,
+        maxRetriesPerWord: 3,
+        singleLetterConsumesAttempt: true,
+        // Includes 3-letter digraph tch. When false, tch words are removed
+        // from the pool entirely (ch fallback is NOT applied).
+        allowThreeLetterDigraphs: true,
+        avoidImmediateRepeat: true
+    };
+
+    /* ============================================================
+       DATA — digraphs
+       ============================================================ */
+    const gameData = {
+        beginningDigraphs: {
+            'sh': ['ship', 'shop', 'shut', 'shed', 'shell', 'shark', 'sheep', 'shine', 'shake', 'sharp'],
+            'ch': ['chip', 'chop', 'chin', 'chat', 'chest', 'chick', 'chair', 'chain', 'chalk', 'cheek'],
+            'th': ['this', 'that', 'them', 'then', 'thin', 'thick', 'thumb', 'thorn', 'thing', 'think'],
+            'wh': ['when', 'what', 'whip', 'wheel', 'white', 'whale', 'while', 'wheat', 'whisk', 'whiz'],
+            'ph': ['phone', 'photo', 'phase', 'phrase', 'phonics', 'phantom', 'phobia', 'phoenix'],
+            'wr': ['write', 'wrong', 'wrap', 'wrist', 'wreck', 'wrestle', 'wren', 'wrath', 'wrinkle', 'wrench'],
+            'kn': ['know', 'knee', 'knot', 'knife', 'knock', 'knit', 'knob', 'kneel', 'knack', 'knead'],
+            'gn': ['gnome', 'gnat', 'gnaw', 'gnash'],
+            'gh': ['ghost', 'ghastly', 'gherkin', 'ghetto']
+        },
+        endingDigraphs: {
+            'sh': ['fish', 'dish', 'wash', 'wish', 'rush', 'brush', 'crash', 'trash', 'flash', 'fresh'],
+            'ch': ['much', 'such', 'rich', 'which', 'bench', 'lunch', 'punch', 'torch', 'porch', 'church'],
+            'th': ['with', 'math', 'bath', 'path', 'moth', 'cloth', 'tooth', 'truth', 'breath', 'fifth'],
+            'nk': ['bank', 'tank', 'pink', 'drink', 'think', 'honk', 'junk', 'sink', 'wink', 'blank'],
+            'ng': ['sing', 'ring', 'king', 'long', 'song', 'bang', 'hang', 'bring', 'thing', 'strong'],
+            'ph': ['graph', 'morph', 'lymph', 'sylph', 'paragraph', 'autograph', 'telegraph', 'triumph', 'nymph', 'digraph'],
+            'ck': ['back', 'duck', 'sick', 'rock', 'kick', 'black', 'truck', 'click', 'stick', 'block'],
+            'gn': ['sign', 'design', 'assign', 'reign', 'feign', 'deign', 'align', 'campaign', 'foreign', 'resign'],
+            'gh': ['laugh', 'cough', 'tough', 'rough', 'enough', 'high', 'sigh', 'thigh', 'weigh', 'neigh']
+        }
+    };
+
+    const threeLetterDigraphs = {
+        'tch': ['catch', 'watch', 'match', 'pitch', 'ditch', 'witch', 'notch', 'hutch', 'stitch', 'scratch']
+    };
+
+    if (CONFIG.allowThreeLetterDigraphs) {
+        Object.assign(gameData.endingDigraphs, threeLetterDigraphs);
+    }
+
+    /* ============================================================
+       TARGET COMPUTATION
+       Longest beginning match wins.
+       Longest ending match wins.
+       Internal digraphs required unless they overlap begin/end.
+       ============================================================ */
+    const allDigraphKeys = new Set([
+        ...Object.keys(gameData.beginningDigraphs),
+        ...Object.keys(gameData.endingDigraphs)
+    ]);
+
+    function findAllDigraphsInWord(word) {
+        const lc = word.toLowerCase();
+        const targets = [];
+
+        let beginDigraph = null;
+        for (const digraph of Object.keys(gameData.beginningDigraphs)) {
+            if (lc.startsWith(digraph) && (!beginDigraph || digraph.length > beginDigraph.length)) {
+                beginDigraph = digraph;
+            }
+        }
+
+        let endDigraph = null;
+        for (const digraph of Object.keys(gameData.endingDigraphs)) {
+            if (lc.endsWith(digraph) && (!endDigraph || digraph.length > endDigraph.length)) {
+                endDigraph = digraph;
+            }
+        }
+
+        const beginEnd = beginDigraph ? beginDigraph.length : 0;
+        const endStart = endDigraph ? lc.length - endDigraph.length : lc.length;
+
+        if (beginDigraph) {
+            targets.push({
+                digraph: beginDigraph,
+                indices: Array.from({ length: beginDigraph.length }, (_, i) => i),
+                type: 'beginning'
+            });
+        }
+
+        if (endDigraph) {
+            targets.push({
+                digraph: endDigraph,
+                indices: Array.from({ length: endDigraph.length }, (_, i) => endStart + i),
+                type: 'ending'
+            });
+        }
+
+        const seen = new Set();
+        for (let start = 1; start < lc.length - 1; start++) {
+            for (const digraph of allDigraphKeys) {
+                const end = start + digraph.length;
+                if (end > lc.length) continue;
+                if (lc.slice(start, end) !== digraph) continue;
+
+                const indices = Array.from({ length: digraph.length }, (_, i) => start + i);
+                if (beginDigraph && indices.some(i => i < beginEnd)) continue;
+                if (endDigraph && indices.some(i => i >= endStart)) continue;
+
+                const key = indices.join(',');
+                if (seen.has(key)) continue;
+                seen.add(key);
+
+                targets.push({ digraph, indices, type: 'internal' });
+                break;
+            }
+        }
+
+        return targets;
+    }
+
+    /* ============================================================
+       WORD POOL
+       ============================================================ */
+    const rawWords = [];
+    for (const digraph in gameData.beginningDigraphs) rawWords.push(...gameData.beginningDigraphs[digraph]);
+    for (const digraph in gameData.endingDigraphs) rawWords.push(...gameData.endingDigraphs[digraph]);
+
+    const uniqueWords = [...new Set(rawWords.map(w => w.toLowerCase()))];
+    const playableWords = uniqueWords.filter(w => findAllDigraphsInWord(w).length > 0);
+    const effectiveTotalWords = Math.min(CONFIG.totalWords, playableWords.length);
+
+    /* ============================================================
+       STATE
+       ============================================================ */
+    const gameState = {
+        currentWord: '',
+        selectedLetters: [],
+        wordsCompleted: 0,
+        digraphsFound: 0,
+        totalAttempts: 0,
+        correctAttempts: 0,
+        attemptsRemaining: CONFIG.maxRetriesPerWord,
+        gameActive: true,
+        allDigraphsInWord: [],
+        foundDigraphs: [],
+        inputLocked: false,
+        lastWord: ''
+    };
+
+    let feedbackTimer = null;
+    let transitionTimer = null;
+    let lastFocusedBeforeSheet = null;
+
+    /* ============================================================
+       DOM
+       ============================================================ */
+    const wordDisplay = document.getElementById('wordDisplay');
+    const subtitle = document.getElementById('subtitle');
+    const checkWordBtn = document.getElementById('checkWordBtn');
+    const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+    const feedbackPopup = document.getElementById('feedbackPopup');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const wordsCompletedElement = document.getElementById('wordsCompleted');
+    const digraphsFoundElement = document.getElementById('digraphsFound');
+    const accuracyRateElement = document.getElementById('accuracyRate');
+    const attemptsContainer = document.getElementById('attempts');
+    const gameOverScreen = document.getElementById('gameOver');
+    const victoryScreen = document.getElementById('victory');
+    const finalScoreElement = document.getElementById('finalScore');
+    const victoryScoreElement = document.getElementById('victoryScore');
+    const restartGameBtn = document.getElementById('restartGameBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const pracBtn = document.getElementById('PracBtn');
+    const progressBar = document.getElementById('progressBar');
+    const helpBtn = document.getElementById('helpBtn');
+    const instructionsPanel = document.getElementById('instructions');
+    const sheetBackdrop = document.getElementById('sheetBackdrop');
+
+    document.getElementById('retryCount').textContent = CONFIG.maxRetriesPerWord;
+
+    /* ============================================================
+       MOBILE SHEET
+       ============================================================ */
+    function getFocusable(container) {
+        return container.querySelectorAll(
+            'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        );
+    }
+
+    function openSheet() {
+        lastFocusedBeforeSheet = document.activeElement;
+        instructionsPanel.classList.add('open');
+        sheetBackdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        instructionsPanel.focus();
+    }
+
+    function closeSheet() {
+        const wasOpen = instructionsPanel.classList.contains('open');
+        instructionsPanel.classList.remove('open');
+        sheetBackdrop.classList.remove('show');
+        document.body.style.overflow = '';
+        if (wasOpen && lastFocusedBeforeSheet && typeof lastFocusedBeforeSheet.focus === 'function') {
+            lastFocusedBeforeSheet.focus();
+        }
+        lastFocusedBeforeSheet = null;
+    }
+
+    helpBtn.addEventListener('click', function () {
+        if (instructionsPanel.classList.contains('open')) closeSheet();
+        else openSheet();
+    });
+    sheetBackdrop.addEventListener('click', closeSheet);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && instructionsPanel.classList.contains('open')) {
+            closeSheet();
+            return;
+        }
+        if (e.key === 'Tab' && instructionsPanel.classList.contains('open')) {
+            const focusable = getFocusable(instructionsPanel);
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    });
+
+    /* ============================================================
+       INIT
+       ============================================================ */
+    function initGame() {
+        gameState.wordsCompleted = 0;
+        gameState.digraphsFound = 0;
+        gameState.totalAttempts = 0;
+        gameState.correctAttempts = 0;
+        gameState.attemptsRemaining = CONFIG.maxRetriesPerWord;
+        gameState.gameActive = true;
+        gameState.inputLocked = false;
+        gameState.lastWord = '';
+
+        clearTimeout(feedbackTimer);
+        clearTimeout(transitionTimer);
+        closeSheet();
+
+        updateStats();
+        updateAttemptsDisplay();
+        updateProgressBar();
+        hideFeedback();
+
+        gameOverScreen.style.display = 'none';
+        victoryScreen.style.display = 'none';
+
+        nextWord();
+    }
+
+    function nextWord() {
+        if (!gameState.gameActive) return;
+
+        gameState.selectedLetters = [];
+        gameState.foundDigraphs = [];
+        gameState.inputLocked = false;
+        gameState.attemptsRemaining = CONFIG.maxRetriesPerWord;
+        updateAttemptsDisplay();
+
+        let word;
+        let safety = 0;
+        do {
+            word = playableWords[Math.floor(Math.random() * playableWords.length)];
+            safety++;
+        } while (
+            CONFIG.avoidImmediateRepeat &&
+            playableWords.length > 1 &&
+            word === gameState.lastWord &&
+            safety < 20
+        );
+        gameState.lastWord = word;
+        gameState.currentWord = word;
+
+        gameState.allDigraphsInWord = findAllDigraphsInWord(word);
+
+        displayWord(word);
+        updateWordHint();
+        checkWordBtn.disabled = true;
+        hideFeedback();
+    }
+
+    function updateWordHint() {
+        const n = gameState.allDigraphsInWord.length;
+        if (n === 1) {
+            subtitle.textContent = 'Find the digraph in this word';
+        } else {
+            subtitle.textContent = `Find all ${n} digraphs in this word`;
+        }
+    }
+
+    /* ============================================================
+       RENDER
+       ============================================================ */
+    function displayWord(word) {
+        wordDisplay.innerHTML = '';
+        for (let i = 0; i < word.length; i++) {
+            const letter = document.createElement('span');
+            letter.className = 'letter';
+            letter.textContent = word[i];
+            letter.dataset.index = i;
+
+            letter.addEventListener('click', function () {
+                if (!gameState.gameActive || gameState.inputLocked) return;
+                handleLetterClick(parseInt(this.dataset.index));
+            });
+
+            wordDisplay.appendChild(letter);
+        }
+    }
+
+    function handleLetterClick(index) {
+        if (gameState.selectedLetters.length === 0) {
+            gameState.selectedLetters = [index];
+        } else if (gameState.selectedLetters.length === 1) {
+            const first = gameState.selectedLetters[0];
+            const start = Math.min(first, index);
+            const end = Math.max(first, index);
+            gameState.selectedLetters = [];
+            for (let i = start; i <= end; i++) gameState.selectedLetters.push(i);
+        } else {
+            gameState.selectedLetters = [index];
+        }
+        updateLetterSelection();
+    }
+
+    function updateLetterSelection() {
+        const letters = wordDisplay.querySelectorAll('.letter');
+        letters.forEach(l => l.classList.remove('selected'));
+        gameState.selectedLetters.forEach(i => {
+            if (letters[i]) letters[i].classList.add('selected');
+        });
+        checkWordBtn.disabled = gameState.selectedLetters.length === 0 || gameState.inputLocked;
+    }
+
+    function markFound(indices) {
+        const letters = wordDisplay.querySelectorAll('.letter');
+        indices.forEach(i => {
+            if (letters[i]) letters[i].classList.add('found');
+        });
+    }
+
+    /* ============================================================
+       HELPERS
+       ============================================================ */
+    function sameSelection(a, b) {
+        return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+    function findFoundDigraph(text, indices) {
+        return gameState.foundDigraphs.find(d => d.digraph === text && sameSelection(d.indices, indices));
+    }
+    function findTargetDigraph(text, indices) {
+        return gameState.allDigraphsInWord.find(d => d.digraph === text && sameSelection(d.indices, indices));
+    }
+    function clearSelection() {
+        gameState.selectedLetters = [];
+        updateLetterSelection();
+    }
+
+    /* ============================================================
+       CHECK SELECTION
+       ============================================================ */
+    function checkSelection() {
+        if (!gameState.gameActive || gameState.inputLocked) return;
+        if (gameState.selectedLetters.length === 0) return;
+
+        const indices = [...gameState.selectedLetters].sort((a, b) => a - b);
+        const selectedText = indices.map(i => gameState.currentWord[i]).join('');
+
+        if (findFoundDigraph(selectedText, indices)) {
+            showFeedback('Already found', `You already found "${selectedText}".`, 'correct', '✓');
+            clearSelection();
+            return;
+        }
+
+        if (selectedText.length < 2) {
+            if (CONFIG.singleLetterConsumesAttempt) {
+                gameState.totalAttempts++;
+                gameState.attemptsRemaining--;
+                updateAttemptsDisplay();
+                updateStats();
+            }
+            showFeedback('Not a digraph', `"${selectedText}" is only one letter. Digraphs need at least two.`, 'incorrect', '✗');
+            clearSelection();
+            if (CONFIG.singleLetterConsumesAttempt) checkForGameOver();
+            return;
+        }
+
+        const match = findTargetDigraph(selectedText, indices);
+        if (match) {
+            gameState.totalAttempts++;
+            gameState.correctAttempts++;
+            gameState.digraphsFound++;
+            gameState.foundDigraphs.push(match);
+            gameState.allDigraphsInWord = gameState.allDigraphsInWord.filter(d => d !== match);
+
+            markFound(indices);
+            clearSelection();
+            updateStats();
+
+            showFeedback('Correct!', `"${selectedText}" is a ${match.type} digraph.`, 'correct', '✓');
+
+            if (gameState.allDigraphsInWord.length === 0) {
+                finishWord();
+            } else {
+                gameState.attemptsRemaining = CONFIG.maxRetriesPerWord;
+                updateAttemptsDisplay();
+                updateWordHint();
+            }
+            return;
+        }
+
+        gameState.totalAttempts++;
+        gameState.attemptsRemaining--;
+        updateAttemptsDisplay();
+        updateStats();
+
+        const isKnownDigraph = allDigraphKeys.has(selectedText);
+        const insideTarget = gameState.allDigraphsInWord.some(t =>
+            indices.every(i => t.indices.includes(i))
+        );
+
+        let msg;
+        if (insideTarget) {
+            msg = `"${selectedText}" is part of a longer digraph. Try selecting all the letters.`;
+        } else if (isKnownDigraph) {
+            msg = `"${selectedText}" is a digraph, but not one in this word.`;
+        } else {
+            msg = `"${selectedText}" is not a valid digraph.`;
+        }
+
+        showFeedback('Incorrect!', msg, 'incorrect', '✗');
+        clearSelection();
+        checkForGameOver();
+    }
+
+    function checkForGameOver() {
+        if (gameState.attemptsRemaining <= 0) {
+            gameState.inputLocked = true;
+            transitionTimer = setTimeout(showGameOver, 1900);
+        }
+    }
+
+    function finishWord() {
+        gameState.inputLocked = true;
+        gameState.wordsCompleted++;
+        updateStats();
+        updateProgressBar();
+
+        if (gameState.wordsCompleted >= effectiveTotalWords) {
+            transitionTimer = setTimeout(showVictory, 1900);
+        } else {
+            transitionTimer = setTimeout(nextWord, 1900);
+        }
+    }
+
+    /* ============================================================
+       FEEDBACK / STATS / UI
+       ============================================================ */
+    function showFeedback(title, message, type, icon) {
+        clearTimeout(feedbackTimer);
+        feedbackTitle.textContent = title;
+        feedbackMessage.textContent = message;
+        feedbackIcon.textContent = icon;
+        feedbackPopup.className = 'feedback-popup ' + type + ' show';
+        feedbackTimer = setTimeout(hideFeedback, 1400);
+    }
+
+    function hideFeedback() {
+        feedbackPopup.classList.remove('show');
+    }
+
+    function updateStats() {
+        wordsCompletedElement.textContent = gameState.wordsCompleted;
+        digraphsFoundElement.textContent = gameState.digraphsFound;
+        const acc = gameState.totalAttempts > 0
+            ? Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100)
+            : 100;
+        accuracyRateElement.textContent = acc + '%';
+    }
+
+    function updateProgressBar() {
+        const pct = (gameState.wordsCompleted / effectiveTotalWords) * 100;
+        progressBar.style.width = pct + '%';
+    }
+
+    function updateAttemptsDisplay() {
+        attemptsContainer.innerHTML = '';
+        for (let i = 0; i < CONFIG.maxRetriesPerWord; i++) {
+            const a = document.createElement('div');
+            a.className = i < gameState.attemptsRemaining ? 'attempt' : 'attempt used';
+            attemptsContainer.appendChild(a);
+        }
+    }
+
+    function showGameOver() {
+        gameState.gameActive = false;
+        gameState.inputLocked = true;
+        finalScoreElement.textContent = gameState.wordsCompleted;
+        gameOverScreen.style.display = 'flex';
+        restartGameBtn.focus();
+    }
+
+    function showVictory() {
+        gameState.gameActive = false;
+        gameState.inputLocked = true;
+        victoryScoreElement.textContent = gameState.wordsCompleted;
+        victoryScreen.style.display = 'flex';
+        playAgainBtn.focus();
+    }
+
+    /* ============================================================
+       EVENTS
+       ============================================================ */
+    checkWordBtn.addEventListener('click', checkSelection);
+    clearSelectionBtn.addEventListener('click', function () {
+        if (gameState.inputLocked) return;
+        clearSelection();
+    });
+    restartGameBtn.addEventListener('click', initGame);
+    playAgainBtn.addEventListener('click', initGame);
+    pracBtn.addEventListener('click', function () {
+        window.open('P-missingLet-B1.html', '_blank');
+    });
+
+    initGame();
+});
+</script>
+</body>
+</html>
