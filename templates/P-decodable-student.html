@@ -336,6 +336,17 @@
     .icon-btn.active-seg {
       background: #7c3aed; color: #fff; border-color: #7c3aed;
     }
+    .icon-btn.speed-btn {
+      width: auto; min-width: 40px; padding: 0 10px;
+      border-radius: 20px; font-size: 0.7rem; font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+    .icon-btn.speed-btn.is-slow {
+      background: #fef3c7; border-color: #f59e0b; color: #92400e;
+    }
+    [data-theme="dark"] .icon-btn.speed-btn.is-slow {
+      background: #78350f; border-color: #f59e0b; color: #fde68a;
+    }
 
     /* Segment overlay / modal */
     .segment-overlay {
@@ -433,6 +444,7 @@
         <div class="meta" id="readMeta"></div>
       </div>
       <button class="icon-btn" id="ttsChunkBtn" title="Read this part aloud">🔊</button>
+      <button class="icon-btn speed-btn" id="ttsSpeedBtn" title="Toggle reading speed">Slow</button>
       <button class="icon-btn" id="segmentBtn" title="Segment mode">🔤</button>
       <button class="icon-btn" id="themeBtn2" title="Toggle theme">🌙</button>
     </div>
@@ -553,6 +565,7 @@
   let profile = { name: '', grade: '' };
   let progress = {}; // lessonId -> { highestDay, bestScores: {}, submits: { 'YYYY-MM-DD': n }, currentTapped: [], readingDone: false }
   let theme = 'light';
+  let ttsSpeed = 'slow'; // 'slow' | 'normal' — saved for next time
   let currentLesson = null;
   let currentDay = 1;
   let tappedSet = new Set(); // global word keys "line-word"
@@ -561,6 +574,8 @@
   let lastResult = null;
   let segmentMode = false;
   let segmentModalWord = '';
+
+  const TTS_RATES = { slow: 0.7, normal: 0.95 };
 
   /* ========== STORAGE ========== */
   function loadStore() {
@@ -571,11 +586,12 @@
       if (data.profile) profile = data.profile;
       if (data.progress) progress = data.progress;
       if (data.theme) theme = data.theme;
+      if (data.ttsSpeed === 'slow' || data.ttsSpeed === 'normal') ttsSpeed = data.ttsSpeed;
     } catch (e) {}
   }
   function saveStore() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile, progress, theme }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile, progress, theme, ttsSpeed }));
     } catch (e) {}
   }
 
@@ -850,7 +866,32 @@
     try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
   }
 
-  function speakText(text, rate) {
+  function currentTtsRate() {
+    return TTS_RATES[ttsSpeed] || TTS_RATES.slow;
+  }
+
+  function updateSpeedBtn() {
+    const btn = document.getElementById('ttsSpeedBtn');
+    if (!btn) return;
+    if (ttsSpeed === 'slow') {
+      btn.textContent = 'Slow';
+      btn.classList.add('is-slow');
+      btn.title = 'Reading speed: Slow (tap for Normal)';
+    } else {
+      btn.textContent = 'Norm';
+      btn.classList.remove('is-slow');
+      btn.title = 'Reading speed: Normal (tap for Slow)';
+    }
+  }
+
+  function toggleTtsSpeed() {
+    ttsSpeed = ttsSpeed === 'slow' ? 'normal' : 'slow';
+    saveStore();
+    updateSpeedBtn();
+    toast(ttsSpeed === 'slow' ? 'Audio: Slow' : 'Audio: Normal', 1800);
+  }
+
+  function speakText(text) {
     if (!text || !window.speechSynthesis) {
       toast('Speech not available on this device');
       return;
@@ -858,10 +899,10 @@
     stopTTS();
     const u = new SpeechSynthesisUtterance(String(text));
     u.lang = 'en-US';
-    u.rate = rate || 0.85; // slow by default for learners
+    u.rate = currentTtsRate();
     u.pitch = 1;
 
-    // Prefer a clear/slow English voice when available
+    // Prefer a clear English voice when available
     try {
       const voices = window.speechSynthesis.getVoices() || [];
       const preferred = voices.find(v =>
@@ -887,10 +928,11 @@
     const lines = currentLesson.storyLines.slice(start, visibleChunkEnd);
     const text = lines.join(' ');
     if (!text.trim()) return;
-    speakText(text, 0.85);
+    speakText(text);
   }
 
   document.getElementById('ttsChunkBtn').addEventListener('click', speakCurrentChunk);
+  document.getElementById('ttsSpeedBtn').addEventListener('click', toggleTtsSpeed);
 
   /* ========== SEGMENT MODE ========== */
   function setSegmentMode(on) {
@@ -953,7 +995,7 @@
   document.getElementById('segmentCloseBtn').addEventListener('click', closeSegmentModal);
   document.getElementById('segmentPlayBtn').addEventListener('click', function (e) {
     e.stopPropagation();
-    speakText(segmentModalWord, 0.8);
+    speakText(segmentModalWord);
   });
   document.getElementById('segmentInner').addEventListener('click', function (e) {
     e.stopPropagation();
@@ -1298,6 +1340,7 @@
   // (replaced at build time)
   loadStore();
   applyTheme();
+  updateSpeedBtn();
 
   if (profile.name && profile.grade) {
     renderHome();
