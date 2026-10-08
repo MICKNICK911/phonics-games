@@ -538,6 +538,32 @@
             display: block;
         }
 
+        /* ---- "exist" toast ---- */
+        #toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(10, 10, 30, 0.95);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
         @media (min-width: 900px) {
             #app {
                 display: grid;
@@ -644,6 +670,7 @@
 </head>
 <body>
     <canvas id="fireworksCanvas"></canvas>
+    <div id="toast" aria-live="polite"></div>
 
     <div id="app">
         <header id="titlebar">
@@ -748,7 +775,8 @@
                 <li>Move the shooter one column at a time with <strong>◀</strong> and <strong>▶</strong>.</li>
                 <li>Press <strong>FIRE</strong> (or Enter) to shoot.</li>
                 <li>Valid words destroy one brick in the aimed column.</li>
-                <li>Invalid or repeated words add a red penalty brick.</li>
+                <li>Invalid words add a red penalty brick.</li>
+                <li>Repeating a word you already used shows <em>exist</em> and is not penalised.</li>
                 <li>Clear all bricks to win. Six penalties and you lose.</li>
             </ul>
             <div class="dialog-actions">
@@ -775,7 +803,7 @@
             SHOW_WORDS_BUTTON:     true,
             SHOW_SETTINGS_DIALOG:  false,
 
-            DEFAULT_LEVELS:        'bl(1x1), st(1x1), gl(1x1)',
+            DEFAULT_LEVELS:        'bl(1x5), fl(1x5), gl(1x5), pl(1x5), sl(1x5), cl(1x5)',
             DEFAULT_SOUND_ENABLED: true,
 
             BULLET_SPEED:            8,
@@ -801,7 +829,10 @@
 
             VICTORY_IMAGE: '',
             VICTORY_IMAGE_ALT: 'Victory!',
-            VICTORY_IMAGE_ONLY_ON_WIN: true
+            VICTORY_IMAGE_ONLY_ON_WIN: true,
+
+            /* ---- Toast ---- */
+            TOAST_EXISTS_MS:         2000
         };
 
         /* =========================================================================
@@ -1295,6 +1326,11 @@
                 click() {
                     tone({ freq: 900, freqEnd: 700, type: 'triangle', duration: 0.05, volume: 0.09 });
                 },
+                /* Soft "uh-uh" for already-used words — no penalty */
+                exists() {
+                    tone({ freq: 520, freqEnd: 420, type: 'triangle', duration: 0.10, volume: 0.16 });
+                    tone({ freq: 420, freqEnd: 320, type: 'triangle', duration: 0.12, volume: 0.16, delay: 0.10 });
+                },
                 launch() {
                     noise({ duration: 0.35, volume: 0.08, filterFreq: 500, sweepTo: 1400, filterType: 'bandpass' });
                 },
@@ -1324,13 +1360,6 @@
 
         /* =========================================================================
            FIREWORKS OVERLAY — allocation-free
-           -------------------------------------------------------------------------
-           • Fixed-capacity typed-array pools → no per-particle objects, no GC churn
-           • Swap-remove keeps all live particles packed at the front of the arrays
-           • Pre-interned colour strings → no per-frame string building
-           • fillRect (no arc, no shadowBlur) → no path tessellation / blur buffers
-           • Hard particle + rocket caps → memory stays bounded no matter how long
-             the celebration runs.
            ========================================================================= */
         const Fireworks = (() => {
             const canvas = document.getElementById('fireworksCanvas');
@@ -1346,7 +1375,6 @@
             ];
             const COLOR_COUNT = COLORS.length;
 
-            /* particle pools (structure-of-arrays) */
             const pX     = new Float32Array(MAX_PARTICLES);
             const pY     = new Float32Array(MAX_PARTICLES);
             const pVX    = new Float32Array(MAX_PARTICLES);
@@ -1357,7 +1385,6 @@
             const pCol   = new Uint8Array(MAX_PARTICLES);
             let pCount = 0;
 
-            /* rocket pools */
             const rX       = new Float32Array(MAX_ROCKETS);
             const rY       = new Float32Array(MAX_ROCKETS);
             const rVY      = new Float32Array(MAX_ROCKETS);
@@ -1402,7 +1429,7 @@
                 const room = MAX_PARTICLES - pCount;
                 if (room <= 0) return;
                 let count = BURST_MIN + ((Math.random() * (BURST_MAX - BURST_MIN)) | 0);
-                if (count > room) count = room;   // never exceed the pool
+                if (count > room) count = room;
 
                 for (let n = 0; n < count; n++) {
                     const i = pCount++;
@@ -1435,7 +1462,6 @@
 
                 cx.globalCompositeOperation = 'lighter';
 
-                /* ---- rockets ---- */
                 for (let i = rCount - 1; i >= 0; i--) {
                     rY[i] += rVY[i];
                     rVY[i] += 0.16;
@@ -1453,7 +1479,6 @@
                     }
                 }
 
-                /* ---- particles ---- */
                 for (let i = pCount - 1; i >= 0; i--) {
                     pVY[i] += 0.05;
                     pVX[i] *= 0.99;
@@ -1516,6 +1541,21 @@
             return { start, stop };
         })();
 
+        /* ================= Toast ================= */
+        let toastTimer = null;
+
+        function showToast(message, duration = CONFIG.TOAST_EXISTS_MS) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
         /* ================= Level Parsing ================= */
         function parseLevels(str) {
             const levels = [];
@@ -1557,7 +1597,7 @@
         const MIN_BRICK_W = CONFIG.MIN_BRICK_W;
 
         /* ================= Column geometry ================= */
-        let brickWidth = 56;   // actual computed px width of each brick column
+        let brickWidth = 56;
 
         function currentColumnCount() {
             return levels[currentLevelIndex] ? levels[currentLevelIndex].bricks : 8;
@@ -1567,10 +1607,6 @@
             return levels[currentLevelIndex] ? levels[currentLevelIndex].rows : 3;
         }
 
-        /* Sizes the brick columns to a *fixed pixel width* instead of a
-           fraction of the play area. Few columns → bricks keep a sane size
-           and the whole grid just centres itself; many columns → the grid
-           shrinks so it still fits both the width and the height budget. */
         function layoutGrid() {
             const grid      = document.getElementById('brickGrid');
             const container = document.getElementById('gameContainer');
@@ -1581,12 +1617,10 @@
             const containerH = container.clientHeight || 320;
 
             const availW = Math.max(40, containerW - GRID_PADDING * 2);
-            const availH = Math.max(60, containerH - 120);   // keep clear of the shooter
+            const availH = Math.max(60, containerH - 120);
 
-            // Width-limited size
             let bw = (availW - (N - 1) * GRID_GAP) / N;
 
-            // Height-limited size (brick height = bw / BRICK_RATIO)
             const maxBrickH = (availH - (rows - 1) * GRID_GAP) / rows;
             bw = Math.min(bw, maxBrickH * BRICK_RATIO, MAX_BRICK_W);
             bw = Math.max(bw, MIN_BRICK_W);
@@ -1603,7 +1637,7 @@
             const containerW = container.clientWidth || 320;
             const innerW     = containerW - GRID_PADDING * 2;
             const gridW      = N * brickWidth + (N - 1) * GRID_GAP;
-            const offset     = GRID_PADDING + (innerW - gridW) / 2;  // matches justify-content:center
+            const offset     = GRID_PADDING + (innerW - gridW) / 2;
             return offset + col * (brickWidth + GRID_GAP) + brickWidth / 2;
         }
 
@@ -1804,6 +1838,17 @@
             const currentWord = document.getElementById('currentWord').textContent;
             if (!currentWord) return;
 
+            const inputLower = currentWord.toLowerCase();
+
+            /* --- Already-used word: toast + soft sound, NO penalty --- */
+            if (usedWords.includes(inputLower)) {
+                showToast('exist', CONFIG.TOAST_EXISTS_MS);
+                SoundEngine.exists();
+                document.getElementById('currentWord').textContent = '';
+                return;
+            }
+
+            /* --- Invalid word: red brick + penalty --- */
             if (!checkWord()) {
                 addRedBrickToGrid();
                 updateBrickCount();
@@ -1817,7 +1862,8 @@
                 return;
             }
 
-            usedWords.push(currentWord);
+            /* --- Valid word: fire! --- */
+            usedWords.push(inputLower);
             renderUsedWords();
             document.getElementById('wordsUsed').textContent = usedWords.length;
             document.getElementById('currentWord').textContent = '';
