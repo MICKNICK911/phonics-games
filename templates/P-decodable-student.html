@@ -920,21 +920,22 @@
   document.getElementById('exitSegmentBtn').addEventListener('click', exitSegmentMode);
 
   function openSegmentModal(wordText) {
-    // Strip trailing punctuation for cleaner display/TTS, keep original for letters if needed
+    // Strip trailing punctuation for cleaner display/TTS
     const clean = String(wordText || '').replace(/[.,!?;:'"]+$/g, '');
     segmentModalWord = clean || String(wordText || '');
     const box = document.getElementById('segmentWord');
     box.innerHTML = '';
+    // Same sequence for every letter; each letter cycles independently
     const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7', '#ffffff'];
-    let ci = 0;
     Array.from(segmentModalWord).forEach(ch => {
       const s = document.createElement('span');
       s.className = 'segment-letter';
       s.textContent = ch === ' ' ? '\u00A0' : ch;
+      let letterIndex = 0; // independent cycle per letter
       s.addEventListener('click', e => {
         e.stopPropagation();
-        s.style.color = colors[ci % colors.length];
-        ci++;
+        s.style.color = colors[letterIndex % colors.length];
+        letterIndex++;
       });
       box.appendChild(s);
     });
