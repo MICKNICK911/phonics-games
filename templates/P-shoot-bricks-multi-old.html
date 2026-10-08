@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>Word Brick Breaker</title>
+    <style>
+        :root {
+            --gold: #ffd700;
+            --panel-bg: rgba(0, 0, 0, 0.4);
+            --panel-bg-solid: rgba(10, 10, 30, 0.97);
+            --brick-green: linear-gradient(135deg, #4CAF50, #2E7D32);
+            --brick-red: linear-gradient(135deg, #f44336, #c62828);
+            --key-blue: linear-gradient(to bottom, #4a86e8, #1c5bb6);
+            --key-green: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            --key-red: linear-gradient(to bottom, #f44336, #c62828);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a2a6c;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
+            touch-action: manipulation;
+        }
+
+        #app {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            padding: 0;
+            padding-top: env(safe-area-inset-top);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+        }
+
+        #titlebar {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: justify;
+            -webkit-justify-content: space-between;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            padding: 6px 12px;
+            gap: 8px;
+        }
+
+        #titlebar h1 {
+            font-size: 1.4rem;
+            font-size: clamp(0.95rem, 3.8vw, 1.8rem);
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #ff8c00, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .titlebar-actions {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            gap: 4px;
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+            color: var(--gold);
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            -webkit-transition: background 0.15s;
+            transition: background 0.15s;
+        }
+
+        .icon-btn:active {
+            background: rgba(255, 215, 0, 0.25);
+        }
+
+        #statStrip {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-justify-content: space-around;
+            -ms-flex-pack: distribute;
+            justify-content: space-around;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 8px;
+            margin: 0 10px 4px;
+            padding: 4px 10px;
+            background: rgba(0, 0, 0, 0.4);
+            background: var(--panel-bg);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .stat {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-icon {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        .stat-value {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #ffd700;
+            color: var(--gold);
+        }
+
+        #gameContainer {
+            position: relative;
+            -webkit-box-flex: 1;
+            -webkit-flex: 1 1 auto;
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin: 4px 10px 6px;
+            overflow: hidden;
+            background: #0b3d91;
+            background: linear-gradient(180deg, #0b3d91 0%, #1a237e 100%);
+            border: 2px solid #ffd700;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+        }
+
+        #brickGrid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: -ms-grid;
+            display: grid;
+            grid-template-columns: repeat(var(--cols, 8), minmax(0, 1fr));
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .brick {
+            width: 100%;
+            height: 40px;
+            height: var(--brick-h, 40px);
+            background: #4CAF50;
+            background: var(--brick-green);
+            border-radius: 4px;
+            -webkit-transition: opacity 0.15s;
+            transition: opacity 0.15s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .brick.red {
+            background: #f44336;
+            background: var(--brick-red);
+        }
+
+        .brick.destroyed {
+            visibility: hidden;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        #shooter {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            width: 46px;
+            width: clamp(34px, 7vw, 60px);
+            height: 46px;
+            height: clamp(34px, 7vw, 60px);
+            background: radial-gradient(circle, #ff9800 0%, #f57c00 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff9800;
+            border: 2px solid #ffd700;
+            border: 2px solid var(--gold);
+            z-index: 10;
+            -webkit-transition: left 0.08s ease-out;
+            transition: left 0.08s ease-out;
+        }
+
+        #shooter::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            width: 22%;
+            height: 16px;
+            background: linear-gradient(to bottom, #ffd700, #f57c00);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 8px #ff5252;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            background: #1a237e;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 14px;
+            display: none;
+            z-index: 1000;
+            width: 82%;
+            max-width: 360px;
+            border: 3px solid #ffd700;
+            border: 3px solid var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .gameOver h2 {
+            font-size: 1.9rem;
+            margin-bottom: 12px;
+            color: #ffd700;
+            color: var(--gold);
+        }
+
+        .gameOver p {
+            font-size: 1.05rem;
+            margin-bottom: 18px;
+        }
+
+        #victoryImage {
+            display: block;
+            max-width: 100%;
+            max-height: 28vh;
+            margin: 0 auto 14px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+            object-fit: contain;
+            -webkit-animation: victoryPop 0.5s ease-out;
+            animation: victoryPop 0.5s ease-out;
+        }
+
+        #victoryImage.hidden {
+            display: none;
+        }
+
+        @-webkit-keyframes victoryPop {
+            0%   { -webkit-transform: scale(0.6); opacity: 0; }
+            70%  { -webkit-transform: scale(1.08); opacity: 1; }
+            100% { -webkit-transform: scale(1); }
+        }
+
+        @keyframes victoryPop {
+            0%   { transform: scale(0.6); opacity: 0; }
+            70%  { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        #playArea {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            padding: 0 12px;
+        }
+
+        #currentWord {
+            text-align: center;
+            font-size: 1.6rem;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            font-weight: bold;
+            height: 1.7em;
+            line-height: 1.7em;
+            letter-spacing: 3px;
+            color: #ffd700;
+            color: var(--gold);
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        #moveBar {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            gap: 6px;
+            padding: 4px 12px;
+        }
+
+        #moveBar button {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+        }
+
+        .key-btn-lf {
+            padding: 10px 4px;
+            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 2.8vw, 1rem);
+            font-weight: bold;
+            background: #4CAF50;
+            background: var(--key-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 3px 0 #1b5e20, 0 4px 6px rgba(0, 0, 0, 0.3);
+            -webkit-transition: all 0.1s;
+            transition: all 0.1s;
+        }
+
+        .key-btn-lf:active {
+            -webkit-transform: translateY(3px);
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #1b5e20, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #customKeyboard {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            display: -ms-grid;
+            display: grid;
+            grid-template-columns: repeat(9, minmax(0, 1fr));
+            gap: 4px;
+            padding: 4px 12px;
+        }
+
+        .key-btn {
+            padding: 9px 2px;
+            font-size: 0.95rem;
+            font-size: clamp(0.8rem, 3.2vw, 1.1rem);
+            font-weight: bold;
+            background: #4a86e8;
+            background: var(--key-blue);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 3px 0 #0d3c8a, 0 4px 6px rgba(0, 0, 0, 0.3);
+            -webkit-transition: all 0.1s;
+            transition: all 0.1s;
+        }
+
+        .key-btn:active {
+            -webkit-transform: translateY(3px);
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #0d3c8a, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #actionBar {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            gap: 8px;
+            padding: 6px 12px 10px;
+        }
+
+        #actionBar #replay {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+        }
+
+        .key-btn-shoot {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+            padding: 12px;
+            font-size: 1.05rem;
+            font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+            font-weight: bold;
+            background: #f44336;
+            background: var(--key-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 4px 0 #b71c1c, 0 5px 8px rgba(0, 0, 0, 0.3);
+            -webkit-transition: all 0.1s;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .key-btn-shoot:active {
+            -webkit-transform: translateY(4px);
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b71c1c, 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #wordsPanel {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: rgba(10, 10, 30, 0.97);
+            background: var(--panel-bg-solid);
+            z-index: 500;
+            padding: 20px;
+            display: none;
+            -webkit-box-orient: vertical;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #wordsPanel.open {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .panel-header {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: justify;
+            -webkit-justify-content: space-between;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #ffd700;
+            color: var(--gold);
+        }
+
+        .panel-close {
+            background: transparent;
+            border: 1px solid #ffd700;
+            border: 1px solid var(--gold);
+            color: #ffd700;
+            color: var(--gold);
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        #usedWords {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid #ffd700;
+            border: 2px solid var(--gold);
+            font-size: 1rem;
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        .word-chip {
+            display: inline-block;
+            background: #4a86e8;
+            background: var(--key-blue);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin: 2px 3px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            margin: 0;
+            width: 92%;
+            max-width: 400px;
+            max-height: 88vh;
+            overflow-y: auto;
+            border: 3px solid #ffd700;
+            border: 3px solid var(--gold);
+            border-radius: 14px;
+            background: #1a237e;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 0;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.45);
+            z-index: 3000;
+        }
+
+        dialog[open] {
+            display: block;
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .dialog-content {
+            padding: 22px;
+        }
+
+        .dialog-content h2 {
+            color: #ffd700;
+            color: var(--gold);
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .dialog-content p,
+        .dialog-content li {
+            font-size: 0.95rem;
+            line-height: 1.55;
+            margin-bottom: 8px;
+        }
+
+        .dialog-content ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .dialog-field {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            margin-bottom: 14px;
+        }
+
+        .dialog-field label {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .dialog-field input {
+            padding: 9px;
+            border: 1px solid #ffd700;
+            border: 1px solid var(--gold);
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .dialog-actions {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .dialog-actions button {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255,255,255,0.25) !important;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            background: var(--key-green);
+            box-shadow: 0 3px 0 #1b5e20;
+        }
+
+        #fireworksCanvas {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 900;
+            display: none;
+        }
+
+        #fireworksCanvas.active {
+            display: block;
+        }
+
+        #toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%) scale(0.9);
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(10, 10, 30, 0.95);
+            color: #ffd700;
+            color: var(--gold);
+            border: 2px solid #ffd700;
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            -webkit-transition: opacity 0.15s, -webkit-transform 0.15s;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+
+        #toast.show {
+            opacity: 1;
+            -webkit-transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        @media (min-width: 900px) {
+            #app {
+                display: -ms-grid;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 380px;
+                grid-template-rows: auto minmax(0, 1fr);
+                gap: 12px;
+                padding: 12px;
+            }
+
+            #titlebar {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                padding: 0;
+            }
+
+            #titlebar h1 {
+                font-size: 1.8rem;
+            }
+
+            #gameContainer {
+                grid-column: 1;
+                grid-row: 2;
+                margin: 0;
+                border-width: 3px;
+            }
+
+            #rail {
+                display: -webkit-box;
+                display: -webkit-flex;
+                display: -ms-flexbox;
+                display: flex;
+                -webkit-box-orient: vertical;
+                -webkit-flex-direction: column;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                gap: 8px;
+                grid-column: 2;
+                grid-row: 2;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            #statStrip {
+                margin: 0;
+                padding: 8px 14px;
+                font-size: 0.95rem;
+            }
+
+            .stat-value {
+                font-size: 1.25rem;
+            }
+
+            #playArea {
+                padding: 0;
+            }
+
+            #currentWord {
+                font-size: 2rem;
+            }
+
+            #moveBar {
+                padding: 0;
+            }
+
+            #customKeyboard {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+                padding: 0;
+                gap: 5px;
+            }
+
+            .key-btn {
+                padding: 10px 4px;
+                font-size: 1.05rem;
+            }
+
+            #actionBar {
+                padding: 0;
+            }
+
+            #wordsPanel {
+                position: static;
+                display: -webkit-box;
+                display: -webkit-flex;
+                display: -ms-flexbox;
+                display: flex;
+                background: rgba(0, 0, 0, 0.4);
+                background: var(--panel-bg);
+                border-radius: 10px;
+                padding: 12px;
+                -webkit-box-flex: 1;
+                -webkit-flex: 1 1 auto;
+                -ms-flex: 1 1 auto;
+                flex: 1 1 auto;
+                min-height: 0;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .panel-close {
+                display: none;
+            }
+
+            #wordsToggle {
+                display: none;
+            }
+
+            #usedWords {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            #app {
+                grid-template-columns: minmax(0, 1fr) 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworksCanvas"></canvas>
+    <div id="toast" aria-live="polite"></div>
+
+    <div id="app">
+        <header id="titlebar">
+            <h1>WORD BRICK BREAKER</h1>
+            <div class="titlebar-actions">
+                <button class="icon-btn" id="soundToggle" title="Sound on/off">&#128266;</button>
+                <button class="icon-btn" id="wordsToggle" title="Used words">&#128221;</button>
+                <button class="icon-btn" id="settingsBtn" title="Settings">&#9881;</button>
+                <button class="icon-btn" id="helpBtn" title="Help">&#10068;</button>
+            </div>
+        </header>
+
+        <main id="gameContainer">
+            <div id="brickGrid"></div>
+            <div id="shooter"></div>
+            <div id="gameOver" class="gameOver">
+                <img id="victoryImage" class="hidden" alt="Victory">
+                <h2 id="gameOverText">Game Over!</h2>
+                <p id="gameOverMessage">
+                    You've used <span id="finalWords">0</span> words and cleared
+                    <span id="clearedBricks">0</span> bricks!
+                </p>
+                <button class="key-btn" onclick="restartGame()">Play Again</button>
+            </div>
+        </main>
+
+        <aside id="rail">
+            <div id="statStrip">
+                <div class="stat">
+                    <span class="stat-icon">&#129521;</span>
+                    <span id="brickCount" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">&#128221;</span>
+                    <span id="wordsUsed" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">&#128266;</span>
+                    <span id="targetSound" class="stat-value">&mdash;</span>
+                </div>
+                <div class="stat" id="levelStat" style="display:none;">
+                    <span class="stat-icon">&#127919;</span>
+                    <span id="levelIndicator" class="stat-value">1/1</span>
+                </div>
+            </div>
+
+            <div id="playArea">
+                <div id="currentWord"></div>
+            </div>
+
+            <div id="moveBar">
+                <button class="key-btn-lf" id="leftBtn">&#9664;&#9664; LEFT</button>
+                <button class="key-btn-lf" id="backspaceBtn">CLEAR</button>
+                <button class="key-btn-lf" id="rightBtn">RIGHT &#9654;&#9654;</button>
+            </div>
+
+            <div id="customKeyboard"></div>
+
+            <div id="actionBar">
+                <button class="key-btn" id="replay" onclick="restartGame()">Restart</button>
+                <button class="key-btn-shoot" id="shootBtn">FIRE! &#128293;</button>
+            </div>
+
+            <div id="wordsPanel">
+                <div class="panel-header">
+                    <span>&#128221; Used Words</span>
+                    <button class="panel-close" id="wordsClose">&#10005;</button>
+                </div>
+                <div id="usedWords">No words used yet...</div>
+            </div>
+        </aside>
+    </div>
+
+    <dialog id="settingsDialog">
+        <div class="dialog-content">
+            <h2>&#9881; Settings</h2>
+            <div class="dialog-field">
+                <label for="target-row">Rows</label>
+                <input type="number" id="target-row" min="1" max="10" value="3">
+            </div>
+            <div class="dialog-field">
+                <label for="target-bricks">Bricks per Row</label>
+                <input type="number" id="target-bricks" min="1" max="15" value="8">
+            </div>
+            <div class="dialog-field">
+                <label for="target-sound">Target Sound</label>
+                <input type="text" id="target-sound" value="st">
+            </div>
+            <div class="dialog-actions">
+                <button type="button" class="btn-secondary" id="settingsCancel">Cancel</button>
+                <button type="button" class="btn-primary" id="settingsApply">Apply &amp; Restart</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="helpDialog">
+        <div class="dialog-content">
+            <h2>&#10068; How to Play</h2>
+            <p>Create words that contain the <strong>target sound</strong> to fire at the bricks.</p>
+            <ul>
+                <li>Type a word using the on-screen keyboard or your physical keyboard.</li>
+                <li>Move the shooter one column at a time with <strong>&#9664;</strong> and <strong>&#9654;</strong>.</li>
+                <li>Press <strong>FIRE</strong> (or Enter) to shoot.</li>
+                <li>Valid words destroy one brick in the aimed column.</li>
+                <li>Invalid words add a red penalty brick.</li>
+                <li>Repeating a word you already used shows <em>exist</em> and is not penalised.</li>
+                <li>Clear all bricks to win. Six penalties and you lose.</li>
+            </ul>
+            <div class="dialog-actions">
+                <button type="button" class="btn-primary" id="helpClose">Got it</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="levelModal">
+        <div class="dialog-content" style="text-align:center; padding: 28px 22px;">
+            <h2 id="levelModalTitle" style="margin-bottom: 10px;">Level 1</h2>
+            <p id="levelModalSound" style="font-size: 1.8rem; font-weight: bold; color: #ffd700; color: var(--gold); letter-spacing: 2px; margin: 0;">bl</p>
+        </div>
+    </dialog>
+
+<script type="text/javascript">
+/* Word Brick Breaker — ES5 build.
+   All syntax below is ES5 (no let/const, arrow functions, template literals,
+   Set/Map, Promise/async, Array.from, spread, destructuring or default params),
+   so very old engines can parse and run it. Modern APIs are feature-detected. */
+(function () {
+    'use strict';
+
+    /* =====================================================================
+       POLYFILLS
+       ===================================================================== */
+    if (!Array.prototype.indexOf) {
+        Array.prototype.indexOf = function (item, from) {
+            var len = this.length >>> 0;
+            var i = from ? Number(from) : 0;
+            if (i < 0) i = Math.max(0, len + i);
+            for (; i < len; i++) { if (this[i] === item) return i; }
+            return -1;
+        };
+    }
+    if (!Array.prototype.forEach) {
+        Array.prototype.forEach = function (fn, thisArg) {
+            var len = this.length >>> 0;
+            for (var i = 0; i < len; i++) { if (i in this) fn.call(thisArg, this[i], i, this); }
+        };
+    }
+    if (!Array.prototype.map) {
+        Array.prototype.map = function (fn, thisArg) {
+            var len = this.length >>> 0;
+            var out = new Array(len);
+            for (var i = 0; i < len; i++) { if (i in this) out[i] = fn.call(thisArg, this[i], i, this); }
+            return out;
+        };
+    }
+    if (!Array.prototype.filter) {
+        Array.prototype.filter = function (fn, thisArg) {
+            var len = this.length >>> 0;
+            var out = [];
+            for (var i = 0; i < len; i++) { if (i in this && fn.call(thisArg, this[i], i, this)) out.push(this[i]); }
+            return out;
+        };
+    }
+    if (!Array.prototype.reduce) {
+        Array.prototype.reduce = function (fn, initial) {
+            var len = this.length >>> 0;
+            var i = 0;
+            var acc;
+            if (arguments.length > 1) {
+                acc = initial;
+            } else {
+                while (i < len && !(i in this)) i++;
+                acc = this[i++];
+            }
+            for (; i < len; i++) { if (i in this) acc = fn(acc, this[i], i, this); }
+            return acc;
+        };
+    }
+    if (!Array.prototype.includes) {
+        Array.prototype.includes = function (item) { return this.indexOf(item) !== -1; };
+    }
+    if (!Array.isArray) {
+        Array.isArray = function (v) { return Object.prototype.toString.call(v) === '[object Array]'; };
+    }
+    if (!String.prototype.trim) {
+        String.prototype.trim = function () {
+            return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+        };
+    }
+    if (!String.prototype.includes) {
+        String.prototype.includes = function (s) { return this.indexOf(s) !== -1; };
+    }
+    if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = function (cb) {
+            return window.setTimeout(function () { cb(Date.now ? Date.now() : +new Date()); }, 16);
+        };
+    }
+    if (!window.cancelAnimationFrame) {
+        window.cancelAnimationFrame = function (id) { window.clearTimeout(id); };
+    }
+    if (!window.performance) { window.performance = {}; }
+    if (!window.performance.now) {
+        window.performance.now = function () { return Date.now ? Date.now() : +new Date(); };
+    }
+    if (!Element.prototype.remove) {
+        Element.prototype.remove = function () {
+            if (this.parentNode) this.parentNode.removeChild(this);
+        };
+    }
+
+    /* ---------- classList helpers ---------- */
+    function addClass(el, cls) {
+        if (!el || !cls) return;
+        if (el.classList) { el.classList.add(cls); return; }
+        var cur = ' ' + (el.className || '') + ' ';
+        if (cur.indexOf(' ' + cls + ' ') === -1) {
+            el.className = ((el.className || '') + ' ' + cls).replace(/^\s+/, '');
+        }
+    }
+    function removeClass(el, cls) {
+        if (!el || !cls) return;
+        if (el.classList) { el.classList.remove(cls); return; }
+        var re = new RegExp('(^|\\s)' + cls + '(\\s|$)', 'g');
+        el.className = (el.className || '').replace(re, ' ').replace(/^\s+|\s+$/g, '');
+    }
+    function hasClass(el, cls) {
+        if (!el || !cls) return false;
+        if (el.classList) return el.classList.contains(cls);
+        return (' ' + (el.className || '') + ' ').indexOf(' ' + cls + ' ') > -1;
+    }
+    function toggleClass(el, cls) {
+        if (hasClass(el, cls)) removeClass(el, cls);
+        else addClass(el, cls);
+    }
+
+    /* ---------- <dialog> helpers (works with or without native support) ---------- */
+    function dialogShowModal(dlg) {
+        if (!dlg) return;
+        if (dlg.showModal) { dlg.showModal(); return; }
+        dlg.setAttribute('open', '');
+        dlg.style.display = 'block';
+        dlg.style.position = 'fixed';
+        dlg.style.top = '50%';
+        dlg.style.left = '50%';
+        dlg.style.webkitTransform = 'translate(-50%, -50%)';
+        dlg.style.transform = 'translate(-50%, -50%)';
+        dlg.style.margin = '0';
+        dlg.style.zIndex = '3000';
+    }
+    function dialogClose(dlg) {
+        if (!dlg) return;
+        if (dlg.close) { try { dlg.close(); } catch (e) {} return; }
+        dlg.removeAttribute('open');
+        dlg.style.display = 'none';
+    }
+
+    /* ---------- unique array helper (replaces Set) ---------- */
+    function uniqueArray(arr) {
+        var seen = {};
+        var out = [];
+        for (var i = 0; i < arr.length; i++) {
+            var v = arr[i];
+            if (!Object.prototype.hasOwnProperty.call(seen, v)) {
+                seen[v] = true;
+                out.push(v);
+            }
+        }
+        return out;
+    }
+
+    /* ---------- on()/off() helpers ---------- */
+    function on(el, type, fn) {
+        if (!el) return;
+        if (el.addEventListener) el.addEventListener(type, fn, false);
+        else if (el.attachEvent) el.attachEvent('on' + type, function () { fn.call(el, window.event); });
+    }
+    function off(el, type, fn) {
+        if (!el) return;
+        if (el.removeEventListener) el.removeEventListener(type, fn, false);
+        else if (el.detachEvent) el.detachEvent('on' + type, fn);
+    }
+
+    /* =====================================================================
+       HARD-CODED CONFIG
+       ===================================================================== */
+    var CONFIG = {
+        SHOW_SETTINGS_BUTTON:  false,
+        SHOW_HELP_BUTTON:      true,
+        SHOW_SOUND_TOGGLE:     true,
+        SHOW_WORDS_BUTTON:     true,
+        SHOW_SETTINGS_DIALOG:  false,
+
+        DEFAULT_LEVELS:        'bl(1x5), fl(1x5), gl(1x5), pl(1x5), sl(1x5), cl(1x5)',
+        DEFAULT_SOUND_ENABLED: true,
+
+        BULLET_SPEED:            8,
+        MAX_PENALTIES:           5,
+        GRID_PADDING:            10,
+        GRID_GAP:                5,
+
+        BRICK_RATIO:             2.4,
+        MAX_BRICK_W:             72,
+        MIN_BRICK_W:             18,
+
+        MASTER_VOLUME:           0.55,
+
+        FIREWORKS_DURATION_MS:   7500,
+        MAX_FIREWORK_PARTICLES:  320,
+        MAX_FIREWORK_ROCKETS:    8,
+
+        LEVEL_MODAL_MS:          2000,
+        SHOOTER_START_COL:       null,
+        ALLOW_PHYSICAL_KEYBOARD: true,
+        UNLOCK_AUDIO_ON_FIRST_GESTURE: true,
+
+        VICTORY_IMAGE: '',
+        VICTORY_IMAGE_ALT: 'Victory!',
+        VICTORY_IMAGE_ONLY_ON_WIN: true,
+
+        TOAST_EXISTS_MS:         2000
+    };
+
+    /* =====================================================================
+       HARD-CODED WORD LIST
+       ===================================================================== */
+    var wordList = [
+    /* ================= BEGINNING BLENDS ================= */
+    "black", "blackberry", "blackboard", "blacken", "blackout", "blacksmith", "blacktop",
+    "bladder", "blade", "blame", "bland", "blank", "blanket", "blare", "blast",
+    "blaze", "blazer", "bleach", "bleachers", "bleak", "bleary", "bleat", "bleed",
+    "blemish", "blend", "blender", "bless", "blessed", "blessing", "blew", "blight",
+    "blimp", "blind", "blinder", "blindfold", "blink", "blinking", "bliss", "blissful",
+    "blister", "blizzard", "bloat", "blob", "block", "blockade", "blockage", "blond",
+    "blonde", "blood", "bloodhound", "bloom", "bloomers", "blooper", "blossom",
+    "blot", "blotch", "blotter", "blouse", "blow", "blowfish", "blown", "blowout",
+    "blowtorch", "blubber", "blue", "bluebell", "blueberry", "bluebird", "bluegrass",
+    "blueprint", "bluff", "blunder", "blunt", "blur", "blurb", "blurry", "blurt",
+    "blush", "blushing", "blustery",
+    "clack", "clad", "claim", "clam", "clamber", "clammy", "clamor", "clamp", "clan",
+    "clang", "clank", "clap", "clapper", "clarify", "clarinet", "clarity", "clash",
+    "clasp", "class", "classic", "classify", "classmate", "classroom", "clatter",
+    "clause", "claw", "clay", "clean", "cleaner", "cleanse", "clear", "clearance",
+    "clearing", "cleat", "cleave", "clef", "cleft", "clementine", "clench", "clergy",
+    "clerk", "clever", "click", "client", "cliff", "climate", "climax", "climb",
+    "climber", "clinch", "cling", "clinic", "clink", "clip", "clipboard", "clipper",
+    "clique", "cloak", "clock", "clockwise", "clod", "clog", "clone", "close",
+    "closet", "closure", "clot", "cloth", "clothe", "clothes", "clothing", "cloud",
+    "cloudy", "clout", "clove", "clover", "clown", "club", "cluck", "clue", "clump",
+    "clumsy", "clung", "cluster", "clutch", "clutter",
+    "flab", "flabby", "flag", "flagpole", "flair", "flake", "flaky", "flame",
+    "flamingo", "flank", "flannel", "flap", "flapjack", "flare", "flash", "flashback",
+    "flashlight", "flask", "flat", "flatten", "flatter", "flavor", "flaw", "flawless",
+    "flax", "flea", "fleck", "fled", "flee", "fleece", "fleet", "flesh", "flew",
+    "flex", "flexible", "flick", "flicker", "flier", "flight", "flimsy", "flinch",
+    "fling", "flint", "flip", "flipper", "flirt", "float", "flock", "flog", "flood",
+    "floodlight", "floor", "flop", "floppy", "flora", "floral", "florist", "floss",
+    "flotilla", "flounder", "flour", "flourish", "flow", "flower", "flowerpot",
+    "flowery", "flown", "flu", "fluctuate", "fluent", "fluff", "fluffy", "fluid",
+    "fluke", "flung", "flunk", "fluorescent", "flurry", "flush", "fluster", "flute",
+    "flutter", "flux", "fly", "flyer", "flyway",
+    "glacier", "glad", "gladden", "glade", "gladiator", "glamor", "glance", "gland",
+    "glare", "glass", "glasses", "glaze", "gleam", "glean", "glee", "glen", "glide",
+    "glider", "glimmer", "glimpse", "glint", "glisten", "glitch", "glitter", "gloat",
+    "global", "globe", "gloom", "gloomy", "glory", "gloss", "glossary", "glossy",
+    "glove", "glow", "glower", "glowworm", "glucose", "glue", "glum", "glut",
+    "glutton",
+    "placard", "place", "placemat", "placid", "plague", "plaid", "plain", "plainly",
+    "plait", "plan", "plane", "planet", "plank", "plankton", "planner", "plant",
+    "plantation", "plaque", "plasma", "plaster", "plastic", "plate", "plateau",
+    "platform", "platinum", "platoon", "platter", "platypus", "play", "player",
+    "playful", "playground", "playmate", "playpen", "plaything", "plaza", "plea",
+    "plead", "pleasant", "please", "pleasure", "pleat", "pledge", "plenty", "pliers",
+    "plight", "plod", "plop", "plot", "plough", "plow", "pluck", "plug", "plum",
+    "plumber", "plume", "plump", "plunder", "plunge", "plural", "plus", "plush",
+    "plywood",
+    "slab", "slack", "slacks", "slain", "slam", "slander", "slang", "slant", "slap",
+    "slapstick", "slash", "slat", "slate", "sled", "sledge", "sleek", "sleep",
+    "sleeper", "sleepy", "sleet", "sleeve", "sleigh", "slender", "slept", "sleuth",
+    "slew", "slice", "slick", "slid", "slide", "slight", "slim", "slime", "slimy",
+    "sling", "slingshot", "slink", "slip", "slipper", "slippery", "slit", "slither",
+    "sliver", "slobber", "slogan", "slop", "slope", "sloppy", "slosh", "sloth",
+    "slouch", "slow", "sludge", "slug", "slum", "slumber", "slump", "slung", "slunk",
+    "slurp", "slush", "sly",
+    "brace", "bracelet", "bracket", "brag", "braid", "braille", "brain", "brainy",
+    "brake", "bramble", "bran", "branch", "brand", "brandish", "brass", "brat",
+    "brave", "bravery", "bravo", "brawl", "bray", "brazen", "breach", "bread",
+    "breadth", "break", "breakfast", "breakthrough", "breast", "breath", "breathe",
+    "breed", "breeze", "breezy", "brew", "brewery", "brick", "bride", "bridegroom",
+    "bridge", "bridle", "brief", "briefcase", "brigade", "bright", "brighten",
+    "brilliant", "brim", "brine", "bring", "brink", "brisk", "bristle", "brittle",
+    "broad", "broadcast", "broccoli", "brochure", "broil", "broke", "broken",
+    "broker", "bronze", "brooch", "brood", "brook", "broom", "broth", "brother",
+    "brought", "brow", "brown", "brownie", "browse", "bruise", "brunch", "brunette",
+    "brunt", "brush", "brutal", "brute",
+    "crab", "crack", "cracker", "crackle", "cradle", "craft", "crafty", "crag",
+    "cram", "cramp", "cranberry", "crane", "crank", "cranky", "crash", "crate",
+    "crater", "crave", "crawl", "crayon", "craze", "crazy", "creak", "cream",
+    "creamy", "crease", "create", "creation", "creative", "creature", "credit",
+    "creed", "creek", "creep", "creepy", "crescent", "crest", "crew", "crib",
+    "cricket", "cried", "crime", "criminal", "crimson", "cringe", "cripple",
+    "crisis", "crisp", "critic", "critter", "croak", "crochet", "crock", "crocodile",
+    "crocus", "crook", "crooked", "crop", "croquet", "cross", "crossbar", "crossing",
+    "crossroad", "crossword", "crouch", "crow", "crowbar", "crowd", "crown",
+    "crucial", "crude", "cruel", "cruise", "crumb", "crumble", "crumple", "crunch",
+    "crusade", "crush", "crust", "crusty", "crutch", "cry", "crying", "crypt",
+    "crystal",
+    "drab", "draft", "drag", "dragon", "dragonfly", "drain", "drainage", "drake",
+    "drama", "dramatic", "drank", "drape", "drastic", "draw", "drawbridge", "drawer",
+    "drawing", "drawl", "drawn", "dread", "dreadful", "dream", "dreamer", "dreamy",
+    "dreary", "dredge", "drench", "dress", "dresser", "dressing", "drew", "dribble",
+    "dried", "drier", "drift", "driftwood", "drill", "drink", "drip", "drive",
+    "driven", "driver", "driveway", "drizzle", "droop", "drop", "droplet", "dropper",
+    "drought", "drove", "drown", "drowsy", "drudge", "drum", "drummer", "drumstick",
+    "dry", "dryer",
+    "fraction", "fragile", "fragment", "fragrance", "frail", "frame", "framework",
+    "franc", "frank", "frantic", "fraud", "fray", "freak", "freckle", "free",
+    "freedom", "freeway", "freeze", "freezer", "freight", "frequent", "fresh",
+    "freshman", "fret", "friar", "friction", "friday", "fridge", "fried", "friend",
+    "friendly", "friendship", "fright", "frighten", "frill", "fringe", "frisk",
+    "fritter", "frizzy", "frock", "frog", "frolic", "from", "front", "frontier",
+    "frost", "frosting", "frosty", "froth", "frown", "froze", "frozen", "frugal",
+    "fruit", "fruitful", "fry", "frying",
+    "grab", "grace", "graceful", "gracious", "grade", "gradual", "graduate",
+    "graffiti", "graft", "grain", "gram", "grammar", "granary", "grand", "grandchild",
+    "grandfather", "grandma", "grandmother", "grandpa", "grandparent", "grandson",
+    "granite", "granny", "grant", "grape", "grapefruit", "graph", "grasp", "grass",
+    "grasshopper", "grate", "grateful", "gratitude", "grave", "gravel", "graveyard",
+    "gravity", "gravy", "gray", "graze", "grease", "greasy", "great", "greed",
+    "greedy", "green", "greenhouse", "greet", "greeting", "grew", "grey", "greyhound",
+    "grid", "griddle", "grief", "grill", "grim", "grime", "grin", "grind", "grip",
+    "gripe", "grit", "grizzly", "groan", "grocer", "grocery", "groom", "groove",
+    "grope", "gross", "grotto", "ground", "grounds", "group", "grouse", "grove",
+    "grow", "growl", "grown", "growth", "grub", "grudge", "gruel", "gruff",
+    "grumble", "grumpy", "grunt",
+    "practical", "practice", "praise", "prance", "prank", "prawn", "pray", "prayer",
+    "preach", "precious", "precise", "predict", "prefer", "prefix", "prehistoric",
+    "prepare", "present", "preserve", "president", "press", "pressure", "pretend",
+    "pretty", "prevent", "prey", "price", "prick", "prickle", "pride", "priest",
+    "primary", "prime", "primitive", "prince", "princess", "principal", "principle",
+    "print", "printer", "prior", "prism", "prison", "prisoner", "private", "prize",
+    "probable", "probe", "problem", "procedure", "process", "produce", "product",
+    "profile", "profit", "program", "progress", "project", "promise", "promote",
+    "prompt", "prone", "pronoun", "pronounce", "proof", "prop", "propeller",
+    "proper", "property", "protect", "protein", "protest", "proud", "prove",
+    "proverb", "provide", "prowl", "prune", "pry",
+    "trace", "track", "tractor", "trade", "trader", "tradition", "traffic",
+    "tragedy", "trail", "trailer", "train", "trainer", "trait", "tramp", "trample",
+    "trampoline", "trance", "tranquil", "transfer", "transform", "translate",
+    "transport", "trap", "trapeze", "trash", "travel", "traveler", "tray", "tread",
+    "treasure", "treasurer", "treat", "treatment", "treaty", "treble", "tree",
+    "treetop", "trek", "tremble", "tremendous", "trench", "trend", "trespass",
+    "trial", "triangle", "tribe", "tribute", "trick", "trickle", "tricky",
+    "tricycle", "tried", "trifle", "trigger", "trim", "trio", "trip", "triple",
+    "triplet", "triumph", "trivia", "troll", "trombone", "troop", "trophy", "tropic",
+    "tropical", "trot", "trouble", "trough", "trousers", "trout", "trowel", "truce",
+    "truck", "trudge", "true", "truly", "trumpet", "trunk", "trust", "truth", "try",
+    "trying",
+    "scab", "scaffold", "scald", "scale", "scallop", "scalp", "scamper", "scan",
+    "scandal", "scanner", "scant", "scar", "scarce", "scare", "scarecrow", "scarf",
+    "scarlet", "scary", "scatter", "scholar", "school", "schoolboy", "schoolhouse",
+    "schooner", "scoff", "scold", "scone", "scoop", "scooter", "scope", "scorch",
+    "score", "scoreboard", "scorn", "scorpion", "scoundrel", "scour", "scout",
+    "scowl", "scramble", "scrap", "scrapbook", "scrape", "scratch", "scrawl",
+    "scream", "screech", "screen", "screw", "screwdriver", "scribble", "scribe",
+    "script", "scroll", "scrub", "scrumptious", "scuba", "scuff", "sculpt",
+    "sculptor", "sculpture", "scurry", "scuttle",
+    "scene", "scenery", "scent", "schedule", "scheme", "science", "scientist",
+    "scissors",
+    "skate", "skateboard", "skater", "skeleton", "sketch", "sketchy", "skewer",
+    "ski", "skid", "skier", "skiff", "skill", "skilled", "skillet", "skillful",
+    "skim", "skimp", "skin", "skinny", "skip", "skipper", "skirmish", "skirt",
+    "skit", "skittle", "skulk", "skull", "skunk", "sky", "skylark", "skylight",
+    "skyline", "skyscraper",
+    "squabble", "squad", "squadron", "squalid", "squall", "squander", "square",
+    "squash", "squat", "squawk", "squeak", "squeaky", "squeal", "squeamish",
+    "squeeze", "squid", "squiggle", "squint", "squire", "squirm", "squirrel",
+    "squirt", "squish", "squishy",
+    "stab", "stability", "stable", "stack", "stadium", "staff", "stag", "stage",
+    "stagger", "stain", "stair", "staircase", "stake", "stale", "stalk", "stall",
+    "stallion", "stamina", "stammer", "stamp", "stampede", "stand", "standard",
+    "standing", "staple", "star", "starch", "stare", "starfish", "stark", "starling",
+    "start", "startle", "starve", "state", "statement", "station", "stationery",
+    "statistic", "statue", "status", "stay", "steady", "steak", "steal", "stealth",
+    "steam", "steamboat", "steamer", "steel", "steep", "steeple", "steer", "stem",
+    "stench", "step", "stepfather", "stepladder", "stepmother", "stereo", "sterling",
+    "stern", "stethoscope", "stew", "steward", "stick", "sticker", "sticky", "stiff",
+    "stifle", "still", "stilts", "sting", "stingy", "stink", "stir", "stitch",
+    "stock", "stocking", "stomach", "stomp", "stone", "stony", "stood", "stool",
+    "stoop", "stop", "stopper", "stopwatch", "storage", "store", "storekeeper",
+    "stork", "storm", "stormy", "story", "storybook", "stout", "stove", "stow",
+    "straddle", "straight", "strain", "strait", "strand", "strange", "stranger",
+    "strap", "strategy", "straw", "strawberry", "stray", "streak", "stream",
+    "streamer", "street", "streetlight", "strength", "strengthen", "stress",
+    "stretch", "stretcher", "strict", "stride", "strife", "strike", "string",
+    "strip", "stripe", "strive", "stroke", "stroll", "strong", "struck", "structure",
+    "struggle", "strum", "strut", "stub", "stubble", "stubborn", "stuck", "stud",
+    "student", "studio", "study", "stuff", "stuffing", "stuffy", "stumble", "stump",
+    "stun", "stung", "stunk", "stunt", "stupid", "sturdy", "stutter", "style",
+    "stylish",
+    "smack", "small", "smart", "smarter", "smash", "smear", "smell", "smelly",
+    "smelt", "smile", "smirk", "smith", "smock", "smog", "smoke", "smoker",
+    "smokestack", "smoky", "smolder", "smooth", "smoothie", "smother", "smudge",
+    "smug", "smuggle",
+    "snack", "snag", "snail", "snake", "snap", "snapshot", "snare", "snarl",
+    "snatch", "sneak", "sneaker", "sneer", "sneeze", "snicker", "sniff", "sniffle",
+    "snip", "snipe", "snippet", "snob", "snoop", "snooze", "snore", "snorkel",
+    "snort", "snout", "snow", "snowball", "snowboard", "snowdrift", "snowfall",
+    "snowflake", "snowman", "snowstorm", "snowy", "snub", "snuck", "snuff", "snug",
+    "snuggle",
+    "space", "spacecraft", "spaceship", "spacious", "spade", "spaghetti", "span",
+    "spangle", "spaniel", "spare", "spark", "sparkle", "sparrow", "sparse", "spasm",
+    "spat", "spatula", "spawn", "speak", "speaker", "spear", "special", "species",
+    "specific", "specimen", "speck", "spectacle", "spectator", "speech", "speed",
+    "speedy", "spell", "speller", "spelling", "spend", "sphere", "spice", "spicy",
+    "spider", "spike", "spill", "spin", "spinach", "spine", "spinner", "spiral",
+    "spire", "spirit", "spit", "spite", "splash", "splatter", "splendid", "splint",
+    "splinter", "split", "splurge", "spoil", "spoke", "sponge", "sponsor", "spoof",
+    "spook", "spool", "spoon", "sport", "sportsman", "spot", "spotlight", "spouse",
+    "spout", "sprain", "sprang", "sprawl", "spray", "spread", "spree", "sprig",
+    "spring", "springboard", "sprinkle", "sprint", "sprout", "spruce", "sprung",
+    "spun", "spur", "spurt", "spy",
+    "swab", "swagger", "swallow", "swam", "swamp", "swan", "swap", "swarm", "sway",
+    "swear", "sweat", "sweater", "sweaty", "sweep", "sweeper", "sweet", "sweeten",
+    "sweetheart", "sweetly", "swell", "swept", "swerve", "swift", "swim", "swimmer",
+    "swimming", "swindle", "swine", "swing", "swipe", "swirl", "swish", "switch",
+    "switchboard", "swivel", "swollen", "swoop", "sword", "swordfish", "swore",
+    "sworn", "swum", "swung",
+    "tweak", "tweed", "tweet", "tweeter", "tweezers", "twelfth", "twelve", "twenty",
+    "twice", "twiddle", "twig", "twilight", "twin", "twine", "twinge", "twinkle",
+    "twirl", "twist", "twister", "twitch", "twitter", "two", "twofold",
+    "dwarf", "dwell", "dweller", "dwelling", "dwelt", "dwindle",
+    /* ================= ENDING BLENDS ================= */
+    "adjust", "almost", "amidst", "armrest", "arrest", "assist", "august", "backrest",
+    "beast", "best", "biggest", "blast", "boast", "bravest", "breakfast", "breast",
+    "broadcast", "burst", "cast", "cheapest", "checklist", "chest", "closest",
+    "coast", "contest", "contrast", "cost", "crest", "crust", "darkest", "digest",
+    "disgust", "distrust", "dust", "earnest", "east", "exist", "fairest", "fast",
+    "fastest", "feast", "fist", "first", "fittest", "foremost", "forecast", "forest",
+    "frost", "ghost", "greatest", "guest", "gust", "harvest", "highest", "honest",
+    "host", "insist", "interest", "invest", "jest", "just", "kindest", "largest",
+    "last", "least", "lest", "lightest", "list", "longest", "lost", "lowest", "mast",
+    "mist", "modest", "most", "must", "nest", "newest", "nicest", "oldest", "outcast",
+    "past", "pest", "post", "priest", "protest", "quest", "request", "rest", "roast",
+    "robust", "rust", "shortest", "slowest", "smallest", "strongest", "suggest",
+    "sunburst", "tallest", "test", "thirst", "toast", "trust", "twist", "unjust",
+    "unrest", "vast", "vest", "waist", "west", "wishlist", "worst", "wrist", "yeast",
+    "youngest", "zest",
+    "ask", "asterisk", "bask", "brisk", "cask", "desk", "disk", "dusk", "flask",
+    "frisk", "husk", "kiosk", "mask", "mollusk", "multitask", "musk", "obelisk",
+    "risk", "rusk", "task", "tusk", "unmask", "whisk",
+    "asp", "clasp", "crisp", "cusp", "gasp", "grasp", "hasp", "lisp", "rasp",
+    "unclasp", "wasp", "wisp",
+    "almond", "and", "around", "ascend", "astound", "attend", "background", "backhand",
+    "band", "behind", "bend", "beyond", "bland", "blend", "blind", "blond", "bond",
+    "bound", "brand", "command", "compound", "contend", "correspond", "defend",
+    "demand", "depend", "descend", "diamond", "end", "errand", "expand", "extend",
+    "farmland", "fend", "fond", "forehand", "found", "friend", "fund", "garland",
+    "gland", "grand", "grassland", "ground", "hand", "handstand", "highland",
+    "hind", "homeland", "hound", "husband", "intend", "kind", "land", "legend",
+    "lend", "lowland", "mainland", "mankind", "mend", "mind", "mound", "offend",
+    "playground", "pond", "pound", "pretend", "profound", "rebound", "recommend",
+    "refund", "remind", "respond", "rind", "round", "sand", "second", "secondhand",
+    "send", "sound", "spend", "stand", "strand", "surround", "suspend", "tend",
+    "thousand", "trend", "underground", "understand", "unkind", "unwind", "wand",
+    "wasteland", "weekend", "wetland", "wind", "withstand", "wonderland", "woodland",
+    "wound",
+    "accident", "account", "agent", "agreement", "ailment", "amount", "amusement",
+    "ancient", "ant", "apartment", "appoint", "argument", "ascent", "assistant",
+    "aunt", "basement", "bent", "blunt", "brunt", "bunt", "cement", "cent", "chant",
+    "client", "comment", "confront", "consent", "constant", "content", "continent",
+    "count", "current", "decent", "dent", "department", "descent", "different",
+    "discount", "dismount", "distant", "elegant", "element", "elephant", "environment",
+    "equipment", "event", "excellent", "excitement", "extent", "faint", "fingerprint",
+    "flaunt", "flint", "footprint", "frequent", "front", "garment", "giant",
+    "glint", "government", "grant", "grunt", "gaunt", "haunt", "hint", "hunt",
+    "imprint", "important", "innocent", "instant", "intent", "invent", "jaunt",
+    "joint", "lent", "lint", "mint", "moment", "monument", "mount", "movement",
+    "pageant", "paint", "pant", "parent", "patient", "payment", "peasant",
+    "peppermint", "percent", "permanent", "pheasant", "pint", "plant", "pleasant",
+    "point", "present", "prevent", "print", "punt", "quaint", "rant", "recent",
+    "relent", "rent", "repent", "resent", "restaurant", "runt", "saint", "scent",
+    "sent", "settlement", "shunt", "silent", "slant", "spearmint", "spent",
+    "splint", "sprint", "squint", "statement", "stint", "student", "stunt",
+    "supplement", "talent", "taunt", "tent", "tint", "tournament", "treatment",
+    "urgent", "vacant", "vent", "violent", "want", "warrant", "went",
+    "bank", "blank", "blink", "bonk", "brink", "bunk", "chink", "chunk", "clank",
+    "clink", "clonk", "clunk", "conk", "crank", "drank", "drink", "dunk", "fink",
+    "flank", "flunk", "frank", "hank", "honk", "hoodwink", "hunk", "ink", "junk",
+    "kink", "lank", "link", "mink", "monk", "oink", "pink", "plank", "plonk",
+    "plunk", "prank", "punk", "rank", "rethink", "rink", "riverbank", "sandbank",
+    "sank", "shank", "shrank", "shrink", "shrunk", "sink", "skink", "skunk",
+    "slink", "slunk", "snowbank", "spank", "spunk", "stank", "stink", "stunk",
+    "sunk", "swank", "tank", "thank", "think", "thunk", "trunk", "wink", "yank",
+    "airpump", "blimp", "bump", "camp", "champ", "chimp", "chomp", "chump", "clamp",
+    "clump", "cramp", "crimp", "damp", "decamp", "dump", "encamp", "frump", "grump",
+    "handpump", "headlamp", "hemp", "hump", "jump", "lamp", "limp",
+    "lump", "plump", "pomp", "primp", "pump", "ramp", "revamp", "romp", "rump",
+    "scamp", "scrimp", "shrimp", "skimp", "slump", "stamp", "stomp", "streetlamp",
+    "stump", "sump", "sunlamp", "swamp", "tamp", "temp", "thump", "tramp", "trump",
+    "tromp", "vamp", "wimp",
+    "aboard", "accord", "afford", "afterward", "award", "awkward", "backward",
+    "backyard", "bard", "barnyard", "baseboard", "beard", "billboard", "billiard",
+    "bird", "blackbird", "blackboard", "blizzard", "board", "bodyguard", "bluebird",
+    "bombard", "boulevard", "buzzard", "buzzword", "card", "cardboard", "chalkboard",
+    "chord", "churchyard", "clipboard", "cord", "courtyard", "coward", "crossword",
+    "cupboard", "curd", "custard", "dartboard", "dashboard", "discard", "discord",
+    "disregard", "downward", "eastward", "farmyard", "fjord", "flashcard",
+    "floorboard", "ford", "foreword", "forward", "gizzard", "graveyard", "guard",
+    "haggard", "hard", "hazard", "headboard", "herd", "homeward", "hummingbird",
+    "inward", "jailbird", "junkyard", "keyboard", "keyword", "ladybird", "landlord",
+    "laggard", "lard", "leopard", "leeward", "lifeguard", "lizard", "lord",
+    "lovebird", "mallard", "mockingbird", "motherboard", "mudguard", "mustard",
+    "nerd", "northward", "onboard", "onward", "orchard", "outward", "overboard",
+    "overlord", "password", "placard", "postcard", "record", "regard", "reward",
+    "safeguard", "schoolyard", "scoreboard", "seabird", "shepherd", "shipyard",
+    "sideboard", "skateboard", "skyward", "snowboard", "songbird", "southward",
+    "springboard", "standard", "starboard", "steward", "storyboard", "surfboard",
+    "switchboard", "sword", "third", "toward", "upward", "vanguard", "vineyard",
+    "ward", "warlord", "washboard", "watchword", "westward", "whiteboard",
+    "windward", "wizard", "word", "yard",
+    "bald", "behold", "billfold", "blindfold", "bold", "build", "child", "cold",
+    "emerald", "enfold", "field", "fold", "foothold", "foretold", "freehold",
+    "gild", "godchild", "gold", "grandchild", "guild", "handhold", "held", "herald",
+    "hold", "household", "manifold", "marigold", "meld", "mild", "mold",
+    "minefield", "old", "outfield", "piebald", "rebuild", "refold", "resold",
+    "retold", "scaffold", "scald", "scold", "shield", "sold", "stepchild",
+    "stronghold", "told", "twofold", "unfold", "uphold", "weld", "wield",
+    "wild", "windshield", "withhold", "world", "yield", "airfield", "battlefield",
+    "cornfield", "infield", "midfield", "playfield", "underworld", "threshold",
+    "threefold", "tenfold", "fourfold", "centerfold", "schoolchild",
+    "alp", "gulp", "help", "kelp", "pulp", "scalp", "whelp", "yelp",
+    "aardvark", "artwork", "ballpark", "bark", "benchmark", "birthmark", "bookmark",
+    "bookwork", "bulwark", "clerk", "clockwork", "cork", "coursework", "dark",
+    "dork", "earmark", "earthwork", "embark", "fieldwork", "firework", "fork",
+    "framework", "groundwork", "hallmark", "hark", "homework", "housework", "irk",
+    "jerk", "landmark", "lark", "lurk", "mark", "masterwork", "meadowlark", "murk",
+    "network", "overwork", "paperwork", "park", "patchwork", "perk", "pitchfork",
+    "pork", "postmark", "quirk", "remark", "rework", "shark", "shirk", "skylark",
+    "smirk", "snark", "spark", "stark", "stork", "teamwork", "trademark",
+    "uncork", "watermark", "woodwork", "work",
+    "behalf", "bookshelf", "calf", "elf", "engulf", "golf", "gulf", "half",
+    "herself", "himself", "itself", "minigolf", "myself", "oneself", "pelf",
+    "self", "shelf", "thyself", "werewolf", "wolf", "yourself",
+    "abrupt", "accept", "adapt", "adept", "adopt", "apt", "attempt", "bankrupt",
+    "concept", "contempt", "conscript", "corrupt", "crept", "crypt", "disrupt",
+    "erupt", "except", "exempt", "inept", "intercept", "interrupt", "kept", "leapt",
+    "manuscript", "nondescript", "opt", "overslept", "postscript", "preempt",
+    "precept", "prompt", "rapt", "receipt", "script", "slept", "subscript",
+    "superscript", "swept", "tempt", "transcript", "unkempt", "wept",
+    "adrift", "aft", "aircraft", "airlift", "airshaft", "bereft", "camshaft",
+    "chairlift", "cleft", "craft", "crankshaft", "croft", "daft", "deft",
+    "downdraft", "draft", "drift", "driveshaft", "facelift", "forklift", "gearshift",
+    "gift", "graft", "handicraft", "heft", "hovercraft", "left", "lift", "loft",
+    "makeshift", "mineshaft", "overdraft", "raft", "redraft", "rift", "shaft",
+    "shift", "shoplift", "sift", "snowdrift", "soft", "spacecraft", "spendthrift",
+    "stagecraft", "stickshift", "swift", "theft", "thrift", "tuft", "updraft",
+    "uplift", "waft", "watercraft", "weft", "witchcraft", "woodcraft",
+    "abduct", "abstract", "act", "addict", "affect", "afflict", "aqueduct",
+    "architect", "artifact", "aspect", "attract", "bisect", "byproduct", "collect",
+    "compact", "conduct", "conflict", "connect", "construct", "contact", "contract",
+    "convict", "correct", "counteract", "deduct", "defect", "deflect", "depict",
+    "destruct", "detect", "detract", "dialect", "direct", "disconnect", "disinfect",
+    "dissect", "distinct", "distract", "district", "duct", "edict", "effect",
+    "eject", "elect", "enact", "erect", "evict", "exact", "expect", "extract",
+    "fact", "impact", "incorrect", "indict", "indirect", "induct", "infect",
+    "inflict", "inject", "insect", "inspect", "instinct", "instruct", "intact",
+    "intellect", "interact", "intersect", "misdirect", "neglect", "object", "obstruct",
+    "overact", "pact", "perfect", "predict", "prefect", "product", "project",
+    "prospect", "protect", "react", "reconnect", "redirect", "reenact", "reflect",
+    "refract", "reject", "resurrect", "respect", "restrict", "retract", "select",
+    "strict", "subject", "subtract", "suspect", "tact", "tract", "transact",
+    "verdict", "viaduct",
+    "backtalk", "balk", "beanstalk", "bilk", "boardwalk", "bulk", "buttermilk",
+    "catwalk", "caulk", "chalk", "cornstalk", "crosstalk", "crosswalk", "elk",
+    "folk", "hulk", "ilk", "jaywalk", "kinfolk", "menfolk", "milk", "moonwalk",
+    "sidewalk", "silk", "skulk", "sleepwalk", "spacewalk", "stalk", "sulk",
+    "talk", "walk", "womenfolk", "yolk",
+    "adult", "asphalt", "assault", "basalt", "belt", "bolt", "built", "catapult",
+    "cobalt", "colt", "consult", "cult", "dealt", "deadbolt", "default", "difficult",
+    "dolt", "dwelt", "exalt", "exult", "fault", "felt", "gilt", "greenbelt",
+    "guilt", "halt", "hilt", "inbuilt", "insult", "jilt", "jolt", "kilt", "knelt",
+    "lilt", "malt", "melt", "molt", "occult", "pelt", "prebuilt", "quilt", "rebuilt",
+    "result", "revolt", "salt", "seatbelt", "shalt", "silt", "smelt", "somersault",
+    "spelt", "spilt", "stilt", "sunbelt", "thunderbolt", "tilt", "toolbelt",
+    "tumult", "unbolt", "vault", "volt", "welt", "wilt",
+    "context", "fulltext", "hypertext", "intertext", "next", "plaintext", "pretext",
+    "subtext", "teletext", "text",
+    "accidents", "acts", "adults", "agents", "ants", "arts", "aunts", "bats",
+    "beasts", "beets", "belts", "bets", "bits", "blasts", "blots", "boats", "bolts",
+    "boots", "brats", "buckets", "bunts", "carrots", "cats", "cents", "chants",
+    "charts", "chats", "cheats", "chests", "clients", "coasts", "coats", "cots",
+    "counts", "crafts", "crests", "crusts", "cults", "cuts", "darts", "debts",
+    "dents", "doubts", "dots", "drafts", "drifts", "dusts", "eats", "elements",
+    "events", "exists", "expects", "facts", "feasts", "feats", "fights", "fists",
+    "flats", "fleets", "flights", "floats", "forests", "fronts", "fruits", "gets",
+    "ghosts", "giants", "gifts", "gnats", "goats", "grants", "grits", "guests",
+    "gusts", "hats", "hearts", "heats", "helmets", "hints", "hits", "hosts",
+    "hunts", "huts", "insects", "jackets", "jets", "jots", "kits",
+    "knights", "knits", "knots", "lasts", "lets", "lifts", "lights", "limits",
+    "lists", "lots", "magnets", "malts", "markets", "masts", "mats", "meats",
+    "meets", "minutes", "mints", "mists", "mitts", "moats", "moments", "mounts",
+    "nests", "nets", "nights", "nuts", "oats", "objects", "outfits", "pants",
+    "parents", "parrots", "parts", "patients", "pests", "pets", "pits", "planets",
+    "plants", "plots", "pockets", "poets", "points", "pots", "presents", "prints",
+    "products", "projects", "puts", "quests", "quilts", "rabbits", "rackets",
+    "rafts", "rants", "rats", "rents", "rests", "rights", "roasts", "robots",
+    "rockets", "roots", "rusts", "saints", "salts", "scents", "seats", "secrets",
+    "sets", "sheets", "shifts", "shirts", "shots", "shorts", "shouts", "sights",
+    "skirts", "slants", "slots", "smarts", "spots", "sports", "sprouts", "streets",
+    "students", "subjects", "suits", "sweets", "talents", "tents", "tests",
+    "tickets", "tilts", "tints", "toasts", "treats", "trumpets", "trusts", "twists",
+    "units", "vents", "vests", "wallets", "wants", "warts", "watts", "weights",
+    "wits", "wrists", "yachts"
+    ];
+
+    /* Build unique, lowercase, a-z-only word array */
+    var words = (function () {
+        var mapped = [];
+        for (var i = 0; i < wordList.length; i++) {
+            var w = String(wordList[i]).replace(/^\s+|\s+$/g, '').toLowerCase();
+            if (/^[a-z]+$/.test(w)) mapped.push(w);
+        }
+        return uniqueArray(mapped);
+    })();
+
+    /* =====================================================================
+       SOUND ENGINE
+       ===================================================================== */
+    var SoundEngine = (function () {
+        var ctx = null;
+        var master = null;
+        var enabled = CONFIG.DEFAULT_SOUND_ENABLED;
+        var noiseBuffer = null;
+
+        function ensure() {
+            if (!ctx) {
+                var AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return null;
+                ctx = new AC();
+                master = ctx.createGain();
+                master.gain.value = CONFIG.MASTER_VOLUME;
+                master.connect(ctx.destination);
+
+                var len = Math.floor(ctx.sampleRate * 0.5);
+                noiseBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
+                var data = noiseBuffer.getChannelData(0);
+                for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+            }
+            if (ctx.state === 'suspended') ctx.resume();
+            return ctx;
+        }
+
+        function tone(opts) {
+            if (!enabled) return;
+            var freq = opts.freq;
+            var freqEnd = (opts.freqEnd !== undefined) ? opts.freqEnd : null;
+            var type = opts.type || 'sine';
+            var duration = (opts.duration !== undefined) ? opts.duration : 0.2;
+            var volume = (opts.volume !== undefined) ? opts.volume : 0.3;
+            var attack = (opts.attack !== undefined) ? opts.attack : 0.005;
+            var delay = opts.delay || 0;
+
+            var c = ensure(); if (!c) return;
+            var now = c.currentTime + delay;
+            var osc = c.createOscillator();
+            var gain = c.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            if (freqEnd != null) {
+                osc.frequency.exponentialRampToValueAtTime(Math.max(1, freqEnd), now + duration);
+            }
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(volume, now + attack);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+            osc.connect(gain);
+            gain.connect(master);
+            osc.start(now);
+            osc.stop(now + duration + 0.03);
+        }
+
+        function noise(opts) {
+            if (!enabled) return;
+            var duration = (opts.duration !== undefined) ? opts.duration : 0.15;
+            var volume = (opts.volume !== undefined) ? opts.volume : 0.3;
+            var filterFreq = (opts.filterFreq !== undefined) ? opts.filterFreq : 1000;
+            var filterType = opts.filterType || 'lowpass';
+            var sweepTo = (opts.sweepTo !== undefined) ? opts.sweepTo : null;
+            var delay = opts.delay || 0;
+
+            var c = ensure(); if (!c) return;
+            var now = c.currentTime + delay;
+            var src = c.createBufferSource();
+            src.buffer = noiseBuffer;
+            var filter = c.createBiquadFilter();
+            filter.type = filterType;
+            filter.frequency.setValueAtTime(filterFreq, now);
+            if (sweepTo != null) {
+                filter.frequency.exponentialRampToValueAtTime(Math.max(1, sweepTo), now + duration);
+            }
+            var gain = c.createGain();
+            gain.gain.setValueAtTime(volume, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+            src.connect(filter);
+            filter.connect(gain);
+            gain.connect(master);
+            src.start(now);
+            src.stop(now + duration + 0.03);
+        }
+
+        return {
+            unlock: function () { ensure(); },
+            isEnabled: function () { return enabled; },
+            toggle: function () { enabled = !enabled; if (enabled) ensure(); return enabled; },
+
+            shoot: function () {
+                tone({ freq: 900, freqEnd: 220, type: 'sine', duration: 0.13, volume: 0.22 });
+                tone({ freq: 1500, freqEnd: 400, type: 'triangle', duration: 0.09, volume: 0.10 });
+            },
+            hit: function () {
+                noise({ duration: 0.14, volume: 0.35, filterFreq: 2200, sweepTo: 300 });
+                tone({ freq: 180, freqEnd: 60, type: 'sine', duration: 0.20, volume: 0.28 });
+            },
+            bad: function () {
+                tone({ freq: 220, freqEnd: 90, type: 'sawtooth', duration: 0.28, volume: 0.18 });
+                tone({ freq: 160, freqEnd: 70, type: 'square', duration: 0.30, volume: 0.10 });
+            },
+            penalty: function () {
+                noise({ duration: 0.20, volume: 0.30, filterFreq: 600, sweepTo: 80 });
+                tone({ freq: 130, freqEnd: 55, type: 'sawtooth', duration: 0.32, volume: 0.22 });
+            },
+            click: function () {
+                tone({ freq: 900, freqEnd: 700, type: 'triangle', duration: 0.05, volume: 0.09 });
+            },
+            exists: function () {
+                tone({ freq: 520, freqEnd: 420, type: 'triangle', duration: 0.10, volume: 0.16 });
+                tone({ freq: 420, freqEnd: 320, type: 'triangle', duration: 0.12, volume: 0.16, delay: 0.10 });
+            },
+            launch: function () {
+                noise({ duration: 0.35, volume: 0.08, filterFreq: 500, sweepTo: 1400, filterType: 'bandpass' });
+            },
+            burst: function () {
+                noise({ duration: 0.45, volume: 0.14, filterFreq: 3000, sweepTo: 200 });
+                tone({ freq: 900 + Math.random() * 400, freqEnd: 200, type: 'triangle', duration: 0.30, volume: 0.06 });
+            },
+            victory: function () {
+                var notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+                for (var i = 0; i < notes.length; i++) {
+                    tone({ freq: notes[i], type: 'triangle', duration: 0.5, volume: 0.18, attack: 0.01, delay: i * 0.11 });
+                    tone({ freq: notes[i] * 2, type: 'sine', duration: 0.4, volume: 0.08, attack: 0.01, delay: i * 0.11 });
+                }
+                var tail = [523.25, 659.25, 783.99, 1046.5];
+                for (var j = 0; j < tail.length; j++) {
+                    tone({ freq: tail[j], type: 'sine', duration: 1.4, volume: 0.11, attack: 0.02, delay: 0.7 });
+                }
+            },
+            gameover: function () {
+                var notes = [440, 392, 349.23, 261.63];
+                for (var i = 0; i < notes.length; i++) {
+                    tone({ freq: notes[i], type: 'sawtooth', duration: 0.4, volume: 0.16, delay: i * 0.18 });
+                    tone({ freq: notes[i] / 2, type: 'sine', duration: 0.5, volume: 0.10, delay: i * 0.18 });
+                }
+            }
+        };
+    })();
+
+    /* =====================================================================
+       FIREWORKS OVERLAY
+       ===================================================================== */
+    var Fireworks = (function () {
+        var canvas = document.getElementById('fireworksCanvas');
+        var cx = canvas.getContext('2d');
+
+        var MAX_PARTICLES = CONFIG.MAX_FIREWORK_PARTICLES;
+        var MAX_ROCKETS   = CONFIG.MAX_FIREWORK_ROCKETS;
+
+        var COLORS = [
+            '#ff3b30', '#ff9500', '#ffcc00', '#34c759',
+            '#00c7be', '#0a84ff', '#5e5ce6', '#bf5af2',
+            '#ff2d55', '#ffffff'
+        ];
+        var COLOR_COUNT = COLORS.length;
+
+        var pX     = new Float32Array(MAX_PARTICLES);
+        var pY     = new Float32Array(MAX_PARTICLES);
+        var pVX    = new Float32Array(MAX_PARTICLES);
+        var pVY    = new Float32Array(MAX_PARTICLES);
+        var pLife  = new Float32Array(MAX_PARTICLES);
+        var pDecay = new Float32Array(MAX_PARTICLES);
+        var pSize  = new Float32Array(MAX_PARTICLES);
+        var pCol   = new Uint8Array(MAX_PARTICLES);
+        var pCount = 0;
+
+        var rX       = new Float32Array(MAX_ROCKETS);
+        var rY       = new Float32Array(MAX_ROCKETS);
+        var rVY      = new Float32Array(MAX_ROCKETS);
+        var rTargetY = new Float32Array(MAX_ROCKETS);
+        var rCol     = new Uint8Array(MAX_ROCKETS);
+        var rCount = 0;
+
+        var running = false;
+        var rafId = 0;
+        var lastSpawn = 0;
+        var endTime = 0;
+        var W = 0, H = 0;
+
+        var SPAWN_INTERVAL = 380;
+        var BURST_MIN = 22;
+        var BURST_MAX = 34;
+
+        function resize() {
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width  = Math.round(W * dpr);
+            canvas.height = Math.round(H * dpr);
+            canvas.style.width  = W + 'px';
+            canvas.style.height = H + 'px';
+            cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function spawnRocket() {
+            if (rCount >= MAX_ROCKETS) return;
+            var i = rCount++;
+            var targetY = H * (0.12 + Math.random() * 0.35);
+            var dy = (H + 10) - targetY;
+            rX[i] = W * (0.12 + Math.random() * 0.76);
+            rY[i] = H + 10;
+            rTargetY[i] = targetY;
+            rVY[i] = -Math.sqrt(2 * 0.09 * dy);
+            rCol[i] = (Math.random() * COLOR_COUNT) | 0;
+        }
+
+        function burst(x, y, colorIdx) {
+            var room = MAX_PARTICLES - pCount;
+            if (room <= 0) return;
+            var count = BURST_MIN + ((Math.random() * (BURST_MAX - BURST_MIN)) | 0);
+            if (count > room) count = room;
+
+            for (var n = 0; n < count; n++) {
+                var i = pCount++;
+                var angle = (n / count) * Math.PI * 2 + Math.random() * 0.2;
+                var speed = 1.2 + Math.random() * 3.6;
+                pX[i] = x;
+                pY[i] = y;
+                pVX[i] = Math.cos(angle) * speed;
+                pVY[i] = Math.sin(angle) * speed;
+                pLife[i] = 1;
+                pDecay[i] = 0.012 + Math.random() * 0.016;
+                pSize[i] = 1.5 + Math.random() * 1.8;
+                pCol[i] = Math.random() < 0.12 ? (COLOR_COUNT - 1) : colorIdx;
+            }
+        }
+
+        function loop(t) {
+            if (!running) return;
+
+            cx.globalCompositeOperation = 'source-over';
+            cx.globalAlpha = 1;
+            cx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+            cx.fillRect(0, 0, W, H);
+
+            if (t - lastSpawn > SPAWN_INTERVAL && t < endTime - 800) {
+                spawnRocket();
+                lastSpawn = t;
+                SoundEngine.launch();
+            }
+
+            cx.globalCompositeOperation = 'lighter';
+
+            for (var i = rCount - 1; i >= 0; i--) {
+                rY[i] += rVY[i];
+                rVY[i] += 0.16;
+
+                cx.fillStyle = COLORS[rCol[i]];
+                cx.fillRect(rX[i] - 1.5, rY[i] - 1.5, 3, 3);
+
+                if (rY[i] <= rTargetY[i] || rVY[i] >= 0) {
+                    burst(rX[i], rY[i], rCol[i]);
+                    SoundEngine.burst();
+
+                    var last = --rCount;
+                    rX[i] = rX[last]; rY[i] = rY[last]; rVY[i] = rVY[last];
+                    rTargetY[i] = rTargetY[last]; rCol[i] = rCol[last];
+                }
+            }
+
+            for (var k = pCount - 1; k >= 0; k--) {
+                pVY[k] += 0.05;
+                pVX[k] *= 0.99;
+                pVY[k] *= 0.99;
+                pX[k] += pVX[k];
+                pY[k] += pVY[k];
+
+                var life = pLife[k] - pDecay[k];
+                if (life <= 0) {
+                    var pl = --pCount;
+                    pX[k] = pX[pl]; pY[k] = pY[pl];
+                    pVX[k] = pVX[pl]; pVY[k] = pVY[pl];
+                    pLife[k] = pLife[pl]; pDecay[k] = pDecay[pl];
+                    pSize[k] = pSize[pl]; pCol[k] = pCol[pl];
+                    continue;
+                }
+                pLife[k] = life;
+
+                cx.globalAlpha = life;
+                cx.fillStyle = COLORS[pCol[k]];
+                var s = pSize[k];
+                cx.fillRect(pX[k] - s * 0.5, pY[k] - s * 0.5, s, s);
+            }
+
+            cx.globalAlpha = 1;
+            cx.globalCompositeOperation = 'source-over';
+
+            if (t >= endTime && rCount === 0 && pCount === 0) {
+                stop();
+                return;
+            }
+            rafId = requestAnimationFrame(loop);
+        }
+
+        function start(duration) {
+            if (duration === undefined) duration = CONFIG.FIREWORKS_DURATION_MS;
+            if (running) return;
+            resize();
+            pCount = 0;
+            rCount = 0;
+            lastSpawn = 0;
+            cx.clearRect(0, 0, W, H);
+            addClass(canvas, 'active');
+            running = true;
+            endTime = performance.now() + duration;
+            rafId = requestAnimationFrame(loop);
+        }
+
+        function stop() {
+            running = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = 0;
+            pCount = 0;
+            rCount = 0;
+            removeClass(canvas, 'active');
+            cx.setTransform(1, 0, 0, 1, 0, 0);
+            cx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        on(window, 'resize', function () { if (running) resize(); });
+        return { start: start, stop: stop };
+    })();
+
+    /* ================= Toast ================= */
+    var toastTimer = null;
+
+    function showToast(message, duration) {
+        if (duration === undefined) duration = CONFIG.TOAST_EXISTS_MS;
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = message;
+        addClass(toast, 'show');
+
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            removeClass(toast, 'show');
+        }, duration);
+    }
+
+    /* ================= Level Parsing ================= */
+    function parseLevels(str) {
+        var levels = [];
+        var parts = String(str || '').split(',');
+        for (var i = 0; i < parts.length; i++) {
+            var m = parts[i].replace(/^\s+|\s+$/g, '')
+                .match(/^([a-zA-Z]+)(?:\s*)\((\d+)\s*[xX\u00D7]\s*(\d+)\)$/);
+            if (m) {
+                levels.push({
+                    sound: m[1].toLowerCase(),
+                    rows: Math.max(1, Math.min(10, parseInt(m[2], 10))),
+                    bricks: Math.max(1, Math.min(15, parseInt(m[3], 10)))
+                });
+            }
+        }
+        if (levels.length === 0) {
+            levels.push({ sound: 'bl', rows: 3, bricks: 8 });
+        }
+        return levels;
+    }
+
+    /* ================= Game State ================= */
+    var allLetters = uniqueArray(words.join('').split('')).sort();
+    var levels = parseLevels(CONFIG.DEFAULT_LEVELS);
+    var currentLevelIndex = 0;
+    var bricks = [];
+    var shooterCol = 3;
+    var usedWords = [];
+    var gameActive = true;
+    var clearedBricks = 0;
+    var levelClearedBricks = 0;
+    var penaltyCount = 0;
+    var targetSound = levels[0].sound;
+    var bulletSpeed = CONFIG.BULLET_SPEED;
+    var MAX_PENALTIES = CONFIG.MAX_PENALTIES;
+    var GRID_PADDING = CONFIG.GRID_PADDING;
+    var GRID_GAP = CONFIG.GRID_GAP;
+    var BRICK_RATIO = CONFIG.BRICK_RATIO;
+    var MAX_BRICK_W = CONFIG.MAX_BRICK_W;
+    var MIN_BRICK_W = CONFIG.MIN_BRICK_W;
+
+    /* ================= Column geometry ================= */
+    var brickWidth = 56;
+
+    function currentColumnCount() {
+        return levels[currentLevelIndex] ? levels[currentLevelIndex].bricks : 8;
+    }
+
+    function currentRowCount() {
+        return levels[currentLevelIndex] ? levels[currentLevelIndex].rows : 3;
+    }
+
+    function layoutGrid() {
+        var grid      = document.getElementById('brickGrid');
+        var container = document.getElementById('gameContainer');
+        var N    = currentColumnCount();
+        var rows = currentRowCount();
+
+        var containerW = container.clientWidth  || 320;
+        var containerH = container.clientHeight || 320;
+
+        var availW = Math.max(40, containerW - GRID_PADDING * 2);
+        var availH = Math.max(60, containerH - 120);
+
+        var bw = (availW - (N - 1) * GRID_GAP) / N;
+
+        var maxBrickH = (availH - (rows - 1) * GRID_GAP) / rows;
+        bw = Math.min(bw, maxBrickH * BRICK_RATIO, MAX_BRICK_W);
+        bw = Math.max(bw, MIN_BRICK_W);
+
+        brickWidth = bw;
+
+        var bh = bw / BRICK_RATIO;
+        grid.style.setProperty('--brick-h', bh.toFixed(2) + 'px');
+        grid.style.setProperty('--cols', N);
+        grid.style.gridTemplateColumns = 'repeat(' + N + ', ' + bw.toFixed(2) + 'px)';
+        grid.style.webkitGridTemplateColumns = 'repeat(' + N + ', ' + bw.toFixed(2) + 'px)';
+        grid.style.justifyContent = 'center';
+    }
+
+    function getColumnCenterX(col) {
+        var container  = document.getElementById('gameContainer');
+        var N          = currentColumnCount();
+        var containerW = container.clientWidth || 320;
+        var innerW     = containerW - GRID_PADDING * 2;
+        var gridW      = N * brickWidth + (N - 1) * GRID_GAP;
+        var offset     = GRID_PADDING + (innerW - gridW) / 2;
+        return offset + col * (brickWidth + GRID_GAP) + brickWidth / 2;
+    }
+
+    function updateShooterPosition() {
+        var N = currentColumnCount();
+        shooterCol = Math.max(0, Math.min(N - 1, shooterCol));
+        var x = getColumnCenterX(shooterCol);
+        document.getElementById('shooter').style.left = x + 'px';
+    }
+
+    function updateLevelIndicator() {
+        var el = document.getElementById('levelIndicator');
+        var wrap = document.getElementById('levelStat');
+        if (el && wrap) {
+            el.textContent = (currentLevelIndex + 1) + '/' + levels.length;
+            wrap.style.display = 'flex';
+        }
+    }
+
+    /* ================= UI config ================= */
+    function applyUIConfig() {
+        if (!CONFIG.SHOW_SETTINGS_BUTTON) document.getElementById('settingsBtn').style.display = 'none';
+        if (!CONFIG.SHOW_HELP_BUTTON)     document.getElementById('helpBtn').style.display = 'none';
+        if (!CONFIG.SHOW_SOUND_TOGGLE)    document.getElementById('soundToggle').style.display = 'none';
+        if (!CONFIG.SHOW_WORDS_BUTTON)    document.getElementById('wordsToggle').style.display = 'none';
+
+        var st = document.getElementById('soundToggle');
+        st.textContent = CONFIG.DEFAULT_SOUND_ENABLED ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+        st.title       = CONFIG.DEFAULT_SOUND_ENABLED ? 'Sound on' : 'Sound muted';
+
+        var vimg = document.getElementById('victoryImage');
+        if (CONFIG.VICTORY_IMAGE) {
+            vimg.src = CONFIG.VICTORY_IMAGE;
+            vimg.alt = CONFIG.VICTORY_IMAGE_ALT || 'Victory';
+        } else {
+            vimg.removeAttribute('src');
+            vimg.alt = '';
+        }
+        addClass(vimg, 'hidden');
+    }
+
+    /* ================= Level Modal ================= */
+    function showLevelModal(levelIndex, isIntro, callback) {
+        var modal = document.getElementById('levelModal');
+        var title = document.getElementById('levelModalTitle');
+        var soundEl = document.getElementById('levelModalSound');
+        var lvl = levels[levelIndex];
+
+        title.textContent = 'Level ' + (levelIndex + 1);
+        if (isIntro) {
+            soundEl.textContent = 'Target Sound: ' + lvl.sound;
+        } else {
+            soundEl.textContent = 'Next Sound: ' + lvl.sound;
+        }
+
+        dialogShowModal(modal);
+        setTimeout(function () {
+            dialogClose(modal);
+            if (callback) callback();
+        }, CONFIG.LEVEL_MODAL_MS);
+    }
+
+    /* ================= Init ================= */
+    function startLevel(index, showModal, callback) {
+        currentLevelIndex = index;
+        var lvl = levels[currentLevelIndex];
+        targetSound = lvl.sound;
+
+        usedWords = [];
+        penaltyCount = 0;
+        levelClearedBricks = 0;
+        document.getElementById('currentWord').textContent = '';
+        document.getElementById('wordsUsed').textContent = '0';
+        renderUsedWords();
+
+        document.getElementById('targetSound').textContent = targetSound;
+        updateLevelIndicator();
+
+        var N = currentColumnCount();
+        shooterCol = CONFIG.SHOOTER_START_COL !== null
+            ? Math.max(0, Math.min(N - 1, CONFIG.SHOOTER_START_COL))
+            : Math.floor((N - 1) / 2);
+
+        initializeBricks();
+        requestAnimationFrame(function () {
+            layoutGrid();
+            updateShooterPosition();
+        });
+
+        if (showModal) {
+            gameActive = false;
+            showLevelModal(currentLevelIndex, index === 0, function () {
+                gameActive = true;
+                if (callback) callback();
+            });
+        } else {
+            if (callback) callback();
+        }
+    }
+
+    function initializeGame() {
+        createCustomKeyboard();
+        clearedBricks = 0;
+        startLevel(0, true, null);
+    }
+
+    function initializeBricks() {
+        var brickGrid = document.getElementById('brickGrid');
+        brickGrid.innerHTML = '';
+        bricks = [];
+        var rows = currentRowCount();
+        var N = currentColumnCount();
+        brickGrid.style.setProperty('--cols', N);
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < N; c++) {
+                var brick = createBrick(r, c);
+                brickGrid.appendChild(brick);
+                bricks.push(brick);
+            }
+        }
+        updateBrickCount();
+    }
+
+    function createBrick(row, col) {
+        var brick = document.createElement('div');
+        brick.className = 'brick';
+        brick.setAttribute('data-row', row);
+        brick.setAttribute('data-col', col);
+        return brick;
+    }
+
+    function createBrickRed(row, col) {
+        var brick = document.createElement('div');
+        brick.className = 'brick red';
+        brick.setAttribute('data-row', row);
+        brick.setAttribute('data-col', col);
+        return brick;
+    }
+
+    function addRedBrickToGrid() {
+        var brickGrid = document.getElementById('brickGrid');
+        var destroyed = brickGrid.querySelector('.brick.destroyed');
+        if (destroyed) {
+            removeClass(destroyed, 'destroyed');
+            addClass(destroyed, 'red');
+            bricks.push(destroyed);
+            return;
+        }
+        var brick = createBrickRed(-1, -1);
+        brickGrid.appendChild(brick);
+        bricks.push(brick);
+    }
+
+    /* ================= Word / shot logic ================= */
+    function updateTargetSound() {
+        document.getElementById('targetSound').textContent = targetSound;
+    }
+
+    function checkWord() {
+        var input = document.getElementById('currentWord').textContent.toLowerCase();
+        if (!input) return false;
+        var hasTag = input.indexOf(targetSound) !== -1;
+        var isValid = words.indexOf(input) !== -1;
+        var isUsed = usedWords.indexOf(input) !== -1;
+        return hasTag && isValid && !isUsed;
+    }
+
+    /*
+     * createParticles
+     * Spawns 15 short-lived DOM particles at (x, y).
+     * Each particle owns its own opacity counter so they fade independently.
+     */
+    function createParticles(x, y, color) {
+        var container = document.getElementById('gameContainer');
+        for (var i = 0; i < 15; i++) {
+            var particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.backgroundColor = color;
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            container.appendChild(particle);
+
+            var angle = Math.random() * Math.PI * 2;
+            var speed = Math.random() * 5 + 2;
+            var vx = Math.cos(angle) * speed;
+            var vy = Math.sin(angle) * speed;
+
+            (function (p, vx, vy) {
+                /* per-particle opacity, captured in the closure */
+                var opacity = 1;
+                var anim = setInterval(function () {
+                    var left = parseFloat(p.style.left);
+                    var top = parseFloat(p.style.top);
+                    p.style.left = (left + vx) + 'px';
+                    p.style.top = (top + vy) + 'px';
+                    opacity -= 0.03;
+                    p.style.opacity = opacity;
+                    if (opacity <= 0) {
+                        p.remove();
+                        clearInterval(anim);
+                    }
+                }, 30);
+            })(particle, vx, vy);
+        }
+    }
+
+    function anyDialogOpen() {
+        return !!document.querySelector('dialog[open]');
+    }
+
+    function shootBullet() {
+        if (!gameActive) return;
+        if (anyDialogOpen()) return;
+        var currentWord = document.getElementById('currentWord').textContent;
+        if (!currentWord) return;
+
+        var inputLower = currentWord.toLowerCase();
+
+        /* Already-used word: toast + soft sound, NO penalty */
+        if (usedWords.indexOf(inputLower) !== -1) {
+            showToast('exist', CONFIG.TOAST_EXISTS_MS);
+            SoundEngine.exists();
+            document.getElementById('currentWord').textContent = '';
+            return;
+        }
+
+        /* Invalid word: red brick + penalty */
+        if (!checkWord()) {
+            addRedBrickToGrid();
+            updateBrickCount();
+            penaltyCount++;
+            SoundEngine.bad();
+            SoundEngine.penalty();
+            if (penaltyCount > MAX_PENALTIES) {
+                showGameOver(false);
+            }
+            document.getElementById('currentWord').textContent = '';
+            return;
+        }
+
+        /* Valid word: fire! */
+        usedWords.push(inputLower);
+        renderUsedWords();
+        document.getElementById('wordsUsed').textContent = usedWords.length;
+        document.getElementById('currentWord').textContent = '';
+
+        SoundEngine.shoot();
+
+        var spawnX = getColumnCenterX(shooterCol);
+        var bullet = document.createElement('div');
+        bullet.className = 'bullet';
+        bullet.style.left = spawnX + 'px';
+        bullet.style.bottom = '40px';
+        document.getElementById('gameContainer').appendChild(bullet);
+
+        var container = document.getElementById('gameContainer');
+        var animation = setInterval(function () {
+            if (!gameActive) {
+                bullet.remove();
+                clearInterval(animation);
+                return;
+            }
+            if (anyDialogOpen()) return;
+
+            var currentBottom = parseFloat(bullet.style.bottom) || 40;
+            var newBottom = currentBottom + bulletSpeed;
+            bullet.style.bottom = newBottom + 'px';
+
+            var bulletRect = bullet.getBoundingClientRect();
+            var containerRect = container.getBoundingClientRect();
+            var adjBullet = {
+                left: bulletRect.left - containerRect.left,
+                top: bulletRect.top - containerRect.top,
+                right: bulletRect.right - containerRect.left,
+                bottom: bulletRect.bottom - containerRect.top
+            };
+
+            for (var i = 0; i < bricks.length; i++) {
+                var brick = bricks[i];
+                var brickRect = brick.getBoundingClientRect();
+                var adjBrick = {
+                    left: brickRect.left - containerRect.left,
+                    top: brickRect.top - containerRect.top,
+                    right: brickRect.right - containerRect.left,
+                    bottom: brickRect.bottom - containerRect.top
+                };
+                if (adjBullet.left < adjBrick.right &&
+                    adjBullet.right > adjBrick.left &&
+                    adjBullet.top < adjBrick.bottom &&
+                    adjBullet.bottom > adjBrick.top) {
+
+                    var cxp = (adjBrick.left + adjBrick.right) / 2;
+                    var cyp = (adjBrick.top + adjBrick.bottom) / 2;
+                    var color = hasClass(brick, 'red') ? '#f44336' : '#4CAF50';
+                    createParticles(cxp, cyp, color);
+                    SoundEngine.hit();
+
+                    addClass(brick, 'destroyed');
+                    removeClass(brick, 'red');
+                    bricks.splice(i, 1);
+                    clearedBricks++;
+                    levelClearedBricks++;
+
+                    bullet.remove();
+                    clearInterval(animation);
+                    updateBrickCount();
+
+                    if (bricks.length === 0) {
+                        onLevelCleared();
+                    }
+                    return;
+                }
+            }
+
+            if (newBottom > container.clientHeight) {
+                bullet.remove();
+                clearInterval(animation);
+            }
+        }, 16);
+    }
+
+    function updateBrickCount() {
+        document.getElementById('brickCount').textContent = bricks.length;
+    }
+
+    function renderUsedWords() {
+        var el = document.getElementById('usedWords');
+        if (!usedWords.length) {
+            el.textContent = 'No words used yet...';
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < usedWords.length; i++) {
+            html += '<span class="word-chip">' + usedWords[i] + '</span>';
+        }
+        el.innerHTML = html;
+    }
+
+    function onLevelCleared() {
+        gameActive = false;
+        var isLast = currentLevelIndex >= levels.length - 1;
+
+        if (isLast) {
+            showGameOver(true);
+            return;
+        }
+
+        var nextIndex = currentLevelIndex + 1;
+        showLevelModal(nextIndex, false, function () {
+            startLevel(nextIndex, false, function () {
+                gameActive = true;
+            });
+        });
+    }
+
+    function showGameOver(won) {
+        gameActive = false;
+        document.getElementById('gameOverText').textContent = won ? 'You Win!' : 'Game Over!';
+        document.getElementById('finalWords').textContent = usedWords.length;
+        document.getElementById('clearedBricks').textContent = clearedBricks;
+
+        var vimg = document.getElementById('victoryImage');
+        var shouldShow = CONFIG.VICTORY_IMAGE &&
+                         (won || !CONFIG.VICTORY_IMAGE_ONLY_ON_WIN);
+        if (shouldShow) {
+            removeClass(vimg, 'hidden');
+            vimg.style.animation = 'none';
+            void vimg.offsetWidth;
+            vimg.style.animation = '';
+        } else {
+            addClass(vimg, 'hidden');
+        }
+
+        document.getElementById('gameOver').style.display = 'block';
+
+        if (won) {
+            SoundEngine.victory();
+            Fireworks.start(CONFIG.FIREWORKS_DURATION_MS);
+        } else {
+            SoundEngine.gameover();
+        }
+    }
+
+    function restartGame() {
+        Fireworks.stop();
+        document.getElementById('gameOver').style.display = 'none';
+        addClass(document.getElementById('victoryImage'), 'hidden');
+        clearedBricks = 0;
+        startLevel(0, true, null);
+    }
+    /* expose to inline onclick */
+    window.restartGame = restartGame;
+
+    function createCustomKeyboard() {
+        var keyboard = document.getElementById('customKeyboard');
+        keyboard.innerHTML = '';
+        for (var i = 0; i < allLetters.length; i++) {
+            (function (letter) {
+                var btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter.toUpperCase();
+                btn.onclick = function () {
+                    SoundEngine.click();
+                    document.getElementById('currentWord').textContent += letter;
+                };
+                keyboard.appendChild(btn);
+            })(allLetters[i]);
+        }
+    }
+
+    /* ================= Event listeners ================= */
+    on(document.getElementById('leftBtn'), 'click', function () {
+        SoundEngine.click();
+        shooterCol = Math.max(0, shooterCol - 1);
+        updateShooterPosition();
+    });
+
+    on(document.getElementById('rightBtn'), 'click', function () {
+        SoundEngine.click();
+        shooterCol = Math.min(currentColumnCount() - 1, shooterCol + 1);
+        updateShooterPosition();
+    });
+
+    on(document.getElementById('backspaceBtn'), 'click', function () {
+        SoundEngine.click();
+        var current = document.getElementById('currentWord');
+        current.textContent = current.textContent.slice(0, -1);
+    });
+
+    on(document.getElementById('shootBtn'), 'click', shootBullet);
+
+    on(document.getElementById('target-row'), 'change', function () {
+        this.value = Math.max(1, Math.min(10, parseInt(this.value, 10) || 3));
+    });
+
+    on(document.getElementById('target-bricks'), 'change', function () {
+        this.value = Math.max(1, Math.min(15, parseInt(this.value, 10) || 8));
+    });
+
+    on(document.getElementById('target-sound'), 'input', function () {
+        updateTargetSound();
+    });
+
+    var settingsDialog = document.getElementById('settingsDialog');
+    on(document.getElementById('settingsBtn'), 'click', function () {
+        if (!CONFIG.SHOW_SETTINGS_DIALOG) return;
+        SoundEngine.click();
+        dialogShowModal(settingsDialog);
+    });
+    on(document.getElementById('settingsCancel'), 'click', function () {
+        SoundEngine.click();
+        dialogClose(settingsDialog);
+    });
+    on(document.getElementById('settingsApply'), 'click', function () {
+        SoundEngine.click();
+        dialogClose(settingsDialog);
+        restartGame();
+    });
+
+    var helpDialog = document.getElementById('helpDialog');
+    on(document.getElementById('helpBtn'), 'click', function () {
+        SoundEngine.click();
+        dialogShowModal(helpDialog);
+    });
+    on(document.getElementById('helpClose'), 'click', function () {
+        SoundEngine.click();
+        dialogClose(helpDialog);
+    });
+
+    on(document.getElementById('wordsToggle'), 'click', function () {
+        SoundEngine.click();
+        toggleClass(document.getElementById('wordsPanel'), 'open');
+    });
+    on(document.getElementById('wordsClose'), 'click', function () {
+        SoundEngine.click();
+        removeClass(document.getElementById('wordsPanel'), 'open');
+    });
+
+    var soundToggleBtn = document.getElementById('soundToggle');
+    on(soundToggleBtn, 'click', function () {
+        var isOn = SoundEngine.toggle();
+        soundToggleBtn.textContent = isOn ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+        soundToggleBtn.title = isOn ? 'Sound on' : 'Sound muted';
+        if (isOn) SoundEngine.click();
+    });
+
+    on(document, 'keydown', function (e) {
+        e = e || window.event;
+        if (!gameActive) return;
+        if (!CONFIG.ALLOW_PHYSICAL_KEYBOARD) return;
+        if (anyDialogOpen()) return;
+        if (e.key === 'Escape') return;
+
+        if (e.key === 'ArrowLeft') {
+            shooterCol = Math.max(0, shooterCol - 1);
+            updateShooterPosition();
+        } else if (e.key === 'ArrowRight') {
+            shooterCol = Math.min(currentColumnCount() - 1, shooterCol + 1);
+            updateShooterPosition();
+        } else if (e.key === 'Backspace') {
+            var current = document.getElementById('currentWord');
+            current.textContent = current.textContent.slice(0, -1);
+        } else if (e.key === 'Enter') {
+            shootBullet();
+        } else if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
+            document.getElementById('currentWord').textContent += e.key.toLowerCase();
+        }
+    });
+
+    on(window, 'resize', function () {
+        requestAnimationFrame(function () {
+            layoutGrid();
+            updateShooterPosition();
+        });
+    });
+
+    if (CONFIG.UNLOCK_AUDIO_ON_FIRST_GESTURE) {
+        var unlocked = false;
+        var unlockOnce = function () {
+            if (unlocked) return;
+            unlocked = true;
+            SoundEngine.unlock();
+            off(document, 'pointerdown', unlockOnce);
+            off(document, 'keydown', unlockOnce);
+            off(document, 'touchstart', unlockOnce);
+        };
+        on(document, 'pointerdown', unlockOnce);
+        on(document, 'keydown', unlockOnce);
+        on(document, 'touchstart', unlockOnce);
+    }
+
+    /* Boot */
+    applyUIConfig();
+    initializeGame();
+})();
+</script>
+</body>
+</html>

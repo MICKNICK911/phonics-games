@@ -264,6 +264,82 @@
     [data-theme="dark"] .feedback-banner.ok { background: #14532d; color: #bbf7d0; }
     [data-theme="dark"] .feedback-banner.bad { background: #7f1d1d; color: #fecaca; }
 
+    /* Sound Hunt */
+    #soundHuntScreen .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 100px; }
+    .sh-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 16px; box-shadow: var(--shadow);
+    }
+    .sh-instruction {
+      font-size: 1rem; font-weight: 700; margin-bottom: 6px; line-height: 1.4;
+      text-align: center;
+    }
+    .sh-instruction .sh-sound {
+      color: var(--accent-dark);
+      background: #fef3c7;
+      padding: 1px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    [data-theme="dark"] .sh-instruction .sh-sound {
+      background: #78350f;
+      color: #fde68a;
+    }
+    .sh-counter {
+      font-size: 0.85rem; font-weight: 700; color: var(--text-3);
+      text-align: center; margin-bottom: 16px; letter-spacing: 0.04em;
+    }
+    .sh-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .sh-tile {
+      padding: 18px 10px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--surface-2);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      text-align: center;
+      min-height: 56px;
+      word-break: break-word;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sh-tile:hover:not(:disabled) { border-color: var(--accent); }
+    .sh-tile:active:not(:disabled) { transform: scale(0.97); }
+    .sh-tile.selected {
+      border-color: var(--accent);
+      background: #fef3c7;
+      color: #92400e;
+    }
+    [data-theme="dark"] .sh-tile.selected {
+      background: #78350f;
+      color: #fde68a;
+      border-color: var(--accent);
+    }
+    .sh-tile.wrong {
+      border-color: var(--danger);
+      background: #fee2e2;
+      color: #991b1b;
+      animation: sh-shake 0.35s;
+    }
+    [data-theme="dark"] .sh-tile.wrong {
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+    .sh-tile:disabled { cursor: default; }
+    @keyframes sh-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
     /* Results */
     #resultsScreen .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 24px; }
     .result-badge {
@@ -522,6 +598,37 @@
     </div>
   </div>
 
+  <!-- SOUND HUNT -->
+  <div id="soundHuntScreen" class="screen">
+    <div class="app-header">
+      <button class="icon-btn" id="shBackBtn" title="Back to story" aria-label="Back to story">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div style="flex:1;min-width:0">
+        <h1 style="font-size:0.95rem">Sound Hunt</h1>
+        <div class="meta" id="shMeta"></div>
+      </div>
+      <button class="icon-btn" id="themeBtn5" title="Toggle theme" aria-label="Toggle theme"></button>
+    </div>
+    <div class="content">
+      <div class="content-wrap">
+        <div class="target-bar">
+          <span class="day-chip" id="shDayChip">Day 1</span>
+          <span class="sound" id="shTargetSound"></span>
+        </div>
+        <div class="sh-card">
+          <div class="sh-instruction" id="shInstruction">Tap the 5 words with the target sound.</div>
+          <div class="sh-counter" id="shCounter">0 of 5 selected</div>
+          <div class="sh-grid" id="shGrid"></div>
+          <div class="feedback-banner" id="shFeedback"></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn btn-primary btn-lg btn-block btn-locked" id="shFinishBtn" disabled></button>
+    </div>
+  </div>
+
   <!-- RESULTS -->
   <div id="resultsScreen" class="screen">
     <div class="app-header">
@@ -542,6 +649,7 @@
             <div class="row"><span class="label">Grade</span><span class="val" id="resGrade">—</span></div>
             <div class="row"><span class="label">Lesson</span><span class="val" id="resLesson">—</span></div>
             <div class="row"><span class="label">Target Sound</span><span class="val" id="resSound">—</span></div>
+            <div class="row" id="resShRow" style="display:none"><span class="label">Sound Hunt</span><span class="val" id="resShVal">—</span></div>
             <div class="row"><span class="label">Date</span><span class="val" id="resDate">—</span></div>
             <div class="row"><span class="label">Status</span><span class="val" id="resStatus">—</span></div>
           </div>
@@ -601,6 +709,60 @@
   /* ========== LESSONS ========== */
   const LESSONS = [{"id":"g2l1_story","lessonNumber":1,"title":"The Shrew's Shrub","targetSound":"Digraph-Blends: shr","storyLines":["A tiny shrew lived under a shrub by the old shrine.","Every morning he would shrug his shoulders and stretch.","One day the shrub began to shrink for no reason at all.","The shrew let out a shrill shriek and ran to find help.","A shrimp popped out of the pond and asked what was wrong.","They found a shroud of dust covering the roots of the shrub.","The shrew brushed the dust away and gave the roots some water.","By evening the shrub had grown taller than ever before."],"questions":[{"question":"Where did the shrew live?","options":["under a shrub","in a pond","under a rock"],"correctIndex":0},{"question":"What was covering the roots of the shrub?","options":["a shroud of dust","water","leaves"],"correctIndex":0},{"question":"What happened to the shrub by evening?","options":["it grew taller","it shrank more","it disappeared"],"correctIndex":0}]},{"id":"g2l2_story","lessonNumber":2,"title":"Three on the Throne","targetSound":"Digraph-Blends: thr","storyLines":["Three young friends found an old throne hidden in the thrift shop.","One friend began to throw questions about who had built it.","A loose thread hung from the seat, and it began to throb with light.","The friends felt a thrill rush through their throats as the light grew.","They learned the throne once belonged to a king who loved to thrive on adventure.","A soft throng of birds gathered outside the shop window.","The friends decided the throne was too special to sell.","They placed it in the town square for everyone to see."],"questions":[{"question":"Where did the friends find the throne?","options":["a thrift shop","a museum","a forest"],"correctIndex":0},{"question":"What began to hang from the seat?","options":["a loose thread","a rope","a ribbon"],"correctIndex":0},{"question":"What did the friends decide to do with the throne?","options":["place it in the town square","sell it","throw it away"],"correctIndex":0}]},{"id":"g2l3_story","lessonNumber":3,"title":"The Schedule at School","targetSound":"Digraph-Blends: sch","storyLines":["At school, a busy scholar named Miss Chen followed a strict schedule.","She kept a small schnauzer named Scout who waited by the gate.","One rainy day, her schedule was ruined by a leaking roof.","Miss Chen came up with a clever scheme to fix the leak.","The students helped build a model schooner to catch the drips.","Scout barked with joy as the water poured neatly into the boat.","The whole school praised the young scholars for their bright idea.","From then on, the schedule always had time for new inventions."],"questions":[{"question":"What did Miss Chen keep by the gate?","options":["a schnauzer named Scout","a scholar","a schooner"],"correctIndex":0},{"question":"What problem happened on a rainy day?","options":["a leaking roof","a broken window","a flat tire"],"correctIndex":0},{"question":"What did the students build?","options":["a model schooner","a new roof","a school bell"],"correctIndex":0}]},{"id":"g2l4_story","lessonNumber":4,"title":"The Warm Reward","targetSound":"R-Controlled Vowels (Irregular): ar (or)","storyLines":["In a warm valley, a small dwarf named Warryn guarded an old gate.","His job was to warn travelers before a coming storm.","One day the sky began to warp with dark, swirling clouds.","Warryn ran forward to warn the village before the wind hit.","A swarm of leaves flew past, but he kept moving toward the gate.","Thanks to his warning, everyone made it safely to shelter.","The village mayor gave Warryn a shiny reward for his courage.","Warryn smiled and said the safety of his friends was reward enough."],"questions":[{"question":"What was Warryn's job?","options":["to warn travelers before a storm","to guard treasure","to build gates"],"correctIndex":0},{"question":"What flew past Warryn as he ran?","options":["a swarm of leaves","a swarm of bees","a swarm of birds"],"correctIndex":0},{"question":"What did Warryn say was reward enough?","options":["the safety of his friends","the shiny reward","the storm passing"],"correctIndex":0}]},{"id":"g2l5_story","lessonNumber":5,"title":"Worth More Than Gold","targetSound":"R-Controlled Vowels (Irregular): or (er)","storyLines":["A hardworking worm named Wilma dug through the world under the garden.","She would work all day, never worried about the worst weather.","One morning she found a strange word carved into a root.","The word said, \"Your work is worth more than you know.\"","Wilma felt worn out, but the message gave her new energy.","She kept working, turning the soil so the flowers could grow.","By summer, the garden was the worthiest in the whole world.","Wilma smiled, knowing her small work had made a big difference."],"questions":[{"question":"What did Wilma find carved into a root?","options":["a strange word","a picture","a map"],"correctIndex":0},{"question":"How did the message make Wilma feel?","options":["it gave her new energy","it made her sad","it made her stop working"],"correctIndex":0},{"question":"What happened to the garden by summer?","options":["it became the worthiest in the world","it dried up","it disappeared"],"correctIndex":0}]},{"id":"g2l6_story","lessonNumber":6,"title":"The Sailor and the Doctor","targetSound":"Agent Suffixes: -or","storyLines":["A brave sailor named Victor sailed far from home to visit a distant island.","On the ship, the tailor mended sails while the doctor cared for the sick.","A storm hit, and Victor was hurt while helping the crew.","The ship's doctor rushed over and treated his wound with great care.","Victor rested while the sponsor of the voyage checked on everyone aboard.","The mayor of the island greeted the ship when it finally landed.","Victor thanked the doctor for saving him during the storm.","He learned that every sailor needed a good doctor by their side."],"questions":[{"question":"Who mended sails on the ship?","options":["the tailor","the sailor","the mayor"],"correctIndex":0},{"question":"What happened to Victor during the storm?","options":["he was hurt","he fell overboard","he got sick"],"correctIndex":0},{"question":"What did Victor learn?","options":["every sailor needs a good doctor","storms are dangerous","islands are far away"],"correctIndex":0}]},{"id":"g2l7_story","lessonNumber":7,"title":"A Better Camper","targetSound":"Agent Suffixes: -er","storyLines":["Every summer, Farmer Joe let campers stay near his water tower.","One young camper named Tessa wanted to become a better hiker.","Her helper, a friendly teacher named Mr. Lowe, showed her the trails.","They walked past a smaller stream and a bigger, rushing river.","Tessa never got tired, even during the hottest part of summer.","By the end of the week, she was the fastest camper in the group.","Mr. Lowe told her she had grown stronger than she ever thought.","Tessa promised to return next summer as an even better hiker."],"questions":[{"question":"Who was Tessa's helper?","options":["a teacher named Mr. Lowe","a farmer","a fastest camper"],"correctIndex":0},{"question":"What did Tessa and her helper walk past?","options":["a stream and a river","a mountain and a lake","a forest and a field"],"correctIndex":0},{"question":"What did Tessa become by the end of the week?","options":["the fastest camper","the tallest camper","the youngest camper"],"correctIndex":0}]},{"id":"g2l8_story","lessonNumber":8,"title":"Push and Pull","targetSound":"Phonograms with Short Vowels: ull, ush","storyLines":["A young bull named Bruno loved to pull his cart full of hay.","One morning he got stuck in a thick bush near the barn.","His friend Molly the goat tried to push him free.","Together they would push and pull until the cart was fully loose.","Bruno's owner brought a soft cushion to rest his tired legs.","Molly laughed and said Bruno was being a bit pushy today.","By noon, the cart was full again and ready to roll.","Bruno thanked Molly for helping him pull through the tricky morning."],"questions":[{"question":"Where did Bruno get stuck?","options":["in a thick bush","in the mud","in a river"],"correctIndex":0},{"question":"Who tried to push Bruno free?","options":["Molly the goat","his owner","another bull"],"correctIndex":0},{"question":"What did Bruno's owner bring him?","options":["a soft cushion","some hay","a cart"],"correctIndex":0}]},{"id":"g2l9_story","lessonNumber":9,"title":"A Helpful and Careful Plan","targetSound":"Phonograms with Short Vowels: -ful","storyLines":["A playful puppy named Buddy wanted to be more helpful around the house.","He was hopeful that he could learn to carry small things carefully.","His owner put a spoon on the table and asked him to be careful.","Buddy picked it up gently and set it down without a single sound.","\"That was very useful of you,\" said his owner with a thankful smile.","Buddy wagged his tail and decided to put every toy back in its place.","From then on, he was known as the most helpful pup on the street.","Being careful and thankful had made Buddy everyone's favorite little helper."],"questions":[{"question":"What did Buddy want to learn to do?","options":["carry small things carefully","run faster","bark louder"],"correctIndex":0},{"question":"What did Buddy carry?","options":["a spoon","a shoe","a toy"],"correctIndex":0},{"question":"What was Buddy known as?","options":["the most helpful pup","the fastest pup","the loudest pup"],"correctIndex":0}]},{"id":"g2l10_story","lessonNumber":10,"title":"A Walk to the Mall","targetSound":"Phonograms with Short Vowels: all, al","storyLines":["Paul and his sister decided to walk all the way to the tall mall.","Along the way, they had to talk their way past a small chalk drawing.","Someone had drawn a giant ball rolling down a wall in bright colors.","Paul almost stepped on it before he noticed the fresh chalk.","They walked through the hall of the mall, admiring all the shops.","By the time they finished their walk, it was almost dark outside.","They called their mom to say they would fall asleep early tonight.","It had been a tall order, but they were glad they made the walk."],"questions":[{"question":"Where did Paul and his sister walk to?","options":["the tall mall","the small hall","the chalk shop"],"correctIndex":0},{"question":"What did they see drawn on the wall?","options":["a giant ball","a small dog","a tall tree"],"correctIndex":0},{"question":"What time was it by the end of their walk?","options":["almost dark","early morning","noon"],"correctIndex":0}]},{"id":"g2l11_story","lessonNumber":11,"title":"Waiting for the Train","targetSound":"Vowel Digraphs: ai","storyLines":["Gail had to wait at the station while the rain poured down outside.","Her train was delayed because of a chain of small delays down the line.","She opened her bag and pulled out a book with a torn tail of pages.","A friendly man sat beside her and offered to paint her a quick sketch.","He drew a train racing across a field to help her gain some cheer.","Gail's brain lit up with joy, and she forgot all about the wait.","At last, the train pulled in, ready to take her on her way.","She thanked the man and boarded the train just as the rain stopped."],"questions":[{"question":"Why was Gail's train delayed?","options":["a chain of small delays","the rain","a broken track"],"correctIndex":0},{"question":"What did the man draw for Gail?","options":["a train racing across a field","a picture of the rain","her portrait"],"correctIndex":0},{"question":"How did Gail feel after seeing the sketch?","options":["her brain lit up with joy","she was bored","she was scared"],"correctIndex":0}]},{"id":"g2l12_story","lessonNumber":12,"title":"The Best Play Day","targetSound":"Vowel Digraphs: -ay","storyLines":["Maya and her friends had planned to play all day at the park.","They packed a tray of sandwiches to stay all afternoon.","On the way there, gray clouds began to fill the sky.","\"Let's stay anyway,\" Maya said, \"we can play a game today.\"","They found a way to build a small fort away from the wind.","Soon the sun came back out, and they could not stop laughing.","They stayed until it was almost time to say goodbye for the day.","It turned out to be the best play day they'd had all May."],"questions":[{"question":"What did Maya and her friends pack?","options":["a tray of sandwiches","a game","a fort"],"correctIndex":0},{"question":"What did they build away from the wind?","options":["a small fort","a sandcastle","a tent"],"correctIndex":0},{"question":"How did the day turn out?","options":["it was the best play day","it was rained out","they went home early"],"correctIndex":0}]},{"id":"g2l13_story","lessonNumber":13,"title":"Deep in the Green Trees","targetSound":"Vowel Digraphs: ee","storyLines":["Under a tall green tree, a small bee began to buzz and sweep past.","A sleepy squirrel peeked out to see what all the fuss was about.","The bee needed to keep flying to find something sweet to eat.","Deep in the meadow, she found a field free of any weeds.","The flowers were the sweetest she had seen all week.","She filled her legs with pollen and began the trip back home.","The squirrel watched from a nearby tree, feeling free and happy.","By evening, the whole meadow felt peaceful and green once more."],"questions":[{"question":"What was the squirrel doing at first?","options":["peeking out to watch","sleeping","eating"],"correctIndex":0},{"question":"What did the bee find in the meadow?","options":["a field free of weeds","a river","a cave"],"correctIndex":0},{"question":"How did the meadow feel by evening?","options":["peaceful and green","loud and busy","dark and cold"],"correctIndex":0}]},{"id":"g2l14_story","lessonNumber":14,"title":"The Donkey's Honey","targetSound":"Vowel Digraphs: -ey","storyLines":["A small donkey named Barney found a jar of honey by the old key gate.","He wondered if a monkey nearby had left it there by mistake.","A turkey strutted by and said the honey belonged to no one at all.","Barney decided to share it with all his friends in the valley.","They gathered near the old wooden fence to enjoy the sweet treat.","Even the shy monkey came down from the tree to join them.","They spent the whole afternoon laughing and sharing stories together.","Barney learned that sharing turned a small find into a big memory."],"questions":[{"question":"What did Barney find?","options":["a jar of honey","a golden key","a bag of coins"],"correctIndex":0},{"question":"Who said the honey belonged to no one?","options":["the turkey","the monkey","the donkey"],"correctIndex":0},{"question":"What did Barney learn?","options":["sharing turns a find into a memory","honey is dangerous","keys are valuable"],"correctIndex":0}]},{"id":"g2l15_story","lessonNumber":15,"title":"A Seat by the Beach","targetSound":"Vowel Digraphs: ea (long e)","storyLines":["Each summer, Mia's family would clean the beach near their home.","She loved to read while sitting in her favorite seat by the water.","One day, her team found a leaf shaped like a tiny boat.","They decided to speak with the park ranger about protecting the beach.","The ranger was pleased and offered them fresh cream and meat for lunch.","Mia's team worked hard to keep the beach clean all week.","By evening, every seat along the shore was neat and tidy.","Mia felt proud that her small team had made a big difference."],"questions":[{"question":"What did Mia's team find shaped like a boat?","options":["a leaf","a shell","a rock"],"correctIndex":0},{"question":"Who did the team speak with about the beach?","options":["the park ranger","the mayor","a fisherman"],"correctIndex":0},{"question":"How did the beach look by evening?","options":["neat and tidy","messy","empty"],"correctIndex":0}]},{"id":"g2l16_story","lessonNumber":16,"title":"Bread for Breakfast","targetSound":"Vowel Digraphs: ea (short e, long a)","storyLines":["It was a heavy, rainy morning, and the baker had fresh bread ready.","He was already thinking about spreading honey on it instead of butter.","His helper said the weather meant they should be ready for a rush.","\"That's a great idea,\" the baker said, \"let's not break our routine today.\"","They cooked a small steak for the first hungry customer of the day.","The bread came out warm, and everyone said it meant a wonderful start.","The baker felt ready to take a short break after the busy rush.","The heavy rain outside made the warm bakery feel even more welcoming."],"questions":[{"question":"What was the weather like that morning?","options":["heavy and rainy","sunny and warm","cold and windy"],"correctIndex":0},{"question":"What did the baker cook for the first customer?","options":["a small steak","a cake","a sandwich"],"correctIndex":0},{"question":"How did the bread make everyone feel?","options":["it meant a wonderful start","it was too hot","it was disappointing"],"correctIndex":0}]},{"id":"g2l17_story","lessonNumber":17,"title":"A Piece of the Field","targetSound":"Vowel Digraphs: ie (long e)","storyLines":["Sophie walked across the wide field, holding tight to her small shield.","The village chief had told her about a hidden piece of land nearby.","It was said that anyone with a strong belief could find it.","Sophie gave a brief look around before spotting a glowing stone.","She picked it up carefully and felt a piece of warmth spread through her hand.","The chief smiled when she returned and shared the story of the field.","Sophie kept the stone as a reminder to always keep believing.","From then on, she visited the field every chance she had."],"questions":[{"question":"What did Sophie hold on to?","options":["a small shield","a book","a lantern"],"correctIndex":0},{"question":"What did Sophie find in the field?","options":["a glowing stone","a hidden village","a treasure chest"],"correctIndex":0},{"question":"What did Sophie keep the stone as?","options":["a reminder to keep believing","a gift for the chief","a good luck charm"],"correctIndex":0}]},{"id":"g2l18_story","lessonNumber":18,"title":"The Fox Who Cried","targetSound":"Vowel Digraphs: ie (long i)","storyLines":["A sly fox tried to tie a rope to a fresh apple pie on a windowsill.","When the baker caught him, the fox cried and told a quick lie.","He said a mouse had run off with the pie earlier that day.","The baker was not fooled, for she had tried this trick before.","She asked the fox to tie his own apron and help bake instead.","The fox sighed but agreed, glad not to be sent away.","By the end of the day, he had learned to make his own pie.","He never had to lie about pie again, for now he could bake his own."],"questions":[{"question":"What did the fox try to steal?","options":["an apple pie","a loaf of bread","a cake"],"correctIndex":0},{"question":"What lie did the fox tell?","options":["a mouse had taken it","a bird had taken it","he never saw it"],"correctIndex":0},{"question":"What did the fox learn to do?","options":["make his own pie","run faster","tie better knots"],"correctIndex":0}]},{"id":"g2l19_story","lessonNumber":19,"title":"The Bear's Paw","targetSound":"Vowel Digraphs: aw (or)","storyLines":["At dawn, a bear stretched out his paw and gave a big yawn.","He saw a fox nearby trying to draw pictures in the mud with a claw.","\"That's against the law of the forest,\" joked the bear with a laugh.","The fox laughed too and offered to draw the bear a picture instead.","They used a long piece of straw to trace a shape in the sand.","By midday, they had drawn a whole scene of the forest they loved.","The bear said it was the finest drawing he had ever seen.","They agreed to meet again at dawn to draw something new."],"questions":[{"question":"What was the fox doing when the bear saw him?","options":["drawing pictures in the mud","climbing a tree","chasing a rabbit"],"correctIndex":0},{"question":"What did they use to trace a shape in the sand?","options":["a piece of straw","a stick","a claw"],"correctIndex":0},{"question":"What did they agree to do again?","options":["meet at dawn to draw","race each other","build a home"],"correctIndex":0}]},{"id":"g2l20_story","lessonNumber":20,"title":"The Autumn Sauce","targetSound":"Vowel Digraphs: au (or)","storyLines":["It was autumn, and Grandma taught the whole family to make her famous sauce.","She had to haul a heavy pot from the stove to the long table.","\"Be careful,\" she said, \"or the sauce might cause a mess on the floor.\"","Everyone laughed and helped stir, careful not to make a fault in the recipe.","The smell filled the kitchen, and the cause of the joy was easy to see.","Grandma taught them the sauce was best when made together as a family.","By the end of autumn, every child in the house knew the recipe by heart.","The autumn sauce became their favorite tradition every single year."],"questions":[{"question":"What season was it?","options":["autumn","spring","winter"],"correctIndex":0},{"question":"What did Grandma have to haul?","options":["a heavy pot","a bag of flour","a basket of apples"],"correctIndex":0},{"question":"What did Grandma teach the family?","options":["the sauce is best made together","cooking is easy","autumn is the best season"],"correctIndex":0}]},{"id":"g2l21_story","lessonNumber":21,"title":"Joe's Boat and Hoe","targetSound":"Vowel Digraphs: oa, -oe","storyLines":["Joe kept an old wooden boat tied by the road near his garden.","Every morning he would soak his hoe in water before working the soil.","One day he found a toad sitting right on top of his coat.","\"Hello there,\" Joe said, gently placing the toad on a nearby log.","He rowed his boat out to check the goal he had set for the season.","His toe caught on a rope, but he steadied himself before falling in.","By afternoon, Joe had planted rows of vegetables using only his hoe.","He returned home, tired but happy, his boat and hoe both put away."],"questions":[{"question":"What did Joe keep by the road?","options":["an old wooden boat","a garden shed","a wagon"],"correctIndex":0},{"question":"What did Joe find on his coat?","options":["a toad","a leaf","a spider"],"correctIndex":0},{"question":"What tool did Joe use to plant vegetables?","options":["his hoe","his boat","a shovel"],"correctIndex":0}]},{"id":"g2l22_story","lessonNumber":22,"title":"The Snow Will Show","targetSound":"Vowel Digraphs: -ow (long o)","storyLines":["The children watched the snow slowly begin to grow across the yard.","They wanted to show their parents the biggest snowman they could build.","As the wind began to blow, the snow started to glow under the streetlight.","They worked in a slow, careful row, packing the snow tight.","Soon the snowman began to grow taller than any of them.","They called their parents to come and see the show outside.","Everyone clapped as the snowman's smile seemed to glow in the dark.","It was the best snow show the neighborhood had seen in years."],"questions":[{"question":"What did the children want to build?","options":["the biggest snowman","a snow fort","a snow angel"],"correctIndex":0},{"question":"What did they work in to pack the snow?","options":["a slow, careful row","a big pile","a circle"],"correctIndex":0},{"question":"How did the snowman's smile look in the dark?","options":["it seemed to glow","it looked scary","it melted away"],"correctIndex":0}]},{"id":"g2l23_story","lessonNumber":23,"title":"A True Clue","targetSound":"Vowel Digraphs: -ue (long u)","storyLines":["Sue found a jar of blue glue while cleaning out her art box.","She wondered if it was true that the glue never dried out.","Her brother said the answer was hidden as a clue in an old notebook.","Sue searched the pages until she found the true clue at last.","It said the glue was due to be used for a special project.","Sue used the glue to fix her favorite broken toy.","The toy looked good as new, and Sue felt very proud.","She decided the true value of the glue was in what it could fix."],"questions":[{"question":"What did Sue find while cleaning her art box?","options":["a jar of blue glue","an old notebook","a broken toy"],"correctIndex":0},{"question":"Where did Sue find the clue?","options":["in an old notebook","under her bed","in the kitchen"],"correctIndex":0},{"question":"What did Sue use the glue for?","options":["fixing her broken toy","painting a picture","sealing an envelope"],"correctIndex":0}]},{"id":"g2l24_story","lessonNumber":24,"title":"The New Crew Grew","targetSound":"Vowel Digraphs: -ew (long u)","storyLines":["A small crew of sailors flew their new flag on the ship's mast.","They had grown to trust each other after a few tough weeks at sea.","One evening a giant bird flew close and dropped a shiny stone.","The crew was thrilled, and a few of them began to chew over what it meant.","Their captain drew a quick map to figure out where the stone had come from.","They cooked a warm stew that night to celebrate their discovery.","The new crew grew closer with every strange thing they found together.","By morning, they knew their journey was far from over."],"questions":[{"question":"What did the crew fly on the ship's mast?","options":["their new flag","a lantern","a sail"],"correctIndex":0},{"question":"What did the giant bird drop?","options":["a shiny stone","a fish","a feather"],"correctIndex":0},{"question":"What did they cook to celebrate?","options":["a warm stew","fresh bread","a big cake"],"correctIndex":0}]},{"id":"g2l25_story","lessonNumber":25,"title":"The Cow's Crown","targetSound":"Diphthongs: ow","storyLines":["A curious brown cow wandered down the road toward the busy town.","She wondered how the people there spent their days without any grass.","In a shop window she spotted a shiny crown that made her smile.","The shopkeeper let her wear it and walk proudly down the street.","People bowed and laughed, unsure of what to think of it all.","Now the cow felt like the queen of the whole town, if only for now.","As the sun went down, she returned the crown with a happy frown.","She trotted home, proud of her funny adventure in town."],"questions":[{"question":"What did the cow spot in the shop window?","options":["a shiny crown","a bag of hay","a bell"],"correctIndex":0},{"question":"How did people react when the cow wore the crown?","options":["they bowed and laughed","they ran away","they ignored her"],"correctIndex":0},{"question":"What did the cow do as the sun went down?","options":["returned the crown","kept the crown","gave the crown away"],"correctIndex":0}]},{"id":"g2l26_story","lessonNumber":26,"title":"Counting Sounds in the House","targetSound":"Diphthongs: ou","storyLines":["A small mouse lived quietly inside an old house on the edge of town.","One night, a loud sound came from outside near the ground.","He crept out to find a cloud of dust rising from a pile of leaves.","A group of animals were counting the acorns they had found that day.","The mouse decided to shout hello and join in on the count.","They welcomed him, and he helped gather more acorns for the winter.","Working together, they filled the ground with enough food for the whole group.","The mouse went home proud, no longer feeling alone in his old house."],"questions":[{"question":"What did the mouse hear at night?","options":["a loud sound","a soft song","a knock"],"correctIndex":0},{"question":"What were the animals counting?","options":["acorns","leaves","stars"],"correctIndex":0},{"question":"How did the mouse feel by the end?","options":["proud, no longer alone","still lonely","tired and sad"],"correctIndex":0}]},{"id":"g2l27_story","lessonNumber":27,"title":"A Boy's Coin, a Boy's Joy","targetSound":"Diphthongs: oi, oy","storyLines":["A young boy named Roy found an old coin buried in the soil.","He decided to join his friends to figure out what it was worth.","They boiled some water for tea while they talked about the shiny find.","A noise outside caught their attention, and they went to check the point of it.","It was only the wind moving through the trees, and everyone let out a joyful laugh.","Roy's toy collection grew richer with the strange old coin added to it.","He gave his voice to a plan: to enjoy the coin as a memory, not sell it.","His friends agreed, and the coin became a symbol of that happy day."],"questions":[{"question":"Where did Roy find the coin?","options":["buried in the soil","in a river","in an old chest"],"correctIndex":0},{"question":"What caused the noise outside?","options":["the wind moving through trees","an animal","a storm"],"correctIndex":0},{"question":"What did Roy decide to do with the coin?","options":["keep it as a memory","sell it","bury it again"],"correctIndex":0}]},{"id":"g2l28_story","lessonNumber":28,"title":"Soup Under the Moon","targetSound":"Diphthongs: oo (long u)","storyLines":["On a cool evening, Grandpa made soup and served it with a big spoon.","The moon shone through the roof window, lighting the whole room.","Soon the whole family gathered around, waiting for their share of food.","Grandpa told a story about a boot he once lost near the pool.","Everyone laughed as he acted it out, spinning around the room.","The soup was warm, and the mood in the house felt calm and cool.","After dinner, they sat under the moon and watched the stars for a while.","It was the kind of soup-filled evening they would always remember."],"questions":[{"question":"What did Grandpa make?","options":["soup","stew","bread"],"correctIndex":0},{"question":"What story did Grandpa tell?","options":["about losing a boot near the pool","about a trip to the moon","about fixing a spoon"],"correctIndex":0},{"question":"What did the family do after dinner?","options":["watched the stars under the moon","went to sleep","played a game"],"correctIndex":0}]},{"id":"g2l29_story","lessonNumber":29,"title":"A Good Look in the Wood","targetSound":"Diphthongs: oo (short u)","storyLines":["A young boy took a good book and walked into the wood behind his house.","He wore a warm hood to keep his head cool in the shade.","He hurt his foot on a root but decided to look around anyway.","He found a wooden hook hanging from a branch nearby.","The boy took a good look and figured someone had hung it there long ago.","He sat on a stump and read his book until the light began to fade.","On his walk home, he took one last look at the quiet wood.","It had been a good afternoon, full of small, quiet discoveries."],"questions":[{"question":"What did the boy wear to keep cool?","options":["a warm hood","a hat","a scarf"],"correctIndex":0},{"question":"What did the boy find hanging from a branch?","options":["a wooden hook","a rope","a bird's nest"],"correctIndex":0},{"question":"Where did the boy sit to read his book?","options":["on a stump","on a rock","under a tree"],"correctIndex":0}]},{"id":"g2l30_story","lessonNumber":30,"title":"Why the Fly Would Not Cry","targetSound":"Y as Vowel: y (short i, long i)","storyLines":["A little fly named Sky dreamed of learning to fly higher than the gym roof.","His friends said the whole idea sounded like a myth, not something real.","Sky felt shy about trying, worried he might cry if he failed.","He found a dry leaf and used it to try flying just once more.","With a quick beat of his wings, he rose higher into the sky.","His friends looked up and asked why he had never told them his plan.","Sky laughed and said he just wanted to try before he explained.","From that day, no one doubted what a small fly could try to do."],"questions":[{"question":"What did Sky's friends think of his idea?","options":["it sounded like a myth","it sounded easy","it sounded silly"],"correctIndex":0},{"question":"What did Sky use to help him fly higher?","options":["a dry leaf","a small stick","a feather"],"correctIndex":0},{"question":"What did Sky's friends ask him?","options":["why he never told them his plan","why he was crying","why he was shy"],"correctIndex":0}]},{"id":"g2l31_story","lessonNumber":31,"title":"The Happy Party","targetSound":"Y as Vowel: y (long e)","storyLines":["Every year, the whole family threw a happy party for baby Emmy.","This year, a sleepy puppy named Candy joined the celebration too.","A funny clown made everyone laugh with silly jokes about candy.","Grandma brought a tray of tasty treats she had made carefully.","The party grew louder and merrier as more friends and family arrived.","Emmy giggled happily every time Candy chased a floating balloon.","By evening, everyone agreed it was the happiest party of the year.","They promised to gather again for an even bigger party next summer."],"questions":[{"question":"Who joined the party this year?","options":["a puppy named Candy","a clown","a baker"],"correctIndex":0},{"question":"What did the clown do?","options":["made everyone laugh with jokes","sang a song","danced"],"correctIndex":0},{"question":"What did everyone agree about the party?","options":["it was the happiest party of the year","it was too loud","it ended too soon"],"correctIndex":0}]},{"id":"g2l32_story","lessonNumber":32,"title":"Awake Before Dawn","targetSound":"Words Beginning with Short A: a-","storyLines":["Long before dawn, a small bird sat awake apart from the sleeping forest.","She wondered about the world around her, still asleep in the dark.","Soon other birds began to stir, waking one by one across the trees.","A deer walked ahead of the group, sniffing the cool morning air.","The forest slowly came alive, alike in energy and sound.","The little bird flew around, amazed at how the day was beginning.","By sunrise, the whole forest was awake and full of song.","She smiled, glad she had been the first one awake that day."],"questions":[{"question":"Who was awake before the rest of the forest?","options":["a small bird","a deer","a squirrel"],"correctIndex":0},{"question":"What did the deer do?","options":["walked ahead sniffing the air","climbed a tree","hid in a bush"],"correctIndex":0},{"question":"How did the bird feel by sunrise?","options":["glad she was awake first","tired and sleepy","scared of the noise"],"correctIndex":0}]},{"id":"g2l33_story","lessonNumber":33,"title":"The Nicest City Center","targetSound":"Rainbow S & J: c = s","storyLines":["In the center of the city, there was a nice park loved by everyone.","A young girl named Cindy would ride her bike in a wide circle there.","One evening a tiny mouse scurried through the grass near a large fountain.","Cindy watched with curiosity as it searched for a piece of bread.","She placed a small piece near a bench and waited quietly.","The mouse crept closer, its tiny face full of relief.","Cindy smiled, happy she could help even a tiny visitor to the city.","From then on, she always brought a snack when she came to the park."],"questions":[{"question":"What did Cindy ride in the park?","options":["her bike","a scooter","a horse"],"correctIndex":0},{"question":"What was the mouse searching for?","options":["a piece of bread","a place to sleep","another mouse"],"correctIndex":0},{"question":"What did Cindy do from then on?","options":["brought a snack for visitors","stopped riding her bike","avoided the fountain"],"correctIndex":0}]},{"id":"g2l34_story","lessonNumber":34,"title":"The Gym Stage","targetSound":"Rainbow S & J: g = j","storyLines":["At a certain age, George decided to build a small stage in the school gym.","He wanted to change the way students practiced for the big show.","Every page of his plan included a giant curtain and colorful lights.","His teacher was pleased with the courage it took to try something new.","On the night of the show, the gym filled with an eager crowd.","George stood by the stage, watching every student take their turn.","The performance brought huge cheers, and everyone agreed it was a success.","George's simple idea had changed the gym into something magical."],"questions":[{"question":"What did George decide to build?","options":["a small stage in the gym","a new classroom","a garden"],"correctIndex":0},{"question":"What did his plan include on every page?","options":["a giant curtain and lights","a list of names","song lyrics"],"correctIndex":0},{"question":"How did the performance turn out?","options":["it was a success","it was cancelled","no one came"],"correctIndex":0}]},{"id":"g2l35_story","lessonNumber":35,"title":"The Bridge and the Badge","targetSound":"Rainbow S & J: dge = j","storyLines":["A wise old judge lived near a bridge that was starting to fall apart.","He offered a badge of honor to anyone who could fix the edge safely.","A young girl named Edna suggested using stronger wood at the edge of the bridge.","The whole village helped gather materials and worked together for days.","They kept the old bridge design but reinforced every weak spot.","When the bridge was finished, it was stronger than it had ever been.","The judge gave Edna the badge and thanked the whole village for their help.","The bridge became a symbol of what a village could do together."],"questions":[{"question":"What was starting to fall apart?","options":["a bridge","a house","a fence"],"correctIndex":0},{"question":"Who suggested using stronger wood?","options":["Edna","the judge","the villagers"],"correctIndex":0},{"question":"What did the bridge become a symbol of?","options":["what a village could do together","the judge's wisdom","Edna's courage"],"correctIndex":0}]},{"id":"g2l36_story","lessonNumber":36,"title":"A Rough Night, a Bright Light","targetSound":"Sounds of GH: gh (silent, f)","storyLines":["It was a dark, tough night, and Ralph could not sleep at all.","He had a small cough and felt too light-headed to rest.","His sister brought a bright lamp and sat beside his bed.","\"You have the right to feel worried,\" she said with a gentle laugh.","She told him a story about a knight who fought through a rough storm.","Ralph felt his cough ease as he listened to every word.","By the time the story ended, he felt light enough to sleep.","The tough night had turned into a night full of comfort and light."],"questions":[{"question":"What kept Ralph from sleeping?","options":["a small cough","loud noises","a bad dream"],"correctIndex":0},{"question":"What story did his sister tell?","options":["about a knight in a storm","about a bird","about a fire"],"correctIndex":0},{"question":"How did Ralph feel by the end?","options":["light enough to sleep","worse than before","still awake"],"correctIndex":0}]},{"id":"g2l37_story","lessonNumber":37,"title":"Listen to the Castle","targetSound":"Silent Letters: t","storyLines":["In an old castle, a king would often listen closely to the wind.","He would hasten to the highest tower to hear the sounds of the land.","One evening he heard a faint cry and decided to fasten his cloak.","He softened his footsteps as he crept through the dark forest.","The cry led him to a small hut where a bird was trapped.","He gently freed the bird, and it sang the sweetest song he had ever heard.","The king returned to his castle, feeling calm and content.","He often told his people that listening was the truest form of kindness."],"questions":[{"question":"What did the king listen closely to?","options":["the wind","the birds","his soldiers"],"correctIndex":0},{"question":"What was trapped in the hut?","options":["a bird","a rabbit","a cat"],"correctIndex":0},{"question":"What did the king tell his people?","options":["listening is the truest kindness","castles are safe","the forest is dangerous"],"correctIndex":0}]},{"id":"g2l38_story","lessonNumber":38,"title":"The Lamb's Sore Limb","targetSound":"Silent Letters: b","storyLines":["A young lamb hurt his limb while trying to climb a rocky hill.","He felt like a small crumb compared to the other strong lambs.","His mother told him to comb his fur and rest for a while.","A kind old sheep offered her shoulder to help him climb slowly.","Together they made it to the top, one careful step at a time.","His friends cheered when they finally reached the peak.","The lamb was proud, even though his limb still felt a little sore.","He learned that with help, even a small lamb could climb high."],"questions":[{"question":"What did the lamb hurt?","options":["his limb","his ear","his tail"],"correctIndex":0},{"question":"Who helped the lamb climb?","options":["an old sheep","his mother","another lamb"],"correctIndex":0},{"question":"What did the lamb learn?","options":["with help, even a small lamb can climb high","climbing is easy","he should stay home"],"correctIndex":0}]},{"id":"g2l39_story","lessonNumber":39,"title":"A Calm Talk and a Walk","targetSound":"Silent Letters: l","storyLines":["In a quiet town, neighbors often took a calm walk and talk together.","One morning, a lost calf wandered right into the middle of the square.","A young girl named Alma said they should walk it back to the farm.","The townspeople formed a small search party and began to walk together.","They talked with a nearby farmer about who might be missing a calf.","Finally they found the calf's mother, calm and relieved to see her baby.","The whole town felt proud they could help in such a calm way.","It became a story they would talk about for years to come."],"questions":[{"question":"What wandered into the town square?","options":["a lost calf","a lost dog","a lost sheep"],"correctIndex":0},{"question":"Who suggested walking the calf home?","options":["Alma","the mayor","a farmer"],"correctIndex":0},{"question":"How did the town feel by the end?","options":["proud they helped","worried","tired"],"correctIndex":0}]},{"id":"g2l40_story","lessonNumber":40,"title":"Choosing the Wise Cheese","targetSound":"Spelling Patterns: se (z)","storyLines":["A wise mouse lived in a small house shaped like a wheel of cheese.","He liked to pose a riddle to any mouse who came to visit.","A young mouse named Rose came one afternoon looking for advice.","\"Choose wisely,\" said the old mouse, \"and you will find your answer.\"","Rose thought about it and realized the cheese around her was already a gift.","She smiled and said she was wise enough to notice what she already had.","The old mouse nodded, pleased with the choice she had made.","Rose returned home, feeling richer than she had felt before."],"questions":[{"question":"What shape was the wise mouse's house?","options":["a wheel of cheese","a stack of books","a tree stump"],"correctIndex":0},{"question":"What did Rose realize?","options":["the cheese around her was already a gift","she needed more cheese","the riddle had no answer"],"correctIndex":0},{"question":"How did Rose feel when she returned home?","options":["richer than before","confused","hungry"],"correctIndex":0}]},{"id":"g2l41_story","lessonNumber":41,"title":"The Little Purple Candle","targetSound":"Spelling Patterns: le","storyLines":["On a little farm, an apple tree stood beside a wooden table.","A girl named Mabel liked to sit there and read under its shade.","One day she noticed a small purple candle resting near the roots.","It was wrapped in a sticky bubble that was hard to remove.","Her friend, a boy named Circle, came over to help her clean it.","Together they worked until the bubble finally popped away.","Inside was a tiny coin, shiny and round.","Mabel decided to plant it near the apple tree as a little symbol of luck."],"questions":[{"question":"Where did Mabel like to sit and read?","options":["beside the apple tree","in the barn","by the river"],"correctIndex":0},{"question":"What did Mabel find near the roots?","options":["a small purple candle","a coin","a bubble"],"correctIndex":0},{"question":"What did Mabel do with the coin she found?","options":["planted it near the tree","gave it to Circle","sold it"],"correctIndex":0}]},{"id":"g2l42_story","lessonNumber":42,"title":"A Mission at the Station","targetSound":"Spelling Patterns: tion, sion","storyLines":["At the busy train station, a boy named Nathan was on a mission to find his lost dog.","He asked a kind woman for a portion of her attention and help.","She said she had seen a dog running near the motion of the arriving train.","Nathan ran in that direction, hoping this mission would soon be over.","He found his dog sitting calmly on a bench, waiting for him.","The station master reminded him to keep a closer watch on his pet.","They held a short session to talk about staying safe near the tracks.","Nathan thanked everyone and walked home with his dog by his side."],"questions":[{"question":"What was Nathan's mission?","options":["to find his lost dog","to catch a train","to meet a friend"],"correctIndex":0},{"question":"Where did Nathan find his dog?","options":["on a bench","on the train","near the tracks"],"correctIndex":0},{"question":"What did they hold at the station?","options":["a short session about safety","a party","a race"],"correctIndex":0}]},{"id":"g2l43_story","lessonNumber":43,"title":"The Word Ted Counted","targetSound":"Spelling Patterns: ed (ed)","storyLines":["In class, the teacher added a new word to the list every single day.","The students ended each lesson by writing their words in a small notebook.","A boy named Ted wanted to remember the words a little faster than his friends.","He counted the letters in each word and created a short tune for them.","His method worked, and he landed near the top of the class by Friday.","The teacher rested and smiled, proud of how creative Ted had become.","She added a small award just for his clever new method.","Soon the whole class started counting and singing their spelling words too."],"questions":[{"question":"What did the teacher add every day?","options":["a new word","a new song","a new rule"],"correctIndex":0},{"question":"How did Ted remember the words?","options":["by creating a short tune","by writing them many times","by drawing pictures"],"correctIndex":0},{"question":"What did the teacher give Ted?","options":["a small award","extra homework","a new book"],"correctIndex":0}]},{"id":"g2l44_story","lessonNumber":44,"title":"The Game They Played","targetSound":"Spelling Patterns: ed (d)","storyLines":["The children played a brand new game in the schoolyard during recess.","They saved a spot for their friend, who always arrived a little late.","They stayed outside even after the bell rang, wanting to finish one more round.","Laughter filled the air as they called each other funny nicknames.","They smiled and cheered every time someone scored a point.","The game was so fun that they planned to play it again the next day.","They learned that playing together built stronger friendships than playing alone.","The simple game they played became a tradition that lasted all year."],"questions":[{"question":"Where did the children play their game?","options":["the schoolyard","the park","the gym"],"correctIndex":0},{"question":"What did the children fill the air with?","options":["laughter","music","shouting"],"correctIndex":0},{"question":"What did the game become?","options":["a tradition","a chore","a competition"],"correctIndex":0}]},{"id":"g2l45_story","lessonNumber":45,"title":"A Baker's Paper","targetSound":"Long Vowels in Open Syllables","storyLines":["For a school paper, Ivy decided to write about a hero she admired.","She wrote about her mother, a baker who worked hard every single day.","Ivy described how her mother baked bread and cakes for the whole community.","She wrote that her mother was never a zero when it came to helping others.","Her teacher was so impressed that she read the paper aloud to the class.","The class went silent, listening carefully to every open, honest word.","Ivy felt proud, knowing she had told her mother's story well.","That evening, she shared the paper with her mother, who smiled with pride."],"questions":[{"question":"Who did Ivy write about?","options":["her mother","her teacher","a hero from a book"],"correctIndex":0},{"question":"What did Ivy's mother do for work?","options":["she was a baker","she was a teacher","she was a nurse"],"correctIndex":0},{"question":"How did the teacher react to Ivy's paper?","options":["she was impressed","she was confused","she was bored"],"correctIndex":0}]},{"id":"g2l46_story","lessonNumber":46,"title":"Two Cats, Many Books","targetSound":"Plurals: -s","storyLines":["Emma had two cats who loved to nap on her favorite books.","She kept her hats, cups, and pens neatly on her shelf.","One day, her cats chased a bird that flew past the trees outside.","Emma called her friends to come help find her runaway pets.","They searched the yard, checking behind chairs and under toys.","Finally, they found both cats curled up near the flowers.","Emma thanked her friends and gave them each a cup of juice.","Her cats returned to their favorite spot among the stacked books."],"questions":[{"question":"What did Emma's cats love to nap on?","options":["her favorite books","her hats","her chairs"],"correctIndex":0},{"question":"What did the cats chase?","options":["a bird","a mouse","a squirrel"],"correctIndex":0},{"question":"What did Emma give her friends?","options":["a cup of juice","a book","a toy"],"correctIndex":0}]},{"id":"g2l47_story","lessonNumber":47,"title":"Boxes, Babies, and Ponies","targetSound":"Plurals: -es, -ies","storyLines":["The farm was full of boxes, wishes, and even a few playful ponies.","Two foxes watched from the fence while the babies of the farm slept nearby.","The farmer carried the boxes of vegetables into town on the bus.","Along the way, the buses stopped near a shop full of candies.","Children ran out with wishes for a taste of the sweet treats.","The ponies waited patiently, munching quietly on fresh grass.","By evening, all the boxes had been delivered to happy families.","The farm grew quiet again, ready to welcome new days ahead."],"questions":[{"question":"What was the farm full of?","options":["boxes, wishes, and ponies","flowers and gardens","rivers and lakes"],"correctIndex":0},{"question":"Where did the buses stop?","options":["near a shop full of candies","near a river","near a school"],"correctIndex":0},{"question":"What happened to all the boxes by evening?","options":["they were delivered to families","they were lost","they were empty"],"correctIndex":0}]},{"id":"g2l48_story","lessonNumber":48,"title":"The Teacher's Desk","targetSound":"Possessives","storyLines":["On the teacher's desk sat a small photo of her dog and cat.","The dog's collar had a tiny bell that jingled softly.","The class loved hearing stories about the teacher's pets after lunch.","One day, the students' project was to draw their own favorite pets.","A boy drew his sister's rabbit, and a girl drew her friends' puppy.","The teacher hung every child's drawing on the classroom wall.","By the end of the day, the room was full of the students' art.","Everyone agreed it was one of the class's favorite projects yet."],"questions":[{"question":"What sat on the teacher's desk?","options":["a small photo of her pets","a stack of books","a jar of pencils"],"correctIndex":0},{"question":"What was the students' project?","options":["to draw their favorite pets","to write a story","to build a model"],"correctIndex":0},{"question":"Where did the teacher hang the drawings?","options":["on the classroom wall","on her desk","in a folder"],"correctIndex":0}]},{"id":"g2l49_story","lessonNumber":49,"title":"The Kindest, Fastest Friend","targetSound":"Comparatives & Superlatives","storyLines":["In gym class, two friends raced to see who was faster around the track.","Marco was quick, but Lily proved to be even faster by the final lap.","Everyone agreed she was the fastest runner the school had ever seen.","After the race, Marco felt a little smaller and disappointed in himself.","Lily walked over and said kind words to cheer up her tired friend.","The other students said she was the kindest winner they had ever met.","Marco smiled, deciding to train harder to become even stronger next year.","Their friendship grew warmer than ever after that sunny afternoon."],"questions":[{"question":"Who won the race?","options":["Lily","Marco","neither of them"],"correctIndex":0},{"question":"How did Marco feel after the race?","options":["a little smaller and disappointed","proud and happy","angry"],"correctIndex":0},{"question":"What did the other students say about Lily?","options":["she was the kindest winner","she was too fast","she was unfair"],"correctIndex":0}]},{"id":"g2l50_story","lessonNumber":50,"title":"Redo, Undo, Retry","targetSound":"Prefixes: re-, un-","storyLines":["Maya's drawing didn't look right, so she decided to redo the whole thing.","She felt unhappy at first, worried it might turn out unfair to her hard work.","Her teacher said it was fine to undo a mistake and start again.","Maya took a deep breath and began to rewrite her plan from scratch.","This time, she made sure to unlock every idea hiding in her mind.","She had to unpack a whole box of new colors to finish it.","The new drawing turned out even better than her first unfinished attempt.","Maya learned that trying again was never something to feel unhappy about."],"questions":[{"question":"What did Maya decide to do with her drawing?","options":["redo it","throw it away","give it away"],"correctIndex":0},{"question":"What did Maya's teacher say?","options":["it's fine to undo a mistake","she should stop drawing","the drawing was perfect"],"correctIndex":0},{"question":"What did Maya learn?","options":["trying again is nothing to feel unhappy about","drawing is too hard","mistakes are bad"],"correctIndex":0}]},{"id":"g2l51_story","lessonNumber":51,"title":"Prepare Before You Disagree","targetSound":"Prefixes: dis-, pre-","storyLines":["Before the class debate, students had to prepare and preview their arguments.","Some students would disagree loudly, while others chose to stay quiet.","One boy said he would dislike losing, so he wanted extra time to prepare.","The teacher helped everyone preheat their ideas with a quick warm-up talk.","No one wanted their good points to disappear once the debate began.","During the debate, both sides listened carefully, even when they disagreed.","By the end, everyone agreed the preparation had made the debate fair.","The class learned that it's okay to disagree if you prepare with respect."],"questions":[{"question":"What did students do before the debate?","options":["prepare and preview their arguments","play a game","read a story"],"correctIndex":0},{"question":"What did one boy say he would dislike?","options":["losing","speaking","listening"],"correctIndex":0},{"question":"What did the class learn?","options":["it's okay to disagree with respect","debates are unfair","preparation is unnecessary"],"correctIndex":0}]},{"id":"g2l52_story","lessonNumber":52,"title":"Kindness Over Sadness","targetSound":"Suffixes: -less, -ness","storyLines":["A new student named Omar felt a quiet sadness on his first day of school.","He worried the other kids might think he was careless or shy.","A fearless girl named Nadia walked right up and said hello with kindness.","She showed him around, careful not to leave him feeling helpless or alone.","By lunchtime, Omar's sadness had turned into real happiness.","He thanked Nadia for her kindness and her endless patience.","The two became close friends, sharing stories in the softness of the afternoon sun.","Omar learned that a little kindness could erase a lot of sadness."],"questions":[{"question":"How did Omar feel on his first day?","options":["a quiet sadness","excited","angry"],"correctIndex":0},{"question":"Who greeted Omar with kindness?","options":["Nadia","his teacher","another new student"],"correctIndex":0},{"question":"What did Omar learn?","options":["kindness could erase sadness","school is hard","friends are rare"],"correctIndex":0}]},{"id":"g2l53_story","lessonNumber":53,"title":"The Payment of Enjoyment","targetSound":"Suffix: -ment","storyLines":["The neighborhood held a small event to raise money for new playground equipment.","Everyone who helped felt a real sense of enjoyment and accomplishment.","Children made a statement with colorful posters asking for support.","Families made a small payment at the entrance to help the cause.","The excitement grew as more people arrived with donations and treats.","By the end of the day, they had reached their agreement on a final goal.","The whole event felt like a celebration of teamwork and kindness.","New playground equipment arrived a week later, bringing even more enjoyment."],"questions":[{"question":"What was the event raising money for?","options":["new playground equipment","a new school","a garden"],"correctIndex":0},{"question":"What did families do at the entrance?","options":["made a small payment","signed their names","picked up posters"],"correctIndex":0},{"question":"What arrived a week later?","options":["new playground equipment","more donations","new posters"],"correctIndex":0}]},{"id":"g2l54_story","lessonNumber":54,"title":"It Isn't So Bad","targetSound":"Contractions: n't","storyLines":["It wasn't raining yet, but the sky didn't look very friendly.","\"We shouldn't wait too long,\" said Mia, glancing at the clouds.","Her brother said he couldn't find his umbrella anywhere in the house.","\"Don't worry,\" Mia said, \"we won't need it if we hurry.\"","They ran outside, hoping the storm wouldn't catch up to them.","By the time they reached the bus stop, it still hadn't started to rain.","\"See,\" Mia laughed, \"I told you it wasn't so bad after all.\"","They boarded the bus just as the first drops began to fall."],"questions":[{"question":"What couldn't Mia's brother find?","options":["his umbrella","his shoes","his backpack"],"correctIndex":0},{"question":"What did Mia say they wouldn't need?","options":["an umbrella","a coat","boots"],"correctIndex":0},{"question":"What happened right as they boarded the bus?","options":["the first drops of rain began to fall","the sun came out","the bus was late"],"correctIndex":0}]},{"id":"g2l55_story","lessonNumber":55,"title":"I'll See You Soon","targetSound":"Contractions: 'll, 've, 'm","storyLines":["\"I'll meet you at the library after lunch,\" said Zoe to her friend.","\"We've never been to that new section before,\" her friend replied.","\"You'll love the new books they just brought in,\" Zoe added with a smile.","By the time they arrived, they'd both already picked their favorite spots.","\"I'm so glad we're finally here,\" said Zoe, settling into a soft chair.","\"They'll probably close soon,\" her friend said, checking the clock.","\"We'll come back tomorrow then,\" Zoe answered, still smiling.","\"I've already picked out three more books for next time,\" she said happily."],"questions":[{"question":"Where did Zoe agree to meet her friend?","options":["at the library","at school","at home"],"correctIndex":0},{"question":"What did Zoe say about the new books?","options":["her friend would love them","they were too old","there weren't any"],"correctIndex":0},{"question":"What did Zoe say she already picked out?","options":["three more books for next time","a new chair","a library card"],"correctIndex":0}]},{"id":"g2l56_story","lessonNumber":56,"title":"The Rabbit's Muffin","targetSound":"Closed Syllables & VC/CV Rule","storyLines":["A little rabbit named Robby lived in a basket under a big tree.","Every morning, he would hop to the garden to find a muffin for breakfast.","One day, he found a kitten who was lost and crying under a bush.","Robby was a kind rabbit, so he decided to help the kitten find its home.","They walked together, passing traffic near a number of tall trees.","Suddenly, they heard a noise from behind a nearby bush.","It was the kitten's mother, a large and worried cat searching everywhere.","The kitten was reunited with its mother, and Robby returned home happy."],"questions":[{"question":"What was Robby's name?","options":["Robby the rabbit","Muffin","Basket"],"correctIndex":0},{"question":"What did Robby find under the bush?","options":["a lost kitten","a muffin","a number of trees"],"correctIndex":0},{"question":"Who was searching for the kitten?","options":["the kitten's mother","Robby's mother","a gardener"],"correctIndex":0}]},{"id":"g2l57_story","lessonNumber":57,"title":"The Tiger's Paper Trail","targetSound":"Open Syllables & V/CV Rule","storyLines":["In the jungle, a tiger named Tino loved to read the daily paper.","One morning, he read about a baby who had wandered off alone.","Tino was determined to help, so he set off on a mission at once.","He used even, steady steps to move quietly through the dense forest.","He followed the music of the birds along open paths to guide him.","Finally, he found the baby sitting under a tree, crying softly.","Tino was gentle and calm as he led the baby back to its family.","The family thanked him, and Tino returned to his jungle feeling like a hero."],"questions":[{"question":"What did Tino love to read?","options":["the daily paper","storybooks","maps"],"correctIndex":0},{"question":"What did Tino read about that morning?","options":["a lost baby","a new jungle","a storm"],"correctIndex":0},{"question":"How did Tino feel when he returned?","options":["like a hero","tired and sad","confused"],"correctIndex":0}]},{"id":"g2l58_story","lessonNumber":58,"title":"The Kite That Saved the Day","targetSound":"Magic-e Syllables (VCe)","storyLines":["By the lake, a young boy named Jake built a giant paper kite.","One day, a storm hit the village, and the river began to flood.","People were trapped on their roofs, and hope was fading fast.","Jake had a brave idea: he tied a rope to his kite and flew it across.","The kite carried the rope over the raging water, and people grabbed it tight.","One by one, they pulled themselves to safety along the kite's line.","Jake's simple kite had saved the whole village from the terrible flood.","The village honored Jake, and his kite became a symbol of hope."],"questions":[{"question":"What did Jake build?","options":["a giant paper kite","a boat","a bridge"],"correctIndex":0},{"question":"What was the problem in the village?","options":["a terrible flood","a fire","a drought"],"correctIndex":0},{"question":"What did Jake's kite become a symbol of?","options":["hope","danger","adventure"],"correctIndex":0}]},{"id":"g2l59_story","lessonNumber":59,"title":"The Rainbow Bridge","targetSound":"Vowel Team Syllables (ai, ea, oa, ee, ay)","storyLines":["After a great rainstorm, a beautiful rainbow appeared over the river.","A girl named Maya believed the rainbow was a bridge to a magical land.","She followed its path through the trees, feeling brave with every step.","At the end of the rainbow, she found a wounded eagle with a broken wing.","Maya wrapped the eagle gently in her coat and carried it to her home.","She fed the eagle and gave it water until its wing began to heal.","Before it flew away, the eagle dropped a golden feather in her hand.","Maya realized the true treasure had been helping a creature in need."],"questions":[{"question":"What did Maya believe the rainbow was?","options":["a bridge to a magical land","a sign of a storm","a trick of the light"],"correctIndex":0},{"question":"What did Maya find at the end of the rainbow?","options":["a wounded eagle","a pot of gold","a hidden cave"],"correctIndex":0},{"question":"What did Maya realize the treasure had been?","options":["helping a creature in need","the golden feather","the rainbow itself"],"correctIndex":0}]},{"id":"g2l60_story","lessonNumber":60,"title":"The Star in the Dark","targetSound":"R-Controlled Syllables (ar, er, ir, or, ur)","storyLines":["A little girl named Pearl lived in a town where the stars never shone.","Every night, she looked up at the dark sky, wondering where the stars had gone.","Her grandfather told her an old story about a star trapped inside a cave.","Pearl decided to find the star and bring light back to her town.","She traveled through a dark forest and climbed a rocky mountain path.","Inside the cave, she found the star, but a fierce storm blocked her way.","Pearl stayed calm, and slowly the storm quieted enough for the star to break free.","The star soared into the sky, and Pearl's whole town was bathed in light."],"questions":[{"question":"What was Pearl's problem?","options":["the stars never shone","she was lost","she had no friends"],"correctIndex":0},{"question":"Where was the star trapped?","options":["in a cave","in a tree","in the water"],"correctIndex":0},{"question":"What happened when the star broke free?","options":["the town was bathed in light","the storm grew worse","nothing changed"],"correctIndex":0}]},{"id":"g2l61_story","lessonNumber":61,"title":"The Turtle's Table","targetSound":"Consonant-le Syllables (Turtle Rule)","storyLines":["A gentle turtle named Tilly lived under an old wooden table in the forest.","The table was covered in soft moss that made it feel cozy.","One day, a small purple candle appeared on the table, and Tilly grew curious.","It smelled like apples and honey and gave off a gentle warmth.","A shivering squirrel came by, cold from the winter wind outside.","Tilly shared the candle's warmth and offered the squirrel a nut to eat.","The squirrel was grateful and promised to visit Tilly whenever she needed help.","They became close friends, meeting at the little table every single day."],"questions":[{"question":"Where did Tilly live?","options":["under an old table","in a pond","in a tree"],"correctIndex":0},{"question":"What did Tilly share with the squirrel?","options":["warmth from the candle and a nut","water","a shell"],"correctIndex":0},{"question":"What did Tilly and the squirrel become?","options":["close friends","strangers","rivals"],"correctIndex":0}]},{"id":"g2l62_story","lessonNumber":62,"title":"The Loud Disturbance","targetSound":"Multisyllable Words (Mixed Syllable Types)","storyLines":["A strange disturbance woke up the whole neighborhood late one night.","A remarkable noise seemed to come from a mountainous pile of boxes in the yard.","Neighbors gathered to entertain a growing sense of curiosity about the sound.","They found a container that had rolled off the back of a delivery truck.","Inside was a small thunderstorm machine used for a school science celebration.","With a little understanding of how it worked, they turned it off safely.","The neighborhood laughed about the strange disturbance for weeks afterward.","It became a remarkable story everyone loved to tell at the next celebration."],"questions":[{"question":"What woke up the neighborhood?","options":["a strange disturbance","a loud alarm","a dog barking"],"correctIndex":0},{"question":"What had rolled off a delivery truck?","options":["a container","a mountain of leaves","a bicycle"],"correctIndex":0},{"question":"What was inside the container?","options":["a thunderstorm machine","a broken lamp","a pile of books"],"correctIndex":0}]},{"id":"g2l63_story","lessonNumber":63,"title":"A Wonderful Afternoon","targetSound":"Multisyllable Words (Mixed Syllable Types)","storyLines":["One particular afternoon, the whole family gathered for a wonderful picnic.","Grandpa told stories about an important character from his favorite book.","Everyone laughed as he described a hamburger that grew as big as an umbrella.","They set up their blankets near the part of the park with the best shade.","A particular breeze made the whole afternoon feel cool and comfortable.","The children played games while the grown-ups shared wonderful old memories.","It was important to everyone that they gathered like this every year.","By evening, they agreed it had been a truly wonderful afternoon together."],"questions":[{"question":"What did the family gather for?","options":["a wonderful picnic","a birthday party","a school event"],"correctIndex":0},{"question":"What did Grandpa's hamburger story describe?","options":["a hamburger as big as an umbrella","a tiny sandwich","a talking hamburger"],"correctIndex":0},{"question":"What did everyone agree about the day?","options":["it was a wonderful afternoon","it was too hot","it was too short"],"correctIndex":0}]}];
 
+  /* ========== SOUND HUNT DATA (lessons 1–10) ========== */
+  const SOUND_HUNT_DATA = {
+    "g2l1_story": {
+      targetWords: ["shrew", "shrub", "shrine", "shrug", "shriek"],
+      decoyWords:  ["shoulder", "shout", "tiny", "morning", "under"]
+    },
+    "g2l2_story": {
+      targetWords: ["three", "throne", "thrift", "throw", "thrill"],
+      decoyWords:  ["thick", "thorn", "small", "window", "garden"]
+    },
+    "g2l3_story": {
+      targetWords: ["scholar", "schedule", "schnauzer", "scheme", "schooner"],
+      decoyWords:  ["scar", "scale", "sun", "morning", "gate"]
+    },
+    "g2l4_story": {
+      targetWords: ["warm", "dwarf", "warn", "warp", "swarm"],
+      decoyWords:  ["garden", "farmer", "park", "car", "star"]
+    },
+    "g2l5_story": {
+      targetWords: ["worm", "work", "world", "word", "worth"],
+      decoyWords:  ["for", "more", "store", "order", "morning"]
+    },
+    "g2l6_story": {
+      targetWords: ["sailor", "doctor", "tailor", "sponsor", "mayor"],
+      decoyWords:  ["teacher", "farmer", "helper", "writer", "singer"]
+    },
+    "g2l7_story": {
+      targetWords: ["farmer", "camper", "hiker", "helper", "teacher"],
+      decoyWords:  ["sailor", "doctor", "tailor", "actor", "author"]
+    },
+    "g2l8_story": {
+      targetWords: ["bull", "pull", "full", "bush", "push"],
+      decoyWords:  ["goat", "cart", "barn", "hay", "legs"]
+    },
+    "g2l9_story": {
+      targetWords: ["helpful", "hopeful", "careful", "useful", "thankful"],
+      decoyWords:  ["happy", "gentle", "quiet", "little", "tiny"]
+    },
+    "g2l10_story": {
+      targetWords: ["tall", "walk", "small", "ball", "wall"],
+      decoyWords:  ["half", "palm", "yellow", "sun", "orange"]
+    }
+  };
+
+  // Merge Sound Hunt data into lessons
+  LESSONS.forEach(l => {
+    const sh = SOUND_HUNT_DATA[l.id];
+    if (sh && Array.isArray(sh.targetWords) && Array.isArray(sh.decoyWords) &&
+        sh.targetWords.length >= 5 && sh.decoyWords.length >= 5) {
+      l.targetWords = sh.targetWords;
+      l.decoyWords = sh.decoyWords;
+    }
+  });
+
   /* ========== CONSTANTS ========== */
   const DAY_COLORS = { 1: 'd1', 2: 'd2', 3: 'd3', 4: 'd4', 5: 'd5' };
   const DAY_HEX = { 1: '#ef4444', 2: '#eab308', 3: '#22c55e', 4: '#3b82f6', 5: '#a855f7' };
@@ -626,6 +788,13 @@
   let lastResult = null;
   let segmentMode = false;
   let segmentModalWord = '';
+  let soundHunt = {
+    tiles: [],
+    attempts: 0,
+    passed: false,
+    checking: false
+  };
+  let soundHuntTimer = null;
 
   const TTS_RATES = { slow: 0.7, normal: 0.95 };
 
@@ -677,7 +846,7 @@
   function applyTheme() {
     document.documentElement.setAttribute('data-theme', theme);
     const svg = theme === 'dark' ? ICONS.sun : ICONS.moon;
-    ['themeBtn', 'themeBtn2', 'themeBtn3', 'themeBtn4'].forEach(id => {
+    ['themeBtn', 'themeBtn2', 'themeBtn3', 'themeBtn4', 'themeBtn5'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = svg;
     });
@@ -1188,10 +1357,24 @@
       day: currentDay,
       score, total, pct, passed,
       highestDay: p.highestDay,
-      date: new Date()
+      date: new Date(),
+      soundHuntAttempts: null
     };
-    renderResults();
-    showScreen('resultsScreen');
+
+    // If this lesson has Sound Hunt data, go there before results
+    if (hasSoundHuntData(currentLesson)) {
+      startSoundHunt();
+      showScreen('soundHuntScreen');
+    } else {
+      renderResults();
+      showScreen('resultsScreen');
+    }
+  }
+
+  function hasSoundHuntData(lesson) {
+    return lesson &&
+      Array.isArray(lesson.targetWords) && lesson.targetWords.length >= 5 &&
+      Array.isArray(lesson.decoyWords)  && lesson.decoyWords.length  >= 5;
   }
 
   document.getElementById('qBackStoryBtn').addEventListener('click', () => {
@@ -1201,6 +1384,199 @@
   });
   document.getElementById('qToStoryBtn').addEventListener('click', () => {
     clearQuizTimer();
+    renderReading();
+    showScreen('readingScreen');
+  });
+
+  /* ========== SOUND HUNT ========== */
+  function clearSoundHuntTimer() {
+    if (soundHuntTimer) {
+      clearTimeout(soundHuntTimer);
+      soundHuntTimer = null;
+    }
+  }
+
+  // Extract the short, kid-friendly part of the target sound string.
+  // "Digraph-Blends: shr"  -> "shr"
+  // "Agent Suffixes: -or"  -> "-or"
+  // "R-Controlled Vowels (Irregular): ar (or)" -> "ar (or)"
+  // "Multisyllable Words (Mixed Syllable Types)" -> whole string (no colon)
+  function shortTargetSound(s) {
+    const str = String(s || '').trim();
+    const idx = str.lastIndexOf(':');
+    return idx >= 0 ? str.slice(idx + 1).trim() : str;
+  }
+
+  function startSoundHunt() {
+    clearSoundHuntTimer();
+    if (!hasSoundHuntData(currentLesson)) return;
+
+    const targets = currentLesson.targetWords.slice(0, 5);
+    const decoys  = currentLesson.decoyWords.slice(0, 5);
+    const tiles = [];
+    targets.forEach(w => tiles.push({ word: String(w), isTarget: true,  selected: false }));
+    decoys.forEach(w  => tiles.push({ word: String(w), isTarget: false, selected: false }));
+
+    soundHunt.tiles = shuffle(tiles);
+    soundHunt.attempts = 0;
+    soundHunt.passed = false;
+    soundHunt.checking = false;
+
+    renderSoundHunt();
+  }
+
+  function renderSoundHunt() {
+    if (!currentLesson) return;
+
+    document.getElementById('shMeta').textContent = profile.name + ' · Day ' + currentDay;
+
+    const chip = document.getElementById('shDayChip');
+    chip.textContent = 'Day ' + currentDay;
+    chip.style.background = DAY_HEX[currentDay];
+    chip.style.color = DAY_TEXT[currentDay];
+
+    document.getElementById('shTargetSound').textContent = 'Target: ' + currentLesson.targetSound;
+
+    // Inject the short sound into the instruction, safely.
+    const soundSpan = '<span class="sh-sound">' + esc(shortTargetSound(currentLesson.targetSound)) + '</span>';
+    document.getElementById('shInstruction').innerHTML =
+      'Tap the 5 words that have the ' + soundSpan + ' sound.';
+
+    const grid = document.getElementById('shGrid');
+    grid.innerHTML = '';
+    soundHunt.tiles.forEach((tile, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sh-tile';
+      btn.dataset.idx = String(idx);
+      btn.textContent = tile.word;
+      if (tile.selected) btn.classList.add('selected');
+      btn.addEventListener('click', () => onShTileTap(idx));
+      grid.appendChild(btn);
+    });
+
+    updateShCounter();
+    updateShFeedback();
+    updateShFinishBtn();
+  }
+
+  function onShTileTap(idx) {
+    if (soundHunt.checking || soundHunt.passed) return;
+    const tile = soundHunt.tiles[idx];
+    if (!tile) return;
+
+    // Clear lingering failure banner
+    const fb = document.getElementById('shFeedback');
+    if (fb && fb.classList.contains('show') && !fb.classList.contains('ok')) {
+      fb.className = 'feedback-banner';
+      fb.textContent = '';
+    }
+
+    tile.selected = !tile.selected;
+
+    const btn = document.querySelector('.sh-tile[data-idx="' + idx + '"]');
+    if (btn) {
+      if (tile.selected) btn.classList.add('selected');
+      else btn.classList.remove('selected');
+    }
+
+    updateShCounter();
+
+    if (selectedShCount() === 5) {
+      runSoundHuntCheck();
+    }
+  }
+
+  function selectedShCount() {
+    return soundHunt.tiles.filter(t => t.selected).length;
+  }
+
+  function runSoundHuntCheck() {
+    soundHunt.checking = true;
+    soundHunt.attempts++;
+
+    const wrongIdxs = [];
+    soundHunt.tiles.forEach((t, i) => {
+      if (t.selected && !t.isTarget) wrongIdxs.push(i);
+    });
+
+    if (wrongIdxs.length === 0) {
+      soundHunt.passed = true;
+      soundHunt.checking = false;
+      if (lastResult) lastResult.soundHuntAttempts = soundHunt.attempts;
+      updateShFeedback();
+      updateShFinishBtn();
+      return;
+    }
+
+    // Failed — flash the wrong tiles, then clear only those
+    wrongIdxs.forEach(i => {
+      const btn = document.querySelector('.sh-tile[data-idx="' + i + '"]');
+      if (btn) btn.classList.add('wrong');
+    });
+    updateShFeedback();
+
+    clearSoundHuntTimer();
+    soundHuntTimer = setTimeout(() => {
+      soundHuntTimer = null;
+      wrongIdxs.forEach(i => {
+        const t = soundHunt.tiles[i];
+        if (!t) return;
+        t.selected = false;
+        const btn = document.querySelector('.sh-tile[data-idx="' + i + '"]');
+        if (btn) btn.classList.remove('wrong', 'selected');
+      });
+      soundHunt.checking = false;
+      updateShCounter();
+      updateShFeedback();
+    }, 1200);
+  }
+
+  function updateShCounter() {
+    const n = selectedShCount();
+    document.getElementById('shCounter').textContent = n + ' of 5 selected';
+  }
+
+  function updateShFeedback() {
+    const fb = document.getElementById('shFeedback');
+    if (!fb) return;
+    if (soundHunt.passed) {
+      fb.textContent = '✓ All 5 target words found!';
+      fb.className = 'feedback-banner show ok';
+    } else if (soundHunt.checking) {
+      fb.textContent = '✗ Not quite — try again';
+      fb.className = 'feedback-banner show bad';
+    } else {
+      fb.className = 'feedback-banner';
+      fb.textContent = '';
+    }
+  }
+
+  function updateShFinishBtn() {
+    const btn = document.getElementById('shFinishBtn');
+    if (!btn) return;
+    if (soundHunt.passed) {
+      btn.disabled = false;
+      btn.classList.remove('btn-locked');
+      btn.innerHTML = ICONS.check + 'See Results';
+    } else {
+      btn.disabled = true;
+      btn.classList.add('btn-locked');
+      btn.innerHTML = ICONS.lock + 'Find all 5 words';
+    }
+  }
+
+  function finishSoundHunt() {
+    if (!soundHunt.passed) return;
+    if (lastResult) lastResult.soundHuntAttempts = soundHunt.attempts;
+    renderResults();
+    showScreen('resultsScreen');
+  }
+
+  document.getElementById('shFinishBtn').addEventListener('click', finishSoundHunt);
+
+  document.getElementById('shBackBtn').addEventListener('click', () => {
+    clearSoundHuntTimer();
     renderReading();
     showScreen('readingScreen');
   });
@@ -1229,6 +1605,18 @@
     document.getElementById('resStatus').textContent = r.passed
       ? 'Day ' + r.day + ' Completed ✓'
       : 'Score below 80% — try again';
+
+    // Sound Hunt row
+    const shRow = document.getElementById('resShRow');
+    const shVal = document.getElementById('resShVal');
+    if (typeof r.soundHuntAttempts === 'number') {
+      shRow.style.display = 'flex';
+      shVal.textContent = r.soundHuntAttempts === 1
+        ? '✓ First try'
+        : '✓ After ' + r.soundHuntAttempts + ' tries';
+    } else {
+      shRow.style.display = 'none';
+    }
 
     const pills = document.getElementById('resDayPills');
     pills.innerHTML = '';
@@ -1298,6 +1686,9 @@
       'Lesson: ' + r.lessonNumber + ' – ' + r.title + '\n' +
       'Day: ' + r.day + ' of 5\n' +
       'Score: ' + r.score + '/' + r.total + ' (' + r.pct + '%)\n' +
+      (typeof r.soundHuntAttempts === 'number'
+        ? 'Sound Hunt: Passed on try ' + r.soundHuntAttempts + '\n'
+        : '') +
       'Date: ' + formatDate(r.date) + '\n' +
       'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
 
@@ -1386,7 +1777,7 @@
   }
 
   /* ========== THEME BUTTONS ========== */
-  ['themeBtn', 'themeBtn2', 'themeBtn3', 'themeBtn4'].forEach(id => {
+  ['themeBtn', 'themeBtn2', 'themeBtn3', 'themeBtn4', 'themeBtn5'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('click', toggleTheme);
   });
@@ -1395,15 +1786,17 @@
   loadStore();
   applyTheme();
   updateSpeedBtn();
-  // Set initial state of the "Finish reading first" button (rendered empty in HTML)
   (function initReadButton() {
     const btn = document.getElementById('goQuestionsBtn');
     if (btn) btn.innerHTML = ICONS.lock + 'Finish reading first';
   })();
-  // Set initial submit button icon (rendered empty in HTML)
   (function initSubmitButton() {
     const btn = document.getElementById('submitWaBtn');
     if (btn) btn.innerHTML = ICONS.send + 'Submit to Teacher';
+  })();
+  (function initShButton() {
+    const btn = document.getElementById('shFinishBtn');
+    if (btn) btn.innerHTML = ICONS.lock + 'Find all 5 words';
   })();
 
   if (profile.name && profile.grade) {
