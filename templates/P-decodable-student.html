@@ -303,23 +303,66 @@
     .result-actions { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
     .submit-note { font-size: 0.75rem; color: var(--text-3); text-align: center; margin-top: 4px; }
 
-    /* Segment overlay */
+    /* Segment mode */
+    #readingScreen.segment-mode {
+      background: linear-gradient(180deg, #ede9fe 0%, var(--bg) 40%);
+    }
+    [data-theme="dark"] #readingScreen.segment-mode {
+      background: linear-gradient(180deg, #2e1065 0%, var(--bg) 45%);
+    }
+    #readingScreen.segment-mode .story-area {
+      border-color: #a78bfa;
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25);
+    }
+    #readingScreen.segment-mode .word {
+      outline: 1.5px dashed transparent;
+    }
+    #readingScreen.segment-mode .word:active {
+      outline-color: #a78bfa;
+    }
+    .segment-banner {
+      display: none;
+      align-items: center; justify-content: space-between; gap: 10px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #fff; padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
+      font-size: 0.85rem; font-weight: 700;
+    }
+    #readingScreen.segment-mode .segment-banner { display: flex; }
+    .segment-banner .exit-seg {
+      background: rgba(255,255,255,0.2); border: none; color: #fff;
+      padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.78rem;
+      font-family: inherit; cursor: pointer;
+    }
+    .icon-btn.active-seg {
+      background: #7c3aed; color: #fff; border-color: #7c3aed;
+    }
+
+    /* Segment overlay / modal */
     .segment-overlay {
       position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.92);
       display: none; align-items: center; justify-content: center; padding: 24px;
     }
     .segment-overlay.show { display: flex; }
-    .segment-inner { text-align: center; }
+    .segment-inner {
+      text-align: center; max-width: 96vw;
+      background: #1e293b; border-radius: 20px; padding: 28px 20px 24px;
+      border: 1px solid #334155; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
     .segment-word {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
-      font-size: clamp(40px, 11vw, 90px); font-weight: 800; color: #fff; line-height: 1.1;
+      font-size: clamp(36px, 10vw, 80px); font-weight: 800; color: #fff; line-height: 1.15;
+      margin-bottom: 20px;
     }
     .segment-letter {
-      display: inline-flex; padding: 2px 4px; border-radius: 6px; cursor: pointer;
-      transition: transform 0.12s, color 0.15s;
+      display: inline-flex; padding: 4px 6px; border-radius: 8px; cursor: pointer;
+      transition: transform 0.12s, color 0.15s; user-select: none;
     }
     .segment-letter:active { transform: scale(0.95); }
-    .segment-hint { margin-top: 24px; color: #94a3b8; font-size: 0.85rem; font-weight: 600; }
+    .segment-actions {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .segment-actions .btn { min-width: 120px; }
+    .segment-hint { color: #94a3b8; font-size: 0.8rem; font-weight: 600; }
 
     /* Toast */
     .toast {
@@ -389,11 +432,16 @@
         <h1 id="readTitle" style="font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Lesson</h1>
         <div class="meta" id="readMeta"></div>
       </div>
-      <button class="icon-btn" id="segmentBtn" title="Segment letters">🔤</button>
+      <button class="icon-btn" id="ttsChunkBtn" title="Read this part aloud">🔊</button>
+      <button class="icon-btn" id="segmentBtn" title="Segment mode">🔤</button>
       <button class="icon-btn" id="themeBtn2" title="Toggle theme">🌙</button>
     </div>
     <div class="content">
       <div class="content-wrap">
+        <div class="segment-banner" id="segmentBanner">
+          <span>🔤 Segment mode — tap any word</span>
+          <button type="button" class="exit-seg" id="exitSegmentBtn">Exit</button>
+        </div>
         <div class="target-bar">
           <span class="day-chip" id="dayChip">Day 1</span>
           <span class="sound" id="targetSound"></span>
@@ -462,7 +510,7 @@
         </div>
         <div class="result-actions">
           <button class="btn btn-wa btn-lg btn-block" id="submitWaBtn">📤 Submit to Teacher</button>
-          <p class="submit-note" id="submitNote">Sends result badge image via WhatsApp</p>
+          <p class="submit-note" id="submitNote">Opens teacher chat with result ready — just tap Send</p>
           <button class="btn btn-outline btn-block" id="resAgainBtn">Read again</button>
           <button class="btn btn-primary btn-block" id="resListBtn">Back to Lessons</button>
         </div>
@@ -470,11 +518,15 @@
     </div>
   </div>
 
-  <!-- Segment overlay -->
+  <!-- Segment word modal -->
   <div class="segment-overlay" id="segmentOverlay">
-    <div class="segment-inner">
+    <div class="segment-inner" id="segmentInner">
       <div class="segment-word" id="segmentWord"></div>
-      <div class="segment-hint">Tap outside to close</div>
+      <div class="segment-actions">
+        <button type="button" class="btn btn-primary" id="segmentPlayBtn">🔊 Play word</button>
+        <button type="button" class="btn btn-outline" id="segmentCloseBtn" style="border-color:#475569;color:#e2e8f0;">Close</button>
+      </div>
+      <div class="segment-hint">Tap a letter to change color · Tap outside or Close to dismiss</div>
     </div>
   </div>
 
@@ -507,6 +559,8 @@
   let visibleChunkEnd = CHUNK_SIZE; // exclusive line index
   let quiz = { questions: [], index: 0, correct: 0, answered: false };
   let lastResult = null;
+  let segmentMode = false;
+  let segmentModalWord = '';
 
   /* ========== STORAGE ========== */
   function loadStore() {
@@ -629,14 +683,10 @@
     currentDay = Math.min(p.highestDay + 1, 5);
     // Restore in-progress taps for current day attempt if any
     tappedSet = new Set(p.currentTapped || []);
-    // If starting a fresh day (no readingDone from previous incomplete), and highestDay already advanced, reset taps
-    if (!p.readingDone && tappedSet.size === 0) {
-      // fresh
-    }
-    // If they already finished reading for this day session but didn't quiz, keep readingDone
     visibleChunkEnd = CHUNK_SIZE;
-    // Expand visible chunks based on already-tapped words
     recomputeVisibleChunk();
+    exitSegmentMode();
+    stopTTS();
     renderReading();
     showScreen('readingScreen');
   }
@@ -727,10 +777,16 @@
   }
 
   function onWordTap(key, el) {
-    if (tappedSet.has(key)) return; // already tapped — keep color
-    // Only allow tapping words in visible chunks
     const li = parseInt(key.split('-')[0], 10);
     if (li >= visibleChunkEnd) return;
+
+    // Segment mode: open modal instead of counting progress
+    if (segmentMode) {
+      openSegmentModal(el.textContent);
+      return;
+    }
+
+    if (tappedSet.has(key)) return; // already tapped — keep color
 
     tappedSet.add(key);
     el.classList.add('tapped', DAY_COLORS[currentDay]);
@@ -778,33 +834,100 @@
     }
   }
 
-  document.getElementById('goQuestionsBtn').addEventListener('click', startQuiz);
+  document.getElementById('goQuestionsBtn').addEventListener('click', () => {
+    exitSegmentMode();
+    startQuiz();
+  });
   document.getElementById('readBackBtn').addEventListener('click', () => {
+    exitSegmentMode();
+    stopTTS();
     renderHome();
     showScreen('homeScreen');
   });
 
-  /* ========== SEGMENT ========== */
-  document.getElementById('segmentBtn').addEventListener('click', () => {
-    // Pick first untapped visible word, or first word
-    let word = null;
-    for (let li = 0; li < visibleChunkEnd; li++) {
-      const words = tokenize(currentLesson.storyLines[li]);
-      for (let wi = 0; wi < words.length; wi++) {
-        if (!tappedSet.has(li + '-' + wi)) { word = words[wi]; break; }
-      }
-      if (word) break;
-    }
-    if (!word) word = tokenize(currentLesson.storyLines[0])[0] || '';
-    openSegment(word);
-  });
+  /* ========== TTS ========== */
+  function stopTTS() {
+    try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+  }
 
-  function openSegment(wordText) {
+  function speakText(text, rate) {
+    if (!text || !window.speechSynthesis) {
+      toast('Speech not available on this device');
+      return;
+    }
+    stopTTS();
+    const u = new SpeechSynthesisUtterance(String(text));
+    u.lang = 'en-US';
+    u.rate = rate || 0.85; // slow by default for learners
+    u.pitch = 1;
+
+    // Prefer a clear/slow English voice when available
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      const preferred = voices.find(v =>
+        /en(-|_)US/i.test(v.lang) && /samantha|google us|allison|ava|susan|zira/i.test(v.name)
+      ) || voices.find(v => /en(-|_)GB/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang));
+      if (preferred) u.voice = preferred;
+    } catch (e) {}
+
+    window.speechSynthesis.speak(u);
+  }
+
+  // Warm up voices list (some browsers load async)
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.getVoices(); } catch (e) {}
+    window.speechSynthesis.onvoiceschanged = function () {
+      try { window.speechSynthesis.getVoices(); } catch (e) {}
+    };
+  }
+
+  function speakCurrentChunk() {
+    if (!currentLesson) return;
+    const start = Math.max(0, visibleChunkEnd - CHUNK_SIZE);
+    const lines = currentLesson.storyLines.slice(start, visibleChunkEnd);
+    const text = lines.join(' ');
+    if (!text.trim()) return;
+    speakText(text, 0.85);
+  }
+
+  document.getElementById('ttsChunkBtn').addEventListener('click', speakCurrentChunk);
+
+  /* ========== SEGMENT MODE ========== */
+  function setSegmentMode(on) {
+    segmentMode = !!on;
+    const screen = document.getElementById('readingScreen');
+    const btn = document.getElementById('segmentBtn');
+    if (segmentMode) {
+      screen.classList.add('segment-mode');
+      btn.classList.add('active-seg');
+      btn.title = 'Exit segment mode';
+      toast('Segment mode on — tap any word', 2200);
+    } else {
+      screen.classList.remove('segment-mode');
+      btn.classList.remove('active-seg');
+      btn.title = 'Segment mode';
+      closeSegmentModal();
+    }
+  }
+
+  function exitSegmentMode() {
+    if (segmentMode) setSegmentMode(false);
+  }
+
+  document.getElementById('segmentBtn').addEventListener('click', () => {
+    setSegmentMode(!segmentMode);
+  });
+  document.getElementById('exitSegmentBtn').addEventListener('click', exitSegmentMode);
+
+  function openSegmentModal(wordText) {
+    // Strip trailing punctuation for cleaner display/TTS, keep original for letters if needed
+    const clean = String(wordText || '').replace(/[.,!?;:'"]+$/g, '');
+    segmentModalWord = clean || String(wordText || '');
     const box = document.getElementById('segmentWord');
     box.innerHTML = '';
-    const colors = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#6366f1','#a855f7','#ffffff'];
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7', '#ffffff'];
     let ci = 0;
-    Array.from(String(wordText)).forEach(ch => {
+    Array.from(segmentModalWord).forEach(ch => {
       const s = document.createElement('span');
       s.className = 'segment-letter';
       s.textContent = ch === ' ' ? '\u00A0' : ch;
@@ -817,8 +940,22 @@
     });
     document.getElementById('segmentOverlay').classList.add('show');
   }
+
+  function closeSegmentModal() {
+    document.getElementById('segmentOverlay').classList.remove('show');
+    stopTTS();
+  }
+
   document.getElementById('segmentOverlay').addEventListener('click', function (e) {
-    if (e.target === this) this.classList.remove('show');
+    if (e.target === this) closeSegmentModal();
+  });
+  document.getElementById('segmentCloseBtn').addEventListener('click', closeSegmentModal);
+  document.getElementById('segmentPlayBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    speakText(segmentModalWord, 0.8);
+  });
+  document.getElementById('segmentInner').addEventListener('click', function (e) {
+    e.stopPropagation();
   });
 
   /* ========== QUIZ ========== */
@@ -1017,7 +1154,7 @@
     } else {
       btn.disabled = false;
       btn.textContent = '📤 Submit to Teacher';
-      note.textContent = 'Sends result badge image via WhatsApp (' + (MAX_SUBMITS_PER_DAY - count) + ' left today)';
+      note.textContent = 'Opens teacher chat with result ready — just tap Send (' + (MAX_SUBMITS_PER_DAY - count) + ' left today)';
     }
   }
 
@@ -1036,9 +1173,10 @@
     const btn = document.getElementById('submitWaBtn');
     const orig = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Preparing image…';
+    btn.textContent = 'Opening WhatsApp…';
 
     const r = lastResult;
+    // Detailed text — opens directly in the teacher's chat; student only taps Send
     const shareText =
       'Decodable Reader Result\n' +
       'Name: ' + profile.name + '\n' +
@@ -1049,6 +1187,12 @@
       'Date: ' + formatDate(r.date) + '\n' +
       'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
 
+    // Mark submitted
+    p.submits[tk] = count + 1;
+    saveStore();
+    updateSubmitButton();
+
+    // Optional: save badge image so student can attach it in the chat if they want
     try {
       if (typeof html2canvas === 'function') {
         const badge = document.getElementById('resultBadge');
@@ -1059,63 +1203,29 @@
           logging: false
         });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        if (!blob) throw new Error('blob null');
-
-        const file = new File([blob], 'decodable-result.png', { type: 'image/png' });
-
-        // Mark submitted
-        p.submits[tk] = count + 1;
-        saveStore();
-        updateSubmitButton();
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: 'Decodable Reader Result',
-              text: shareText
-            });
-            toast('Shared! Choose WhatsApp to send to teacher');
-            return;
-          } catch (shareErr) {
-            if (shareErr && shareErr.name === 'AbortError') {
-              btn.disabled = false;
-              btn.textContent = orig;
-              return;
-            }
-          }
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'decodable-result.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
         }
-
-        // Fallback: download image + open WhatsApp
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'decodable-result.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 4000);
-        toast('Image saved — attach it in WhatsApp', 3500);
-        setTimeout(() => {
-          window.open('https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText), '_blank');
-        }, 600);
-      } else {
-        p.submits[tk] = count + 1;
-        saveStore();
-        updateSubmitButton();
-        window.open('https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText), '_blank');
       }
-    } catch (err) {
-      console.error(err);
-      try {
-        window.open('https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText), '_blank');
-      } catch (e) {}
-      toast('Opened WhatsApp with text result');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = orig;
-      updateSubmitButton();
+    } catch (imgErr) {
+      console.warn('Badge image capture skipped', imgErr);
     }
+
+    // Always open WhatsApp straight to the teacher's number with message pre-filled
+    const waUrl = 'https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText);
+    window.open(waUrl, '_blank');
+    toast('WhatsApp opened — just tap Send', 3200);
+
+    btn.disabled = false;
+    btn.textContent = orig;
+    updateSubmitButton();
   }
 
   document.getElementById('resHomeBtn').addEventListener('click', () => { renderHome(); showScreen('homeScreen'); });
