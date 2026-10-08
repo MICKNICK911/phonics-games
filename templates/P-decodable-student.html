@@ -510,7 +510,7 @@
         </div>
         <div class="result-actions">
           <button class="btn btn-wa btn-lg btn-block" id="submitWaBtn">📤 Submit to Teacher</button>
-          <p class="submit-note" id="submitNote">Sends result badge image via WhatsApp — select teacher and send</p>
+          <p class="submit-note" id="submitNote">Shares badge image, then opens teacher chat (works without saved contact)</p>
           <button class="btn btn-outline btn-block" id="resAgainBtn">Read again</button>
           <button class="btn btn-primary btn-block" id="resListBtn">Back to Lessons</button>
         </div>
@@ -1155,7 +1155,7 @@
     } else {
       btn.disabled = false;
       btn.textContent = '📤 Submit to Teacher';
-      note.textContent = 'Sends result badge image via WhatsApp — select teacher and send (' + (MAX_SUBMITS_PER_DAY - count) + ' left today)';
+      note.textContent = 'Shares badge image, then opens teacher chat (works without saved contact) · ' + (MAX_SUBMITS_PER_DAY - count) + ' left today';
     }
   }
 
@@ -1185,10 +1185,16 @@
       'Day: ' + r.day + ' of 5\n' +
       'Score: ' + r.score + '/' + r.total + ' (' + r.pct + '%)\n' +
       'Date: ' + formatDate(r.date) + '\n' +
-      'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice') + '\n' +
-      'Teacher: +' + TEACHER_WA;
+      'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
 
     const waUrl = 'https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText);
+
+    function openTeacherChat() {
+      // Always open teacher number — works even if contact is not saved
+      try {
+        window.open(waUrl, '_blank');
+      } catch (e) {}
+    }
 
     try {
       if (typeof html2canvas === 'function') {
@@ -1199,7 +1205,6 @@
           useCORS: true,
           logging: false,
           onclone: function (clonedDoc) {
-            // Hide action buttons if any appear inside badge clone
             const cloneBadge = clonedDoc.getElementById('resultBadge');
             if (cloneBadge) {
               cloneBadge.querySelectorAll('button').forEach(function (b) {
@@ -1215,12 +1220,23 @@
 
         const file = new File([blob], 'decodable-result.png', { type: 'image/png' });
 
-        // Mark submitted only after image is ready
+        // Also download so student can attach later if needed
+        try {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'decodable-result.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        } catch (dlErr) {}
+
         p.submits[tk] = count + 1;
         saveStore();
         updateSubmitButton();
 
-        // Primary: native share sheet with badge image (same as reference app)
+        // 1) Share sheet with badge image (if supported)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
@@ -1228,48 +1244,30 @@
               title: 'Decodable Reader Result',
               text: shareText
             });
-            toast('Shared! Choose WhatsApp → teacher → Send');
-            return;
           } catch (shareErr) {
             if (shareErr && shareErr.name === 'AbortError') {
-              // User cancelled share — undo submit count
-              p.submits[tk] = count;
-              saveStore();
-              updateSubmitButton();
-              return;
+              // Cancelled share — still open teacher chat so they can send text
             }
           }
         }
 
-        // Fallback: download image + open teacher WhatsApp with text
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'decodable-result.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-        toast('Badge saved — attach it in WhatsApp', 3500);
-        setTimeout(function () {
-          window.open(waUrl, '_blank');
-        }, 600);
+        // 2) Always open teacher chat (works without saved contact)
+        toast('Opening teacher chat — just tap Send', 3000);
+        setTimeout(openTeacherChat, 400);
       } else {
         p.submits[tk] = count + 1;
         saveStore();
         updateSubmitButton();
-        window.open(waUrl, '_blank');
-        toast('WhatsApp opened with result text');
+        openTeacherChat();
+        toast('WhatsApp opened — just tap Send');
       }
     } catch (err) {
       console.error(err);
       p.submits[tk] = count + 1;
       saveStore();
       updateSubmitButton();
-      try {
-        window.open(waUrl, '_blank');
-      } catch (e) {}
-      toast('Opened WhatsApp with text result');
+      openTeacherChat();
+      toast('Opened teacher chat with result text');
     } finally {
       btn.disabled = false;
       btn.textContent = orig;
