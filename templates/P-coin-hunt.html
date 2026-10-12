@@ -197,8 +197,17 @@
       .fire[disabled] { opacity: 0.38; cursor: default; }
       .dpad { display: none; }
       @media (pointer: coarse) {
-        .controls { flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
-        .controls .hint { flex: 1 1 100%; width: 100%; margin: 0 0 4px; text-align: center; }
+        .controls {
+          flex: 0 0 auto; flex-wrap: nowrap; align-items: center; justify-content: space-between;
+          gap: 12px; width: 100%; max-width: 560px; margin: 0 auto;
+          padding-top: 6px; border-top: 1px solid var(--line);
+        }
+        /* Keep instructions available to assistive technology without using game space. */
+        .controls .hint {
+          position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+          border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+          white-space: nowrap;
+        }
         .dpad {
           display: grid;
           grid-template-columns: repeat(3, var(--dpad-btn));
@@ -237,49 +246,7 @@
         .stat .k { font-size: 0.6rem; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .stat .v { font-size: 0.85rem; line-height: 1.1; white-space: nowrap; }
       }
-      @media (pointer: coarse) and (max-height: 600px) {
-        .hint {
-          position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
-          border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
-          white-space: nowrap;
-        }
-      }
-
       @media (pointer: coarse) {
-        /* Shell becomes the positioning context so .controls can be lifted
-           out of the flex flow without changing markup. */
-        .shell { position: relative; }
-        /* Anchor controls to the lower safe-area corner of the shell.
-           Absolute children ignore .shell's padding, so re-add its insets. */
-        .controls {
-          position: absolute;
-          left: calc(var(--shell-pad) + var(--safe-l));
-          right: calc(var(--shell-pad) + var(--safe-r));
-          bottom: calc(var(--shell-pad) + var(--safe-b));
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 10px;
-          margin: 0;
-          padding: 0;
-          background: none;
-          pointer-events: none; /* canvas receives taps between the buttons */
-        }
-        .controls > * { pointer-events: auto; /* buttons remain interactive */ }
-        /* Keep instructions available to AT, but visually hidden on touch */
-        .controls .hint {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          margin: -1px;
-          padding: 0;
-          border: 0;
-          overflow: hidden;
-          clip: rect(0 0 0 0);
-          clip-path: inset(50%);
-          white-space: nowrap;
-        }
         /* Subtle backdrop so the D-pad reads over the canvas */
         .dpad {
           background: rgba(8, 12, 24, 0.45);
@@ -602,7 +569,7 @@
           var slotIndex = 0;
           for (var i = 0; i < positives.length; i += 1) {
             var pos = slots[slotIndex++];
-            coins.push({ x: pos[0], y: pos[1], r: 22, text: positives[i] });
+            coins.push({ x: pos[0], y: pos[1], r: 22, text: positives[i], hit: 0 });
           }
           for (var j = 0; j < negatives.length; j += 1) {
             var neg = slots[slotIndex++];
@@ -810,6 +777,37 @@
         /* ---------------- targeting ---------------- */
 
         /* ---------------- events (entity) ---------------- */
+        /* Swept segment-vs-pill test returns the nearest pill crossed this frame. */
+        function sweepPill(bullet) {
+          var dx = bullet.x - bullet.px;
+          var dy = bullet.y - bullet.py;
+          var dist = Math.hypot(dx, dy);
+          if (dist < 1e-6) return null;
+          var ux = dx / dist;
+          var uy = dy / dist;
+          var best = null;
+          var bestT = dist + 0.001;
+          var i, t;
+          for (i = 0; i < blocks.length; i += 1) {
+            t = rayCircle(bullet.px, bullet.py, ux, uy, blocks[i].x, blocks[i].y, blocks[i].r * 0.92 + 3);
+            if (t >= 0 && t < bestT) { bestT = t; best = { kind: "block", index: i }; }
+          }
+          for (i = 0; i < coins.length; i += 1) {
+            t = rayCircle(bullet.px, bullet.py, ux, uy, coins[i].x, coins[i].y, coins[i].r * 0.92 + 3);
+            if (t >= 0 && t < bestT) { bestT = t; best = { kind: "coin", index: i }; }
+          }
+          return best;
+        }
+
+        /* Targets absorb shots without changing score or collection progress. */
+        function absorbShot(idx) {
+          var c = coins[idx];
+          if (!c) return;
+          c.hit = 0.18;
+          burst(c.x, c.y, "#9fd8ff", 5, 0.4);
+          sfx(300, 0.05, "triangle", 0.012);
+        }
+
         function destroyBlock(idx) {
           var b = blocks[idx];
           blocks.splice(idx, 1);
@@ -912,36 +910,33 @@
             bullets.push({
               x: player.x,
               y: player.y,
+              px: player.x,
+              py: player.y,
               vx: player.fx * BULLET_SPEED,
               vy: player.fy * BULLET_SPEED
             });
             sfx(600, 0.04, "square", 0.011);
           }
 
-          /* move bullets */
+          /* Move bullets and retain the previous point for swept collision. */
           for (var i = 0; i < bullets.length; i += 1) {
-            bullets[i].x += bullets[i].vx * dt;
-            bullets[i].y += bullets[i].vy * dt;
+            var bu = bullets[i];
+            bu.px = bu.x;
+            bu.py = bu.y;
+            bu.x += bu.vx * dt;
+            bu.y += bu.vy * dt;
           }
           bullets = bullets.filter(function (b) {
             return b.x > -12 && b.x < VW + 12 && b.y > -12 && b.y < VH + 12;
           });
 
-          /* bullets vs blocks */
+          /* Bullets stop at every pill: blocks explode, targets absorb the shot. */
           for (i = bullets.length - 1; i >= 0; i -= 1) {
-            var b = bullets[i];
-            var hitIdx = -1;
-            for (var j = blocks.length - 1; j >= 0; j -= 1) {
-              var blk = blocks[j];
-              var ddx = b.x - blk.x;
-              var ddy = b.y - blk.y;
-              var rr = blk.r * 0.9 + 3;
-              if (ddx * ddx + ddy * ddy < rr * rr) { hitIdx = j; break; }
-            }
-            if (hitIdx >= 0) {
-              bullets.splice(i, 1);
-              destroyBlock(hitIdx);
-            }
+            var hitPill = sweepPill(bullets[i]);
+            if (!hitPill) continue;
+            bullets.splice(i, 1);
+            if (hitPill.kind === "block") destroyBlock(hitPill.index);
+            else absorbShot(hitPill.index);
           }
 
           /* player vs blocks */
@@ -970,6 +965,11 @@
               coins.splice(i, 1);
               collectCoin(c);
             }
+          }
+
+          /* Decay the brief target flash after an absorbed shot. */
+          for (i = 0; i < coins.length; i += 1) {
+            if (coins[i].hit > 0) coins[i].hit = Math.max(0, coins[i].hit - dt);
           }
 
           /* Complete all unique positives to advance automatically. */
@@ -1044,9 +1044,16 @@
         function drawPatternPills(items) {
           for (var i = 0; i < items.length; i += 1) {
             var item = items[i], w = 54, h = 30;
+            var hit = item.hit || 0;
             ctx.save();
+            if (hit > 0) {
+              var k = hit / 0.18;
+              ctx.translate(item.x, item.y);
+              ctx.scale(1 + 0.12 * k, 1 + 0.12 * k);
+              ctx.translate(-item.x, -item.y);
+            }
             ctx.fillStyle = "rgba(19, 31, 61, 0.96)";
-            ctx.strokeStyle = "rgba(190, 210, 255, 0.8)";
+            ctx.strokeStyle = hit > 0 ? "rgba(185, 240, 255, 1)" : "rgba(190, 210, 255, 0.8)";
             ctx.lineWidth = 2;
             roundRectPath(item.x - w / 2, item.y - h / 2, w, h, 7);
             ctx.fill(); ctx.stroke();
