@@ -247,6 +247,55 @@
         }
       }
 
+      @media (pointer: coarse) {
+        /* Shell becomes the positioning context so .controls can be lifted
+           out of the flex flow without changing markup. */
+        .shell { position: relative; }
+        /* Anchor controls to the lower safe-area corner of the shell.
+           Absolute children ignore .shell's padding, so re-add its insets. */
+        .controls {
+          position: absolute;
+          left: calc(var(--shell-pad) + var(--safe-l));
+          right: calc(var(--shell-pad) + var(--safe-r));
+          bottom: calc(var(--shell-pad) + var(--safe-b));
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 10px;
+          margin: 0;
+          padding: 0;
+          background: none;
+          pointer-events: none; /* canvas receives taps between the buttons */
+        }
+        .controls > * { pointer-events: auto; /* buttons remain interactive */ }
+        /* Keep instructions available to AT, but visually hidden on touch */
+        .controls .hint {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          margin: -1px;
+          padding: 0;
+          border: 0;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+          clip-path: inset(50%);
+          white-space: nowrap;
+        }
+        /* Subtle backdrop so the D-pad reads over the canvas */
+        .dpad {
+          background: rgba(8, 12, 24, 0.45);
+          border-radius: 14px;
+          padding: 4px;
+        }
+        /* Preserve FIRE's existing orange gradient; only add visibility aids */
+        #fire {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+          outline: 1px solid rgba(255, 255, 255, 0.35);
+          outline-offset: 1px;
+        }
+      }
+
       button:focus-visible { outline: 3px solid #ffd28e; outline-offset: 3px; }
 
       @media (min-width: 480px) {
