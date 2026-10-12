@@ -94,16 +94,15 @@
       .stat .v.hearts { color: #ff8098; letter-spacing: 0.08em; }
       .stat .v.chain-on { color: var(--gold); }
 
+      /* Stage-slot now holds everything, so the stage can stretch full-height. */
       .stage-slot {
         flex: 1 1 0;
         min-height: 0;
         min-width: 0;
         display: grid;
         place-items: center;
-        container-type: size;
         overflow: hidden;
       }
-      /* Stage now fills the available width and height, with the game canvas centered inside */
       .stage {
         position: relative;
         width: 100%;
@@ -147,38 +146,32 @@
       }
       .pause-btn:disabled { opacity: 0.35; cursor: default; }
 
-      .overlay {
-        position: absolute; inset: 0; z-index: 3;
-        display: grid; place-items: center; padding: 16px;
-        background: #070c1ac9;
-        backdrop-filter: blur(6px);
+      /* ---- Overlay controls (D-pad + FIRE float over the playfield) ---- */
+      .controls {
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;   /* default: FIRE only, bottom-right */
+        gap: 12px;
+        padding: 12px;
+        pointer-events: none;        /* taps fall through to the canvas */
       }
-      .overlay[hidden] { display: none; }
-      .panel {
-        width: min(100%, 320px); padding: 20px 18px;
-        border: 1px solid #ffffff20; border-radius: 20px;
-        background: linear-gradient(155deg, #252d45f2, #171d2df5);
-        box-shadow: 0 20px 60px #0007; text-align: center;
-      }
-      .panel-icon { font-size: 2.3rem; filter: drop-shadow(0 5px 14px #ffb64c66); }
-      .panel h2 { margin: 6px 0 8px; font-size: 1.32rem; }
-      .panel p { margin: 0 auto 16px; max-width: 30ch; color: #bdc5d9; font-size: 0.83rem; line-height: 1.55; }
-      .primary {
-        min-height: 46px; padding: 0 22px;
-        border: 0; border-radius: 13px;
-        background: linear-gradient(105deg, #ffc56c, #ff895f);
-        color: #201a26; font-weight: 850; cursor: pointer;
-        box-shadow: 0 8px 22px #ff9b5140;
-      }
-      .primary:active { transform: translateY(1px); }
+      .controls .fire,
+      .controls .dpad { pointer-events: auto; }
+      .controls .hint { pointer-events: none; }
 
-      .topbar, .stats, .controls {
-        flex: 0 0 auto;
-        min-height: 0;
+      .hint {
+        margin: 0;
+        font-size: 0.66rem;
+        line-height: 1.4;
+        color: var(--muted);
+        max-width: 230px;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.9);
       }
-      .controls { display: flex; align-items: center; justify-content: center; gap: 14px; }
-      .hint { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.3; }
       .hint strong { color: #c7d0e8; }
+
       .fire {
         flex: 0 0 auto;
         width: var(--fire-size); height: var(--fire-size); border-radius: 50%;
@@ -191,15 +184,17 @@
       }
       .fire.on, .fire:active { transform: translateY(1px) scale(0.97); }
       .fire[disabled] { opacity: 0.38; cursor: default; }
+
       .dpad { display: none; }
+
       @media (pointer: coarse) {
+        /* Full controls overlay: D-pad bottom-left, FIRE bottom-right. */
         .controls {
-          flex: 0 0 auto; flex-wrap: nowrap; align-items: center; justify-content: space-between;
-          gap: 12px; width: 100%; max-width: 560px; margin: 0 auto;
-          padding-top: 6px; border-top: 1px solid var(--line);
+          justify-content: space-between;
+          padding: 10px 12px calc(12px + var(--safe-b));
         }
-        /* Keep instructions available to assistive technology without using game space. */
-        .controls .hint {
+        /* Keyboard hint goes screen-reader-only on touch. */
+        .hint {
           position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
           border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
           white-space: nowrap;
@@ -209,11 +204,15 @@
           grid-template-columns: repeat(3, var(--dpad-btn));
           grid-template-rows: repeat(3, var(--dpad-btn));
           gap: 4px; flex: 0 0 auto; touch-action: none;
+          background: rgba(8, 12, 24, 0.35);
+          border-radius: 14px;
+          padding: 4px;
+          backdrop-filter: blur(3px);
         }
         .dpad-btn {
           width: var(--dpad-btn); height: var(--dpad-btn);
           display: flex; align-items: center; justify-content: center; padding: 0;
-          border-radius: 10px; border: 1px solid rgba(255,255,255,.28);
+          border-radius: 10px; border: 1px solid rgba(255,255,255,.24);
           background: rgba(255,255,255,.08); color: #e8eefc;
           font-size: 18px; line-height: 1; touch-action: none;
           user-select: none; -webkit-user-select: none; cursor: pointer;
@@ -225,7 +224,25 @@
         .dpad-btn.on, .dpad-btn:active { background: rgba(120,200,255,.35); border-color: rgba(120,200,255,.9); }
         .dpad-btn:focus-visible { outline: 2px solid #7cf; outline-offset: 2px; }
         .dpad-btn:disabled { opacity: .4; cursor: default; }
+
+        /* Keep the FIRE button readable against the playfield. */
+        #fire {
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55), inset 0 2px 5px #fff8;
+          outline: 1px solid rgba(255, 255, 255, 0.35);
+          outline-offset: 1px;
+          opacity: 0.88;
+        }
+        #fire.on, #fire:active { opacity: 1; }
       }
+
+      /* On desktop, keep FIRE small so it barely intrudes. */
+      @media (pointer: fine) {
+        :root { --fire-size: 58px; }
+        .fire { opacity: 0.75; }
+        .fire.on, .fire:active { opacity: 1; }
+        .controls { padding: 14px 14px calc(14px + var(--safe-b)); }
+      }
+
       @media (pointer: coarse) and (max-height: 740px) {
         :root { --dpad-btn: 46px; --fire-size: 72px; --shell-gap: 6px; --shell-pad: 6px; }
       }
@@ -241,20 +258,6 @@
         .stat { flex: 1 1 0; min-width: 0; padding: 2px 3px; text-align: center; }
         .stat .k { font-size: 0.6rem; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .stat .v { font-size: 0.85rem; line-height: 1.1; white-space: nowrap; }
-      }
-      @media (pointer: coarse) {
-        /* Subtle backdrop so the D-pad reads over the canvas */
-        .dpad {
-          background: rgba(8, 12, 24, 0.45);
-          border-radius: 14px;
-          padding: 4px;
-        }
-        /* Preserve FIRE's existing orange gradient; only add visibility aids */
-        #fire {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-          outline: 1px solid rgba(255, 255, 255, 0.35);
-          outline-offset: 1px;
-        }
       }
 
       button:focus-visible { outline: 3px solid #ffd28e; outline-offset: 3px; }
@@ -289,38 +292,37 @@
         <div class="stat"><span class="k">Targets</span><span class="v" id="hud-coins">0/0</span></div>
         <div class="stat"><span class="k">Chain</span><span class="v" id="hud-chain">&mdash;</span></div>
         <div class="stat"><span class="k">Shields</span><span class="v hearts" id="hud-lives">&#x2665; &#x2665; &#x2665;</span></div>
-              </section>
+      </section>
 
       <div class="stage-slot">
-      <section class="stage" aria-label="Game area">
-        <canvas id="game" role="img" aria-label="Starfall playfield. Collect target sound patterns and avoid negative patterns. Hold fire to clear a negative pattern, but shooting a target detonates your ship."></canvas>
-        <div class="room-pill" id="room-pill">LEVEL 1/3</div>
-        <button id="pause" class="pause-btn" type="button" aria-label="Pause game" title="Pause" disabled>&#x2016;</button>
-        <div id="level-instruction" class="level-instruction" aria-live="polite">TARGET: blends like bl/fl/st · AVOID: digraphs like ch/sh/th</div>
-        <div id="overlay" class="overlay">
-          <div class="panel" role="dialog" aria-label="Game status">
-            <div id="panel-icon" class="panel-icon" aria-hidden="true">&#x1F680;</div>
-            <h2 id="panel-title">Ready, pilot?</h2>
-            <p id="panel-copy">Collect every target pattern in each level. Avoid negative patterns; touching one costs a shield. Both kinds look the same, so read each label.</p>
-            <button id="start" class="primary" type="button">Start run</button>
+        <section class="stage" aria-label="Game area">
+          <canvas id="game" role="img" aria-label="Starfall playfield. Collect target sound patterns and avoid negative patterns. Hold fire to clear a negative pattern, but shooting a target detonates your ship."></canvas>
+          <div class="room-pill" id="room-pill">LEVEL 1/3</div>
+          <button id="pause" class="pause-btn" type="button" aria-label="Pause game" title="Pause" disabled>&#x2016;</button>
+          <div id="level-instruction" class="level-instruction" aria-live="polite">TARGET: blends like bl/fl/st · AVOID: digraphs like ch/sh/th</div>
+
+          <section class="controls" aria-label="Controls">
+            <p class="hint"><strong>Keyboard:</strong> WASD / arrows steer &middot; Space fires &middot; P or Esc pauses</p>
+            <div class="dpad" role="group" aria-label="Movement">
+              <button id="pad-up" class="dpad-btn up" type="button" aria-label="Move up" disabled>&#9650;</button>
+              <button id="pad-left" class="dpad-btn left" type="button" aria-label="Move left" disabled>&#9664;</button>
+              <button id="pad-right" class="dpad-btn right" type="button" aria-label="Move right" disabled>&#9654;</button>
+              <button id="pad-down" class="dpad-btn down" type="button" aria-label="Move down" disabled>&#9660;</button>
+            </div>
+            <button id="fire" class="fire" type="button" aria-label="Fire" disabled>FIRE</button>
+          </section>
+
+          <div id="overlay" class="overlay">
+            <div class="panel" role="dialog" aria-label="Game status">
+              <div id="panel-icon" class="panel-icon" aria-hidden="true">&#x1F680;</div>
+              <h2 id="panel-title">Ready, pilot?</h2>
+              <p id="panel-copy">Collect every target pattern in each level. Avoid negative patterns; touching one costs a shield. Both kinds look the same, so read each label.</p>
+              <button id="start" class="primary" type="button">Start run</button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       </div>
 
-      <section class="controls" aria-label="Controls">
-        <p class="hint">
-          <strong>Keyboard:</strong> WASD / arrows steer &middot; Space fires &middot; P or Esc pauses<br />
-          <strong>Touch:</strong> hold arrows to move &middot; hold FIRE to shoot
-        </p>
-        <div class="dpad" role="group" aria-label="Movement">
-          <button id="pad-up" class="dpad-btn up" type="button" aria-label="Move up" disabled>&#9650;</button>
-          <button id="pad-left" class="dpad-btn left" type="button" aria-label="Move left" disabled>&#9664;</button>
-          <button id="pad-right" class="dpad-btn right" type="button" aria-label="Move right" disabled>&#9654;</button>
-          <button id="pad-down" class="dpad-btn down" type="button" aria-label="Move down" disabled>&#9660;</button>
-        </div>
-        <button id="fire" class="fire" type="button" aria-label="Fire" disabled>FIRE</button>
-      </section>
       <div id="announcer" class="sr-only" aria-live="polite"></div>
     </main>
 
@@ -330,17 +332,12 @@
 
         /* ---------------------------------------------------------------
            Starfall: Sound Sorter
-           Top-down bounded rooms. Virtual 360x540 units scaled to fit.
+           Reference width is fixed (360 units); height adapts to the
+           stage's real aspect ratio so the canvas fills the stage.
         ---------------------------------------------------------------- */
         var VW = 360;
         var VH = 540;
         var TAU = Math.PI * 2;
-
-        var SPAWN_X = 180;
-        var SPAWN_Y = 490;
-        var EXIT_X = 180;
-        var EXIT_Y = 50;
-        var EXIT_R = 26;
 
         var PLAYER_R = 13;
         var MAX_SPEED = 210;
@@ -353,7 +350,6 @@
 
         var CHAIN_CAP = 10;
 
-        /* Append future phonics sets here. Positives are collected once; negatives are hazards. */
         var LEVELS = [
           { name: "Blends over digraphs", instruction: "TARGET: blends like bl/fl/st · AVOID: digraphs like ch/sh/th", positive: ["bl", "cl", "dr", "fl", "gr", "pr", "tr", "sc", "sk", "squ", "st", "sm", "sn", "sp", "sw", "tw", "dw"], negative: ["ch", "tch", "th", "ng", "nk", "sh"] },
           { name: "Digraphs over blends", instruction: "TARGET: digraphs like ch/sh/th · AVOID: blends like bl/fl/st", positive: ["ch", "tch", "th", "ng", "nk", "sh"], negative: ["bl", "cl", "dr", "fl", "gr", "pr", "tr", "sc", "sk", "squ", "st", "sm", "sn", "sp", "sw", "tw", "dw"] },
@@ -374,6 +370,7 @@
         var announcer = document.getElementById("announcer");
         var roomPill = document.getElementById("room-pill");
         var levelInstruction = document.getElementById("level-instruction");
+        var stageEl = document.querySelector(".stage");
 
         var hudScore = document.getElementById("hud-score");
         var hudCoins = document.getElementById("hud-coins");
@@ -385,19 +382,29 @@
         var dpr = 1;
 
         function resize() {
-          var stage = document.querySelector('.stage');
-          if (!stage) return;
-          var rect = stage.getBoundingClientRect();
+          if (!stageEl) return;
+          var rect = stageEl.getBoundingClientRect();
           if (rect.width < 1 || rect.height < 1) return;
           dpr = Math.min(window.devicePixelRatio || 1, 2);
-          // Fit the virtual world (VW x VH) inside the stage while preserving aspect ratio
-          var scaleX = rect.width / VW;
-          var scaleY = rect.height / VH;
-          scale = Math.min(scaleX, scaleY);
+
+          var aspect = rect.height / rect.width;
+          VW = 360;
+          VH = clamp(360 * aspect, 320, 540);
+
+          scale = Math.min(rect.width / VW, rect.height / VH);
           canvas.width = Math.round(VW * scale * dpr);
           canvas.height = Math.round(VH * scale * dpr);
-          canvas.style.width = (VW * scale) + 'px';
-          canvas.style.height = (VH * scale) + 'px';
+          canvas.style.width = (VW * scale) + "px";
+          canvas.style.height = (VH * scale) + "px";
+
+          layoutEntities();
+          if (player) {
+            player.x = clamp(player.x, PLAYER_R + 4, VW - PLAYER_R - 4);
+            player.y = clamp(player.y, PLAYER_R + 8, VH - PLAYER_R - 6);
+          }
+
+          bgGrad = null;
+          nebulaGrad = null;
           render();
         }
 
@@ -483,25 +490,12 @@
           ctx.arcTo(x, y, x, y + w, rr);
           ctx.closePath();
         }
-        function starPath(cx, cy, spikes, outer, inner) {
-          var rot = -Math.PI / 2;
-          var step = Math.PI / spikes;
-          ctx.beginPath();
-          ctx.moveTo(cx, cy - outer);
-          for (var i = 0; i < spikes; i += 1) {
-            ctx.lineTo(cx + Math.cos(rot) * outer, cy + Math.sin(rot) * outer);
-            rot += step;
-            ctx.lineTo(cx + Math.cos(rot) * inner, cy + Math.sin(rot) * inner);
-            rot += step;
-          }
-          ctx.closePath();
-        }
         function announce(text) {
           if (!announcer) return;
           announcer.textContent = text;
         }
+        function spawnPoint() { return { x: VW * 0.5, y: VH - 48 }; }
 
-        /* Ray-circle intersection. Returns t in [0, maxDist] or -1. */
         function rayCircle(ox, oy, ux, uy, cx, cy, r) {
           var fx = ox - cx;
           var fy = oy - cy;
@@ -514,19 +508,8 @@
           if (t < 0) t = 0;
           return t;
         }
-        function rayHitsBlock(ox, oy, ux, uy, maxDist) {
-          var nearest = null;
-          var nearestT = maxDist;
-          for (var i = 0; i < blocks.length; i += 1) {
-            var b = blocks[i];
-            var t = rayCircle(ox, oy, ux, uy, b.x, b.y, b.r + PLAYER_R);
-            if (t >= 0 && t < nearestT) { nearest = b; nearestT = t; }
-          }
-          return nearest;
-        }
 
         /* ---------------- HUD ---------------- */
-
         function syncHud() {
           hudScore.textContent = String(score).padStart(4, "0");
           hudCoins.textContent = (roomCoinTotal - coins.length) + "/" + roomCoinTotal;
@@ -548,7 +531,6 @@
         }
 
         /* ---------------- hazards / levels ---------------- */
-        function makeBlock(x, y, r, text) { return { x: x, y: y, r: r, tint: 0, text: text }; }
         function shuffle(items) {
           for (var i = items.length - 1; i > 0; i -= 1) {
             var j = Math.floor(Math.random() * (i + 1));
@@ -556,37 +538,62 @@
           }
           return items;
         }
+
+        function layoutEntities() {
+          var i;
+          for (i = 0; i < coins.length; i += 1) {
+            coins[i].x = coins[i].fx * VW;
+            coins[i].y = coins[i].fy * VH;
+          }
+          for (i = 0; i < blocks.length; i += 1) {
+            blocks[i].x = blocks[i].fx * VW;
+            blocks[i].y = blocks[i].fy * VH;
+          }
+        }
+
         function loadRoom(idx) {
           var level = LEVELS[idx];
           roomIdx = idx;
-          var slots = [], xs = [34, 107, 180, 253, 326], ys = [150, 220, 290, 360, 430, 500];
-          for (var row = 0; row < ys.length; row += 1) {
-            for (var col = 0; col < xs.length; col += 1) {
-              if (ys[row] > 430 && col === 2) continue;
-              slots.push([xs[col], ys[row]]);
+          var cols = 5, rows = 6;
+          var slots = [];
+          for (var r = 0; r < rows; r += 1) {
+            for (var c = 0; c < cols; c += 1) {
+              if (r === rows - 1 && c === 2) continue;
+              slots.push({ fx: 0.095 + c * 0.2025, fy: 0.17 + r * 0.142 });
             }
           }
           shuffle(slots);
-          var positives = shuffle(level.positive.slice()), negatives = shuffle(level.negative.slice());
+          var positives = shuffle(level.positive.slice());
+          var negatives = shuffle(level.negative.slice());
           coins = []; blocks = [];
-          var slotIndex = 0;
+          var si = 0;
           for (var i = 0; i < positives.length; i += 1) {
-            var pos = slots[slotIndex++];
-            coins.push({ x: pos[0], y: pos[1], r: 22, text: positives[i], hit: 0 });
+            var ps = slots[si++];
+            coins.push({
+              fx: ps.fx, fy: ps.fy,
+              x: ps.fx * VW, y: ps.fy * VH,
+              r: 22, text: positives[i], hit: 0
+            });
           }
           for (var j = 0; j < negatives.length; j += 1) {
-            var neg = slots[slotIndex++];
-            blocks.push(makeBlock(neg[0], neg[1], 22, negatives[j]));
+            var ns = slots[si++];
+            blocks.push({
+              fx: ns.fx, fy: ns.fy,
+              x: ns.fx * VW, y: ns.fy * VH,
+              r: 22, text: negatives[j], tint: 0
+            });
           }
           roomCoinTotal = coins.length;
           bullets = []; particles = [];
           if (player) {
-            player.x = SPAWN_X; player.y = SPAWN_Y;
+            var sp = spawnPoint();
+            player.x = sp.x; player.y = sp.y;
             player.vx = 0; player.vy = 0; player.kx = 0; player.ky = 0; player.kt = 0;
             player.invuln = 1.2; player.fx = 0; player.fy = -1;
           }
           syncHud();
         }
+
         function advanceRoom() {
           if (roomIdx + 1 >= LEVELS.length) { endRun("clear"); return; }
           loadRoom(roomIdx + 1);
@@ -605,8 +612,9 @@
           lives = 3;
           gameTime = 0;
 
+          var sp = spawnPoint();
           player = {
-            x: SPAWN_X, y: SPAWN_Y,
+            x: sp.x, y: sp.y,
             vx: 0, vy: 0,
             kx: 0, ky: 0, kt: 0,
             invuln: 1.5,
@@ -617,7 +625,6 @@
           flash = 0;
           endDelay = 0;
           shotClock = 0;
-
 
           loadRoom(0);
         }
@@ -652,6 +659,9 @@
           }
           announce(panelTitle.textContent + ". " + panelCopy.textContent);
         }
+
+        var pad = { up: false, down: false, left: false, right: false };
+        var padRefs = { up: null, down: null, left: null, right: null };
 
         function setPlayControlsEnabled(on) {
           pauseBtn.disabled = !on;
@@ -753,8 +763,6 @@
         var keys = new Set();
         var keyFire = false;
         var btnFire = false;
-        var pad = { up: false, down: false, left: false, right: false };
-        var padRefs = { up: null, down: null, left: null, right: null };
 
         function keysClear() {
           keys.clear(); keyFire = false; btnFire = false; fireBtn.classList.remove("on");
@@ -777,10 +785,7 @@
           return { x: x, y: y };
         }
 
-        /* ---------------- targeting ---------------- */
-
-        /* ---------------- events (entity) ---------------- */
-        /* Swept segment-vs-pill test returns the nearest pill crossed this frame. */
+        /* ---------------- collisions ---------------- */
         function sweepPill(bullet) {
           var dx = bullet.x - bullet.px;
           var dy = bullet.y - bullet.py;
@@ -802,14 +807,14 @@
           return best;
         }
 
-        /* Shooting a target is a misfire: the ship detonates, same penalty as touching a negative. */
+        /* Shooting a target is a misfire: same penalty as touching a negative. */
         function absorbShot(idx) {
           var c = coins[idx];
           if (!c) return;
           c.hit = 0.18;
           burst(c.x, c.y, "#9fd8ff", 6, 0.5);
           sfx(300, 0.05, "triangle", 0.012);
-          bullets = [];            /* one mistake costs one shield, not a whole volley */
+          bullets = [];
           hitPlayer();
         }
 
@@ -845,8 +850,9 @@
 
           if (lives <= 0) { endRun("dead"); return; }
 
-          player.x = SPAWN_X;
-          player.y = SPAWN_Y;
+          var sp = spawnPoint();
+          player.x = sp.x;
+          player.y = sp.y;
           player.vx = 0;
           player.vy = 0;
           player.kx = 0;
@@ -864,13 +870,11 @@
           var input = readInput();
           var mag = Math.hypot(input.x, input.y);
 
-          /* facing */
           if (mag > 0.15) {
             player.fx = input.x / mag;
             player.fy = input.y / mag;
           }
 
-          /* acceleration */
           player.vx += input.x * ACCEL * dt;
           player.vy += input.y * ACCEL * dt;
           var damp = Math.exp(-DAMP * dt);
@@ -882,7 +886,6 @@
             player.vy = (player.vy / sp) * MAX_SPEED;
           }
 
-          /* knockback */
           if (player.kt > 0) {
             player.kt = Math.max(0, player.kt - dt);
             player.x += player.kx * dt;
@@ -892,11 +895,9 @@
             player.ky *= kd;
           }
 
-          /* velocity move */
           player.x += player.vx * dt;
           player.y += player.vy * dt;
 
-          /* bounds */
           if (player.x < PLAYER_R + 4) { player.x = PLAYER_R + 4; player.vx = Math.max(0, player.vx); }
           if (player.x > VW - PLAYER_R - 4) { player.x = VW - PLAYER_R - 4; player.vx = Math.min(0, player.vx); }
           if (player.y < PLAYER_R + 8) { player.y = PLAYER_R + 8; player.vy = Math.max(0, player.vy); }
@@ -908,7 +909,6 @@
 
           if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
 
-          /* firing: bullets travel straight along the direction the ship faces */
           shotClock -= dt;
           if (isFiring() && shotClock <= 0) {
             shotClock = FIRE_CD;
@@ -923,7 +923,6 @@
             sfx(600, 0.04, "square", 0.011);
           }
 
-          /* Move bullets and retain the previous point for swept collision. */
           for (var i = 0; i < bullets.length; i += 1) {
             var bu = bullets[i];
             bu.px = bu.x;
@@ -935,7 +934,6 @@
             return b.x > -12 && b.x < VW + 12 && b.y > -12 && b.y < VH + 12;
           });
 
-          /* Bullets stop at every pill: negatives explode, targets detonate YOU. */
           for (i = bullets.length - 1; i >= 0; i -= 1) {
             if (i >= bullets.length) break;
             var hitPill = sweepPill(bullets[i]);
@@ -946,11 +944,10 @@
             } else {
               absorbShot(hitPill.index);
               if (state !== "playing") return;
-              break; /* the detonation cleared the rest of the volley */
+              break;
             }
           }
 
-          /* player vs blocks */
           if (player.invuln <= 0) {
             for (i = blocks.length - 1; i >= 0; i -= 1) {
               var blk2 = blocks[i];
@@ -966,7 +963,6 @@
             }
           }
 
-          /* player vs coins */
           for (i = coins.length - 1; i >= 0; i -= 1) {
             var c = coins[i];
             var cr = PLAYER_R + c.r + 4;
@@ -978,12 +974,10 @@
             }
           }
 
-          /* Decay the brief target flash after an absorbed shot. */
           for (i = 0; i < coins.length; i += 1) {
             if (coins[i].hit > 0) coins[i].hit = Math.max(0, coins[i].hit - dt);
           }
 
-          /* Complete all unique positives to advance automatically. */
           if (coins.length === 0) {
             advanceRoom();
             if (state !== "playing") return;
@@ -992,7 +986,6 @@
           updateParticles(dt);
           shake = Math.max(0, shake - dt * 18);
           flash = Math.max(0, flash - dt * 2.2);
-
         }
 
         function updateEnding(dt) {
@@ -1044,14 +1037,6 @@
           }
         }
 
-        function drawCoins() {
-          drawPatternPills(coins);
-        }
-
-        function drawBlocks() {
-          drawPatternPills(blocks);
-        }
-
         function drawPatternPills(items) {
           for (var i = 0; i < items.length; i += 1) {
             var item = items[i], w = 54, h = 30;
@@ -1074,43 +1059,6 @@
             ctx.fillText(item.text, item.x, item.y + 0.5, w - 6);
             ctx.restore();
           }
-        }
-
-        function drawExit() {
-          var active = coins.length === 0;
-          ctx.save();
-          ctx.translate(EXIT_X, EXIT_Y);
-          if (active) {
-            var pulse = 1 + Math.sin(gameTime * 4) * 0.1;
-            ctx.shadowColor = "#7ee7ff";
-            ctx.shadowBlur = 26;
-            ctx.strokeStyle = "#b8f5ff";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(0, 0, EXIT_R * pulse, 0, TAU);
-            ctx.stroke();
-            ctx.globalAlpha = 0.35;
-            ctx.fillStyle = "#b8f5ff";
-            ctx.beginPath();
-            ctx.arc(0, 0, EXIT_R * 0.65 * pulse, 0, TAU);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 0.85;
-            ctx.fillStyle = "#0a1024";
-            ctx.font = "bold 15px ui-sans-serif, system-ui, sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("\u25B2", 0, 1);
-          } else {
-            ctx.globalAlpha = 0.16;
-            ctx.strokeStyle = "#7ea9ff";
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 6]);
-            ctx.beginPath();
-            ctx.arc(0, 0, EXIT_R, 0, TAU);
-            ctx.stroke();
-          }
-          ctx.restore();
         }
 
         function drawBullets() {
@@ -1177,7 +1125,7 @@
 
           ctx.shadowBlur = 0;
           ctx.fillStyle = "#4d5b86";
-                    ctx.beginPath();
+          ctx.beginPath();
           ctx.ellipse(0, -1, 4, 6, 0, 0, TAU);
           ctx.fill();
           ctx.fillStyle = "#ffe6a6";
@@ -1201,9 +1149,8 @@
           }
 
           drawBackground();
-
-          drawBlocks();
-          drawCoins();
+          drawPatternPills(blocks);
+          drawPatternPills(coins);
           drawBullets();
           drawParticles();
           drawShip();
