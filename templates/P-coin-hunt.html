@@ -160,6 +160,24 @@
       }
       .fire.on, .fire:active { transform: translateY(1px) scale(0.97); }
       .fire[disabled] { opacity: 0.38; cursor: default; }
+      .dpad { display: none; }
+      @media (pointer: coarse) {
+        .controls { flex-wrap: wrap; align-items: center; justify-content: center; }
+        .controls .hint { flex: 1 1 100%; width: 100%; margin: 0 0 10px 0; text-align: center; }
+        .dpad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px); gap: 4px; flex: 0 0 auto; touch-action: none; }
+        .dpad-btn { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.08); color: #e8eefc; font-size: 18px; line-height: 1; padding: 0; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .dpad-btn.up { grid-column: 2; grid-row: 1; }
+        .dpad-btn.left { grid-column: 1; grid-row: 2; }
+        .dpad-btn.right { grid-column: 3; grid-row: 2; }
+        .dpad-btn.down { grid-column: 2; grid-row: 3; }
+        .dpad-btn.on, .dpad-btn:active { background: rgba(120,200,255,.35); border-color: rgba(120,200,255,.9); }
+        .dpad-btn:focus-visible { outline: 2px solid #7cf; outline-offset: 2px; }
+        .dpad-btn:disabled { opacity: .4; cursor: default; }
+      }
+      @media (pointer: coarse) and (max-width: 380px) {
+        .dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
+        .dpad-btn { width: 44px; height: 44px; font-size: 16px; }
+      }
 
       button:focus-visible { outline: 3px solid #ffd28e; outline-offset: 3px; }
 
@@ -192,7 +210,7 @@
           <span class="brand-mark" aria-hidden="true">&#x2605;</span>
           <div>
             <h1>STARFALL: COIN CHASER</h1>
-            <p class="sub">Clear the rocks. Chase the stardust.</p>
+            <p class="sub">Clear the boxes. Chase the stardust.</p>
           </div>
         </div>
         <button id="sound" class="icon-btn" type="button" aria-label="Turn sound on" title="Sound off">&#x266A;</button>
@@ -208,14 +226,14 @@
       <div class="chainbar" id="chainbar" aria-hidden="true"><i id="chainfill"></i></div>
 
       <section class="stage" aria-label="Game area">
-        <canvas id="game" role="img" aria-label="Starfall playfield. Steer your ship to collect stardust coins and hold fire to shoot static asteroid blocks in the direction the ship faces."></canvas>
+        <canvas id="game" role="img" aria-label="Starfall playfield. Steer your ship to collect stardust coins and hold fire to shoot static box obstacles in the direction the ship faces."></canvas>
         <div class="room-pill" id="room-pill">ROOM 1/5</div>
         <button id="pause" class="pause-btn" type="button" aria-label="Pause game" title="Pause" disabled>&#x2016;</button>
         <div id="overlay" class="overlay">
           <div class="panel" role="dialog" aria-label="Game status">
             <div id="panel-icon" class="panel-icon" aria-hidden="true">&#x1F680;</div>
             <h2 id="panel-title">Ready, pilot?</h2>
-            <p id="panel-copy">Collect every stardust coin in each room, then fly through the glowing exit. Shoot or steer around the asteroid blocks — touching one costs a shield.</p>
+            <p id="panel-copy">Collect every stardust coin in each room, then fly through the glowing exit. Shoot or steer around the boxes — touching one costs a shield.</p>
             <button id="start" class="primary" type="button">Start run</button>
           </div>
         </div>
@@ -224,8 +242,14 @@
       <section class="controls" aria-label="Controls">
         <p class="hint">
           <strong>Keyboard:</strong> WASD / arrows steer &middot; Space fires &middot; P or Esc pauses<br />
-          <strong>Touch:</strong> drag anywhere on the field to steer &middot; hold FIRE with a second finger
+          <strong>Touch:</strong> hold arrows to move &middot; hold FIRE to shoot
         </p>
+        <div class="dpad" role="group" aria-label="Movement">
+          <button id="pad-up" class="dpad-btn up" type="button" aria-label="Move up" disabled>&#9650;</button>
+          <button id="pad-left" class="dpad-btn left" type="button" aria-label="Move left" disabled>&#9664;</button>
+          <button id="pad-right" class="dpad-btn right" type="button" aria-label="Move right" disabled>&#9654;</button>
+          <button id="pad-down" class="dpad-btn down" type="button" aria-label="Move down" disabled>&#9660;</button>
+        </div>
         <button id="fire" class="fire" type="button" aria-label="Fire" disabled>FIRE</button>
       </section>
       <div id="announcer" class="sr-only" aria-live="polite"></div>
@@ -258,7 +282,6 @@
         var FIRE_CD = 0.18;
         var BULLET_SPEED = 520;
 
-        var STICK_R = 52;
         var RUN_TIME = 90;
         var CHAIN_MAX = 2.5;
         var CHAIN_CAP = 10;
@@ -326,14 +349,6 @@
           render();
         }
 
-        function toVirtual(clientX, clientY) {
-          var rect = canvas.getBoundingClientRect();
-          return {
-            x: ((clientX - rect.left) / rect.width) * VW,
-            y: ((clientY - rect.top) / rect.height) * VH
-          };
-        }
-
         /* ---------------- state ---------------- */
         var state = "ready";
         var player = null;
@@ -366,9 +381,6 @@
 
         var reduced = false;
         try { reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
-
-        var coarse = false;
-        try { coarse = window.matchMedia("(pointer: coarse)").matches; } catch (e) {}
 
         /* ---------------- stars ---------------- */
         var stars = [];
@@ -514,17 +526,8 @@
         function makeBlock(x, y, r) {
           var seed = (((x | 0) * 73 + (y | 0) * 37 + (r | 0) * 11) | 0) || 12345;
           seed = seed & 0x7fffffff;
-          var verts = [];
-          for (var i = 0; i < 9; i += 1) {
-            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-            var t = (seed % 1000) / 1000;
-            verts.push(0.74 + t * 0.36);
-          }
           seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-          var angle = ((seed % 1000) / 1000) * TAU;
-          seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-          var tint = (seed % 1000) / 1000;
-          return { x: x, y: y, r: r, verts: verts, angle: angle, tint: tint };
+          return { x: x, y: y, r: r, tint: (seed % 1000) / 1000 };
         }
 
         function loadRoom(idx) {
@@ -618,7 +621,7 @@
             panelIcon.textContent = "\u{1F680}";
             panelTitle.textContent = "Ready, pilot?";
             panelCopy.textContent =
-              "Collect every stardust coin in each room, then fly through the glowing exit. Shoot or steer around the asteroid blocks \u2014 touching one costs a shield.";
+              "Collect every stardust coin in each room, then fly through the glowing exit. Shoot or steer around the boxes \u2014 touching one costs a shield.";
             startBtn.textContent = "Start run";
           } else if (mode === "paused") {
             panelIcon.textContent = "\u23F8";
@@ -650,6 +653,13 @@
           pauseBtn.disabled = !on;
           fireBtn.disabled = !on;
           if (!on) fireBtn.classList.remove("on");
+          for (var pk in padRefs) {
+            if (padRefs[pk]) {
+              padRefs[pk].disabled = !on;
+              if (!on) padRefs[pk].classList.remove("on");
+            }
+          }
+          if (!on) { pad.up = false; pad.down = false; pad.left = false; pad.right = false; }
         }
 
         function startGame() {
@@ -666,10 +676,6 @@
           if (state !== "playing") return;
           state = "paused";
           keysClear();
-          stick.active = false;
-          stick.id = null;
-          stick.dx = 0;
-          stick.dy = 0;
           cancelAnimationFrame(raf);
           setPlayControlsEnabled(false);
           showOverlay("paused");
@@ -698,10 +704,6 @@
           state = "ending";
           endDelay = 0.9;
           keysClear();
-          stick.active = false;
-          stick.id = null;
-          stick.dx = 0;
-          stick.dy = 0;
           setPlayControlsEnabled(false);
           chain = 0;
           chainTimer = 0;
@@ -750,52 +752,28 @@
         var keys = new Set();
         var keyFire = false;
         var btnFire = false;
-        var stick = { active: false, id: null, ox: 0, oy: 0, dx: 0, dy: 0, kx: 0, ky: 0 };
+        var pad = { up: false, down: false, left: false, right: false };
+        var padRefs = { up: null, down: null, left: null, right: null };
 
         function keysClear() {
-          keys.clear();
-          keyFire = false;
-          btnFire = false;
-          fireBtn.classList.remove("on");
+          keys.clear(); keyFire = false; btnFire = false; fireBtn.classList.remove("on");
+          pad.up = false; pad.down = false; pad.left = false; pad.right = false;
+          for (var pk in padRefs) if (padRefs[pk]) padRefs[pk].classList.remove("on");
         }
         function isFiring() { return keyFire || btnFire; }
 
         function readInput() {
-          var x = 0;
-          var y = 0;
+          var x = 0, y = 0;
           if (keys.has("ArrowLeft") || keys.has("a")) x -= 1;
           if (keys.has("ArrowRight") || keys.has("d")) x += 1;
           if (keys.has("ArrowUp") || keys.has("w")) y -= 1;
           if (keys.has("ArrowDown") || keys.has("s")) y += 1;
-          if (x !== 0 || y !== 0) {
-            var m = Math.hypot(x, y);
-            x /= m;
-            y /= m;
-          }
-          if (stick.active) {
-            var sm = Math.hypot(stick.dx, stick.dy);
-            if (sm > 0.06) {
-              var k = Math.min(1, sm);
-              x = (stick.dx / sm) * k;
-              y = (stick.dy / sm) * k;
-            }
-          }
+          if (pad.left) x -= 1;
+          if (pad.right) x += 1;
+          if (pad.up) y -= 1;
+          if (pad.down) y += 1;
+          if (x !== 0 || y !== 0) { var m = Math.hypot(x, y); x /= m; y /= m; }
           return { x: x, y: y };
-        }
-
-        function updateStick(clientX, clientY) {
-          var v = toVirtual(clientX, clientY);
-          var dx = v.x - stick.ox;
-          var dy = v.y - stick.oy;
-          var m = Math.hypot(dx, dy);
-          if (m > STICK_R) {
-            dx = (dx / m) * STICK_R;
-            dy = (dy / m) * STICK_R;
-          }
-          stick.kx = dx;
-          stick.ky = dy;
-          stick.dx = dx / STICK_R;
-          stick.dy = dy / STICK_R;
         }
 
         /* ---------------- targeting ---------------- */
@@ -1081,44 +1059,23 @@
 
         function drawBlocks() {
           for (var i = 0; i < blocks.length; i += 1) {
-            var a = blocks[i];
-            ctx.save();
-            ctx.translate(a.x, a.y);
-            ctx.rotate(a.angle);
-            ctx.beginPath();
-            var n = a.verts.length;
-            for (var k = 0; k < n; k += 1) {
-              var ang = (k / n) * TAU;
-              var rr = a.r * a.verts[k];
-              var px = Math.cos(ang) * rr;
-              var py = Math.sin(ang) * rr;
-              if (k === 0) ctx.moveTo(px, py);
-              else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-
-            var g = ctx.createLinearGradient(-a.r, -a.r, a.r, a.r);
-            if (a.tint > 0.5) {
-              g.addColorStop(0, "#6f6fa8");
-              g.addColorStop(1, "#33334f");
-            } else {
-              g.addColorStop(0, "#5c6b96");
-              g.addColorStop(1, "#2a3050");
-            }
-            ctx.fillStyle = g;
-            ctx.fill();
-            ctx.strokeStyle = "rgba(160,180,235,0.35)";
-            ctx.lineWidth = 1.4;
-            ctx.stroke();
-
-            ctx.fillStyle = "rgba(20,24,42,0.55)";
-            ctx.beginPath();
-            ctx.arc(-a.r * 0.28, -a.r * 0.12, a.r * 0.18, 0, TAU);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(a.r * 0.26, a.r * 0.22, a.r * 0.13, 0, TAU);
-            ctx.fill();
-
+            var a = blocks[i], r = a.r, cx = a.x, cy = a.y;
+            var topH = r * 0.55, botH = r * 0.75, halfW = r * 0.9;
+            var hue = 205 + a.tint * 40;
+            var topFill = "hsl(" + hue + ", 18%, " + (62 + a.tint * 8) + "%)";
+            var leftFill = "hsl(" + hue + ", 24%, " + (34 + a.tint * 5) + "%)";
+            var rightFill = "hsl(" + hue + ", 22%, " + (48 + a.tint * 5) + "%)";
+            var topA = [cx, cy - topH - botH * 0.5];
+            var rightA = [cx + halfW, cy - botH * 0.5];
+            var centerA = [cx, cy + topH - botH * 0.5];
+            var leftA = [cx - halfW, cy - botH * 0.5];
+            var leftBot = [leftA[0], leftA[1] + botH];
+            var centerBot = [centerA[0], centerA[1] + botH];
+            var rightBot = [rightA[0], rightA[1] + botH];
+            ctx.save(); ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(0,0,0,0.45)";
+            ctx.beginPath(); ctx.moveTo(leftA[0], leftA[1]); ctx.lineTo(centerA[0], centerA[1]); ctx.lineTo(centerBot[0], centerBot[1]); ctx.lineTo(leftBot[0], leftBot[1]); ctx.closePath(); ctx.fillStyle = leftFill; ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(centerA[0], centerA[1]); ctx.lineTo(rightA[0], rightA[1]); ctx.lineTo(rightBot[0], rightBot[1]); ctx.lineTo(centerBot[0], centerBot[1]); ctx.closePath(); ctx.fillStyle = rightFill; ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(topA[0], topA[1]); ctx.lineTo(rightA[0], rightA[1]); ctx.lineTo(centerA[0], centerA[1]); ctx.lineTo(leftA[0], leftA[1]); ctx.closePath(); ctx.fillStyle = topFill; ctx.fill(); ctx.stroke();
             ctx.restore();
           }
         }
@@ -1235,40 +1192,6 @@
           ctx.restore();
         }
 
-        function drawStick() {
-          if (stick.active) {
-            ctx.save();
-            ctx.globalAlpha = 0.3;
-            ctx.strokeStyle = "#cfe0ff";
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(stick.ox, stick.oy, STICK_R, 0, TAU);
-            ctx.stroke();
-
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = "#ffc861";
-            ctx.beginPath();
-            ctx.arc(stick.ox + stick.kx, stick.oy + stick.ky, 17, 0, TAU);
-            ctx.fill();
-            ctx.restore();
-          } else if (coarse && state === "playing") {
-            ctx.save();
-            ctx.globalAlpha = 0.14;
-            ctx.strokeStyle = "#cfe0ff";
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(62, VH - 72, STICK_R * 0.8, 0, TAU);
-            ctx.stroke();
-            ctx.globalAlpha = 0.22;
-            ctx.fillStyle = "#cfe0ff";
-            ctx.font = "600 9px ui-sans-serif, system-ui, sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("STEER", 62, VH - 72);
-            ctx.restore();
-          }
-        }
-
         function render() {
           if (!scale) return;
           ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
@@ -1290,8 +1213,6 @@
           drawShip();
 
           ctx.restore();
-
-          drawStick();
 
           if (flash > 0) {
             ctx.fillStyle = "rgba(255,80,110," + (flash * 0.5).toFixed(3) + ")";
@@ -1316,39 +1237,29 @@
         }
 
         /* ---------------- events ---------------- */
-        canvas.addEventListener("pointerdown", function (e) {
-          if (state !== "playing") return;
-          if (stick.id !== null) return;
-          e.preventDefault();
-          stick.id = e.pointerId;
-          stick.active = true;
-          var v = toVirtual(e.clientX, e.clientY);
-          stick.ox = v.x;
-          stick.oy = v.y;
-          stick.dx = 0;
-          stick.dy = 0;
-          stick.kx = 0;
-          stick.ky = 0;
-          try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+        var padDefs = [
+          { id: "pad-up", dir: "up" }, { id: "pad-down", dir: "down" },
+          { id: "pad-left", dir: "left" }, { id: "pad-right", dir: "right" }
+        ];
+        padDefs.forEach(function (def) {
+          var el = document.getElementById(def.id);
+          if (!el) return;
+          padRefs[def.dir] = el;
+          function padPress(e) {
+            e.preventDefault(); if (state !== "playing") return;
+            try { el.setPointerCapture(e.pointerId); } catch (err) {}
+            pad[def.dir] = true; el.classList.add("on");
+          }
+          function padRelease(e) {
+            pad[def.dir] = false; el.classList.remove("on");
+            try { if (el.hasPointerCapture && el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId); } catch (err) {}
+          }
+          el.addEventListener("pointerdown", padPress);
+          el.addEventListener("pointerup", padRelease);
+          el.addEventListener("pointercancel", padRelease);
+          el.addEventListener("lostpointercapture", function () { pad[def.dir] = false; el.classList.remove("on"); });
+          el.addEventListener("contextmenu", function (e) { e.preventDefault(); });
         });
-
-        canvas.addEventListener("pointermove", function (e) {
-          if (e.pointerId !== stick.id) return;
-          e.preventDefault();
-          updateStick(e.clientX, e.clientY);
-        });
-
-        function endStick(e) {
-          if (e.pointerId !== stick.id) return;
-          stick.id = null;
-          stick.active = false;
-          stick.dx = 0;
-          stick.dy = 0;
-          stick.kx = 0;
-          stick.ky = 0;
-        }
-        canvas.addEventListener("pointerup", endStick);
-        canvas.addEventListener("pointercancel", endStick);
         canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
         fireBtn.addEventListener("pointerdown", function (e) {
@@ -1393,8 +1304,6 @@
 
         window.addEventListener("blur", function () {
           keysClear();
-          stick.active = false;
-          stick.id = null;
           if (state === "playing") pauseGame();
         });
 
