@@ -297,7 +297,7 @@
 
       <div class="stage-slot">
       <section class="stage" aria-label="Game area">
-        <canvas id="game" role="img" aria-label="Starfall playfield. Collect target sound patterns and avoid negative patterns. Hold fire to clear a negative pattern."></canvas>
+        <canvas id="game" role="img" aria-label="Starfall playfield. Collect target sound patterns and avoid negative patterns. Hold fire to clear a negative pattern, but shooting a target detonates your ship."></canvas>
         <div class="room-pill" id="room-pill">LEVEL 1/3</div>
         <button id="pause" class="pause-btn" type="button" aria-label="Pause game" title="Pause" disabled>&#x2016;</button>
         <div id="level-instruction" class="level-instruction" aria-live="polite">TARGET: blends like bl/fl/st · AVOID: digraphs like ch/sh/th</div>
@@ -799,13 +799,15 @@
           return best;
         }
 
-        /* Targets absorb shots without changing score or collection progress. */
+        /* Shooting a target is a misfire: the ship detonates, same penalty as touching a negative. */
         function absorbShot(idx) {
           var c = coins[idx];
           if (!c) return;
           c.hit = 0.18;
-          burst(c.x, c.y, "#9fd8ff", 5, 0.4);
+          burst(c.x, c.y, "#9fd8ff", 6, 0.5);
           sfx(300, 0.05, "triangle", 0.012);
+          bullets = [];            /* one mistake costs one shield, not a whole volley */
+          hitPlayer();
         }
 
         function destroyBlock(idx) {
@@ -930,13 +932,19 @@
             return b.x > -12 && b.x < VW + 12 && b.y > -12 && b.y < VH + 12;
           });
 
-          /* Bullets stop at every pill: blocks explode, targets absorb the shot. */
+          /* Bullets stop at every pill: negatives explode, targets detonate YOU. */
           for (i = bullets.length - 1; i >= 0; i -= 1) {
+            if (i >= bullets.length) break;
             var hitPill = sweepPill(bullets[i]);
             if (!hitPill) continue;
             bullets.splice(i, 1);
-            if (hitPill.kind === "block") destroyBlock(hitPill.index);
-            else absorbShot(hitPill.index);
+            if (hitPill.kind === "block") {
+              destroyBlock(hitPill.index);
+            } else {
+              absorbShot(hitPill.index);
+              if (state !== "playing") return;
+              break; /* the detonation cleared the rest of the volley */
+            }
           }
 
           /* player vs blocks */
