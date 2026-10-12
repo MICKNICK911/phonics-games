@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1020" />
-    <title>Starfall: Coin Chaser</title>
+    <title>Starfall: Sound Sorter</title>
     <style>
       :root {
         color-scheme: dark;
@@ -94,15 +94,6 @@
       .stat .v.hearts { color: #ff8098; letter-spacing: 0.08em; }
       .stat .v.chain-on { color: var(--gold); }
 
-      .chainbar { height: 5px; border-radius: 4px; background: #ffffff12; overflow: hidden; }
-      .chainbar i {
-        display: block; height: 100%; width: 0%;
-        border-radius: 4px; background: linear-gradient(90deg, #ff9a3d, #ffd977);
-        opacity: 0; transition: opacity 0.15s;
-      }
-      .chainbar.on i { opacity: 1; }
-      .chainbar.low i { background: linear-gradient(90deg, #ff5f6d, #ff9a5a); }
-
       .stage-slot {
         flex: 1 1 0;
         min-height: 0;
@@ -145,6 +136,13 @@
         text-transform: uppercase;
         pointer-events: none;
       }
+      .level-instruction {
+        position: absolute; top: 48px; left: 8px; right: 8px; z-index: 2;
+        padding: 5px 7px; border: 1px solid #ffffff25; border-radius: 8px;
+        background: #0d1226e8; color: #f2f6ff; text-align: center;
+        font-size: 0.62rem; font-weight: 800; line-height: 1.25;
+        letter-spacing: 0.02em; overflow-wrap: anywhere; pointer-events: none;
+      }
       .pause-btn {
         position: absolute; top: 9px; right: 9px; z-index: 2;
         width: 38px; height: 38px;
@@ -178,7 +176,7 @@
       }
       .primary:active { transform: translateY(1px); }
 
-      .topbar, .stats, .chainbar, .controls {
+      .topbar, .stats, .controls {
         flex: 0 0 auto;
         min-height: 0;
       }
@@ -299,7 +297,7 @@
       button:focus-visible { outline: 3px solid #ffd28e; outline-offset: 3px; }
 
       @media (min-width: 480px) {
-        .stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       }
       @media (min-width: 620px) { h1 { font-size: 1.05rem; } }
       @media (prefers-reduced-motion: reduce) {
@@ -316,8 +314,8 @@
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">&#x2605;</span>
           <div>
-            <h1>STARFALL: COIN CHASER</h1>
-            <p class="sub">Clear the boxes. Chase the stardust.</p>
+            <h1>STARFALL: SOUND SORTER</h1>
+            <p class="sub">Collect the target sounds. Avoid the distractors.</p>
           </div>
         </div>
         <button id="sound" class="icon-btn" type="button" aria-label="Turn sound on" title="Sound off">&#x266A;</button>
@@ -325,23 +323,22 @@
 
       <section class="stats" aria-label="Game stats">
         <div class="stat"><span class="k">Score</span><span class="v" id="hud-score">0000</span></div>
-        <div class="stat"><span class="k">Coins</span><span class="v" id="hud-coins">0/0</span></div>
+        <div class="stat"><span class="k">Targets</span><span class="v" id="hud-coins">0/0</span></div>
         <div class="stat"><span class="k">Chain</span><span class="v" id="hud-chain">&mdash;</span></div>
         <div class="stat"><span class="k">Shields</span><span class="v hearts" id="hud-lives">&#x2665; &#x2665; &#x2665;</span></div>
-        <div class="stat"><span class="k">Time</span><span class="v" id="hud-time">1:30</span></div>
-      </section>
-      <div class="chainbar" id="chainbar" aria-hidden="true"><i id="chainfill"></i></div>
+              </section>
 
       <div class="stage-slot">
       <section class="stage" aria-label="Game area">
-        <canvas id="game" role="img" aria-label="Starfall playfield. Steer your ship to collect stardust coins and hold fire to shoot static box obstacles in the direction the ship faces."></canvas>
-        <div class="room-pill" id="room-pill">ROOM 1/5</div>
+        <canvas id="game" role="img" aria-label="Starfall playfield. Collect target sound patterns and avoid negative patterns. Hold fire to clear a negative pattern."></canvas>
+        <div class="room-pill" id="room-pill">LEVEL 1/3</div>
         <button id="pause" class="pause-btn" type="button" aria-label="Pause game" title="Pause" disabled>&#x2016;</button>
+        <div id="level-instruction" class="level-instruction" aria-live="polite">TARGET: blends like bl/fl/st · AVOID: digraphs like ch/sh/th</div>
         <div id="overlay" class="overlay">
           <div class="panel" role="dialog" aria-label="Game status">
             <div id="panel-icon" class="panel-icon" aria-hidden="true">&#x1F680;</div>
             <h2 id="panel-title">Ready, pilot?</h2>
-            <p id="panel-copy">Collect every stardust coin in each room, then fly through the glowing exit. Shoot or steer around the boxes — touching one costs a shield.</p>
+            <p id="panel-copy">Collect every target pattern in each level. Avoid negative patterns; touching one costs a shield. Both kinds look the same, so read each label.</p>
             <button id="start" class="primary" type="button">Start run</button>
           </div>
         </div>
@@ -369,7 +366,7 @@
         "use strict";
 
         /* ---------------------------------------------------------------
-           Starfall: Coin Chaser
+           Starfall: Sound Sorter
            Top-down bounded rooms. Virtual 360x540 units scaled to fit.
         ---------------------------------------------------------------- */
         var VW = 360;
@@ -391,35 +388,13 @@
         var FIRE_CD = 0.18;
         var BULLET_SPEED = 520;
 
-        var RUN_TIME = 90;
-        var CHAIN_MAX = 2.5;
         var CHAIN_CAP = 10;
 
-        /* ---------------- rooms ---------------- */
-        /* Each room: coins [[x,y],...], blocks [[x,y,r],...]
-           Hand-authored, deterministic, spaced so spawn is clear and
-           no coin overlaps a block. */
-        var ROOMS = [
-          {
-            coins: [[60, 420], [300, 420], [180, 240]],
-            blocks: [[180, 330, 22]]
-          },
-          {
-            coins: [[60, 420], [300, 420], [60, 200], [300, 200]],
-            blocks: [[120, 300, 20], [240, 300, 20], [180, 180, 20]]
-          },
-          {
-            coins: [[60, 420], [300, 420], [180, 340], [60, 200], [300, 200]],
-            blocks: [[100, 340, 20], [260, 340, 20], [180, 250, 20], [100, 150, 20], [260, 150, 20]]
-          },
-          {
-            coins: [[60, 420], [300, 420], [180, 350], [60, 230], [300, 230], [180, 100]],
-            blocks: [[110, 380, 18], [250, 380, 18], [180, 300, 22], [80, 190, 18], [280, 190, 18], [180, 140, 20]]
-          },
-          {
-            coins: [[50, 430], [310, 430], [180, 360], [50, 260], [310, 260], [180, 140], [180, 60]],
-            blocks: [[100, 390, 18], [260, 390, 18], [180, 320, 18], [70, 230, 18], [290, 230, 18], [120, 190, 18], [240, 190, 18], [100, 60, 18], [260, 60, 18]]
-          }
+        /* Append future phonics sets here. Positives are collected once; negatives are hazards. */
+        var LEVELS = [
+          { name: "Blends over digraphs", instruction: "TARGET: blends like bl/fl/st · AVOID: digraphs like ch/sh/th", positive: ["bl", "cl", "dr", "fl", "gr", "pr", "tr", "sc", "sk", "squ", "st", "sm", "sn", "sp", "sw", "tw", "dw"], negative: ["ch", "tch", "th", "ng", "nk", "sh"] },
+          { name: "Digraphs over blends", instruction: "TARGET: digraphs like ch/sh/th · AVOID: blends like bl/fl/st", positive: ["ch", "tch", "th", "ng", "nk", "sh"], negative: ["bl", "cl", "dr", "fl", "gr", "pr", "tr", "sc", "sk", "squ", "st", "sm", "sn", "sp", "sw", "tw", "dw"] },
+          { name: "Short a over long a", instruction: "TARGET: short-a words like mat/cat · AVOID: long-a like mate/make", positive: ["mat", "sat", "cat", "fan", "rat"], negative: ["mate", "make", "rate", "bake", "take"] }
         ];
 
         /* ---------------- DOM ---------------- */
@@ -435,14 +410,12 @@
         var fireBtn = document.getElementById("fire");
         var announcer = document.getElementById("announcer");
         var roomPill = document.getElementById("room-pill");
+        var levelInstruction = document.getElementById("level-instruction");
 
         var hudScore = document.getElementById("hud-score");
         var hudCoins = document.getElementById("hud-coins");
         var hudChain = document.getElementById("hud-chain");
         var hudLives = document.getElementById("hud-lives");
-        var hudTime = document.getElementById("hud-time");
-        var chainBar = document.getElementById("chainbar");
-        var chainFill = document.getElementById("chainfill");
 
         /* ---------------- scaling ---------------- */
         var scale = 1;
@@ -472,10 +445,8 @@
         var score = 0;
         var coinCount = 0;
         var chain = 0;
-        var chainTimer = 0;
         var bestChain = 0;
         var lives = 3;
-        var timeLeft = RUN_TIME;
 
         var shotClock = 0;
 
@@ -483,7 +454,7 @@
         var flash = 0;
         var gameTime = 0;
         var endDelay = 0;
-        var finalReason = "time";
+        var finalReason = "dead";
 
         var raf = 0;
         var last = 0;
@@ -531,12 +502,6 @@
 
         /* ---------------- helpers ---------------- */
         function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
-        function fmtTime(s) {
-          var t = Math.max(0, Math.ceil(s));
-          var m = Math.floor(t / 60);
-          var ss = t % 60;
-          return m + ":" + (ss < 10 ? "0" : "") + ss;
-        }
         function roundRectPath(x, y, w, h, r) {
           ctx.beginPath();
           if (typeof ctx.roundRect === "function") { ctx.roundRect(x, y, w, h, r); return; }
@@ -591,8 +556,6 @@
         }
 
         /* ---------------- HUD ---------------- */
-        var lastTimeText = "";
-        var lastChainPct = -1;
 
         function syncHud() {
           hudScore.textContent = String(score).padStart(4, "0");
@@ -610,85 +573,56 @@
             if (i < 2) hearts += " ";
           }
           hudLives.textContent = hearts;
-          roomPill.textContent = "ROOM " + (roomIdx + 1) + "/" + ROOMS.length;
+          roomPill.textContent = "LEVEL " + (roomIdx + 1) + "/" + LEVELS.length;
+          levelInstruction.textContent = LEVELS[roomIdx].instruction;
         }
 
-        function syncChainBar() {
-          var pct = chain > 0 ? Math.round((chainTimer / CHAIN_MAX) * 100) : 0;
-          if (pct !== lastChainPct) {
-            chainFill.style.width = pct + "%";
-            lastChainPct = pct;
+        /* ---------------- hazards / levels ---------------- */
+        function makeBlock(x, y, r, text) { return { x: x, y: y, r: r, tint: 0, text: text }; }
+        function shuffle(items) {
+          for (var i = items.length - 1; i > 0; i -= 1) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = items[i]; items[i] = items[j]; items[j] = tmp;
           }
-          chainBar.classList.toggle("on", chain > 0 && chainTimer > 0);
-          chainBar.classList.toggle("low", chain > 0 && chainTimer > 0 && chainTimer < 0.9);
+          return items;
         }
-
-        function syncTime() {
-          var text = fmtTime(timeLeft);
-          if (text !== lastTimeText) {
-            hudTime.textContent = text;
-            lastTimeText = text;
-          }
-        }
-
-        /* ---------------- blocks / rooms ---------------- */
-        function makeBlock(x, y, r) {
-          var seed = (((x | 0) * 73 + (y | 0) * 37 + (r | 0) * 11) | 0) || 12345;
-          seed = seed & 0x7fffffff;
-          seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-          return { x: x, y: y, r: r, tint: (seed % 1000) / 1000 };
-        }
-
         function loadRoom(idx) {
-          var r = ROOMS[idx];
+          var level = LEVELS[idx];
           roomIdx = idx;
-
-          coins = [];
-          for (var i = 0; i < r.coins.length; i += 1) {
-            var c = r.coins[i];
-            coins.push({
-              x: c[0],
-              y: c[1],
-              r: 9,
-              phase: ((c[0] * 13 + c[1] * 7) % 628) / 100,
-              spin: ((c[0] * 5 + c[1] * 11) % 628) / 100
-            });
+          var slots = [], xs = [34, 107, 180, 253, 326], ys = [150, 220, 290, 360, 430, 500];
+          for (var row = 0; row < ys.length; row += 1) {
+            for (var col = 0; col < xs.length; col += 1) {
+              if (ys[row] > 430 && col === 2) continue;
+              slots.push([xs[col], ys[row]]);
+            }
+          }
+          shuffle(slots);
+          var positives = shuffle(level.positive.slice()), negatives = shuffle(level.negative.slice());
+          coins = []; blocks = [];
+          var slotIndex = 0;
+          for (var i = 0; i < positives.length; i += 1) {
+            var pos = slots[slotIndex++];
+            coins.push({ x: pos[0], y: pos[1], r: 22, text: positives[i] });
+          }
+          for (var j = 0; j < negatives.length; j += 1) {
+            var neg = slots[slotIndex++];
+            blocks.push(makeBlock(neg[0], neg[1], 22, negatives[j]));
           }
           roomCoinTotal = coins.length;
-
-          blocks = [];
-          for (var j = 0; j < r.blocks.length; j += 1) {
-            var b = r.blocks[j];
-            blocks.push(makeBlock(b[0], b[1], b[2]));
-          }
-
-          bullets = [];
-          particles = [];
-
+          bullets = []; particles = [];
           if (player) {
-            player.x = SPAWN_X;
-            player.y = SPAWN_Y;
-            player.vx = 0;
-            player.vy = 0;
-            player.kx = 0;
-            player.ky = 0;
-            player.kt = 0;
-            player.invuln = 1.2;
-            player.fx = 0;
-            player.fy = -1;
+            player.x = SPAWN_X; player.y = SPAWN_Y;
+            player.vx = 0; player.vy = 0; player.kx = 0; player.ky = 0; player.kt = 0;
+            player.invuln = 1.2; player.fx = 0; player.fy = -1;
           }
-
           syncHud();
         }
-
         function advanceRoom() {
-          if (roomIdx + 1 >= ROOMS.length) {
-            endRun("clear");
-            return;
-          }
+          if (roomIdx + 1 >= LEVELS.length) { endRun("clear"); return; }
           loadRoom(roomIdx + 1);
           flash = 0.15;
           if (!reduced) shake = Math.max(shake, 2);
+          announce("Level " + (roomIdx + 1) + ". " + LEVELS[roomIdx].instruction);
           sfx(820, 0.14, "sine", 0.04);
         }
 
@@ -697,10 +631,8 @@
           score = 0;
           coinCount = 0;
           chain = 0;
-          chainTimer = 0;
           bestChain = 0;
           lives = 3;
-          timeLeft = RUN_TIME;
           gameTime = 0;
 
           player = {
@@ -716,12 +648,8 @@
           endDelay = 0;
           shotClock = 0;
 
-          lastTimeText = "";
-          lastChainPct = -1;
 
           loadRoom(0);
-          syncChainBar();
-          syncTime();
         }
 
         function showOverlay(mode) {
@@ -730,14 +658,14 @@
             panelIcon.textContent = "\u{1F680}";
             panelTitle.textContent = "Ready, pilot?";
             panelCopy.textContent =
-              "Collect every stardust coin in each room, then fly through the glowing exit. Shoot or steer around the boxes \u2014 touching one costs a shield.";
+              "Level " + (roomIdx + 1) + ". " + LEVELS[roomIdx].instruction + ". Collect each target once; avoid the negative patterns.";
             startBtn.textContent = "Start run";
           } else if (mode === "paused") {
             panelIcon.textContent = "\u23F8";
             panelTitle.textContent = "Paused";
             panelCopy.textContent =
-              "Room " + (roomIdx + 1) + "/" + ROOMS.length + " \u00B7 score " + score +
-              " \u00B7 best chain x" + Math.min(bestChain, CHAIN_CAP) + ".";
+              "Level " + (roomIdx + 1) + ". " + LEVELS[roomIdx].instruction +
+              " \u00B7 score " + score + " \u00B7 best chain x" + Math.min(bestChain, CHAIN_CAP) + ".";
             startBtn.textContent = "Resume";
           } else {
             if (finalReason === "dead") {
@@ -745,14 +673,11 @@
               panelTitle.textContent = "Ship destroyed";
             } else if (finalReason === "clear") {
               panelIcon.textContent = "\u{1F3C1}";
-              panelTitle.textContent = "All rooms cleared";
-            } else {
-              panelIcon.textContent = "\u23F1";
-              panelTitle.textContent = "Time up";
+              panelTitle.textContent = "All levels cleared";
             }
             panelCopy.textContent =
-              "Score " + score + " \u00B7 " + coinCount + " coins \u00B7 best chain x" +
-              Math.min(bestChain, CHAIN_CAP) + " \u00B7 rooms " + (finalReason === "clear" ? ROOMS.length : roomIdx + 1) + "/" + ROOMS.length + ".";
+              "Score " + score + " \u00B7 " + coinCount + " targets \u00B7 best chain x" +
+              Math.min(bestChain, CHAIN_CAP) + " \u00B7 levels " + (finalReason === "clear" ? LEVELS.length : roomIdx + 1) + "/" + LEVELS.length + ".";
             startBtn.textContent = "Fly again";
           }
           announce(panelTitle.textContent + ". " + panelCopy.textContent);
@@ -809,15 +734,12 @@
           if (state !== "playing") return;
           finalReason = reason;
           if (chain > bestChain) bestChain = chain;
-          if (reason === "clear") score += Math.max(0, Math.floor(timeLeft)) * 20;
           state = "ending";
           endDelay = 0.9;
           keysClear();
           setPlayControlsEnabled(false);
           chain = 0;
-          chainTimer = 0;
           syncHud();
-          syncChainBar();
           if (reason === "dead") {
             if (!reduced) shake = Math.max(shake, 9);
             flash = 0.35;
@@ -900,7 +822,6 @@
 
         function collectCoin(c) {
           chain += 1;
-          chainTimer = CHAIN_MAX;
           if (chain > bestChain) bestChain = chain;
           var mult = Math.min(chain, CHAIN_CAP);
           score += 50 * mult;
@@ -913,13 +834,11 @@
         function hitPlayer() {
           lives -= 1;
           chain = 0;
-          chainTimer = 0;
           burst(player.x, player.y, "#ff7d92", 22, 1.3);
           if (!reduced) shake = Math.max(shake, 6);
           flash = 0.22;
           sfx(90, 0.22, "sawtooth", 0.05);
           syncHud();
-          syncChainBar();
 
           if (lives <= 0) { endRun("dead"); return; }
 
@@ -936,14 +855,6 @@
         /* ---------------- update ---------------- */
         function update(dt) {
           gameTime += dt;
-          timeLeft -= dt;
-          if (timeLeft <= 0) {
-            timeLeft = 0;
-            syncTime();
-            endRun("time");
-            return;
-          }
-          syncTime();
 
           var oldX = player.x;
           var oldY = player.y;
@@ -993,16 +904,6 @@
           if (moved > 0.15) { player.fx = movedX / moved; player.fy = movedY / moved; }
 
           if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
-
-          /* chain timer */
-          if (chain > 0) {
-            chainTimer -= dt;
-            if (chainTimer <= 0) {
-              chainTimer = 0;
-              chain = 0;
-              syncHud();
-            }
-          }
 
           /* firing: bullets travel straight along the direction the ship faces */
           shotClock -= dt;
@@ -1071,22 +972,16 @@
             }
           }
 
-          /* exit */
-          if (coins.length === 0 && player.invuln <= 0) {
-            var edx = player.x - EXIT_X;
-            var edy = player.y - EXIT_Y;
-            var er = EXIT_R + PLAYER_R;
-            if (edx * edx + edy * edy < er * er) {
-              advanceRoom();
-              if (state !== "playing") return;
-            }
+          /* Complete all unique positives to advance automatically. */
+          if (coins.length === 0) {
+            advanceRoom();
+            if (state !== "playing") return;
           }
 
           updateParticles(dt);
           shake = Math.max(0, shake - dt * 18);
           flash = Math.max(0, flash - dt * 2.2);
 
-          syncChainBar();
         }
 
         function updateEnding(dt) {
@@ -1139,52 +1034,26 @@
         }
 
         function drawCoins() {
-          for (var i = 0; i < coins.length; i += 1) {
-            var c = coins[i];
-
-            ctx.save();
-            ctx.translate(c.x, c.y);
-            var sx = Math.max(0.25, Math.abs(Math.cos(c.spin + gameTime * 1.6)));
-            ctx.scale(sx, 1);
-
-            ctx.shadowColor = "#ffcf6b";
-            ctx.shadowBlur = 12;
-            var g = ctx.createRadialGradient(-3, -3, 1, 0, 0, c.r);
-            g.addColorStop(0, "#fff6c8");
-            g.addColorStop(0.5, "#ffc34f");
-            g.addColorStop(1, "#e08a2a");
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(0, 0, c.r, 0, TAU);
-            ctx.fill();
-
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "#a8621d";
-            starPath(0, 0, 5, c.r * 0.58, c.r * 0.26);
-            ctx.fill();
-            ctx.restore();
-          }
+          drawPatternPills(coins);
         }
 
         function drawBlocks() {
-          for (var i = 0; i < blocks.length; i += 1) {
-            var a = blocks[i], r = a.r, cx = a.x, cy = a.y;
-            var topH = r * 0.55, botH = r * 0.75, halfW = r * 0.9;
-            var hue = 205 + a.tint * 40;
-            var topFill = "hsl(" + hue + ", 18%, " + (62 + a.tint * 8) + "%)";
-            var leftFill = "hsl(" + hue + ", 24%, " + (34 + a.tint * 5) + "%)";
-            var rightFill = "hsl(" + hue + ", 22%, " + (48 + a.tint * 5) + "%)";
-            var topA = [cx, cy - topH - botH * 0.5];
-            var rightA = [cx + halfW, cy - botH * 0.5];
-            var centerA = [cx, cy + topH - botH * 0.5];
-            var leftA = [cx - halfW, cy - botH * 0.5];
-            var leftBot = [leftA[0], leftA[1] + botH];
-            var centerBot = [centerA[0], centerA[1] + botH];
-            var rightBot = [rightA[0], rightA[1] + botH];
-            ctx.save(); ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(0,0,0,0.45)";
-            ctx.beginPath(); ctx.moveTo(leftA[0], leftA[1]); ctx.lineTo(centerA[0], centerA[1]); ctx.lineTo(centerBot[0], centerBot[1]); ctx.lineTo(leftBot[0], leftBot[1]); ctx.closePath(); ctx.fillStyle = leftFill; ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(centerA[0], centerA[1]); ctx.lineTo(rightA[0], rightA[1]); ctx.lineTo(rightBot[0], rightBot[1]); ctx.lineTo(centerBot[0], centerBot[1]); ctx.closePath(); ctx.fillStyle = rightFill; ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(topA[0], topA[1]); ctx.lineTo(rightA[0], rightA[1]); ctx.lineTo(centerA[0], centerA[1]); ctx.lineTo(leftA[0], leftA[1]); ctx.closePath(); ctx.fillStyle = topFill; ctx.fill(); ctx.stroke();
+          drawPatternPills(blocks);
+        }
+
+        function drawPatternPills(items) {
+          for (var i = 0; i < items.length; i += 1) {
+            var item = items[i], w = 54, h = 30;
+            ctx.save();
+            ctx.fillStyle = "rgba(19, 31, 61, 0.96)";
+            ctx.strokeStyle = "rgba(190, 210, 255, 0.8)";
+            ctx.lineWidth = 2;
+            roundRectPath(item.x - w / 2, item.y - h / 2, w, h, 7);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = "#f2f6ff";
+            ctx.font = "bold 13px ui-sans-serif, system-ui, sans-serif";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(item.text, item.x, item.y + 0.5, w - 6);
             ctx.restore();
           }
         }
@@ -1314,7 +1183,7 @@
           }
 
           drawBackground();
-          drawExit();
+
           drawBlocks();
           drawCoins();
           drawBullets();
