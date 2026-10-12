@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101421" />
+    <title>Starfall - arcade run</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #101421; color: #f4f6ff; font-synthesis: none; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; min-height: 100dvh; background: radial-gradient(ellipse at 50% -20%, #293454 0, #171d2e 42%, #101421 78%); }
+      button { font: inherit; color: inherit; }
+      .shell { width: min(100%, 760px); margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)); }
+      header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 1px 14px; }
+      .brand { display: flex; align-items: center; gap: 10px; }
+      .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #ffffff24; border-radius: 13px; background: linear-gradient(145deg, #ffca70, #ff865f); box-shadow: 0 6px 22px #ff9e5b35; font-size: 20px; }
+      h1 { margin: 0; font-size: 1.13rem; letter-spacing: .02em; }
+      .tagline { margin: 2px 0 0; color: #a8b0c8; font-size: .76rem; }
+      .sound-button, .pause-button { border: 1px solid #ffffff1c; border-radius: 12px; background: #ffffff0b; cursor: pointer; }
+      .sound-button { min-width: 42px; height: 42px; font-size: 1.1rem; }
+      .scoreboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 10px; }
+      .stat { min-width: 0; padding: 10px 12px; border: 1px solid #ffffff12; border-radius: 14px; background: #ffffff08; }
+      .stat-label { display: block; color: #97a1bd; font-size: .65rem; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
+      .stat-value { display: block; margin-top: 3px; font-size: 1.08rem; font-variant-numeric: tabular-nums; font-weight: 800; }
+      .game-frame { position: relative; overflow: hidden; border: 1px solid #ffffff25; border-radius: 22px; background: #101728; box-shadow: 0 18px 55px #05081280, inset 0 0 0 1px #ffffff08; }
+      canvas { display: block; width: 100%; height: min(63vh, 560px); height: min(63dvh, 560px); min-height: 340px; touch-action: none; }
+      .overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: #0d1223bd; backdrop-filter: blur(7px); text-align: center; }
+      .overlay[hidden] { display: none; }
+      .panel { width: min(100%, 360px); padding: 24px 20px; border: 1px solid #ffffff20; border-radius: 22px; background: linear-gradient(155deg, #252d45f2, #171d2df5); box-shadow: 0 20px 60px #0007; }
+      .panel-icon { font-size: 2.8rem; filter: drop-shadow(0 5px 14px #ffb64c66); }
+      .panel h2 { margin: 8px 0; font-size: 1.7rem; }
+      .panel p { margin: 0 auto 18px; max-width: 29ch; color: #bdc5d9; font-size: .9rem; line-height: 1.55; }
+      .primary-button { min-height: 48px; padding: 0 24px; border: 0; border-radius: 14px; background: linear-gradient(105deg, #ffc56c, #ff895f); color: #201a26; font-weight: 850; cursor: pointer; box-shadow: 0 8px 22px #ff9b5140; }
+      .primary-button:active { transform: translateY(1px); }
+      .game-tools { position: absolute; top: 10px; right: 10px; }
+      .pause-button { width: 40px; height: 40px; background: #11182799; font-weight: 800; }
+      .controls { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 3px 0; }
+      .move-pad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 43px); gap: 5px; }
+      .control-button { display: grid; place-items: center; border: 1px solid #ffffff20; border-radius: 13px; background: linear-gradient(150deg, #ffffff14, #ffffff08); color: #e8ecfa; font-size: 1.1rem; font-weight: 800; touch-action: none; user-select: none; -webkit-user-select: none; }
+      .control-button:active, .control-button.pressed { border-color: #ffbd6b99; background: #ffbd6b29; }
+      .move-pad [data-dir="up"] { grid-column: 2; grid-row: 1; }
+      .move-pad [data-dir="left"] { grid-column: 1; grid-row: 2; }
+      .move-pad [data-dir="down"] { grid-column: 2; grid-row: 2; }
+      .move-pad [data-dir="right"] { grid-column: 3; grid-row: 2; }
+      .fire-button { width: 88px; height: 88px; border: 1px solid #ffb76c70; border-radius: 50%; background: radial-gradient(circle at 35% 28%, #ffcf84, #f88962 72%); color: #241822; font-size: .77rem; font-weight: 900; letter-spacing: .1em; box-shadow: 0 7px 25px #ff925844, inset 0 2px 4px #fff7; }
+      .help { margin: 13px 0 0; color: #939db6; text-align: center; font-size: .74rem; line-height: 1.5; }
+      .help strong { color: #cbd2e5; }
+      button:focus-visible { outline: 3px solid #ffd28e; outline-offset: 3px; }
+      @media (min-width: 600px) { .shell { padding-top: 24px; } canvas { height: 560px; } .controls { padding: 14px 10px 0; } }
+      @media (pointer: fine) { .controls { max-width: 330px; margin: 0 auto; } }
+      @media (max-width: 380px) { .shell { padding-left: 12px; padding-right: 12px; } canvas { min-height: 310px; } .stat { padding: 9px; } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <div class="brand"><span class="brand-mark" aria-hidden="true">&#x2726;</span><div><h1>STARFALL</h1><p class="tagline">A tiny cosmic arcade run</p></div></div>
+        <button id="sound-toggle" class="sound-button" type="button" aria-label="Turn sound on" title="Sound off">&#x266A;</button>
+      </header>
+
+      <section class="scoreboard" aria-label="Game stats">
+        <div class="stat"><span class="stat-label">Score</span><span id="score" class="stat-value">0000</span></div>
+        <div class="stat"><span class="stat-label">Coins</span><span id="coins" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">Shields</span><span id="lives" class="stat-value">&#x2665; &#x2665; &#x2665;</span></div>
+      </section>
+
+      <section class="game-frame" aria-label="Starfall game area">
+        <canvas id="game" aria-label="Game screen. Move your ship, shoot falling asteroids and collect coins." role="img"></canvas>
+        <div class="game-tools"><button id="pause" class="pause-button" type="button" aria-label="Pause game" title="Pause">&#x2016;</button></div>
+        <div id="overlay" class="overlay">
+          <div class="panel"><div id="panel-icon" class="panel-icon" aria-hidden="true">&#x1F680;</div><h2 id="panel-title">Ready, pilot?</h2><p id="panel-copy">Blast the asteroids, scoop up the stardust coins, and see how long you can last.</p><button id="start" class="primary-button" type="button">Start game</button></div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Game controls">
+        <div class="move-pad" aria-label="Movement controls">
+          <button class="control-button" type="button" data-dir="up" aria-label="Move up">&#x25B2;</button>
+          <button class="control-button" type="button" data-dir="left" aria-label="Move left">&#x25C0;</button>
+          <button class="control-button" type="button" data-dir="down" aria-label="Move down">&#x25BC;</button>
+          <button class="control-button" type="button" data-dir="right" aria-label="Move right">&#x25B6;</button>
+        </div>
+        <button id="fire" class="control-button fire-button" type="button" aria-label="Fire">FIRE</button>
+      </section>
+      <p class="help"><strong>Keyboard:</strong> WASD or arrow keys to move &middot; Space to fire &middot; P to pause<br /><strong>Touch:</strong> hold a direction and FIRE. Collect gold coins; avoid asteroids.</p>
+    </main>
+    <script>
+const canvas = document.querySelector("#game");
+const ctx = canvas.getContext("2d");
+const overlay = document.querySelector("#overlay");
+const title = document.querySelector("#panel-title");
+const copy = document.querySelector("#panel-copy");
+const icon = document.querySelector("#panel-icon");
+const startButton = document.querySelector("#start");
+const pauseButton = document.querySelector("#pause");
+const soundButton = document.querySelector("#sound-toggle");
+const scoreOutput = document.querySelector("#score");
+const coinsOutput = document.querySelector("#coins");
+const livesOutput = document.querySelector("#lives");
+
+const held = new Set();
+const pointers = new Map();
+const stars = Array.from({ length: 74 }, () => ({ x: Math.random(), y: Math.random(), size: .5 + Math.random() * 1.6, phase: Math.random() * Math.PI * 2 }));
+let width = 0;
+let height = 0;
+let player;
+let asteroids = [];
+let bullets = [];
+let coins = [];
+let particles = [];
+let score = 0;
+let coinCount = 0;
+let lives = 3;
+let elapsed = 0;
+let spawnClock = 0;
+let coinClock = 0;
+let shotClock = 0;
+let lastFrame = 0;
+let gameState = "ready";
+let soundOn = false;
+let audioContext = null;
+let frameRequest = 0;
+let screenShake = 0;
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  width = rect.width;
+  height = rect.height;
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (player) {
+    player.x = Math.min(width - player.r, Math.max(player.r, player.x));
+    player.y = Math.min(height - player.r, Math.max(player.r, player.y));
+  }
+  draw(performance.now());
+}
+
+function updateStats() {
+  scoreOutput.textContent = String(score).padStart(4, "0");
+  coinsOutput.textContent = String(coinCount);
+  livesOutput.textContent = lives > 0 ? `${"\u2665 ".repeat(lives).trim()}${" \u2661".repeat(3 - lives)}` : "-";
+}
+
+function resetGame() {
+  score = 0;
+  coinCount = 0;
+  lives = 3;
+  elapsed = 0;
+  spawnClock = .4;
+  coinClock = 2;
+  shotClock = 0;
+  screenShake = 0;
+  asteroids = [];
+  bullets = [];
+  coins = [];
+  particles = [];
+  player = { x: width / 2, y: height * .78, r: 15, invulnerable: 0 };
+  updateStats();
+}
+
+function showOverlay(mode) {
+  overlay.hidden = false;
+  if (mode === "ready") {
+    icon.textContent = "\u{1F680}"; title.textContent = "Ready, pilot?";
+    copy.textContent = "Blast the asteroids, scoop up the stardust coins, and see how long you can last.";
+    startButton.textContent = "Start game";
+  } else if (mode === "paused") {
+    icon.textContent = "\u{23F8}"; title.textContent = "Taking a breather?";
+    copy.textContent = `Score ${score} - ${coinCount} ${coinCount === 1 ? "coin" : "coins"} collected. Your run is paused.`;
+    startButton.textContent = "Resume run";
+  } else {
+    icon.textContent = "\u{1F320}"; title.textContent = "Run complete";
+    copy.textContent = `You scored ${score} and collected ${coinCount} ${coinCount === 1 ? "coin" : "coins"}. Ready to fly again?`;
+    startButton.textContent = "Play again";
+  }
+}
+
+function startGame() {
+  if (gameState === "ready" || gameState === "over") resetGame();
+  gameState = "playing";
+  overlay.hidden = true;
+  pauseButton.setAttribute("aria-label", "Pause game");
+  pauseButton.title = "Pause";
+  lastFrame = performance.now();
+  cancelAnimationFrame(frameRequest);
+  frameRequest = requestAnimationFrame(loop);
+}
+
+function pauseGame() {
+  if (gameState !== "playing") return;
+  gameState = "paused";
+  held.clear(); pointers.clear();
+  document.querySelectorAll(".control-button.pressed").forEach((button) => button.classList.remove("pressed"));
+  pauseButton.setAttribute("aria-label", "Resume game");
+  pauseButton.title = "Resume";
+  showOverlay("paused");
+  draw(performance.now());
+}
+
+function togglePause() {
+  if (gameState === "playing") pauseGame();
+  else if (gameState === "paused") startGame();
+}
+
+function endGame() {
+  gameState = "over";
+  held.clear(); pointers.clear();
+  pauseButton.setAttribute("aria-label", "Pause game");
+  pauseButton.title = "Pause";
+  showOverlay("over");
+}
+
+function isDown(...keys) {
+  return keys.some((key) => held.has(key));
+}
+
+function movementVector() {
+  let x = (isDown("ArrowRight", "d", "D", "right") ? 1 : 0) - (isDown("ArrowLeft", "a", "A", "left") ? 1 : 0);
+  let y = (isDown("ArrowDown", "s", "S", "down") ? 1 : 0) - (isDown("ArrowUp", "w", "W", "up") ? 1 : 0);
+  if (x && y) { x *= Math.SQRT1_2; y *= Math.SQRT1_2; }
+  return { x, y };
+}
+
+function isFiring() { return isDown(" ", "fire"); }
+
+function spawnAsteroid() {
+  const r = 13 + Math.random() * 17;
+  const vertices = Array.from({ length: 9 }, () => .72 + Math.random() * .38);
+  asteroids.push({ x: r + Math.random() * (width - 2 * r), y: -r, r, speed: 90 + Math.random() * 70 + Math.min(110, elapsed * 2), spin: (Math.random() - .5) * 2, angle: Math.random() * 6, vertices, tint: Math.random() });
+}
+
+function spawnCoin() {
+  const r = 10;
+  coins.push({ x: 22 + Math.random() * (width - 44), y: -r, r, speed: 75 + Math.random() * 35, phase: Math.random() * 6 });
+}
+
+function burst(x, y, color, amount = 10) {
+  for (let i = 0; i < amount; i += 1) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 35 + Math.random() * 145;
+    particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: .3 + Math.random() * .45, max: .75, size: 1.5 + Math.random() * 3, color });
+  }
+}
+
+function sound(frequency, duration = .07, type = "sine", volume = .035) {
+  if (!soundOn) return;
+  try {
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === "suspended") audioContext.resume();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    gain.gain.setValueAtTime(volume, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, audioContext.currentTime + duration);
+    oscillator.connect(gain); gain.connect(audioContext.destination);
+    oscillator.start(); oscillator.stop(audioContext.currentTime + duration);
+  } catch { /* Audio is optional; game input stays available if the browser blocks it. */ }
+}
+
+function update(dt) {
+  elapsed += dt;
+  screenShake = Math.max(0, screenShake - dt * 17);
+  const move = movementVector();
+  const speed = 260;
+  player.x = Math.max(player.r + 4, Math.min(width - player.r - 4, player.x + move.x * speed * dt));
+  player.y = Math.max(player.r + 8, Math.min(height - player.r - 4, player.y + move.y * speed * dt));
+  player.invulnerable = Math.max(0, player.invulnerable - dt);
+
+  spawnClock -= dt;
+  if (spawnClock <= 0) { spawnAsteroid(); spawnClock = Math.max(.34, .95 - elapsed * .008) + Math.random() * .35; }
+  coinClock -= dt;
+  if (coinClock <= 0) { spawnCoin(); coinClock = 2.6 + Math.random() * 2.2; }
+  shotClock -= dt;
+  if (isFiring() && shotClock <= 0) {
+    bullets.push({ x: player.x, y: player.y - 18, speed: 480 });
+    shotClock = .2;
+    sound(520, .045, "triangle", .016);
+  }
+
+  bullets.forEach((bullet) => { bullet.y -= bullet.speed * dt; });
+  bullets = bullets.filter((bullet) => bullet.y > -10);
+  asteroids.forEach((asteroid) => { asteroid.y += asteroid.speed * dt; asteroid.angle += asteroid.spin * dt; });
+  coins.forEach((coin) => { coin.y += coin.speed * dt; coin.phase += dt * 5; });
+  particles.forEach((particle) => { particle.x += particle.vx * dt; particle.y += particle.vy * dt; particle.vx *= .985; particle.vy *= .985; particle.life -= dt; });
+  particles = particles.filter((particle) => particle.life > 0);
+
+  for (let ai = asteroids.length - 1; ai >= 0; ai -= 1) {
+    const asteroid = asteroids[ai];
+    const bulletIndex = bullets.findIndex((bullet) => Math.hypot(bullet.x - asteroid.x, bullet.y - asteroid.y) < asteroid.r + 4);
+    if (bulletIndex !== -1) {
+      bullets.splice(bulletIndex, 1); asteroids.splice(ai, 1); score += 100;
+      burst(asteroid.x, asteroid.y, "#ffb779", 13); sound(190, .14, "triangle", .035);
+      screenShake = Math.max(screenShake, 2.5);
+      continue;
+    }
+    if (player.invulnerable <= 0 && Math.hypot(player.x - asteroid.x, player.y - asteroid.y) < player.r + asteroid.r * .8) {
+      asteroids.splice(ai, 1); lives -= 1; player.invulnerable = 1.2;
+      burst(player.x, player.y, "#ff7185", 20); sound(105, .2, "sawtooth", .05);
+      if (lives <= 0) { updateStats(); endGame(); return; }
+    }
+  }
+
+  for (let ci = coins.length - 1; ci >= 0; ci -= 1) {
+    const coin = coins[ci];
+    if (Math.hypot(player.x - coin.x, player.y - coin.y) < player.r + coin.r + 4) {
+      coins.splice(ci, 1); coinCount += 1; score += 50;
+      burst(coin.x, coin.y, "#ffd46e", 9); sound(840, .12, "sine", .04);
+    }
+  }
+  asteroids = asteroids.filter((asteroid) => asteroid.y < height + asteroid.r);
+  coins = coins.filter((coin) => coin.y < height + coin.r);
+  updateStats();
+}
+
+function drawBackground(now) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, "#18243a"); gradient.addColorStop(.55, "#111a2e"); gradient.addColorStop(1, "#17182c");
+  ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
+  stars.forEach((star) => {
+    const twinkle = .45 + (Math.sin(now * .0015 + star.phase) + 1) * .25;
+    ctx.globalAlpha = twinkle; ctx.fillStyle = "#dce7ff";
+    ctx.beginPath(); ctx.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  const glow = ctx.createRadialGradient(width * .5, height * .52, 5, width * .5, height * .52, width * .58);
+  glow.addColorStop(0, "#625b9a10"); glow.addColorStop(1, "#10142100");
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height);
+}
+
+function drawShip(now) {
+  if (!player || (player.invulnerable > 0 && Math.floor(now / 90) % 2 === 0)) return;
+  ctx.save(); ctx.translate(player.x, player.y);
+  ctx.fillStyle = "#ffab68"; ctx.shadowColor = "#ff9e62"; ctx.shadowBlur = 16;
+  ctx.beginPath(); ctx.moveTo(-5, 12); ctx.lineTo(0, 22 + Math.random() * 4); ctx.lineTo(5, 12); ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 14; ctx.shadowColor = "#76dcff";
+  ctx.fillStyle = "#b9f2ff"; ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(14, 13); ctx.lineTo(0, 8); ctx.lineTo(-14, 13); ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0; ctx.fillStyle = "#546187"; ctx.beginPath(); ctx.ellipse(0, 1, 4.5, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ffe2a3"; ctx.beginPath(); ctx.arc(0, -2, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawAsteroid(asteroid) {
+  ctx.save(); ctx.translate(asteroid.x, asteroid.y); ctx.rotate(asteroid.angle);
+  ctx.beginPath();
+  asteroid.vertices.forEach((factor, i) => {
+    const angle = i / asteroid.vertices.length * Math.PI * 2;
+    const x = Math.cos(angle) * asteroid.r * factor; const y = Math.sin(angle) * asteroid.r * factor;
+    if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  const fill = ctx.createLinearGradient(-asteroid.r, -asteroid.r, asteroid.r, asteroid.r);
+  fill.addColorStop(0, asteroid.tint > .5 ? "#8b7c8c" : "#796c82"); fill.addColorStop(1, "#45445d");
+  ctx.fillStyle = fill; ctx.strokeStyle = "#b5a6b65c"; ctx.lineWidth = 1.5; ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#302e48";
+  ctx.beginPath(); ctx.arc(-asteroid.r * .25, -asteroid.r * .15, asteroid.r * .18, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(asteroid.r * .28, asteroid.r * .24, asteroid.r * .12, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawCoin(coin) {
+  ctx.save(); ctx.translate(coin.x, coin.y); ctx.scale(Math.max(.28, Math.abs(Math.cos(coin.phase))), 1);
+  ctx.shadowColor = "#ffd365"; ctx.shadowBlur = 16;
+  const gradient = ctx.createLinearGradient(-coin.r, -coin.r, coin.r, coin.r);
+  gradient.addColorStop(0, "#fff1a3"); gradient.addColorStop(.45, "#ffc344"); gradient.addColorStop(1, "#f18b39");
+  ctx.fillStyle = gradient; ctx.strokeStyle = "#fff1ae"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, 0, coin.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0; ctx.fillStyle = "#a85b34"; ctx.font = "bold 12px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("*", 0, 1);
+  ctx.restore();
+}
+
+function draw(now = 0) {
+  if (!width || !height) return;
+  drawBackground(now);
+  ctx.save();
+  if (screenShake > 0) ctx.translate((Math.random() * 2 - 1) * screenShake, (Math.random() * 2 - 1) * screenShake);
+  coins.forEach(drawCoin);
+  bullets.forEach((bullet) => {
+    ctx.save(); ctx.shadowColor = "#9deaff"; ctx.shadowBlur = 12; ctx.fillStyle = "#c5f6ff";
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") ctx.roundRect(bullet.x - 2, bullet.y - 8, 4, 15, 3);
+    else ctx.rect(bullet.x - 2, bullet.y - 8, 4, 15);
+    ctx.fill(); ctx.restore();
+  });
+  asteroids.forEach(drawAsteroid);
+  particles.forEach((particle) => {
+    ctx.globalAlpha = Math.max(0, particle.life / particle.max); ctx.fillStyle = particle.color;
+    ctx.beginPath(); ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  drawShip(now);
+  ctx.restore();
+}
+
+function loop(now) {
+  if (gameState !== "playing") return;
+  const dt = Math.min(.04, Math.max(0, (now - lastFrame) / 1000));
+  lastFrame = now;
+  update(dt);
+  draw(now);
+  if (gameState === "playing") frameRequest = requestAnimationFrame(loop);
+}
+
+function setControl(button, value) {
+  const key = button.dataset.dir || "fire";
+  if (value) held.add(key); else held.delete(key);
+  button.classList.toggle("pressed", value);
+}
+
+document.querySelectorAll(".control-button").forEach((button) => {
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    if (gameState !== "playing") return;
+    button.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, button);
+    setControl(button, true);
+  });
+  const release = (event) => {
+    const activeButton = pointers.get(event.pointerId);
+    if (!activeButton) return;
+    pointers.delete(event.pointerId);
+    setControl(activeButton, false);
+  };
+  button.addEventListener("pointerup", release);
+  button.addEventListener("pointercancel", release);
+  button.addEventListener("lostpointercapture", release);
+  button.addEventListener("contextmenu", (event) => event.preventDefault());
+});
+
+window.addEventListener("keydown", (event) => {
+  const key = event.key;
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(key)) event.preventDefault();
+  if (key === "p" || key === "P" || key === "Escape") { togglePause(); return; }
+  if (key === "Enter" && gameState !== "playing") { event.preventDefault(); startGame(); return; }
+  held.add(key);
+});
+window.addEventListener("keyup", (event) => held.delete(event.key));
+window.addEventListener("blur", () => { held.clear(); pointers.clear(); if (gameState === "playing") pauseGame(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && gameState === "playing") pauseGame(); });
+window.addEventListener("resize", resize);
+
+startButton.addEventListener("click", startGame);
+pauseButton.addEventListener("click", togglePause);
+soundButton.addEventListener("click", () => {
+  soundOn = !soundOn;
+  soundButton.textContent = soundOn ? "\u266b" : "\u266a";
+  soundButton.title = soundOn ? "Sound on" : "Sound off";
+  soundButton.setAttribute("aria-label", soundOn ? "Turn sound off" : "Turn sound on");
+  if (soundOn) sound(660, .08);
+});
+
+resize();
+resetGame();
+draw(performance.now());
+
+</script>
+  </body>
+</html>
