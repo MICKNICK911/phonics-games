@@ -12,8 +12,9 @@
   --forces:#e65100; --forces-bg:#fff3e0;
   --english:#c62828; --english-bg:#ffebee;
   --maths:#00838f;   --maths-bg:#e0f7fa;
-  --ink:#1a2027; --muted:#5a6b7b; --line:#d8e0e8;
-  --paper:#fff; --bg:#f4f7fa; --accent:#0d47a1;
+  --ink:#18283a; --muted:#65768a; --line:#dbe3ec;
+  --paper:#fff; --bg:#f3f6fa; --accent:#244c75;
+  --soft:#f7f9fc; --hover:#edf3f8; --topbar:#142d45; --sidebar:#fff;
   --side-w:300px; --top-h:56px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -24,19 +25,22 @@ body{font-family:"Segoe UI",Roboto,-apple-system,system-ui,sans-serif;
 
 /* ---------- Top bar ---------- */
 #topbar{position:fixed;top:0;left:0;right:0;height:var(--top-h);
-  background:#0d2b45;color:#fff;display:flex;align-items:center;
-  gap:14px;padding:0 16px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-#topbar h1{font-size:16px;font-weight:600;flex:1;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#topbar button{background:transparent;border:0;color:#fff;font-size:20px;
-  cursor:pointer;padding:8px 10px;border-radius:6px;transition:.15s;}
-#topbar button:hover{background:rgba(255,255,255,.12);}
+  background:var(--topbar);color:#fff;display:flex;align-items:center;
+  gap:10px;padding:0 18px;z-index:100;
+  box-shadow:0 4px 18px rgba(10,25,40,.16);}
+#topbar h1{font-size:15px;font-weight:650;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em;}
+#topbar button{background:transparent;border:1px solid transparent;color:#fff;
+  cursor:pointer;width:40px;height:40px;display:grid;place-items:center;
+  padding:0;border-radius:11px;transition:background .18s ease,border-color .18s ease;}
+#topbar button:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.12);}
+#topbar button:focus-visible{outline:3px solid #9fc7ff;outline-offset:2px;}
 #hamburger{display:none;}
-.crumb{font-size:14px;opacity:.85;}
+.crumb{font-size:14px;opacity:.88;}
 
 /* ---------- Sidebar ---------- */
 #sidebar{position:fixed;top:var(--top-h);left:0;bottom:0;width:var(--side-w);
-  background:#fff;border-right:1px solid var(--line);overflow-y:auto;
+  background:var(--sidebar);color:var(--ink);border-right:1px solid var(--line);overflow-y:auto;
   padding:16px 0 60px;z-index:90;transition:transform .25s;}
 #sidebar .side-title{font-size:12px;text-transform:uppercase;
   letter-spacing:1.5px;color:var(--muted);padding:10px 18px 4px;}
@@ -271,22 +275,113 @@ footer.site{background:#0d2b45;color:#cdd9e5;text-align:center;
     display:none;}
   #backdrop.show{display:block;}
 }
+/* ---------- modern surfaces, theme tokens and SVG icons ---------- */
+.icon-svg{width:20px;height:20px;display:inline-block;flex:0 0 auto;
+  fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+#sidebar .book-head .icon .icon-svg{width:17px;height:17px;}
+.book-head .chev .icon-svg{width:15px;height:15px;transition:transform .2s ease;}
+.book-group.open .chev .icon-svg{transform:rotate(90deg);}
+#sidebar{box-shadow:8px 0 28px rgba(20,40,60,.035);}
+.book-head{border-radius:10px;margin:2px 8px;padding:11px 10px;}
+.book-head:hover,.unit-link:hover{background:var(--hover);}
+.unit-link.active{background:color-mix(in srgb,var(--accent) 11%,var(--paper));}
+#main{background:var(--bg);}
+.page{max-width:1080px;width:calc(100% - 48px);margin:24px auto;
+  min-height:calc(100vh - var(--top-h) - 48px);border:1px solid var(--line);
+  border-radius:20px;box-shadow:0 8px 32px rgba(24,40,58,.055);}
+.lib-intro{padding:36px 0 12px;}
+.lib-intro h2{display:flex;align-items:center;justify-content:center;gap:11px;letter-spacing:-.035em;}
+.heading-icon{display:inline-flex;vertical-align:middle;}
+.heading-icon .icon-svg{width:30px;height:30px;}
+.book-card{background:var(--paper);border-radius:16px;box-shadow:0 3px 14px rgba(24,40,58,.045);text-decoration:none;min-height:170px;}
+.book-card .bc-icon{border-radius:13px;}
+.book-card .bc-icon .icon-svg{width:24px;height:24px;}
+.book-card .bc-title{letter-spacing:-.015em;}
+.book-card .bc-status{color:var(--matter);}
+.cover{border-radius:16px;box-shadow:0 12px 28px rgba(16,35,52,.12);}
+.box,.quiz{border-radius:14px;}
+.quiz{background:var(--soft);border-color:var(--line);}
+.quiz-q{background:var(--paper);border-radius:11px;}
+.callout,.example,.quote{border-radius:10px;}
+.mark-read{display:inline-flex;align-items:center;gap:8px;}
+.mark-read .icon-svg{width:17px;height:17px;}
+.page-nav a{display:inline-flex;align-items:center;gap:6px;}
+.page-nav .icon-svg{width:17px;height:17px;}
+#topbar .icon-svg{width:19px;height:19px;}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 60%,white);outline-offset:3px;}
+[data-theme="dark"]{color-scheme:dark;--ink:#e8eff7;--muted:#a6b5c5;--line:#314355;
+  --paper:#182638;--bg:#101a27;--accent:#91bdf2;--soft:#1c2c3e;--hover:#24364a;
+  --topbar:#0c1724;--sidebar:#142133;}
+[data-theme="dark"] body{color:var(--ink);background:var(--bg);}
+[data-theme="dark"] .page,[data-theme="dark"] .book-card,[data-theme="dark"] .quiz-q,[data-theme="dark"] .score-panel{background:var(--paper);}
+[data-theme="dark"] .book-card{box-shadow:0 4px 18px rgba(0,0,0,.16);}
+[data-theme="dark"] .objectives,[data-theme="dark"] .vocab,[data-theme="dark"] .think,[data-theme="dark"] .try,
+[data-theme="dark"] .summary,[data-theme="dark"] .example,[data-theme="dark"] .callout,[data-theme="dark"] .quote{background:var(--soft);color:var(--ink);}
+[data-theme="dark"] .objectives h4,[data-theme="dark"] .vocab h4,[data-theme="dark"] .think h4,
+[data-theme="dark"] .try h4,[data-theme="dark"] .summary h4,[data-theme="dark"] .content h3,
+[data-theme="dark"] .content strong{color:var(--accent);}
+[data-theme="dark"] .vocab dt{color:#f4c66a;}
+[data-theme="dark"] .content h3{border-color:var(--line);}
+[data-theme="dark"] table.data-table th{background:#24364a;color:var(--ink);}
+[data-theme="dark"] .quiz .quiz-q{border-color:var(--line);}
+[data-theme="dark"] .quiz button.secondary{background:var(--paper);color:var(--accent);}
+[data-theme="dark"] .quiz-q label:hover{background:var(--hover);}
+[data-theme="dark"] .lib-intro h2,[data-theme="dark"] .quiz h4,[data-theme="dark"] .score-panel .score-num{color:var(--accent);}
+[data-theme="dark"] .img-placeholder{background:var(--soft);border-color:#47627b;color:var(--muted);}
+[data-theme="dark"] .img-placeholder .ph-title{color:var(--ink);}
+[data-theme="dark"] .img-placeholder .ph-hint{color:var(--muted);}
+[data-theme="dark"] .toc-list li a{color:var(--ink);}
+@media(max-width:880px){.page{width:100%;margin:0;border-radius:0;border:0;box-shadow:none;}.book-card{min-height:150px;}.lib-intro{padding-top:28px;}#sidebar{box-shadow:14px 0 40px rgba(0,0,0,.22);}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;}}
+#sidebar .unit-link .done .icon-svg{width:15px;height:15px;vertical-align:middle;}
+[data-theme="dark"] .book-card .bc-status{color:#86d693;}
+[data-theme="dark"] .example b,[data-theme="dark"] .quote{color:var(--ink);}
+@page{size:A4;margin:15mm 16mm 17mm;}
 @media print{
-  #topbar,#sidebar,#backdrop,.mark-read,.page-nav{display:none!important;}
-  #main{margin:0;padding:0;}
-  .page{box-shadow:none;padding:0 20px;}
-  .quiz{page-break-inside:avoid;}
-  .unit-header{color:#000;border:1px solid #000;background:#fff!important;}
+  :root,[data-theme="dark"]{color-scheme:light;--ink:#172534;--muted:#4f6172;--line:#d5dde5;--paper:#fff;--bg:#fff;--accent:#214a72;--soft:#f5f7f9;}
+  html,body{background:#fff!important;color:#172534!important;font:10.5pt/1.48 Arial,Helvetica,sans-serif!important;overflow:visible!important;-webkit-print-color-adjust:economy;print-color-adjust:economy;}
+  #topbar,#sidebar,#backdrop,.mark-read,.page-nav,.quiz-actions,.feedback,.score-panel{display:none!important;}
+  #main{margin:0!important;padding:0!important;min-height:0!important;background:#fff!important;}
+  #page.page{width:auto!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;}
+  .cover{padding:18px 0 15px!important;margin:0 0 16px!important;border:0!important;border-bottom:2px solid #315b7c!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;color:#172534!important;text-align:left!important;break-inside:avoid;page-break-inside:avoid;}
+  .cover::after{display:none!important;}
+  .cover .cover-badge{background:#fff!important;border:1px solid #9babb9!important;color:#40556a!important;padding:4px 10px!important;margin-bottom:10px!important;font-size:8pt!important;letter-spacing:1px!important;}
+  .cover h1{color:#172534!important;font-size:24pt!important;letter-spacing:-.3px!important;}
+  .cover h2{color:#40556a!important;font-size:13pt!important;margin-top:5px!important;}
+  .cover p.tag{color:#4f6172!important;margin-top:7px!important;font-size:9pt!important;}
+  .unit-header{margin:0 0 14px!important;padding:12px 16px!important;border:0!important;border-left:5px solid #315b7c!important;border-radius:0!important;background:#f2f5f8!important;color:#172534!important;box-shadow:none!important;break-inside:avoid;page-break-inside:avoid;}
+  .unit-header .strand-tag,.unit-header h2,.unit-header .substrand,.unit-header .code{color:#172534!important;opacity:1!important;}
+  .unit-header h2{font-size:19pt!important;}
+  .page h3,.content h3{color:#214a72!important;break-after:avoid;page-break-after:avoid;}
+  h1,h2,h3,h4{break-after:avoid;page-break-after:avoid;}
+  p,li{orphans:3;widows:3;}
+  .box,.callout,.example,.quote,figure,.quiz-q{break-inside:avoid;page-break-inside:avoid;}
+  .quiz{background:#fff!important;border:1px solid #b8c7d5!important;padding:14px!important;margin-top:18px!important;}
+  .quiz-q{background:#fff!important;border-color:#d5dde5!important;padding:10px 12px!important;}
+  .quiz-q label{padding:3px 5px!important;}
+  table.data-table{font-size:9pt!important;}
+  table.data-table thead{display:table-header-group;}
+  table.data-table tr{break-inside:avoid;page-break-inside:avoid;}
+  table.data-table th{background:#eef2f6!important;color:#172534!important;}
+  figure{max-width:100%;}.fig-img,img,svg{max-width:100%;}
+  footer.site{margin-top:18px!important;padding:10px!important;border-top:1px solid #d5dde5!important;border-radius:0!important;background:#fff!important;color:#4f6172!important;}
+  .book-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;}
+  .book-card{min-height:0!important;padding:12px!important;box-shadow:none!important;border-radius:8px!important;break-inside:avoid;page-break-inside:avoid;color:#172534!important;}
+  a{color:inherit!important;text-decoration:none!important;}
 }
 </style>
+<script>
+(()=>{try{const saved=localStorage.getItem("tb.theme");const preferred=saved==="dark"||saved==="light"?saved:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=preferred;}catch(e){document.documentElement.dataset.theme="light";}})();
+</script>
 </head>
 <body>
 
 <header id="topbar">
-  <button id="hamburger" aria-label="Menu">☰</button>
+  <button id="hamburger" type="button" aria-label="Open navigation" title="Open navigation"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <h1 id="crumb">Ghana Textbook Library</h1>
-  <button id="print-btn" title="Print" aria-label="Print">🖨️</button>
-  <button id="home-btn" title="Home" aria-label="Home">🏠</button>
+  <button id="theme-btn" type="button" title="Switch to dark mode" aria-label="Switch to dark mode" aria-pressed="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 13.1A8.5 8.5 0 0 1 10.9 3.2 8.5 8.5 0 1 0 20.8 13.1Z"/></svg></button>
+  <button id="print-btn" type="button" title="Print this page" aria-label="Print this page"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7zM17 11h.01"/></svg></button>
+  <button id="home-btn" type="button" title="Home" aria-label="Home"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
 </header>
 
 <aside id="sidebar">
@@ -339,6 +434,25 @@ const BOOK = id=> DATA()[id] || null;
 const UNIT = (bid,uid)=>{ const b=BOOK(bid); if(!b) return null;
   return (b.units||[]).find(u=>u.id===uid) || null; };
 const unitKey = (bid,uid)=> bid + "/" + uid;
+const ICON_PATHS = {
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+  print:'<path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7zM17 11h.01"/>',
+  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+  moon:'<path d="M20.8 13.1A8.5 8.5 0 0 1 10.9 3.2 8.5 8.5 0 1 0 20.8 13.1Z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>',
+  science:'<path d="M9 3h6M10 3v6l-5.5 9.2A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.8L14 9V3"/><path d="M8 14h8M9.5 11.5h5"/>',
+  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h7"/>',
+  maths:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h2m4 0h2M8 16h2m4 0h2"/>',
+  library:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13M8 7h8M8 11h8M8 15h6"/>',
+  chevron:'<path d="m9 18 6-6-6-6"/>',
+  check:'<path d="m5 12 4 4L19 6"/>',
+  cross:'<path d="m6 6 12 12M18 6 6 18"/>',
+  circle:'<circle cx="12" cy="12" r="8"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+  left:'<path d="m15 18-6-6 6-6M9 12h12"/>',
+  right:'<path d="m9 18 6-6-6-6m6 6H3"/>'
+};
+function svgIcon(name){return `<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICON_PATHS[name]||ICON_PATHS.book}</svg>`;}
 
 /* ---------- sidebar ---------- */
 function renderSidebar(){
@@ -347,7 +461,7 @@ function renderSidebar(){
     const theme = book.meta.theme || "matter";
     const g = document.createElement("div");
     g.className = "book-group"; g.dataset.book = book.meta.id;
-    const icon = { science:"🔬", english:"📖", maths:"🔢" }[book.meta.subject.toLowerCase()] || "📘";
+    const icon = { science:"science", english:"book", maths:"maths" }[book.meta.subject.toLowerCase()] || "book";
     const terms = {};
     (book.units||[]).forEach(u=>{ (terms[u.term]=terms[u.term]||[]).push(u); });
     const unitsHTML = (book.units||[]).length
@@ -357,15 +471,15 @@ function renderSidebar(){
             <a class="unit-link" data-book="${book.meta.id}" data-unit="${u.id}"
                href="#/${book.meta.id}/${u.id}">
               <span>Unit ${u.number} · ${esc(u.title)}</span>
-              <span class="done">✓</span>
+              <span class="done">${svgIcon("check")}</span>
             </a>`).join("")}
         `).join("")
       : `<div class="book-empty">Content coming soon</div>`;
     g.innerHTML = `
       <div class="book-head" data-toggle="${book.meta.id}">
-        <div class="icon" style="background:var(--${theme})">${icon}</div>
+        <div class="icon" style="background:var(--${theme})">${svgIcon(icon)}</div>
         <span>${esc(book.meta.title)}</span>
-        <span class="chev">▸</span>
+        <span class="chev">${svgIcon("chevron")}</span>
       </div>
       <div class="book-body">${unitsHTML}</div>`;
     tree.appendChild(g);
@@ -419,6 +533,23 @@ $("#hamburger").addEventListener("click",()=>{
 $("#backdrop").addEventListener("click", closeSidebar);
 
 /* ---------- top bar buttons ---------- */
+function applyTheme(theme,persist=false){
+  const mode=theme==="dark"?"dark":"light";
+  document.documentElement.dataset.theme=mode;
+  const btn=$("#theme-btn");
+  if(btn){
+    const target=mode==="dark"?"light":"dark";
+    btn.setAttribute("aria-label",`Switch to ${target} mode`);
+    btn.setAttribute("title",`Switch to ${target} mode`);
+    btn.setAttribute("aria-pressed",String(mode==="dark"));
+    btn.innerHTML=svgIcon(mode==="dark"?"sun":"moon");
+  }
+  if(persist) store.set("tb.theme",mode);
+}
+applyTheme(store.get("tb.theme",document.documentElement.dataset.theme||"light"));
+$("#theme-btn").addEventListener("click",()=>{
+  applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark",true);
+});
 $("#home-btn").addEventListener("click",()=> location.hash="#/");
 $("#print-btn").addEventListener("click",()=> window.print());
 
@@ -462,7 +593,7 @@ window.imgFallback = function(img){
   const src = img.getAttribute("src") || "";
   const ph = document.createElement("div");
   ph.className = "img-placeholder";
-  ph.innerHTML = `<div class="ph-icon">🖼️</div>
+  ph.innerHTML = `<div class="ph-icon">${svgIcon("image")}</div>
     <div class="ph-title">${esc(alt)}</div>
     <div class="ph-hint">img src: ${esc(src)}</div>`;
   img.replaceWith(ph);
@@ -509,9 +640,9 @@ window.checkQuiz = function(btn){
       fb.textContent = `Not answered. Correct: ${correct.toUpperCase()}.`;
       fb.className = "feedback notanswered";
     } else if(sel.value===correct){ score++;
-      fb.textContent = "✓ Correct!";
+      fb.innerHTML = `${svgIcon("check")} Correct!`;
       fb.className = "feedback right";
-    } else { fb.textContent = `✗ Correct answer is ${correct.toUpperCase()}.`;
+    } else { fb.innerHTML = `${svgIcon("cross")} Correct answer is ${correct.toUpperCase()}.`;
       fb.className = "feedback wrong";
     }
     if(q.dataset.explain && (sel && sel.value!==correct)){
@@ -519,8 +650,8 @@ window.checkQuiz = function(btn){
     }
   });
   const pct = total? Math.round(score/total*100):0;
-  const msg = pct===100?"Excellent! You are a star. 🌟"
-            : pct>=75 ?"Very good work! Keep it up. 👍"
+  const msg = pct===100?"Excellent! You are a star."
+            : pct>=75 ?"Very good work! Keep it up."
             : pct>=50 ?"Good try. Review the unit and retake."
             :          "Keep practising. Read the unit and try again.";
   const panel = $(".score-panel", quiz);
@@ -547,20 +678,20 @@ function renderHome(){
   const books = ALL_BOOKS();
   const cards = books.map(b=>{
     const theme = b.meta.theme||"matter";
-    const icon = {science:"🔬",english:"📖",maths:"🔢"}[b.meta.subject.toLowerCase()]||"📘";
+    const icon = {science:"science",english:"book",maths:"maths"}[b.meta.subject.toLowerCase()]||"book";
     const unitCount = (b.units||[]).length;
     const done = (b.units||[]).filter(u=>(getProgress()[b.meta.id+"/"+u.id]||{}).done).length;
-    return `<div class="book-card" onclick="location.hash='#/${b.meta.id}'">
-      <div class="bc-icon" style="background:var(--${theme})">${icon}</div>
+    return `<a class="book-card" href="#/${b.meta.id}">
+      <div class="bc-icon" style="background:var(--${theme})">${svgIcon(icon)}</div>
       <div class="bc-title">${esc(b.meta.title)}</div>
       <div class="bc-meta">${esc(b.meta.subtitle||'')}</div>
       <div class="bc-status">${unitCount?`${done}/${unitCount} units complete`:'Content coming soon'}</div>
-    </div>`;
+    </a>`;
   }).join("");
   $("#crumb").textContent = "Library";
   $("#page").innerHTML = `
     <div class="lib-intro">
-      <h2>📚 Ghana Textbook Library</h2>
+      <h2><span class="heading-icon">${svgIcon("library")}</span> Ghana Textbook Library</h2>
       <p>Standards-Based Curriculum (NaCCA) · Basic 3–5 · Works offline</p>
     </div>
     <div class="book-grid">${cards}</div>
@@ -658,14 +789,14 @@ function renderUnit(bid, uid){
     ${extras}
     ${quiz}
     <button class="mark-read ${done?'done':''}" data-key="${key}">
-      ${done?'✓ Marked as read':'○ Mark this unit as read'}
+      ${done?`${svgIcon("check")} Marked as read`:`${svgIcon("circle")} Mark this unit as read`}
     </button>
     <div class="page-nav">
       <a class="${prev?'':'disabled'}" ${prev?`onclick="location.hash='#/${bid}/${prev.id}'"`:''}>
-        ← ${prev?`Unit ${prev.number}`:'Start'}
+        ${svgIcon("left")} ${prev?`Unit ${prev.number}`:'Start'}
       </a>
       <a class="${next?'':'disabled'}" ${next?`onclick="location.hash='#/${bid}/${next.id}'"`:''}>
-        ${next?`Unit ${next.number} →`:'End of book'}
+        ${next?`Unit ${next.number}`:'End of book'} ${svgIcon("right")}
       </a>
     </div>
     <footer class="site" style="margin-top:30px;border-radius:10px">
@@ -684,7 +815,7 @@ $("#page").addEventListener("click", e=>{
   const now = !((p[key]||{}).done);
   markDone(key, now);
   btn.classList.toggle("done", now);
-  btn.textContent = now ? "✓ Marked as read" : "○ Mark this unit as read";
+  btn.innerHTML = now ? `${svgIcon("check")} Marked as read` : `${svgIcon("circle")} Mark this unit as read`;
   refreshSidebarState();
 });
 
