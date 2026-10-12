@@ -228,107 +228,182 @@
   </div>
 
   <script>
-    // Task data with descriptions
-    const tasks = [
-  { id: 1, title: "Challenge 1", description: "" },
-  { id: 2, title: "Challenge 2", description: "" },
-  { id: 3, title: "Challenge 3", description: "" },
-  { id: 4, title: "Challenge 4", description: "" },
-  { id: 5, title: "Challenge 5", description: "" },
-  { id: 6, title: "Challenge 6", description: "" },
-  { id: 7, title: "Challenge 7", description: "" },
-  { id: 8, title: "Challenge 8", description: "" },
-  { id: 9, title: "Challenge 9", description: "" },
-  { id: 10, title: "Challenge 10", description: "" },
-  { id: 11, title: "Challenge 11", description: "" },
-  { id: 12, title: "Challenge 12", description: "" },
-  { id: 13, title: "Challenge 13", description: "" },
-  { id: 14, title: "Challenge 14", description: "" },
-  { id: 15, title: "Challenge 15", description: "" },
-  { id: 16, title: "Challenge 16", description: "" },
-  { id: 17, title: "Challenge 17", description: "" },
-  { id: 18, title: "Challenge 18", description: "" },
-  { id: 19, title: "Challenge 19", description: "" },
-  { id: 20, title: "Challenge 20", description: "" },
-  { id: 21, title: "Challenge 21", description: "" },
-  { id: 22, title: "Challenge 22", description: "" },
-  { id: 23, title: "Challenge 23", description: "" },
-  { id: 24, title: "Challenge 24", description: "" },
-  { id: 25, title: "Challenge 25", description: "" },
-  { id: 26, title: "Challenge 26", description: "" },
-  { id: 27, title: "Challenge 27", description: "" },
-  { id: 28, title: "Challenge 28", description: "" },
-  { id: 29, title: "Challenge 29", description: "" }
-];
+(function () {
+  "use strict";
 
-    // Helper function to get template filename based on task ID
-    function getTemplateFileName(id) {
-      const filenames = [
-    "templates/P-pic-word.html",
-    "templates/P-pickVC.html",
-    "templates/P-pickVC2.html",
-    "templates/P-pickCTimer.html",
-    "templates/P-21-consonants.html",
-    "templates/P-cvc-maker.html",
-    "templates/P-shoot-bricks-Bl.html",
-    "templates/P-silente-Switch.html",
-    "templates/P-sight-word-fix.html",
-    "templates/P-missingLet.html",
-    "templates/P-word-sorting.html",
-    "templates/P-word-sort-multi.html",
-    "templates/P-basicSort-learn.html",
-    "templates/P-basicSort-learn2.html",
-    "templates/P-word-war2o.html",
-    "templates/P-word-war3o.html",
-    "templates/P-word-war4o.html",
-    "templates/P-pickCCLearn.html",
-    "templates/P-sentence-formation2o.html",
-    "templates/P-decode-5.html",
-    "templates/P-decode-8.html",
-    "templates/P-quizLearn.html",
-    "templates/P-sound-snake-game.html",
-    "templates/C-21-consonants.html",
-    "templates/C-shoot-brick2o.html",
-    "templates/C-shoot-brick2o1.html",
-    "templates/C-pickCCLetter.html",
-    "templates/C-decode-7.html",
-    "templates/C-sound-snake-game2.html"
-];
-      
-      return filenames[id - 1] || 'index.html';
-    }
+  var APPS = [
+    { file: "C-21-consonants.html", title: "21 Consonants", description: "Practice the 21 consonant letters of the alphabet." },
+    { file: "C-cvc-maker-G1.html", title: "CVC Maker G1", description: "Build CVC words by choosing letters for grade 1 practice." },
+    { file: "C-cvc-maker-G2.html", title: "CVC Maker G2", description: "Build CVC words with a grade 2 level challenge." },
+    { file: "C-cvcE-maker-G2.html", title: "CVCe Maker G2", description: "Make CVCe words by adding a silent e for grade 2." },
+    { file: "C-decode-7.html", title: "Decode 7", description: "Decode set 7 of word cards by sounding them out." },
+    { file: "C-missingLet.html", title: "Missing Letter", description: "Fill in the missing letter to complete each word." },
+    { file: "C-pickCCLetter.html", title: "Pick Consonant Letter", description: "Pick the correct consonant letter to match a sound." },
+    { file: "C-pickCCLetterG2.html", title: "Pick Consonant Letter G2", description: "Pick the correct consonant letter at grade 2 level." },
+    { file: "C-pickCCWord.html", title: "Pick Consonant Word", description: "Pick the word that matches the consonant sounds shown." },
+    { file: "C-pickVC-BD-W.html", title: "Pick VC B D W", description: "Choose between vowel-consonant patterns with b, d and w." },
+    { file: "C-pickVC-BD.html", title: "Pick VC B D", description: "Choose between vowel-consonant patterns with b and d." },
+    { file: "C-shoot-brick2o.html", title: "Shoot Bricks 2", description: "Shoot the right brick to score points." },
+    { file: "C-shoot-brick2o1.html", title: "Shoot Bricks 2 (Set 2)", description: "Shoot the right brick to score points in this second set." },
+    { file: "C-sight-pick-G1.html", title: "Sight Pick G1", description: "Pick the sight word you hear at grade 1 level." },
+    { file: "C-sight-pick-G2.html", title: "Sight Pick G2", description: "Pick the sight word you hear at grade 2 level." },
+    { file: "C-sortPick-G2.html", title: "Sort and Pick G2", description: "Sort and pick the correct word at grade 2 level." },
+    { file: "C-sound-snake-game2.html", title: "Sound Snake 2", description: "Guide the sound snake to the right letter." },
+    { file: "C-tug-war-compound-words.html", title: "Tug War Compound Words", description: "Win a tug of war by reading compound words." },
+    { file: "C-tug-war-shoot.html", title: "Tug War Shoot", description: "Win a tug of war by shooting the correct answer." },
+    { file: "C-tug-war-sort.html", title: "Tug War Sort", description: "Win a tug of war by sorting words into groups." },
+    { file: "C-tug-war-spelling.html", title: "Tug War Spelling", description: "Win a tug of war by spelling words correctly." },
+    { file: "C-tug-war-time.html", title: "Tug War Time", description: "Win a tug of war against the clock." },
+    { file: "D-decode-C.html", title: "Decode C", description: "Decode words in set C by sounding out each letter." },
+    { file: "D-decode-E.html", title: "Decode E", description: "Decode words in set E by sounding out each letter." },
+    { file: "D-decode-E2.html", title: "Decode E2", description: "Decode words in set E2 by sounding out each letter." },
+    { file: "D-decode-T.html", title: "Decode T", description: "Decode words in set T by sounding out each letter." },
+    { file: "D-decode-T2.html", title: "Decode T2", description: "Decode words in set T2 by sounding out each letter." },
+    { file: "digiNpr.html", title: "Digital Notes Practice", description: "Digital notes page for practice." },
+    { file: "digiNpub.html", title: "Digital Notes Public", description: "Digital notes page for publishing." },
+    { file: "Ex-Assessment-admin.html", title: "Assessment Admin", description: "Admin page for setting up assessments." },
+    { file: "Ex-Assessment2.html", title: "Assessment 2", description: "Assessment set 2 for checking skills." },
+    { file: "L-basic-1.html", title: "Basic Lesson 1", description: "Basic lesson 1 activity." },
+    { file: "L-myNotes1-table.html", title: "My Notes 1 Table", description: "My Notes 1 arranged in a table layout." },
+    { file: "L-myNotes1.html", title: "My Notes 1", description: "My Notes 1 page for writing and reading notes." },
+    { file: "l-myNotes2.html", title: "My Notes 2", description: "My Notes 2 page for writing and reading notes." },
+    { file: "L-note-table-g1.html", title: "Note Table G1", description: "Note table for grade 1 practice." },
+    { file: "L-note-table-g2.html", title: "Note Table G2", description: "Note table for grade 2 practice." },
+    { file: "L-notesReaderMD-2.html", title: "Notes Reader MD 2", description: "Read notes in markdown format, version 2." },
+    { file: "L-NotesReaderMD.html", title: "Notes Reader MD", description: "Read notes in markdown format." },
+    { file: "my-slides.html", title: "My Slides", description: "My Slides page for viewing a slide deck." },
+    { file: "P-21-consonants-G1.html", title: "21 Consonants G1", description: "Practice the 21 consonant letters at grade 1 level." },
+    { file: "P-basicSort-learn.html", title: "Basic Sort Learn", description: "Learn to sort words by their sounds." },
+    { file: "P-basicSort-learn2.html", title: "Basic Sort Learn 2", description: "Learn to sort words by sounds in a second set." },
+    { file: "P-blend-show-1.html", title: "Blend Show 1", description: "Show blends with set 1 examples." },
+    { file: "P-blend-show.html", title: "Blend Show", description: "Show how two letters blend into one sound." },
+    { file: "P-blend-table.html", title: "Blend Table", description: "Table of consonant blends for reference." },
+    { file: "P-codexTUT.html", title: "Codex Tutorial", description: "A tutorial page for working with the Codex app." },
+    { file: "P-coin-hunt.html", title: "Coin Hunt", description: "Fly a ship, shoot boxes, and collect coins." },
+    { file: "P-compound-word.html", title: "Compound Word", description: "Practice building and reading compound words." },
+    { file: "P-cvc-maker.html", title: "CVC Maker", description: "Make CVC words by picking letters." },
+    { file: "P-decode-5.html", title: "Decode 5", description: "Decode set 5 word cards by sounding them out." },
+    { file: "P-decode-6.html", title: "Decode 6", description: "Decode set 6 word cards by sounding them out." },
+    { file: "P-decode-8.html", title: "Decode 8", description: "Decode set 8 word cards by sounding them out." },
+    { file: "P-digraph-show-1.html", title: "Digraph Show 1", description: "Show digraphs with set 1 examples." },
+    { file: "P-digraph-show.html", title: "Digraph Show", description: "Show how two letters make one digraph sound." },
+    { file: "P-digraph-table.html", title: "Digraph Table", description: "Table of digraphs for reference." },
+    { file: "P-form-sent.html", title: "Form Sentences", description: "Form sentences from jumbled words." },
+    { file: "P-missingLet-1o.html", title: "Missing Letter 1", description: "Fill in the missing letter, set 1." },
+    { file: "P-missingLet-B1.html", title: "Missing Letter B1", description: "Fill in the missing letter, B1 set." },
+    { file: "P-missingLet-ee.html", title: "Missing Letter ee", description: "Fill in the missing ee in each word." },
+    { file: "P-missingLet-multi.html", title: "Missing Letter Multi", description: "Fill in missing letters across many words." },
+    { file: "P-missingLet.html", title: "Missing Letter", description: "Fill in the missing letter to complete each word." },
+    { file: "P-misspell-pick.html", title: "Misspell Pick", description: "Pick the correct spelling from the choices." },
+    { file: "P-numOfSounds1.html", title: "Number of Sounds 1", description: "Count the sounds in each word, set 1." },
+    { file: "P-numOfSounds2.html", title: "Number of Sounds 2", description: "Count the sounds in each word, set 2." },
+    { file: "P-numOfsyllables.html", title: "Number of Syllables", description: "Count the syllables in each word." },
+    { file: "P-phonogram-table.html", title: "Phonogram Table", description: "Table of phonograms for reference." },
+    { file: "P-pic-word.html", title: "Picture to Word", description: "Match a picture to the correct word." },
+    { file: "P-pickCCLearn.html", title: "Pick Consonant Learn", description: "Learn to pick the correct consonant." },
+    { file: "P-pickCTimer.html", title: "Pick Consonant Timer", description: "Pick the correct consonant against the clock." },
+    { file: "P-pickVC-bl-di.html", title: "Pick VC bl di", description: "Pick the vowel-consonant pattern for bl and di." },
+    { file: "P-pickVC-CDB.html", title: "Pick VC C D B", description: "Pick between vowel-consonant patterns c, d and b." },
+    { file: "P-pickVC.html", title: "Pick VC", description: "Pick the correct vowel-consonant pattern." },
+    { file: "P-pickVC2.html", title: "Pick VC 2", description: "Pick the correct vowel-consonant pattern, set 2." },
+    { file: "P-quizLearn.html", title: "Quiz Learn", description: "Learn with a friendly phonics quiz." },
+    { file: "P-reader1.html", title: "Reader 1", description: "Reader 1 with simple sentences to read." },
+    { file: "P-readerT-1.html", title: "Reader T 1", description: "Reader T set 1 with simple texts." },
+    { file: "P-readerT-2.html", title: "Reader T 2", description: "Reader T set 2 with simple texts." },
+    { file: "P-readerT-old1.html", title: "Reader T Old 1", description: "Older Reader T set 1 for extra practice." },
+    { file: "P-readerT-old2.html", title: "Reader T Old 2", description: "Older Reader T set 2 for extra practice." },
+    { file: "P-rhyme-word.html", title: "Rhyme Word", description: "Pick the word that rhymes." },
+    { file: "P-roteWord-bl.html", title: "Rote Word bl", description: "Practice reading rote words with bl." },
+    { file: "P-roteWord-multi.html", title: "Rote Word Multi", description: "Practice reading rote words from many sets." },
+    { file: "P-roteWord-vt.html", title: "Rote Word vt", description: "Practice reading rote words with vt." },
+    { file: "P-sentence-formation2o.html", title: "Sentence Formation 2", description: "Form sentences from words, set 2." },
+    { file: "P-shoot-bricks-Bl.html", title: "Shoot Bricks Bl", description: "Shoot the brick with the correct bl word." },
+    { file: "P-shoot-bricks-g1.html", title: "Shoot Bricks G1", description: "Shoot the brick with the correct answer at grade 1." },
+    { file: "P-shoot-bricks-multi-old.html", title: "Shoot Bricks Multi (Old)", description: "Older multi-set brick shooting game." },
+    { file: "P-shoot-bricks-multi.html", title: "Shoot Bricks Multi", description: "Shoot bricks across many word sets." },
+    { file: "P-sight-pick-k.html", title: "Sight Pick K", description: "Pick the sight word for kindergarten." },
+    { file: "P-sight-pick-multi-D.html", title: "Sight Pick Multi D", description: "Pick sight words from many sets, set D." },
+    { file: "P-sight-pick-multi.html", title: "Sight Pick Multi", description: "Pick sight words from many sets." },
+    { file: "P-sight-pick-pract-D.html", title: "Sight Pick Practice D", description: "Practice picking sight words, set D." },
+    { file: "P-sight-pick-pract.html", title: "Sight Pick Practice", description: "Practice picking the sight word you hear." },
+    { file: "P-sight-word-fix-1.html", title: "Sight Word Fix 1", description: "Fix the sight word, set 1." },
+    { file: "P-sight-word-fix-2.html", title: "Sight Word Fix 2", description: "Fix the sight word, set 2." },
+    { file: "P-sight-word-fix-multi-D.html", title: "Sight Word Fix Multi D", description: "Fix sight words across many sets, set D." },
+    { file: "P-sight-word-fix-multi.html", title: "Sight Word Fix Multi", description: "Fix sight words across many sets." },
+    { file: "P-sight-word-fix.html", title: "Sight Word Fix", description: "Fix the misspelled sight word." },
+    { file: "P-silente-Switch.html", title: "Silent e Switch", description: "Switch a word by adding a silent e." },
+    { file: "P-sound-snake-game.html", title: "Sound Snake Game", description: "Guide the sound snake to the right letter." },
+    { file: "P-spellBee-fix-026.html", title: "SpellBee Fix 026", description: "SpellBee fix set 026." },
+    { file: "P-spellBee-fix-0262.html", title: "SpellBee Fix 0262", description: "SpellBee fix set 0262." },
+    { file: "P-spellBee-fix.html", title: "SpellBee Fix", description: "Fix spellings in a spelling bee." },
+    { file: "P-spellBee-fix2-026.html", title: "SpellBee Fix 2 026", description: "SpellBee fix set 2 for 026." },
+    { file: "P-spellBee-pract-026.html", title: "SpellBee Practice 026", description: "SpellBee practice set 026." },
+    { file: "P-spellBee-pract-0262.html", title: "SpellBee Practice 0262", description: "SpellBee practice set 0262." },
+    { file: "P-spellBee-Pract.html", title: "SpellBee Practice", description: "Practice for a spelling bee." },
+    { file: "P-spellBee-pract2-026.html", title: "SpellBee Practice 2 026", description: "SpellBee practice set 2 for 026." },
+    { file: "P-spellBee-pract3-026.html", title: "SpellBee Practice 3 026", description: "SpellBee practice set 3 for 026." },
+    { file: "P-tag-segmentor.html", title: "Tag Segmentor", description: "Segment words into sounds with tag tools." },
+    { file: "P-VCD-table.html", title: "VCD Table", description: "Table of vowel-consonant-digraph patterns." },
+    { file: "P-word-sort-multi.html", title: "Word Sort Multi", description: "Sort words into groups across many sets." },
+    { file: "P-word-sorting.html", title: "Word Sorting", description: "Sort words into the right sound groups." },
+    { file: "P-word-war2o.html", title: "Word War 2", description: "Word War set 2 to practice reading." },
+    { file: "P-word-war3o.html", title: "Word War 3", description: "Word War set 3 to practice reading." },
+    { file: "P-word-war4o.html", title: "Word War 4", description: "Word War set 4 to practice reading." },
+    { file: "R-numofsounds1.html", title: "Number of Sounds R1", description: "Count sounds in words, review set 1." },
+    { file: "R-numofsounds2.html", title: "Number of Sounds R2", description: "Count sounds in words, review set 2." },
+    { file: "R-term1-G1.html", title: "Term 1 Review G1", description: "Term 1 review for grade 1." },
+    { file: "R-term1-G2.html", title: "Term 1 Review G2", description: "Term 1 review for grade 2." },
+    { file: "T-quizApp.html", title: "Quiz App", description: "Quiz app for phonics practice." },
+    { file: "T-quizApp2.html", title: "Quiz App 2", description: "Quiz app set 2 for phonics practice." },
+    { file: "T-quizAppC-multi.html", title: "Quiz App C Multi", description: "Quiz app C with multiple word sets." },
+    { file: "T-quizAppC.html", title: "Quiz App C", description: "Quiz app C for phonics practice." }
+  ];
 
-    // Generate task cards
-    function generateTaskCards() {
-      const container = document.getElementById('taskContainer');
-      
-      tasks.forEach((task, index) => {
-        const card = document.createElement('div');
-        card.className = 'task-card';
-        card.style.animationDelay = `${index * 0.05}s`;
-        card.innerHTML = `
-          <div class="task-number">${task.id}</div>
-          <div class="task-title">${task.title}</div>
-          <div class="task-description">${task.description}</div>
-          <div class="loading">Loading task...</div>
-        `;
-        
-        card.addEventListener('click', function() {
-          // Add active class and show loading
-          this.classList.add('active');
-          
-          // Simulate loading before navigation
-          setTimeout(() => {
-            window.location.href = getTemplateFileName(task.id);
-          }, 800);
-        });
-        
-        container.appendChild(card);
-      });
-    }
+  var container = document.getElementById("taskContainer");
+  if (!container) return;
+  container.innerHTML = "";
 
-    // Initialize the app
-    document.addEventListener('DOMContentLoaded', generateTaskCards);
-  </script>
+  APPS.forEach(function (app, index) {
+    var href = "templates/" + app.file;
+    var card = document.createElement("a");
+    card.className = "task-card";
+    card.href = href;
+    card.setAttribute("data-file", app.file);
+    card.style.color = "inherit";
+    card.style.textDecoration = "none";
+
+    var number = document.createElement("div");
+    number.className = "task-number";
+    number.textContent = String(index + 1).padStart(2, "0");
+
+    var title = document.createElement("div");
+    title.className = "task-title";
+    title.textContent = app.title;
+
+    var description = document.createElement("div");
+    description.className = "task-description";
+    description.textContent = app.description;
+
+    var loading = document.createElement("div");
+    loading.className = "loading";
+    loading.textContent = "Loading task...";
+
+    card.appendChild(number);
+    card.appendChild(title);
+    card.appendChild(description);
+    card.appendChild(loading);
+    container.appendChild(card);
+
+    card.addEventListener("click", function (event) {
+      event.preventDefault();
+      if (card.classList.contains("active")) return;
+      card.classList.add("active");
+      window.setTimeout(function () {
+        window.location.href = href;
+      }, 800);
+    });
+  });
+})();
+</script>
 </body>
 </html>
