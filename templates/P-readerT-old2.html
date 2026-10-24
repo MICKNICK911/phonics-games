@@ -769,6 +769,62 @@
       flex: 1; padding: 12px 16px; font-size: 0.9rem;
     }
 
+    /* ===== Reading video (opt-in) ===== */
+    .rec-pill {
+      position: fixed; top: 70px; right: 12px; z-index: 60;
+      background: #dc2626; color: #fff; font-size: 0.7rem; font-weight: 800;
+      padding: 4px 10px; border-radius: 20px; letter-spacing: 0.04em;
+      -webkit-animation: recBlink 1.4s infinite; animation: recBlink 1.4s infinite;
+      pointer-events: auto;
+    }
+    @-webkit-keyframes recBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+    @keyframes recBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+    .rec-overlay {
+      position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 120;
+      background: rgba(15,23,42,0.75); display: none; padding: 16px;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+    .rec-overlay.show { display: block; }
+    .rec-sheet {
+      background: #ffffff; background: var(--surface);
+      color: #0f172a; color: var(--text);
+      border-radius: 18px; max-width: 480px; margin: 0 auto; padding: 18px 16px 20px;
+    }
+    .rec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .rec-head h3 { font-size: 1.05rem; font-weight: 800; }
+    .rec-note { font-size: 0.78rem; color: #475569; color: var(--text-2); margin-bottom: 12px; line-height: 1.4; }
+    .rec-empty { font-size: 0.88rem; color: #94a3b8; color: var(--text-3); text-align: center; padding: 22px 8px; }
+    .rec-item {
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px; margin-bottom: 10px;
+      background: #f8fafc; background: var(--surface-2);
+    }
+    .rec-title { font-weight: 700; font-size: 0.9rem; }
+    .rec-meta { font-size: 0.74rem; color: #94a3b8; color: var(--text-3); font-weight: 600; margin: 2px 0 8px; }
+    .rec-player video { width: 100%; max-height: 260px; border-radius: 10px; background: #000; margin-bottom: 8px; }
+    .rec-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rec-btn {
+      flex: 1; min-width: 64px; padding: 9px 8px; border-radius: 9px;
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      background: #ffffff; background: var(--surface); color: #0f172a; color: var(--text);
+      font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    }
+    .rec-send { background: #25d366; color: #fff; border-color: transparent; }
+    .rec-del { color: #dc2626; }
+
+    .rec-pill { pointer-events: auto !important; cursor: pointer; }
+    .rec-ask {
+      position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 160;
+      background: rgba(15,23,42,0.6); display: none; align-items: center; justify-content: center; padding: 24px;
+    }
+    .rec-ask.show { display: -webkit-box; display: -webkit-flex; display: flex; }
+    .rec-ask-box {
+      background: #ffffff; background: var(--surface); color: #0f172a; color: var(--text);
+      border-radius: 20px; padding: 24px 20px; max-width: 340px; width: 100%; text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+    .rec-ask-icon { color: #dc2626; font-size: 2rem; line-height: 1; margin-bottom: 8px; }
+    .rec-ask-text { font-weight: 700; font-size: 1rem; line-height: 1.4; margin-bottom: 18px; }
     @media (min-width: 600px) {
       .content-wrap { max-width: 520px; margin: 0 auto; width: 100%; }
     }
@@ -885,6 +941,10 @@
             <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></span>
             <span class="menu-label">Export Excel</span>
           </button>
+          <button type="button" class="menu-item" id="recListBtn" role="menuitem">
+            <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span>
+            <span class="menu-label">My reading videos</span>
+          </button>
           <button type="button" class="menu-item" id="backupBtn" role="menuitem">
             <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></span>
             <span class="menu-label">Backup</span>
@@ -942,6 +1002,11 @@
             <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 8 6l4 14"/><path d="M5.5 15h5"/><path d="M14 6h3a2.5 2.5 0 0 1 0 5h-3z"/><path d="M14 11h3.5a2.5 2.5 0 0 1 0 5H14z"/></svg></span>
             <span class="menu-label">Segment mode</span>
             <span class="menu-check" id="segmentCheck" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="menu-item" id="recToggleBtn" role="menuitem">
+            <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span>
+            <span class="menu-label">Record my reading</span>
+            <span class="menu-check" aria-hidden="true">&#10003;</span>
           </button>
           <div class="menu-divider" role="separator"></div>
           <button type="button" class="menu-item" id="themeBtn2" role="menuitem">
@@ -1102,6 +1167,22 @@
     </div>
   </div>
 
+  <div class="rec-pill" id="recPill" style="display:none">&#9679; REC</div>
+  <div class="rec-overlay" id="recOverlay">
+    <div class="rec-sheet">
+      <div class="rec-head"><h3>My reading videos</h3><button type="button" class="icon-btn" id="recCloseBtn" aria-label="Close">&#10005;</button></div>
+      <p class="rec-note">Videos stay on this device. Nothing is sent unless you tap Send. Your teacher may ask you to send one as proof.</p>
+      <div id="recList"></div>
+    </div>
+  </div>
+  <div class="rec-ask" id="recAskOverlay">
+    <div class="rec-ask-box">
+      <div class="rec-ask-icon">&#9679;</div>
+      <div class="rec-ask-text" id="recAskText"></div>
+      <button type="button" class="btn btn-primary btn-lg btn-block" id="recAskContinue">Continue</button>
+      <button type="button" class="btn btn-outline btn-block" id="recAskStop" style="margin-top:10px">Stop recording</button>
+    </div>
+  </div>
   <div class="toast" id="toast"></div>
 
 <script type="text/javascript">
@@ -5630,6 +5711,7 @@
     var el = $(id);
     if (el) addClass(el, 'active');
     window.scrollTo(0, 0);
+    if (typeof RecMod !== 'undefined' && RecMod) RecMod.onScreen(id);
   }
 
   function toast(msg, ms) {
@@ -6654,6 +6736,7 @@
         ? 'Sound Hunt: Passed on try ' + r.soundHuntAttempts + '\n'
         : '') +
       'Date: ' + formatDate(r.date) + '\n' +
+      (RecMod.has(r.lessonId, r.day) ? 'Reading video: saved on device (teacher can request it)\n' : '') +
       (String(FINISH_CODE || '').replace(/^\s+|\s+$/g, '') ? 'Finish Code: ' + String(FINISH_CODE).replace(/^\s+|\s+$/g, '') + '\n' : '') +
       'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
 
@@ -7081,6 +7164,386 @@
       if (k === 'Escape' || e.keyCode === 27) closeMenu();
     });
   })();
+
+  /* ========== READING VIDEO (opt-in, saved on device only) ========== */
+  var RecMod = (function () {
+    var DB_NAME = 'decodable_rec', STORE = 'videos', PREF_KEY = 'decodable_rec_pref';
+    var MAX_KEEP = 12, MAX_SEC = 150, MIN_SEC = 3;
+    var supported = !!(window.MediaRecorder && window.indexedDB && navigator.mediaDevices &&
+                       navigator.mediaDevices.getUserMedia && window.Blob && window.URL);
+    var pref = false, db = null, index = {};
+    var stream = null, rec = null, chunks = [], timer = null, ctx = null, mime = '';
+    var starting = false, stopWanted = false, playUrl = null;
+
+    function el(id) { return document.getElementById(id); }
+    function say(m, ms) { try { toast(m, ms); } catch (e) {} }
+    function readPref() { try { return window.localStorage.getItem(PREF_KEY) === '1'; } catch (e) { return false; } }
+    function writePref(v) { try { window.localStorage.setItem(PREF_KEY, v ? '1' : '0'); } catch (e) {} }
+
+    function openDB(cb) {
+      if (db) { cb(db); return; }
+      if (!supported) { cb(null); return; }
+      var req;
+      try { req = window.indexedDB.open(DB_NAME, 1); } catch (e) { cb(null); return; }
+      req.onupgradeneeded = function () {
+        try { req.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true }); } catch (e) {}
+      };
+      req.onsuccess = function () { db = req.result; cb(db); };
+      req.onerror = function () { cb(null); };
+    }
+
+    function keyOf(lessonId, day) { return lessonId + '|' + day; }
+
+    function loadIndex() {
+      openDB(function (d) {
+        if (!d) return;
+        index = {};
+        try {
+          var cur = d.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
+          cur.onsuccess = function () {
+            var c = cur.result;
+            if (c) { index[keyOf(c.value.lessonId, c.value.day)] = true; c['continue'](); }
+          };
+        } catch (e) {}
+      });
+    }
+
+    function pickMime() {
+      var list = ['video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+      for (var i = 0; i < list.length; i++) {
+        try { if (window.MediaRecorder.isTypeSupported(list[i])) return list[i]; } catch (e) {}
+      }
+      return '';
+    }
+
+    function setPill(on) {
+      var p = el('recPill');
+      if (p) p.style.display = on ? 'block' : 'none';
+    }
+
+    function updateUI() {
+      var b = el('recToggleBtn');
+      if (!b) return;
+      if (pref) { b.className = b.className.replace(/\s*active-seg/g, '') + ' active-seg'; }
+      else { b.className = b.className.replace(/\s*active-seg/g, ''); }
+    }
+
+    function release() {
+      if (stream) {
+        try { var t = stream.getTracks(); for (var i = 0; i < t.length; i++) t[i].stop(); } catch (e) {}
+      }
+      stream = null;
+    }
+
+    function saveRecord(blob, meta, cb) {
+      openDB(function (d) {
+        if (!d) { cb(false); return; }
+        try {
+          var rec2 = { lessonId: meta.lessonId, lessonNumber: meta.lessonNumber, title: meta.title,
+                       day: meta.day, student: meta.student, grade: meta.grade, date: meta.date,
+                       seconds: meta.seconds, mime: meta.mime, size: blob.size, blob: blob };
+          var tx = d.transaction(STORE, 'readwrite');
+          var os = tx.objectStore(STORE);
+          os.add(rec2);
+          tx.oncomplete = function () { index[keyOf(meta.lessonId, meta.day)] = true; prune(); cb(true); };
+          tx.onerror = function () { cb(false); };
+          tx.onabort = function () { cb(false); };
+        } catch (e) { cb(false); }
+      });
+    }
+
+    function prune() {
+      openDB(function (d) {
+        if (!d) return;
+        try {
+          var tx = d.transaction(STORE, 'readwrite');
+          var os = tx.objectStore(STORE);
+          var keys = [];
+          var cur = os.openCursor();
+          cur.onsuccess = function () {
+            var c = cur.result;
+            if (c) { keys.push(c.key); c['continue'](); }
+            else {
+              while (keys.length > MAX_KEEP) os['delete'](keys.shift());
+            }
+          };
+        } catch (e) {}
+      });
+    }
+
+    function finalize() {
+      var c = ctx; ctx = null;
+      var secs = c ? Math.round((new Date().getTime() - c.t0) / 1000) : 0;
+      var blob = null;
+      try { blob = new window.Blob(chunks, { type: mime || 'video/webm' }); } catch (e) { blob = null; }
+      chunks = [];
+      rec = null;
+      release();
+      setPill(false);
+      if (!c || !blob || !blob.size) return;
+      if (secs < MIN_SEC) { return; }
+      c.seconds = secs; c.mime = blob.type || mime;
+      saveRecord(blob, c, function (ok) {
+        say(ok ? 'Reading video saved on this device' : 'Could not save video', 2600);
+      });
+    }
+
+    function start() {
+      if (!pref || !supported || rec || starting || !currentLesson) return;
+      starting = true; stopWanted = false;
+      var c = {
+        lessonId: currentLesson.id, lessonNumber: currentLesson.lessonNumber, title: currentLesson.title,
+        day: currentDay, student: profile.name, grade: profile.grade, date: new Date().getTime(), t0: 0
+      };
+      var p;
+      try {
+        p = navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } },
+          audio: true
+        });
+      } catch (e) { starting = false; return; }
+      p.then(function (s) {
+        starting = false;
+        if (stopWanted || !pref) { stream = s; release(); return; }
+        stream = s;
+        mime = pickMime();
+        var opts = { videoBitsPerSecond: 250000, audioBitsPerSecond: 32000 };
+        if (mime) opts.mimeType = mime;
+        try { rec = new window.MediaRecorder(s, opts); }
+        catch (e1) { try { rec = new window.MediaRecorder(s); } catch (e2) { rec = null; } }
+        if (!rec) { release(); say('Recording not available here', 2800); return; }
+        if (!mime) mime = rec.mimeType || '';
+        chunks = [];
+        rec.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        rec.onstop = finalize;
+        c.t0 = new Date().getTime();
+        ctx = c;
+        try { rec.start(1000); } catch (e3) { rec = null; ctx = null; release(); return; }
+        setPill(true);
+        timer = setTimeout(function () { timer = null; stop(); }, MAX_SEC * 1000);
+      })['catch'](function () {
+        starting = false;
+        pref = false; writePref(false); updateUI();
+        say('Camera or microphone blocked — recording is off', 3200);
+      });
+    }
+
+    function stop() {
+      stopWanted = true;
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (rec && rec.state !== 'inactive') { try { rec.stop(); } catch (e) { finalize(); } }
+      else if (!starting) { release(); setPill(false); }
+    }
+
+    function toggle() {
+      if (!supported) { say('Video recording is not supported on this device', 3200); return; }
+      if (pref) {
+        pref = false; writePref(false); updateUI(); stop();
+        say('Recording off', 1800);
+        return;
+      }
+      var ok = true;
+      try {
+        ok = window.confirm('Record a video of you reading?\n\nThe video is saved only on this device. ' +
+          'Your teacher may ask you to send it as proof.');
+      } catch (e) { ok = true; }
+      if (!ok) return;
+      pref = true; writePref(true); updateUI();
+      say('Recording on — it starts while you read', 2600);
+      start();
+    }
+
+    /* ---------- Recordings list ---------- */
+    function listAll(cb) {
+      openDB(function (d) {
+        if (!d) { cb([]); return; }
+        var out = [];
+        try {
+          var cur = d.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
+          cur.onsuccess = function () {
+            var c = cur.result;
+            if (c) { out.push(c.value); c['continue'](); }
+            else { out.reverse(); cb(out); }
+          };
+          cur.onerror = function () { cb([]); };
+        } catch (e) { cb([]); }
+      });
+    }
+
+    function removeOne(id, cb) {
+      openDB(function (d) {
+        if (!d) { cb(); return; }
+        try {
+          var tx = d.transaction(STORE, 'readwrite');
+          tx.objectStore(STORE)['delete'](id);
+          tx.oncomplete = function () { loadIndex(); cb(); };
+          tx.onerror = function () { cb(); };
+        } catch (e) { cb(); }
+      });
+    }
+
+    function fmtDate(ts) {
+      var d = new Date(ts), m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var h = d.getHours(), mi = d.getMinutes();
+      return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + (h < 10 ? '0' : '') + h + ':' + (mi < 10 ? '0' : '') + mi;
+    }
+    function fmtSize(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+
+    function fileNameFor(r) {
+      var ext = /mp4/i.test(r.mime || '') ? 'mp4' : 'webm';
+      var who = String(r.student || 'student').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase() || 'student';
+      return 'reading_' + who + '_L' + r.lessonNumber + '_day' + r.day + '_' + r.id + '.' + ext;
+    }
+
+    function download(r) {
+      var url = window.URL.createObjectURL(r.blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = fileNameFor(r);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { try { window.URL.revokeObjectURL(url); } catch (e) {} }, 4000);
+    }
+
+    function sendVideo(r) {
+      var text = 'Reading video\nName: ' + r.student + '\nGrade: ' + r.grade + '\nLesson: ' + r.lessonNumber + ' – ' + r.title + '\nDay: ' + r.day + ' of 5';
+      try {
+        if (typeof window.File === 'function' && navigator.canShare && navigator.share) {
+          var f = new window.File([r.blob], fileNameFor(r), { type: r.blob.type || r.mime || 'video/webm' });
+          if (navigator.canShare({ files: [f] })) {
+            navigator.share({ files: [f], title: 'Reading video', text: text })['catch'](function (e) {
+              if (!e || e.name !== 'AbortError') download(r);
+            });
+            return;
+          }
+        }
+      } catch (e) {}
+      download(r);
+      say('Video saved to your downloads — send it to your teacher', 3200);
+    }
+
+    function stopPlay() {
+      if (playUrl) { try { window.URL.revokeObjectURL(playUrl); } catch (e) {} playUrl = null; }
+    }
+
+    function esc2(s) { return String(s).replace(/[&<>"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]; }); }
+
+    function renderList() {
+      var box = el('recList');
+      if (!box) return;
+      box.innerHTML = '<div class="rec-empty">Loading…</div>';
+      listAll(function (items) {
+        box.innerHTML = '';
+        if (!items.length) {
+          box.innerHTML = '<div class="rec-empty">No videos yet. Turn on “Record my reading” in the ⋮ menu while reading.</div>';
+          return;
+        }
+        items.forEach(function (r) {
+          var row = document.createElement('div');
+          row.className = 'rec-item';
+          row.innerHTML =
+            '<div class="rec-title">Lesson ' + r.lessonNumber + ' — ' + esc2(r.title) + '</div>' +
+            '<div class="rec-meta">Day ' + r.day + ' · ' + fmtDate(r.date) + ' · ' + r.seconds + 's · ' + fmtSize(r.size) + '</div>' +
+            '<div class="rec-player"></div>' +
+            '<div class="rec-actions">' +
+              '<button type="button" class="rec-btn" data-a="play">Play</button>' +
+              '<button type="button" class="rec-btn rec-send" data-a="send">Send</button>' +
+              '<button type="button" class="rec-btn" data-a="save">Save</button>' +
+              '<button type="button" class="rec-btn rec-del" data-a="del">Delete</button>' +
+            '</div>';
+          row.onclick = function (e) {
+            e = e || window.event;
+            var t = e.target || e.srcElement;
+            var a = t && t.getAttribute ? t.getAttribute('data-a') : null;
+            if (!a) return;
+            if (a === 'play') {
+              stopPlay();
+              var all = box.querySelectorAll('.rec-player');
+              for (var i = 0; i < all.length; i++) all[i].innerHTML = '';
+              playUrl = window.URL.createObjectURL(r.blob);
+              var pl = row.querySelector('.rec-player');
+              pl.innerHTML = '<video controls playsinline autoplay></video>';
+              var v = pl.firstChild;
+              v.src = playUrl;
+            } else if (a === 'send') { sendVideo(r); }
+            else if (a === 'save') { download(r); }
+            else if (a === 'del') {
+              var ok = true;
+              try { ok = window.confirm('Delete this video? This cannot be undone.'); } catch (x) { ok = true; }
+              if (ok) { stopPlay(); removeOne(r.id, renderList); }
+            }
+          };
+          box.appendChild(row);
+        });
+      });
+    }
+
+    function openList() {
+      if (!supported) { say('Video recording is not supported on this device', 3200); return; }
+      el('recOverlay').className = 'rec-overlay show';
+      renderList();
+    }
+    function closeList() {
+      stopPlay();
+      var pl = document.querySelectorAll('#recList video');
+      for (var i = 0; i < pl.length; i++) { try { pl[i].pause(); } catch (e) {} }
+      el('recOverlay').className = 'rec-overlay';
+    }
+
+    function bind(id, fn) {
+      var n = el(id);
+      if (n) n.addEventListener('click', fn, false);
+    }
+
+    function init() {
+      pref = supported && readPref();
+      var t = el('recToggleBtn');
+      if (t && !supported) t.style.display = 'none';
+      var l = el('recListBtn');
+      if (l && !supported) l.style.display = 'none';
+      updateUI();
+      bind('recToggleBtn', toggle);
+      bind('recListBtn', openList);
+      bind('recCloseBtn', closeList);
+      bind('recAskContinue', askContinue);
+      bind('recAskStop', askStop);
+      bind('recPill', function () { showAsk(!!rec); });
+      var ov = el('recOverlay');
+      if (ov) ov.addEventListener('click', function (e) { if (e.target === ov) closeList(); }, false);
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); }, false);
+      loadIndex();
+    }
+
+    var lastScreen = '';
+    function showAsk(active) {
+      var t = el('recAskText');
+      if (t) t.innerHTML = active ? 'Your reading is being recorded.<br>Keep going or stop?' : 'Record a video of you reading?<br>It stays on this device.';
+      el('recAskOverlay').className = 'rec-ask show';
+    }
+    function hideAsk() { var o = el('recAskOverlay'); if (o) o.className = 'rec-ask'; }
+    function askContinue() {
+      hideAsk();
+      if (!rec && !starting) start();
+    }
+    function askStop() {
+      hideAsk();
+      pref = false; writePref(false); updateUI(); stop();
+      say('Recording off', 1800);
+    }
+
+    return {
+      init: init,
+      has: function (lessonId, day) { return !!index[keyOf(lessonId, day)]; },
+      onScreen: function (id) {
+        var prev = lastScreen; lastScreen = id;
+        if (id === 'readingScreen') {
+          if (!pref) return;
+          if (prev === 'questionsScreen' || prev === 'soundHuntScreen' || prev === 'readingScreen') start();
+          else showAsk(false);
+        } else { stop(); hideAsk(); }
+      },
+      ask: function () { showAsk(!!rec); }
+    };
+  })();
+  RecMod.init();
 
   /* ========== INIT ========== */
   loadStore();
