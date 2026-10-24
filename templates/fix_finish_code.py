@@ -1,47 +1,162 @@
 #!/usr/bin/env python3
 """
-apply_patches.py  (complete, four files)
+apply_all.py — one-shot in-place patcher for all four Decodable Reader builds.
 
-  P-readerT-1.html       (modern ES6, v1)
-  P-readerT-2.html       (modern ES6, v2)
-  P-readerT-old1.html    (legacy ES5, v1)
-  P-readerT-old2.html    (legacy ES5, v2)
+Per file:
+  1. Backup: if <file>.bak doesn't exist, copy the current file to it.
+     On re-run, <file>.bak is used as source (pristine). Manual edits to the
+     main file will be overwritten — the .bak is the source of truth.
+  2. Merge: SOUND_HUNT_DATA is folded into each lesson's targetWords/decoyWords.
+     SOUND_HUNT_DATA declaration and merge loop are removed.
+  3. Patches: all 17 patches applied in order.
+  4. Write back: only if merge + ALL patches succeed. Otherwise file untouched.
 
-Writes *.patched.html — originals untouched.
+Usage:
+    python3 apply_all.py
+    python3 apply_all.py P-readerT-1.html        # single file
 """
 
+import json
+import re
 import sys
 from pathlib import Path
 
-MODERN_FILES = ["P-readerT-1.html", "P-readerT-2.html"]
-LEGACY_FILES = ["P-readerT-old1.html", "P-readerT-old2.html"]
+FILES = [
+    "P-readerT-1.html",
+    "P-readerT-2.html",
+    "P-readerT-old1.html",
+    "P-readerT-old2.html",
+]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# ═════════════════════════════════════════════════════════════════════════════
+# Merge: SOUND_HUNT_DATA → LESSONS
+# ═════════════════════════════════════════════════════════════════════════════
 
-def apply_one(html, find, replace, name):
+def _span_of_block(html, prefixes, open_c, close_c):
+    """Return (start_of_decl, index_after_close) or None. String-aware."""
+    start = open_idx = -1
+    for pat in prefixes:
+        i = html.find(pat)
+        if i >= 0:
+            start = i
+            open_idx = i + len(pat) - 1
+            break
+    if open_idx < 0:
+        return None
+    depth, i, in_str, esc = 0, open_idx, False, False
+    while i < len(html):
+        c = html[i]
+        if in_str:
+            if esc: esc = False
+            elif c == '\\': esc = True
+            elif c == '"': in_str = False
+        else:
+            if c == '"': in_str = True
+            elif c == open_c: depth += 1
+            elif c == close_c:
+                depth -= 1
+                if depth == 0:
+                    return (start, i + 1)
+        i += 1
+    return None
+
+
+def merge_lesson_data(html):
+    lessons_span = _span_of_block(html, ["const LESSONS = [", "var LESSONS = ["], "[", "]")
+    if not lessons_span:
+        raise RuntimeError("LESSONS array not found")
+    sh_span = _span_of_block(
+        html,
+        ["const SOUND_HUNT_DATA = {", "var SOUND_HUNT_DATA = {"],
+        "{", "}",
+    )
+    if not sh_span:
+        raise RuntimeError("SOUND_HUNT_DATA object not found")
+
+    l_open = html.find("[", lessons_span[0])
+    l_close = lessons_span[1] - 1
+    lessons = json.loads(html[l_open:l_close + 1])
+
+    s_open = html.find("{", sh_span[0])
+    s_close = sh_span[1] - 1
+    sh_data = json.loads(html[s_open:s_close + 1])
+
+    merged = 0
+    for lesson in lessons:
+        entry = sh_data.get(lesson.get("id"))
+        if (isinstance(entry, dict)
+                and isinstance(entry.get("targetWords"), list)
+                and isinstance(entry.get("decoyWords"), list)
+                and len(entry["targetWords"]) >= 5
+                and len(entry["decoyWords"]) >= 5):
+            lesson["targetWords"] = entry["targetWords"]
+            lesson["decoyWords"] = entry["decoyWords"]
+            merged += 1
+
+    new_lessons = json.dumps(lessons, indent=2, ensure_ascii=False)
+
+    replacements = []
+
+    # (a) LESSONS content
+    replacements.append((l_open, l_close + 1, new_lessons))
+
+    # (b) SOUND_HUNT_DATA declaration + one trailing newline
+    end = s_close + 1
+    while end < len(html) and html[end] in " \t;":
+        end += 1
+    if end < len(html) and html[end] == '\r': end += 1
+    if end < len(html) and html[end] == '\n': end += 1
+    replacements.append((sh_span[0], end, ""))
+
+    # (c) merge loop (both variants)
+    loop = re.compile(
+        r"\n[ \t]*// Merge Sound Hunt data into lessons\n[ \t]*LESSONS\.forEach\(l => \{[\s\S]*?\n[ \t]*\}\);[ \t]*\n"
+        r"|"
+        r"\n[ \t]*/\* Merge Sound Hunt data into lessons \*/\n[ \t]*LESSONS\.forEach\(function \(l\) \{[\s\S]*?\n[ \t]*\}\);[ \t]*\n",
+        re.MULTILINE,
+    )
+    m = loop.search(html)
+    if m:
+        replacements.append((m.start(), m.end(), "\n"))
+
+    # apply in reverse so earlier offsets stay valid
+    replacements.sort(key=lambda r: r[0], reverse=True)
+    for start, end, repl in replacements:
+        html = html[:start] + repl + html[end:]
+
+    # (d) section header comment
+    html = html.replace("/* ========== SOUND HUNT DATA ========== */\n", "", 1)
+    # collapse the blank lines the removal left behind
+    html = html.replace("];\n\n\n\n", "];\n\n")
+
+    return html, merged
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Patches
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _apply(html, find, replace):
     n = html.count(find)
     if n == 0:
-        return html, False, f"{name}: FIND not found"
+        return html, False, "FIND not found"
     if n > 1:
-        return html, False, f"{name}: FIND matched {n}x (expected 1)"
-    return html.replace(find, replace, 1), True, f"{name}: OK"
+        return html, False, f"FIND matched {n}x"
+    return html.replace(find, replace, 1), True, "OK"
 
 
-def apply_patches(html, patches):
+def apply_patches(html, patches, verbose=False):
     results = []
     for name, find, replace in patches:
-        html, ok, msg = apply_one(html, find, replace, name)
+        html, ok, msg = _apply(html, find, replace)
         results.append((name, ok, msg))
-        print(f"    {'✓' if ok else '✗'} {msg}")
+        if not ok or verbose:
+            print(f"      {'✓' if ok else '✗'} {name}: {msg}")
     return html, results
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MODERN (ES6) patches
-# ─────────────────────────────────────────────────────────────────────────────
+# ─── MODERN (ES6) ────────────────────────────────────────────────────────────
 
 MODERN_PATCHES = [
 
@@ -511,9 +626,7 @@ MODERN_PATCHES = [
       text-align: left; margin-top: 12px; padding-top: 12px;
       border-top: 1px dashed var(--border);
     }
-    .res-meta-line {
-      font-size: 0.85rem; font-weight: 600; padding: 2px 0; line-height: 1.35;
-    }
+    .res-meta-line { font-size: 0.85rem; font-weight: 600; padding: 2px 0; line-height: 1.35; }
     .res-meta-line.muted { color: var(--text-3); font-weight: 500; font-size: 0.8rem; }
     .results-bottom-bar { flex-direction: column; gap: 8px; }
     .results-secondary-row { display: flex; gap: 8px; width: 100%; }
@@ -701,9 +814,7 @@ MODERN_PATCHES = [
 ]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# LEGACY (ES5) patches
-# ─────────────────────────────────────────────────────────────────────────────
+# ─── LEGACY (ES5) ────────────────────────────────────────────────────────────
 
 LEGACY_PATCHES = [
 
@@ -1443,54 +1554,83 @@ LEGACY_PATCHES = [
 ]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# main
-# ─────────────────────────────────────────────────────────────────────────────
+# ═════════════════════════════════════════════════════════════════════════════
+# Orchestration
+# ═════════════════════════════════════════════════════════════════════════════
 
-def process(src_path, patches, label):
-    print(f"\n=== {label}: {src_path.name} ===")
-    if not src_path.exists():
-        print(f"    ✗ file not found — skipping")
-        return {"file": src_path.name, "present": False, "ok": 0, "fail": 0}
+def process_file(fname: str, verbose: bool = False) -> dict:
+    src = Path(fname)
+    bak = Path(fname + ".bak")
 
-    html = src_path.read_text(encoding="utf-8")
-    html, results = apply_patches(html, patches)
+    print(f"\n── {fname} ──")
 
-    dst = src_path.with_suffix(".patched.html")
-    dst.write_text(html, encoding="utf-8")
+    if not src.exists():
+        print(f"   ✗ file not found")
+        return {"file": fname, "ok": False, "reason": "missing"}
+
+    # ── Backup / load pristine source ────────────────────────────────
+    if bak.exists():
+        print(f"   using .bak as source (idempotent — will not touch .bak)")
+        content = bak.read_text(encoding="utf-8")
+    else:
+        content = src.read_text(encoding="utf-8")
+        bak.write_text(content, encoding="utf-8")
+        print(f"   backed up  →  {bak.name}")
+
+    # ── Merge ────────────────────────────────────────────────────────
+    try:
+        content, merged = merge_lesson_data(content)
+        print(f"   merge: {merged} lessons received targetWords/decoyWords")
+    except Exception as e:
+        print(f"   ✗ merge failed: {e}")
+        print(f"   → {fname} NOT modified")
+        return {"file": fname, "ok": False, "reason": f"merge: {e}"}
+
+    # ── Patches ──────────────────────────────────────────────────────
+    patches = LEGACY_PATCHES if "old" in fname.lower() else MODERN_PATCHES
+    content, results = apply_patches(content, patches, verbose=verbose)
 
     ok_count = sum(1 for _, ok, _ in results if ok)
     fail_count = len(results) - ok_count
-    print(f"    → {ok_count} OK, {fail_count} failed  →  wrote {dst.name}")
-    return {"file": src_path.name, "present": True, "ok": ok_count, "fail": fail_count}
+
+    if fail_count > 0:
+        print(f"   ✗ {fail_count}/{len(patches)} patches failed")
+        for name, ok, msg in results:
+            if not ok:
+                print(f"       ✗ {name}: {msg}")
+        print(f"   → {fname} NOT modified (fix the failures first)")
+        return {"file": fname, "ok": False, "reason": f"{fail_count} patches failed"}
+
+    # ── Write back ───────────────────────────────────────────────────
+    src.write_text(content, encoding="utf-8")
+    print(f"   ✓ {ok_count} patches applied + merge  →  {fname} updated")
+    return {"file": fname, "ok": True, "reason": "OK"}
 
 
 def main():
-    print("Applying patches to all builds…\n")
+    args = sys.argv[1:]
+    verbose = "--verbose" in args or "-v" in args
+    targets = [a for a in args if not a.startswith("-")] or FILES
 
-    summary = []
-    for f in MODERN_FILES:
-        summary.append(process(Path(f), MODERN_PATCHES, "MODERN"))
-    for f in LEGACY_FILES:
-        summary.append(process(Path(f), LEGACY_PATCHES, "LEGACY"))
+    print("═" * 60)
+    print("Decodable Reader — merge + patch (in-place)")
+    print("═" * 60)
 
-    print("\n──────────── summary ────────────")
-    all_green = True
+    summary = [process_file(f, verbose=verbose) for f in targets]
+
+    print("\n" + "═" * 60)
+    print("Summary")
+    print("═" * 60)
     for s in summary:
-        if not s["present"]:
-            print(f"  {s['file']:<26}  MISSING")
-            all_green = False
-        elif s["fail"] == 0:
-            print(f"  {s['file']:<26}  ✓ {s['ok']} patches applied")
-        else:
-            print(f"  {s['file']:<26}  ⚠ {s['ok']} OK, {s['fail']} failed")
-            all_green = False
+        mark = "✓" if s["ok"] else "✗"
+        print(f"  {mark}  {s['file']:<26} {s['reason']}")
 
-    print("\nOriginals untouched. Output written as *.patched.html")
-    if not all_green:
-        print("\nFailed patches are usually whitespace/version drift.")
-        print("Paste the ✗ lines back and I'll issue per-file variants.")
+    if not all(s["ok"] for s in summary):
+        print("\nFiles that failed were NOT touched. .bak backups are intact.")
         sys.exit(1)
+    else:
+        print("\nAll files updated in place.")
+        print("Originals are in *.bak — restore by copying them back if needed.")
 
 
 if __name__ == "__main__":
