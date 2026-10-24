@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Decodable Reader</title>
@@ -45,7 +46,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #f1f5f9;
       background: var(--bg);
+      color: #0f172a;
       color: var(--text);
       min-height: 100%;
       -webkit-font-smoothing: antialiased;
@@ -62,7 +65,7 @@
     .badge-icon  { width: 11px; height: 11px; vertical-align: -1px; margin-right: 2px; }
     .banner-icon { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
     .app-header h1 > svg { width: 20px; height: 20px; vertical-align: -4px; margin-right: 4px; }
-    .profile-card .logo svg { width: 56px; height: 56px; color: var(--accent); }
+    .profile-card .logo svg { width: 56px; height: 56px; color: #f59e0b; color: var(--accent); }
 
     /* Screens */
     .screen { display: none; min-height: 100vh; flex-direction: column; }
@@ -71,19 +74,25 @@
     /* Header */
     .app-header {
       position: sticky; top: 0; z-index: 50;
+      background: #ffffff;
       background: var(--surface);
+      border-bottom: 1px solid #e2e8f0;
       border-bottom: 1px solid var(--border);
       padding: 12px 16px;
       display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 1px 0 #e2e8f0;
       box-shadow: 0 1px 0 var(--border);
     }
     .app-header h1 { font-size: 1.05rem; font-weight: 800; flex: 1; letter-spacing: -0.02em; }
-    .app-header .meta { font-size: 0.72rem; color: var(--text-3); font-weight: 600; }
+    .app-header .meta { font-size: 0.72rem; color: #94a3b8; color: var(--text-3); font-weight: 600; }
     .icon-btn {
       width: 40px; height: 40px; border-radius: 50%;
-      border: 1px solid var(--border); background: var(--surface-2);
+      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      background: var(--surface-2);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--text);
+      cursor: pointer; color: #0f172a; color: var(--text);
       flex-shrink: 0;
     }
     .icon-btn:active { transform: scale(0.94); }
@@ -98,12 +107,13 @@
     }
     .btn:active:not(:disabled) { transform: scale(0.97); }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-primary { background: var(--accent); color: #0f172a; }
-    .btn-primary:not(:disabled):hover { background: var(--accent-dark); }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-wa { background: linear-gradient(135deg, #25d366, #128c7e); color: #fff; }
+    .btn-primary { background: #f59e0b; background: var(--accent); color: #0f172a; }
+    .btn-primary:not(:disabled):hover { background: #d97706; background: var(--accent-dark); }
+    .btn-success { background: #16a34a; background: var(--success); color: #fff; }
+    .btn-wa { background: #25d366; background: linear-gradient(135deg, #25d366, #128c7e); color: #fff; }
     .btn-outline {
-      background: transparent; border: 2px solid var(--border); color: var(--text-2);
+      background: transparent; border: 2px solid #e2e8f0; border: 2px solid var(--border);
+      color: #475569; color: var(--text-2);
     }
     .btn-block { width: 100%; }
     .btn-lg { padding: 16px 24px; font-size: 1.05rem; border-radius: 14px; }
@@ -111,40 +121,51 @@
     /* Profile Screen */
     #profileScreen {
       justify-content: center; padding: 24px 20px;
+      background: #f1f5f9;
       background: radial-gradient(ellipse at top, #fef3c7 0%, transparent 55%), var(--bg);
     }
     [data-theme="dark"] #profileScreen {
+      background: #0f172a;
       background: radial-gradient(ellipse at top, #1e293b 0%, transparent 55%), var(--bg);
     }
     .profile-card {
-      background: var(--surface); border-radius: 24px; padding: 32px 24px;
-      box-shadow: var(--shadow); border: 1px solid var(--border); max-width: 400px; width: 100%; margin: 0 auto;
+      background: #ffffff;
+      background: var(--surface);
+      border-radius: 24px; padding: 32px 24px;
+      box-shadow: 0 4px 20px rgba(15,23,42,0.08);
+      box-shadow: var(--shadow);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      max-width: 400px; width: 100%; margin: 0 auto;
     }
     .profile-card .logo { text-align: center; margin-bottom: 12px; line-height: 1; }
     .profile-card h2 { text-align: center; font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
-    .profile-card .sub { text-align: center; color: var(--text-2); font-size: 0.9rem; margin-bottom: 24px; }
+    .profile-card .sub { text-align: center; color: #475569; color: var(--text-2); font-size: 0.9rem; margin-bottom: 24px; }
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #475569; color: var(--text-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
     .form-group input {
-      width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px;
-      font-size: 1rem; font-family: inherit; background: var(--surface-2); color: var(--text);
+      width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border: 2px solid var(--border); border-radius: 12px;
+      font-size: 1rem; font-family: inherit; background: #f8fafc; background: var(--surface-2);
+      color: #0f172a; color: var(--text);
     }
-    .form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(245,158,11,0.2); }
-    .char-count { font-size: 0.7rem; color: var(--text-3); text-align: right; margin-top: 4px; }
+    .form-group input:focus { outline: none; border-color: #f59e0b; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(245,158,11,0.2); }
+    .char-count { font-size: 0.7rem; color: #94a3b8; color: var(--text-3); text-align: right; margin-top: 4px; }
 
     /* Home / Lesson List */
     #homeScreen .content { flex: 1; padding: 16px; overflow-y: auto; }
     .student-banner {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      background: #ffffff; background: var(--surface);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 16px; border-radius: var(--radius);
       padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
     }
     .student-banner .avatar {
-      width: 44px; height: 44px; border-radius: 50%; background: var(--accent);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #f59e0b; background: var(--accent);
       display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0f172a; font-size: 1.1rem;
     }
     .student-banner .info { flex: 1; min-width: 0; }
     .student-banner .name { font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .student-banner .grade { font-size: 0.78rem; color: var(--text-3); font-weight: 600; }
+    .student-banner .grade { font-size: 0.78rem; color: #94a3b8; color: var(--text-3); font-weight: 600; }
 
     /* Data bar (export / backup / import) */
     .data-bar {
@@ -152,48 +173,57 @@
     }
     .data-btn {
       flex: 1; padding: 10px 8px; border-radius: 10px;
-      border: 1px solid var(--border); background: var(--surface);
-      color: var(--text-2); font-family: inherit; font-size: 0.72rem; font-weight: 700;
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      background: #ffffff; background: var(--surface);
+      color: #475569; color: var(--text-2);
+      font-family: inherit; font-size: 0.72rem; font-weight: 700;
       cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center; gap: 5px;
       letter-spacing: -0.01em; line-height: 1;
       -webkit-tap-highlight-color: transparent;
     }
     .data-btn:active { transform: scale(0.97); }
-    .data-btn:hover { border-color: var(--accent); color: var(--text); }
+    .data-btn:hover { border-color: #f59e0b; border-color: var(--accent); color: #0f172a; color: var(--text); }
     .data-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
     .lesson-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+      background: #ffffff; background: var(--surface);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 16px; border-radius: var(--radius);
+      padding: 16px; margin-bottom: 10px; cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
       display: flex; gap: 14px; align-items: flex-start;
     }
     .lesson-card:active { transform: scale(0.99); }
-    .lesson-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .lesson-card:hover { border-color: #f59e0b; border-color: var(--accent); box-shadow: 0 4px 20px rgba(15,23,42,0.08); box-shadow: var(--shadow); }
     .lesson-num {
-      width: 42px; height: 42px; border-radius: 12px; background: var(--surface-2);
+      width: 42px; height: 42px; border-radius: 12px;
+      background: #f8fafc; background: var(--surface-2);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 0.95rem; color: var(--text-2); flex-shrink: 0;
+      font-weight: 800; font-size: 0.95rem; color: #475569; color: var(--text-2); flex-shrink: 0;
     }
-    .lesson-card.mastered .lesson-num { background: var(--day5); color: #fff; }
+    .lesson-card.mastered .lesson-num { background: #a855f7; background: var(--day5); color: #fff; }
     .lesson-body { flex: 1; min-width: 0; }
     .lesson-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
-    .lesson-sound { font-size: 0.75rem; color: var(--text-3); font-weight: 600; margin-bottom: 8px; }
+    .lesson-sound { font-size: 0.75rem; color: #94a3b8; color: var(--text-3); font-weight: 600; margin-bottom: 8px; }
     .day-pills { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
     .day-pill {
-      width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid #e2e8f0; border: 2px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.65rem; font-weight: 800; color: var(--text-3); background: var(--surface-2);
+      font-size: 0.65rem; font-weight: 800; color: #94a3b8; color: var(--text-3);
+      background: #f8fafc; background: var(--surface-2);
     }
     .day-pill.done { color: #fff; border-color: transparent; }
-    .day-pill.d1 { background: var(--day1); }
-    .day-pill.d2 { background: var(--day2); color: #0f172a; }
-    .day-pill.d3 { background: var(--day3); }
-    .day-pill.d4 { background: var(--day4); }
-    .day-pill.d5 { background: var(--day5); }
-    .day-label { font-size: 0.72rem; font-weight: 700; color: var(--text-2); margin-left: 4px; }
+    .day-pill.d1 { background: #ef4444; background: var(--day1); }
+    .day-pill.d2 { background: #eab308; background: var(--day2); color: #0f172a; }
+    .day-pill.d3 { background: #22c55e; background: var(--day3); }
+    .day-pill.d4 { background: #3b82f6; background: var(--day4); }
+    .day-pill.d5 { background: #a855f7; background: var(--day5); }
+    .day-label { font-size: 0.72rem; font-weight: 700; color: #475569; color: var(--text-2); margin-left: 4px; }
     .mastered-badge {
       display: inline-flex; align-items: center;
+      background: #a855f7;
       background: linear-gradient(135deg, #a855f7, #6366f1);
       color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px;
       border-radius: 20px; letter-spacing: 0.02em; margin-top: 6px;
@@ -202,43 +232,57 @@
     /* Reading Screen */
     #readingScreen .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 100px; }
     .target-bar {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      background: #ffffff; background: var(--surface);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 12px;
       padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
     }
-    .target-bar .sound { font-size: 0.85rem; font-weight: 700; color: var(--text-2); flex: 1; }
-    .story-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; }
+    .target-bar .sound { font-size: 0.85rem; font-weight: 700; color: #475569; color: var(--text-2); flex: 1; }
+    .story-area {
+      background: #ffffff; background: var(--surface);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 16px; border-radius: var(--radius);
+      padding: 18px 16px;
+    }
     .story-line {
       display: flex; flex-wrap: wrap; gap: 6px 8px; margin-bottom: 14px;
-      padding-bottom: 14px; border-bottom: 1px dashed var(--border);
+      padding-bottom: 14px; border-bottom: 1px dashed #e2e8f0; border-bottom: 1px dashed var(--border);
     }
     .story-line:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .story-line.dimmed { opacity: 0.45; }
     .story-line.hidden-chunk { display: none; }
     .word {
       display: inline-block; padding: 6px 4px; border-radius: 6px;
-      font-size: 1.15rem; font-weight: 600; cursor: pointer; user-select: none;
+      font-size: 1.15rem; font-weight: 600; cursor: pointer;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
       transition: color 0.15s, background 0.15s, transform 0.1s;
       -webkit-tap-highlight-color: transparent;
-      color: var(--text);
+      color: #0f172a; color: var(--text);
     }
     .word:active { transform: scale(0.96); }
     .word.tapped { font-weight: 700; }
-    .word.tapped.d1 { color: var(--day1); }
-    .word.tapped.d2 { color: var(--day2); }
-    .word.tapped.d3 { color: var(--day3); }
-    .word.tapped.d4 { color: var(--day4); }
-    .word.tapped.d5 { color: var(--day5); }
+    .word.tapped.d1 { color: #ef4444; color: var(--day1); }
+    .word.tapped.d2 { color: #eab308; color: var(--day2); }
+    .word.tapped.d3 { color: #22c55e; color: var(--day3); }
+    .word.tapped.d4 { color: #3b82f6; color: var(--day4); }
+    .word.tapped.d5 { color: #a855f7; color: var(--day5); }
     .progress-row {
       display: flex; align-items: center; gap: 10px; margin-top: 14px;
-      font-size: 0.8rem; font-weight: 600; color: var(--text-2);
+      font-size: 0.8rem; font-weight: 600; color: #475569; color: var(--text-2);
     }
-    .progress-track { flex: 1; height: 8px; background: var(--surface-2); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-    .progress-fill { height: 100%; background: var(--accent); border-radius: 20px; transition: width 0.3s; width: 0%; }
+    .progress-track {
+      flex: 1; height: 8px; background: #f8fafc; background: var(--surface-2);
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+    }
+    .progress-fill { height: 100%; background: #f59e0b; background: var(--accent); border-radius: 20px; transition: width 0.3s; width: 0%; }
 
     .bottom-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
-      background: var(--surface); border-top: 1px solid var(--border);
-      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      background: #ffffff; background: var(--surface);
+      border-top: 1px solid #e2e8f0; border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
       display: flex; gap: 10px;
     }
     .bottom-bar .btn { flex: 1; }
@@ -246,25 +290,30 @@
     /* Questions */
     #questionsScreen .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 100px; }
     .q-progress {
-      font-size: 0.8rem; font-weight: 700; color: var(--text-3);
+      font-size: 0.8rem; font-weight: 700; color: #94a3b8; color: var(--text-3);
       margin-bottom: 12px; letter-spacing: 0.04em;
     }
     .q-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 22px 18px; box-shadow: var(--shadow);
+      background: #ffffff; background: var(--surface);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 16px; border-radius: var(--radius);
+      padding: 22px 18px;
+      box-shadow: 0 4px 20px rgba(15,23,42,0.08); box-shadow: var(--shadow);
     }
     .q-text { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; line-height: 1.4; }
     .q-opt {
       display: block; width: 100%; text-align: left;
       padding: 16px 18px; margin-bottom: 10px; border-radius: 12px;
-      border: 2px solid var(--border); background: var(--surface-2);
-      font-family: inherit; font-size: 1rem; font-weight: 600; color: var(--text);
+      border: 2px solid #e2e8f0; border: 2px solid var(--border);
+      background: #f8fafc; background: var(--surface-2);
+      font-family: inherit; font-size: 1rem; font-weight: 600;
+      color: #0f172a; color: var(--text);
       cursor: pointer; transition: border-color 0.15s, background 0.15s;
     }
     .q-opt:active:not(:disabled) { transform: scale(0.98); }
-    .q-opt:hover:not(:disabled) { border-color: var(--accent); }
-    .q-opt.correct { border-color: var(--success); background: #dcfce7; color: #166534; }
-    .q-opt.wrong { border-color: var(--danger); background: #fee2e2; color: #991b1b; }
+    .q-opt:hover:not(:disabled) { border-color: #f59e0b; border-color: var(--accent); }
+    .q-opt.correct { border-color: #16a34a; border-color: var(--success); background: #dcfce7; color: #166534; }
+    .q-opt.wrong { border-color: #dc2626; border-color: var(--danger); background: #fee2e2; color: #991b1b; }
     .q-opt:disabled { cursor: default; }
     [data-theme="dark"] .q-opt.correct { background: #14532d; color: #bbf7d0; }
     [data-theme="dark"] .q-opt.wrong { background: #7f1d1d; color: #fecaca; }
@@ -281,15 +330,18 @@
     /* Sound Hunt */
     #soundHuntScreen .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 100px; }
     .sh-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 20px 16px; box-shadow: var(--shadow);
+      background: #ffffff; background: var(--surface);
+      border: 1px solid #e2e8f0; border: 1px solid var(--border);
+      border-radius: 16px; border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: 0 4px 20px rgba(15,23,42,0.08); box-shadow: var(--shadow);
     }
     .sh-instruction {
       font-size: 1rem; font-weight: 700; margin-bottom: 6px; line-height: 1.4;
       text-align: center;
     }
     .sh-instruction .sh-sound {
-      color: var(--accent-dark);
+      color: #d97706; color: var(--accent-dark);
       background: #fef3c7;
       padding: 1px 8px;
       border-radius: 6px;
@@ -300,7 +352,7 @@
       color: #fde68a;
     }
     .sh-counter {
-      font-size: 0.85rem; font-weight: 700; color: var(--text-3);
+      font-size: 0.85rem; font-weight: 700; color: #94a3b8; color: var(--text-3);
       text-align: center; margin-bottom: 16px; letter-spacing: 0.04em;
     }
     .sh-grid {
@@ -312,12 +364,12 @@
     .sh-tile {
       padding: 18px 10px;
       border-radius: 12px;
-      border: 2px solid var(--border);
-      background: var(--surface-2);
+      border: 2px solid #e2e8f0; border: 2px solid var(--border);
+      background: #f8fafc; background: var(--surface-2);
       font-family: inherit;
       font-size: 1rem;
       font-weight: 700;
-      color: var(--text);
+      color: #0f172a; color: var(--text);
       cursor: pointer;
       transition: border-color 0.15s, background 0.15s, transform 0.1s;
       text-align: center;
@@ -325,22 +377,23 @@
       word-break: break-word;
       -webkit-tap-highlight-color: transparent;
     }
-    .sh-tile:hover:not(:disabled) { border-color: var(--accent); }
+    .sh-tile:hover:not(:disabled) { border-color: #f59e0b; border-color: var(--accent); }
     .sh-tile:active:not(:disabled) { transform: scale(0.97); }
     .sh-tile.selected {
-      border-color: var(--accent);
+      border-color: #f59e0b; border-color: var(--accent);
       background: #fef3c7;
       color: #92400e;
     }
     [data-theme="dark"] .sh-tile.selected {
       background: #78350f;
       color: #fde68a;
-      border-color: var(--accent);
+      border-color: #f59e0b; border-color: var(--accent);
     }
     .sh-tile.wrong {
-      border-color: var(--danger);
+      border-color: #dc2626; border-color: var(--danger);
       background: #fee2e2;
       color: #991b1b;
+      -webkit-animation: sh-shake 0.35s;
       animation: sh-shake 0.35s;
     }
     [data-theme="dark"] .sh-tile.wrong {
@@ -348,6 +401,11 @@
       color: #fecaca;
     }
     .sh-tile:disabled { cursor: default; }
+    @-webkit-keyframes sh-shake {
+      0%, 100% { -webkit-transform: translateX(0); }
+      25% { -webkit-transform: translateX(-4px); }
+      75% { -webkit-transform: translateX(4px); }
+    }
     @keyframes sh-shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-4px); }
@@ -357,56 +415,105 @@
     /* Results */
     #resultsScreen .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 24px; }
     .result-badge {
-      background: var(--surface); border: 2px solid var(--border); border-radius: 20px;
-      padding: 28px 20px; text-align: center; box-shadow: var(--shadow);
+      background: #ffffff; background: var(--surface);
+      border: 2px solid #e2e8f0; border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 20px; text-align: center;
+      box-shadow: 0 4px 20px rgba(15,23,42,0.08); box-shadow: var(--shadow);
       max-width: 400px; margin: 0 auto 20px;
     }
     .result-badge .badge-title {
       font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text-3); margin-bottom: 8px;
+      color: #94a3b8; color: var(--text-3); margin-bottom: 8px;
     }
     .result-badge .score-big {
       font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1;
       margin: 8px 0;
     }
-    .result-badge .score-big.pass { color: var(--success); }
-    .result-badge .score-big.fail { color: var(--danger); }
+    .result-badge .score-big.pass { color: #16a34a; color: var(--success); }
+    .result-badge .score-big.fail { color: #dc2626; color: var(--danger); }
     .result-badge .day-announce {
       display: inline-block; padding: 6px 16px; border-radius: 20px;
       font-weight: 800; font-size: 0.9rem; color: #fff; margin: 10px 0;
     }
     .result-badge .details {
       text-align: left; margin-top: 18px; padding-top: 16px;
-      border-top: 1px dashed var(--border); font-size: 0.88rem;
+      border-top: 1px dashed #e2e8f0; border-top: 1px dashed var(--border);
+      font-size: 0.88rem;
     }
     .result-badge .details .row {
       display: flex; justify-content: space-between; padding: 5px 0;
     }
-    .result-badge .details .label { color: var(--text-3); font-weight: 600; }
+    .result-badge .details .label { color: #94a3b8; color: var(--text-3); font-weight: 600; }
     .result-badge .details .val { font-weight: 700; text-align: right; }
     .result-badge .day-row { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
     .result-badge .day-row .dp {
       width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 800; border: 2px solid var(--border); color: var(--text-3);
+      font-size: 0.75rem; font-weight: 800;
+      border: 2px solid #e2e8f0; border: 2px solid var(--border);
+      color: #94a3b8; color: var(--text-3);
     }
     .result-badge .day-row .dp.done { color: #fff; border-color: transparent; }
     .result-badge .day-row .dp.done.d2 { color: #0f172a; }
     .result-badge .champ {
       margin-top: 14px; padding: 10px 14px; border-radius: 12px;
+      background: #a855f7;
       background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff;
       font-weight: 800; font-size: 0.9rem; display: none;
       align-items: center; justify-content: center;
     }
     .result-badge .champ svg { width: 16px; height: 16px; margin-right: 6px; }
     .result-badge .champ.show { display: inline-flex; }
+    .finish-code-box {
+      margin: 14px auto 0;
+      padding: 12px 16px;
+      background: var(--surface-2);
+      border: 2px dashed var(--primary);
+      border-radius: 14px;
+      text-align: center;
+      max-width: 320px;
+      cursor: pointer;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+    .finish-code-box:hover { background: var(--surface); }
+    .finish-code-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 4px;
+    }
+    .finish-code-value {
+      font-family: ui-monospace, Menlo, Consolas, 'Courier New', monospace;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      line-height: 1.1;
+      word-break: break-all;
+    }
+    .finish-code-meta {
+      font-size: 0.72rem;
+      color: var(--text-3);
+      margin-top: 4px;
+      font-weight: 600;
+    }
     .result-actions { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-    .submit-note { font-size: 0.75rem; color: var(--text-3); text-align: center; margin-top: 4px; }
+    .submit-note { font-size: 0.75rem; color: #94a3b8; color: var(--text-3); text-align: center; margin-top: 4px; }
 
     /* Segment mode */
     #readingScreen.segment-mode {
+      background: #f1f5f9;
       background: linear-gradient(180deg, #ede9fe 0%, var(--bg) 40%);
     }
     [data-theme="dark"] #readingScreen.segment-mode {
+      background: #0f172a;
       background: linear-gradient(180deg, #2e1065 0%, var(--bg) 45%);
     }
     #readingScreen.segment-mode .story-area {
@@ -422,6 +529,7 @@
     .segment-banner {
       display: none;
       align-items: center; justify-content: space-between; gap: 10px;
+      background: #7c3aed;
       background: linear-gradient(135deg, #7c3aed, #6366f1);
       color: #fff; padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
       font-size: 0.85rem; font-weight: 700;
@@ -437,7 +545,8 @@
 
     /* Segment overlay / modal */
     .segment-overlay {
-      position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0.92);
+      position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 100;
+      background: rgba(15,23,42,0.92);
       display: none; align-items: center; justify-content: center; padding: 24px;
     }
     .segment-overlay.show { display: flex; }
@@ -448,12 +557,15 @@
     }
     .segment-word {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
-      font-size: clamp(36px, 10vw, 80px); font-weight: 800; color: #fff; line-height: 1.15;
+      font-size: 56px;
+      font-size: clamp(36px, 10vw, 80px);
+      font-weight: 800; color: #fff; line-height: 1.15;
       margin-bottom: 20px;
     }
     .segment-letter {
       display: inline-flex; padding: 4px 6px; border-radius: 8px; cursor: pointer;
-      transition: transform 0.12s, color 0.15s; user-select: none;
+      transition: transform 0.12s, color 0.15s;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
     }
     .segment-letter:active { transform: scale(0.95); }
     .segment-actions {
@@ -464,17 +576,26 @@
 
     /* Toast */
     .toast {
-      position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(40px);
+      position: fixed; left: 50%; bottom: 90px;
+      -webkit-transform: translateX(-50%) translateY(40px);
+      transform: translateX(-50%) translateY(40px);
       background: #0f172a; color: #fff; padding: 12px 20px; border-radius: 24px;
-      font-size: 0.85rem; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 200;
+      font-size: 0.85rem; font-weight: 600; opacity: 0;
+      -webkit-transition: all 0.3s;
+      transition: all 0.3s; z-index: 200;
       max-width: 90vw; text-align: center; pointer-events: none;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show {
+      opacity: 1;
+      -webkit-transform: translateX(-50%) translateY(0);
+      transform: translateX(-50%) translateY(0);
+    }
 
     /* Locked button state */
     .btn-locked {
-      background: var(--surface-2) !important; color: var(--text-3) !important;
-      border: 2px solid var(--border) !important;
+      background: #f8fafc !important; background: var(--surface-2) !important;
+      color: #94a3b8 !important; color: var(--text-3) !important;
+      border: 2px solid #e2e8f0 !important; border: 2px solid var(--border) !important;
     }
 
     /* ===== App-bar day chip ===== */
@@ -492,7 +613,6 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    /* Target-bar context (Sound Hunt screen) keeps the smaller variant */
     .target-bar .day-chip {
       padding: 4px 10px;
       font-size: 0.7rem;
@@ -505,9 +625,12 @@
     }
     .overflow-menu {
       position: absolute;
-      top: calc(100% + 10px);
+      top: 100%;
+      margin-top: 10px;
       right: 0;
+      background: #ffffff;
       background: var(--surface);
+      border: 1px solid #e2e8f0;
       border: 1px solid var(--border);
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(15,23,42,0.15);
@@ -521,7 +644,12 @@
     }
     .overflow-menu.open {
       display: block;
+      -webkit-animation: menuFade 0.15s ease-out;
       animation: menuFade 0.15s ease-out;
+    }
+    @-webkit-keyframes menuFade {
+      from { opacity: 0; -webkit-transform: translateY(-4px); }
+      to   { opacity: 1; -webkit-transform: translateY(0); }
     }
     @keyframes menuFade {
       from { opacity: 0; transform: translateY(-4px); }
@@ -539,19 +667,21 @@
       font-family: inherit;
       font-size: 0.92rem;
       font-weight: 600;
+      color: #0f172a;
       color: var(--text);
       cursor: pointer;
       text-align: left;
       letter-spacing: -0.01em;
       -webkit-tap-highlight-color: transparent;
     }
-    .menu-item:hover  { background: var(--surface-2); }
-    .menu-item:active { background: var(--border); }
+    .menu-item:hover  { background: #f8fafc; background: var(--surface-2); }
+    .menu-item:active { background: #e2e8f0; background: var(--border); }
     .menu-item .menu-icon {
       width: 18px; height: 18px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      color: #475569;
       color: var(--text-2);
       flex-shrink: 0;
     }
@@ -575,12 +705,88 @@
     [data-theme="dark"] .menu-item.is-slow .menu-icon { color: #fbbf24; }
     .menu-divider {
       height: 1px;
+      background: #e2e8f0;
       background: var(--border);
       margin: 4px 6px;
     }
 
     @media (min-width: 600px) {
       .content-wrap { max-width: 520px; margin: 0 auto; width: 100%; }
+    }
+
+    /* ------------------------------------------------------------------
+       Legacy flexbox fallbacks for older WebKit / IE10 / Android 4.x.
+       ------------------------------------------------------------------ */
+    .screen.active {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
+    }
+    .app-header, .student-banner, .lesson-card, .target-bar, .bottom-bar,
+    .progress-row, .day-pills, .result-badge .details .row,
+    .result-badge .day-row, .segment-actions, .icon-btn, .story-line,
+    .segment-word, .data-bar, .menu-item {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+    }
+    .btn, .mastered-badge, .data-btn, .day-chip {
+      display: -webkit-inline-box;
+      display: -webkit-inline-flex;
+      display: -ms-inline-flexbox;
+      display: inline-flex;
+    }
+    .result-badge .champ.show,
+    .segment-overlay.show,
+    #readingScreen.segment-mode .segment-banner {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+    }
+    .app-header, .student-banner, .target-bar, .progress-row, .bottom-bar,
+    .day-pills, .result-badge .details .row, .result-badge .day-row,
+    .result-badge .champ, .segment-actions, .btn, .icon-btn,
+    .segment-banner, .mastered-badge, .data-bar, .data-btn, .menu-item,
+    .day-chip {
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+      -ms-flex-align: center;
+      align-items: center;
+    }
+    .btn, .icon-btn, .result-badge .champ, .result-badge .day-row,
+    .segment-actions, .segment-overlay, .segment-word, .data-btn,
+    .day-chip {
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+    }
+    #homeScreen .content, #readingScreen .content, #questionsScreen .content,
+    #soundHuntScreen .content, #resultsScreen .content,
+    .student-banner .info, .lesson-body, .bottom-bar .btn, .progress-track,
+    .segment-banner .seg-label, .data-btn, .data-bar,
+    .menu-item .menu-label {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+      flex: 1;
+    }
+    .result-actions {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
     }
   </style>
 </head>
@@ -602,7 +808,7 @@
         <label>Grade</label>
         <input type="text" id="profileGrade" maxlength="10" placeholder="e.g. 2" />
       </div>
-      <button class="btn btn-primary btn-block btn-lg" id="startBtn">Start Reading</button>
+      <button type="button" class="btn btn-primary btn-block btn-lg" id="startBtn">Start Reading</button>
     </div>
   </div>
 
@@ -610,7 +816,7 @@
   <div id="homeScreen" class="screen">
     <div class="app-header">
       <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>My Lessons</h1>
-      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"></button>
+      <button type="button" class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"></button>
     </div>
     <div class="content">
       <div class="content-wrap">
@@ -622,17 +828,17 @@
           </div>
         </div>
         <div class="data-bar">
-          <button class="data-btn" id="exportExcelBtn" title="Export progress to Excel (CSV)">
+          <button type="button" class="data-btn" id="exportExcelBtn" title="Export progress to Excel (CSV)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-            Export Excel
+            <span>Export Excel</span>
           </button>
-          <button class="data-btn" id="backupBtn" title="Save full backup (JSON)">
+          <button type="button" class="data-btn" id="backupBtn" title="Save full backup (JSON)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
-            Backup
+            <span>Backup</span>
           </button>
-          <button class="data-btn" id="importBtn" title="Restore from a backup file">
+          <button type="button" class="data-btn" id="importBtn" title="Restore from a backup file">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Import
+            <span>Import</span>
           </button>
           <input type="file" id="importFile" accept=".json,application/json" style="display:none" />
         </div>
@@ -644,7 +850,7 @@
   <!-- READING -->
   <div id="readingScreen" class="screen">
     <div class="app-header">
-      <button class="icon-btn" id="readBackBtn" title="Back" aria-label="Back">
+      <button type="button" class="icon-btn" id="readBackBtn" title="Back" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
       <span class="day-chip" id="dayChip">Day 1</span>
@@ -653,25 +859,25 @@
         <div class="meta" id="readMeta"></div>
       </div>
       <div class="menu-wrap">
-        <button class="icon-btn" id="menuBtn" title="More options" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="icon-btn" id="menuBtn" title="More options" aria-label="More options" aria-haspopup="true" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
         </button>
         <div class="overflow-menu" id="overflowMenu" role="menu" aria-label="Options">
-          <button class="menu-item" id="ttsChunkBtn" role="menuitem">
+          <button type="button" class="menu-item" id="ttsChunkBtn" role="menuitem">
             <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span>
             <span class="menu-label">Read aloud</span>
           </button>
-          <button class="menu-item" id="ttsSpeedBtn" role="menuitem">
+          <button type="button" class="menu-item" id="ttsSpeedBtn" role="menuitem">
             <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
             <span class="menu-label" id="ttsSpeedLabel">Audio: Slow</span>
           </button>
-          <button class="menu-item" id="segmentBtn" role="menuitem">
+          <button type="button" class="menu-item" id="segmentBtn" role="menuitem">
             <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 8 6l4 14"/><path d="M5.5 15h5"/><path d="M14 6h3a2.5 2.5 0 0 1 0 5h-3z"/><path d="M14 11h3.5a2.5 2.5 0 0 1 0 5H14z"/></svg></span>
             <span class="menu-label">Segment mode</span>
             <span class="menu-check" id="segmentCheck" aria-hidden="true">✓</span>
           </button>
           <div class="menu-divider" role="separator"></div>
-          <button class="menu-item" id="themeBtn2" role="menuitem">
+          <button type="button" class="menu-item" id="themeBtn2" role="menuitem">
             <span class="menu-icon" id="themeIcon2"></span>
             <span class="menu-label">Toggle theme</span>
           </button>
@@ -698,21 +904,21 @@
       </div>
     </div>
     <div class="bottom-bar">
-      <button class="btn btn-primary btn-lg btn-block btn-locked" id="goQuestionsBtn" disabled></button>
+      <button type="button" class="btn btn-primary btn-lg btn-block btn-locked" id="goQuestionsBtn" disabled></button>
     </div>
   </div>
 
   <!-- QUESTIONS -->
   <div id="questionsScreen" class="screen">
     <div class="app-header">
-      <button class="icon-btn" id="qBackStoryBtn" title="Back to story" aria-label="Back to story">
+      <button type="button" class="icon-btn" id="qBackStoryBtn" title="Back to story" aria-label="Back to story">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       </button>
       <div style="flex:1;min-width:0">
         <h1 style="font-size:0.95rem">Questions</h1>
         <div class="meta" id="qMeta"></div>
       </div>
-      <button class="icon-btn" id="themeBtn3" title="Toggle theme" aria-label="Toggle theme"></button>
+      <button type="button" class="icon-btn" id="themeBtn3" title="Toggle theme" aria-label="Toggle theme"></button>
     </div>
     <div class="content">
       <div class="content-wrap">
@@ -725,7 +931,7 @@
       </div>
     </div>
     <div class="bottom-bar">
-      <button class="btn btn-outline" id="qToStoryBtn">
+      <button type="button" class="btn btn-outline" id="qToStoryBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         Story
       </button>
@@ -735,14 +941,14 @@
   <!-- SOUND HUNT -->
   <div id="soundHuntScreen" class="screen">
     <div class="app-header">
-      <button class="icon-btn" id="shBackBtn" title="Back to story" aria-label="Back to story">
+      <button type="button" class="icon-btn" id="shBackBtn" title="Back to story" aria-label="Back to story">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
       <div style="flex:1;min-width:0">
         <h1 style="font-size:0.95rem">Sound Hunt</h1>
         <div class="meta" id="shMeta"></div>
       </div>
-      <button class="icon-btn" id="themeBtn5" title="Toggle theme" aria-label="Toggle theme"></button>
+      <button type="button" class="icon-btn" id="themeBtn5" title="Toggle theme" aria-label="Toggle theme"></button>
     </div>
     <div class="content">
       <div class="content-wrap">
@@ -759,18 +965,18 @@
       </div>
     </div>
     <div class="bottom-bar">
-      <button class="btn btn-primary btn-lg btn-block btn-locked" id="shFinishBtn" disabled></button>
+      <button type="button" class="btn btn-primary btn-lg btn-block btn-locked" id="shFinishBtn" disabled></button>
     </div>
   </div>
 
   <!-- RESULTS -->
   <div id="resultsScreen" class="screen">
     <div class="app-header">
-      <button class="icon-btn" id="resHomeBtn" title="Home" aria-label="Home">
+      <button type="button" class="icon-btn" id="resHomeBtn" title="Home" aria-label="Home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
       </button>
       <h1>Results</h1>
-      <button class="icon-btn" id="themeBtn4" title="Toggle theme" aria-label="Toggle theme"></button>
+      <button type="button" class="icon-btn" id="themeBtn4" title="Toggle theme" aria-label="Toggle theme"></button>
     </div>
     <div class="content">
       <div class="content-wrap">
@@ -788,16 +994,21 @@
             <div class="row"><span class="label">Status</span><span class="val" id="resStatus">—</span></div>
           </div>
           <div class="day-row" id="resDayPills"></div>
+          <div class="finish-code-box" id="resFinishCodeBox" style="display:none;">
+            <div class="finish-code-label">Completion code</div>
+            <div class="finish-code-value" id="resFinishCode" title="Tap to copy">—</div>
+            <div class="finish-code-meta" id="resFinishCodeMeta"></div>
+          </div>
           <div class="champ" id="resChamp">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/></svg>
             All 5 Days Completed — Champion!
           </div>
         </div>
         <div class="result-actions">
-          <button class="btn btn-wa btn-lg btn-block" id="submitWaBtn"></button>
+          <button type="button" class="btn btn-wa btn-lg btn-block" id="submitWaBtn"></button>
           <p class="submit-note" id="submitNote">Shares badge image, then opens teacher chat (works without saved contact)</p>
-          <button class="btn btn-outline btn-block" id="resAgainBtn">Read again</button>
-          <button class="btn btn-primary btn-block" id="resListBtn">Back to Lessons</button>
+          <button type="button" class="btn btn-outline btn-block" id="resAgainBtn">Read again</button>
+          <button type="button" class="btn btn-primary btn-block" id="resListBtn">Back to Lessons</button>
         </div>
       </div>
     </div>
@@ -820,12 +1031,133 @@
 
   <div class="toast" id="toast"></div>
 
-<script>
+<script type="text/javascript">
+/* Decodable Reader — ES5 build.
+   All syntax below is ES5. Modern APIs are feature-detected and skipped
+   gracefully when missing. */
 (function () {
   'use strict';
 
+  /* =========================================================
+     POLYFILLS
+     ========================================================= */
+  if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (item, from) {
+      var len = this.length >>> 0;
+      var i = from ? Number(from) : 0;
+      if (i < 0) i = Math.max(0, len + i);
+      for (; i < len; i++) { if (this[i] === item) return i; }
+      return -1;
+    };
+  }
+  if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function (fn, thisArg) {
+      var len = this.length >>> 0;
+      for (var i = 0; i < len; i++) { if (i in this) fn.call(thisArg, this[i], i, this); }
+    };
+  }
+  if (!Array.prototype.map) {
+    Array.prototype.map = function (fn, thisArg) {
+      var len = this.length >>> 0;
+      var out = new Array(len);
+      for (var i = 0; i < len; i++) { if (i in this) out[i] = fn.call(thisArg, this[i], i, this); }
+      return out;
+    };
+  }
+  if (!Array.prototype.filter) {
+    Array.prototype.filter = function (fn, thisArg) {
+      var len = this.length >>> 0;
+      var out = [];
+      for (var i = 0; i < len; i++) { if (i in this && fn.call(thisArg, this[i], i, this)) out.push(this[i]); }
+      return out;
+    };
+  }
+  if (!Array.prototype.reduce) {
+    Array.prototype.reduce = function (fn, initial) {
+      var len = this.length >>> 0;
+      var i = 0;
+      var acc;
+      if (arguments.length > 1) { acc = initial; }
+      else { while (i < len && !(i in this)) i++; acc = this[i++]; }
+      for (; i < len; i++) { if (i in this) acc = fn(acc, this[i], i, this); }
+      return acc;
+    };
+  }
+  if (!Array.isArray) {
+    Array.isArray = function (v) {
+      return Object.prototype.toString.call(v) === '[object Array]';
+    };
+  }
+  if (!String.prototype.trim) {
+    String.prototype.trim = function () {
+      return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
+  }
+
+  /* =========================================================
+     DOM HELPERS
+     ========================================================= */
+  function $(id) { return document.getElementById(id); }
+
+  function addClass(el, cls) {
+    if (!el || !cls) return;
+    if (el.classList) { el.classList.add(cls); return; }
+    var cur = ' ' + (el.className || '') + ' ';
+    if (cur.indexOf(' ' + cls + ' ') === -1) {
+      el.className = ((el.className || '') + ' ' + cls).replace(/^\s+/, '');
+    }
+  }
+
+  function removeClass(el, cls) {
+    if (!el || !cls) return;
+    if (el.classList) { el.classList.remove(cls); return; }
+    var re = new RegExp('(^|\\s)' + cls + '(\\s|$)', 'g');
+    el.className = (el.className || '').replace(re, ' ').replace(/^\s+|\s+$/g, '');
+  }
+
+  function hasClass(el, cls) {
+    if (!el || !cls) return false;
+    if (el.classList) return el.classList.contains(cls);
+    return (' ' + (el.className || '') + ' ').indexOf(' ' + cls + ' ') > -1;
+  }
+
+  function on(el, type, fn) {
+    if (!el) return;
+    if (el.addEventListener) {
+      el.addEventListener(type, fn, false);
+    } else if (el.attachEvent) {
+      el.attachEvent('on' + type, function () {
+        fn.call(el, window.event);
+      });
+    }
+  }
+
+  function evTarget(e) {
+    e = e || window.event;
+    if (!e) return null;
+    return e.target || e.srcElement;
+  }
+
+  function stopEvent(e) {
+    e = e || window.event;
+    if (!e) return;
+    if (e.stopPropagation) e.stopPropagation(); else e.cancelBubble = true;
+    if (e.preventDefault) e.preventDefault(); else e.returnValue = false;
+  }
+
+  /* Old-browser-safe contains() */
+  function nodeContains(parent, child) {
+    if (!parent || !child) return false;
+    if (parent.contains) return parent.contains(child);
+    while (child) {
+      if (child === parent) return true;
+      child = child.parentNode;
+    }
+    return false;
+  }
+
   /* ========== SVG ICONS ========== */
-  const ICONS = {
+  var ICONS = {
     book:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
     moon:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
     sun:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.93 19.07 1.41-1.41"/><path d="m17.66 6.34 1.41-1.41"/></svg>',
@@ -841,7 +1173,7 @@
   };
 
   /* ========== LESSONS ========== */
-  const LESSONS = [
+  var LESSONS = [
   {
     "id": "g1l1_story",
     "lessonNumber": 1,
@@ -2502,7 +2834,7 @@
 ];
 
 /* ========== SOUND HUNT DATA ========== */
-const SOUND_HUNT_DATA = {
+var SOUND_HUNT_DATA = {
   "g1l1_story": { "targetWords": ["cake", "kite", "bike", "tree", "rope"], "decoyWords": ["cat", "pen", "hat", "dog", "cup"] },
   "g1l2_story": { "targetWords": ["ball", "cat", "dog", "fish", "hat"], "decoyWords": ["apple", "egg", "ice", "orange", "umbrella"] },
   "g1l3_story": { "targetWords": ["bag", "cat", "mat", "hat", "rat"], "decoyWords": ["pen", "sit", "pot", "sun", "bed"] },
@@ -2588,9 +2920,9 @@ const SOUND_HUNT_DATA = {
   "g1l83_story": { "targetWords": ["her", "bird", "girl", "turn", "fur"], "decoyWords": ["corn", "fork", "car", "star", "storm"] }
 };
 
-  // Merge Sound Hunt data into lessons
-  LESSONS.forEach(l => {
-    const sh = SOUND_HUNT_DATA[l.id];
+  /* Merge Sound Hunt data into lessons */
+  LESSONS.forEach(function (l) {
+    var sh = SOUND_HUNT_DATA[l.id];
     if (sh && Array.isArray(sh.targetWords) && Array.isArray(sh.decoyWords) &&
         sh.targetWords.length >= 5 && sh.decoyWords.length >= 5) {
       l.targetWords = sh.targetWords;
@@ -2599,42 +2931,69 @@ const SOUND_HUNT_DATA = {
   });
 
   /* ========== CONSTANTS ========== */
-  const DAY_COLORS = { 1: 'd1', 2: 'd2', 3: 'd3', 4: 'd4', 5: 'd5' };
-  const DAY_HEX = { 1: '#ef4444', 2: '#eab308', 3: '#22c55e', 4: '#3b82f6', 5: '#a855f7' };
-  const DAY_TEXT = { 1: '#ffffff', 2: '#0f172a', 3: '#ffffff', 4: '#ffffff', 5: '#ffffff' };
-  const CHUNK_SIZE = 3;
-  const PASS_PCT = 80;
-  const MAX_SUBMITS_PER_DAY = 2;
-  const TEACHER_WA = '233545800158';
-  const STORAGE_KEY = 'decodable_student_v1';
+  var DAY_COLORS = { 1: 'd1', 2: 'd2', 3: 'd3', 4: 'd4', 5: 'd5' };
+  var DAY_HEX = { 1: '#ef4444', 2: '#eab308', 3: '#22c55e', 4: '#3b82f6', 5: '#a855f7' };
+  var DAY_TEXT = { 1: '#ffffff', 2: '#0f172a', 3: '#ffffff', 4: '#ffffff', 5: '#ffffff' };
+  var CHUNK_SIZE = 3;
+  var PASS_PCT = 80;
+  var MAX_SUBMITS_PER_DAY = 2;
+  var TEACHER_WA = '233545800158';
+  var STORAGE_KEY = 'decodable_student_v1';
+  // Completion code shown on every results screen. Set to your own code
+  // (e.g. 'ABC123'), or '' to hide the box entirely.
+  var FINISH_CODE = 'CHANGE-ME';
 
   /* ========== STATE ========== */
-  let profile = { name: '', grade: '' };
-  let progress = {};
-  let theme = 'light';
-  let ttsSpeed = 'slow';
-  let currentLesson = null;
-  let currentDay = 1;
-  let tappedSet = new Set();
-  let visibleChunkStart = 0;
-  let visibleChunkEnd = CHUNK_SIZE;
-  let quiz = { questions: [], index: 0, correct: 0, answered: false, triedWrong: false };
-  let quizTimer = null;
-  let lastResult = null;
-  let segmentMode = false;
-  let segmentModalWord = '';
-  let menuOpen = false;
-  let soundHunt = { tiles: [], attempts: 0, passed: false, checking: false };
-  let soundHuntTimer = null;
+  var profile = { name: '', grade: '' };
+  var progress = {};
+  var theme = 'light';
+  var ttsSpeed = 'slow';
+  var currentLesson = null;
+  var currentDay = 1;
+  var tappedMap = {};
+  var visibleChunkStart = 0;
+  var visibleChunkEnd = CHUNK_SIZE;
+  var quiz = { questions: [], index: 0, correct: 0, answered: false, triedWrong: false };
+  var quizTimer = null;
+  var lastResult = null;
+  var segmentMode = false;
+  var segmentModalWord = '';
+  var menuOpen = false;
+  var soundHunt = {
+    tiles: [],
+    buttons: [],
+    attempts: 0,
+    passed: false,
+    checking: false
+  };
+  var soundHuntTimer = null;
 
-  const TTS_RATES = { slow: 0.7, normal: 0.95 };
+  var TTS_RATES = { slow: 0.7, normal: 0.95 };
+
+  function tappedHas(key) { return tappedMap[key] === true; }
+  function tappedAdd(key) { tappedMap[key] = true; }
+  function tappedCount() {
+    var n = 0;
+    for (var k in tappedMap) {
+      if (Object.prototype.hasOwnProperty.call(tappedMap, k)) n++;
+    }
+    return n;
+  }
+  function tappedToList() {
+    var out = [];
+    for (var k in tappedMap) {
+      if (Object.prototype.hasOwnProperty.call(tappedMap, k)) out.push(k);
+    }
+    return out;
+  }
 
   /* ========== STORAGE ========== */
   function loadStore() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      var raw = null;
+      try { raw = window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : null; } catch (e0) { raw = null; }
       if (!raw) return;
-      const data = JSON.parse(raw);
+      var data = JSON.parse(raw);
       if (data.profile && typeof data.profile === 'object') profile = data.profile;
       if (data.progress && typeof data.progress === 'object') progress = data.progress;
       if (data.theme === 'dark' || data.theme === 'light') theme = data.theme;
@@ -2643,12 +3002,18 @@ const SOUND_HUNT_DATA = {
   }
   function saveStore() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile, progress, theme, ttsSpeed }));
+      if (!window.localStorage) return;
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        profile: profile,
+        progress: progress,
+        theme: theme,
+        ttsSpeed: ttsSpeed
+      }));
     } catch (e) {}
   }
 
   function getProg(id) {
-    const defaults = {
+    var defaults = {
       highestDay: 0,
       bestScores: {},
       submits: {},
@@ -2657,42 +3022,48 @@ const SOUND_HUNT_DATA = {
       lastPlayDate: '',
       lastPlayDay: 0
     };
-    const existing = progress[id];
+    var existing = progress[id];
     if (!existing || typeof existing !== 'object' || Array.isArray(existing)) {
       progress[id] = defaults;
       return progress[id];
     }
-    existing.highestDay = Number.isFinite(existing.highestDay) ? existing.highestDay : 0;
-    existing.bestScores = (existing.bestScores && typeof existing.bestScores === 'object' && !Array.isArray(existing.bestScores)) ? existing.bestScores : {};
-    existing.submits = (existing.submits && typeof existing.submits === 'object' && !Array.isArray(existing.submits)) ? existing.submits : {};
+    existing.highestDay = (typeof existing.highestDay === 'number' && isFinite(existing.highestDay))
+      ? existing.highestDay : 0;
+    existing.bestScores = (existing.bestScores && typeof existing.bestScores === 'object' && !Array.isArray(existing.bestScores))
+      ? existing.bestScores : {};
+    existing.submits = (existing.submits && typeof existing.submits === 'object' && !Array.isArray(existing.submits))
+      ? existing.submits : {};
     existing.currentTapped = Array.isArray(existing.currentTapped) ? existing.currentTapped : [];
     existing.readingDone = !!existing.readingDone;
-    existing.lastPlayDate = (typeof existing.lastPlayDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(existing.lastPlayDate))
-      ? existing.lastPlayDate
-      : '';
-    existing.lastPlayDay = (Number.isFinite(existing.lastPlayDay) && existing.lastPlayDay >= 1 && existing.lastPlayDay <= 5)
-      ? existing.lastPlayDay
-      : 0;
+    existing.lastPlayDate = (typeof existing.lastPlayDate === 'string' &&
+      /^\d{4}-\d{2}-\d{2}$/.test(existing.lastPlayDate))
+      ? existing.lastPlayDate : '';
+    existing.lastPlayDay = (typeof existing.lastPlayDay === 'number' && isFinite(existing.lastPlayDay) &&
+      existing.lastPlayDay >= 1 && existing.lastPlayDay <= 5)
+      ? existing.lastPlayDay : 0;
     return existing;
   }
 
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
   function todayKey() {
-    const d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   }
 
   /* ========== THEME ========== */
+  var THEME_IDS = ['themeBtn', 'themeBtn2', 'themeBtn3', 'themeBtn4', 'themeBtn5'];
+  var THEME_ICON_IDS = ['themeBtn', 'themeBtn3', 'themeBtn4', 'themeBtn5'];
+
   function applyTheme() {
     document.documentElement.setAttribute('data-theme', theme);
-    const svg = theme === 'dark' ? ICONS.sun : ICONS.moon;
-    /* Whole-button icons (home + other screens) — themeBtn2 is now a menu
-       item with children, so it is handled separately below. */
-    ['themeBtn', 'themeBtn3', 'themeBtn4', 'themeBtn5'].forEach(id => {
-      const el = document.getElementById(id);
+    var svg = theme === 'dark' ? ICONS.sun : ICONS.moon;
+    for (var i = 0; i < THEME_ICON_IDS.length; i++) {
+      var el = $(THEME_ICON_IDS[i]);
       if (el) el.innerHTML = svg;
-    });
+    }
     /* Menu item on the reading screen: update only its icon span. */
-    const icon = document.getElementById('themeIcon2');
+    var icon = $('themeIcon2');
     if (icon) icon.innerHTML = svg;
   }
   function toggleTheme() {
@@ -2703,37 +3074,40 @@ const SOUND_HUNT_DATA = {
 
   /* ========== NAV ========== */
   function showScreen(id) {
-    closeOverflowMenu(); /* safe no-op if not open */
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const el = document.getElementById(id);
-    if (el) el.classList.add('active');
+    closeOverflowMenu();
+    var screens = document.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++) {
+      removeClass(screens[i], 'active');
+    }
+    var el = $(id);
+    if (el) addClass(el, 'active');
     window.scrollTo(0, 0);
   }
 
   function toast(msg, ms) {
-    const t = document.getElementById('toast');
+    var t = $('toast');
     if (!t) return;
     t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toast._tm);
-    toast._tm = setTimeout(() => t.classList.remove('show'), ms || 2800);
+    addClass(t, 'show');
+    if (toast._tm) clearTimeout(toast._tm);
+    toast._tm = setTimeout(function () { removeClass(t, 'show'); }, ms || 2800);
   }
 
   /* ========== OVERFLOW MENU ========== */
   function openOverflowMenu() {
-    const menu = document.getElementById('overflowMenu');
-    const btn = document.getElementById('menuBtn');
+    var menu = $('overflowMenu');
+    var btn = $('menuBtn');
     if (!menu || !btn) return;
     menuOpen = true;
-    menu.classList.add('open');
+    addClass(menu, 'open');
     btn.setAttribute('aria-expanded', 'true');
   }
   function closeOverflowMenu() {
-    const menu = document.getElementById('overflowMenu');
-    const btn = document.getElementById('menuBtn');
+    var menu = $('overflowMenu');
+    var btn = $('menuBtn');
     if (!menu || !btn) return;
     menuOpen = false;
-    menu.classList.remove('open');
+    removeClass(menu, 'open');
     btn.setAttribute('aria-expanded', 'false');
   }
   function toggleOverflowMenu() {
@@ -2742,16 +3116,25 @@ const SOUND_HUNT_DATA = {
   }
 
   /* ========== PROFILE ========== */
-  document.getElementById('profileName').addEventListener('input', function () {
-    document.getElementById('nameCount').textContent = this.value.length;
-  });
-  document.getElementById('startBtn').addEventListener('click', function () {
-    const name = document.getElementById('profileName').value.trim();
-    const grade = document.getElementById('profileGrade').value.trim();
-    if (!name) return toast('Please enter your full name');
-    if (!grade) return toast('Please enter your grade');
-    if (name.length > 30) return toast('Name must be 30 characters or less');
-    profile = { name, grade };
+  var nameInput = $('profileName');
+
+  function updateNameCount() {
+    var c = $('nameCount');
+    if (c) c.textContent = String(nameInput.value.length);
+  }
+
+  if (nameInput) {
+    if ('oninput' in nameInput) on(nameInput, 'input', updateNameCount);
+    else on(nameInput, 'keyup', updateNameCount);
+  }
+
+  on($('startBtn'), 'click', function () {
+    var name = $('profileName').value.replace(/^\s+|\s+$/g, '');
+    var grade = $('profileGrade').value.replace(/^\s+|\s+$/g, '');
+    if (!name) { toast('Please enter your full name'); return; }
+    if (!grade) { toast('Please enter your grade'); return; }
+    if (name.length > 30) { toast('Name must be 30 characters or less'); return; }
+    profile = { name: name, grade: grade };
     saveStore();
     renderHome();
     showScreen('homeScreen');
@@ -2759,23 +3142,27 @@ const SOUND_HUNT_DATA = {
 
   /* ========== HOME ========== */
   function renderHome() {
-    document.getElementById('homeName').textContent = profile.name || '—';
-    document.getElementById('homeGrade').textContent = 'Grade ' + (profile.grade || '—');
-    document.getElementById('homeAvatar').textContent = ((profile.name && profile.name[0]) || '?').toUpperCase();
+    $('homeName').textContent = profile.name || '—';
+    $('homeGrade').textContent = 'Grade ' + (profile.grade || '—');
+    $('homeAvatar').textContent = ((profile.name && profile.name.charAt(0)) || '?').toUpperCase();
 
-    const list = document.getElementById('lessonList');
+    var list = $('lessonList');
     list.innerHTML = '';
-    LESSONS.forEach(l => {
-      const p = getProg(l.id);
-      const day = p.highestDay;
-      const mastered = day >= 5;
-      const card = document.createElement('div');
+
+    LESSONS.forEach(function (l) {
+      var p = getProg(l.id);
+      var day = p.highestDay;
+      var mastered = day >= 5;
+
+      var card = document.createElement('div');
       card.className = 'lesson-card' + (mastered ? ' mastered' : '');
-      let pills = '';
-      for (let d = 1; d <= 5; d++) {
-        const done = d <= day;
+
+      var pills = '';
+      for (var d = 1; d <= 5; d++) {
+        var done = d <= day;
         pills += '<span class="day-pill ' + (done ? 'done d' + d : '') + '">' + d + '</span>';
       }
+
       card.innerHTML =
         '<div class="lesson-num">' + l.lessonNumber + '</div>' +
         '<div class="lesson-body">' +
@@ -2784,22 +3171,27 @@ const SOUND_HUNT_DATA = {
           '<div class="day-pills">' + pills + '<span class="day-label">Day ' + day + '/5</span></div>' +
           (mastered ? '<div class="mastered-badge">' + ICONS.trophy + '5-Day Champion</div>' : '') +
         '</div>';
-      card.addEventListener('click', () => openLesson(l.id));
+
+      on(card, 'click', function () { openLesson(l.id); });
       list.appendChild(card);
     });
   }
 
   /* ========== READING ========== */
   function openLesson(id) {
-    currentLesson = LESSONS.find(l => l.id === id);
+    var found = null;
+    for (var i = 0; i < LESSONS.length; i++) {
+      if (LESSONS[i].id === id) { found = LESSONS[i]; break; }
+    }
+    currentLesson = found;
     if (!currentLesson) return;
 
-    const p = getProg(id);
-    const today = todayKey();
-    const sameDayReplay = (p.lastPlayDate === today && today.length === 10);
+    var p = getProg(id);
+    var today = todayKey();
+    var sameDayReplay = (p.lastPlayDate === today && today.length === 10);
 
     if (sameDayReplay) {
-      const fallback = Math.max(1, Math.min(p.highestDay, 5));
+      var fallback = Math.max(1, Math.min(p.highestDay, 5));
       currentDay = (p.lastPlayDay >= 1 && p.lastPlayDay <= 5) ? p.lastPlayDay : fallback;
 
       if (p.highestDay >= 5) {
@@ -2822,7 +3214,10 @@ const SOUND_HUNT_DATA = {
       }
     }
 
-    tappedSet = new Set(p.currentTapped || []);
+    tappedMap = {};
+    var prev = p.currentTapped || [];
+    for (var j = 0; j < prev.length; j++) { tappedMap[prev[j]] = true; }
+
     recomputeVisibleChunk();
     exitSegmentMode();
     stopTTS();
@@ -2831,76 +3226,84 @@ const SOUND_HUNT_DATA = {
   }
 
   function tokenize(sentence) {
-    return String(sentence || '').trim().split(/\s+/).filter(Boolean);
+    return String(sentence || '').replace(/^\s+|\s+$/g, '').split(/\s+/).filter(function (w) { return !!w; });
   }
 
   function recomputeVisibleChunk() {
-    const lines = currentLesson.storyLines || [];
-    let end = Math.min(CHUNK_SIZE, lines.length);
+    var lines = currentLesson.storyLines || [];
+    var end = Math.min(CHUNK_SIZE, lines.length);
+
     while (end < lines.length) {
-      let allPrevTapped = true;
-      for (let li = 0; li < end && allPrevTapped; li++) {
-        const words = tokenize(lines[li]);
-        for (let wi = 0; wi < words.length; wi++) {
-          if (!tappedSet.has(li + '-' + wi)) { allPrevTapped = false; break; }
+      var allPrevTapped = true;
+      for (var li = 0; li < end && allPrevTapped; li++) {
+        var words = tokenize(lines[li]);
+        for (var wi = 0; wi < words.length; wi++) {
+          if (!tappedHas(li + '-' + wi)) { allPrevTapped = false; break; }
         }
       }
       if (allPrevTapped) end = Math.min(end + CHUNK_SIZE, lines.length);
       else break;
     }
+
     visibleChunkEnd = end;
     visibleChunkStart = end > 0 ? Math.floor((end - 1) / CHUNK_SIZE) * CHUNK_SIZE : 0;
   }
 
   function totalWords() {
-    return currentLesson.storyLines.reduce((n, s) => n + tokenize(s).length, 0);
+    return currentLesson.storyLines.reduce(function (n, s) {
+      return n + tokenize(s).length;
+    }, 0);
   }
 
-  function tappedCount() { return tappedSet.size; }
-
   function wordsLeftInVisibleChunk() {
-    let left = 0;
-    for (let li = visibleChunkStart; li < visibleChunkEnd; li++) {
-      const words = tokenize(currentLesson.storyLines[li]);
-      for (let wi = 0; wi < words.length; wi++) {
-        if (!tappedSet.has(li + '-' + wi)) left++;
+    var left = 0;
+    for (var li = visibleChunkStart; li < visibleChunkEnd; li++) {
+      var words = tokenize(currentLesson.storyLines[li]);
+      for (var wi = 0; wi < words.length; wi++) {
+        if (!tappedHas(li + '-' + wi)) left++;
       }
     }
     return left;
   }
 
-  function allWordsTapped() { return tappedCount() >= totalWords(); }
+  function allWordsTapped() {
+    return tappedCount() >= totalWords();
+  }
 
   function renderReading() {
-    const l = currentLesson;
-    document.getElementById('readTitle').textContent = 'Lesson ' + l.lessonNumber + ' — ' + l.title;
-    document.getElementById('readMeta').textContent = profile.name + ' · Grade ' + profile.grade;
-    document.getElementById('targetSound').textContent = 'Target: ' + l.targetSound;
+    var l = currentLesson;
+    $('readTitle').textContent = 'Lesson ' + l.lessonNumber + ' — ' + l.title;
+    $('readMeta').textContent = profile.name + ' · Grade ' + profile.grade;
+    $('targetSound').textContent = 'Target: ' + l.targetSound;
 
-    const chip = document.getElementById('dayChip');
+    var chip = $('dayChip');
     chip.textContent = 'Day ' + currentDay;
     chip.style.background = DAY_HEX[currentDay];
     chip.style.color = DAY_TEXT[currentDay];
 
-    const area = document.getElementById('storyArea');
+    var area = $('storyArea');
     area.innerHTML = '';
-    l.storyLines.forEach((sentence, li) => {
-      const lineEl = document.createElement('div');
-      lineEl.className = 'story-line';
-      if (li >= visibleChunkEnd) lineEl.classList.add('hidden-chunk');
-      else if (li < visibleChunkStart) lineEl.classList.add('dimmed');
 
-      const words = tokenize(sentence);
-      words.forEach((w, wi) => {
-        const key = li + '-' + wi;
-        const span = document.createElement('span');
+    l.storyLines.forEach(function (sentence, li) {
+      var lineEl = document.createElement('div');
+      lineEl.className = 'story-line';
+      if (li >= visibleChunkEnd) addClass(lineEl, 'hidden-chunk');
+      else if (li < visibleChunkStart) addClass(lineEl, 'dimmed');
+
+      var words = tokenize(sentence);
+      words.forEach(function (w, wi) {
+        var key = li + '-' + wi;
+        var span = document.createElement('span');
         span.className = 'word';
         span.textContent = w;
-        span.dataset.key = key;
-        if (tappedSet.has(key)) span.classList.add('tapped', DAY_COLORS[currentDay]);
-        span.addEventListener('click', () => onWordTap(key, span));
+        if (tappedHas(key)) {
+          addClass(span, 'tapped');
+          addClass(span, DAY_COLORS[currentDay]);
+        }
+        on(span, 'click', function () { onWordTap(key, span); });
         lineEl.appendChild(span);
       });
+
       area.appendChild(lineEl);
     });
 
@@ -2908,17 +3311,22 @@ const SOUND_HUNT_DATA = {
   }
 
   function onWordTap(key, el) {
-    const li = parseInt(key.split('-')[0], 10);
+    var li = parseInt(key.split('-')[0], 10);
     if (li >= visibleChunkEnd) return;
 
-    if (segmentMode) { openSegmentModal(el.textContent); return; }
-    if (tappedSet.has(key)) return;
+    if (segmentMode) {
+      openSegmentModal(el.textContent);
+      return;
+    }
 
-    tappedSet.add(key);
-    el.classList.add('tapped', DAY_COLORS[currentDay]);
+    if (tappedHas(key)) return;
 
-    const p = getProg(currentLesson.id);
-    p.currentTapped = Array.from(tappedSet);
+    tappedAdd(key);
+    addClass(el, 'tapped');
+    addClass(el, DAY_COLORS[currentDay]);
+
+    var p = getProg(currentLesson.id);
+    p.currentTapped = tappedToList();
     saveStore();
 
     if (wordsLeftInVisibleChunk() === 0 && visibleChunkEnd < currentLesson.storyLines.length) {
@@ -2932,38 +3340,39 @@ const SOUND_HUNT_DATA = {
   }
 
   function updateReadProgress() {
-    const total = totalWords();
-    const done = tappedCount();
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    document.getElementById('readProgress').style.width = pct + '%';
+    var total = totalWords();
+    var done = tappedCount();
+    var pct = total ? Math.round((done / total) * 100) : 0;
+    $('readProgress').style.width = pct + '%';
 
-    const left = wordsLeftInVisibleChunk();
-    document.getElementById('wordsLeftLabel').textContent =
+    var left = wordsLeftInVisibleChunk();
+    $('wordsLeftLabel').textContent =
       left > 0
         ? left + ' word' + (left === 1 ? '' : 's') + ' left in this part'
         : (done < total ? 'Unlocking next part…' : 'All words read!');
 
-    const btn = document.getElementById('goQuestionsBtn');
+    var btn = $('goQuestionsBtn');
     if (allWordsTapped()) {
       btn.disabled = false;
-      btn.classList.remove('btn-locked');
+      removeClass(btn, 'btn-locked');
       btn.innerHTML = ICONS.check + 'Answer Questions';
-      const p = getProg(currentLesson.id);
+      var p = getProg(currentLesson.id);
       p.readingDone = true;
-      p.currentTapped = Array.from(tappedSet);
+      p.currentTapped = tappedToList();
       saveStore();
     } else {
       btn.disabled = true;
-      btn.classList.add('btn-locked');
+      addClass(btn, 'btn-locked');
       btn.innerHTML = ICONS.lock + 'Finish reading first';
     }
   }
 
-  document.getElementById('goQuestionsBtn').addEventListener('click', () => {
+  on($('goQuestionsBtn'), 'click', function () {
     exitSegmentMode();
     startQuiz();
   });
-  document.getElementById('readBackBtn').addEventListener('click', () => {
+
+  on($('readBackBtn'), 'click', function () {
     exitSegmentMode();
     stopTTS();
     renderHome();
@@ -2974,20 +3383,24 @@ const SOUND_HUNT_DATA = {
   function stopTTS() {
     try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
   }
-  function currentTtsRate() { return TTS_RATES[ttsSpeed] || TTS_RATES.slow; }
+
+  function currentTtsRate() {
+    return TTS_RATES[ttsSpeed] || TTS_RATES.slow;
+  }
 
   function updateSpeedBtn() {
-    const btn = document.getElementById('ttsSpeedBtn');
-    const label = document.getElementById('ttsSpeedLabel');
+    var btn = $('ttsSpeedBtn');
+    var label = $('ttsSpeedLabel');
     if (!btn) return;
     if (ttsSpeed === 'slow') {
       if (label) label.textContent = 'Audio: Slow';
-      btn.classList.add('is-slow');
+      addClass(btn, 'is-slow');
     } else {
       if (label) label.textContent = 'Audio: Normal';
-      btn.classList.remove('is-slow');
+      removeClass(btn, 'is-slow');
     }
   }
+
   function toggleTtsSpeed() {
     ttsSpeed = ttsSpeed === 'slow' ? 'normal' : 'slow';
     saveStore();
@@ -2995,21 +3408,36 @@ const SOUND_HUNT_DATA = {
     toast(ttsSpeed === 'slow' ? 'Audio: Slow' : 'Audio: Normal', 1800);
   }
 
+  function pickVoice(voices) {
+    var i;
+    for (i = 0; i < voices.length; i++) {
+      if (/en(-|_)US/i.test(voices[i].lang) &&
+          /samantha|google us|allison|ava|susan|zira/i.test(voices[i].name)) {
+        return voices[i];
+      }
+    }
+    for (i = 0; i < voices.length; i++) {
+      if (/en(-|_)GB/i.test(voices[i].lang)) return voices[i];
+    }
+    for (i = 0; i < voices.length; i++) {
+      if (/^en/i.test(voices[i].lang)) return voices[i];
+    }
+    return null;
+  }
+
   function speakText(text) {
-    if (!text || !window.speechSynthesis) {
+    if (!text || !window.speechSynthesis || typeof window.SpeechSynthesisUtterance !== 'function') {
       toast('Speech not available on this device');
       return;
     }
     stopTTS();
-    const u = new SpeechSynthesisUtterance(String(text));
+    var u = new window.SpeechSynthesisUtterance(String(text));
     u.lang = 'en-US';
     u.rate = currentTtsRate();
     u.pitch = 1;
     try {
-      const voices = window.speechSynthesis.getVoices() || [];
-      const preferred = voices.find(v =>
-        /en(-|_)US/i.test(v.lang) && /samantha|google us|allison|ava|susan|zira/i.test(v.name)
-      ) || voices.find(v => /en(-|_)GB/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang));
+      var voices = window.speechSynthesis.getVoices() || [];
+      var preferred = pickVoice(voices);
       if (preferred) u.voice = preferred;
     } catch (e) {}
     window.speechSynthesis.speak(u);
@@ -3024,90 +3452,135 @@ const SOUND_HUNT_DATA = {
 
   function speakCurrentChunk() {
     if (!currentLesson) return;
-    const lines = (currentLesson.storyLines || []).slice(visibleChunkStart, visibleChunkEnd);
-    const text = lines.join(' ').trim();
+    var lines = (currentLesson.storyLines || []).slice(visibleChunkStart, visibleChunkEnd);
+    var text = lines.join(' ').replace(/^\s+|\s+$/g, '');
     if (!text) return;
     speakText(text);
   }
 
-  document.getElementById('ttsChunkBtn').addEventListener('click', speakCurrentChunk);
-  document.getElementById('ttsSpeedBtn').addEventListener('click', toggleTtsSpeed);
+  on($('ttsChunkBtn'), 'click', speakCurrentChunk);
+  on($('ttsSpeedBtn'), 'click', toggleTtsSpeed);
 
   /* ========== SEGMENT MODE ========== */
-  function setSegmentMode(on) {
-    segmentMode = !!on;
-    const screen = document.getElementById('readingScreen');
-    const btn = document.getElementById('segmentBtn');
+  function setSegmentMode(isOn) {
+    segmentMode = !!isOn;
+    var screen = $('readingScreen');
+    var btn = $('segmentBtn');
     if (segmentMode) {
-      screen.classList.add('segment-mode');
-      btn.classList.add('active-seg');
+      addClass(screen, 'segment-mode');
+      addClass(btn, 'active-seg');
       toast('Segment mode on — tap any word', 2200);
     } else {
-      screen.classList.remove('segment-mode');
-      btn.classList.remove('active-seg');
+      removeClass(screen, 'segment-mode');
+      removeClass(btn, 'active-seg');
       closeSegmentModal();
     }
   }
-  function exitSegmentMode() { if (segmentMode) setSegmentMode(false); }
 
-  document.getElementById('segmentBtn').addEventListener('click', () => setSegmentMode(!segmentMode));
-  document.getElementById('exitSegmentBtn').addEventListener('click', exitSegmentMode);
+  function exitSegmentMode() {
+    if (segmentMode) setSegmentMode(false);
+  }
+
+  on($('segmentBtn'), 'click', function () { setSegmentMode(!segmentMode); });
+  on($('exitSegmentBtn'), 'click', exitSegmentMode);
+
+  function makeSegmentLetter(ch, colors) {
+    var s = document.createElement('span');
+    s.className = 'segment-letter';
+    s.textContent = ch === ' ' ? '\u00A0' : ch;
+    var letterIndex = 0;
+    on(s, 'click', function (e) {
+      stopEvent(e);
+      s.style.color = colors[letterIndex % colors.length];
+      letterIndex++;
+    });
+    return s;
+  }
 
   function openSegmentModal(wordText) {
-    const clean = String(wordText || '').replace(/[.,!?;:'"]+$/g, '');
+    var clean = String(wordText || '').replace(/[.,!?;:'"]+$/g, '');
     segmentModalWord = clean || String(wordText || '');
-    const box = document.getElementById('segmentWord');
+
+    var box = $('segmentWord');
     box.innerHTML = '';
-    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7', '#ffffff'];
-    Array.from(segmentModalWord).forEach(ch => {
-      const s = document.createElement('span');
-      s.className = 'segment-letter';
-      s.textContent = ch === ' ' ? '\u00A0' : ch;
-      let letterIndex = 0;
-      s.addEventListener('click', e => {
-        e.stopPropagation();
-        s.style.color = colors[letterIndex % colors.length];
-        letterIndex++;
-      });
-      box.appendChild(s);
-    });
-    document.getElementById('segmentOverlay').classList.add('show');
+
+    var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7', '#ffffff'];
+    var chars = segmentModalWord.split('');
+    for (var i = 0; i < chars.length; i++) {
+      box.appendChild(makeSegmentLetter(chars[i], colors));
+    }
+    addClass($('segmentOverlay'), 'show');
   }
+
   function closeSegmentModal() {
-    document.getElementById('segmentOverlay').classList.remove('show');
+    removeClass($('segmentOverlay'), 'show');
     stopTTS();
   }
-  document.getElementById('segmentOverlay').addEventListener('click', function (e) {
-    if (e.target === this) closeSegmentModal();
+
+  var overlayEl = $('segmentOverlay');
+  on(overlayEl, 'click', function (e) {
+    if (evTarget(e) === overlayEl) closeSegmentModal();
   });
-  document.getElementById('segmentCloseBtn').addEventListener('click', closeSegmentModal);
-  document.getElementById('segmentPlayBtn').addEventListener('click', function (e) {
-    e.stopPropagation();
+  on($('segmentCloseBtn'), 'click', closeSegmentModal);
+  on($('segmentPlayBtn'), 'click', function (e) {
+    stopEvent(e);
     speakText(segmentModalWord);
   });
-  document.getElementById('segmentInner').addEventListener('click', function (e) {
-    e.stopPropagation();
+  on($('segmentInner'), 'click', function (e) {
+    stopEvent(e);
   });
 
   /* ========== QUIZ ========== */
   function clearQuizTimer() {
-    if (quizTimer) { clearTimeout(quizTimer); quizTimer = null; }
+    if (quizTimer) {
+      clearTimeout(quizTimer);
+      quizTimer = null;
+    }
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i];
+      a[i] = a[j];
+      a[j] = tmp;
+    }
+    return a;
   }
 
   function startQuiz() {
     if (!allWordsTapped()) return;
-    const raw = (currentLesson.questions || []).filter(q =>
-      q && q.question && Array.isArray(q.options) &&
-      q.options.filter(o => o && String(o).trim()).length >= 2
-    );
-    if (!raw.length) { toast('No questions for this lesson'); return; }
-    quiz.questions = raw.map(q => {
-      const opts = q.options.map(o => String(o).trim()).filter(Boolean);
-      const ci = Math.min(Math.max(0, Number(q.correctIndex) || 0), opts.length - 1);
-      const correctText = opts[ci];
-      const shuffled = shuffle(opts.slice());
-      return { question: q.question, options: shuffled, correctIndex: shuffled.indexOf(correctText) };
+
+    var raw = (currentLesson.questions || []).filter(function (q) {
+      if (!q || !q.question || !Array.isArray(q.options)) return false;
+      var good = 0;
+      for (var i = 0; i < q.options.length; i++) {
+        if (q.options[i] && String(q.options[i]).replace(/^\s+|\s+$/g, '')) good++;
+      }
+      return good >= 2;
     });
+
+    if (!raw.length) {
+      toast('No questions for this lesson');
+      return;
+    }
+
+    quiz.questions = raw.map(function (q) {
+      var opts = [];
+      for (var i = 0; i < q.options.length; i++) {
+        var t = String(q.options[i]).replace(/^\s+|\s+$/g, '');
+        if (t) opts.push(t);
+      }
+      var ci = Math.min(Math.max(0, Number(q.correctIndex) || 0), opts.length - 1);
+      var correctText = opts[ci];
+      var shuffled = shuffle(opts.slice());
+      return {
+        question: q.question,
+        options: shuffled,
+        correctIndex: shuffled.indexOf(correctText)
+      };
+    });
+
     quiz.index = 0;
     quiz.correct = 0;
     quiz.answered = false;
@@ -3117,68 +3590,70 @@ const SOUND_HUNT_DATA = {
     showScreen('questionsScreen');
   }
 
-  function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
   function renderQuestion() {
     clearQuizTimer();
-    const q = quiz.questions[quiz.index];
-    document.getElementById('qProgress').textContent = 'Question ' + (quiz.index + 1) + ' of ' + quiz.questions.length;
-    document.getElementById('qMeta').textContent = profile.name + ' · Day ' + currentDay;
-    document.getElementById('qText').textContent = q.question;
+    var q = quiz.questions[quiz.index];
+    $('qProgress').textContent = 'Question ' + (quiz.index + 1) + ' of ' + quiz.questions.length;
+    $('qMeta').textContent = profile.name + ' · Day ' + currentDay;
+    $('qText').textContent = q.question;
 
-    const box = document.getElementById('qOptions');
+    var box = $('qOptions');
     box.innerHTML = '';
-    const fb = document.getElementById('qFeedback');
+
+    var fb = $('qFeedback');
     fb.className = 'feedback-banner';
     fb.textContent = '';
 
     quiz.answered = false;
     quiz.triedWrong = false;
 
-    q.options.forEach((opt, i) => {
-      const b = document.createElement('button');
+    q.options.forEach(function (opt, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
       b.className = 'q-opt';
       b.textContent = opt;
-      b.addEventListener('click', () => onAnswer(i, b));
+      on(b, 'click', function () { onAnswer(i, b); });
       box.appendChild(b);
     });
   }
 
   function onAnswer(chosen, btn) {
     if (quiz.answered) return;
-    const q = quiz.questions[quiz.index];
-    const correct = chosen === q.correctIndex;
+    var q = quiz.questions[quiz.index];
+    var correct = chosen === q.correctIndex;
     quiz.answered = true;
 
-    const opts = document.querySelectorAll('#qOptions .q-opt');
-    opts.forEach((el, i) => {
+    var opts = document.querySelectorAll('#qOptions .q-opt');
+    for (var i = 0; i < opts.length; i++) {
+      var el = opts[i];
       el.disabled = true;
-      if (i === q.correctIndex) el.classList.add('correct');
-      if (i === chosen && !correct) el.classList.add('wrong');
-    });
+      if (i === q.correctIndex) addClass(el, 'correct');
+      if (i === chosen && !correct) addClass(el, 'wrong');
+    }
 
-    const fb = document.getElementById('qFeedback');
+    var fb = $('qFeedback');
     if (correct) {
       if (!quiz.triedWrong) quiz.correct++;
       fb.textContent = '✓ Correct!';
       fb.className = 'feedback-banner show ok';
       clearQuizTimer();
-      quizTimer = setTimeout(() => { quizTimer = null; advanceQuiz(); }, 1000);
+      quizTimer = setTimeout(function () {
+        quizTimer = null;
+        advanceQuiz();
+      }, 1000);
     } else {
       quiz.triedWrong = true;
       fb.textContent = '✗ Try again';
       fb.className = 'feedback-banner show bad';
       clearQuizTimer();
-      quizTimer = setTimeout(() => {
+      quizTimer = setTimeout(function () {
         quizTimer = null;
-        const currentOpts = document.querySelectorAll('#qOptions .q-opt');
-        currentOpts.forEach(el => { el.disabled = false; el.classList.remove('wrong', 'correct'); });
+        var currentOpts = document.querySelectorAll('#qOptions .q-opt');
+        for (var k = 0; k < currentOpts.length; k++) {
+          currentOpts[k].disabled = false;
+          removeClass(currentOpts[k], 'wrong');
+          removeClass(currentOpts[k], 'correct');
+        }
         fb.className = 'feedback-banner';
         quiz.answered = false;
       }, 1400);
@@ -3196,13 +3671,13 @@ const SOUND_HUNT_DATA = {
 
   function finishQuiz() {
     clearQuizTimer();
-    const total = quiz.questions.length;
-    const score = quiz.correct;
-    const pct = total ? Math.round((score / total) * 100) : 0;
-    const passed = pct >= PASS_PCT;
+    var total = quiz.questions.length;
+    var score = quiz.correct;
+    var pct = total ? Math.round((score / total) * 100) : 0;
+    var passed = pct >= PASS_PCT;
 
-    const p = getProg(currentLesson.id);
-    const prev = p.bestScores[currentDay] || 0;
+    var p = getProg(currentLesson.id);
+    var prev = p.bestScores[currentDay] || 0;
     if (score > prev) p.bestScores[currentDay] = score;
 
     if (passed && currentDay > p.highestDay) p.highestDay = currentDay;
@@ -3217,7 +3692,10 @@ const SOUND_HUNT_DATA = {
       title: currentLesson.title,
       targetSound: currentLesson.targetSound,
       day: currentDay,
-      score, total, pct, passed,
+      score: score,
+      total: total,
+      pct: pct,
+      passed: passed,
       highestDay: p.highestDay,
       date: new Date(),
       soundHuntAttempts: null
@@ -3233,40 +3711,54 @@ const SOUND_HUNT_DATA = {
   }
 
   function hasSoundHuntData(lesson) {
-    return lesson &&
+    return !!lesson &&
       Array.isArray(lesson.targetWords) && lesson.targetWords.length >= 5 &&
-      Array.isArray(lesson.decoyWords)  && lesson.decoyWords.length  >= 5;
+      Array.isArray(lesson.decoyWords) && lesson.decoyWords.length >= 5;
   }
 
-  document.getElementById('qBackStoryBtn').addEventListener('click', () => {
-    clearQuizTimer(); renderReading(); showScreen('readingScreen');
+  on($('qBackStoryBtn'), 'click', function () {
+    clearQuizTimer();
+    renderReading();
+    showScreen('readingScreen');
   });
-  document.getElementById('qToStoryBtn').addEventListener('click', () => {
-    clearQuizTimer(); renderReading(); showScreen('readingScreen');
+
+  on($('qToStoryBtn'), 'click', function () {
+    clearQuizTimer();
+    renderReading();
+    showScreen('readingScreen');
   });
 
   /* ========== SOUND HUNT ========== */
   function clearSoundHuntTimer() {
-    if (soundHuntTimer) { clearTimeout(soundHuntTimer); soundHuntTimer = null; }
+    if (soundHuntTimer) {
+      clearTimeout(soundHuntTimer);
+      soundHuntTimer = null;
+    }
   }
 
   function shortTargetSound(s) {
-    const str = String(s || '').trim();
-    const idx = str.lastIndexOf(':');
-    return idx >= 0 ? str.slice(idx + 1).trim() : str;
+    var str = String(s || '').replace(/^\s+|\s+$/g, '');
+    var idx = str.lastIndexOf(':');
+    return idx >= 0 ? str.slice(idx + 1).replace(/^\s+|\s+$/g, '') : str;
   }
 
   function startSoundHunt() {
     clearSoundHuntTimer();
     if (!hasSoundHuntData(currentLesson)) return;
 
-    const targets = currentLesson.targetWords.slice(0, 5);
-    const decoys  = currentLesson.decoyWords.slice(0, 5);
-    const tiles = [];
-    targets.forEach(w => tiles.push({ word: String(w), isTarget: true,  selected: false }));
-    decoys.forEach(w  => tiles.push({ word: String(w), isTarget: false, selected: false }));
+    var targets = currentLesson.targetWords.slice(0, 5);
+    var decoys = currentLesson.decoyWords.slice(0, 5);
+    var tiles = [];
+
+    for (var i = 0; i < targets.length; i++) {
+      tiles.push({ word: String(targets[i]), isTarget: true, selected: false });
+    }
+    for (var j = 0; j < decoys.length; j++) {
+      tiles.push({ word: String(decoys[j]), isTarget: false, selected: false });
+    }
 
     soundHunt.tiles = shuffle(tiles);
+    soundHunt.buttons = [];
     soundHunt.attempts = 0;
     soundHunt.passed = false;
     soundHunt.checking = false;
@@ -3277,30 +3769,31 @@ const SOUND_HUNT_DATA = {
   function renderSoundHunt() {
     if (!currentLesson) return;
 
-    document.getElementById('shMeta').textContent = profile.name + ' · Day ' + currentDay;
+    $('shMeta').textContent = profile.name + ' · Day ' + currentDay;
 
-    const chip = document.getElementById('shDayChip');
+    var chip = $('shDayChip');
     chip.textContent = 'Day ' + currentDay;
     chip.style.background = DAY_HEX[currentDay];
     chip.style.color = DAY_TEXT[currentDay];
 
-    document.getElementById('shTargetSound').textContent = 'Target: ' + currentLesson.targetSound;
+    $('shTargetSound').textContent = 'Target: ' + currentLesson.targetSound;
 
-    const soundSpan = '<span class="sh-sound">' + esc(shortTargetSound(currentLesson.targetSound)) + '</span>';
-    document.getElementById('shInstruction').innerHTML =
-      'Tap the 5 words that have the ' + soundSpan + ' sound.';
+    var soundSpan = '<span class="sh-sound">' + esc(shortTargetSound(currentLesson.targetSound)) + '</span>';
+    $('shInstruction').innerHTML = 'Tap the 5 words that have the ' + soundSpan + ' sound.';
 
-    const grid = document.getElementById('shGrid');
+    var grid = $('shGrid');
     grid.innerHTML = '';
-    soundHunt.tiles.forEach((tile, idx) => {
-      const btn = document.createElement('button');
+    soundHunt.buttons = [];
+
+    soundHunt.tiles.forEach(function (tile, idx) {
+      var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'sh-tile';
-      btn.dataset.idx = String(idx);
       btn.textContent = tile.word;
-      if (tile.selected) btn.classList.add('selected');
-      btn.addEventListener('click', () => onShTileTap(idx));
+      if (tile.selected) addClass(btn, 'selected');
+      on(btn, 'click', function () { onShTileTap(idx); });
       grid.appendChild(btn);
+      soundHunt.buttons[idx] = btn;
     });
 
     updateShCounter();
@@ -3310,38 +3803,46 @@ const SOUND_HUNT_DATA = {
 
   function onShTileTap(idx) {
     if (soundHunt.checking || soundHunt.passed) return;
-    const tile = soundHunt.tiles[idx];
+    var tile = soundHunt.tiles[idx];
     if (!tile) return;
 
-    const fb = document.getElementById('shFeedback');
-    if (fb && fb.classList.contains('show') && !fb.classList.contains('ok')) {
+    var fb = $('shFeedback');
+    if (fb && hasClass(fb, 'show') && !hasClass(fb, 'ok')) {
       fb.className = 'feedback-banner';
       fb.textContent = '';
     }
 
     tile.selected = !tile.selected;
 
-    const btn = document.querySelector('.sh-tile[data-idx="' + idx + '"]');
+    var btn = soundHunt.buttons[idx];
     if (btn) {
-      if (tile.selected) btn.classList.add('selected');
-      else btn.classList.remove('selected');
+      if (tile.selected) addClass(btn, 'selected');
+      else removeClass(btn, 'selected');
     }
 
     updateShCounter();
 
-    if (selectedShCount() === 5) runSoundHuntCheck();
+    if (selectedShCount() === 5) {
+      runSoundHuntCheck();
+    }
   }
 
-  function selectedShCount() { return soundHunt.tiles.filter(t => t.selected).length; }
+  function selectedShCount() {
+    var n = 0;
+    for (var i = 0; i < soundHunt.tiles.length; i++) {
+      if (soundHunt.tiles[i].selected) n++;
+    }
+    return n;
+  }
 
   function runSoundHuntCheck() {
     soundHunt.checking = true;
     soundHunt.attempts++;
 
-    const wrongIdxs = [];
-    soundHunt.tiles.forEach((t, i) => {
-      if (t.selected && !t.isTarget) wrongIdxs.push(i);
-    });
+    var wrongIdxs = [];
+    for (var i = 0; i < soundHunt.tiles.length; i++) {
+      if (soundHunt.tiles[i].selected && !soundHunt.tiles[i].isTarget) wrongIdxs.push(i);
+    }
 
     if (wrongIdxs.length === 0) {
       soundHunt.passed = true;
@@ -3352,22 +3853,25 @@ const SOUND_HUNT_DATA = {
       return;
     }
 
-    wrongIdxs.forEach(i => {
-      const btn = document.querySelector('.sh-tile[data-idx="' + i + '"]');
-      if (btn) btn.classList.add('wrong');
-    });
+    for (var w = 0; w < wrongIdxs.length; w++) {
+      var b = soundHunt.buttons[wrongIdxs[w]];
+      if (b) addClass(b, 'wrong');
+    }
     updateShFeedback();
 
     clearSoundHuntTimer();
-    soundHuntTimer = setTimeout(() => {
+    soundHuntTimer = setTimeout(function () {
       soundHuntTimer = null;
-      wrongIdxs.forEach(i => {
-        const t = soundHunt.tiles[i];
-        if (!t) return;
+      for (var k = 0; k < wrongIdxs.length; k++) {
+        var t = soundHunt.tiles[wrongIdxs[k]];
+        if (!t) continue;
         t.selected = false;
-        const btn = document.querySelector('.sh-tile[data-idx="' + i + '"]');
-        if (btn) btn.classList.remove('wrong', 'selected');
-      });
+        var btn = soundHunt.buttons[wrongIdxs[k]];
+        if (btn) {
+          removeClass(btn, 'wrong');
+          removeClass(btn, 'selected');
+        }
+      }
       soundHunt.checking = false;
       updateShCounter();
       updateShFeedback();
@@ -3375,11 +3879,12 @@ const SOUND_HUNT_DATA = {
   }
 
   function updateShCounter() {
-    document.getElementById('shCounter').textContent = selectedShCount() + ' of 5 selected';
+    var n = selectedShCount();
+    $('shCounter').textContent = n + ' of 5 selected';
   }
 
   function updateShFeedback() {
-    const fb = document.getElementById('shFeedback');
+    var fb = $('shFeedback');
     if (!fb) return;
     if (soundHunt.passed) {
       fb.textContent = '✓ All 5 target words found!';
@@ -3394,15 +3899,15 @@ const SOUND_HUNT_DATA = {
   }
 
   function updateShFinishBtn() {
-    const btn = document.getElementById('shFinishBtn');
+    var btn = $('shFinishBtn');
     if (!btn) return;
     if (soundHunt.passed) {
       btn.disabled = false;
-      btn.classList.remove('btn-locked');
+      removeClass(btn, 'btn-locked');
       btn.innerHTML = ICONS.check + 'See Results';
     } else {
       btn.disabled = true;
-      btn.classList.add('btn-locked');
+      addClass(btn, 'btn-locked');
       btn.innerHTML = ICONS.lock + 'Find all 5 words';
     }
   }
@@ -3414,9 +3919,9 @@ const SOUND_HUNT_DATA = {
     showScreen('resultsScreen');
   }
 
-  document.getElementById('shFinishBtn').addEventListener('click', finishSoundHunt);
+  on($('shFinishBtn'), 'click', finishSoundHunt);
 
-  document.getElementById('shBackBtn').addEventListener('click', () => {
+  on($('shBackBtn'), 'click', function () {
     clearSoundHuntTimer();
     renderReading();
     showScreen('readingScreen');
@@ -3424,31 +3929,31 @@ const SOUND_HUNT_DATA = {
 
   /* ========== RESULTS ========== */
   function renderResults() {
-    const r = lastResult;
+    var r = lastResult;
     if (!r) return;
 
-    const scoreEl = document.getElementById('resScore');
+    var scoreEl = $('resScore');
     scoreEl.textContent = r.score + '/' + r.total;
     scoreEl.className = 'score-big ' + (r.passed ? 'pass' : 'fail');
 
-    const ann = document.getElementById('resDayAnnounce');
+    var ann = $('resDayAnnounce');
     ann.textContent = r.passed
       ? 'Day ' + r.day + ' Completed!'
       : 'Day ' + r.day + ' — Keep practicing';
     ann.style.background = DAY_HEX[r.day];
     ann.style.color = DAY_TEXT[r.day];
 
-    document.getElementById('resName').textContent = profile.name;
-    document.getElementById('resGrade').textContent = profile.grade;
-    document.getElementById('resLesson').textContent = r.lessonNumber + ' – ' + r.title;
-    document.getElementById('resSound').textContent = r.targetSound;
-    document.getElementById('resDate').textContent = formatDate(r.date);
-    document.getElementById('resStatus').textContent = r.passed
+    $('resName').textContent = profile.name;
+    $('resGrade').textContent = profile.grade;
+    $('resLesson').textContent = r.lessonNumber + ' – ' + r.title;
+    $('resSound').textContent = r.targetSound;
+    $('resDate').textContent = formatDate(r.date);
+    $('resStatus').textContent = r.passed
       ? 'Day ' + r.day + ' Completed ✓'
       : 'Score below 80% — try again';
 
-    const shRow = document.getElementById('resShRow');
-    const shVal = document.getElementById('resShVal');
+    var shRow = $('resShRow');
+    var shVal = $('resShVal');
     if (typeof r.soundHuntAttempts === 'number') {
       shRow.style.display = 'flex';
       shVal.textContent = r.soundHuntAttempts === 1
@@ -3458,38 +3963,86 @@ const SOUND_HUNT_DATA = {
       shRow.style.display = 'none';
     }
 
-    const pills = document.getElementById('resDayPills');
+    var pills = $('resDayPills');
     pills.innerHTML = '';
-    for (let d = 1; d <= 5; d++) {
-      const s = document.createElement('span');
+    for (var d = 1; d <= 5; d++) {
+      var s = document.createElement('span');
       s.className = 'dp' + (d <= r.highestDay ? ' done d' + d : '');
       if (d <= r.highestDay) {
         s.style.background = DAY_HEX[d];
         s.style.color = DAY_TEXT[d];
       }
-      s.textContent = d;
+      s.textContent = String(d);
       pills.appendChild(s);
     }
 
-    const champ = document.getElementById('resChamp');
-    if (r.highestDay >= 5) champ.classList.add('show');
-    else champ.classList.remove('show');
+    var champ = $('resChamp');
+    if (r.highestDay >= 5) addClass(champ, 'show');
+    else removeClass(champ, 'show');
+
+    /* Finish code box */
+    var fcBox = $('resFinishCodeBox');
+    var fcVal = $('resFinishCode');
+    var fcMeta = $('resFinishCodeMeta');
+    if (fcBox && fcVal && fcMeta) {
+      var code = String(FINISH_CODE || '').replace(/^\s+|\s+$/g, '');
+      if (code) {
+        fcBox.style.display = '';
+        fcVal.textContent = code;
+        fcMeta.textContent = profile.name + ' \u00b7 ' + formatDate(r.date);
+        fcBox.onclick = copyFinishCode;
+      } else {
+        fcBox.style.display = 'none';
+      }
+    }
 
     updateSubmitButton();
   }
 
   function formatDate(d) {
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function copyFinishCode() {
+    var code = String(FINISH_CODE || '').replace(/^\s+|\s+$/g, '');
+    if (!code) return;
+    var el = document.getElementById('resFinishCode');
+    if (!el) return;
+    var showCopied = function () {
+      el.textContent = 'Copied!';
+      clearTimeout(el._copyTimer);
+      el._copyTimer = setTimeout(function () { el.textContent = code; }, 1200);
+    };
+    var fallback = function () {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = code;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) showCopied(); else toast('Copy failed');
+      } catch (e) { toast('Copy failed'); }
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(showCopied, fallback);
+      } else {
+        fallback();
+      }
+    } catch (e) { fallback(); }
   }
 
   function updateSubmitButton() {
     if (!lastResult) return;
-    const p = getProg(lastResult.lessonId);
-    const tk = todayKey();
-    const count = p.submits[tk] || 0;
-    const btn = document.getElementById('submitWaBtn');
-    const note = document.getElementById('submitNote');
+    var p = getProg(lastResult.lessonId);
+    var tk = todayKey();
+    var count = p.submits[tk] || 0;
+    var btn = $('submitWaBtn');
+    var note = $('submitNote');
     if (count >= MAX_SUBMITS_PER_DAY) {
       btn.disabled = true;
       btn.innerHTML = 'Already submitted twice today';
@@ -3497,29 +4050,31 @@ const SOUND_HUNT_DATA = {
     } else {
       btn.disabled = false;
       btn.innerHTML = ICONS.send + 'Submit to Teacher';
-      note.textContent = 'Shares badge image, then opens teacher chat (works without saved contact) · ' + (MAX_SUBMITS_PER_DAY - count) + ' left today';
+      note.textContent = 'Shares badge image, then opens teacher chat (works without saved contact) · ' +
+        (MAX_SUBMITS_PER_DAY - count) + ' left today';
     }
   }
 
-  document.getElementById('submitWaBtn').addEventListener('click', submitToTeacher);
+  on($('submitWaBtn'), 'click', submitToTeacher);
 
-  async function submitToTeacher() {
+  function submitToTeacher() {
     if (!lastResult) return;
-    const p = getProg(lastResult.lessonId);
-    const tk = todayKey();
-    const count = p.submits[tk] || 0;
+
+    var p = getProg(lastResult.lessonId);
+    var tk = todayKey();
+    var count = p.submits[tk] || 0;
     if (count >= MAX_SUBMITS_PER_DAY) {
       toast('Already submitted twice today');
       return;
     }
 
-    const btn = document.getElementById('submitWaBtn');
-    const origHTML = btn.innerHTML;
+    var btn = $('submitWaBtn');
+    var origHTML = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = 'Preparing image…';
 
-    const r = lastResult;
-    const shareText =
+    var r = lastResult;
+    var shareText =
       'Decodable Reader Result\n' +
       'Name: ' + profile.name + '\n' +
       'Grade: ' + profile.grade + '\n' +
@@ -3530,118 +4085,188 @@ const SOUND_HUNT_DATA = {
         ? 'Sound Hunt: Passed on try ' + r.soundHuntAttempts + '\n'
         : '') +
       'Date: ' + formatDate(r.date) + '\n' +
+      (String(FINISH_CODE || '').replace(/^\s+|\s+$/g, '') ? 'Finish Code: ' + String(FINISH_CODE).replace(/^\s+|\s+$/g, '') + '\n' : '') +
       'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
 
-    const waUrl = 'https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText);
+    var waUrl = 'https://wa.me/' + TEACHER_WA + '?text=' + encodeURIComponent(shareText);
 
-    let recorded = false;
+    var recorded = false;
     function recordSubmit() {
       if (recorded) return;
       recorded = true;
       p.submits[tk] = (p.submits[tk] || 0) + 1;
       saveStore();
     }
+
     function openTeacherChat() {
       try { window.open(waUrl, '_blank'); } catch (e) {}
     }
 
-    try {
-      if (typeof html2canvas === 'function') {
-        const badge = document.getElementById('resultBadge');
-        const canvas = await html2canvas(badge, {
-          backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff',
-          scale: 2,
-          useCORS: true,
-          logging: false
-        });
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        if (!blob) throw new Error('toBlob returned null');
+    function resetButton() {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+      updateSubmitButton();
+    }
 
-        const file = new File([blob], 'decodable-result.png', { type: 'image/png' });
-
-        try {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'decodable-result.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 4000);
-        } catch (dlErr) {}
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: 'Decodable Reader Result',
-              text: shareText
-            });
-            recordSubmit();
-            toast('Shared. Opening teacher chat…', 2800);
-            setTimeout(openTeacherChat, 400);
-            return;
-          } catch (shareErr) {
-            if (shareErr && shareErr.name === 'AbortError') {
-              toast('Share cancelled — not submitted', 2600);
-              return;
-            }
-          }
-        }
-
-        recordSubmit();
-        toast('Opening teacher chat — just tap Send', 3000);
-        setTimeout(openTeacherChat, 400);
-      } else {
-        recordSubmit();
-        toast('Opening teacher chat — just tap Send', 2800);
-        setTimeout(openTeacherChat, 400);
-      }
-    } catch (err) {
-      console.error(err);
+    function whatsAppPath(message) {
       recordSubmit();
-      toast('Opening teacher chat with result text', 2800);
+      updateSubmitButton();
+      toast(message || 'Opening teacher chat — just tap Send', 2800);
       setTimeout(openTeacherChat, 400);
-    } finally {
-      setTimeout(updateSubmitButton, 1200);
+      setTimeout(resetButton, 800);
+    }
+
+    var canCapture = (typeof window.html2canvas === 'function') &&
+                     (typeof window.Promise === 'function');
+
+    if (!canCapture) {
+      whatsAppPath('WhatsApp opened — just tap Send');
+      return;
+    }
+
+    var finished = false;
+
+    function afterCapture(canvas) {
+      if (finished) return;
+      finished = true;
+
+      var dataUrl = null;
+      try { dataUrl = canvas.toDataURL('image/png'); } catch (e) { dataUrl = null; }
+      if (dataUrl) {
+        try {
+          var a = document.createElement('a');
+          if (typeof a.download !== 'undefined') {
+            a.href = dataUrl;
+            a.download = 'decodable-result.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
+        } catch (e) {}
+      }
+
+      var canNativeShare = canvas.toBlob &&
+                           typeof window.File === 'function' &&
+                           typeof window.Blob === 'function' &&
+                           navigator && navigator.canShare && navigator.share;
+
+      if (canNativeShare) {
+        try {
+          canvas.toBlob(function (blob) {
+            if (!blob) { whatsAppPath(); return; }
+            var file = null;
+            try { file = new window.File([blob], 'decodable-result.png', { type: 'image/png' }); }
+            catch (e) { file = null; }
+            if (!file || !navigator.canShare({ files: [file] })) { whatsAppPath(); return; }
+
+            var pr;
+            try {
+              pr = navigator.share({
+                files: [file],
+                title: 'Decodable Reader Result',
+                text: shareText
+              });
+            } catch (e) { whatsAppPath(); return; }
+
+            if (pr && pr.then) {
+              pr.then(function () {
+                recordSubmit();
+                updateSubmitButton();
+                toast('Shared. Opening teacher chat…', 2800);
+                setTimeout(openTeacherChat, 400);
+                setTimeout(resetButton, 800);
+              })['catch'](function (err) {
+                if (err && err.name === 'AbortError') {
+                  toast('Share cancelled — not submitted', 2600);
+                  resetButton();
+                } else {
+                  whatsAppPath();
+                }
+              });
+            } else {
+              whatsAppPath();
+            }
+          }, 'image/png');
+        } catch (e) {
+          whatsAppPath();
+        }
+      } else {
+        whatsAppPath();
+      }
+    }
+
+    try {
+      window.html2canvas($('resultBadge'), {
+        backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      }).then(function (canvas) {
+        afterCapture(canvas);
+      })['catch'](function (err) {
+        if (window.console && console.error) console.error(err);
+        if (finished) return;
+        finished = true;
+        whatsAppPath('Opened teacher chat with result text');
+      });
+    } catch (err) {
+      if (window.console && console.error) console.error(err);
+      if (finished) return;
+      finished = true;
+      whatsAppPath('Opened teacher chat with result text');
     }
   }
 
-  document.getElementById('resHomeBtn').addEventListener('click', () => { renderHome(); showScreen('homeScreen'); });
-  document.getElementById('resListBtn').addEventListener('click', () => { renderHome(); showScreen('homeScreen'); });
-  document.getElementById('resAgainBtn').addEventListener('click', () => {
+  on($('resHomeBtn'), 'click', function () { renderHome(); showScreen('homeScreen'); });
+  on($('resListBtn'), 'click', function () { renderHome(); showScreen('homeScreen'); });
+  on($('resAgainBtn'), 'click', function () {
     if (lastResult) openLesson(lastResult.lessonId);
   });
 
   /* ========== EXPORT / BACKUP / IMPORT ========== */
 
-  function fileName(prefix, ext) {
-    const safe = String(profile.name || 'student')
+  function safeFileName(prefix, ext) {
+    var safe = String(profile.name || 'student')
       .replace(/[^a-z0-9]+/gi, '_')
       .replace(/^_+|_+$/g, '')
       .toLowerCase() || 'student';
-    const d = new Date();
-    const stamp =
-      d.getFullYear() +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      String(d.getDate()).padStart(2, '0');
+    var d = new Date();
+    var stamp = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
     return prefix + '_' + safe + '_' + stamp + '.' + ext;
   }
 
-  function downloadBlob(blob, name) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  function triggerDownload(url, name) {
+    var a = document.createElement('a');
+    if (typeof a.download !== 'undefined') {
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      try { window.open(url, '_blank'); } catch (e) {}
+    }
+  }
+
+  function downloadText(text, mime, name) {
+    if (window.Blob && window.URL && window.URL.createObjectURL) {
+      try {
+        var blob = new window.Blob([text], { type: mime });
+        var url = window.URL.createObjectURL(blob);
+        triggerDownload(url, name);
+        setTimeout(function () {
+          try { window.URL.revokeObjectURL(url); } catch (e) {}
+        }, 4000);
+        return;
+      } catch (e) { /* fall through to data URI */ }
+    }
+    var dataUrl = 'data:' + mime + ';charset=utf-8,' + encodeURIComponent(text);
+    triggerDownload(dataUrl, name);
   }
 
   function csvCell(v) {
     if (v === null || v === undefined) return '';
-    const s = String(v);
+    var s = String(v);
     if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
     return s;
   }
@@ -3649,25 +4274,41 @@ const SOUND_HUNT_DATA = {
   function exportExcel() {
     if (!profile.name) { toast('No profile to export'); return; }
 
-    const rows = [];
+    var rows = [];
     rows.push([
       'Student', 'Grade', 'Lesson #', 'Title', 'Target Sound',
       'Highest Day', 'Best Scores', 'Submits Today',
       'Last Played', 'Last Day', 'Mastered'
     ]);
 
-    let started = 0, mastered = 0;
-    LESSONS.forEach(l => {
-      const p = progress[l.id];
-      if (!p || typeof p !== 'object') return;
+    var started = 0;
+    var mastered = 0;
+    var tk = todayKey();
+
+    for (var i = 0; i < LESSONS.length; i++) {
+      var l = LESSONS[i];
+      var p = progress[l.id];
+      if (!p || typeof p !== 'object') continue;
+
       started++;
-      const bestScores = Object.keys(p.bestScores || {})
-        .sort((a, b) => Number(a) - Number(b))
-        .map(d => 'D' + d + ':' + p.bestScores[d])
-        .join(' ');
-      const submitsToday = (p.submits && p.submits[todayKey()]) || 0;
-      const masteredFlag = (p.highestDay >= 5) ? 'Yes' : 'No';
+
+      var bestKeys = [];
+      var k;
+      for (k in p.bestScores) {
+        if (Object.prototype.hasOwnProperty.call(p.bestScores, k)) bestKeys.push(k);
+      }
+      bestKeys.sort(function (a, b) { return Number(a) - Number(b); });
+      var bestParts = [];
+      for (k = 0; k < bestKeys.length; k++) {
+        var dkey = bestKeys[k];
+        bestParts.push('D' + dkey + ':' + p.bestScores[dkey]);
+      }
+      var bestScores = bestParts.join(' ');
+
+      var submitsToday = (p.submits && p.submits[tk]) || 0;
+      var masteredFlag = (p.highestDay >= 5) ? 'Yes' : 'No';
       if (masteredFlag === 'Yes') mastered++;
+
       rows.push([
         profile.name,
         profile.grade,
@@ -3681,7 +4322,7 @@ const SOUND_HUNT_DATA = {
         p.lastPlayDay || 0,
         masteredFlag
       ]);
-    });
+    }
 
     rows.push([]);
     rows.push(['Summary']);
@@ -3690,51 +4331,75 @@ const SOUND_HUNT_DATA = {
     rows.push(['Total lessons', LESSONS.length]);
     rows.push(['Export date', formatDate(new Date())]);
 
-    const csv = rows.map(r => r.map(csvCell).join(',')).join('\r\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-    downloadBlob(blob, fileName('progress', 'csv'));
+    var lines = [];
+    for (var ri = 0; ri < rows.length; ri++) {
+      var cells = [];
+      for (var ci = 0; ci < rows[ri].length; ci++) {
+        cells.push(csvCell(rows[ri][ci]));
+      }
+      lines.push(cells.join(','));
+    }
+    var csv = lines.join('\r\n');
+
+    downloadText('\uFEFF' + csv, 'text/csv', safeFileName('progress', 'csv'));
     toast('Exported — open in Excel', 3000);
   }
 
   function exportBackup() {
-    const data = {
+    var data = {
       version: 1,
       exportedAt: new Date().toISOString(),
-      profile,
-      progress,
-      theme,
-      ttsSpeed
+      profile: profile,
+      progress: progress,
+      theme: theme,
+      ttsSpeed: ttsSpeed
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    downloadBlob(blob, fileName('backup', 'json'));
+    downloadText(JSON.stringify(data, null, 2), 'application/json', safeFileName('backup', 'json'));
     toast('Backup saved', 2600);
   }
 
   function importBackup() {
-    document.getElementById('importFile').click();
+    var input = $('importFile');
+    if (input && typeof input.click === 'function') {
+      input.click();
+    } else {
+      toast('Import not supported on this browser', 3000);
+    }
   }
 
   function onImportFile(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+    var input = (e && evTarget(e)) || $('importFile');
+    var file = (input.files && input.files[0]) || null;
+    if (!file) { if (input) input.value = ''; return; }
 
-    const reader = new FileReader();
-    reader.onload = ev => {
+    if (!window.FileReader) {
+      toast('Import not supported on this browser', 3200);
+      input.value = '';
+      return;
+    }
+
+    var reader = new window.FileReader();
+    reader.onload = function (ev) {
+      var raw = (ev && ev.target) ? ev.target.result : null;
       try {
-        const data = JSON.parse(ev.target.result);
-        if (!data || typeof data !== 'object') throw new Error('Not an object');
-        if (!data.profile || typeof data.profile !== 'object') throw new Error('Missing profile');
+        var data = JSON.parse(raw);
+        if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('bad');
+        if (!data.profile || typeof data.profile !== 'object') throw new Error('bad');
         if (!data.progress || typeof data.progress !== 'object' || Array.isArray(data.progress)) {
-          throw new Error('Missing or invalid progress');
+          throw new Error('bad');
         }
 
-        const currentName = profile.name || 'this device';
-        const incomingName = String(data.profile.name || 'unknown');
-        const msg =
-          'Import progress for "' + incomingName + '"?\n\n' +
-          'This will REPLACE all current progress on this device (' + currentName + ').\n\n' +
-          'Continue?';
-        if (!window.confirm(msg)) { e.target.value = ''; return; }
+        var incomingName = String(data.profile.name || 'unknown');
+        var currentName = profile.name || 'this device';
+        var ok = false;
+        try {
+          ok = window.confirm(
+            'Import progress for "' + incomingName + '"?\n\n' +
+            'This will REPLACE all current progress on this device (' + currentName + ').\n\n' +
+            'Continue?'
+          );
+        } catch (ce) { ok = true; }
+        if (!ok) { input.value = ''; return; }
 
         profile = {
           name: String(data.profile.name || '').slice(0, 30),
@@ -3752,70 +4417,77 @@ const SOUND_HUNT_DATA = {
           renderHome();
           showScreen('homeScreen');
         } else {
-          document.getElementById('profileName').value = profile.name || '';
-          document.getElementById('profileGrade').value = profile.grade || '';
-          document.getElementById('nameCount').textContent = (profile.name || '').length;
+          $('profileName').value = profile.name || '';
+          $('profileGrade').value = profile.grade || '';
+          updateNameCount();
           showScreen('profileScreen');
         }
 
-        toast('Imported ' + Object.keys(progress).length + ' lesson records', 3200);
+        var n = 0;
+        for (var k in progress) {
+          if (Object.prototype.hasOwnProperty.call(progress, k)) n++;
+        }
+        toast('Imported ' + n + ' lesson records', 3200);
       } catch (err) {
-        console.error(err);
+        if (window.console && console.error) console.error(err);
         toast('Import failed — file may be corrupt', 3200);
       } finally {
-        e.target.value = '';
+        input.value = '';
       }
     };
-    reader.onerror = () => {
+    reader.onerror = function () {
       toast('Could not read file', 2600);
-      e.target.value = '';
+      input.value = '';
     };
     reader.readAsText(file);
   }
 
-  document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
-  document.getElementById('backupBtn').addEventListener('click', exportBackup);
-  document.getElementById('importBtn').addEventListener('click', importBackup);
-  document.getElementById('importFile').addEventListener('change', onImportFile);
+  on($('exportExcelBtn'), 'click', exportExcel);
+  on($('backupBtn'), 'click', exportBackup);
+  on($('importBtn'), 'click', importBackup);
+  on($('importFile'), 'change', onImportFile);
 
   /* ========== HELPERS ========== */
   function esc(s) {
-    return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    return String(s).replace(/[&<>"']/g, function (m) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+    });
   }
 
   /* ========== THEME BUTTONS ========== */
-  ['themeBtn', 'themeBtn2', 'themeBtn3', 'themeBtn4', 'themeBtn5'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('click', toggleTheme);
-  });
+  for (var tbi = 0; tbi < THEME_IDS.length; tbi++) {
+    var themeEl = $(THEME_IDS[tbi]);
+    if (themeEl) on(themeEl, 'click', toggleTheme);
+  }
 
   /* ========== OVERFLOW MENU WIRING ========== */
   (function initOverflowMenu() {
-    const btn = document.getElementById('menuBtn');
-    const menu = document.getElementById('overflowMenu');
+    var btn = $('menuBtn');
+    var menu = $('overflowMenu');
     if (!btn || !menu) return;
 
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
+    on(btn, 'click', function (e) {
+      stopEvent(e);
       toggleOverflowMenu();
     });
 
-    /* Any click inside the menu closes it. Bubbling ensures the item's own
-       handler runs first, then this fires. */
-    menu.addEventListener('click', () => {
+    on(menu, 'click', function () {
       closeOverflowMenu();
     });
 
-    document.addEventListener('click', e => {
+    on(document, 'click', function (e) {
       if (!menuOpen) return;
-      const t = e.target;
-      if (menu.contains(t) || btn.contains(t)) return;
+      var t = evTarget(e);
+      if (nodeContains(menu, t)) return;
+      if (nodeContains(btn, t)) return;
       closeOverflowMenu();
     });
 
-    document.addEventListener('keydown', e => {
+    on(document, 'keydown', function (e) {
       if (!menuOpen) return;
-      if (e.key === 'Escape' || e.keyCode === 27) closeOverflowMenu();
+      e = e || window.event;
+      var k = e.key || '';
+      if (k === 'Escape' || e.keyCode === 27) closeOverflowMenu();
     });
   })();
 
@@ -3823,16 +4495,17 @@ const SOUND_HUNT_DATA = {
   loadStore();
   applyTheme();
   updateSpeedBtn();
+
   (function initReadButton() {
-    const btn = document.getElementById('goQuestionsBtn');
+    var btn = $('goQuestionsBtn');
     if (btn) btn.innerHTML = ICONS.lock + 'Finish reading first';
   })();
   (function initSubmitButton() {
-    const btn = document.getElementById('submitWaBtn');
+    var btn = $('submitWaBtn');
     if (btn) btn.innerHTML = ICONS.send + 'Submit to Teacher';
   })();
   (function initShButton() {
-    const btn = document.getElementById('shFinishBtn');
+    var btn = $('shFinishBtn');
     if (btn) btn.innerHTML = ICONS.lock + 'Find all 5 words';
   })();
 
