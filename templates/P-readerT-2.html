@@ -719,6 +719,18 @@
     }
     .rec-ask-icon { color: #dc2626; font-size: 2rem; line-height: 1; margin-bottom: 8px; }
     .rec-ask-text { font-weight: 700; font-size: 1rem; line-height: 1.4; margin-bottom: 18px; }
+    /* ===== Today's target lesson highlight ===== */
+    .lesson-card.target-lesson {
+      border-color: #f59e0b; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.28);
+      background: rgba(245,158,11,0.10);
+    }
+    .target-badge {
+      display: inline-block; margin-top: 8px; padding: 3px 9px; border-radius: 20px;
+      background: #f59e0b; background: var(--accent); color: #0f172a;
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 0.02em;
+    }
+    .day-pill.target-day { box-shadow: 0 0 0 2px #f59e0b; box-shadow: 0 0 0 2px var(--accent); }
     @media (min-width: 600px) {
       .content-wrap { max-width: 520px; margin: 0 auto; width: 100%; }
     }
@@ -944,6 +956,7 @@
             <div class="res-meta-line" id="resLine2">—</div>
             <div class="res-meta-line muted" id="resLine3">—</div>
             <div class="res-meta-line muted" id="resLine4" style="display:none;">—</div>
+            <div class="res-meta-line" id="resLine5" style="display:none;"></div>
           </div>
           <div class="finish-code-box" id="resFinishCodeBox" style="display:none;">
             <div class="finish-code-label">Completion code</div>
@@ -5262,7 +5275,11 @@
   const DAY_HEX = { 1: '#ef4444', 2: '#eab308', 3: '#22c55e', 4: '#3b82f6', 5: '#a855f7' };
   const DAY_TEXT = { 1: '#ffffff', 2: '#0f172a', 3: '#ffffff', 4: '#ffffff', 5: '#ffffff' };
   const CHUNK_SIZE = 3;
-  const PASS_PCT = 50;
+  /* ===== TEACHER CONTROLS - edit these each day ===== */
+  var TARGET_LESSON_TITLE = 'The Shrew and the Shrub';  /* lesson title, not case-sensitive */
+  var TARGET_DAY = 1;                      /* 1 to 5 */
+  /* ================================================== */
+  var FLAGS_DB_NAME = 'decodable_flags_r2';  /* IndexedDB for the 5 day flags (Reader 1 and Reader 2 differ) */
   const MAX_SUBMITS_PER_DAY = 2;
   const TEACHER_WA = '233545800158';
   const STORAGE_KEY = 'decodable_student_v2';
@@ -5290,6 +5307,119 @@
   let soundHuntTimer = null;
 
   const TTS_RATES = { slow: 0.7, normal: 0.95 };
+
+  /* ========== DAY FLAGS (IndexedDB, per student + lesson) ========== */
+  var FlagsMod = (function () {
+    var STORE = 'flags';
+    var db = null, cache = {}, warned = false;
+    var supported = !!window.indexedDB;
+
+    function studentKey(name) { return String(name || '').replace(/^\s+|\s+$/g, '').toLowerCase(); }
+    function recKey(name, lessonId) { return studentKey(name) + '|' + lessonId; }
+    function blank(name, lessonId) {
+      return { key: recKey(name, lessonId), student: studentKey(name), lessonId: lessonId,
+               day1: false, day2: false, day3: false, day4: false, day5: false };
+    }
+    function put(rec) {
+      if (!db) return;
+      try { db.transaction(STORE, 'readwrite').objectStore(STORE).put(rec); } catch (e) {}
+    }
+    function warn() {
+      if (db || warned) return;
+      warned = true;
+      try { toast('Progress storage unavailable - days will not be saved', 3500); } catch (e) {}
+    }
+    function init(cb) {
+      var done = false;
+      function finish() { if (done) return; done = true; if (cb) cb(); }
+      if (!supported) { finish(); return; }
+      var req;
+      try { req = window.indexedDB.open(FLAGS_DB_NAME, 1); } catch (e) { finish(); return; }
+      req.onupgradeneeded = function () {
+        try { req.result.createObjectStore(STORE, { keyPath: 'key' }); } catch (e) {}
+      };
+      req.onsuccess = function () {
+        db = req.result;
+        try {
+          var cur = db.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
+          cur.onsuccess = function () {
+            var c = cur.result;
+            if (c) { cache[c.value.key] = c.value; c['continue'](); }
+            else { finish(); }
+          };
+          cur.onerror = function () { finish(); };
+        } catch (e) { finish(); }
+      };
+      req.onerror = function () { finish(); };
+      req.onblocked = function () { finish(); };
+    }
+    /* A record is created once per student + lesson. Lesson 1 starts with Day 1 = true. */
+    function ensure(name, lessonId) {
+      var k = recKey(name, lessonId);
+      if (!cache[k]) {
+        var rec = blank(name, lessonId);
+        if (LESSONS.length && lessonId === LESSONS[0].id) rec.day1 = true;
+        cache[k] = rec;
+        put(rec);
+      }
+      return cache[k];
+    }
+    function ensureStudent(name) {
+      if (!studentKey(name)) return;
+      for (var i = 0; i < LESSONS.length; i++) ensure(name, LESSONS[i].id);
+      warn();
+    }
+    function get(name, lessonId) {
+      var r = ensure(name, lessonId);
+      return [r.day1 === true, r.day2 === true, r.day3 === true, r.day4 === true, r.day5 === true];
+    }
+    /* Only ever turns a flag true. Never resets. */
+    function setDay(name, lessonId, day) {
+      if (!(day >= 1 && day <= 5)) return false;
+      var r = ensure(name, lessonId);
+      if (r['day' + day] === true) return false;
+      r['day' + day] = true;
+      put(r);
+      return true;
+    }
+    function count(name, lessonId) {
+      var f = get(name, lessonId), n = 0;
+      for (var i = 0; i < 5; i++) if (f[i]) n++;
+      return n;
+    }
+    function allDone(name, lessonId) { return count(name, lessonId) === 5; }
+    function summary(name, lessonId) {
+      var f = get(name, lessonId), out = [];
+      for (var i = 0; i < 5; i++) out.push((i + 1) + (f[i] ? '\u2713' : '\u2717'));
+      return out.join(' ');
+    }
+    function exportAll() {
+      var out = [];
+      for (var k in cache) {
+        if (Object.prototype.hasOwnProperty.call(cache, k)) out.push(cache[k]);
+      }
+      return out;
+    }
+    function importAll(list) {
+      if (!Array.isArray(list)) return;
+      cache = {};
+      var os = null;
+      if (db) {
+        try { os = db.transaction(STORE, 'readwrite').objectStore(STORE); os.clear(); } catch (e) { os = null; }
+      }
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (!r || typeof r.key !== 'string' || typeof r.lessonId !== 'string') continue;
+        var rec = { key: r.key, student: String(r.student || ''), lessonId: r.lessonId,
+                    day1: r.day1 === true, day2: r.day2 === true, day3: r.day3 === true,
+                    day4: r.day4 === true, day5: r.day5 === true };
+        cache[rec.key] = rec;
+        if (os) { try { os.put(rec); } catch (e) {} }
+      }
+    }
+    return { init: init, ensureStudent: ensureStudent, get: get, setDay: setDay, count: count,
+             allDone: allDone, summary: summary, exportAll: exportAll, importAll: importAll };
+  })();
 
   /* ========== STORAGE ========== */
   function loadStore() {
@@ -5416,73 +5546,112 @@
     if (name.length > 30) return toast('Name must be 30 characters or less');
     profile = { name, grade };
     saveStore();
+    FlagsMod.ensureStudent(profile.name);
     renderHome();
     showScreen('homeScreen');
   });
 
   /* ========== HOME ========== */
-  function renderHome() {
-    document.getElementById('homeName').textContent = profile.name || '—';
-    document.getElementById('homeGrade').textContent = 'Grade ' + (profile.grade || '—');
-    document.getElementById('homeAvatar').textContent = ((profile.name && profile.name[0]) || '?').toUpperCase();
+  var homeScrolledOnce = false;
 
-    const list = document.getElementById('lessonList');
+  function renderHome() {
+    document.getElementById('homeName').textContent = profile.name || '\u2014';
+    document.getElementById('homeGrade').textContent = 'Grade ' + (profile.grade || '\u2014');
+    document.getElementById('homeAvatar').textContent = ((profile.name && profile.name.charAt(0)) || '?').toUpperCase();
+
+    var list = document.getElementById('lessonList');
     list.innerHTML = '';
-    LESSONS.forEach(l => {
-      const p = getProg(l.id);
-      const day = p.highestDay;
-      const mastered = day >= 5;
-      const card = document.createElement('div');
-      card.className = 'lesson-card' + (mastered ? ' mastered' : '');
-      let pills = '';
-      for (let d = 1; d <= 5; d++) {
-        const done = d <= day;
-        pills += '<span class="day-pill ' + (done ? 'done d' + d : '') + '">' + d + '</span>';
+    var targetCard = null;
+
+    LESSONS.forEach(function (l) {
+      var flags = FlagsMod.get(profile.name, l.id);
+      var doneCount = 0;
+      for (var i = 0; i < 5; i++) { if (flags[i]) doneCount++; }
+      var mastered = doneCount === 5;
+      var isTarget = isTargetLesson(l);
+
+      var card = document.createElement('div');
+      card.className = 'lesson-card' + (mastered ? ' mastered' : '') + (isTarget ? ' target-lesson' : '');
+
+      var pills = '';
+      for (var d = 1; d <= 5; d++) {
+        pills += '<span class="day-pill ' + (flags[d - 1] ? 'done d' + d : '') +
+                 (isTarget && d === targetDay() ? ' target-day' : '') + '">' + d + '</span>';
       }
+
       card.innerHTML =
         '<div class="lesson-num">' + l.lessonNumber + '</div>' +
         '<div class="lesson-body">' +
           '<div class="lesson-title">' + esc(l.title) + '</div>' +
           '<div class="lesson-sound">' + ICONS.target + esc(l.targetSound) + '</div>' +
-          '<div class="day-pills">' + pills + '<span class="day-label">Day ' + day + '/5</span></div>' +
+          '<div class="day-pills">' + pills + '<span class="day-label">' + doneCount + '/5 days</span></div>' +
           (mastered ? '<div class="mastered-badge">' + ICONS.trophy + '5-Day Champion</div>' : '') +
+          (isTarget ? '<div class="target-badge">Today\u2019s lesson \u00B7 Day ' + targetDay() + '</div>' : '') +
         '</div>';
-      card.addEventListener('click', () => openLesson(l.id));
+
+      card.onclick = function () { openLesson(l.id); };
+      if (isTarget) targetCard = card;
       list.appendChild(card);
     });
+
+    if (targetCard && !homeScrolledOnce) {
+      homeScrolledOnce = true;
+      setTimeout(function () {
+        try { targetCard.scrollIntoView({ block: 'center' }); }
+        catch (e) { try { targetCard.scrollIntoView(); } catch (e2) {} }
+      }, 120);
+    }
   }
 
   /* ========== READING ========== */
+  function isTargetLesson(l) {
+    if (!l) return false;
+    var a = String(l.title).replace(/^\s+|\s+$/g, '').toLowerCase();
+    var b = String(TARGET_LESSON_TITLE).replace(/^\s+|\s+$/g, '').toLowerCase();
+    return a === b;
+  }
+
+  function targetDay() {
+    var d = parseInt(TARGET_DAY, 10);
+    return (d >= 1 && d <= 5) ? d : 1;
+  }
+
+  /* Called when the full cycle (reading + questions + Sound Hunt) is passed. */
+  function completeCycle() {
+    if (!lastResult || !lastResult.passed) return;
+    if (!isTargetLesson(currentLesson) || lastResult.day !== targetDay()) { lastResult.counted = false; return; }
+    FlagsMod.setDay(profile.name, currentLesson.id, lastResult.day);
+    lastResult.counted = true;
+  }
+
   function openLesson(id) {
-    currentLesson = LESSONS.find(l => l.id === id);
+    var found = null;
+    for (var i = 0; i < LESSONS.length; i++) {
+      if (LESSONS[i].id === id) { found = LESSONS[i]; break; }
+    }
+    currentLesson = found;
     if (!currentLesson) return;
 
-    const p = getProg(id);
-    const today = todayKey();
-    const sameDayReplay = (p.lastPlayDate === today && today.length === 10);
+    var p = getProg(id);
+    currentDay = targetDay();
+    p.lastPlayDate = todayKey();
+    p.lastPlayDay = currentDay;
 
-    if (sameDayReplay) {
-      const fallback = Math.max(1, Math.min(p.highestDay, 5));
-      currentDay = (p.lastPlayDay >= 1 && p.lastPlayDay <= 5) ? p.lastPlayDay : fallback;
+    /* a half-finished read from a different day must not carry over */
+    if (p.tappedDay !== currentDay) {
+      p.currentTapped = [];
+      p.tappedDay = currentDay;
+    }
+    saveStore();
 
-      if (p.highestDay >= 5) {
-        toast('Champion — Day 5 replay', 2600);
-      } else if (currentDay > p.highestDay) {
-        toast('Same day — Day ' + currentDay + ' practice', 2600);
+    if (isTargetLesson(currentLesson)) {
+      if (FlagsMod.get(profile.name, id)[currentDay - 1]) {
+        toast('Day ' + currentDay + ' already complete \u2014 replay', 2600);
       } else {
-        toast('Same day — Day ' + currentDay + ' replay', 2600);
+        toast('Today\u2019s lesson \u2014 Day ' + currentDay, 2400);
       }
     } else {
-      currentDay = Math.min(p.highestDay + 1, 5);
-      p.lastPlayDate = today;
-      p.lastPlayDay = currentDay;
-      saveStore();
-
-      if (p.highestDay >= 5) {
-        toast('Champion mode — Day 5 replay', 2400);
-      } else if (currentDay > 1) {
-        toast('New day! Day ' + currentDay + ' unlocked', 2400);
-      }
+      toast('Practice only \u2014 not today\u2019s lesson', 2800);
     }
 
     tappedSet = new Set(p.currentTapped || []);
@@ -5904,8 +6073,6 @@
     const prev = p.bestScores[currentDay] || 0;
     if (score > prev) p.bestScores[currentDay] = score;
 
-    if (passed && currentDay > p.highestDay) p.highestDay = currentDay;
-
     p.currentTapped = [];
     p.readingDone = false;
     quiz.active = false;
@@ -5918,7 +6085,8 @@
       targetSound: currentLesson.targetSound,
       day: currentDay,
       score, total, pct, passed,
-      highestDay: p.highestDay,
+      isTarget: isTargetLesson(currentLesson),
+      counted: false,
       date: new Date(),
       soundHuntAttempts: null
     };
@@ -5927,6 +6095,7 @@
       startSoundHunt();
       showScreen('soundHuntScreen');
     } else {
+      completeCycle();
       renderResults();
       showScreen('resultsScreen');
     }
@@ -6112,6 +6281,7 @@
 
   function finishSoundHunt() {
     if (!soundHunt.passed) return;
+    completeCycle();
     if (lastResult) lastResult.soundHuntAttempts = soundHunt.attempts;
     renderResults();
     showScreen('resultsScreen');
@@ -6157,22 +6327,33 @@
       line4.style.display = 'none';
     }
 
-    const pills = document.getElementById('resDayPills');
+    var fl = FlagsMod.get(profile.name, r.lessonId);
+    var pills = document.getElementById('resDayPills');
     pills.innerHTML = '';
-    for (let d = 1; d <= 5; d++) {
-      const s = document.createElement('span');
-      s.className = 'dp' + (d <= r.highestDay ? ' done d' + d : '');
-      if (d <= r.highestDay) {
+    for (var d = 1; d <= 5; d++) {
+      var s = document.createElement('span');
+      var isOn = fl[d - 1];
+      s.className = 'dp' + (isOn ? ' done d' + d : '');
+      if (isOn) {
         s.style.background = DAY_HEX[d];
         s.style.color = DAY_TEXT[d];
       }
-      s.textContent = d;
+      s.textContent = String(d);
       pills.appendChild(s);
     }
 
-    const champ = document.getElementById('resChamp');
-    if (r.highestDay >= 5) champ.classList.add('show');
-    else champ.classList.remove('show');
+    var champ = document.getElementById('resChamp');
+    champ.className = FlagsMod.allDone(profile.name, r.lessonId) ? 'champ show' : 'champ';
+
+    var line5 = document.getElementById('resLine5');
+    if (line5) {
+      var msg = '';
+      if (r.counted) msg = '\u2605 Day ' + r.day + ' counted for this lesson';
+      else if (!r.passed) msg = 'Not counted \u2014 pass the questions and Sound Hunt to earn the day';
+      else if (!r.isTarget) msg = 'Practice lesson \u2014 not today\u2019s target, so no day earned';
+      line5.textContent = msg;
+      line5.style.display = msg ? '' : 'none';
+    }
 
     const fcBox = document.getElementById('resFinishCodeBox');
     const fcVal = document.getElementById('resFinishCode');
@@ -6271,6 +6452,8 @@
         ? 'Sound Hunt: Passed on try ' + r.soundHuntAttempts + '\n'
         : '') +
       'Date: ' + formatDate(r.date) + '\n' +
+      'Days: ' + FlagsMod.summary(profile.name, r.lessonId) + '\n' +
+      (r.counted ? 'Counted: Day ' + r.day + '\n' : '') +
       (RecMod.has(r.lessonId, r.day) ? 'Reading video: saved on device (teacher can request it)\n' : '') +
       (String(FINISH_CODE || '').replace(/^\s+|\s+$/g, '') ? 'Finish Code: ' + String(FINISH_CODE).replace(/^\s+|\s+$/g, '') + '\n' : '') +
       'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
@@ -6392,57 +6575,72 @@
   function exportExcel() {
     if (!profile.name) { toast('No profile to export'); return; }
 
-    const rows = [];
+    var rows = [];
     rows.push([
       'Student', 'Grade', 'Lesson #', 'Title', 'Target Sound',
-      'Highest Day', 'Best Scores', 'Submits Today',
-      'Last Played', 'Last Day', 'Mastered'
+      'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Days Done',
+      'Best Scores', 'Submits Today', 'Last Played', 'Last Day', 'Champion'
     ]);
 
-    let started = 0, mastered = 0;
-    LESSONS.forEach(l => {
-      const p = progress[l.id];
-      if (!p || typeof p !== 'object') return;
-      started++;
-      const bestScores = Object.keys(p.bestScores || {})
-        .sort((a, b) => Number(a) - Number(b))
-        .map(d => 'D' + d + ':' + p.bestScores[d])
-        .join(' ');
-      const submitsToday = (p.submits && p.submits[todayKey()]) || 0;
-      const masteredFlag = (p.highestDay >= 5) ? 'Yes' : 'No';
-      if (masteredFlag === 'Yes') mastered++;
+    var started = 0, champions = 0;
+    var tk = todayKey();
+
+    for (var i = 0; i < LESSONS.length; i++) {
+      var l = LESSONS[i];
+      var raw = progress[l.id];
+      var p = (raw && typeof raw === 'object') ? raw : {};
+      var bs = (p.bestScores && typeof p.bestScores === 'object') ? p.bestScores : {};
+      var sub = (p.submits && typeof p.submits === 'object') ? p.submits : {};
+      var f = FlagsMod.get(profile.name, l.id);
+      var n = 0;
+      for (var j = 0; j < 5; j++) { if (f[j]) n++; }
+      if (n === 5) champions++;
+      if (n > 0 || raw) started++;
+
+      var bestKeys = [];
+      var k;
+      for (k in bs) {
+        if (Object.prototype.hasOwnProperty.call(bs, k)) bestKeys.push(k);
+      }
+      bestKeys.sort(function (a, b) { return Number(a) - Number(b); });
+      var bestParts = [];
+      for (k = 0; k < bestKeys.length; k++) bestParts.push('D' + bestKeys[k] + ':' + bs[bestKeys[k]]);
+
       rows.push([
-        profile.name,
-        profile.grade,
-        l.lessonNumber,
-        l.title,
-        l.targetSound,
-        p.highestDay || 0,
-        bestScores,
-        submitsToday,
-        p.lastPlayDate || '',
-        p.lastPlayDay || 0,
-        masteredFlag
+        profile.name, profile.grade, l.lessonNumber, l.title, l.targetSound,
+        f[0] ? 'Yes' : 'No', f[1] ? 'Yes' : 'No', f[2] ? 'Yes' : 'No', f[3] ? 'Yes' : 'No', f[4] ? 'Yes' : 'No',
+        n, bestParts.join(' '), sub[tk] || 0, p.lastPlayDate || '', p.lastPlayDay || 0,
+        n === 5 ? 'Yes' : 'No'
       ]);
-    });
+    }
 
     rows.push([]);
     rows.push(['Summary']);
-    rows.push(['Lessons started', started]);
-    rows.push(['Lessons mastered', mastered]);
+    rows.push(['Lessons with progress', started]);
+    rows.push(['Lessons completed all 5 days', champions]);
     rows.push(['Total lessons', LESSONS.length]);
+    rows.push(['Target lesson', TARGET_LESSON_TITLE]);
+    rows.push(['Target day', targetDay()]);
     rows.push(['Export date', formatDate(new Date())]);
 
-    const csv = rows.map(r => r.map(csvCell).join(',')).join('\r\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+    var lines = [];
+    for (var ri = 0; ri < rows.length; ri++) {
+      var cells = [];
+      for (var ci = 0; ci < rows[ri].length; ci++) cells.push(csvCell(rows[ri][ci]));
+      lines.push(cells.join(','));
+    }
+    var csv = lines.join('\r\n');
+
+    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     downloadBlob(blob, fileName('progress', 'csv'));
-    toast('Exported — open in Excel', 3000);
+    toast('Exported \u2014 open in Excel', 3000);
   }
 
   function exportBackup() {
     const data = {
       version: 1,
       exportedAt: new Date().toISOString(),
+      flags: FlagsMod.exportAll(),
       profile,
       progress,
       theme,
@@ -6484,6 +6682,8 @@
           grade: String(data.profile.grade || '').slice(0, 10)
         };
         progress = data.progress;
+        FlagsMod.importAll(data.flags);
+        FlagsMod.ensureStudent(profile.name);
         if (data.theme === 'dark' || data.theme === 'light') theme = data.theme;
         if (data.ttsSpeed === 'slow' || data.ttsSpeed === 'normal') ttsSpeed = data.ttsSpeed;
 
@@ -6584,7 +6784,7 @@
 
   /* ========== READING VIDEO (opt-in, saved on device only) ========== */
   var RecMod = (function () {
-    var DB_NAME = 'decodable_rec', STORE = 'videos', PREF_KEY = 'decodable_rec_pref';
+    var DB_NAME = 'decodable_rec_r2', STORE = 'videos', PREF_KEY = 'decodable_rec_pref_r2';
     var MAX_KEEP = 12, MAX_SEC = 150, MIN_SEC = 3;
     var supported = !!(window.MediaRecorder && window.indexedDB && navigator.mediaDevices &&
                        navigator.mediaDevices.getUserMedia && window.Blob && window.URL);
@@ -6979,12 +7179,15 @@
     if (btn) btn.innerHTML = ICONS.lock + 'Find all 5 words';
   })();
 
-  if (profile.name && profile.grade) {
-    renderHome();
-    showScreen('homeScreen');
-  } else {
-    showScreen('profileScreen');
-  }
+  FlagsMod.init(function () {
+    if (profile.name && profile.grade) {
+      FlagsMod.ensureStudent(profile.name);
+      renderHome();
+      showScreen('homeScreen');
+    } else {
+      showScreen('profileScreen');
+    }
+  });
 })();
 </script>
 </body>
