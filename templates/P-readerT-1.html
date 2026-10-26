@@ -6759,7 +6759,10 @@
       var k = recKey(name, lessonId);
       if (!cache[k]) {
         var rec = blank(name, lessonId);
-        if (LESSONS.length && lessonId === LESSONS[0].id) rec.day1 = true;
+        /* Day-1 seed removed 2026-10-26. Existing students keep their earned
+           flags in IndexedDB; new students start at 0/5 on every lesson.
+           Do NOT re-add this line unless intentionally granting Day 1 to
+           every new student account. */
         cache[k] = rec;
         put(rec);
       }
@@ -7838,6 +7841,20 @@
     }
 
     updateSubmitButton();
+    updateResultButtonEmphasis(r);
+  }
+
+  function updateResultButtonEmphasis(r) {
+    var againBtn = document.getElementById('resAgainBtn');
+    var listBtn = document.getElementById('resListBtn');
+    if (!againBtn || !listBtn) return;
+    if (r.passed) {
+      againBtn.className = 'btn btn-outline';
+      listBtn.className = 'btn btn-primary';
+    } else {
+      againBtn.className = 'btn btn-primary';
+      listBtn.className = 'btn btn-outline';
+    }
   }
 
   function formatDate(d) {
@@ -7883,9 +7900,16 @@
     const tk = todayKey();
     const count = p.submits[tk] || 0;
     const btn = document.getElementById('submitWaBtn');
+    btn.style.display = '';
+
     if (!lastResult.isTarget) {
       btn.disabled = true;
       btn.innerHTML = 'Practice only \u2014 nothing to submit';
+      return;
+    }
+
+    if (!lastResult.passed) {
+      btn.style.display = 'none';
       return;
     }
 
@@ -7902,6 +7926,7 @@
 
   async function submitToTeacher() {
     if (!lastResult) return;
+    if (!lastResult.passed) { toast('Not submitted \u2014 pass the quiz first'); return; }
     const p = getProg(lastResult.lessonId);
     const tk = todayKey();
     const count = p.submits[tk] || 0;
