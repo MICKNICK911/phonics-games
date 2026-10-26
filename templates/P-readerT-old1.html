@@ -837,6 +837,43 @@
       font-size: 0.68rem; font-weight: 800; letter-spacing: 0.02em;
     }
     .day-pill.target-day { box-shadow: 0 0 0 2px #f59e0b; box-shadow: 0 0 0 2px var(--accent); }
+    /* ===== Day banner (Home) ===== */
+    .day-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+    .day-banner-text { flex: 1; min-width: 0; }
+    .day-banner.is-open { border-color: var(--accent); background: rgba(245,158,11,0.10); }
+    .day-banner.is-done { border-color: var(--success); background: rgba(22,163,74,0.08); }
+    .day-banner.is-champion {
+      border-color: #a855f7;
+      background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(99,102,241,0.12));
+    }
+    .day-banner.is-waiting { border-color: var(--border); background: var(--surface-2); color: var(--text-2); }
+    .refresh-btn {
+      width: 44px; height: 44px; min-width: 44px;
+      border-radius: 50%; border: none;
+      background: var(--accent); color: #0f172a;
+      font-size: 1.3rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .refresh-btn:active { transform: scale(0.94); }
+    .day-banner.is-champion .refresh-btn { background: #a855f7; color: #fff; }
+    .day-banner.is-done .refresh-btn { background: var(--success); color: #fff; }
+    .day-banner-hint {
+      font-size: 0.72rem; color: var(--text-3); font-weight: 600;
+      margin-bottom: 14px; padding-left: 4px;
+    }
     @media (min-width: 600px) {
       .content-wrap { max-width: 520px; margin: 0 auto; width: 100%; }
     }
@@ -978,6 +1015,11 @@
           </div>
         </div>
         <input type="file" id="importFile" accept=".json,application/json" style="display:none" />
+        <div class="day-banner" id="dayBanner">
+          <span class="day-banner-text" id="dayBannerText">Loading\u2026</span>
+          <button type="button" class="refresh-btn" id="refreshBtn" aria-label="Refresh">\u21BB</button>
+        </div>
+        <div class="day-banner-hint">Refresh to see latest update</div>
         <div id="lessonList"></div>
       </div>
     </div>
@@ -6876,7 +6918,7 @@
   var CHUNK_SIZE = 3;
   /* ===== TEACHER CONTROLS - edit these each day ===== */
   var TARGET_LESSON_TITLE = 'Pat and Kate';  /* lesson title, not case-sensitive */
-  var TARGET_DAY = 1;                      /* 1 to 5 */
+  var OPEN_DAY = 1;                      /* 1 to 5 */
   /* ================================================== */
   var FLAGS_DB_NAME = 'decodable_flags_r1';  /* IndexedDB for the 5 day flags (Reader 1 and Reader 2 differ) */
   var MAX_SUBMITS_PER_DAY = 2;
@@ -7201,6 +7243,41 @@
   /* ========== HOME ========== */
   var homeScrolledOnce = false;
 
+  function renderDayBanner() {
+    var banner = document.getElementById('dayBanner');
+    var text = document.getElementById('dayBannerText');
+    if (!banner || !text) return;
+
+    var lesson = null;
+    for (var i = 0; i < LESSONS.length; i++) {
+      if (isTargetLesson(LESSONS[i])) { lesson = LESSONS[i]; break; }
+    }
+
+    banner.className = 'day-banner';
+
+    if (!lesson) {
+      text.textContent = 'Waiting for teacher to set today\u2019s lesson';
+      banner.className = 'day-banner is-waiting';
+      return;
+    }
+
+    var openDay = targetDay();
+    var flags = FlagsMod.get(profile.name, lesson.id);
+    var currentDayDone = flags[openDay - 1] === true;
+    var allDone = FlagsMod.count(profile.name, lesson.id) === 5;
+
+    if (allDone) {
+      text.textContent = '\uD83C\uDFC6 All 5 days complete \u2014 Champion!';
+      banner.className = 'day-banner is-champion';
+    } else if (currentDayDone) {
+      text.textContent = 'Day ' + openDay + ' complete \u2713 \u2014 waiting for teacher';
+      banner.className = 'day-banner is-done';
+    } else {
+      text.textContent = 'Day ' + openDay + ' is open \u2014 read it now!';
+      banner.className = 'day-banner is-open';
+    }
+  }
+
   function renderHome() {
     document.getElementById('homeName').textContent = profile.name || '\u2014';
     document.getElementById('homeGrade').textContent = 'Grade ' + (profile.grade || '\u2014');
@@ -7241,6 +7318,8 @@
       list.appendChild(card);
     });
 
+    renderDayBanner();
+
     if (targetCard && !homeScrolledOnce) {
       homeScrolledOnce = true;
       setTimeout(function () {
@@ -7259,16 +7338,26 @@
   }
 
   function targetDay() {
-    var d = parseInt(TARGET_DAY, 10);
+    var d = parseInt(OPEN_DAY, 10);
     return (d >= 1 && d <= 5) ? d : 1;
   }
 
   /* Called when the full cycle (reading + questions + Sound Hunt) is passed. */
   function completeCycle() {
     if (!lastResult || !lastResult.passed) return;
-    if (!isTargetLesson(currentLesson) || lastResult.day !== targetDay()) { lastResult.counted = false; return; }
-    FlagsMod.setDay(profile.name, currentLesson.id, lastResult.day);
-    lastResult.counted = true;
+
+    if (!isTargetLesson(currentLesson) || lastResult.day !== targetDay()) {
+      lastResult.counted = false;
+      lastResult.alreadyCounted = false;
+      return;
+    }
+
+    var flags = FlagsMod.get(profile.name, currentLesson.id);
+    var had = flags[lastResult.day - 1] === true;
+    var earned = FlagsMod.setDay(profile.name, currentLesson.id, lastResult.day);
+
+    lastResult.counted = earned;
+    lastResult.alreadyCounted = had && !earned;
   }
 
   function openLesson(id) {
@@ -7811,6 +7900,7 @@
       passed: passed,
       isTarget: isTargetLesson(currentLesson),
       counted: false,
+      alreadyCounted: false,
       date: new Date(),
       soundHuntAttempts: null
     };
@@ -8050,6 +8140,8 @@
     var r = lastResult;
     if (!r) return;
 
+    try { localStorage.setItem('decodable_lastResult', JSON.stringify(r)); } catch (e) {}
+
     var scoreEl = $('resScore');
     scoreEl.textContent = r.score + '/' + r.total;
     scoreEl.className = 'score-big ' + (r.passed ? 'pass' : 'fail');
@@ -8099,8 +8191,10 @@
     if (line5) {
       var msg = '';
       if (r.counted) msg = '\u2605 Day ' + r.day + ' counted for this lesson';
+      else if (r.alreadyCounted) msg = '\u2713 Day ' + r.day + ' already earned \u2014 replay doesn\'t count again';
       else if (!r.passed) msg = 'Not counted \u2014 pass the questions and Sound Hunt to earn the day';
       else if (!r.isTarget) msg = 'Practice lesson \u2014 not today\u2019s target, so no day earned';
+      else msg = '\u26A0 Day mismatch \u2014 refresh the app and try again';
       line5.textContent = msg;
       line5.style.display = msg ? '' : 'none';
     }
@@ -8164,6 +8258,12 @@
     var tk = todayKey();
     var count = p.submits[tk] || 0;
     var btn = $('submitWaBtn');
+    if (!lastResult.isTarget) {
+      btn.disabled = true;
+      btn.innerHTML = 'Practice only \u2014 nothing to submit';
+      return;
+    }
+
     if (count >= MAX_SUBMITS_PER_DAY) {
       btn.disabled = true;
       btn.innerHTML = 'Already submitted twice today';
@@ -8205,7 +8305,12 @@
         : '') +
       'Date: ' + formatDate(r.date) + '\n' +
       'Days: ' + FlagsMod.summary(profile.name, r.lessonId) + '\n' +
-      (r.counted ? 'Counted: Day ' + r.day + '\n' : '') +
+      (r.counted
+        ? 'Counted: Day ' + r.day + ' (new)\n'
+        : r.alreadyCounted
+          ? 'Day ' + r.day + ' (replay \u2014 already earned)\n'
+          : 'Not counted\n') +
+      'Submits today: ' + ((p.submits[tk] || 0) + 1) + ' of ' + MAX_SUBMITS_PER_DAY + '\n' +
       (RecMod.has(r.lessonId, r.day) ? 'Reading video: saved on device (teacher can request it)\n' : '') +
       (String(FINISH_CODE || '').replace(/^\s+|\s+$/g, '') ? 'Finish Code: ' + String(FINISH_CODE).replace(/^\s+|\s+$/g, '') + '\n' : '') +
       'Status: ' + (r.passed ? 'Day ' + r.day + ' Completed' : 'Needs practice');
@@ -8339,10 +8444,17 @@
     }
   }
 
-  on($('resHomeBtn'), 'click', function () { renderHome(); showScreen('homeScreen'); });
-  on($('resListBtn'), 'click', function () { renderHome(); showScreen('homeScreen'); });
+  function clearLastResult() {
+    lastResult = null;
+    try { localStorage.removeItem('decodable_lastResult'); } catch (e) {}
+  }
+
+  on($('resHomeBtn'), 'click', function () { clearLastResult(); renderHome(); showScreen('homeScreen'); });
+  on($('resListBtn'), 'click', function () { clearLastResult(); renderHome(); showScreen('homeScreen'); });
   on($('resAgainBtn'), 'click', function () {
-    if (lastResult) openLesson(lastResult.lessonId);
+    var keepId = lastResult && lastResult.lessonId;
+    clearLastResult();
+    if (keepId) openLesson(keepId);
   });
 
   /* ========== EXPORT / BACKUP / IMPORT ========== */
@@ -9025,8 +9137,29 @@
     if (btn) btn.innerHTML = ICONS.lock + 'Find all 5 words';
   })();
 
+  (function initRefreshButton() {
+    var refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function () { location.reload(); });
+    }
+  })();
+
   FlagsMod.init(function () {
-    if (profile.name && profile.grade) {
+    var savedLR = null;
+    try { savedLR = localStorage.getItem('decodable_lastResult'); } catch (e) {}
+    if (savedLR) {
+      try {
+        lastResult = JSON.parse(savedLR);
+        if (lastResult && typeof lastResult.date === 'string') {
+          lastResult.date = new Date(lastResult.date);
+        }
+      } catch (e) { lastResult = null; }
+    }
+
+    if (lastResult) {
+      renderResults();
+      showScreen('resultsScreen');
+    } else if (profile.name && profile.grade) {
       FlagsMod.ensureStudent(profile.name);
       renderHome();
       showScreen('homeScreen');
