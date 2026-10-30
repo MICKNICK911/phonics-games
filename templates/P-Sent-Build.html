@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentence Builder</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1f2430;--muted:#667085;--accent:#4f46e5;--accent-text:#fff;--line:#d7dbe6;--tile:#eef0ff;--okbg:#16a34a;--badbg:#dc2626;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161d;--card:#1e212b;--text:#eceef5;--muted:#9aa3b5;--accent:#8b85ff;--accent-text:#14161d;--line:#363b4b;--tile:#2a2e45}}
+:root[data-theme="dark"]{--bg:#14161d;--card:#1e212b;--text:#eceef5;--muted:#9aa3b5;--accent:#8b85ff;--accent-text:#14161d;--line:#363b4b;--tile:#2a2e45}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;padding:16px;text-align:center}
+main{width:100%;max-width:560px;background:var(--card);border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.icons{display:flex;gap:6px}
+.icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:1.1rem;cursor:pointer}
+h1{margin:0;font-size:1.4rem}
+p.sub{margin:10px 0 14px;color:var(--muted)}
+.label{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 6px}
+.zone{min-height:62px;border:2px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.tile{display:inline-flex;align-items:center;justify-content:center;text-align:center;font-size:1.1rem;padding:10px 16px;min-width:56px;border-radius:999px;border:0;background:var(--tile);color:var(--text);cursor:pointer;font-weight:600}
+.tile.used{visibility:hidden}
+.tile.answer{background:var(--accent);color:var(--accent-text)}
+.row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.btn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:1rem;font-weight:600;cursor:pointer;text-align:center}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.stats{display:flex;justify-content:space-around;color:var(--muted);font-size:.95rem}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar{height:100%;width:0;background:var(--okbg);transition:width .3s}
+#foundBox{margin-top:10px}
+#foundList{list-style:none;padding:0;margin:8px 0 0}
+#foundList li{margin:4px 0}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:1rem;text-align:center}
+.hidden{display:none!important}
+
+/* feedback modal */
+#modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+#modalCard{min-width:240px;max-width:360px;padding:28px 24px;border-radius:20px;color:#fff;text-align:center;animation:pop .25s ease-out}
+#modalCard.ok{background:var(--okbg)}#modalCard.bad{background:var(--badbg)}
+#modalCard .big{font-size:2.6rem}
+#modalCard h2{margin:6px 0 4px;font-size:1.5rem}
+#modalCard p{margin:0;font-size:1.05rem;opacity:.95}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* finish screen (full screen) */
+#victory{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px))}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.vbox{position:relative;width:100%;max-width:460px}
+.trophy{font-size:6rem;line-height:1.2;animation:bounce 1.4s ease-in-out infinite}
+.trophy img{max-width:220px;max-height:220px;border-radius:14px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.result div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--muted)}
+.result b{display:block;font-size:1.5rem;color:var(--text)}
+</style>
+</head>
+<body>
+<main id="app">
+  <div class="top">
+    <h1>Sentence Builder</h1>
+    <div class="icons">
+      <button class="icon" id="soundBtn" title="Sound">🔊</button>
+      <button class="icon" id="themeBtn" title="Theme">🌓</button>
+    </div>
+  </div>
+
+  <section id="start">
+    <p class="sub">Arrange the words to make valid sentences. Enter your details to begin.</p>
+    <div class="label">Name</div>
+    <input id="name" maxlength="40" placeholder="Your name" autocomplete="off">
+    <div class="label">Grade</div>
+    <input id="grade" maxlength="20" placeholder="e.g. Grade 3" autocomplete="off">
+    <div class="row"><button class="btn primary" id="startBtn">Start</button></div>
+    <div id="startMsg" style="color:var(--badbg);margin-top:10px"></div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="stats"><span id="lvl"></span><span id="score"></span><span id="time"></span></div>
+    <p class="sub" id="goal"></p>
+    <div class="label">Your sentence</div>
+    <div class="zone" id="answer"></div>
+    <div class="label">Word bank</div>
+    <div class="zone" id="bank"></div>
+    <div class="row">
+      <button class="btn primary" id="check">Check</button>
+      <button class="btn" id="clear">Clear</button>
+      <button class="btn" id="shuffle">Shuffle</button>
+    </div>
+    <div class="label" id="progLabel"></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="foundBox">
+      <button class="btn" id="toggleFound" style="flex:none;padding:8px 14px"></button>
+      <ul id="foundList" class="hidden"></ul>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="hidden"><div id="modalCard"><div class="big" id="mIcon"></div><h2 id="mTitle"></h2><p id="mText"></p></div></div>
+
+<section id="victory" class="hidden">
+  <canvas id="fx"></canvas>
+  <div class="vbox">
+    <div class="trophy" id="trophy"></div>
+    <h1 id="vName" style="font-size:1.8rem;margin-top:6px"></h1>
+    <p class="sub">You completed every level!</p>
+    <div class="result">
+      <div>Score<b id="vScore"></b></div>
+      <div>Time<b id="vTime"></b></div>
+      <div>Levels<b id="vLevels"></b></div>
+      <div>Grade<b id="vGrade"></b></div>
+    </div>
+    <div class="row"><button class="btn primary" id="again">Play again</button></div>
+  </div>
+</section>
+
+<script>
+// ================= SETTINGS (edit here) =================
+const VICTORY_IMAGE = "";   // a data: URI for a custom image. Leave empty for the 🏆 emoji
+const POINTS_CORRECT = 10;  // points per valid sentence
+const POINTS_WRONG = 2;     // points lost per wrong attempt (never below 0)
+const MODAL_MS = 2000;      // feedback modal duration
+
+// To add a level: copy a block, change words, valid sentences and required.
+const LEVELS = [
+  { required: 3, words: ["we","when","can","are","going","will","be"], valid: [
+    "We are going.","We can be going.","We will be going.","We can be.","We will be.",
+    "Are we going?","Can we be going?","Will we be going?","Can we be?","Will we be?",
+    "When are we going?","When can we be going?","When will we be going?",
+    "When are we?","When can we?","When will we?","When can we be?","When will we be?" ]},
+  { required: 3, words: ["they","can","are","playing","when","will","be"], valid: [
+    "They are playing.","They can be playing.","They will be playing.","They can be.","They will be.",
+    "Are they playing?","Can they be playing?","Will they be playing?","Can they be?","Will they be?",
+    "When are they playing?","When can they be playing?","When will they be playing?" ]},
+  { required: 3, words: ["she","is","reading","a","book","now"], valid: [
+    "She is reading.","She is reading now.","She is reading a book.","She is reading a book now.",
+    "She is now reading.","She is now reading a book.","Now she is reading.","Now she is reading a book.",
+    "Is she reading?","Is she reading now?","Is she reading a book?","Is she reading a book now?",
+    "Is she now reading?","Is she now reading a book?" ]},
+  { required: 3, words: ["the","dog","is","running","fast","here"], valid: [
+    "The dog is running.","The dog is running fast.","The dog is running here.","The dog is running fast here.",
+    "The dog is here.","The dog is fast.","Is the dog running?","Is the dog running fast?",
+    "Is the dog running here?","Is the dog running fast here?","Is the dog here?","Is the dog fast?",
+    "Here is the dog.","Here is the dog running.","Here the dog is running.","Here the dog is running fast." ]},
+  { required: 3, words: ["i","like","to","eat","rice","and","beans"], valid: [
+    "I like rice.","I like beans.","I like to eat.","I like to eat rice.","I like to eat beans.",
+    "I like rice and beans.","I like beans and rice.","I like to eat rice and beans.","I like to eat beans and rice.",
+    "I eat rice.","I eat beans.","I eat rice and beans.","I eat beans and rice." ]},
+  { required: 4, words: ["where","is","the","school","my","your","here"], valid: [
+    "Where is the school?","Where is my school?","Where is your school?",
+    "The school is here.","My school is here.","Your school is here.",
+    "Is the school here?","Is my school here?","Is your school here?",
+    "Here is the school.","Here is my school.","Here is your school." ]},
+  { required: 4, words: ["we","have","two","big","red","apples"], valid: [
+    "We have apples.","We have two apples.","We have big apples.","We have red apples.",
+    "We have two big apples.","We have two red apples.","We have big red apples.","We have two big red apples." ]},
+  { required: 4, words: ["can","you","help","me","please","now"], valid: [
+    "Can you help me?","Can you help me now?","Can you help me please?","Can you help me now please?",
+    "Can you please help me?","Can you please help me now?","Can you help?","Can you help now?",
+    "Can you help please?","Can you please help?","Please help me.","Please help me now.",
+    "Help me please.","Help me now.","Help me now please.","Please can you help me?",
+    "Please can you help me now?","Now can you help me?","Now please help me.","Please help now." ]},
+  { required: 4, words: ["the","boy","and","girl","are","playing","outside"], valid: [
+    "The boy and girl are playing.","The boy and girl are playing outside.","The boy and girl are outside.",
+    "The girl and boy are playing.","The girl and boy are playing outside.","The girl and boy are outside.",
+    "Are the boy and girl playing?","Are the boy and girl playing outside?","Are the boy and girl outside?",
+    "Are the girl and boy playing?","Are the girl and boy playing outside?","Are the girl and boy outside?",
+    "Outside the boy and girl are playing.","Outside the girl and boy are playing." ]},
+  { required: 4, words: ["it","is","hot","today","and","sunny"], valid: [
+    "It is hot.","It is sunny.","It is hot today.","It is sunny today.","It is hot and sunny.","It is sunny and hot.",
+    "It is hot and sunny today.","It is sunny and hot today.","Today it is hot.","Today it is sunny.",
+    "Today it is hot and sunny.","Today it is sunny and hot.","Today is hot.","Today is sunny.",
+    "Today is hot and sunny.","Today is sunny and hot.","Is it hot?","Is it sunny?","Is it hot today?",
+    "Is it sunny today?","Is it hot and sunny?","Is it sunny and hot?","Is it hot and sunny today?",
+    "Is it sunny and hot today?","Is today hot?","Is today sunny?","Is today hot and sunny?","Is today sunny and hot?" ]},
+  { required: 4, words: ["my","mother","is","a","very","kind","teacher"], valid: [
+    "My mother is a teacher.","My mother is kind.","My mother is very kind.","My mother is a kind teacher.",
+    "My mother is a very kind teacher.","Is my mother a teacher?","Is my mother kind?","Is my mother very kind?",
+    "Is my mother a kind teacher?","Is my mother a very kind teacher?" ]},
+  { required: 4, words: ["we","will","go","to","school","by","bus"], valid: [
+    "We will go.","We will go to school.","We will go by bus.","We will go to school by bus.","We will go by bus to school.",
+    "We go to school.","We go by bus.","We go to school by bus.","We go by bus to school.",
+    "Will we go?","Will we go to school?","Will we go by bus?","Will we go to school by bus?",
+    "Will we go by bus to school?","By bus we will go to school." ]},
+  { required: 4, words: ["please","do","not","run","in","the","class"], valid: [
+    "Do not run.","Please do not run.","Do not run in class.","Please do not run in class.",
+    "Do not run in the class.","Please do not run in the class.","In class do not run.","In the class do not run.",
+    "In class please do not run.","In the class please do not run." ]},
+  { required: 4, words: ["how","many","books","do","you","have","here"], valid: [
+    "How many books do you have?","How many books do you have here?","Do you have books?","Do you have many books?",
+    "Do you have books here?","Do you have many books here?","You have books.","You have many books.",
+    "You have books here.","You have many books here.","Here you have books.","Here you have many books." ]},
+  { required: 4, words: ["we","are","proud","of","our","school","and","happy"], valid: [
+    "We are happy.","We are proud.","We are proud and happy.","We are happy and proud.","We are proud of our school.",
+    "We are happy and proud of our school.","We are proud and happy of our school.",
+    "Are we proud?","Are we happy?","Are we proud and happy?","Are we happy and proud?","Are we proud of our school?",
+    "Are we happy and proud of our school?" ]}
+];
+// ========================================================
+
+const $ = id => document.getElementById(id);
+const norm = s => s.toLowerCase().replace(/[.?!,]/g, "").trim().replace(/\s+/g, " ");
+const fmt = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+const showMain = id => ["start", "game"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+
+let levelIdx = 0, score = 0, t0 = 0, timer = null, elapsed = 0, locked = false, foundOpen = false;
+let player = { name: "", grade: "" };
+let words = [], order = [], chosen = [], found = new Set(), validMap = new Map();
+
+/* ---------- Sound (Web Audio API) ---------- */
+let audio = null, soundOn = true;
+try { soundOn = localStorage.getItem("sb-sound") !== "off"; } catch (e) {}
+function tone(freq, start, dur, type) {
+  if (!soundOn || !audio) return;
+  const o = audio.createOscillator(), g = audio.createGain();
+  o.type = type || "sine"; o.frequency.value = freq;
+  const t = audio.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(audio.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+const sfx = {
+  click: () => tone(600, 0, 0.06, "triangle"),
+  good: () => { tone(523, 0, 0.12); tone(659, 0.12, 0.12); tone(784, 0.24, 0.2); },
+  bad: () => { tone(220, 0, 0.18, "sawtooth"); tone(165, 0.15, 0.25, "sawtooth"); },
+  level: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.12, 0.18)),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.14, 0.22))
+};
+function initAudio() {
+  try { if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === "suspended") audio.resume(); } catch (e) {}
+}
+const paintSound = () => { $("soundBtn").textContent = soundOn ? "🔊" : "🔇"; };
+$("soundBtn").onclick = () => {
+  soundOn = !soundOn; initAudio(); paintSound();
+  try { localStorage.setItem("sb-sound", soundOn ? "on" : "off"); } catch (e) {}
+  sfx.click();
+};
+
+/* ---------- Theme ---------- */
+const root = document.documentElement;
+try { const th = localStorage.getItem("sb-theme"); if (th) root.setAttribute("data-theme", th); } catch (e) {}
+const isDark = () => { const t = root.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+$("themeBtn").onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("sb-theme", next); } catch (e) {}
+  sfx.click();
+};
+
+/* ---------- Feedback modal ---------- */
+function feedback(ok, title, text, done) {
+  locked = true;
+  $("modalCard").className = ok ? "ok" : "bad";
+  $("mIcon").textContent = ok ? "✅" : "❌";
+  $("mTitle").textContent = title;
+  $("mText").textContent = text || "";
+  $("modal").classList.remove("hidden");
+  setTimeout(() => { $("modal").classList.add("hidden"); locked = false; if (done) done(); }, MODAL_MS);
+}
+
+/* ---------- Game ---------- */
+function shuffle() {
+  order = words.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  chosen = []; render();
+}
+function render() {
+  $("bank").innerHTML = ""; $("answer").innerHTML = "";
+  order.forEach(i => {
+    const b = document.createElement("button");
+    b.className = "tile" + (chosen.includes(i) ? " used" : "");
+    b.textContent = words[i];
+    b.onclick = () => { if (locked) return; initAudio(); sfx.click(); chosen.push(i); render(); };
+    $("bank").appendChild(b);
+  });
+  chosen.forEach((i, pos) => {
+    const b = document.createElement("button");
+    b.className = "tile answer";
+    b.textContent = words[i];
+    b.onclick = () => { if (locked) return; sfx.click(); chosen.splice(pos, 1); render(); };
+    $("answer").appendChild(b);
+  });
+}
+function paintStats() {
+  $("lvl").textContent = "Level " + (levelIdx + 1) + "/" + LEVELS.length;
+  $("score").textContent = "⭐ " + score;
+  $("time").textContent = "⏱ " + fmt(elapsed);
+}
+function paintFound() {
+  const L = LEVELS[levelIdx];
+  $("progLabel").textContent = "Found " + found.size + " of " + L.required;
+  $("bar").style.width = Math.min(100, found.size / L.required * 100) + "%";
+  $("foundList").innerHTML = "";
+  [...found].forEach(s => { const li = document.createElement("li"); li.textContent = s; $("foundList").appendChild(li); });
+  $("foundList").classList.toggle("hidden", !foundOpen);
+  $("toggleFound").textContent = (foundOpen ? "Hide" : "Show") + " found sentences (" + found.size + ")";
+}
+$("toggleFound").onclick = () => { foundOpen = !foundOpen; sfx.click(); paintFound(); };
+
+function loadLevel() {
+  const L = LEVELS[levelIdx];
+  words = L.words; found = new Set();
+  validMap = new Map(L.valid.map(s => [norm(s), s]));
+  $("goal").textContent = "Make " + L.required + " different sentences. You can leave words out.";
+  paintStats(); paintFound(); shuffle();
+}
+
+function startGame() {
+  const name = $("name").value.trim(), grade = $("grade").value.trim();
+  if (!name || !grade) { $("startMsg").textContent = "Please enter your name and grade."; return; }
+  initAudio(); sfx.click();
+  player = { name, grade }; levelIdx = 0; score = 0; elapsed = 0;
+  t0 = Date.now(); clearInterval(timer);
+  timer = setInterval(() => { elapsed = Math.floor((Date.now() - t0) / 1000); $("time").textContent = "⏱ " + fmt(elapsed); }, 1000);
+  showMain("game"); loadLevel();
+}
+
+$("check").onclick = () => {
+  if (locked) return;
+  initAudio();
+  const L = LEVELS[levelIdx];
+  if (!chosen.length) { sfx.bad(); return feedback(false, "Oops!", "Pick some words first."); }
+  const key = norm(chosen.map(i => words[i]).join(" "));
+  if (!validMap.has(key)) {
+    score = Math.max(0, score - POINTS_WRONG); paintStats();
+    sfx.bad(); return feedback(false, "Wrong", "Not a valid sentence. Try again!", () => { chosen = []; render(); });
+  }
+  const s = validMap.get(key);
+  if (found.has(s)) { sfx.bad(); return feedback(false, "Already found", "Find a different sentence.", () => { chosen = []; render(); }); }
+  found.add(s); score += POINTS_CORRECT; paintStats(); paintFound(); chosen = []; render();
+  if (found.size >= L.required) {
+    sfx.level();
+    const last = levelIdx === LEVELS.length - 1;
+    feedback(true, "Level complete!", s, () => { if (last) victory(); else { levelIdx++; loadLevel(); } });
+  } else { sfx.good(); feedback(true, "Correct!", s); }
+};
+$("clear").onclick = () => { if (locked) return; sfx.click(); chosen = []; render(); };
+$("shuffle").onclick = () => { if (locked) return; sfx.click(); shuffle(); };
+
+/* ---------- Finish screen + confetti (light canvas loop) ---------- */
+let raf = 0;
+function startFX() {
+  const c = $("fx"), ctx = c.getContext("2d");
+  let W = 0, H = 0;
+  const size = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
+  size(); addEventListener("resize", size);
+  const colors = ["#f43f5e", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#eab308"];
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const fall = () => ({ x: rnd(0, W), y: rnd(-H, 0), vx: rnd(-0.6, 0.6), vy: rnd(1.5, 3.5), w: rnd(6, 11), h: rnd(4, 8), r: rnd(0, 6.28), vr: rnd(-0.1, 0.1), c: colors[(Math.random() * colors.length) | 0] });
+  const parts = Array.from({ length: 90 }, fall);
+  for (let i = 0; i < 50; i++) { // one-off burst from the middle
+    const a = rnd(0, 6.28), sp = rnd(4, 11);
+    parts.push({ x: W / 2, y: H / 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, w: rnd(6, 10), h: rnd(4, 7), r: 0, vr: rnd(-0.2, 0.2), c: colors[(Math.random() * colors.length) | 0], burst: true, life: 70 });
+  }
+  (function loop() {
+    ctx.clearRect(0, 0, W, H);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.burst) { p.vy += 0.18; p.vx *= 0.98; if (--p.life <= 0) { parts.splice(i, 1); continue; } }
+      else if (p.y > H + 20) { Object.assign(p, fall(), { y: -10 }); }
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.globalAlpha = p.burst ? Math.min(1, p.life / 30) : 1;
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    raf = requestAnimationFrame(loop);
+  })();
+}
+function victory() {
+  clearInterval(timer);
+  elapsed = Math.floor((Date.now() - t0) / 1000);
+  $("trophy").innerHTML = "";
+  if (VICTORY_IMAGE) { const img = document.createElement("img"); img.src = VICTORY_IMAGE; img.alt = "Victory"; $("trophy").appendChild(img); }
+  else $("trophy").textContent = "🏆";
+  $("vName").textContent = "Well done, " + player.name + "!";
+  $("vScore").textContent = score;
+  $("vTime").textContent = fmt(elapsed);
+  $("vLevels").textContent = LEVELS.length + "/" + LEVELS.length;
+  $("vGrade").textContent = player.grade;
+  $("app").classList.add("hidden");
+  $("victory").classList.remove("hidden");
+  sfx.win(); cancelAnimationFrame(raf); startFX();
+}
+$("again").onclick = () => {
+  cancelAnimationFrame(raf);
+  $("victory").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  showMain("start");
+};
+
+$("startBtn").onclick = startGame;
+paintSound(); showMain("start");
+</script>
+</body>
+</html>
