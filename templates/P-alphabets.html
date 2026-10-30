@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Letter Match Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2575fc;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2575fc;
+            margin-bottom: 10px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .emoji-display {
+            font-size: 8rem;
+            margin: 30px 0;
+            text-align: center;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .audio-btn {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .audio-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .audio-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .audio-btn:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .option {
+            background: #f0f8ff;
+            border: 3px solid #2575fc;
+            border-radius: 12px;
+            padding: 20px 10px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .option:hover:not(:disabled) {
+            background: #e1f0ff;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
+        }
+
+        .option:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .option.selected {
+            background: #ffd700;
+        }
+
+        .option.correct {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .option.incorrect {
+            background: #f44336;
+            color: white;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(37, 117, 252, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2575fc;
+        }
+
+        .btn {
+            background: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 10px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #1a5fd0;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            background: #cccccc;
+            color: #666666;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .correct-screen, .gameover-screen, .congrats-screen {
+            padding: 30px 0;
+        }
+
+        .result-icon {
+            font-size: 8rem;
+            margin: 20px 0;
+        }
+
+        .correct-icon {
+            color: #4CAF50;
+        }
+
+        .incorrect-icon {
+            color: #f44336;
+        }
+
+        .congrats-icon {
+            color: #FFC107;
+        }
+
+        .message {
+            font-size: 2rem;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .stats {
+            background: rgba(37, 117, 252, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .stat:last-child {
+            border-bottom: none;
+        }
+
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+
+        .instructions {
+            background: rgba(37, 117, 252, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #2575fc;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            margin: 8px 0;
+        }
+
+        .letter-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #2575fc;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .navigation .btn {
+            margin: 0;
+            padding: 12px 22px;
+            font-size: 1rem;
+        }
+
+        /* ---- Practice mode additions ---- */
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0 5px;
+        }
+
+        .tab {
+            background: #f0f8ff;
+            border: 2px solid #2575fc;
+            color: #2575fc;
+            border-radius: 50px;
+            padding: 9px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .tab:hover {
+            background: #e1f0ff;
+        }
+
+        .tab.active {
+            background: #2575fc;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 117, 252, 0.4);
+        }
+
+        .practice-meta {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        .practice-tag {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #ffffff;
+            background: #da1b60;
+            border-radius: 50px;
+            padding: 4px 12px;
+            margin-bottom: 10px;
+        }
+
+        .practice-counter {
+            font-weight: bold;
+            color: #2575fc;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        #practice-screen .emoji-display {
+            height: 130px;
+            font-size: 6rem;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 15px;
+            }
+
+            .emoji-display {
+                font-size: 6rem;
+                height: 150px;
+            }
+
+            .option {
+                font-size: 2rem;
+                padding: 15px 5px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .navigation .btn {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" role="main">
+        <h1>Picture-Word Match</h1>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active" role="region" aria-label="Start Screen">
+            <div class="emoji-display" aria-hidden="true">🎮</div>
+            <p class="message">Match the letter to the emoji!</p>
+
+            <div class="instructions">
+                <h3>How to Play:</h3>
+                <p>1. Tap the speaker button to hear the word</p>
+                <p>2. Find the correct starting letter (or ending letter for 'x')</p>
+                <p>3. Select the matching letter from the options</p>
+                <p>4. Get it right to advance to the next word</p>
+                <p>5. One wrong answer ends the game!</p>
+                <p><strong>Practice Mode:</strong> browse every word by category
+                   (All Alphabets, Vowels long &amp; short, or Consonants).</p>
+            </div>
+
+            <button id="start-btn" class="btn">Start Game</button>
+            <button id="practice-btn" class="btn">Practice Mode</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen" role="region" aria-label="Game Screen">
+            <div class="game-info">
+                <div class="score">Score: <span id="score">0</span>/<span id="total">0</span></div>
+                <div class="timer">Time: <span id="timer">0</span>s</div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+
+            <div class="emoji-display" id="emoji-display" aria-hidden="true">🍏</div>
+
+            <button id="audio-btn" class="audio-btn" aria-label="Play audio">🔊 Hear the word</button>
+
+            <div class="options-container" id="options-container" role="radiogroup">
+                <!-- Options will be generated here -->
+            </div>
+        </div>
+
+        <!-- Correct Answer Screen -->
+        <div id="correct-screen" class="screen correct-screen" role="region" aria-label="Correct Answer Screen">
+            <div class="result-icon correct-icon" aria-hidden="true">✓</div>
+            <p class="message">Correct!</p>
+            <button style="display: none;" id="next-btn" class="btn">Next Word</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="screen gameover-screen" role="region" aria-label="Game Over Screen">
+            <div class="result-icon incorrect-icon" aria-hidden="true">✗</div>
+            <p class="message">Game Over!</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <span>Final Score:</span>
+                    <span id="final-score">0</span>
+                </div>
+                <div class="stat">
+                    <span>Time Spent:</span>
+                    <span id="final-time">0</span> seconds
+                </div>
+            </div>
+
+            <button id="restart-btn" class="btn">Play Again</button>
+        </div>
+
+        <!-- Congratulations Screen -->
+        <div id="congrats-screen" class="screen congrats-screen" role="region" aria-label="Congratulations Screen">
+            <div class="result-icon congrats-icon" aria-hidden="true">🏆</div>
+            <p class="message">Congratulations!</p>
+            <p>You completed all the words!</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <span>Total Score:</span>
+                    <span id="total-score">0</span>
+                </div>
+                <div class="stat">
+                    <span>Total Time:</span>
+                    <span id="total-time">0</span> seconds
+                </div>
+                <div class="stat">
+                    <span>Perfect Score!</span>
+                    <span>🎉</span>
+                </div>
+            </div>
+
+            <button id="play-again-btn" class="btn">Play Again</button>
+        </div>
+
+        <!-- Practice Screen -->
+        <div id="practice-screen" class="screen" role="region" aria-label="Practice Mode Screen">
+            <h2>Practice Mode</h2>
+
+            <div class="category-tabs" role="tablist" aria-label="Choose a word category">
+                <button class="tab active" role="tab" aria-selected="true" data-cat="all">All Alphabets</button>
+                <button class="tab" role="tab" aria-selected="false" data-cat="vowels">Vowels (Long / Short)</button>
+                <button class="tab" role="tab" aria-selected="false" data-cat="consonants">Consonants</button>
+            </div>
+
+            <div class="emoji-display" id="practice-emoji" aria-hidden="true"></div>
+
+            <div class="letter-display" id="practice-letter"></div>
+            <div class="practice-meta" id="practice-meta"></div>
+            <div class="practice-tag" id="practice-tag"></div>
+
+            <button id="practice-audio-btn" class="audio-btn" aria-label="Play audio">🔊 Hear the word</button>
+
+            <div class="navigation">
+                <button id="practice-prev-btn" class="btn">Previous</button>
+                <span class="practice-counter" id="practice-counter">1 / 0</span>
+                <button id="practice-next-btn" class="btn">Next</button>
+            </div>
+
+            <button id="back-to-start-btn" class="btn">Back to Start</button>
+        </div>
+    </div>
+
+    <script>
+        // Ensure DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            /* ============================================================
+               WORD DATA
+               ------------------------------------------------------------
+               audio: path to a pre-recorded sound file.
+                      Leave it as '' (empty string) to fall back to
+                      the browser's text-to-speech voice.
+                      If the file is missing/unplayable, the code also
+                      falls back to TTS automatically.
+               ============================================================ */
+            const dictionary = [
+                /* ---------- Short vowels ---------- */
+                { word: 'apple',    image: '🍏', letter: 'a', category: 'short-vowel', audio: 'sounds/apple.mp3' },
+                { word: 'egg',      image: '🥚', letter: 'e', category: 'short-vowel', audio: 'sounds/egg.mp3' },
+                { word: 'iguana',   image: '🦎', letter: 'i', category: 'short-vowel', audio: 'sounds/iguana.mp3' },
+                { word: 'orange',   image: '🍊', letter: 'o', category: 'short-vowel', audio: 'sounds/orange.mp3' },
+                { word: 'umbrella', image: '☂️', letter: 'u', category: 'short-vowel', audio: 'sounds/umbrella.mp3' },
+
+                /* ---------- Long vowels ---------- */
+                { word: 'cake',     image: '🎂', letter: 'a', category: 'long-vowel', audio: 'sounds/cake.mp3' },
+                { word: 'rain',     image: '🌧️', letter: 'a', category: 'long-vowel', audio: 'sounds/rain.mp3' },
+                { word: 'tree',     image: '🌳', letter: 'e', category: 'long-vowel', audio: 'sounds/tree.mp3' },
+                { word: 'bee',      image: '🐝', letter: 'e', category: 'long-vowel', audio: 'sounds/bee.mp3' },
+                { word: 'bike',     image: '🚲', letter: 'i', category: 'long-vowel', audio: 'sounds/bike.mp3' },
+                { word: 'kite',     image: '🪁', letter: 'i', category: 'long-vowel', audio: 'sounds/kite.mp3' },
+                { word: 'boat',     image: '⛵', letter: 'o', category: 'long-vowel', audio: 'sounds/boat.mp3' },
+                { word: 'bone',     image: '🦴', letter: 'o', category: 'long-vowel', audio: 'sounds/bone.mp3' },
+                { word: 'cube',     image: '🧊', letter: 'u', category: 'long-vowel', audio: 'sounds/cube.mp3' },
+                { word: 'unicorn',  image: '🦄', letter: 'u', category: 'long-vowel', audio: 'sounds/unicorn.mp3' },
+
+                /* ---------- Consonants ---------- */
+                { word: 'ball',        image: '⚽', letter: 'b', category: 'consonant', audio: 'sounds/ball.mp3' },
+                { word: 'cat',         image: '🐈', letter: 'c', category: 'consonant', audio: 'sounds/cat.mp3' },
+                { word: 'duck',        image: '🦆', letter: 'd', category: 'consonant', audio: 'sounds/duck.mp3' },
+                { word: 'fish',        image: '🐟', letter: 'f', category: 'consonant', audio: 'sounds/fish.mp3' },
+                { word: 'goat',        image: '🐏', letter: 'g', category: 'consonant', audio: 'sounds/goat.mp3' },
+                { word: 'hat',         image: '🎩', letter: 'h', category: 'consonant', audio: 'sounds/hat.mp3' },
+                { word: 'jet',         image: '🚀', letter: 'j', category: 'consonant', audio: 'sounds/jet.mp3' },
+                { word: 'koala',       image: '🐨', letter: 'k', category: 'consonant', audio: 'sounds/koala.mp3' },
+                { word: 'lip',         image: '👄', letter: 'l', category: 'consonant', audio: 'sounds/lip.mp3' },
+                { word: 'man',         image: '👨🏽', letter: 'm', category: 'consonant', audio: 'sounds/man.mp3' },
+                { word: 'note',        image: '🗒️', letter: 'n', category: 'consonant', audio: 'sounds/note.mp3' },
+                { word: 'pineapple',   image: '🍍', letter: 'p', category: 'consonant', audio: 'sounds/pineapple.mp3' },
+                { word: 'queen',       image: '👸🏼', letter: 'q', category: 'consonant', audio: 'sounds/queen.mp3' },
+                { word: 'ring',        image: '💍', letter: 'r', category: 'consonant', audio: 'sounds/ring.mp3' },
+                { word: 'sun',         image: '🌞', letter: 's', category: 'consonant', audio: 'sounds/sun.mp3' },
+                { word: 'tongue',      image: '👅', letter: 't', category: 'consonant', audio: 'sounds/tongue.mp3' },
+                { word: 'van',         image: '🚐', letter: 'v', category: 'consonant', audio: 'sounds/van.mp3' },
+                { word: 'watermelon',  image: '🍉', letter: 'w', category: 'consonant', audio: 'sounds/watermelon.mp3' },
+                { word: 'box',         image: '📦', letter: 'x', category: 'consonant', audio: 'sounds/box.mp3', ending: true },
+                { word: 'yellow',      image: '⭐', letter: 'y', category: 'consonant', audio: 'sounds/yellow.mp3' },
+                { word: 'zebra',       image: '🦓', letter: 'z', category: 'consonant', audio: 'sounds/zebra.mp3' }
+            ];
+
+            /* Category filters used by practice mode */
+            const CATEGORY_FILTERS = {
+                all:        () => true,
+                vowels:     w => w.category === 'short-vowel' || w.category === 'long-vowel',
+                consonants: w => w.category === 'consonant'
+            };
+
+            /* ============================================================
+               STATE
+               ============================================================ */
+            const gameWords = dictionary.slice();   // game mode uses everything (incl. long vowels)
+
+            let currentWordIndex = 0;
+            let score = 0;
+            let startTime = null;
+            let timerInterval = null;
+            let gameActive = false;
+
+            let practiceCategory = 'all';
+            let practiceList = dictionary.slice();
+            let practiceIndex = 0;
+
+            let currentAudio = null;
+
+            const isSpeechSupported = 'speechSynthesis' in window;
+
+            /* ============================================================
+               DOM REFERENCES
+               ============================================================ */
+            const startScreen     = document.getElementById('start-screen');
+            const gameScreen      = document.getElementById('game-screen');
+            const correctScreen   = document.getElementById('correct-screen');
+            const gameoverScreen  = document.getElementById('gameover-screen');
+            const congratsScreen  = document.getElementById('congrats-screen');
+            const practiceScreen  = document.getElementById('practice-screen');
+
+            const emojiDisplay    = document.getElementById('emoji-display');
+            const audioBtn        = document.getElementById('audio-btn');
+            const optionsContainer= document.getElementById('options-container');
+            const scoreDisplay    = document.getElementById('score');
+            const totalDisplay    = document.getElementById('total');
+            const timerDisplay    = document.getElementById('timer');
+            const progressBar     = document.getElementById('progress-bar');
+            const finalScore      = document.getElementById('final-score');
+            const finalTime       = document.getElementById('final-time');
+            const totalScore      = document.getElementById('total-score');
+            const totalTime       = document.getElementById('total-time');
+
+            const practiceEmoji   = document.getElementById('practice-emoji');
+            const practiceLetter  = document.getElementById('practice-letter');
+            const practiceMeta    = document.getElementById('practice-meta');
+            const practiceTag     = document.getElementById('practice-tag');
+            const practiceCounter = document.getElementById('practice-counter');
+            const practiceAudioBtn= document.getElementById('practice-audio-btn');
+            const prevBtn         = document.getElementById('practice-prev-btn');
+            const nextBtn         = document.getElementById('practice-next-btn');
+            const backToStartBtn  = document.getElementById('back-to-start-btn');
+            const tabs            = Array.from(document.querySelectorAll('.tab'));
+
+            const startBtn     = document.getElementById('start-btn');
+            const practiceBtn  = document.getElementById('practice-btn');
+            const gameNextBtn  = document.getElementById('next-btn');
+            const restartBtn   = document.getElementById('restart-btn');
+            const playAgainBtn = document.getElementById('play-again-btn');
+
+            if (!isSpeechSupported) {
+                audioBtn.disabled = true;
+                practiceAudioBtn.disabled = true;
+                audioBtn.title = 'Speech synthesis not supported';
+                practiceAudioBtn.title = 'Speech synthesis not supported';
+            }
+
+            /* ============================================================
+               AUDIO PLAYBACK (pre-recorded file ➜ TTS fallback)
+               ============================================================ */
+            function stopPlayback() {
+                if (currentAudio) {
+                    try {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    } catch (e) { /* ignore */ }
+                    currentAudio = null;
+                }
+                if (isSpeechSupported) {
+                    try { speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+                }
+            }
+
+            function speakWord(word) {
+                if (!isSpeechSupported) {
+                    alert('Speech synthesis is not supported in this browser.');
+                    return;
+                }
+                try {
+                    speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.rate = 0.8;
+                    speechSynthesis.speak(utterance);
+                } catch (error) {
+                    console.error('Error speaking word:', error);
+                }
+            }
+
+            /**
+             * Plays a word.
+             * - If entry.audio has a path  ➜ play the pre-recorded file.
+             * - If entry.audio is empty    ➜ use text-to-speech.
+             * - If the file fails to load  ➜ automatically fall back to TTS.
+             */
+            function playWord(entry) {
+                stopPlayback();
+                if (!entry) return;
+
+                const path = (entry.audio || '').trim();
+
+                if (!path) {
+                    speakWord(entry.word);
+                    return;
+                }
+
+                let fellBack = false;
+                const fallback = () => {
+                    if (fellBack) return;
+                    fellBack = true;
+                    speakWord(entry.word);
+                };
+
+                try {
+                    const audio = new Audio(path);
+                    currentAudio = audio;
+                    audio.addEventListener('error', fallback);
+
+                    const playPromise = audio.play();
+                    if (playPromise && typeof playPromise.catch === 'function') {
+                        playPromise.catch(fallback);
+                    }
+                } catch (error) {
+                    fallback();
+                }
+            }
+
+            /* ============================================================
+               SCREEN HELPERS
+               ============================================================ */
+            function showScreen(screen) {
+                [startScreen, gameScreen, correctScreen, gameoverScreen, congratsScreen, practiceScreen]
+                    .forEach(s => s.classList.remove('active'));
+                screen.classList.add('active');
+                screen.focus();
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            /* ============================================================
+               GAME MODE
+               ============================================================ */
+            function initGame() {
+                try {
+                    stopPlayback();
+                    currentWordIndex = 0;
+                    score = 0;
+                    gameActive = true;
+                    startTime = new Date();
+
+                    scoreDisplay.textContent = score;
+                    totalDisplay.textContent = gameWords.length;
+
+                    clearInterval(timerInterval);
+                    timerInterval = setInterval(updateTimer, 1000);
+                    updateTimer();
+
+                    showScreen(gameScreen);
+                    loadWord();
+                } catch (error) {
+                    console.error('Error initializing game:', error);
+                    alert('An error occurred while starting the game. Please try again.');
+                }
+            }
+
+            function loadWord() {
+                try {
+                    const currentWord = gameWords[currentWordIndex];
+                    emojiDisplay.textContent = currentWord.image;
+
+                    const pct = Math.round((currentWordIndex / gameWords.length) * 100);
+                    progressBar.style.width = pct + '%';
+                    progressBar.setAttribute('aria-valuenow', pct);
+
+                    generateOptions(currentWord.letter);
+                } catch (error) {
+                    console.error('Error loading word:', error);
+                }
+            }
+
+            function generateOptions(correctLetter) {
+                try {
+                    optionsContainer.innerHTML = '';
+                    const target = correctLetter.toLowerCase();
+                    const options = [target];
+
+                    while (options.length < 3) {
+                        const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+                        if (randomChar !== target && !options.includes(randomChar)) {
+                            options.push(randomChar);
+                        }
+                    }
+
+                    shuffleArray(options);
+
+                    options.forEach(letter => {
+                        const button = document.createElement('button');
+                        button.className = 'option';
+                        button.textContent = letter.toUpperCase();
+                        button.dataset.letter = letter;
+                        button.setAttribute('role', 'radio');
+                        button.setAttribute('aria-checked', 'false');
+                        button.addEventListener('click', () => checkAnswer(button, target));
+                        button.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                checkAnswer(button, target);
+                            }
+                        });
+                        optionsContainer.appendChild(button);
+                    });
+                } catch (error) {
+                    console.error('Error generating options:', error);
+                }
+            }
+
+            function checkAnswer(button, correctLetter) {
+                if (!gameActive) return;
+
+                gameActive = false;
+                disableOptions();
+
+                try {
+                    const selectedLetter = button.dataset.letter;
+                    button.classList.add('selected');
+                    button.setAttribute('aria-checked', 'true');
+
+                    if (selectedLetter.toLowerCase() === correctLetter.toLowerCase()) {
+                        score++;
+                        scoreDisplay.textContent = score;
+                        button.classList.add('correct');
+
+                        setTimeout(() => {
+                            currentWordIndex++;
+                            if (currentWordIndex < gameWords.length) {
+                                showScreen(correctScreen);
+                                setTimeout(() => {
+                                    gameActive = true;
+                                    showScreen(gameScreen);
+                                    loadWord();
+                                }, 900);
+                            } else {
+                                endGame(true);
+                            }
+                        }, 450);
+                    } else {
+                        button.classList.add('incorrect');
+                        setTimeout(() => endGame(false), 600);
+                    }
+                } catch (error) {
+                    console.error('Error checking answer:', error);
+                    gameActive = true;
+                    enableOptions();
+                }
+            }
+
+            function disableOptions() {
+                optionsContainer.querySelectorAll('.option').forEach(opt => {
+                    opt.disabled = true;
+                    opt.setAttribute('aria-disabled', 'true');
+                });
+            }
+
+            function enableOptions() {
+                optionsContainer.querySelectorAll('.option').forEach(opt => {
+                    opt.disabled = false;
+                    opt.setAttribute('aria-disabled', 'false');
+                });
+            }
+
+            function updateTimer() {
+                if (!startTime) return;
+                const seconds = Math.floor((new Date() - startTime) / 1000);
+                timerDisplay.textContent = seconds;
+            }
+
+            function endGame(isWin) {
+                try {
+                    stopPlayback();
+                    gameActive = false;
+                    clearInterval(timerInterval);
+
+                    const seconds = startTime
+                        ? Math.floor((new Date() - startTime) / 1000)
+                        : 0;
+
+                    if (isWin) {
+                        totalScore.textContent = score + '/' + gameWords.length;
+                        totalTime.textContent = seconds;
+                        showScreen(congratsScreen);
+                    } else {
+                        finalScore.textContent = score + '/' + gameWords.length;
+                        finalTime.textContent = seconds;
+                        showScreen(gameoverScreen);
+                    }
+                } catch (error) {
+                    console.error('Error ending game:', error);
+                }
+            }
+
+            /* ============================================================
+               PRACTICE MODE
+               ============================================================ */
+            function initPracticeMode() {
+                try {
+                    stopPlayback();
+                    setPracticeCategory(practiceCategory || 'all');
+                    showScreen(practiceScreen);
+                } catch (error) {
+                    console.error('Error initializing practice mode:', error);
+                    alert('An error occurred while starting practice mode. Please try again.');
+                }
+            }
+
+            function setPracticeCategory(cat) {
+                practiceCategory = cat;
+                practiceList = dictionary.filter(CATEGORY_FILTERS[cat] || CATEGORY_FILTERS.all);
+                practiceIndex = 0;
+
+                tabs.forEach(tab => {
+                    const isActive = tab.dataset.cat === cat;
+                    tab.classList.toggle('active', isActive);
+                    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                });
+
+                loadPracticeWord();
+            }
+
+            function categoryLabel(word) {
+                if (word.category === 'short-vowel') return 'Short vowel';
+                if (word.category === 'long-vowel') return 'Long vowel';
+                return 'Consonant';
+            }
+
+            function loadPracticeWord() {
+                try {
+                    if (!practiceList.length) {
+                        practiceEmoji.textContent = '🤷';
+                        practiceLetter.textContent = '';
+                        practiceMeta.textContent = 'No words in this category';
+                        practiceTag.textContent = '';
+                        practiceCounter.textContent = '0 / 0';
+                        prevBtn.disabled = true;
+                        nextBtn.disabled = true;
+                        return;
+                    }
+
+                    const word = practiceList[practiceIndex];
+
+                    practiceEmoji.textContent = word.image;
+                    practiceLetter.textContent = word.letter.toUpperCase();
+                    practiceMeta.textContent = word.word;
+                    practiceTag.textContent = categoryLabel(word) +
+                        (word.ending ? ' · ending sound' : '');
+                    practiceCounter.textContent = (practiceIndex + 1) + ' / ' + practiceList.length;
+
+                    const atStart = practiceIndex === 0;
+                    const atEnd = practiceIndex === practiceList.length - 1;
+
+                    prevBtn.disabled = atStart;
+                    nextBtn.disabled = atEnd;
+                    prevBtn.setAttribute('aria-disabled', atStart ? 'true' : 'false');
+                    nextBtn.setAttribute('aria-disabled', atEnd ? 'true' : 'false');
+
+                    stopPlayback();
+                } catch (error) {
+                    console.error('Error loading practice word:', error);
+                }
+            }
+
+            /* ============================================================
+               EVENT LISTENERS
+               ============================================================ */
+            startBtn.addEventListener('click', initGame);
+            restartBtn.addEventListener('click', initGame);
+            playAgainBtn.addEventListener('click', initGame);
+
+            gameNextBtn.addEventListener('click', () => {
+                gameActive = true;
+                showScreen(gameScreen);
+                loadWord();
+            });
+
+            audioBtn.addEventListener('click', () => {
+                if (gameActive) playWord(gameWords[currentWordIndex]);
+            });
+
+            practiceBtn.addEventListener('click', initPracticeMode);
+
+            practiceAudioBtn.addEventListener('click', () => {
+                if (practiceList.length) playWord(practiceList[practiceIndex]);
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (practiceIndex > 0) {
+                    practiceIndex--;
+                    loadPracticeWord();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (practiceIndex < practiceList.length - 1) {
+                    practiceIndex++;
+                    loadPracticeWord();
+                }
+            });
+
+            backToStartBtn.addEventListener('click', () => {
+                stopPlayback();
+                showScreen(startScreen);
+            });
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => setPracticeCategory(tab.dataset.cat));
+            });
+
+            /* Keyboard support inside the practice screen */
+            document.addEventListener('keydown', (e) => {
+                if (!practiceScreen.classList.contains('active')) return;
+                if (e.key === 'ArrowLeft' && !prevBtn.disabled) {
+                    prevBtn.click();
+                } else if (e.key === 'ArrowRight' && !nextBtn.disabled) {
+                    nextBtn.click();
+                }
+            });
+
+            /* ============================================================
+               INIT
+               ============================================================ */
+            totalDisplay.textContent = gameWords.length;
+            practiceList = dictionary.slice();
+        });
+    </script>
+</body>
+</html>
