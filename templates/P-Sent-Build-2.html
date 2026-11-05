@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentence Builder - Grade 3</title>
+<style>
+:root{--bg:#fff7ed;--card:#fff;--text:#3a2415;--muted:#8a6a52;--accent:#c2410c;--accent-text:#fff;--line:#f1d9bf;--tile:#ffedd5;--okbg:#16a34a;--badbg:#dc2626;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c120b;--card:#281a10;--text:#fbeee0;--muted:#c4a68c;--accent:#fb923c;--accent-text:#1c120b;--line:#4a3220;--tile:#3d2a1a}}
+:root[data-theme="dark"]{--bg:#1c120b;--card:#281a10;--text:#fbeee0;--muted:#c4a68c;--accent:#fb923c;--accent-text:#1c120b;--line:#4a3220;--tile:#3d2a1a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;padding:16px;text-align:center}
+main{width:100%;max-width:560px;background:var(--card);border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.icons{display:flex;gap:6px}
+.icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:1.1rem;cursor:pointer}
+h1{margin:0;font-size:1.4rem}
+p.sub{margin:10px 0 14px;color:var(--muted)}
+.label{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 6px}
+.zone{min-height:62px;border:2px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.tile{display:inline-flex;align-items:center;justify-content:center;text-align:center;font-size:1.1rem;padding:10px 16px;min-width:56px;border-radius:999px;border:0;background:var(--tile);color:var(--text);cursor:pointer;font-weight:600}
+.tile.used{visibility:hidden}
+.tile.answer{background:var(--accent);color:var(--accent-text)}
+.row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.btn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:1rem;font-weight:600;cursor:pointer;text-align:center}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.stats{display:flex;justify-content:space-around;color:var(--muted);font-size:.95rem}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar{height:100%;width:0;background:var(--okbg);transition:width .3s}
+#foundBox{margin-top:10px}
+#foundList{list-style:none;padding:0;margin:8px 0 0}
+#foundList li{margin:4px 0}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:1rem;text-align:center}
+.hidden{display:none!important}
+
+/* feedback modal */
+#modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+#modalCard{min-width:240px;max-width:360px;padding:28px 24px;border-radius:20px;color:#fff;text-align:center;animation:pop .25s ease-out}
+#modalCard.ok{background:var(--okbg)}#modalCard.bad{background:var(--badbg)}
+#modalCard .big{font-size:2.6rem}
+#modalCard h2{margin:6px 0 4px;font-size:1.5rem}
+#modalCard p{margin:0;font-size:1.05rem;opacity:.95}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* finish screen (full screen) */
+#victory{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px))}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.vbox{position:relative;width:100%;max-width:460px}
+.trophy{font-size:6rem;line-height:1.2;animation:bounce 1.4s ease-in-out infinite}
+.trophy img{max-width:220px;max-height:220px;border-radius:14px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.result div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--muted)}
+.result b{display:block;font-size:1.5rem;color:var(--text)}
+</style>
+</head>
+<body>
+<main id="app">
+  <div class="top">
+    <h1>Sentence Builder 3</h1>
+    <div class="icons">
+      <button class="icon" id="soundBtn" title="Sound">🔊</button>
+      <button class="icon" id="themeBtn" title="Theme">🌓</button>
+    </div>
+  </div>
+
+  <section id="start">
+    <p class="sub">Arrange the words to make valid sentences. Enter your details to begin.</p>
+    <div class="label">Name</div>
+    <input id="name" maxlength="40" placeholder="Your name" autocomplete="off">
+    <div class="label">Grade</div>
+    <input id="grade" maxlength="20" placeholder="e.g. Grade 3" autocomplete="off">
+    <div class="row"><button class="btn primary" id="startBtn">Start</button></div>
+    <div id="startMsg" style="color:var(--badbg);margin-top:10px"></div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="stats"><span id="lvl"></span><span id="score"></span><span id="time"></span></div>
+    <p class="sub" id="goal"></p>
+    <div class="label">Your sentence</div>
+    <div class="zone" id="answer"></div>
+    <div class="label">Word bank</div>
+    <div class="zone" id="bank"></div>
+    <div class="row">
+      <button class="btn primary" id="check">Check</button>
+      <button class="btn" id="clear">Clear</button>
+      <button class="btn" id="shuffle">Shuffle</button>
+    </div>
+    <div class="label" id="progLabel"></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="foundBox">
+      <button class="btn" id="toggleFound" style="flex:none;padding:8px 14px"></button>
+      <ul id="foundList" class="hidden"></ul>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="hidden"><div id="modalCard"><div class="big" id="mIcon"></div><h2 id="mTitle"></h2><p id="mText"></p></div></div>
+
+<section id="victory" class="hidden">
+  <canvas id="fx"></canvas>
+  <div class="vbox">
+    <div class="trophy" id="trophy"></div>
+    <h1 id="vName" style="font-size:1.8rem;margin-top:6px"></h1>
+    <p class="sub">You completed every level!</p>
+    <div class="result">
+      <div>Score<b id="vScore"></b></div>
+      <div>Time<b id="vTime"></b></div>
+      <div>Levels<b id="vLevels"></b></div>
+      <div>Grade<b id="vGrade"></b></div>
+    </div>
+    <div class="row"><button class="btn primary" id="again">Play again</button></div>
+  </div>
+</section>
+
+<script>
+// ================= SETTINGS (edit here) =================
+const VICTORY_IMAGE = "";   // a data: URI for a custom image. Leave empty for the 🏆 emoji
+const POINTS_CORRECT = 10;  // points per valid sentence
+const POINTS_WRONG = 2;     // points lost per wrong attempt (never below 0)
+const MODAL_MS = 2000;      // feedback modal duration
+
+// To add a level: copy a block, change words, valid sentences and required.
+const LEVELS = [
+  { required: 4, words: ["the", "children", "played", "in", "the", "park", "yesterday"], valid: [
+    "The children played.",
+    "The children played in the park.",
+    "The children played yesterday.",
+    "The children played in the park yesterday.",
+    "The children played yesterday in the park.",
+    "In the park the children played.",
+    "In the park the children played yesterday.",
+    "Yesterday the children played.",
+    "Yesterday the children played in the park.",
+    "In the park yesterday the children played.",
+    "Yesterday in the park the children played." ]},
+  { required: 4, words: ["my", "sister", "and", "i", "walked", "to", "school", "this", "morning"], valid: [
+    "My sister walked.",
+    "My sister walked to school.",
+    "My sister walked this morning.",
+    "My sister walked to school this morning.",
+    "My sister walked this morning to school.",
+    "This morning my sister walked.",
+    "This morning my sister walked to school.",
+    "I walked.",
+    "I walked to school.",
+    "I walked this morning.",
+    "I walked to school this morning.",
+    "I walked this morning to school.",
+    "This morning I walked.",
+    "This morning I walked to school.",
+    "My sister and I walked.",
+    "My sister and I walked to school.",
+    "My sister and I walked this morning.",
+    "My sister and I walked to school this morning.",
+    "My sister and I walked this morning to school.",
+    "This morning my sister and I walked.",
+    "This morning my sister and I walked to school." ]},
+  { required: 4, words: ["there", "are", "three", "cats", "and", "two", "dogs", "in", "the", "yard"], valid: [
+    "There are three cats.",
+    "There are three cats in the yard.",
+    "There are three dogs.",
+    "There are three dogs in the yard.",
+    "There are two cats.",
+    "There are two cats in the yard.",
+    "There are two dogs.",
+    "There are two dogs in the yard.",
+    "There are three cats and two dogs.",
+    "There are three cats and two dogs in the yard.",
+    "There are two cats and three dogs.",
+    "There are two cats and three dogs in the yard.",
+    "There are two dogs and three cats.",
+    "There are two dogs and three cats in the yard.",
+    "There are three dogs and two cats.",
+    "There are three dogs and two cats in the yard.",
+    "There are cats.",
+    "There are cats in the yard.",
+    "There are dogs.",
+    "There are dogs in the yard.",
+    "There are cats and dogs.",
+    "There are cats and dogs in the yard.",
+    "There are dogs and cats.",
+    "There are dogs and cats in the yard.",
+    "In the yard there are three cats.",
+    "In the yard there are three dogs.",
+    "In the yard there are two cats.",
+    "In the yard there are two dogs.",
+    "In the yard there are three cats and two dogs.",
+    "In the yard there are two cats and three dogs.",
+    "In the yard there are two dogs and three cats.",
+    "In the yard there are three dogs and two cats.",
+    "In the yard there are cats.",
+    "In the yard there are dogs.",
+    "In the yard there are cats and dogs.",
+    "In the yard there are dogs and cats." ]},
+  { required: 4, words: ["did", "you", "we", "see", "the", "bright", "moon", "last", "night"], valid: [
+    "Did you see the moon?",
+    "Did you see the moon last night?",
+    "Did you see the bright moon?",
+    "Did you see the bright moon last night?",
+    "Did we see the moon?",
+    "Did we see the moon last night?",
+    "Did we see the bright moon?",
+    "Did we see the bright moon last night?" ]},
+  { required: 4, words: ["i", "wanted", "to", "play", "outside", "but", "it", "was", "raining"], valid: [
+    "I wanted to play.",
+    "I wanted to play outside.",
+    "It was raining.",
+    "It was raining outside.",
+    "I wanted to play but it was raining.",
+    "I wanted to play outside but it was raining.",
+    "I wanted to play but it was raining outside.",
+    "It was raining but I wanted to play.",
+    "It was raining but I wanted to play outside.",
+    "It was raining outside but I wanted to play.",
+    "Outside it was raining.",
+    "Outside it was raining but I wanted to play." ]},
+  { required: 4, words: ["we", "stayed", "home", "because", "it", "was", "very", "cold"], valid: [
+    "We stayed home.",
+    "It was cold.",
+    "It was very cold.",
+    "We stayed home because it was cold.",
+    "We stayed home because it was very cold.",
+    "Because it was cold we stayed home.",
+    "Because it was very cold we stayed home." ]},
+  { required: 4, words: ["the", "road", "was", "wet", "so", "we", "walked", "slowly"], valid: [
+    "The road was wet.",
+    "We walked.",
+    "We walked slowly.",
+    "So we walked.",
+    "So we walked slowly.",
+    "The road was wet so we walked.",
+    "The road was wet so we walked slowly." ]},
+  { required: 4, words: ["my", "dog", "is", "bigger", "than", "your", "cat"], valid: [
+    "My dog is bigger than your cat.",
+    "My cat is bigger than your dog.",
+    "Your dog is bigger than my cat.",
+    "Your cat is bigger than my dog.",
+    "Is my dog bigger than your cat?",
+    "Is my cat bigger than your dog?",
+    "Is your dog bigger than my cat?",
+    "Is your cat bigger than my dog?",
+    "My dog is bigger.",
+    "My cat is bigger.",
+    "Your dog is bigger.",
+    "Your cat is bigger.",
+    "Is my dog bigger?",
+    "Is my cat bigger?",
+    "Is your dog bigger?",
+    "Is your cat bigger?" ]},
+  { required: 4, words: ["this", "is", "the", "teacher's", "new", "red", "bag"], valid: [
+    "This is the teacher's bag.",
+    "This is the bag.",
+    "This is the new teacher's bag.",
+    "This is the new bag.",
+    "This is the red teacher's bag.",
+    "This is the red bag.",
+    "This is the new red teacher's bag.",
+    "This is the new red bag.",
+    "Is this the teacher's bag?",
+    "Is this the bag?",
+    "Is this the new teacher's bag?",
+    "Is this the new bag?",
+    "Is this the red teacher's bag?",
+    "Is this the red bag?",
+    "Is this the new red teacher's bag?",
+    "Is this the new red bag?" ]},
+  { required: 4, words: ["could", "you", "please", "open", "the", "window", "for", "me"], valid: [
+    "Could you open the window?",
+    "Could you please open the window?",
+    "Could you open the window please?",
+    "Could you open the window for me?",
+    "Could you please open the window for me?",
+    "Could you open the window for me please?",
+    "Please could you open the window?",
+    "Please could you open the window for me?",
+    "Please open the window.",
+    "Please open the window for me.",
+    "Open the window please.",
+    "Open the window for me please.",
+    "Open the window.",
+    "Open the window for me." ]},
+  { required: 5, words: ["we", "are", "going", "to", "visit", "our", "grandmother", "tomorrow"], valid: [
+    "We are going to visit our grandmother.",
+    "We are going to visit our grandmother tomorrow.",
+    "Tomorrow we are going to visit our grandmother.",
+    "We are going to visit.",
+    "We are going to visit tomorrow.",
+    "Tomorrow we are going to visit.",
+    "We are going.",
+    "We are going tomorrow.",
+    "Tomorrow we are going.",
+    "Are we going to visit our grandmother?",
+    "Are we going to visit our grandmother tomorrow?",
+    "Are we going to visit?",
+    "Are we going to visit tomorrow?",
+    "Are we going?",
+    "Are we going tomorrow?" ]},
+  { required: 5, words: ["when", "the", "bell", "rang", "the", "students", "went", "home", "quickly"], valid: [
+    "The bell rang.",
+    "The students went home.",
+    "The students went home quickly.",
+    "Quickly the students went home.",
+    "When the bell rang the students went home.",
+    "When the bell rang the students went home quickly.",
+    "The students went home when the bell rang.",
+    "The students went home quickly when the bell rang.",
+    "Quickly the students went home when the bell rang." ]},
+  { required: 5, words: ["our", "teacher", "always", "reads", "us", "a", "funny", "story", "every", "day"], valid: [
+    "Our teacher reads us a story.",
+    "Our teacher reads us a story every day.",
+    "Every day our teacher reads us a story.",
+    "Our teacher reads us a funny story.",
+    "Our teacher reads us a funny story every day.",
+    "Every day our teacher reads us a funny story.",
+    "Our teacher always reads us a story.",
+    "Our teacher always reads us a story every day.",
+    "Every day our teacher always reads us a story.",
+    "Our teacher always reads us a funny story.",
+    "Our teacher always reads us a funny story every day.",
+    "Every day our teacher always reads us a funny story." ]},
+  { required: 5, words: ["you", "should", "always", "wash", "your", "hands", "before", "eating"], valid: [
+    "You should wash your hands.",
+    "You should wash your hands before eating.",
+    "Before eating you should wash your hands.",
+    "You should always wash your hands.",
+    "You should always wash your hands before eating.",
+    "Before eating you should always wash your hands.",
+    "Wash your hands.",
+    "Wash your hands before eating.",
+    "Before eating wash your hands.",
+    "Always wash your hands.",
+    "Always wash your hands before eating.",
+    "Before eating always wash your hands." ]},
+  { required: 5, words: ["after", "school", "my", "friends", "and", "i", "play", "football", "in", "the", "field"], valid: [
+    "My friends and I play football.",
+    "My friends and I play football after school.",
+    "My friends and I play football in the field.",
+    "My friends and I play football after school in the field.",
+    "My friends and I play football in the field after school.",
+    "After school my friends and I play football.",
+    "After school my friends and I play football in the field.",
+    "In the field my friends and I play football.",
+    "In the field my friends and I play football after school.",
+    "After school in the field my friends and I play football.",
+    "In the field after school my friends and I play football.",
+    "My friends play football.",
+    "My friends play football after school.",
+    "My friends play football in the field.",
+    "My friends play football after school in the field.",
+    "My friends play football in the field after school.",
+    "After school my friends play football.",
+    "After school my friends play football in the field.",
+    "In the field my friends play football.",
+    "In the field my friends play football after school.",
+    "After school in the field my friends play football.",
+    "In the field after school my friends play football.",
+    "I play football.",
+    "I play football after school.",
+    "I play football in the field.",
+    "I play football after school in the field.",
+    "I play football in the field after school.",
+    "After school I play football.",
+    "After school I play football in the field.",
+    "In the field I play football.",
+    "In the field I play football after school.",
+    "After school in the field I play football.",
+    "In the field after school I play football." ]}
+];
+// ========================================================
+
+const $ = id => document.getElementById(id);
+const norm = s => s.toLowerCase().replace(/[.?!,]/g, "").trim().replace(/\s+/g, " ");
+const fmt = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+const showMain = id => ["start", "game"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+
+let levelIdx = 0, score = 0, t0 = 0, timer = null, elapsed = 0, locked = false, foundOpen = false;
+let player = { name: "", grade: "" };
+let words = [], order = [], chosen = [], found = new Set(), validMap = new Map();
+
+/* ---------- Sound (Web Audio API) ---------- */
+let audio = null, soundOn = true;
+try { soundOn = localStorage.getItem("sb3-sound") !== "off"; } catch (e) {}
+function tone(freq, start, dur, type) {
+  if (!soundOn || !audio) return;
+  const o = audio.createOscillator(), g = audio.createGain();
+  o.type = type || "sine"; o.frequency.value = freq;
+  const t = audio.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(audio.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+const sfx = {
+  click: () => tone(600, 0, 0.06, "triangle"),
+  good: () => { tone(523, 0, 0.12); tone(659, 0.12, 0.12); tone(784, 0.24, 0.2); },
+  bad: () => { tone(220, 0, 0.18, "sawtooth"); tone(165, 0.15, 0.25, "sawtooth"); },
+  level: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.12, 0.18)),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.14, 0.22))
+};
+function initAudio() {
+  try { if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === "suspended") audio.resume(); } catch (e) {}
+}
+const paintSound = () => { $("soundBtn").textContent = soundOn ? "🔊" : "🔇"; };
+$("soundBtn").onclick = () => {
+  soundOn = !soundOn; initAudio(); paintSound();
+  try { localStorage.setItem("sb3-sound", soundOn ? "on" : "off"); } catch (e) {}
+  sfx.click();
+};
+
+/* ---------- Theme ---------- */
+const root = document.documentElement;
+try { const th = localStorage.getItem("sb3-theme"); if (th) root.setAttribute("data-theme", th); } catch (e) {}
+const isDark = () => { const t = root.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+$("themeBtn").onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("sb3-theme", next); } catch (e) {}
+  sfx.click();
+};
+
+/* ---------- Feedback modal ---------- */
+function feedback(ok, title, text, done) {
+  locked = true;
+  $("modalCard").className = ok ? "ok" : "bad";
+  $("mIcon").textContent = ok ? "✅" : "❌";
+  $("mTitle").textContent = title;
+  $("mText").textContent = text || "";
+  $("modal").classList.remove("hidden");
+  setTimeout(() => { $("modal").classList.add("hidden"); locked = false; if (done) done(); }, MODAL_MS);
+}
+
+/* ---------- Game ---------- */
+function shuffle() {
+  order = words.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  chosen = []; render();
+}
+function render() {
+  $("bank").innerHTML = ""; $("answer").innerHTML = "";
+  order.forEach(i => {
+    const b = document.createElement("button");
+    b.className = "tile" + (chosen.includes(i) ? " used" : "");
+    b.textContent = words[i];
+    b.onclick = () => { if (locked) return; initAudio(); sfx.click(); chosen.push(i); render(); };
+    $("bank").appendChild(b);
+  });
+  chosen.forEach((i, pos) => {
+    const b = document.createElement("button");
+    b.className = "tile answer";
+    b.textContent = words[i];
+    b.onclick = () => { if (locked) return; sfx.click(); chosen.splice(pos, 1); render(); };
+    $("answer").appendChild(b);
+  });
+}
+function paintStats() {
+  $("lvl").textContent = "Level " + (levelIdx + 1) + "/" + LEVELS.length;
+  $("score").textContent = "⭐ " + score;
+  $("time").textContent = "⏱ " + fmt(elapsed);
+}
+function paintFound() {
+  const L = LEVELS[levelIdx];
+  $("progLabel").textContent = "Found " + found.size + " of " + L.required;
+  $("bar").style.width = Math.min(100, found.size / L.required * 100) + "%";
+  $("foundList").innerHTML = "";
+  [...found].forEach(s => { const li = document.createElement("li"); li.textContent = s; $("foundList").appendChild(li); });
+  $("foundList").classList.toggle("hidden", !foundOpen);
+  $("toggleFound").textContent = (foundOpen ? "Hide" : "Show") + " found sentences (" + found.size + ")";
+}
+$("toggleFound").onclick = () => { foundOpen = !foundOpen; sfx.click(); paintFound(); };
+
+function loadLevel() {
+  const L = LEVELS[levelIdx];
+  words = L.words; found = new Set();
+  validMap = new Map(L.valid.map(s => [norm(s), s]));
+  $("goal").textContent = "Make " + L.required + " different sentences. You can leave words out.";
+  paintStats(); paintFound(); shuffle();
+}
+
+function startGame() {
+  const name = $("name").value.trim(), grade = $("grade").value.trim();
+  if (!name || !grade) { $("startMsg").textContent = "Please enter your name and grade."; return; }
+  initAudio(); sfx.click();
+  player = { name, grade }; levelIdx = 0; score = 0; elapsed = 0;
+  t0 = Date.now(); clearInterval(timer);
+  timer = setInterval(() => { elapsed = Math.floor((Date.now() - t0) / 1000); $("time").textContent = "⏱ " + fmt(elapsed); }, 1000);
+  showMain("game"); loadLevel();
+}
+
+$("check").onclick = () => {
+  if (locked) return;
+  initAudio();
+  const L = LEVELS[levelIdx];
+  if (!chosen.length) { sfx.bad(); return feedback(false, "Oops!", "Pick some words first."); }
+  const key = norm(chosen.map(i => words[i]).join(" "));
+  if (!validMap.has(key)) {
+    score = Math.max(0, score - POINTS_WRONG); paintStats();
+    sfx.bad(); return feedback(false, "Wrong", "Not a valid sentence. Try again!", () => { chosen = []; render(); });
+  }
+  const s = validMap.get(key);
+  if (found.has(s)) { sfx.bad(); return feedback(false, "Already found", "Find a different sentence.", () => { chosen = []; render(); }); }
+  found.add(s); score += POINTS_CORRECT; paintStats(); paintFound(); chosen = []; render();
+  if (found.size >= L.required) {
+    sfx.level();
+    const last = levelIdx === LEVELS.length - 1;
+    feedback(true, "Level complete!", s, () => { if (last) victory(); else { levelIdx++; loadLevel(); } });
+  } else { sfx.good(); feedback(true, "Correct!", s); }
+};
+$("clear").onclick = () => { if (locked) return; sfx.click(); chosen = []; render(); };
+$("shuffle").onclick = () => { if (locked) return; sfx.click(); shuffle(); };
+
+/* ---------- Finish screen + confetti (light canvas loop) ---------- */
+let raf = 0;
+function startFX() {
+  const c = $("fx"), ctx = c.getContext("2d");
+  let W = 0, H = 0;
+  const size = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
+  size(); addEventListener("resize", size);
+  const colors = ["#f43f5e", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#eab308"];
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const fall = () => ({ x: rnd(0, W), y: rnd(-H, 0), vx: rnd(-0.6, 0.6), vy: rnd(1.5, 3.5), w: rnd(6, 11), h: rnd(4, 8), r: rnd(0, 6.28), vr: rnd(-0.1, 0.1), c: colors[(Math.random() * colors.length) | 0] });
+  const parts = Array.from({ length: 90 }, fall);
+  for (let i = 0; i < 50; i++) { // one-off burst from the middle
+    const a = rnd(0, 6.28), sp = rnd(4, 11);
+    parts.push({ x: W / 2, y: H / 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, w: rnd(6, 10), h: rnd(4, 7), r: 0, vr: rnd(-0.2, 0.2), c: colors[(Math.random() * colors.length) | 0], burst: true, life: 70 });
+  }
+  (function loop() {
+    ctx.clearRect(0, 0, W, H);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.burst) { p.vy += 0.18; p.vx *= 0.98; if (--p.life <= 0) { parts.splice(i, 1); continue; } }
+      else if (p.y > H + 20) { Object.assign(p, fall(), { y: -10 }); }
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.globalAlpha = p.burst ? Math.min(1, p.life / 30) : 1;
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    raf = requestAnimationFrame(loop);
+  })();
+}
+function victory() {
+  clearInterval(timer);
+  elapsed = Math.floor((Date.now() - t0) / 1000);
+  $("trophy").innerHTML = "";
+  if (VICTORY_IMAGE) { const img = document.createElement("img"); img.src = VICTORY_IMAGE; img.alt = "Victory"; $("trophy").appendChild(img); }
+  else $("trophy").textContent = "🏆";
+  $("vName").textContent = "Well done, " + player.name + "!";
+  $("vScore").textContent = score;
+  $("vTime").textContent = fmt(elapsed);
+  $("vLevels").textContent = LEVELS.length + "/" + LEVELS.length;
+  $("vGrade").textContent = player.grade;
+  $("app").classList.add("hidden");
+  $("victory").classList.remove("hidden");
+  sfx.win(); cancelAnimationFrame(raf); startFX();
+}
+$("again").onclick = () => {
+  cancelAnimationFrame(raf);
+  $("victory").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  showMain("start");
+};
+
+$("startBtn").onclick = startGame;
+paintSound(); showMain("start");
+</script>
+</body>
+</html>
