@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hedge Maze</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--soil:#eadfc4;--hedge:#2f6b3a;--trail:#c9b98f;--hero:#e4572e;--gold:#f2b705;--ink:#1f3322;--panel:#f7f0dc;--btn:#2f6b3a;--btntext:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--soil:#17241a;--hedge:#58a566;--trail:#2f4533;--hero:#ff7a4d;--gold:#ffc933;--ink:#e8f0df;--panel:#223427;--btn:#58a566;--btntext:#10200f}}
+:root[data-theme="dark"]{--soil:#17241a;--hedge:#58a566;--trail:#2f4533;--hero:#ff7a4d;--gold:#ffc933;--ink:#e8f0df;--panel:#223427;--btn:#58a566;--btntext:#10200f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--soil);color:var(--ink);font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:560px;margin:0 auto;padding:12px 14px 20px;display:flex;flex-direction:column;gap:12px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h1{font-size:1.5rem;margin:0;font-weight:600}
+.stats{display:flex;gap:14px;font-size:1rem}
+.stats b{font-weight:600}
+.board{position:relative;width:100%;aspect-ratio:1/1;background:var(--panel);border-radius:14px;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.win{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:color-mix(in srgb,var(--soil) 90%,transparent);text-align:center;padding:20px}
+.win.show{display:flex}
+.win h2{margin:0;font-size:1.8rem}
+.win p{margin:0;font-size:1.05rem}
+button{font:inherit;border:0;border-radius:12px;background:var(--btn);color:var(--btntext);padding:12px 18px;font-weight:600;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:10px}
+.row button{flex:1}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,64px);gap:8px;justify-content:center}
+.pad button{padding:0;font-size:1.5rem;touch-action:manipulation}
+.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+.hint{text-align:center;font-size:.9rem;opacity:.75;margin:0}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Hedge Maze</h1>
+<div class="stats"><span>Maze <b id="lv">1</b></span><span>Moves <b id="mv">0</b></span><span>Time <b id="tm">0.0</b>s</span></div>
+</header>
+<div class="board">
+<canvas id="c" aria-label="Maze board"></canvas>
+<div class="win" id="win" role="status">
+<h2>You found the way out!</h2>
+<p id="res"></p>
+<button id="next">Next maze</button>
+</div>
+</div>
+<div class="pad" aria-label="Move controls">
+<button class="u" data-d="0,-1" aria-label="Up">▲</button>
+<button class="l" data-d="-1,0" aria-label="Left">◀</button>
+<button class="d" data-d="0,1" aria-label="Down">▼</button>
+<button class="r" data-d="1,0" aria-label="Right">▶</button>
+</div>
+<div class="row"><button id="restart">Restart maze</button><button id="newm">New maze</button></div>
+<p class="hint">Swipe on the maze, use the arrow buttons, or press arrow keys or WASD. Reach the gold flag.</p>
+</main>
+<script>
+(function(){
+var cv=document.getElementById('c'),ctx=cv.getContext('2d');
+var lvEl=document.getElementById('lv'),mvEl=document.getElementById('mv'),tmEl=document.getElementById('tm');
+var winEl=document.getElementById('win'),resEl=document.getElementById('res');
+var level=1,n=7,cells,cx,cy,px,py,moves,startT,elapsed,running,won,trail,face=[1,0],best={};
+try{best=JSON.parse(localStorage.getItem('hedge-best')||'{}')||{}}catch(e){best={}}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+// wall bits: 1 top, 2 right, 4 bottom, 8 left
+function gen(size){
+var c=new Array(size*size).fill(15),seen=new Array(size*size).fill(false),st=[0];seen[0]=true;
+var D=[[0,-1,1,4],[1,0,2,8],[0,1,4,1],[-1,0,8,2]];
+while(st.length){
+var i=st[st.length-1],x=i%size,y=(i/size)|0,opts=[];
+for(var k=0;k<4;k++){var nx=x+D[k][0],ny=y+D[k][1];
+if(nx>=0&&ny>=0&&nx<size&&ny<size&&!seen[ny*size+nx])opts.push(k)}
+if(!opts.length){st.pop();continue}
+var k=opts[Math.random()*opts.length|0],j=(y+D[k][1])*size+x+D[k][0];
+c[i]&=~D[k][2];c[j]&=~D[k][3];seen[j]=true;st.push(j)}
+return c}
+function size(){
+var w=cv.parentElement.clientWidth,r=window.devicePixelRatio||1;
+cv.width=cv.height=Math.round(w*r);draw()}
+function start(){
+n=Math.min(7+2*(level-1),21);cells=gen(n);cx=cy=0;px=py=0;moves=0;elapsed=0;running=false;won=false;
+trail=[[0,0]];face=[1,0];winEl.classList.remove('show');
+lvEl.textContent=level;mvEl.textContent=0;tmEl.textContent='0.0';draw()}
+function move(dx,dy){
+if(won)return;
+var bit=dx===1?2:dx===-1?8:dy===1?4:1;
+face=[dx,dy];
+if(cells[cy*n+cx]&bit)return;
+cx+=dx;cy+=dy;moves++;mvEl.textContent=moves;
+if(!running){running=true;startT=performance.now()}
+trail.push([cx,cy]);
+if(cx===n-1&&cy===n-1){won=true;running=false;setTimeout(finish,220)}}
+function finish(){
+var t=elapsed,key='l'+level,isBest=!best[key]||t<best[key];
+if(isBest){best[key]=t;try{localStorage.setItem('hedge-best',JSON.stringify(best))}catch(e){}}
+resEl.textContent=moves+' moves in '+t.toFixed(1)+'s'+(isBest?' — a new best for this maze size.':'. Best: '+best[key].toFixed(1)+'s.');
+winEl.classList.add('show')}
+function draw(){
+var s=cv.width,cs=s/n,pad=cs*.07,hc=css('--hedge');
+ctx.clearRect(0,0,s,s);
+ctx.fillStyle=css('--panel');ctx.fillRect(0,0,s,s);
+// trail
+ctx.fillStyle=css('--trail');
+for(var i=0;i<trail.length;i++){ctx.beginPath();ctx.arc((trail[i][0]+.5)*cs,(trail[i][1]+.5)*cs,cs*.1,0,7);ctx.fill()}
+// exit flag
+var ex=(n-1)*cs,ey=(n-1)*cs;
+ctx.fillStyle=css('--gold');
+ctx.fillRect(ex+cs*.3,ey+cs*.2,cs*.07,cs*.62);
+ctx.beginPath();ctx.moveTo(ex+cs*.37,ey+cs*.2);ctx.lineTo(ex+cs*.78,ey+cs*.36);ctx.lineTo(ex+cs*.37,ey+cs*.52);ctx.fill();
+// walls
+ctx.strokeStyle=hc;ctx.lineWidth=Math.max(3,cs*.13);ctx.lineCap='round';ctx.beginPath();
+for(var y=0;y<n;y++)for(var x=0;x<n;x++){
+var w=cells[y*n+x],X=x*cs,Y=y*cs;
+if(w&1){ctx.moveTo(X,Y);ctx.lineTo(X+cs,Y)}
+if(w&8){ctx.moveTo(X,Y);ctx.lineTo(X,Y+cs)}
+if(x===n-1&&(w&2)){ctx.moveTo(X+cs,Y);ctx.lineTo(X+cs,Y+cs)}
+if(y===n-1&&(w&4)){ctx.moveTo(X,Y+cs);ctx.lineTo(X+cs,Y+cs)}}
+ctx.stroke();
+// hero
+var hx=(px+.5)*cs,hy=(py+.5)*cs,r=cs*.3;
+ctx.fillStyle=css('--hero');ctx.beginPath();ctx.arc(hx,hy,r,0,7);ctx.fill();
+ctx.fillStyle='#fff';
+var ox=face[0]*r*.28,oy=face[1]*r*.28,ex2=r*.34;
+var px1=face[1]?ex2:0,py1=face[0]?ex2:0;
+[[-1],[1]].forEach(function(sg){
+var s2=sg[0];ctx.beginPath();
+var ax=hx+ox+(face[1]?s2*ex2:-face[0]*0)+(face[0]?0:0),ay=hy+oy+(face[0]?s2*ex2:0);
+if(!face[0]&&!face[1]){ax=hx+s2*ex2;ay=hy}
+ctx.arc(ax,ay,r*.22,0,7);ctx.fill()});
+ctx.fillStyle='#1f3322';
+[[-1],[1]].forEach(function(sg){
+var s2=sg[0],ax=hx+ox*1.6+(face[1]?s2*ex2:0),ay=hy+oy*1.6+(face[0]?s2*ex2:0);
+ctx.beginPath();ctx.arc(ax,ay,r*.1,0,7);ctx.fill()})}
+var last=performance.now();
+function loop(t){
+var dt=Math.min(.05,(t-last)/1000);last=t;
+var sp=16*dt;
+px+=Math.max(-sp,Math.min(sp,cx-px));py+=Math.max(-sp,Math.min(sp,cy-py));
+if(running){elapsed=(t-startT)/1000;tmEl.textContent=elapsed.toFixed(1)}
+draw();requestAnimationFrame(loop)}
+// input
+document.addEventListener('keydown',function(e){
+var m={ArrowUp:[0,-1],w:[0,-1],W:[0,-1],ArrowDown:[0,1],s:[0,1],S:[0,1],ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],ArrowRight:[1,0],d:[1,0],D:[1,0]}[e.key];
+if(m){e.preventDefault();move(m[0],m[1])}});
+var tx,ty;
+cv.addEventListener('touchstart',function(e){var t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+cv.addEventListener('touchend',function(e){
+var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
+if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:-1,0);else move(0,dy>0?1:-1)});
+var rep;
+document.querySelectorAll('.pad button').forEach(function(b){
+var d=b.dataset.d.split(',').map(Number);
+function go(){move(d[0],d[1])}
+function stop(){clearInterval(rep)}
+b.addEventListener('pointerdown',function(e){e.preventDefault();go();stop();rep=setInterval(go,130)});
+['pointerup','pointerleave','pointercancel'].forEach(function(ev){b.addEventListener(ev,stop)})});
+document.getElementById('restart').onclick=start;
+document.getElementById('newm').onclick=start;
+document.getElementById('next').onclick=function(){level++;start()};
+window.addEventListener('resize',size);
+size();start();requestAnimationFrame(loop)
+})();
+</script>
+</body>
+</html>
