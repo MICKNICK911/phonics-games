@@ -6,162 +6,747 @@
 <title>Hedge Maze</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root{--soil:#eadfc4;--hedge:#2f6b3a;--trail:#c9b98f;--hero:#e4572e;--gold:#f2b705;--ink:#1f3322;--panel:#f7f0dc;--btn:#2f6b3a;--btntext:#fff;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--soil:#17241a;--hedge:#58a566;--trail:#2f4533;--hero:#ff7a4d;--gold:#ffc933;--ink:#e8f0df;--panel:#223427;--btn:#58a566;--btntext:#10200f}}
-:root[data-theme="dark"]{--soil:#17241a;--hedge:#58a566;--trail:#2f4533;--hero:#ff7a4d;--gold:#ffc933;--ink:#e8f0df;--panel:#223427;--btn:#58a566;--btntext:#10200f}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--soil);color:var(--ink);font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
-main{max-width:560px;margin:0 auto;padding:12px 14px 20px;display:flex;flex-direction:column;gap:12px}
-header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-h1{font-size:1.5rem;margin:0;font-weight:600}
-.stats{display:flex;gap:14px;font-size:1rem}
-.stats b{font-weight:600}
-.board{position:relative;width:100%;aspect-ratio:1/1;background:var(--panel);border-radius:14px;overflow:hidden}
-canvas{width:100%;height:100%;display:block;touch-action:none}
-.win{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:color-mix(in srgb,var(--soil) 90%,transparent);text-align:center;padding:20px}
-.win.show{display:flex}
-.win h2{margin:0;font-size:1.8rem}
-.win p{margin:0;font-size:1.05rem}
-button{font:inherit;border:0;border-radius:12px;background:var(--btn);color:var(--btntext);padding:12px 18px;font-weight:600;cursor:pointer}
-button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.row{display:flex;gap:10px}
-.row button{flex:1}
-.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,64px);gap:8px;justify-content:center}
-.pad button{padding:0;font-size:1.5rem;touch-action:manipulation}
-.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
-.hint{text-align:center;font-size:.9rem;opacity:.75;margin:0}
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: #eadfc4;
+  color: #1f3322;
+  font-family: 'Fredoka', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 14px 20px;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 12px;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.stats { display: flex; font-size: 16px; }
+.stats span { margin-left: 14px; }
+.stats span:first-child { margin-left: 0; }
+.stats b { font-weight: 600; }
+
+/* square board: the padding-bottom trick works everywhere */
+.board {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  background: #f7f0dc;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+#c {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  touch-action: none;
+}
+
+.win {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  padding: 20px;
+  text-align: center;
+  background: rgba(234, 223, 196, 0.94);
+}
+
+.win.show { display: block; }
+
+.win-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  padding: 0 20px;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.win h2 { margin: 0 0 8px; font-size: 26px; }
+.win p { margin: 0 0 14px; font-size: 16px; }
+
+button {
+  font: inherit;
+  font-weight: 600;
+  border: 0;
+  border-radius: 12px;
+  background: #2f6b3a;
+  color: #ffffff;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+
+button:focus {
+  outline: 3px solid #f2b705;
+  outline-offset: 2px;
+}
+
+.pad {
+  position: relative;
+  width: 208px;
+  height: 136px;
+  margin: 12px auto 0;
+}
+
+.pad button {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  font-size: 22px;
+  line-height: 62px;
+  text-align: center;
+}
+
+.pad .u { left: 72px;  top: 0; }
+.pad .l { left: 0;     top: 72px; }
+.pad .d { left: 72px;  top: 72px; }
+.pad .r { left: 144px; top: 72px; }
+
+.row { display: flex; margin: 12px 0 0; }
+.row button { flex: 1 1 0; margin-right: 10px; }
+.row button:last-child { margin-right: 0; }
+
+.hint {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #17241a; color: #e8f0df; }
+  .board { background: #223427; }
+  .win { background: rgba(23, 36, 26, 0.94); }
+  button { background: #58a566; color: #10200f; }
+}
 </style>
 </head>
 <body>
 <main>
-<header>
-<h1>Hedge Maze</h1>
-<div class="stats"><span>Maze <b id="lv">1</b></span><span>Moves <b id="mv">0</b></span><span>Time <b id="tm">0.0</b>s</span></div>
-</header>
-<div class="board">
-<canvas id="c" aria-label="Maze board"></canvas>
-<div class="win" id="win" role="status">
-<h2>You found the way out!</h2>
-<p id="res"></p>
-<button id="next">Next maze</button>
-</div>
-</div>
-<div class="pad" aria-label="Move controls">
-<button class="u" data-d="0,-1" aria-label="Up">▲</button>
-<button class="l" data-d="-1,0" aria-label="Left">◀</button>
-<button class="d" data-d="0,1" aria-label="Down">▼</button>
-<button class="r" data-d="1,0" aria-label="Right">▶</button>
-</div>
-<div class="row"><button id="restart">Restart maze</button><button id="newm">New maze</button></div>
-<p class="hint">Swipe on the maze, use the arrow buttons, or press arrow keys or WASD. Reach the gold flag.</p>
+
+  <header>
+    <h1>Hedge Maze</h1>
+    <div class="stats">
+      <span>Maze <b id="lv">1</b></span>
+      <span>Moves <b id="mv">0</b></span>
+      <span>Time <b id="tm">0.0</b>s</span>
+    </div>
+  </header>
+
+  <div class="board" id="board">
+    <canvas id="c" aria-label="Maze board"></canvas>
+    <div class="win" id="win" role="status" aria-live="polite">
+      <div class="win-inner">
+        <h2>You found the way out!</h2>
+        <p id="res"></p>
+        <button id="next" type="button">Next maze</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pad" aria-label="Move controls">
+    <button type="button" class="u" data-d="0,-1"  aria-label="Up">&#9650;</button>
+    <button type="button" class="l" data-d="-1,0" aria-label="Left">&#9664;</button>
+    <button type="button" class="d" data-d="0,1"  aria-label="Down">&#9660;</button>
+    <button type="button" class="r" data-d="1,0"  aria-label="Right">&#9654;</button>
+  </div>
+
+  <div class="row">
+    <button id="restart" type="button">Restart maze</button>
+    <button id="newm" type="button">New maze</button>
+  </div>
+
+  <p class="hint">Swipe on the maze, use the arrow buttons, or press arrow keys or WASD. Reach the gold flag.</p>
+
 </main>
+
 <script>
-(function(){
-var cv=document.getElementById('c'),ctx=cv.getContext('2d');
-var lvEl=document.getElementById('lv'),mvEl=document.getElementById('mv'),tmEl=document.getElementById('tm');
-var winEl=document.getElementById('win'),resEl=document.getElementById('res');
-var level=1,n=7,cells,cx,cy,px,py,moves,startT,elapsed,running,won,trail,face=[1,0],best={};
-try{best=JSON.parse(localStorage.getItem('hedge-best')||'{}')||{}}catch(e){best={}}
-function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
-// wall bits: 1 top, 2 right, 4 bottom, 8 left
-function gen(size){
-var c=new Array(size*size).fill(15),seen=new Array(size*size).fill(false),st=[0];seen[0]=true;
-var D=[[0,-1,1,4],[1,0,2,8],[0,1,4,1],[-1,0,8,2]];
-while(st.length){
-var i=st[st.length-1],x=i%size,y=(i/size)|0,opts=[];
-for(var k=0;k<4;k++){var nx=x+D[k][0],ny=y+D[k][1];
-if(nx>=0&&ny>=0&&nx<size&&ny<size&&!seen[ny*size+nx])opts.push(k)}
-if(!opts.length){st.pop();continue}
-var k=opts[Math.random()*opts.length|0],j=(y+D[k][1])*size+x+D[k][0];
-c[i]&=~D[k][2];c[j]&=~D[k][3];seen[j]=true;st.push(j)}
-return c}
-function size(){
-var w=cv.parentElement.clientWidth,r=window.devicePixelRatio||1;
-cv.width=cv.height=Math.round(w*r);draw()}
-function start(){
-n=Math.min(7+2*(level-1),21);cells=gen(n);cx=cy=0;px=py=0;moves=0;elapsed=0;running=false;won=false;
-trail=[[0,0]];face=[1,0];winEl.classList.remove('show');
-lvEl.textContent=level;mvEl.textContent=0;tmEl.textContent='0.0';draw()}
-function move(dx,dy){
-if(won)return;
-var bit=dx===1?2:dx===-1?8:dy===1?4:1;
-face=[dx,dy];
-if(cells[cy*n+cx]&bit)return;
-cx+=dx;cy+=dy;moves++;mvEl.textContent=moves;
-if(!running){running=true;startT=performance.now()}
-trail.push([cx,cy]);
-if(cx===n-1&&cy===n-1){won=true;running=false;setTimeout(finish,220)}}
-function finish(){
-var t=elapsed,key='l'+level,isBest=!best[key]||t<best[key];
-if(isBest){best[key]=t;try{localStorage.setItem('hedge-best',JSON.stringify(best))}catch(e){}}
-resEl.textContent=moves+' moves in '+t.toFixed(1)+'s'+(isBest?' — a new best for this maze size.':'. Best: '+best[key].toFixed(1)+'s.');
-winEl.classList.add('show')}
-function draw(){
-var s=cv.width,cs=s/n,pad=cs*.07,hc=css('--hedge');
-ctx.clearRect(0,0,s,s);
-ctx.fillStyle=css('--panel');ctx.fillRect(0,0,s,s);
-// trail
-ctx.fillStyle=css('--trail');
-for(var i=0;i<trail.length;i++){ctx.beginPath();ctx.arc((trail[i][0]+.5)*cs,(trail[i][1]+.5)*cs,cs*.1,0,7);ctx.fill()}
-// exit flag
-var ex=(n-1)*cs,ey=(n-1)*cs;
-ctx.fillStyle=css('--gold');
-ctx.fillRect(ex+cs*.3,ey+cs*.2,cs*.07,cs*.62);
-ctx.beginPath();ctx.moveTo(ex+cs*.37,ey+cs*.2);ctx.lineTo(ex+cs*.78,ey+cs*.36);ctx.lineTo(ex+cs*.37,ey+cs*.52);ctx.fill();
-// walls
-ctx.strokeStyle=hc;ctx.lineWidth=Math.max(3,cs*.13);ctx.lineCap='round';ctx.beginPath();
-for(var y=0;y<n;y++)for(var x=0;x<n;x++){
-var w=cells[y*n+x],X=x*cs,Y=y*cs;
-if(w&1){ctx.moveTo(X,Y);ctx.lineTo(X+cs,Y)}
-if(w&8){ctx.moveTo(X,Y);ctx.lineTo(X,Y+cs)}
-if(x===n-1&&(w&2)){ctx.moveTo(X+cs,Y);ctx.lineTo(X+cs,Y+cs)}
-if(y===n-1&&(w&4)){ctx.moveTo(X,Y+cs);ctx.lineTo(X+cs,Y+cs)}}
-ctx.stroke();
-// hero
-var hx=(px+.5)*cs,hy=(py+.5)*cs,r=cs*.3;
-ctx.fillStyle=css('--hero');ctx.beginPath();ctx.arc(hx,hy,r,0,7);ctx.fill();
-ctx.fillStyle='#fff';
-var ox=face[0]*r*.28,oy=face[1]*r*.28,ex2=r*.34;
-var px1=face[1]?ex2:0,py1=face[0]?ex2:0;
-[[-1],[1]].forEach(function(sg){
-var s2=sg[0];ctx.beginPath();
-var ax=hx+ox+(face[1]?s2*ex2:-face[0]*0)+(face[0]?0:0),ay=hy+oy+(face[0]?s2*ex2:0);
-if(!face[0]&&!face[1]){ax=hx+s2*ex2;ay=hy}
-ctx.arc(ax,ay,r*.22,0,7);ctx.fill()});
-ctx.fillStyle='#1f3322';
-[[-1],[1]].forEach(function(sg){
-var s2=sg[0],ax=hx+ox*1.6+(face[1]?s2*ex2:0),ay=hy+oy*1.6+(face[0]?s2*ex2:0);
-ctx.beginPath();ctx.arc(ax,ay,r*.1,0,7);ctx.fill()})}
-var last=performance.now();
-function loop(t){
-var dt=Math.min(.05,(t-last)/1000);last=t;
-var sp=16*dt;
-px+=Math.max(-sp,Math.min(sp,cx-px));py+=Math.max(-sp,Math.min(sp,cy-py));
-if(running){elapsed=(t-startT)/1000;tmEl.textContent=elapsed.toFixed(1)}
-draw();requestAnimationFrame(loop)}
-// input
-document.addEventListener('keydown',function(e){
-var m={ArrowUp:[0,-1],w:[0,-1],W:[0,-1],ArrowDown:[0,1],s:[0,1],S:[0,1],ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],ArrowRight:[1,0],d:[1,0],D:[1,0]}[e.key];
-if(m){e.preventDefault();move(m[0],m[1])}});
-var tx,ty;
-cv.addEventListener('touchstart',function(e){var t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
-cv.addEventListener('touchend',function(e){
-var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
-if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;
-if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:-1,0);else move(0,dy>0?1:-1)});
-var rep;
-document.querySelectorAll('.pad button').forEach(function(b){
-var d=b.dataset.d.split(',').map(Number);
-function go(){move(d[0],d[1])}
-function stop(){clearInterval(rep)}
-b.addEventListener('pointerdown',function(e){e.preventDefault();go();stop();rep=setInterval(go,130)});
-['pointerup','pointerleave','pointercancel'].forEach(function(ev){b.addEventListener(ev,stop)})});
-document.getElementById('restart').onclick=start;
-document.getElementById('newm').onclick=start;
-document.getElementById('next').onclick=function(){level++;start()};
-window.addEventListener('resize',size);
-size();start();requestAnimationFrame(loop)
+(function () {
+  'use strict';
+
+  /* ---------------------------------------------------------------
+     Small compatibility helpers
+     --------------------------------------------------------------- */
+  var TAU = Math.PI * 2;
+
+  var now = (window.performance && window.performance.now)
+    ? function () { return window.performance.now(); }
+    : function () { return new Date().getTime(); };
+
+  var raf = window.requestAnimationFrame
+    || window.webkitRequestAnimationFrame
+    || window.mozRequestAnimationFrame
+    || function (cb) { return window.setTimeout(function () { cb(now()); }, 16); };
+
+  function setText(el, text) {
+    if (!el) return;
+    if ('textContent' in el) { el.textContent = text; }
+    else { el.innerHTML = String(text).replace(/</g, '&lt;'); }
+  }
+
+  /* ---------------------------------------------------------------
+     DOM references
+     --------------------------------------------------------------- */
+  var boardEl  = document.getElementById('board');
+  var cv       = document.getElementById('c');
+  var ctx      = cv.getContext ? cv.getContext('2d') : null;
+  var lvEl     = document.getElementById('lv');
+  var mvEl     = document.getElementById('mv');
+  var tmEl     = document.getElementById('tm');
+  var winEl    = document.getElementById('win');
+  var resEl    = document.getElementById('res');
+  var nextBtn  = document.getElementById('next');
+  var restartB = document.getElementById('restart');
+  var newBtn   = document.getElementById('newm');
+
+  /* ---------------------------------------------------------------
+     Palette (mirrors the CSS colours, cached so draw() is cheap)
+     --------------------------------------------------------------- */
+  var PALETTE_LIGHT = {
+    hedge: '#2f6b3a', trail: '#c9b98f', hero: '#e4572e',
+    gold:  '#f2b705', ink:   '#1f3322', panel: '#f7f0dc'
+  };
+  var PALETTE_DARK = {
+    hedge: '#58a566', trail: '#2f4533', hero: '#ff7a4d',
+    gold:  '#ffc933', ink:   '#e8f0df', panel: '#223427'
+  };
+
+  var pal = PALETTE_LIGHT;
+  var mq  = null;
+
+  function refreshPalette() {
+    pal = (mq && mq.matches) ? PALETTE_DARK : PALETTE_LIGHT;
+  }
+
+  if (window.matchMedia) {
+    mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) { mq.addEventListener('change', refreshPalette); }
+    else if (mq.addListener) { mq.addListener(refreshPalette); }
+  }
+  refreshPalette();
+
+  /* ---------------------------------------------------------------
+     Game state
+     --------------------------------------------------------------- */
+  var level    = 1;
+  var gridN    = 7;          // cells per side
+  var cells    = [];         // wall bitmask per cell (1 top, 2 right, 4 bottom, 8 left)
+  var col      = 0;          // logical cell
+  var row      = 0;
+  var animX    = 0;          // animated position (float, in cells)
+  var animY    = 0;
+  var moves    = 0;
+  var running  = false;
+  var won      = false;
+  var trail    = [];
+  var faceX    = 1;
+  var faceY    = 0;
+  var startT   = 0;
+  var elapsed  = 0;
+  var winTimer = null;
+  var best     = {};
+  var lastTimeText = '';
+
+  /* ---------------------------------------------------------------
+     Best times (keyed by maze size, not by level)
+     --------------------------------------------------------------- */
+  function loadBest() {
+    try {
+      var raw = window.localStorage.getItem('hedge-best');
+      var obj = raw ? JSON.parse(raw) : null;
+      best = (obj && typeof obj === 'object') ? obj : {};
+    } catch (e) {
+      best = {};
+    }
+  }
+
+  function saveBest() {
+    try {
+      window.localStorage.setItem('hedge-best', JSON.stringify(best));
+    } catch (e) { /* private mode / quota — ignore */ }
+  }
+
+  /* ---------------------------------------------------------------
+     Maze generation (iterative depth-first search)
+     --------------------------------------------------------------- */
+  function generateMaze(n) {
+    var total = n * n;
+    var c = [];
+    var seen = [];
+    var i;
+
+    for (i = 0; i < total; i++) { c[i] = 15; seen[i] = false; }
+
+    // [dx, dy, wall bit of current cell, wall bit of neighbour]
+    var D = [[0, -1, 1, 4], [1, 0, 2, 8], [0, 1, 4, 1], [-1, 0, 8, 2]];
+    var stack = [0];
+    seen[0] = true;
+
+    while (stack.length) {
+      var cur = stack[stack.length - 1];
+      var x = cur % n;
+      var y = Math.floor(cur / n);
+      var opts = [];
+      var k;
+
+      for (k = 0; k < 4; k++) {
+        var nx = x + D[k][0];
+        var ny = y + D[k][1];
+        if (nx >= 0 && ny >= 0 && nx < n && ny < n && !seen[ny * n + nx]) {
+          opts.push(k);
+        }
+      }
+
+      if (!opts.length) { stack.pop(); continue; }
+
+      var pick = opts[Math.floor(Math.random() * opts.length)];
+      var jx = x + D[pick][0];
+      var jy = y + D[pick][1];
+      var j  = jy * n + jx;
+
+      c[cur] &= ~D[pick][2];
+      c[j]   &= ~D[pick][3];
+
+      seen[j] = true;
+      stack.push(j);
+    }
+
+    return c;
+  }
+
+  /* ---------------------------------------------------------------
+     Canvas sizing
+     --------------------------------------------------------------- */
+  function resizeCanvas() {
+    if (!boardEl || !cv) return;
+
+    var w = boardEl.clientWidth;
+    if (!w || w < 1) return;
+
+    var dpr = window.devicePixelRatio || 1;
+    if (dpr > 2) dpr = 2;               // cap memory use on 3x phones
+
+    var deviceSize = Math.round(w * dpr);
+
+    cv.width  = deviceSize;
+    cv.height = deviceSize;
+    cv.style.width  = w + 'px';
+    cv.style.height = w + 'px';
+
+    draw();
+  }
+
+  /* ---------------------------------------------------------------
+     Game flow
+     --------------------------------------------------------------- */
+  function startGame(makeNewMaze) {
+    if (winTimer !== null) {
+      window.clearTimeout(winTimer);
+      winTimer = null;
+    }
+
+    if (makeNewMaze || !cells.length) {
+      gridN = Math.min(7 + 2 * (level - 1), 21);
+      cells = generateMaze(gridN);
+    }
+
+    col = 0;
+    row = 0;
+    animX = 0;
+    animY = 0;
+    moves = 0;
+    elapsed = 0;
+    running = false;
+    won = false;
+    startT = 0;
+    faceX = 1;
+    faceY = 0;
+    trail = [[0, 0]];
+    lastTimeText = '0.0';
+
+    setText(lvEl, level);
+    setText(mvEl, '0');
+    setText(tmEl, '0.0');
+
+    winEl.className = 'win';            // hide overlay
+
+    draw();
+  }
+
+  function move(dx, dy) {
+    if (won || !cells.length) return;
+    if (dx === 0 && dy === 0) return;
+
+    var bit = (dx === 1) ? 2 : (dx === -1) ? 8 : (dy === 1) ? 4 : 1;
+
+    // Blocked: do not turn the hero either
+    if (cells[row * gridN + col] & bit) return;
+
+    faceX = dx;
+    faceY = dy;
+
+    col += dx;
+    row += dy;
+    moves++;
+    setText(mvEl, moves);
+
+    if (!running) {
+      running = true;
+      startT = now();
+    }
+
+    trail.push([col, row]);
+
+    if (col === gridN - 1 && row === gridN - 1) {
+      won = true;
+      running = false;
+      elapsed = (now() - startT) / 1000;   // includes the final move
+      setText(tmEl, elapsed.toFixed(1));
+      lastTimeText = elapsed.toFixed(1);
+      winTimer = window.setTimeout(showWin, 260);
+    }
+  }
+
+  function showWin() {
+    winTimer = null;
+    if (!won) return;                      // stale timer after a restart
+
+    var t = elapsed;
+    var key = 'n' + gridN;
+    var isBest = !best[key] || t < best[key];
+
+    if (isBest) {
+      best[key] = t;
+      saveBest();
+    }
+
+    var msg = moves + (moves === 1 ? ' move' : ' moves') + ' in ' + t.toFixed(1) + 's';
+    if (isBest) {
+      msg += ' \u2014 a new best for ' + gridN + '\u00d7' + gridN + '.';
+    } else {
+      msg += '. Best: ' + best[key].toFixed(1) + 's.';
+    }
+
+    setText(resEl, msg);
+    winEl.className = 'win show';
+
+    if (nextBtn && nextBtn.focus) {
+      try { nextBtn.focus(); } catch (e) { /* ignore */ }
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Rendering
+     --------------------------------------------------------------- */
+  function draw() {
+    if (!ctx) return;
+
+    var w = cv.width;
+    if (!w || !gridN || !cells.length) return;
+
+    var cs = w / gridN;
+    var i;
+
+    ctx.clearRect(0, 0, w, w);
+    ctx.fillStyle = pal.panel;
+    ctx.fillRect(0, 0, w, w);
+
+    // Breadcrumb trail
+    ctx.fillStyle = pal.trail;
+    var dotR = Math.max(1, cs * 0.09);
+    for (i = 0; i < trail.length; i++) {
+      ctx.beginPath();
+      ctx.arc((trail[i][0] + 0.5) * cs, (trail[i][1] + 0.5) * cs, dotR, 0, TAU);
+      ctx.fill();
+    }
+
+    // Exit flag
+    var ex = (gridN - 1) * cs;
+    var ey = (gridN - 1) * cs;
+    ctx.fillStyle = pal.gold;
+    ctx.fillRect(ex + cs * 0.30, ey + cs * 0.20, Math.max(2, cs * 0.07), cs * 0.62);
+    ctx.beginPath();
+    ctx.moveTo(ex + cs * 0.37, ey + cs * 0.20);
+    ctx.lineTo(ex + cs * 0.78, ey + cs * 0.36);
+    ctx.lineTo(ex + cs * 0.37, ey + cs * 0.52);
+    ctx.closePath();
+    ctx.fill();
+
+    // Walls
+    ctx.strokeStyle = pal.hedge;
+    ctx.lineWidth = Math.max(3, cs * 0.13);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    for (var y = 0; y < gridN; y++) {
+      for (var x = 0; x < gridN; x++) {
+        var cellWalls = cells[y * gridN + x];
+        var X = x * cs;
+        var Y = y * cs;
+
+        if (cellWalls & 1) { ctx.moveTo(X, Y); ctx.lineTo(X + cs, Y); }
+        if (cellWalls & 8) { ctx.moveTo(X, Y); ctx.lineTo(X, Y + cs); }
+        if (x === gridN - 1 && (cellWalls & 2)) { ctx.moveTo(X + cs, Y); ctx.lineTo(X + cs, Y + cs); }
+        if (y === gridN - 1 && (cellWalls & 4)) { ctx.moveTo(X, Y + cs); ctx.lineTo(X + cs, Y + cs); }
+      }
+    }
+    ctx.stroke();
+
+    // Hero
+    var hx = (animX + 0.5) * cs;
+    var hy = (animY + 0.5) * cs;
+    var r  = cs * 0.30;
+
+    ctx.fillStyle = pal.hero;
+    ctx.beginPath();
+    ctx.arc(hx, hy, r, 0, TAU);
+    ctx.fill();
+
+    // Eyes, offset along the facing direction
+    var perpX = faceY;
+    var perpY = faceX;
+    var fwd   = r * 0.34;
+    var side  = r * 0.38;
+    var eyeR  = r * 0.20;
+    var s;
+
+    ctx.fillStyle = '#ffffff';
+    for (s = -1; s <= 1; s += 2) {
+      ctx.beginPath();
+      ctx.arc(hx + faceX * fwd + perpX * side * s,
+              hy + faceY * fwd + perpY * side * s,
+              eyeR, 0, TAU);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = pal.ink;
+    for (s = -1; s <= 1; s += 2) {
+      ctx.beginPath();
+      ctx.arc(hx + faceX * fwd * 1.5 + perpX * side * s,
+              hy + faceY * fwd * 1.5 + perpY * side * s,
+              eyeR * 0.5, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Animation loop
+     --------------------------------------------------------------- */
+  var lastFrame = now();
+
+  function loop(t) {
+    if (typeof t !== 'number') t = now();
+
+    var dt = (t - lastFrame) / 1000;
+    lastFrame = t;
+
+    if (dt < 0) dt = 0;
+    if (dt > 0.05) dt = 0.05;            // clamp after tab switches
+
+    // Smoothly glide the hero toward its logical cell
+    var step = 16 * dt;
+    var ddx = col - animX;
+    var ddy = row - animY;
+
+    if (ddx > step) ddx = step; else if (ddx < -step) ddx = -step;
+    if (ddy > step) ddy = step; else if (ddy < -step) ddy = -step;
+
+    animX += ddx;
+    animY += ddy;
+
+    if (running) {
+      elapsed = (now() - startT) / 1000;
+      var text = elapsed.toFixed(1);
+      if (text !== lastTimeText) {
+        lastTimeText = text;
+        setText(tmEl, text);
+      }
+    }
+
+    draw();
+    raf(loop);
+  }
+
+  /* ---------------------------------------------------------------
+     Keyboard input
+     --------------------------------------------------------------- */
+  var KEY_MAP = {
+    ArrowUp: [0, -1], w: [0, -1],
+    ArrowDown: [0, 1], s: [0, 1],
+    ArrowLeft: [-1, 0], a: [-1, 0],
+    ArrowRight: [1, 0], d: [1, 0]
+  };
+
+  var CODE_MAP = {
+    38: [0, -1], 87: [0, -1],
+    40: [0, 1],  83: [0, 1],
+    37: [-1, 0], 65: [-1, 0],
+    39: [1, 0],  68: [1, 0]
+  };
+
+  function onKeyDown(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;   // never hijack shortcuts
+
+    var m = null;
+
+    if (e.key) {
+      m = KEY_MAP[e.key];
+      if (!m && e.key.length === 1) {
+        m = KEY_MAP[e.key.toLowerCase()];
+      }
+    } else if (e.keyCode) {
+      m = CODE_MAP[e.keyCode];
+    }
+
+    if (!m) return;
+
+    if (e.preventDefault) e.preventDefault();
+    move(m[0], m[1]);
+  }
+
+  document.addEventListener('keydown', onKeyDown, false);
+
+  /* ---------------------------------------------------------------
+     Touch / swipe input on the canvas
+     --------------------------------------------------------------- */
+  var touchX = 0;
+  var touchY = 0;
+  var touchActive = false;
+
+  cv.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { touchActive = false; return; }
+    var t = e.touches[0];
+    touchX = t.clientX;
+    touchY = t.clientY;
+    touchActive = true;
+  }, false);
+
+  cv.addEventListener('touchmove', function (e) {
+    if (e.preventDefault) e.preventDefault();   // stop page scroll while swiping
+  }, false);
+
+  cv.addEventListener('touchend', function (e) {
+    if (!touchActive) return;
+    touchActive = false;
+
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchX;
+    var dy = t.clientY - touchY;
+
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) { move(dx > 0 ? 1 : -1, 0); }
+    else                             { move(0, dy > 0 ? 1 : -1); }
+  }, false);
+
+  cv.addEventListener('touchcancel', function () { touchActive = false; }, false);
+
+  /* ---------------------------------------------------------------
+     On-screen D-pad (press and hold to repeat, multi-touch safe)
+     --------------------------------------------------------------- */
+  var stopFns = [];
+
+  function bindPadButton(btn) {
+    var parts = (btn.getAttribute('data-d') || '0,0').split(',');
+    var dx = parseInt(parts[0], 10) || 0;
+    var dy = parseInt(parts[1], 10) || 0;
+    var timer = null;
+
+    function go() { move(dx, dy); }
+
+    function stop() {
+      if (timer !== null) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function press(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      stop();
+      go();
+      timer = window.setInterval(go, 140);
+    }
+
+    btn.addEventListener('mousedown',  press, false);
+    btn.addEventListener('touchstart', press, false);
+    btn.addEventListener('mouseup',    stop,  false);
+    btn.addEventListener('mouseleave', stop,  false);
+    btn.addEventListener('touchend',   stop,  false);
+    btn.addEventListener('touchcancel', stop, false);
+    btn.addEventListener('blur',       stop,  false);
+
+    stopFns.push(stop);
+  }
+
+  var padButtons = document.querySelectorAll('.pad button');
+  for (var pi = 0; pi < padButtons.length; pi++) {
+    bindPadButton(padButtons[pi]);
+  }
+
+  function stopAllPads() {
+    for (var i = 0; i < stopFns.length; i++) { stopFns[i](); }
+  }
+
+  document.addEventListener('mouseup',     stopAllPads, false);
+  document.addEventListener('touchend',    stopAllPads, false);
+  document.addEventListener('touchcancel', stopAllPads, false);
+  window.addEventListener('blur',          stopAllPads, false);
+
+  /* ---------------------------------------------------------------
+     Buttons
+     --------------------------------------------------------------- */
+  restartB.onclick = function () { startGame(false); };   // same maze, reset
+  newBtn.onclick   = function () { startGame(true);  };   // fresh maze, same level
+  nextBtn.onclick  = function () { level++; startGame(true); };
+
+  /* ---------------------------------------------------------------
+     Resize handling
+     --------------------------------------------------------------- */
+  window.addEventListener('resize', resizeCanvas, false);
+  window.addEventListener('orientationchange', function () {
+    window.setTimeout(resizeCanvas, 120);
+  }, false);
+
+  /* ---------------------------------------------------------------
+     Boot
+     --------------------------------------------------------------- */
+  loadBest();
+  startGame(true);
+  resizeCanvas();
+  lastFrame = now();
+  raf(loop);
+
 })();
 </script>
 </body>
